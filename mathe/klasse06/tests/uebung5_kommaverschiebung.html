@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Übung 5 – Kommaverschiebung</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Baloo+2:wght@600;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f0fdf4; --card: #ffffff; --primary: #16a34a; --primary-light: #dcfce7;
+    --green: #16a34a; --red: #e05c5c; --text: #1a2e1a; --muted: #6b7280;
+    --radius: 18px; --shadow: 0 4px 24px rgba(0,0,0,0.08);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 32px 16px; }
+  header { text-align: center; margin-bottom: 36px; }
+  header .badge { display: inline-block; background: var(--primary); color: white; font-family: 'Baloo 2', sans-serif; font-size: 13px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; padding: 4px 16px; border-radius: 99px; margin-bottom: 10px; }
+  header h1 { font-family: 'Baloo 2', sans-serif; font-size: 2.2rem; font-weight: 800; color: var(--primary); }
+  header p { color: var(--muted); margin-top: 6px; max-width: 600px; margin-left: auto; margin-right: auto; }
+  .tasks { max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px; }
+  .card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 28px 32px; border-left: 6px solid var(--primary); transition: transform 0.2s; }
+  .card:hover { transform: translateY(-2px); }
+  .card:nth-child(odd) { border-left-color: #2e86ab; }
+  .card:nth-child(3n) { border-left-color: #7c3aed; }
+  .task-label { font-size: 11px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .task-question { font-family: 'Baloo 2', sans-serif; font-size: 1.5rem; font-weight: 700; margin-bottom: 18px; line-height: 1.4; }
+  .task-question .unit-badge { display: inline-block; background: #e8f5e9; color: #1b5e20; border-radius: 8px; padding: 2px 12px; font-size: 1rem; margin-left: 4px; font-weight: 700; }
+  .input-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .answer-input { font-family: 'Baloo 2', sans-serif; font-size: 1.3rem; font-weight: 600; border: 3px solid #e0e0e0; border-radius: 12px; padding: 8px 14px; width: 160px; outline: none; transition: border-color 0.2s, background 0.2s; text-align: center; background: #fafafa; }
+  .answer-input:focus { border-color: var(--primary); background: var(--primary-light); }
+  .answer-input.correct { border-color: var(--green); background: #f0fdf4; color: var(--green); }
+  .answer-input.wrong { border-color: var(--red); background: #fdeaea; color: var(--red); }
+  .unit-label { font-family: 'Baloo 2', sans-serif; font-size: 1.2rem; font-weight: 700; color: var(--primary); }
+  .check-btn { font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.95rem; padding: 10px 22px; border: none; border-radius: 12px; cursor: pointer; background: var(--primary); color: white; transition: background 0.2s, transform 0.1s; }
+  .check-btn:hover { background: #15803d; transform: scale(1.03); }
+  .feedback { margin-top: 12px; font-weight: 700; font-size: 0.95rem; min-height: 22px; }
+  .feedback.correct { color: var(--green); }
+  .feedback.wrong { color: var(--red); }
+  .hint { margin-top: 8px; font-size: 0.88rem; color: var(--muted); background: #f5f5f5; border-radius: 10px; padding: 8px 14px; display: none; }
+  .hint.show { display: block; }
+  .score-bar { max-width: 720px; margin: 0 auto 28px auto; background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 18px 28px; display: flex; align-items: center; gap: 18px; }
+  .score-bar span { font-weight: 800; font-size: 1.1rem; }
+  .progress { flex: 1; background: #f0f0f0; border-radius: 99px; height: 12px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary), #4ade80); border-radius: 99px; transition: width 0.4s; }
+  .arrow { display: inline-block; background: var(--primary); color: white; border-radius: 8px; padding: 2px 10px; font-size: 1rem; }
+  .category-header { font-family: 'Baloo 2', sans-serif; font-size: 1.1rem; font-weight: 800; color: var(--primary); padding: 10px 0 4px; border-bottom: 2px dashed #bbf7d0; margin-bottom: 4px; }
+</style>
+</head>
+<body>
+<header>
+  <div class="badge">Übung 5</div>
+  <h1>Kommaverschiebung mit Einheiten</h1>
+  <p>Wandle die Maßangabe in die angegebene Einheit um. Achte auf die Kommaverschiebung!</p>
+</header>
+<div class="score-bar">
+  <span>Punkte: <span id="score">0</span> / 12</span>
+  <div class="progress"><div class="progress-fill" id="progress" style="width:0%"></div></div>
+</div>
+<div class="tasks">
+
+  <!-- LÄNGEN -->
+  <div class="card">
+    <div class="category-header">📏 Längen</div>
+    <div class="task-label">Aufgabe 1 · km → m</div>
+    <div class="task-question">3,7 km = ? <span class="unit-badge">m</span></div>
+    <div class="input-row">
+      <input class="answer-input" id="a1" type="text" placeholder="z.B. 3700">
+      <span class="unit-label">m</span>
+      <button class="check-btn" onclick="check(1)">Prüfen</button>
+    </div>
+    <div class="feedback" id="f1"></div>
+    <div class="hint" id="h1">💡 1 km = 1000 m → Komma 3 Stellen nach rechts → <strong>3700 m</strong></div>
+  </div>
+
+  <div class="card">
+    <div class="category-header">📏 Längen</div>
+    <div class="task-label">Aufgabe 2 · mm → cm</div>
+    <div class="task-question">85 mm = ? <span class="unit-badge">cm</span></div>
+    <div class="input-row">
+      <input class="answer-input" id="a2" type="text" placeholder="z.B. 8,5">
+      <span class="unit-label">cm</span>
+      <button class="check-btn" onclick="check(2)">Prüfen</button>
+    </div>
+    <div class="feedback" id="f2"></div>
+    <div class="hint" id="h2">💡 1 cm = 10 mm → Komma 1 Stelle nach links → <strong>8,5 cm</strong></div>
+  </div>
+
+  <div class="card">
+    <div class="category-header">📏 Längen</div>
+    <div class="task-label">Aufgabe 3 · m → km (über 2 Stufen)</div>
+    <div class="task-question">4250 m = ? <span class="unit-badge">km</span></div>
+    <div class="input-row">
+      <input class="answer-input" id="a3" type="text" placeholder="z.B. 4,25">
+      <span class="unit-label">km</span>
+      <button class="check-btn" onclick="check(3)">Prüfen</button>
+    </div>
+    <div class="feedback" id="f3"></div>
+    <div class="hint" id="h3">💡 1 km = 1000 m → Komma 3 Stellen nach links → <strong>4,25 km</strong></div>
+  </div>
+
+  <!-- GEWICHTE -->
+  <div class="card">
+    <div class="category-header">⚖️ Gewichte</div>
+    <div class="task-label">Aufgabe 4 · g → kg</div>
+    <div class="task-question">2500 g = ? <span class="unit-badge">kg</span></div>
+    <div class="input-row">
+      <input class="answer-input" id="a4" type="text" placeholder="z.B. 2,5">
+      <span class="unit-label">kg</span>
+      <button class="check-btn" onclick="check(4)">Prüfen</button>
+    </div>
+    <div class="feedback" id="f4"></div>
+    <div class="hint" id="h4">💡 1 kg = 1000 g → Komma 3 Stellen nach links → <strong>2,5 kg</strong></div>
+  </div>
+
+  <div class="card">
+    <div class="category-header">⚖️ Gewichte</div>
+    <div class="task-label">Aufgabe 5 · kg → g</div>
+    <div class="task-question">0,048 kg = ? <span class="unit-badge">g</span></div>
+    <div class="input-row">
+      <input class="answer-input" id="a5" type="text" placeholder="z.B. 48">
+      <span class="unit-label">g</span>
+      <button class="check-btn" onclick="check(5)">Prüfen</button>
+    </div>
+    <div class="feedback" id="f5"></div>
+    <div class="hint" id="h5">💡 1 kg = 1000 g → Komma 3 Stellen nach rechts → <strong>48 g</strong></div>
+  </div>
+
+  <div class="card">
+    <div class="category-header">⚖️ Gewichte</div>
+    <div class="task-label">Aufgabe 6 · t → kg (über mehrere Stufen)</div>
+    <div class="task-question">2,35 t = ? <span class="unit-badge">kg</span></div>
+    <div class="input-row">
+      <input class="answer-input" id="a6" type="text" placeholder="z.B. 2350">
+      <span class="unit-label">kg</span>
+      <button class="check-btn" onclick="check(6)">Prüfen</button>
+    </div>
+    <div class="feedback" id="f6"></div>
+    <div class="hint" id="h6">💡 1 t = 1000 kg → Komma 3 Stellen nach rechts → <strong>2350 kg</strong></div>
+  </div>
+
+  <!-- VOLUMEN -->
+  <div class="card">
+    <div class="category-header">💧 Volumen</div>
+    <div class="task-label">Aufgabe 7 · l → ml</div>
+    <div class="task-question">0,35 l = ? <span class="unit-badge">ml</span></div>
+    <div class="input-row">
+      <input class="answer-input" id="a7" type="text" placeholder="z.B. 350">
+      <span class="unit-label">ml</span>
+      <button class="check-btn" onclick="check(7)">Prüfen</button>
+    </div>
+    <div class="feedback" id="f7"></div>
+    <div class="hint" id="h7">💡 1 l = 1000 ml → Komma 3 Stellen nach rechts → <strong>350 ml</strong></div>
+  </div>
+
+  <div class="card">
+    <div class="category-header">💧 Volumen</div>
+    <div class="task-label">Aufgabe 8 · ml → l</div>
+    <div class="task-question">4700 ml = ? <span class="unit-badge">l</span></div>
+    <div class="input-row">
+      <input class="answer-input" id="a8" type="text" placeholder="z.B. 4,7">
+      <span class="unit-label">l</span>
+      <button class="check-btn" onclick="check(8)">Prüfen</button>
+    </div>
+    <div class="feedback" id="f8"></div>
+    <div class="hint" id="h8">💡 1 l = 1000 ml → Komma 3 Stellen nach links → <strong>4,7 l</strong></div>
+  </div>
+
+  <div class="card">
+    <div class="category-header">💧 Volumen</div>
+    <div class="task-label">Aufgabe 9 · cl → l (über 2 Stufen)</div>
+    <div class="task-question">250 cl = ? <span class="unit-badge">l</span></div>
+    <div class="input-row">
+      <input class="answer-input" id="a9" type="text" placeholder="z.B. 2,5">
+      <span class="unit-label">l</span>
+      <button class="check-btn" onclick="check(9)">Prüfen</button>
+    </div>
+    <div class="feedback" id="f9"></div>
+    <div class="hint" id="h9">💡 1 l = 100 cl → Komma 2 Stellen nach links → <strong>2,5 l</strong></div>
+  </div>
+
+  <!-- FLÄCHEN -->
+  <div class="card">
+    <div class="category-header">🟩 Flächen</div>
+    <div class="task-label">Aufgabe 10 · m² → cm²</div>
+    <div class="task-question">0,5 m² = ? <span class="unit-badge">cm²</span></div>
+    <div class="input-row">
+      <input class="answer-input" id="a10" type="text" placeholder="z.B. 5000">
+      <span class="unit-label">cm²</span>
+      <button class="check-btn" onclick="check(10)">Prüfen</button>
+    </div>
+    <div class="feedback" id="f10"></div>
+    <div class="hint" id="h10">💡 1 m² = 10 000 cm² → Komma 4 Stellen nach rechts → <strong>5000 cm²</strong></div>
+  </div>
+
+  <div class="card">
+    <div class="category-header">🟩 Flächen</div>
+    <div class="task-label">Aufgabe 11 · cm² → m²</div>
+    <div class="task-question">75 000 cm² = ? <span class="unit-badge">m²</span></div>
+    <div class="input-row">
+      <input class="answer-input" id="a11" type="text" placeholder="z.B. 7,5">
+      <span class="unit-label">m²</span>
+      <button class="check-btn" onclick="check(11)">Prüfen</button>
+    </div>
+    <div class="feedback" id="f11"></div>
+    <div class="hint" id="h11">💡 1 m² = 10 000 cm² → Komma 4 Stellen nach links → <strong>7,5 m²</strong></div>
+  </div>
+
+  <div class="card">
+    <div class="category-header">🟩 Flächen</div>
+    <div class="task-label">Aufgabe 12 · ha → m² (über mehrere Stufen)</div>
+    <div class="task-question">3,2 ha = ? <span class="unit-badge">m²</span></div>
+    <div class="input-row">
+      <input class="answer-input" id="a12" type="text" placeholder="z.B. 32000">
+      <span class="unit-label">m²</span>
+      <button class="check-btn" onclick="check(12)">Prüfen</button>
+    </div>
+    <div class="feedback" id="f12"></div>
+    <div class="hint" id="h12">💡 1 ha = 10 000 m² → Komma 4 Stellen nach rechts → <strong>32 000 m²</strong></div>
+  </div>
+
+</div>
+<script>
+  const answers = {
+    1:['3700'], 2:['8,5','8.5'], 3:['4,25','4.25'],
+    4:['2,5','2.5'], 5:['48'], 6:['2350'],
+    7:['350'], 8:['4,7','4.7'], 9:['2,5','2.5'],
+    10:['5000'], 11:['7,5','7.5'], 12:['32000']
+  };
+  let score = 0; const solved = {};
+  function norm(s){ return s.trim().replace('.',',').replace(/\s/g,''); }
+  function check(n) {
+    if (solved[n]) return;
+    const val = norm(document.getElementById('a'+n).value);
+    const fb = document.getElementById('f'+n); const inp = document.getElementById('a'+n);
+    const ok = answers[n].map(a=>norm(a)).includes(val);
+    if (ok) {
+      fb.textContent = '✅ Richtig! Super!'; fb.className = 'feedback correct';
+      inp.className = 'answer-input correct'; solved[n] = true; score++;
+      document.getElementById('score').textContent = score;
+      document.getElementById('progress').style.width = (score/12*100)+'%';
+    } else {
+      fb.textContent = '❌ Leider falsch – schau den Tipp an!'; fb.className = 'feedback wrong';
+      inp.className = 'answer-input wrong';
+      document.getElementById('h'+n).classList.add('show');
+      setTimeout(() => inp.className = 'answer-input', 1200);
+    }
+  }
+  for(let i=1;i<=12;i++){
+    const inp = document.getElementById('a'+i);
+    inp.addEventListener('keydown', e => { if(e.key==='Enter') check(parseInt(inp.id.replace('a',''))); });
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Übung 1 – Bruch + Dezimalzahl</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Baloo+2:wght@600;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fdf6ec; --card: #ffffff; --primary: #e8720c; --primary-light: #fde8d4;
+    --accent: #2e86ab; --green: #3bb273; --red: #e05c5c; --text: #2d2d2d;
+    --muted: #888; --radius: 18px; --shadow: 0 4px 24px rgba(0,0,0,0.08);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 32px 16px; }
+  header { text-align: center; margin-bottom: 36px; }
+  header .badge { display: inline-block; background: var(--primary); color: white; font-family: 'Baloo 2', sans-serif; font-size: 13px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; padding: 4px 16px; border-radius: 99px; margin-bottom: 10px; }
+  header h1 { font-family: 'Baloo 2', sans-serif; font-size: 2.2rem; font-weight: 800; color: var(--primary); }
+  header p { color: var(--muted); margin-top: 6px; }
+  .tasks { max-width: 680px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px; }
+  .card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 28px 32px; border-left: 6px solid var(--primary); transition: transform 0.2s; }
+  .card:nth-child(2) { border-left-color: var(--accent); }
+  .card:nth-child(3) { border-left-color: #9b59b6; }
+  .card:nth-child(4) { border-left-color: var(--green); }
+  .card:hover { transform: translateY(-2px); }
+  .task-label { font-size: 11px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+  .task-question { font-family: 'Baloo 2', sans-serif; font-size: 1.7rem; font-weight: 700; margin-bottom: 18px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .fraction { display: inline-flex; flex-direction: column; align-items: center; font-size: 1.2rem; line-height: 1; vertical-align: middle; }
+  .fraction span:first-child { border-bottom: 2.5px solid var(--text); padding-bottom: 2px; min-width: 28px; text-align: center; }
+  .fraction span:last-child { padding-top: 2px; min-width: 28px; text-align: center; }
+  .input-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .answer-input { font-family: 'Baloo 2', sans-serif; font-size: 1.4rem; font-weight: 600; border: 3px solid #e0e0e0; border-radius: 12px; padding: 8px 18px; width: 140px; outline: none; transition: border-color 0.2s, background 0.2s; text-align: center; background: #fafafa; }
+  .answer-input:focus { border-color: var(--primary); background: var(--primary-light); }
+  .answer-input.correct { border-color: var(--green); background: #eafaf1; color: var(--green); }
+  .answer-input.wrong { border-color: var(--red); background: #fdeaea; color: var(--red); }
+  .check-btn { font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.95rem; padding: 10px 22px; border: none; border-radius: 12px; cursor: pointer; background: var(--primary); color: white; transition: background 0.2s, transform 0.1s; }
+  .check-btn:hover { background: #c9620a; transform: scale(1.03); }
+  .feedback { margin-top: 12px; font-weight: 700; font-size: 0.95rem; min-height: 22px; }
+  .feedback.correct { color: var(--green); }
+  .feedback.wrong { color: var(--red); }
+  .hint { margin-top: 8px; font-size: 0.88rem; color: var(--muted); background: #f5f5f5; border-radius: 10px; padding: 8px 14px; display: none; }
+  .hint.show { display: block; }
+  .score-bar { max-width: 680px; margin: 0 auto 28px auto; background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 18px 28px; display: flex; align-items: center; gap: 18px; }
+  .score-bar span { font-weight: 800; font-size: 1.1rem; }
+  .progress { flex: 1; background: #f0f0f0; border-radius: 99px; height: 12px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary), #f7b733); border-radius: 99px; transition: width 0.4s; }
+  .op { color: var(--primary); font-weight: 900; }
+</style>
+</head>
+<body>
+<header>
+  <div class="badge">Übung 1</div>
+  <h1>Bruch ± Dezimalzahl</h1>
+  <p>Rechne jeden Ausdruck aus. Gib das Ergebnis als Dezimalzahl ein (Komma statt Punkt).</p>
+</header>
+<div class="score-bar">
+  <span>Punkte: <span id="score">0</span> / 4</span>
+  <div class="progress"><div class="progress-fill" id="progress" style="width:0%"></div></div>
+</div>
+<div class="tasks">
+  <div class="card">
+    <div class="task-label">Aufgabe 1 · Addition</div>
+    <div class="task-question">
+      <span class="fraction"><span>3</span><span>4</span></span>
+      <span class="op">+</span><span>0,5</span><span>=</span>
+    </div>
+    <div class="input-row">
+      <input class="answer-input" id="a1" type="text" placeholder="z.B. 1,25">
+      <button class="check-btn" onclick="check(1)">Prüfen</button>
+    </div>
+    <div class="feedback" id="f1"></div>
+    <div class="hint" id="h1">💡 ¾ = 0,75 &nbsp;→&nbsp; 0,75 + 0,5 = <strong>1,25</strong></div>
+  </div>
+  <div class="card">
+    <div class="task-label">Aufgabe 2 · Subtraktion</div>
+    <div class="task-question">
+      <span>2,3</span><span class="op">−</span>
+      <span class="fraction"><span>1</span><span>5</span></span>
+      <span>=</span>
+    </div>
+    <div class="input-row">
+      <input class="answer-input" id="a2" type="text" placeholder="z.B. 2,1">
+      <button class="check-btn" onclick="check(2)">Prüfen</button>
+    </div>
+    <div class="feedback" id="f2"></div>
+    <div class="hint" id="h2">💡 ⅕ = 0,2 &nbsp;→&nbsp; 2,3 − 0,2 = <strong>2,1</strong></div>
+  </div>
+  <div class="card">
+    <div class="task-label">Aufgabe 3 · Addition</div>
+    <div class="task-question">
+      <span class="fraction"><span>2</span><span>5</span></span>
+      <span class="op">+</span><span>1,6</span><span>=</span>
+    </div>
+    <div class="input-row">
+      <input class="answer-input" id="a3" type="text" placeholder="z.B. 2,0">
+      <button class="check-btn" onclick="check(3)">Prüfen</button>
+    </div>
+    <div class="feedback" id="f3"></div>
+    <div class="hint" id="h3">💡 ⅖ = 0,4 &nbsp;→&nbsp; 0,4 + 1,6 = <strong>2,0</strong></div>
+  </div>
+  <div class="card">
+    <div class="task-label">Aufgabe 4 · Subtraktion</div>
+    <div class="task-question">
+      <span class="fraction"><span>7</span><span>4</span></span>
+      <span class="op">−</span><span>0,75</span><span>=</span>
+    </div>
+    <div class="input-row">
+      <input class="answer-input" id="a4" type="text" placeholder="z.B. 1,0">
+      <button class="check-btn" onclick="check(4)">Prüfen</button>
+    </div>
+    <div class="feedback" id="f4"></div>
+    <div class="hint" id="h4">💡 7/4 = 1,75 &nbsp;→&nbsp; 1,75 − 0,75 = <strong>1,0</strong></div>
+  </div>
+</div>
+<script>
+  const answers = { 1:['1,25'], 2:['2,1'], 3:['2','2,0'], 4:['1','1,0'] };
+  let score = 0; const solved = {};
+  function norm(s){ return s.trim().replace('.',','); }
+  function check(n) {
+    if (solved[n]) return;
+    const val = norm(document.getElementById('a'+n).value);
+    const fb = document.getElementById('f'+n);
+    const inp = document.getElementById('a'+n);
+    if (answers[n].includes(val)) {
+      fb.textContent = '✅ Richtig! Super gemacht!'; fb.className = 'feedback correct';
+      inp.className = 'answer-input correct'; solved[n] = true; score++;
+      document.getElementById('score').textContent = score;
+      document.getElementById('progress').style.width = (score/4*100)+'%';
+    } else {
+      fb.textContent = '❌ Leider falsch – schau dir den Tipp an!'; fb.className = 'feedback wrong';
+      inp.className = 'answer-input wrong';
+      document.getElementById('h'+n).classList.add('show');
+      setTimeout(() => inp.className = 'answer-input', 1200);
+    }
+  }
+  document.querySelectorAll('.answer-input').forEach((inp,i) => inp.addEventListener('keydown', e => { if(e.key==='Enter') check(i+1); }));
+</script>
+</body>
+</html>
