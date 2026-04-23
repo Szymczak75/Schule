@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Übung 4 – Vergleichen</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Baloo+2:wght@600;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fff8f0; --card: #ffffff; --primary: #d97706; --primary-light: #fef3c7;
+    --green: #3bb273; --red: #e05c5c; --text: #2d2d2d; --muted: #888;
+    --radius: 18px; --shadow: 0 4px 24px rgba(0,0,0,0.08);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 32px 16px; }
+  header { text-align: center; margin-bottom: 36px; }
+  header .badge { display: inline-block; background: var(--primary); color: white; font-family: 'Baloo 2', sans-serif; font-size: 13px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; padding: 4px 16px; border-radius: 99px; margin-bottom: 10px; }
+  header h1 { font-family: 'Baloo 2', sans-serif; font-size: 2.2rem; font-weight: 800; color: var(--primary); }
+  header p { color: var(--muted); margin-top: 6px; }
+  .tasks { max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px; }
+  .card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 28px 32px; border-left: 6px solid var(--primary); transition: transform 0.2s; }
+  .card:hover { transform: translateY(-2px); }
+  .card:nth-child(2) { border-left-color: #2e86ab; }
+  .card:nth-child(3) { border-left-color: #7c3aed; }
+  .card:nth-child(4) { border-left-color: #e05c5c; }
+  .card:nth-child(5) { border-left-color: var(--green); }
+  .card:nth-child(6) { border-left-color: #e8720c; }
+  .task-label { font-size: 11px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+  .task-question { font-family: 'Baloo 2', sans-serif; font-size: 1.7rem; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .fraction { display: inline-flex; flex-direction: column; align-items: center; font-size: 1.3rem; line-height: 1; }
+  .fraction span:first-child { border-bottom: 2.5px solid var(--text); padding-bottom: 2px; min-width: 30px; text-align: center; }
+  .fraction span:last-child { padding-top: 2px; min-width: 30px; text-align: center; }
+  .btn-group { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+  .cmp-btn { font-family: 'Baloo 2', sans-serif; font-size: 1.5rem; font-weight: 800; width: 60px; height: 60px; border-radius: 14px; border: 3px solid #e0e0e0; background: #fafafa; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; justify-content: center; }
+  .cmp-btn:hover { border-color: var(--primary); background: var(--primary-light); transform: scale(1.07); }
+  .cmp-btn.selected { border-color: var(--primary); background: var(--primary-light); box-shadow: 0 0 0 3px rgba(217,119,6,0.2); }
+  .cmp-btn.correct { border-color: var(--green); background: #eafaf1; color: var(--green); }
+  .cmp-btn.wrong { border-color: var(--red); background: #fdeaea; color: var(--red); }
+  .check-btn { font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.95rem; padding: 10px 22px; border: none; border-radius: 12px; cursor: pointer; background: var(--primary); color: white; transition: background 0.2s, transform 0.1s; }
+  .check-btn:hover { background: #b45309; transform: scale(1.03); }
+  .feedback { margin-top: 12px; font-weight: 700; font-size: 0.95rem; min-height: 22px; }
+  .feedback.correct { color: var(--green); }
+  .feedback.wrong { color: var(--red); }
+  .hint { margin-top: 8px; font-size: 0.88rem; color: var(--muted); background: #f5f5f5; border-radius: 10px; padding: 8px 14px; display: none; }
+  .hint.show { display: block; }
+  .score-bar { max-width: 720px; margin: 0 auto 28px auto; background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 18px 28px; display: flex; align-items: center; gap: 18px; }
+  .score-bar span { font-weight: 800; font-size: 1.1rem; }
+  .progress { flex: 1; background: #f0f0f0; border-radius: 99px; height: 12px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary), #fbbf24); border-radius: 99px; transition: width 0.4s; }
+  .subcategory { font-size: 0.82rem; font-weight: 700; color: white; background: var(--primary); border-radius: 6px; padding: 2px 10px; display: inline-block; margin-bottom: 8px; }
+</style>
+</head>
+<body>
+<header>
+  <div class="badge">Übung 4</div>
+  <h1>Größen vergleichen</h1>
+  <p>Wähle das richtige Vergleichszeichen: &lt;, = oder &gt;</p>
+</header>
+<div class="score-bar">
+  <span>Punkte: <span id="score">0</span> / 6</span>
+  <div class="progress"><div class="progress-fill" id="progress" style="width:0%"></div></div>
+</div>
+<div class="tasks">
+  <!-- Bruch vs Dezimal -->
+  <div class="card">
+    <div class="subcategory">Bruch mit Dezimalzahl</div>
+    <div class="task-label">Aufgabe 1</div>
+    <div class="task-question">
+      <span class="fraction"><span>3</span><span>5</span></span>
+      <span style="color:#ccc">◻</span>
+      <span>0,7</span>
+    </div>
+    <div class="btn-group" id="g1">
+      <button class="cmp-btn" onclick="select(1,'<')">&lt;</button>
+      <button class="cmp-btn" onclick="select(1,'=')">=</button>
+      <button class="cmp-btn" onclick="select(1,'>')">&gt;</button>
+    </div>
+    <button class="check-btn" onclick="check(1)">Prüfen</button>
+    <div class="feedback" id="f1"></div>
+    <div class="hint" id="h1">💡 3/5 = 0,6 und 0,6 &lt; 0,7 → <strong>&lt;</strong></div>
+  </div>
+  <div class="card">
+    <div class="subcategory">Bruch mit Dezimalzahl</div>
+    <div class="task-label">Aufgabe 2</div>
+    <div class="task-question">
+      <span>1,25</span>
+      <span style="color:#ccc">◻</span>
+      <span class="fraction"><span>5</span><span>4</span></span>
+    </div>
+    <div class="btn-group" id="g2">
+      <button class="cmp-btn" onclick="select(2,'<')">&lt;</button>
+      <button class="cmp-btn" onclick="select(2,'=')">=</button>
+      <button class="cmp-btn" onclick="select(2,'>')">&gt;</button>
+    </div>
+    <button class="check-btn" onclick="check(2)">Prüfen</button>
+    <div class="feedback" id="f2"></div>
+    <div class="hint" id="h2">💡 5/4 = 1,25 → <strong>=</strong></div>
+  </div>
+  <!-- Bruch vs Bruch -->
+  <div class="card">
+    <div class="subcategory">Bruch mit Bruch</div>
+    <div class="task-label">Aufgabe 3</div>
+    <div class="task-question">
+      <span class="fraction"><span>2</span><span>3</span></span>
+      <span style="color:#ccc">◻</span>
+      <span class="fraction"><span>3</span><span>4</span></span>
+    </div>
+    <div class="btn-group" id="g3">
+      <button class="cmp-btn" onclick="select(3,'<')">&lt;</button>
+      <button class="cmp-btn" onclick="select(3,'=')">=</button>
+      <button class="cmp-btn" onclick="select(3,'>')">&gt;</button>
+    </div>
+    <button class="check-btn" onclick="check(3)">Prüfen</button>
+    <div class="feedback" id="f3"></div>
+    <div class="hint" id="h3">💡 2/3 = 8/12, 3/4 = 9/12 → 8/12 &lt; 9/12 → <strong>&lt;</strong></div>
+  </div>
+  <div class="card">
+    <div class="subcategory">Bruch mit Bruch</div>
+    <div class="task-label">Aufgabe 4</div>
+    <div class="task-question">
+      <span class="fraction"><span>5</span><span>6</span></span>
+      <span style="color:#ccc">◻</span>
+      <span class="fraction"><span>7</span><span>9</span></span>
+    </div>
+    <div class="btn-group" id="g4">
+      <button class="cmp-btn" onclick="select(4,'<')">&lt;</button>
+      <button class="cmp-btn" onclick="select(4,'=')">=</button>
+      <button class="cmp-btn" onclick="select(4,'>')">&gt;</button>
+    </div>
+    <button class="check-btn" onclick="check(4)">Prüfen</button>
+    <div class="feedback" id="f4"></div>
+    <div class="hint" id="h4">💡 5/6 = 15/18, 7/9 = 14/18 → 15 &gt; 14 → <strong>&gt;</strong></div>
+  </div>
+  <!-- Dezimal vs Dezimal -->
+  <div class="card">
+    <div class="subcategory">Dezimalzahl mit Dezimalzahl</div>
+    <div class="task-label">Aufgabe 5</div>
+    <div class="task-question"><span>0,099</span><span style="color:#ccc">◻</span><span>0,1</span></div>
+    <div class="btn-group" id="g5">
+      <button class="cmp-btn" onclick="select(5,'<')">&lt;</button>
+      <button class="cmp-btn" onclick="select(5,'=')">=</button>
+      <button class="cmp-btn" onclick="select(5,'>')">&gt;</button>
+    </div>
+    <button class="check-btn" onclick="check(5)">Prüfen</button>
+    <div class="feedback" id="f5"></div>
+    <div class="hint" id="h5">💡 0,099 &lt; 0,100 → <strong>&lt;</strong></div>
+  </div>
+  <div class="card">
+    <div class="subcategory">Dezimalzahl mit Dezimalzahl</div>
+    <div class="task-label">Aufgabe 6</div>
+    <div class="task-question"><span>3,40</span><span style="color:#ccc">◻</span><span>3,4</span></div>
+    <div class="btn-group" id="g6">
+      <button class="cmp-btn" onclick="select(6,'<')">&lt;</button>
+      <button class="cmp-btn" onclick="select(6,'=')">=</button>
+      <button class="cmp-btn" onclick="select(6,'>')">&gt;</button>
+    </div>
+    <button class="check-btn" onclick="check(6)">Prüfen</button>
+    <div class="feedback" id="f6"></div>
+    <div class="hint" id="h6">💡 3,40 = 3,4 → <strong>=</strong></div>
+  </div>
+</div>
+<script>
+  const answers = { 1:'<', 2:'=', 3:'<', 4:'>', 5:'<', 6:'=' };
+  const selected = {}; let score = 0; const solved = {};
+  function select(n, sym) {
+    if (solved[n]) return;
+    selected[n] = sym;
+    const btns = document.querySelectorAll('#g'+n+' .cmp-btn');
+    btns.forEach(b => b.classList.remove('selected'));
+    btns.forEach(b => { if (b.textContent === sym) b.classList.add('selected'); });
+  }
+  function check(n) {
+    if (solved[n]) return;
+    const fb = document.getElementById('f'+n);
+    if (!selected[n]) { fb.textContent = '⚠️ Bitte wähle ein Zeichen aus!'; fb.className = 'feedback wrong'; return; }
+    if (selected[n] === answers[n]) {
+      fb.textContent = '✅ Richtig!'; fb.className = 'feedback correct';
+      document.querySelectorAll('#g'+n+' .cmp-btn').forEach(b => { if (b.textContent === answers[n]) b.classList.add('correct'); });
+      solved[n] = true; score++;
+      document.getElementById('score').textContent = score;
+      document.getElementById('progress').style.width = (score/6*100)+'%';
+    } else {
+      fb.textContent = '❌ Falsch – schau dir den Tipp an!'; fb.className = 'feedback wrong';
+      document.querySelectorAll('#g'+n+' .cmp-btn').forEach(b => { if (b.textContent === selected[n]) b.classList.add('wrong'); });
+      document.getElementById('h'+n).classList.add('show');
+      setTimeout(() => {
+        document.querySelectorAll('#g'+n+' .cmp-btn').forEach(b => b.classList.remove('wrong','selected'));
+        selected[n] = null;
+      }, 1500);
+    }
+  }
+</script>
+</body>
+</html>
