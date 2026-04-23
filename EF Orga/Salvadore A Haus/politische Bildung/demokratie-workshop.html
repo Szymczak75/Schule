@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Demokratie-Workshop EF</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1a2e;
+    --paper: #f5f0e8;
+    --accent: #c0392b;
+    --gold: #d4a017;
+    --teal: #1a6b6b;
+    --light: #fff9f0;
+    --border: #2a2a4a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  header {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 3rem 2rem 2rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 20px,
+      rgba(255,255,255,0.02) 20px,
+      rgba(255,255,255,0.02) 40px
+    );
+  }
+
+  header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 900;
+    letter-spacing: -1px;
+    position: relative;
+    z-index: 1;
+  }
+
+  header h1 span {
+    color: var(--gold);
+  }
+
+  header p {
+    margin-top: 0.75rem;
+    font-size: 1rem;
+    opacity: 0.7;
+    position: relative;
+    z-index: 1;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .timer-bar {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  .timer-chip {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    padding: 0.4rem 1.2rem;
+    border-radius: 100px;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .timer-chip .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--gold);
+  }
+
+  /* NAV TABS */
+  nav {
+    display: flex;
+    overflow-x: auto;
+    background: var(--border);
+    gap: 2px;
+    padding: 2px;
+  }
+
+  nav button {
+    flex: 1;
+    min-width: 120px;
+    padding: 0.9rem 1rem;
+    background: rgba(255,255,255,0.05);
+    border: none;
+    color: rgba(255,255,255,0.5);
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  nav button:hover {
+    background: rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.85);
+  }
+
+  nav button.active {
+    background: var(--paper);
+    color: var(--ink);
+  }
+
+  /* MAIN CONTENT */
+  main {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+  }
+
+  .module {
+    display: none;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .module.active { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* MODULE HEADER */
+  .module-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 2px solid var(--border);
+  }
+
+  .module-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 4rem;
+    font-weight: 900;
+    line-height: 1;
+    color: var(--accent);
+    flex-shrink: 0;
+    width: 70px;
+  }
+
+  .module-meta h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 0.4rem;
+  }
+
+  .module-meta .tagline {
+    font-size: 0.9rem;
+    color: #666;
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .tag {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 0.2rem 0.7rem;
+    border-radius: 100px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+  }
+
+  .tag.fun { background: var(--teal); }
+  .tag.serious { background: var(--accent); }
+  .tag.mixed { background: var(--gold); color: var(--ink); }
+
+  /* CARDS */
+  .card {
+    background: white;
+    border: 2px solid var(--border);
+    border-radius: 4px;
+    padding: 1.5rem;
+    margin-bottom: 1.25rem;
+    position: relative;
+  }
+
+  .card h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.15rem;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .card h3 .icon { font-size: 1.2rem; }
+
+  .card p, .card li {
+    font-size: 0.92rem;
+    line-height: 1.7;
+    color: #333;
+  }
+
+  .card ul, .card ol {
+    padding-left: 1.2rem;
+    margin-top: 0.5rem;
+  }
+
+  .card li { margin-bottom: 0.4rem; }
+
+  /* ACCENT CARD */
+  .card.accent {
+    border-color: var(--accent);
+    border-left-width: 5px;
+  }
+
+  .card.gold {
+    border-color: var(--gold);
+    border-left-width: 5px;
+    background: #fffbf0;
+  }
+
+  .card.teal {
+    border-color: var(--teal);
+    border-left-width: 5px;
+    background: #f0fafa;
+  }
+
+  /* TIMER DISPLAY */
+  .time-badge {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: var(--ink);
+    color: var(--paper);
+    padding: 0.25rem 0.75rem;
+    border-radius: 100px;
+    font-size: 0.78rem;
+    font-weight: 600;
+  }
+
+  /* DEBATE ROLES */
+  .roles-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+
+  .role-card {
+    border: 2px solid var(--border);
+    padding: 1rem;
+    text-align: center;
+    border-radius: 4px;
+    background: white;
+  }
+
+  .role-card .role-icon { font-size: 2rem; margin-bottom: 0.4rem; }
+  .role-card .role-name { font-weight: 700; font-size: 0.9rem; margin-bottom: 0.3rem; }
+  .role-card .role-desc { font-size: 0.78rem; color: #666; line-height: 1.4; }
+
+  /* INVENTION LIST */
+  .invention-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 0.75rem;
+    margin-top: 1rem;
+  }
+
+  .inv-item {
+    border: 2px solid var(--border);
+    padding: 0.75rem;
+    text-align: center;
+    background: white;
+    cursor: pointer;
+    transition: all 0.15s;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  .inv-item:hover {
+    background: var(--ink);
+    color: var(--paper);
+    transform: translateY(-2px);
+  }
+
+  .inv-item .inv-icon { font-size: 1.5rem; display: block; margin-bottom: 0.3rem; }
+
+  /* PHASE BAR */
+  .phase-bar {
+    display: flex;
+    gap: 0;
+    margin: 1rem 0;
+    border: 2px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .phase {
+    flex: 1;
+    padding: 0.75rem 0.5rem;
+    text-align: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-right: 1px solid var(--border);
+    background: white;
+  }
+
+  .phase:last-child { border-right: none; }
+  .phase.p1 { background: #ffeaea; }
+  .phase.p2 { background: #fff5e0; }
+  .phase.p3 { background: #e0f5f5; }
+  .phase.p4 { background: #e8ffe8; }
+
+  .phase .ph-time { color: #888; font-size: 0.7rem; margin-top: 0.2rem; }
+
+  /* CHECKLIST */
+  .checklist { list-style: none; padding: 0; }
+  .checklist li {
+    padding: 0.5rem 0.5rem 0.5rem 2rem;
+    position: relative;
+    border-bottom: 1px solid #eee;
+    font-size: 0.9rem;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s;
+  }
+
+  .checklist li:hover { background: #f9f9f9; }
+  .checklist li::before {
+    content: '○';
+    position: absolute;
+    left: 0.5rem;
+    color: #ccc;
+    font-size: 1rem;
+  }
+
+  .checklist li.checked::before {
+    content: '✓';
+    color: var(--teal);
+    font-weight: 700;
+  }
+
+  .checklist li.checked { text-decoration: line-through; color: #aaa; }
+
+  /* DISCUSSION PROMPTS */
+  .prompt-box {
+    border: 2px dashed var(--border);
+    padding: 1.25rem;
+    margin: 0.75rem 0;
+    border-radius: 4px;
+    background: var(--light);
+    font-size: 0.95rem;
+    line-height: 1.6;
+    font-style: italic;
+    color: #333;
+  }
+
+  .prompt-box strong { font-style: normal; color: var(--accent); }
+
+  /* FOOTER NAV */
+  .module-nav {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 2.5rem;
+    padding-top: 1.5rem;
+    border-top: 2px solid var(--border);
+  }
+
+  .btn {
+    padding: 0.75rem 1.75rem;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 700;
+    font-size: 0.85rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border: 2px solid var(--border);
+    transition: all 0.15s;
+    border-radius: 3px;
+  }
+
+  .btn-primary {
+    background: var(--ink);
+    color: var(--paper);
+    border-color: var(--ink);
+  }
+
+  .btn-primary:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--ink);
+  }
+
+  .btn-secondary:hover {
+    background: var(--ink);
+    color: var(--paper);
+  }
+
+  /* OVERVIEW TABLE */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+    font-size: 0.88rem;
+  }
+
+  th {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 0.75rem 1rem;
+    text-align: left;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+  }
+
+  td {
+    padding: 0.7rem 1rem;
+    border-bottom: 1px solid #ddd;
+    vertical-align: top;
+  }
+
+  tr:hover td { background: #f9f6f0; }
+
+  .progress-wrap {
+    background: #eee;
+    height: 6px;
+    border-radius: 100px;
+    margin-top: 1.5rem;
+    overflow: hidden;
+  }
+
+  .progress-bar {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 100px;
+    transition: width 0.4s ease;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Demokratie<span>bildung</span></h1>
+  <p>Workshop · Einführungsphase (EF) · Klasse 11 · Gymnasium</p>
+  <div class="timer-bar">
+    <div class="timer-chip"><span class="dot"></span> 90 Minuten gesamt</div>
+    <div class="timer-chip"><span class="dot"></span> 5 Module</div>
+    <div class="timer-chip"><span class="dot"></span> EF · Klasse 11</div>
+  </div>
+</header>
+
+<nav id="mainNav">
+  <button class="active" onclick="showModule(0, this)">📋 Überblick</button>
+  <button onclick="showModule(1, this)">01 · Einstieg</button>
+  <button onclick="showModule(2, this)">02 · Erfindungen</button>
+  <button onclick="showModule(3, this)">03 · Debatte</button>
+  <button onclick="showModule(4, this)">04 · Schweigen</button>
+  <button onclick="showModule(5, this)">05 · Abschluss</button>
+</nav>
+
+<main>
+
+  <!-- OVERVIEW -->
+  <div class="module active" id="mod-0">
+    <div class="module-header">
+      <div class="module-num">●</div>
+      <div class="module-meta">
+        <h2>Workshop-Überblick</h2>
+        <div class="tagline">
+          <span class="tag">90 Min.</span>
+          <span class="tag">5 Phasen</span>
+          <span class="tag mixed">EF · Klasse 11</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card gold">
+      <h3><span class="icon">🎯</span> Ziel des Workshops</h3>
+      <p>Die Schülerinnen und Schüler erleben Demokratie nicht nur als abstraktes Prinzip, sondern als gelebte Praxis: Argumentation, Kompromiss, Mehrheitsentscheidung und der Schutz von Minderheitsmeinungen – alles am konkreten Beispiel erfahrbar.</p>
+    </div>
+
+    <table>
+      <tr>
+        <th>#</th>
+        <th>Modul</th>
+        <th>Zeit</th>
+        <th>Charakter</th>
+        <th>Methode</th>
+      </tr>
+      <tr>
+        <td><strong>01</strong></td>
+        <td>Einstieg: Was ist Demokratie wirklich?</td>
+        <td>10 Min.</td>
+        <td><span class="tag serious">Ernst</span></td>
+        <td>Blitzlicht-Runde + Cluster</td>
+      </tr>
+      <tr>
+        <td><strong>02</strong></td>
+        <td>Die beste Erfindung der Menschheit</td>
+        <td>15 Min.</td>
+        <td><span class="tag fun">Spaßig</span></td>
+        <td>Einzelarbeit + Pitches</td>
+      </tr>
+      <tr>
+        <td><strong>03</strong></td>
+        <td>Demokratische Debatte</td>
+        <td>30 Min.</td>
+        <td><span class="tag mixed">Gemischt</span></td>
+        <td>Strukturierte Debatte</td>
+      </tr>
+      <tr>
+        <td><strong>04</strong></td>
+        <td>Das Schweigen der Mehrheit</td>
+        <td>20 Min.</td>
+        <td><span class="tag serious">Ernst</span></td>
+        <td>Rollenspiel / Dilemma</td>
+      </tr>
+      <tr>
+        <td><strong>05</strong></td>
+        <td>Mein demokratisches Versprechen</td>
+        <td>15 Min.</td>
+        <td><span class="tag mixed">Gemischt</span></td>
+        <td>Reflexion + Plenum</td>
+      </tr>
+    </table>
+
+    <div class="progress-wrap"><div class="progress-bar" style="width:0%"></div></div>
+
+    <div class="module-nav">
+      <span></span>
+      <button class="btn btn-primary" onclick="showModule(1, document.querySelectorAll('nav button')[1])">Los geht's →</button>
+    </div>
+  </div>
+
+  <!-- MODULE 1: EINSTIEG -->
+  <div class="module" id="mod-1">
+    <div class="module-header">
+      <div class="module-num">01</div>
+      <div class="module-meta">
+        <h2>Einstieg: Was ist Demokratie wirklich?</h2>
+        <div class="tagline">
+          <span class="tag">10 Minuten</span>
+          <span class="tag serious">Ernst</span>
+          <span class="tag">Plenum</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card accent">
+      <div class="time-badge">⏱ 10 Min.</div>
+      <h3><span class="icon">💡</span> Zielsetzung</h3>
+      <p>Die SuS aktivieren ihr Vorwissen, formulieren eigene Definitionen und erleben sofort, dass Demokratie bedeutet: unterschiedliche Stimmen zusammenzubringen.</p>
+    </div>
+
+    <div class="card">
+      <h3><span class="icon">📝</span> Ablauf: Blitzlicht-Runde (5 Min.)</h3>
+      <ol>
+        <li>Jede*r schreibt in <strong>60 Sekunden</strong> auf einen Zettel: <em>„Demokratie ist für mich…"</em> – ein Satz, ein Bild, ein Wort.</li>
+        <li>Reihum vorlesen – ohne Kommentar, ohne Wertung.</li>
+        <li>Lehrkraft clustert spontan an der Tafel: <strong>Rechte / Verfahren / Werte / Gefühle</strong>.</li>
+      </ol>
+    </div>
+
+    <div class="card teal">
+      <h3><span class="icon">💬</span> Impulsfrage fürs Plenum (5 Min.)</h3>
+      <div class="prompt-box">
+        <strong>„Stellt euch vor, ihr dürftet heute darüber abstimmen, ob morgen Schule ist. Ihr seid 28 Personen – 15 stimmen für Schulfrei, 13 dagegen. Ist das Demokratie? Und ist das gerecht?"</strong>
+      </div>
+      <p>Ziel: Die Spannung zwischen <em>Mehrheitsentscheid</em> und <em>Minderheitenschutz</em> aufwerfen – wird im weiteren Workshop immer wieder auftauchen.</p>
+    </div>
+
+    <div class="card">
+      <h3><span class="icon">✅</span> Checkliste für Lehrkraft</h3>
+      <ul class="checklist" id="check1">
+        <li onclick="toggle(this)">Zettel + Stifte bereitgelegt</li>
+        <li onclick="toggle(this)">Tafel / Whiteboard beschriftet (4 Cluster-Felder)</li>
+        <li onclick="toggle(this)">Impulsfrage sichtbar gemacht (Folie / Tafel)</li>
+        <li onclick="toggle(this)">Blitzlicht-Runde abgeschlossen</li>
+        <li onclick="toggle(this)">Übergang zu Modul 02 angekündigt</li>
+      </ul>
+    </div>
+
+    <div class="module-nav">
+      <button class="btn btn-secondary" onclick="showModule(0, document.querySelectorAll('nav button')[0])">← Zurück</button>
+      <button class="btn btn-primary" onclick="showModule(2, document.querySelectorAll('nav button')[2])">Weiter →</button>
+    </div>
+  </div>
+
+  <!-- MODULE 2: ERFINDUNGEN -->
+  <div class="module" id="mod-2">
+    <div class="module-header">
+      <div class="module-num">02</div>
+      <div class="module-meta">
+        <h2>Die beste Erfindung der Menschheit</h2>
+        <div class="tagline">
+          <span class="tag">15 Minuten</span>
+          <span class="tag fun">Spaßig</span>
+          <span class="tag">Einzelarbeit + Pitches</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card accent">
+      <div class="time-badge">⏱ 15 Min.</div>
+      <h3><span class="icon">🏆</span> Aufgabe</h3>
+      <p>Jede*r Schüler*in wählt <strong>eine</strong> Erfindung und bereitet einen <strong>60-Sekunden-Pitch</strong> vor: Warum ist genau diese Erfindung die wichtigste, die die Menschheit je gemacht hat? Überzeuge deine Mitschüler*innen!</p>
+    </div>
+
+    <div class="card">
+      <h3><span class="icon">⚡</span> Vorschläge zur Inspiration</h3>
+      <p style="font-size:0.82rem;color:#888;margin-bottom:0.75rem;">Eigene Ideen sind ausdrücklich erwünscht – das hier sind nur Denkanstöße:</p>
+      <div class="invention-grid">
+        <div class="inv-item"><span class="inv-icon">🖨️</span>Buchdruck</div>
+        <div class="inv-item"><span class="inv-icon">💉</span>Impfstoff</div>
+        <div class="inv-item"><span class="inv-icon">🌐</span>Internet</div>
+        <div class="inv-item"><span class="inv-icon">⚡</span>Elektrizität</div>
+        <div class="inv-item"><span class="inv-icon">🚜</span>Pflug</div>
+        <div class="inv-item"><span class="inv-icon">🔥</span>Feuer</div>
+        <div class="inv-item"><span class="inv-icon">🛞</span>Rad</div>
+        <div class="inv-item"><span class="inv-icon">🧬</span>Antibiotika</div>
+        <div class="inv-item"><span class="inv-icon">📱</span>Smartphone</div>
+        <div class="inv-item"><span class="inv-icon">✈️</span>Flugzeug</div>
+        <div class="inv-item"><span class="inv-icon">🏛️</span>Demokratie</div>
+        <div class="inv-item"><span class="inv-icon">✍️</span>Schrift</div>
+      </div>
+    </div>
+
+    <div class="card gold">
+      <h3><span class="icon">🎤</span> Pitch-Struktur (60 Sek.)</h3>
+      <ol>
+        <li><strong>Hook (10 Sek.):</strong> Eine überraschende Behauptung oder Frage.</li>
+        <li><strong>Argument (30 Sek.):</strong> Warum ist diese Erfindung die wichtigste? Ein konkretes Beispiel.</li>
+        <li><strong>Schluss (20 Sek.):</strong> Was wäre die Welt ohne sie? Emotionaler Abschluss.</li>
+      </ol>
+    </div>
+
+    <div class="card teal">
+      <h3><span class="icon">🔗</span> Verbindung zur Demokratie</h3>
+      <p>Nach den Pitches kurz ansprechen: <em>„Wir haben gerade viele verschiedene Meinungen gehört. Wie entscheiden wir jetzt, wer Recht hat? Genau das ist die Kernfrage der Demokratie."</em></p>
+      <p style="margin-top:0.5rem;">→ Überleitung zur strukturierten Debatte in Modul 03.</p>
+    </div>
+
+    <div class="module-nav">
+      <button class="btn btn-secondary" onclick="showModule(1, document.querySelectorAll('nav button')[1])">← Zurück</button>
+      <button class="btn btn-primary" onclick="showModule(3, document.querySelectorAll('nav button')[3])">Weiter →</button>
+    </div>
+  </div>
+
+  <!-- MODULE 3: DEBATTE -->
+  <div class="module" id="mod-3">
+    <div class="module-header">
+      <div class="module-num">03</div>
+      <div class="module-meta">
+        <h2>Die demokratische Debatte</h2>
+        <div class="tagline">
+          <span class="tag">30 Minuten</span>
+          <span class="tag mixed">Gemischt</span>
+          <span class="tag">Strukturierte Debatte</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card accent">
+      <div class="time-badge">⏱ 30 Min.</div>
+      <h3><span class="icon">⚖️</span> Zielsetzung</h3>
+      <p>Die SuS debattieren strukturiert über die „beste Erfindung" und erfahren dabei demokratische Grundprinzipien <em>am eigenen Leib</em>: Redezeit, Mehrheitsentscheid, Kompromiss, faire Verfahren.</p>
+    </div>
+
+    <div class="card">
+      <h3><span class="icon">🏗️</span> Phasenplan</h3>
+      <div class="phase-bar">
+        <div class="phase p1">Gruppenbildung<div class="ph-time">5 Min.</div></div>
+        <div class="phase p2">Vorbereitung<div class="ph-time">5 Min.</div></div>
+        <div class="phase p3">Debatte<div class="ph-time">15 Min.</div></div>
+        <div class="phase p4">Abstimmung + Auswertung<div class="ph-time">5 Min.</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3><span class="icon">👥</span> Rollen in der Debatte</h3>
+      <div class="roles-grid">
+        <div class="role-card">
+          <div class="role-icon">🎙️</div>
+          <div class="role-name">Redner*in</div>
+          <div class="role-desc">Vertritt eine Erfindung, je 90 Sek. Redezeit</div>
+        </div>
+        <div class="role-card">
+          <div class="role-icon">⚖️</div>
+          <div class="role-name">Moderation</div>
+          <div class="role-desc">Gibt Rederecht, stoppt Zeit, sorgt für Fairness</div>
+        </div>
+        <div class="role-card">
+          <div class="role-icon">📝</div>
+          <div class="role-name">Protokollant*in</div>
+          <div class="role-desc">Notiert die stärksten Argumente jeder Seite</div>
+        </div>
+        <div class="role-card">
+          <div class="role-icon">🗳️</div>
+          <div class="role-name">Publikum</div>
+          <div class="role-desc">Hört zu, darf Zwischenfragen stellen, stimmt ab</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card gold">
+      <h3><span class="icon">📜</span> Debattenregeln (sichtbar aushängen)</h3>
+      <ul>
+        <li>Jede*r Redner*in hat <strong>90 Sekunden</strong> – die Moderation stoppt die Zeit.</li>
+        <li>Unterbrechungen nur per Handzeichen und nach Aufforderung durch die Moderation.</li>
+        <li>Angriffe auf <strong>Argumente</strong>, nie auf Personen.</li>
+        <li>Nach der Debatte: <strong>geheime Abstimmung</strong> – wer hat überzeugt?</li>
+        <li>Die Minderheit akzeptiert das Ergebnis – erklärt aber öffentlich, was sie daran falsch findet.</li>
+      </ul>
+    </div>
+
+    <div class="card teal">
+      <h3><span class="icon">🔍</span> Reflexionsfragen nach der Abstimmung</h3>
+      <div class="prompt-box"><strong>„Wer hat seine Meinung während der Debatte geändert? Warum?"</strong></div>
+      <div class="prompt-box"><strong>„War das Ergebnis gerecht? Hätte ein anderes Verfahren zu einem anderen Ergebnis geführt?"</strong></div>
+      <div class="prompt-box"><strong>„Was hat die Moderation besser oder schlechter gemacht als z.B. ein Bundestag?"</strong></div>
+    </div>
+
+    <div class="module-nav">
+      <button class="btn btn-secondary" onclick="showModule(2, document.querySelectorAll('nav button')[2])">← Zurück</button>
+      <button class="btn btn-primary" onclick="showModule(4, document.querySelectorAll('nav button')[4])">Weiter →</button>
+    </div>
+  </div>
+
+  <!-- MODULE 4: SCHWEIGEN DER MEHRHEIT -->
+  <div class="module" id="mod-4">
+    <div class="module-header">
+      <div class="module-num">04</div>
+      <div class="module-meta">
+        <h2>Das Schweigen der Mehrheit</h2>
+        <div class="tagline">
+          <span class="tag">20 Minuten</span>
+          <span class="tag serious">Ernst</span>
+          <span class="tag">Rollenspiel / Dilemma</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card accent">
+      <div class="time-badge">⏱ 20 Min.</div>
+      <h3><span class="icon">😶</span> Zielsetzung</h3>
+      <p>Die SuS erleben am eigenen Leib, was passiert, wenn Menschen <em>nicht</em> von ihrem demokratischen Recht Gebrauch machen – und welche Konsequenzen das hat. Kernthema: <strong>Verantwortung in der Demokratie</strong>.</p>
+    </div>
+
+    <div class="card gold">
+      <h3><span class="icon">🎭</span> Das Szenario: „Die Klassenfahrt"</h3>
+      <p>Folgendes Szenario wird vorgelesen oder per Folie gezeigt:</p>
+      <div class="prompt-box">
+        <strong>Szenario:</strong> Eure Klasse soll über das Ziel der nächsten Klassenfahrt abstimmen. Drei Optionen stehen zur Wahl: Berlin (Politikschwerpunkt), Paris (Kulturschwerpunkt), Ostsee (Erholung). Eine kleine, aber laute Gruppe von 5 Schüler*innen kämpft lautstark für Berlin. Die meisten anderen finden Ostsee schöner, trauen sich aber nicht, das zu sagen – aus Angst, uncool zu wirken oder Streit zu riskieren. Ergebnis: Berlin gewinnt mit 6 Stimmen (5 + 1 Unsicherer). Ostsee erhält nur 4 Stimmen, obwohl im Nachhinein klar wird, dass 18 von 28 Personen lieber dahin gefahren wären.
+      </div>
+    </div>
+
+    <div class="card">
+      <h3><span class="icon">🔄</span> Ablauf (20 Min.)</h3>
+      <ol>
+        <li><strong>Szenario lesen (2 Min.)</strong></li>
+        <li><strong>Kleingruppenarbeit (8 Min.):</strong> 3er-Gruppen diskutieren:
+          <ul style="margin-top:0.5rem">
+            <li>Wer trägt die Verantwortung für das Ergebnis?</li>
+            <li>War das demokratisch?</li>
+            <li>Was hätten die Schweigenden tun können?</li>
+          </ul>
+        </li>
+        <li><strong>Plenum (10 Min.):</strong> Ergebnisse zusammentragen. Lehrkraft führt das Konzept der <em>„Schweigespirale"</em> (Elisabeth Noelle-Neumann) ein.</li>
+      </ol>
+    </div>
+
+    <div class="card teal">
+      <h3><span class="icon">📖</span> Hintergrundinfo: Die Schweigespirale</h3>
+      <p>Elisabeth Noelle-Neumann beschrieb 1974 das Phänomen: Menschen verschweigen ihre Meinung, wenn sie glauben, in der Minderheit zu sein – aus Angst vor sozialer Isolation. Das verstärkt sich selbst: Je mehr schweigen, desto größer wirkt die laute Mehrheit, desto mehr schweigen andere. Ergebnis: Eine laute Minderheit setzt sich durch.</p>
+      <p style="margin-top:0.75rem;font-weight:600;">→ Was bedeutet das für Social Media? Für Stammtische? Für den Bundestag?</p>
+    </div>
+
+    <div class="card">
+      <h3><span class="icon">💬</span> Abschlussimpuls</h3>
+      <div class="prompt-box">
+        <strong>„Habt ihr selbst schon mal geschwiegen, obwohl ihr eine andere Meinung hattet? Was hat euch davon abgehalten zu sprechen?"</strong>
+      </div>
+      <p style="font-size:0.85rem;color:#666;margin-top:0.5rem;">Kann als stille Reflexion (auf Zettel) oder offene Runde gestaltet werden – je nach Gruppenatmosphäre.</p>
+    </div>
+
+    <div class="module-nav">
+      <button class="btn btn-secondary" onclick="showModule(3, document.querySelectorAll('nav button')[3])">← Zurück</button>
+      <button class="btn btn-primary" onclick="showModule(5, document.querySelectorAll('nav button')[5])">Weiter →</button>
+    </div>
+  </div>
+
+  <!-- MODULE 5: ABSCHLUSS -->
+  <div class="module" id="mod-5">
+    <div class="module-header">
+      <div class="module-num">05</div>
+      <div class="module-meta">
+        <h2>Mein demokratisches Versprechen</h2>
+        <div class="tagline">
+          <span class="tag">15 Minuten</span>
+          <span class="tag mixed">Gemischt</span>
+          <span class="tag">Reflexion + Ritual</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card accent">
+      <div class="time-badge">⏱ 15 Min.</div>
+      <h3><span class="icon">🤝</span> Zielsetzung</h3>
+      <p>Der Workshop endet mit einem persönlichen, konkreten Commitment: Was nehme ich mit? Was werde ich anders machen? Das macht Demokratie zur persönlichen Haltung – nicht nur zum Schulfach.</p>
+    </div>
+
+    <div class="card">
+      <h3><span class="icon">✍️</span> Aufgabe: Das Versprechen (5 Min.)</h3>
+      <p>Jede*r schreibt auf eine Karteikarte (oder Post-it) einen konkreten Satz nach folgendem Muster:</p>
+      <div class="prompt-box">
+        <strong>„Ich verspreche, dass ich in Zukunft…"</strong><br><br>
+        Beispiele:<br>
+        – „…meine Meinung sage, auch wenn sie unbequem ist."<br>
+        – „…bei der nächsten Wahl abstimme, auch wenn ich jung bin."<br>
+        – „…Hasskommentare nicht ignoriere, sondern widerspreche."<br>
+        – „…zuhöre, bevor ich urteile."
+      </div>
+    </div>
+
+    <div class="card gold">
+      <h3><span class="icon">🎪</span> Das Ritual: Der demokratische Kreis (7 Min.)</h3>
+      <ol>
+        <li>Alle stehen im Kreis.</li>
+        <li>Wer möchte, liest sein Versprechen vor – keine Pflicht, aber Ermutigung.</li>
+        <li>Nach jeder Aussage: kurzes, kollektives Nicken oder Applaus als Zeichen: <em>„Wir nehmen das ernst."</em></li>
+        <li>Die Zettel bleiben bei den SuS – als Erinnerung.</li>
+      </ol>
+    </div>
+
+    <div class="card teal">
+      <h3><span class="icon">🌟</span> Abschlussrunde (3 Min.)</h3>
+      <div class="prompt-box">
+        <strong>„Was nehmt ihr heute aus diesem Workshop mit – in einem Wort?"</strong>
+      </div>
+      <p>Reihum, schnell, keine langen Erklärungen. Endet den Workshop auf einer positiven, energetischen Note.</p>
+    </div>
+
+    <div class="card">
+      <h3><span class="icon">📚</span> Weiterführende Impulse (optional)</h3>
+      <ul>
+        <li><strong>Film:</strong> „Die Welle" (Dennis Gansel, 2008) – Wie schnell Demokratie kippen kann</li>
+        <li><strong>Podcast:</strong> „Was jetzt?" (Zeit Online) – aktuelle Demokratiethemen</li>
+        <li><strong>Buch:</strong> „Wir hätten es wissen können" – Demokratieskepsis in Europa</li>
+        <li><strong>Projekt:</strong> Jugendparlament / Model United Nations in der Schule gründen</li>
+      </ul>
+    </div>
+
+    <div class="module-nav">
+      <button class="btn btn-secondary" onclick="showModule(4, document.querySelectorAll('nav button')[4])">← Zurück</button>
+      <button class="btn btn-primary" onclick="showModule(0, document.querySelectorAll('nav button')[0])">↩ Zum Überblick</button>
+    </div>
+  </div>
+
+</main>
+
+<script>
+  let currentModule = 0;
+
+  function showModule(index, btn) {
+    document.querySelectorAll('.module').forEach(m => m.classList.remove('active'));
+    document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+    document.getElementById('mod-' + index).classList.add('active');
+    btn.classList.add('active');
+    currentModule = index;
+    updateProgress();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function updateProgress() {
+    const pct = (currentModule / 5) * 100;
+    document.querySelector('.progress-bar') && (document.querySelector('.progress-bar').style.width = pct + '%');
+  }
+
+  function toggle(el) {
+    el.classList.toggle('checked');
+  }
+</script>
+
+</body>
+</html>
