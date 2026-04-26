@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quiz – Antibiotika & HIV · Biologie Klasse 9</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+      background: linear-gradient(135deg, #EEF7FF 0%, #FFF0E0 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 20px 16px;
+    }
+    #app {
+      background: white;
+      border-radius: 20px;
+      padding: 28px;
+      max-width: 620px;
+      width: 100%;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.10);
+      margin: auto;
+    }
+
+    /* ── Start screen ── */
+    #start-screen { text-align: center; padding: 20px 0; }
+    #start-screen .emoji { font-size: 52px; margin-bottom: 16px; }
+    #start-screen h1 { color: #2E86AB; font-size: 24px; margin-bottom: 8px; }
+    #start-screen .subtitle { color: #555; font-size: 16px; margin-bottom: 6px; }
+    #start-screen .topic { color: #777; font-size: 14px; margin-bottom: 24px; }
+    .tags { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 28px; }
+    .tag { border-radius: 8px; padding: 5px 14px; font-size: 13px; font-weight: bold; }
+
+    /* ── Progress bar ── */
+    #progress-bar { display: flex; gap: 8px; margin-bottom: 24px; }
+    .progress-seg { flex: 1; height: 6px; border-radius: 3px; background: #DDD; transition: background 0.4s; }
+
+    /* ── Question header ── */
+    .q-meta { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .q-topic-badge { border-radius: 8px; padding: 4px 12px; font-size: 12px; font-weight: bold; }
+    .q-count { color: #AAA; font-size: 13px; }
+    .q-title { color: #222; font-size: 18px; margin-bottom: 8px; line-height: 1.5; font-weight: bold; }
+    .q-hint { font-size: 13px; color: #888; margin-bottom: 20px; font-style: italic; }
+
+    /* ── Buttons (generic) ── */
+    button { font-family: inherit; cursor: pointer; border: none; transition: all 0.2s; }
+    button:disabled { cursor: not-allowed; }
+    .btn-primary {
+      color: white; border-radius: 10px; padding: 12px 28px;
+      font-size: 15px; font-weight: bold;
+    }
+    .btn-secondary {
+      background: white; color: #888; border: 2px solid #DDD;
+      border-radius: 10px; padding: 12px 20px; font-size: 15px;
+    }
+    .btn-start {
+      background: #2E86AB; color: white; border-radius: 12px;
+      padding: 14px 36px; font-size: 17px; font-weight: bold; width: 100%;
+    }
+    .btn-next {
+      background: #1A7A4A; color: white; border-radius: 10px;
+      padding: 12px 28px; font-size: 15px; font-weight: bold;
+    }
+
+    /* ── Order question ── */
+    .chosen-list { margin-bottom: 16px; }
+    .chosen-label { font-size: 13px; color: #666; margin-bottom: 8px; font-weight: bold; }
+    .chosen-item {
+      display: flex; align-items: center; gap: 10px;
+      border-radius: 10px; padding: 10px 14px; font-size: 14px; margin-bottom: 6px;
+      border: 2px solid;
+    }
+    .num-badge {
+      width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: bold; font-size: 13px; color: white;
+    }
+    .available-label { font-size: 13px; color: #555; margin-bottom: 8px; font-style: italic; }
+    .step-btn {
+      background: white; border-radius: 10px; padding: 12px 16px;
+      font-size: 15px; display: flex; align-items: center; gap: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08); text-align: left; width: 100%;
+      margin-bottom: 8px; border: 2px solid;
+    }
+    .step-btn .circle {
+      width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; font-size: 16px;
+      border: 2px solid;
+    }
+    .btn-actions { display: flex; gap: 10px; margin-top: 4px; }
+
+    /* ── Multi question ── */
+    .option-btn {
+      background: white; border-radius: 10px; padding: 12px 16px;
+      font-size: 15px; display: flex; align-items: flex-start; gap: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06); text-align: left; width: 100%;
+      margin-bottom: 10px; border: 2px solid;
+    }
+    .checkbox {
+      width: 22px; height: 22px; border-radius: 6px; flex-shrink: 0; margin-top: 1px;
+      border: 2px solid; display: flex; align-items: center; justify-content: center;
+      color: white; font-size: 14px; transition: all 0.2s;
+    }
+    .option-text { flex: 1; }
+    .option-icon { flex-shrink: 0; }
+
+    /* ── Open question ── */
+    .keyword-box { background: #F8F9FA; border-radius: 10px; padding: 12px; margin-bottom: 14px; }
+    .keyword-label { font-size: 13px; color: #555; font-weight: bold; margin-bottom: 8px; }
+    .keywords { display: flex; flex-wrap: wrap; gap: 6px; }
+    .kw-badge {
+      border-radius: 6px; padding: 3px 10px; font-size: 13px; font-weight: bold;
+      border: 1px solid; transition: all 0.3s;
+    }
+    textarea {
+      width: 100%; min-height: 110px; border-radius: 10px; border: 2px solid #DDD;
+      padding: 12px; font-size: 15px; font-family: inherit;
+      resize: vertical; outline: none;
+    }
+    .kw-count { font-size: 13px; color: #888; margin: 6px 0 14px; }
+    .model-answer-box {
+      background: #D0EAF5; border: 2px solid #2E86AB;
+      border-radius: 10px; padding: 14px; margin-bottom: 12px;
+    }
+    .model-answer-box strong { color: #2E86AB; }
+    .model-answer-box p { margin: 8px 0 0; font-size: 14px; color: #333; line-height: 1.6; }
+
+    /* ── Feedback box ── */
+    .feedback {
+      border-radius: 10px; padding: 14px; margin-bottom: 12px; border: 2px solid;
+    }
+    .feedback p { margin: 8px 0 0; font-size: 14px; color: #444; line-height: 1.6; }
+
+
+  </style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+const questions = [
+  {
+    id: 1,
+    topic: "Antibiotika & Resistenz",
+    color: "#2E86AB",
+    light: "#D0EAF5",
+    question: "Bringe die Schritte der Resistenzentstehung in die richtige Reihenfolge.",
+    hint: "Tippe die Schritte der Reihe nach an – zuerst Schritt 1, dann Schritt 2 usw.",
+    type: "order",
+    steps: [
+      { id: "a", text: "Resistente Bakterien vermehren sich ungehindert." },
+      { id: "b", text: "In einer Bakterienpopulation entsteht durch Zufall eine Mutation." },
+      { id: "c", text: "Das Antibiotikum tötet alle empfindlichen Bakterien." },
+      { id: "d", text: "Die resistenten Bakterien geben ihre Gene an Tochterzellen weiter." },
+      { id: "e", text: "Einzelne Bakterien sind dadurch unempfindlich gegenüber dem Antibiotikum." },
+    ],
+    correctOrder: ["b","e","c","a","d"],
+    explanation: "Zufällige Mutation → Resistenz bei einzelnen Bakterien → Antibiotikum selektiert → resistente vermehren sich → Weitergabe der Resistenz. Dies nennt man natürliche Selektion.",
+  },
+  {
+    id: 2,
+    topic: "HIV und AIDS",
+    color: "#E07B39",
+    light: "#FFF0E0",
+    question: "Welche der folgenden Aussagen über HIV sind RICHTIG?",
+    hint: "Mehrfachauswahl möglich – tippe alle zutreffenden Aussagen an.",
+    type: "multi",
+    options: [
+      { id:"a", text:"HIV befällt spezifisch T-Helferzellen des Immunsystems.", correct:true },
+      { id:"b", text:"Antibiotika sind ein wirksames Mittel gegen HIV.", correct:false },
+      { id:"c", text:"Das Glykoprotein ermöglicht die Bindung an Rezeptoren der T-Helferzelle.", correct:true },
+      { id:"d", text:"HIV besitzt eine Zellwand, die das Kapsid schützt.", correct:false },
+      { id:"e", text:"Das Provirus ist die in die Wirts-DNA integrierte virale Erbinformation.", correct:true },
+      { id:"f", text:"HIV kann durch Speichel oder Tränenflüssigkeit zuverlässig übertragen werden.", correct:false },
+    ],
+    explanation: "Richtig: a, c, e. HIV bindet über Glykoprotein an T-Helferzellen, das Provirus integriert sich in die Wirtszell-DNA. Antibiotika wirken nur gegen Bakterien (Viren haben keine Zellwand!). Eine Übertragung durch Speichel ist wissenschaftlich nicht nachgewiesen.",
+  },
+  {
+    id: 3,
+    topic: "Vergleich & Transfer",
+    color: "#1A7A4A",
+    light: "#D4EDDA",
+    question: "Warum helfen Antibiotika gegen HIV nicht? Erkläre mit eigenen Worten.",
+    hint: "Versuche alle Schlüsselbegriffe zu verwenden. Vergleiche dann mit der Musterlösung.",
+    type: "open",
+    keywords: ["Zellwand","Stoffwechsel","Wirtszelle","Virus","Bakterium"],
+    modelAnswer: "Antibiotika greifen spezifisch in bakterielle Strukturen ein, z. B. in den Aufbau der Zellwand. HIV ist ein Virus – Viren besitzen keine Zellwand und keinen eigenen Stoffwechsel. Sie sind für ihre Vermehrung vollständig auf die Maschinerie der Wirtszelle angewiesen. Deshalb gibt es für Antibiotika bei Viren keinen Angriffspunkt.",
+  },
+];
+
+// ── State ──────────────────────────────────────────────────
+let state = {
+  screen: "start",   // start | quiz | result
+  qIndex: 0,
+  results: [],
+  // order question
+  shuffled: [],
+  chosen: [],
+  orderChecked: false,
+  // multi question
+  selected: new Set(),
+  multiChecked: false,
+  // open question
+  openText: "",
+  openChecked: false,
+};
+
+function shuffle(arr) {
+  return [...arr].sort(() => Math.random() - 0.5);
+}
+
+// ── Render ─────────────────────────────────────────────────
+function render() {
+  const app = document.getElementById("app");
+  if (state.screen === "start") { app.innerHTML = renderStart(); }
+  else { app.innerHTML = renderQuiz(); }
+  attachEvents();
+}
+
+function renderStart() {
+  return `
+    <div id="start-screen">
+      <div class="emoji">🧬</div>
+      <h1>Selbstüberprüfung</h1>
+      <p class="subtitle">Biologie Klasse 9 · UV 9.7</p>
+      <p class="topic">Antibiotika &amp; Resistenz | HIV und AIDS</p>
+      <div class="tags">
+        <span class="tag" style="background:#2E86AB18;color:#2E86AB">3 Aufgaben</span>
+        <span class="tag" style="background:#1A7A4A18;color:#1A7A4A">~8 Minuten</span>
+        <span class="tag" style="background:#E07B3918;color:#E07B39">iPad-geeignet</span>
+      </div>
+      <button class="btn-start" onclick="startQuiz()">Quiz starten →</button>
+    </div>`;
+}
+
+function renderProgress() {
+  return `<div id="progress-bar">${questions.map((_, i) => {
+    const bg = i < state.qIndex ? "#2E86AB" : i === state.qIndex ? "#90CDE8" : "#DDD";
+    return `<div class="progress-seg" style="background:${bg}"></div>`;
+  }).join("")}</div>`;
+}
+
+function renderQuiz() {
+  const q = questions[state.qIndex];
+  let body = "";
+  if (q.type === "order") body = renderOrder(q);
+  else if (q.type === "multi") body = renderMulti(q);
+  else body = renderOpen(q);
+
+  return `
+    ${renderProgress()}
+    <div class="q-meta">
+      <span class="q-topic-badge" style="background:${q.light};color:${q.color}">${q.topic}</span>
+      <span class="q-count">Aufgabe ${state.qIndex + 1} von ${questions.length}</span>
+    </div>
+    <div class="q-title">${q.question}</div>
+    <div class="q-hint">💡 ${q.hint}</div>
+    ${body}`;
+}
+
+// ── Order ──────────────────────────────────────────────────
+function renderOrder(q) {
+  const chosen = state.chosen;
+  const checked = state.orderChecked;
+  const chosenSet = new Set(chosen);
+
+  let chosenHTML = "";
+  if (chosen.length > 0) {
+    const items = chosen.map((id, i) => {
+      const step = state.shuffled.find(s => s.id === id);
+      let bg = "#EEF7FF", border = q.color, numBg = q.color, icon = "";
+      if (checked) {
+        const ok = q.correctOrder[i] === id;
+        bg = ok ? "#D4EDDA" : "#FAD7D7";
+        border = ok ? "#1A7A4A" : "#C0392B";
+        numBg = border;
+        icon = ok ? " ✅" : " ❌";
+      }
+      return `<div class="chosen-item" style="background:${bg};border-color:${border}">
+        <div class="num-badge" style="background:${numBg}">${i+1}</div>
+        <span style="flex:1;color:#333">${step.text}</span>
+        <span>${icon}</span>
+      </div>`;
+    }).join("");
+    chosenHTML = `<div class="chosen-list">
+      <div class="chosen-label">Deine Reihenfolge:</div>
+      ${items}
+    </div>`;
+  }
+
+  const availableLabel = checked ? "Ergebnis:"
+    : chosen.length === 0 ? "👇 Tippe jetzt Schritt 1 an:"
+    : `👇 Tippe jetzt Schritt ${chosen.length + 1} an:`;
+
+  const stepBtns = state.shuffled.map(item => {
+    const isChosen = chosenSet.has(item.id);
+    const border = isChosen ? "#DDD" : q.color;
+    const circleColor = isChosen ? "#CCC" : q.color;
+    const opacity = isChosen ? "0.4" : "1";
+    const shadow = isChosen ? "none" : "0 2px 8px rgba(0,0,0,0.08)";
+    return `<button class="step-btn" style="border-color:${border};opacity:${opacity};box-shadow:${shadow}"
+        onclick="tapStep('${item.id}')" ${checked ? "disabled" : ""}>
+      <div class="circle" style="border-color:${circleColor};color:${circleColor}">${isChosen ? "✓" : "○"}</div>
+      <span style="color:${isChosen ? "#AAA" : "#333"}">${item.text}</span>
+    </button>`;
+  }).join("");
+
+  let actions = "";
+  if (!checked) {
+    const canCheck = chosen.length === q.steps.length;
+    actions = `<div class="btn-actions">
+      <button class="btn-primary" style="background:${canCheck ? q.color : "#CCC"}"
+        onclick="checkOrder()" ${canCheck ? "" : "disabled"}>Überprüfen ✓</button>
+      ${chosen.length > 0 ? `<button class="btn-secondary" onclick="resetOrder()">↺ Zurücksetzen</button>` : ""}
+    </div>`;
+  } else {
+    const correct = JSON.stringify(chosen) === JSON.stringify(q.correctOrder);
+    const fbBg = correct ? "#D4EDDA" : "#FAD7D7";
+    const fbBorder = correct ? "#1A7A4A" : "#C0392B";
+    const fbColor = correct ? "#1A7A4A" : "#C0392B";
+    const fbText = correct ? "✅ Richtige Reihenfolge!" : "❌ Nicht ganz – schau auf die Markierungen oben.";
+    const isLast = state.qIndex === questions.length - 1;
+    actions = `<div class="feedback" style="background:${fbBg};border-color:${fbBorder}">
+      <strong style="color:${fbColor}">${fbText}</strong>
+      <p>${q.explanation}</p>
+    </div>
+    ${isLast ? "" : `<button class="btn-next" onclick="nextQuestion(${correct})">Weiter →</button>`}`;
+  }
+
+  return `${chosenHTML}
+    <div class="available-label">${availableLabel}</div>
+    <div>${stepBtns}</div>
+    ${actions}`;
+}
+
+// ── Multi ──────────────────────────────────────────────────
+function renderMulti(q) {
+  const selected = state.selected;
+  const checked = state.multiChecked;
+
+  const optionBtns = q.options.map(opt => {
+    let bg = selected.has(opt.id) ? q.light : "white";
+    let border = selected.has(opt.id) ? q.color : "#DDD";
+    let cbBg = selected.has(opt.id) ? q.color : "white";
+    let icon = "";
+    if (checked) {
+      if (opt.correct && selected.has(opt.id))       { bg="#D4EDDA"; border="#1A7A4A"; cbBg="#1A7A4A"; icon="✅"; }
+      else if (opt.correct && !selected.has(opt.id)) { bg="#FFF3CD"; border="#F4A261"; cbBg="white";   icon="⚠️"; }
+      else if (!opt.correct && selected.has(opt.id)) { bg="#FAD7D7"; border="#C0392B"; cbBg="#C0392B"; icon="❌"; }
+      else { bg="white"; border="#DDD"; cbBg="white"; }
+    }
+    return `<button class="option-btn" style="background:${bg};border-color:${border}"
+        onclick="toggleOption('${opt.id}')" ${checked ? "disabled" : ""}>
+      <div class="checkbox" style="border-color:${border};background:${cbBg}">${selected.has(opt.id) ? "✓" : ""}</div>
+      <span class="option-text" style="color:#333">${opt.text}</span>
+      <span class="option-icon">${icon}</span>
+    </button>`;
+  }).join("");
+
+  const allCorrect =
+    q.options.filter(o => o.correct).every(o => selected.has(o.id)) &&
+    q.options.filter(o => !o.correct).every(o => !selected.has(o.id));
+
+  let actions = "";
+  if (!checked) {
+    const canCheck = selected.size > 0;
+    actions = `<button class="btn-primary" style="background:${canCheck ? q.color : "#CCC"}"
+      onclick="checkMulti()" ${canCheck ? "" : "disabled"}>Überprüfen ✓</button>`;
+  } else {
+    const fbBg = allCorrect ? "#D4EDDA" : "#FFF3CD";
+    const fbBorder = allCorrect ? "#1A7A4A" : "#F4A261";
+    const fbColor = allCorrect ? "#1A7A4A" : "#E07B39";
+    const fbText = allCorrect ? "✅ Alle richtig!" : "🔍 Schau dir die Markierungen an:";
+    const isLast = state.qIndex === questions.length - 1;
+    actions = `<div class="feedback" style="background:${fbBg};border-color:${fbBorder}">
+      <strong style="color:${fbColor}">${fbText}</strong>
+      <p>${q.explanation}</p>
+    </div>
+    ${isLast ? "" : `<button class="btn-next" onclick="nextQuestion(${allCorrect})">Weiter →</button>`}`;
+  }
+
+  return `<div>${optionBtns}</div>${actions}`;
+}
+
+// ── Open ───────────────────────────────────────────────────
+function renderOpen(q) {
+  const checked = state.openChecked;
+  const text = state.openText;
+  const found = q.keywords.filter(k => text.toLowerCase().includes(k.toLowerCase()));
+
+  const kwBadges = q.keywords.map(k => {
+    const hit = checked && found.includes(k);
+    return `<span class="kw-badge" style="background:${hit ? "#D4EDDA" : "#EEE"};border-color:${hit ? "#1A7A4A" : "#CCC"};color:${hit ? "#1A7A4A" : "#555"}">${k}${hit ? " ✓" : ""}</span>`;
+  }).join("");
+
+  let actions = "";
+  if (!checked) {
+    const canCheck = text.trim().length >= 20;
+    actions = `<button class="btn-primary" style="background:${canCheck ? q.color : "#CCC"}"
+      onclick="checkOpen()" ${canCheck ? "" : "disabled"}>Musterlösung anzeigen</button>`;
+  } else {
+    const ok = found.length >= 4;
+    const isLast = state.qIndex === questions.length - 1;
+    actions = `<div class="model-answer-box">
+      <strong>📋 Musterlösung:</strong>
+      <p>${q.modelAnswer}</p>
+    </div>
+    <p style="font-size:14px;color:#555;margin-bottom:12px">
+      Du hast <strong>${found.length}/${q.keywords.length}</strong> Schlüsselbegriffe verwendet. Vergleiche deinen Text mit der Musterlösung.
+    </p>
+    ${isLast ? "" : `<button class="btn-next" onclick="nextQuestion(${ok})">Weiter →</button>`}`;
+  }
+
+  return `
+    <div class="keyword-box">
+      <div class="keyword-label">Schlüsselbegriffe:</div>
+      <div class="keywords">${kwBadges}</div>
+    </div>
+    <textarea id="open-textarea" placeholder="Schreibe deine Erklärung hier …"
+      oninput="updateOpenText(this.value)" ${checked ? "disabled style='background:#F8F9FA'" : ""}>${text}</textarea>
+    <div class="kw-count">Erkannte Begriffe: <strong>${found.length}/${q.keywords.length}</strong></div>
+    ${actions}`;
+}
+
+// ── Event handlers ─────────────────────────────────────────
+function attachEvents() {
+  // textarea live update via oninput attribute – no extra listener needed
+}
+
+function startQuiz() {
+  const q = questions[0];
+  state.screen = "quiz";
+  state.qIndex = 0;
+  state.results = [];
+  state.shuffled = shuffle(q.steps || []);
+  state.chosen = [];
+  state.orderChecked = false;
+  state.selected = new Set();
+  state.multiChecked = false;
+  state.openText = "";
+  state.openChecked = false;
+  render();
+}
+
+function tapStep(id) {
+  if (state.orderChecked) return;
+  const idx = state.chosen.indexOf(id);
+  if (idx !== -1) {
+    state.chosen = state.chosen.slice(0, idx);
+  } else {
+    state.chosen = [...state.chosen, id];
+  }
+  render();
+}
+
+function resetOrder() {
+  state.chosen = [];
+  state.orderChecked = false;
+  render();
+}
+
+function checkOrder() {
+  state.orderChecked = true;
+  render();
+}
+
+function toggleOption(id) {
+  if (state.multiChecked) return;
+  const s = new Set(state.selected);
+  s.has(id) ? s.delete(id) : s.add(id);
+  state.selected = s;
+  render();
+}
+
+function checkMulti() {
+  state.multiChecked = true;
+  render();
+}
+
+function updateOpenText(val) {
+  state.openText = val;
+  // re-render only the keyword count and button state without full re-render
+  const q = questions[state.qIndex];
+  const found = q.keywords.filter(k => val.toLowerCase().includes(k.toLowerCase()));
+  const countEl = document.querySelector(".kw-count");
+  if (countEl) countEl.innerHTML = `Erkannte Begriffe: <strong>${found.length}/${q.keywords.length}</strong>`;
+  const btn = document.querySelector(".btn-primary");
+  if (btn) {
+    const canCheck = val.trim().length >= 20;
+    btn.style.background = canCheck ? q.color : "#CCC";
+    btn.disabled = !canCheck;
+  }
+  // update keyword badges
+  const badges = document.querySelectorAll(".kw-badge");
+  badges.forEach((badge, i) => {
+    const k = q.keywords[i];
+    const hit = found.includes(k);
+    badge.style.background = hit ? "#D4EDDA" : "#EEE";
+    badge.style.borderColor = hit ? "#1A7A4A" : "#CCC";
+    badge.style.color = hit ? "#1A7A4A" : "#555";
+    badge.textContent = k + (hit ? " ✓" : "");
+  });
+}
+
+function checkOpen() {
+  state.openChecked = true;
+  render();
+}
+
+function nextQuestion(ok) {
+  state.results.push(ok);
+  const next = state.qIndex + 1;
+  if (next < questions.length) {
+    state.qIndex = next;
+    const q = questions[next];
+    state.shuffled = shuffle(q.steps || []);
+    state.chosen = [];
+    state.orderChecked = false;
+    state.selected = new Set();
+    state.multiChecked = false;
+    state.openText = "";
+    state.openChecked = false;
+    render();
+  }
+  // last question: do nothing – stay on feedback, no result screen
+}
+
+// ── Boot ───────────────────────────────────────────────────
+render();
+</script>
+</body>
+</html>
