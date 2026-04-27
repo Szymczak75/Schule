@@ -1,0 +1,949 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Echte Brüche – Bilder & Formen</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;900&family=Fredoka+One&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fdf6ee;
+    --card: #ffffff;
+    --primary: #e8703a;
+    --primary-light: #fde8dc;
+    --accent: #4db8a4;
+    --accent2: #7b6cf6;
+    --accent3: #f2c94c;
+    --text: #2d2217;
+    --muted: #9b8c7e;
+    --border: #e8ddd4;
+    --shadow: 0 4px 20px rgba(0,0,0,0.08);
+    --radius: 20px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0 0 60px 0;
+  }
+
+  /* ── Header ── */
+  header {
+    background: linear-gradient(135deg, var(--primary) 0%, #c8512a 100%);
+    padding: 28px 24px 24px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 180px; height: 180px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 50%;
+  }
+  header::after {
+    content: '';
+    position: absolute;
+    bottom: -30px; left: 20px;
+    width: 120px; height: 120px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 50%;
+  }
+  header h1 {
+    font-family: 'Fredoka One', cursive;
+    font-size: 2rem;
+    color: white;
+    letter-spacing: 0.5px;
+    position: relative;
+    z-index: 1;
+  }
+  header p {
+    color: rgba(255,255,255,0.85);
+    font-size: 0.95rem;
+    margin-top: 6px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── Tabs ── */
+  .tabs {
+    display: flex;
+    gap: 8px;
+    padding: 20px 20px 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab-btn {
+    flex-shrink: 0;
+    padding: 10px 18px;
+    border: 2px solid var(--border);
+    border-radius: 50px;
+    background: white;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s;
+    min-height: 44px;
+  }
+  .tab-btn.active {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: white;
+    box-shadow: 0 3px 12px rgba(232,112,58,0.35);
+  }
+
+  /* ── Section ── */
+  .section { display: none; padding: 20px; }
+  .section.active { display: block; }
+
+  /* ── Section title ── */
+  .section-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.4rem;
+    color: var(--primary);
+    margin-bottom: 6px;
+  }
+  .section-desc {
+    font-size: 0.88rem;
+    color: var(--muted);
+    margin-bottom: 18px;
+    line-height: 1.5;
+  }
+
+  /* ── Fraction Explorer Cards ── */
+  .explorer-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+  @media (min-width: 600px) {
+    .explorer-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+  .frac-card {
+    background: white;
+    border-radius: var(--radius);
+    padding: 16px 12px;
+    box-shadow: var(--shadow);
+    border: 3px solid transparent;
+    cursor: pointer;
+    transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+    text-align: center;
+    user-select: none;
+  }
+  .frac-card:active { transform: scale(0.96); }
+  .frac-card.selected {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px var(--primary-light);
+  }
+  .frac-card svg { width: 80px; height: 80px; display: block; margin: 0 auto 8px; }
+  .frac-label {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.5rem;
+    color: var(--text);
+  }
+  .frac-name {
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  /* ── Detail panel ── */
+  .detail-panel {
+    background: white;
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--shadow);
+    margin-top: 18px;
+    border-left: 5px solid var(--primary);
+    display: none;
+    animation: slideIn 0.25s ease;
+  }
+  .detail-panel.visible { display: block; }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .detail-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.2rem;
+    color: var(--primary);
+    margin-bottom: 8px;
+  }
+  .detail-text {
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: var(--text);
+  }
+  .detail-text strong { color: var(--primary); }
+
+  /* ── Quiz ── */
+  .quiz-card {
+    background: white;
+    border-radius: var(--radius);
+    padding: 22px;
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
+  }
+  .quiz-question {
+    font-weight: 700;
+    font-size: 1rem;
+    margin-bottom: 14px;
+    line-height: 1.4;
+  }
+  .quiz-visual {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 16px;
+  }
+  .quiz-visual svg { width: 110px; height: 110px; }
+  .quiz-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .quiz-opt {
+    padding: 12px;
+    border: 2px solid var(--border);
+    border-radius: 14px;
+    text-align: center;
+    cursor: pointer;
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.4rem;
+    color: var(--text);
+    background: white;
+    transition: all 0.15s;
+    min-height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .quiz-opt:active { transform: scale(0.96); }
+  .quiz-opt.correct {
+    background: #d4f4ee;
+    border-color: var(--accent);
+    color: #1a7a68;
+  }
+  .quiz-opt.wrong {
+    background: #fde8e8;
+    border-color: #e05c5c;
+    color: #a02020;
+  }
+  .quiz-opt.disabled { pointer-events: none; }
+  .quiz-feedback {
+    margin-top: 12px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-align: center;
+    min-height: 24px;
+    color: var(--accent);
+  }
+  .quiz-feedback.wrong { color: #e05c5c; }
+
+  /* ── Score bar ── */
+  .score-bar {
+    background: white;
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    box-shadow: var(--shadow);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .score-label {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1rem;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  .score-track {
+    flex: 1;
+    height: 14px;
+    background: var(--border);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .score-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), #38a08e);
+    border-radius: 99px;
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+  .score-num {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.1rem;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+
+  /* ── Next button ── */
+  .btn-next {
+    display: block;
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, var(--primary), #c8512a);
+    color: white;
+    border: none;
+    border-radius: 14px;
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.1rem;
+    cursor: pointer;
+    margin-top: 10px;
+    box-shadow: 0 4px 14px rgba(232,112,58,0.3);
+    transition: transform 0.12s, opacity 0.12s;
+    min-height: 52px;
+  }
+  .btn-next:active { transform: scale(0.97); opacity: 0.9; }
+  .btn-next:disabled { opacity: 0.4; pointer-events: none; }
+
+  /* ── Zuordnung / Matching ── */
+  .match-section {
+    background: white;
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--shadow);
+  }
+  .match-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .match-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+  .match-visual svg { width: 70px; height: 70px; flex-shrink: 0; }
+  .match-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    flex: 1;
+  }
+  .match-chip {
+    padding: 8px 14px;
+    border: 2px solid var(--border);
+    border-radius: 50px;
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.2rem;
+    cursor: pointer;
+    background: white;
+    transition: all 0.15s;
+    min-height: 44px;
+    min-width: 60px;
+    text-align: center;
+  }
+  .match-chip:active { transform: scale(0.95); }
+  .match-chip.selected-chip {
+    background: var(--accent2);
+    border-color: var(--accent2);
+    color: white;
+  }
+  .match-chip.correct-chip {
+    background: #d4f4ee;
+    border-color: var(--accent);
+    color: #1a7a68;
+    pointer-events: none;
+  }
+  .match-chip.wrong-chip {
+    background: #fde8e8;
+    border-color: #e05c5c;
+    color: #a02020;
+    pointer-events: none;
+  }
+  .match-result { font-size: 1.3rem; flex-shrink: 0; }
+
+  /* ── Info page ── */
+  .info-card {
+    background: white;
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--shadow);
+    margin-bottom: 14px;
+  }
+  .info-card h3 {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.1rem;
+    color: var(--accent2);
+    margin-bottom: 10px;
+  }
+  .info-card p {
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: var(--text);
+  }
+  .fraction-display {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.8rem;
+    color: var(--primary);
+    line-height: 1;
+    margin: 8px 16px;
+    vertical-align: middle;
+  }
+  .fraction-display .frac-line {
+    width: 100%;
+    height: 3px;
+    background: var(--primary);
+    margin: 3px 0;
+    min-width: 36px;
+  }
+  .info-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
+  }
+  .badge {
+    display: inline-block;
+    padding: 4px 12px;
+    background: var(--primary-light);
+    color: var(--primary);
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: 0.85rem;
+  }
+  .badge.green { background: #d4f4ee; color: #1a7a68; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🍕 Echte Brüche</h1>
+  <p>Brüche sehen – verstehen – üben</p>
+</header>
+
+<!-- Tabs -->
+<div class="tabs">
+  <button class="tab-btn active" onclick="showTab('erkunden')">🔍 Erkunden</button>
+  <button class="tab-btn" onclick="showTab('info')">📖 Infos</button>
+  <button class="tab-btn" onclick="showTab('zuordnen')">🎯 Zuordnen</button>
+  <button class="tab-btn" onclick="showTab('quiz')">🧠 Quiz</button>
+</div>
+
+<!-- ═══════ TAB: ERKUNDEN ═══════ -->
+<div id="tab-erkunden" class="section active">
+  <div class="section-title">Brüche erkunden</div>
+  <div class="section-desc">Tippe auf eine Form – sieh, was der Bruch bedeutet!</div>
+
+  <div class="explorer-grid" id="explorerGrid"></div>
+
+  <div class="detail-panel" id="detailPanel">
+    <div class="detail-title" id="detailTitle"></div>
+    <div class="detail-text" id="detailText"></div>
+  </div>
+</div>
+
+<!-- ═══════ TAB: INFO ═══════ -->
+<div id="tab-info" class="section">
+  <div class="section-title">Was ist ein echter Bruch?</div>
+
+  <div class="info-card">
+    <h3>📐 Aufbau eines Bruchs</h3>
+    <p>Ein Bruch besteht aus <strong>Zähler</strong> (oben) und <strong>Nenner</strong> (unten):</p>
+    <div class="info-row">
+      <div class="fraction-display">
+        <span>3</span><div class="frac-line"></div><span>4</span>
+      </div>
+      <div>
+        <p>→ Zähler: <strong>3</strong> (so viele Teile sind gefärbt)</p>
+        <p>→ Nenner: <strong>4</strong> (in so viele Teile ist das Ganze geteilt)</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="info-card">
+    <h3>✅ Echter Bruch – Regel</h3>
+    <p>Ein Bruch heißt <strong>echter Bruch</strong>, wenn der <strong>Zähler kleiner als der Nenner</strong> ist.</p>
+    <div class="info-row">
+      <span class="badge green">✓ 1/2 – echt</span>
+      <span class="badge green">✓ 3/5 – echt</span>
+      <span class="badge green">✓ 2/3 – echt</span>
+    </div>
+    <p style="margin-top:10px">Der Wert eines echten Bruchs ist immer <strong>kleiner als 1</strong>.</p>
+  </div>
+
+  <div class="info-card">
+    <h3>🍕 Wie liest man Brüche?</h3>
+    <p style="margin-bottom:8px">Stell dir eine Pizza vor:</p>
+    <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap">
+      <svg viewBox="0 0 80 80" width="80" height="80">
+        <!-- Pizza ganz -->
+        <circle cx="40" cy="40" r="36" fill="#fde8dc" stroke="#e8703a" stroke-width="2"/>
+        <path d="M40,40 L40,4" stroke="#e8703a" stroke-width="1.5" stroke-dasharray="3,3"/>
+        <path d="M40,40 L71.2,58" stroke="#e8703a" stroke-width="1.5" stroke-dasharray="3,3"/>
+        <path d="M40,40 L8.8,58" stroke="#e8703a" stroke-width="1.5" stroke-dasharray="3,3"/>
+        <!-- 2 of 3 filled -->
+        <path d="M40,40 L40,4 A36,36 0 0,1 71.2,58 Z" fill="#e8703a" opacity="0.7"/>
+        <path d="M40,40 L71.2,58 A36,36 0 0,1 8.8,58 Z" fill="#e8703a" opacity="0.7"/>
+        <circle cx="40" cy="40" r="5" fill="white"/>
+      </svg>
+      <div>
+        <div class="fraction-display" style="font-size:1.5rem">
+          <span>2</span><div class="frac-line"></div><span>3</span>
+        </div>
+        <p style="font-size:0.85rem">= 2 von 3 Stücken = zwei Drittel</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="info-card">
+    <h3>📏 Brüche auf dem Zahlenstrahl</h3>
+    <p>Echte Brüche liegen immer <strong>zwischen 0 und 1</strong>:</p>
+    <svg viewBox="0 0 300 60" style="width:100%;margin-top:10px">
+      <line x1="10" y1="30" x2="290" y2="30" stroke="#d0c0b0" stroke-width="2"/>
+      <line x1="10" y1="22" x2="10" y2="38" stroke="#d0c0b0" stroke-width="2"/>
+      <line x1="150" y1="22" x2="150" y2="38" stroke="#d0c0b0" stroke-width="2"/>
+      <line x1="290" y1="22" x2="290" y2="38" stroke="#d0c0b0" stroke-width="2"/>
+      <text x="7" y="52" font-family="Nunito" font-size="12" fill="#9b8c7e">0</text>
+      <text x="143" y="52" font-family="Nunito" font-size="12" fill="#9b8c7e">1</text>
+      <text x="283" y="52" font-family="Nunito" font-size="12" fill="#9b8c7e">2</text>
+      <!-- markers -->
+      <circle cx="75" cy="30" r="6" fill="#e8703a"/>
+      <text x="64" y="20" font-family="Fredoka One" font-size="11" fill="#e8703a">1/2</text>
+      <circle cx="110" cy="30" r="6" fill="#7b6cf6"/>
+      <text x="98" y="20" font-family="Fredoka One" font-size="11" fill="#7b6cf6">3/4</text>
+      <circle cx="50" cy="30" r="6" fill="#4db8a4"/>
+      <text x="38" y="20" font-family="Fredoka One" font-size="11" fill="#4db8a4">1/3</text>
+    </svg>
+  </div>
+</div>
+
+<!-- ═══════ TAB: ZUORDNEN ═══════ -->
+<div id="tab-zuordnen" class="section">
+  <div class="section-title">🎯 Bild zuordnen</div>
+  <div class="section-desc">Welcher Bruch passt zum Bild? Tippe den richtigen Bruch an!</div>
+
+  <div class="match-section" id="matchContainer"></div>
+  <button class="btn-next" onclick="resetMatch()" style="margin-top:16px">🔄 Neue Aufgaben</button>
+</div>
+
+<!-- ═══════ TAB: QUIZ ═══════ -->
+<div id="tab-quiz" class="section">
+  <div class="section-title">🧠 Quiz</div>
+  <div class="section-desc">Welcher Bruch ist im Bild dargestellt?</div>
+
+  <div class="score-bar">
+    <span class="score-label">Punkte</span>
+    <div class="score-track"><div class="score-fill" id="scoreFill"></div></div>
+    <span class="score-num" id="scoreNum">0 / 0</span>
+  </div>
+
+  <div id="quizContainer"></div>
+  <button class="btn-next" id="btnNext" onclick="nextQuiz()" disabled>Nächste Frage ➜</button>
+</div>
+
+<script>
+// ─────────────────────────────────────────
+// SVG GENERATORS
+// ─────────────────────────────────────────
+
+function makeCircle(num, den, fillColor, bgColor) {
+  const cx = 50, cy = 50, r = 40;
+  const slices = [];
+  for (let i = 0; i < den; i++) {
+    const a1 = (i / den) * 2 * Math.PI - Math.PI/2;
+    const a2 = ((i+1) / den) * 2 * Math.PI - Math.PI/2;
+    const x1 = cx + r * Math.cos(a1), y1 = cy + r * Math.sin(a1);
+    const x2 = cx + r * Math.cos(a2), y2 = cy + r * Math.sin(a2);
+    const large = (1/den) > 0.5 ? 1 : 0;
+    const fill = i < num ? fillColor : bgColor;
+    slices.push(`<path d="M${cx},${cy} L${x1.toFixed(2)},${y1.toFixed(2)} A${r},${r} 0 ${large},1 ${x2.toFixed(2)},${y2.toFixed(2)} Z" fill="${fill}" stroke="white" stroke-width="2"/>`);
+  }
+  return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="${bgColor}" stroke="#ccc" stroke-width="1"/>
+    ${slices.join('')}
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#aaa" stroke-width="1.5"/>
+  </svg>`;
+}
+
+function makeRect(num, den, fillColor, bgColor, orient='h') {
+  const W=100, H=56;
+  const parts = [];
+  for (let i = 0; i < den; i++) {
+    const fill = i < num ? fillColor : bgColor;
+    if (orient === 'h') {
+      const x = (i / den) * W;
+      const w = W / den;
+      parts.push(`<rect x="${x}" y="0" width="${w}" height="${H}" fill="${fill}" stroke="white" stroke-width="2" rx="3"/>`);
+    } else {
+      const y = (i / den) * H;
+      const h = H / den;
+      parts.push(`<rect x="0" y="${y}" width="${W}" height="${h}" fill="${fill}" stroke="white" stroke-width="2" rx="3"/>`);
+    }
+  }
+  return `<svg viewBox="0 0 100 56" xmlns="http://www.w3.org/2000/svg">
+    <rect x="0" y="0" width="100" height="56" rx="6" fill="${bgColor}" stroke="#aaa" stroke-width="1.5"/>
+    ${parts.join('')}
+    <rect x="0" y="0" width="100" height="56" rx="6" fill="none" stroke="#aaa" stroke-width="1.5"/>
+  </svg>`;
+}
+
+function makeHexagon(num, den, fillColor, bgColor) {
+  const cx=50, cy=50, r=42;
+  const points = [];
+  for (let i = 0; i < 6; i++) {
+    const a = (i/6)*2*Math.PI - Math.PI/2;
+    points.push([cx+r*Math.cos(a), cy+r*Math.sin(a)]);
+  }
+  const hexPath = points.map((p,i)=>(i===0?'M':'L')+p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ')+'Z';
+
+  // For non-6 denominators, use a simpler fill approach via arc
+  if (den === 6) {
+    const slices = [];
+    for (let i = 0; i < 6; i++) {
+      const p1 = points[i], p2 = points[(i+1)%6];
+      const fill = i < num ? fillColor : bgColor;
+      slices.push(`<path d="M${cx},${cy} L${p1[0].toFixed(1)},${p1[1].toFixed(1)} L${p2[0].toFixed(1)},${p2[1].toFixed(1)} Z" fill="${fill}" stroke="white" stroke-width="1.5"/>`);
+    }
+    return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <path d="${hexPath}" fill="${bgColor}" stroke="#aaa" stroke-width="1.5"/>
+      ${slices.join('')}
+      <path d="${hexPath}" fill="none" stroke="#aaa" stroke-width="1.5"/>
+    </svg>`;
+  }
+  // fallback circle
+  return makeCircle(num, den, fillColor, bgColor);
+}
+
+function makeTriangles(num, den, fillColor, bgColor) {
+  // Row of triangles up/down
+  const W = 100, H = 72;
+  const triW = W / den;
+  const tris = [];
+  for (let i = 0; i < den; i++) {
+    const fill = i < num ? fillColor : bgColor;
+    const x = i * triW;
+    // alternating up/down
+    if (i % 2 === 0) {
+      tris.push(`<polygon points="${x+triW/2},4 ${x+2},${H-4} ${x+triW-2},${H-4}" fill="${fill}" stroke="white" stroke-width="1.5"/>`);
+    } else {
+      tris.push(`<polygon points="${x+2},4 ${x+triW-2},4 ${x+triW/2},${H-4}" fill="${fill}" stroke="white" stroke-width="1.5"/>`);
+    }
+  }
+  return `<svg viewBox="0 0 100 72" xmlns="http://www.w3.org/2000/svg">${tris.join('')}</svg>`;
+}
+
+function makeStar(fillFrac, fillColor, bgColor) {
+  // 5 stars partially filled using clip
+  const stars = 5;
+  const starPaths = [];
+  for (let i = 0; i < stars; i++) {
+    const cx = 10 + i * 20;
+    const cy = 12;
+    const outer = 9, inner = 4;
+    let d = '';
+    for (let p = 0; p < 5; p++) {
+      const ao = (p * 4 * Math.PI / 5) - Math.PI/2;
+      const ai = ((p * 4 + 2) * Math.PI / 5) - Math.PI/2;
+      const xo = cx + outer*Math.cos(ao), yo = cy + outer*Math.sin(ao);
+      const xi = cx + inner*Math.cos(ai), yi = cy + inner*Math.sin(ai);
+      d += (p===0?'M':'L') + xo.toFixed(1)+','+yo.toFixed(1)+' L'+xi.toFixed(1)+','+yi.toFixed(1)+' ';
+    }
+    d += 'Z';
+    starPaths.push(`<path d="${d}" fill="${bgColor}" stroke="#ccc" stroke-width="0.5"/>`);
+  }
+  // fill num stars
+  const filledCount = Math.round(fillFrac * stars);
+  for (let i = 0; i < filledCount; i++) {
+    const cx = 10 + i * 20;
+    const cy = 12;
+    const outer = 9, inner = 4;
+    let d = '';
+    for (let p = 0; p < 5; p++) {
+      const ao = (p * 4 * Math.PI / 5) - Math.PI/2;
+      const ai = ((p * 4 + 2) * Math.PI / 5) - Math.PI/2;
+      const xo = cx + outer*Math.cos(ao), yo = cy + outer*Math.sin(ao);
+      const xi = cx + inner*Math.cos(ai), yi = cy + inner*Math.sin(ai);
+      d += (p===0?'M':'L') + xo.toFixed(1)+','+yo.toFixed(1)+' L'+xi.toFixed(1)+','+yi.toFixed(1)+' ';
+    }
+    d += 'Z';
+    starPaths.push(`<path d="${d}" fill="${fillColor}"/>`);
+  }
+  return `<svg viewBox="0 0 100 24" xmlns="http://www.w3.org/2000/svg">${starPaths.join('')}</svg>`;
+}
+
+// ─────────────────────────────────────────
+// DATA
+// ─────────────────────────────────────────
+
+const COLORS = [
+  { fill: '#e8703a', bg: '#fde8dc' },
+  { fill: '#4db8a4', bg: '#d4f4ee' },
+  { fill: '#7b6cf6', bg: '#ede9ff' },
+  { fill: '#f2c94c', bg: '#fdf3d0' },
+  { fill: '#e05c8a', bg: '#fce4ef' },
+  { fill: '#3a9fe8', bg: '#dceefb' },
+];
+
+const explorerData = [
+  { num:1, den:2, shape:'circle', label:'½', name:'Ein Halb', color:0,
+    desc:'Der Kreis ist in <strong>2 gleiche Teile</strong> geteilt. <strong>1 Teil</strong> ist gefärbt. Das ist <strong>ein Halb (½)</strong>.' },
+  { num:1, den:3, shape:'rect', label:'⅓', name:'Ein Drittel', color:1,
+    desc:'Das Rechteck ist in <strong>3 gleiche Teile</strong> geteilt. <strong>1 Teil</strong> ist gefärbt. Das ist <strong>ein Drittel (⅓)</strong>.' },
+  { num:3, den:4, shape:'circle', label:'¾', name:'Drei Viertel', color:2,
+    desc:'Der Kreis ist in <strong>4 gleiche Teile</strong> geteilt. <strong>3 Teile</strong> sind gefärbt. Das ist <strong>drei Viertel (¾)</strong>.' },
+  { num:2, den:5, shape:'rect', label:'²⁄₅', name:'Zwei Fünftel', color:3,
+    desc:'Das Rechteck ist in <strong>5 gleiche Teile</strong> geteilt. <strong>2 Teile</strong> sind gefärbt. Das ist <strong>zwei Fünftel (²⁄₅)</strong>.' },
+  { num:4, den:6, shape:'hex', label:'⁴⁄₆', name:'Vier Sechstel', color:4,
+    desc:'Das Sechseck ist in <strong>6 gleiche Teile</strong> geteilt. <strong>4 Teile</strong> sind gefärbt. Das ist <strong>vier Sechstel (⁴⁄₆)</strong>.' },
+  { num:2, den:3, shape:'circle', label:'⅔', name:'Zwei Drittel', color:5,
+    desc:'Der Kreis ist in <strong>3 gleiche Teile</strong> geteilt. <strong>2 Teile</strong> sind gefärbt. Das ist <strong>zwei Drittel (⅔)</strong>.' },
+  { num:1, den:4, shape:'rect', label:'¼', name:'Ein Viertel', color:0,
+    desc:'Das Rechteck ist in <strong>4 gleiche Teile</strong> geteilt. <strong>1 Teil</strong> ist gefärbt. Das ist <strong>ein Viertel (¼)</strong>.' },
+  { num:3, den:5, shape:'circle', label:'³⁄₅', name:'Drei Fünftel', color:1,
+    desc:'Der Kreis ist in <strong>5 gleiche Teile</strong> geteilt. <strong>3 Teile</strong> sind gefärbt. Das ist <strong>drei Fünftel (³⁄₅)</strong>.' },
+  { num:2, den:4, shape:'triangle', label:'²⁄₄', name:'Zwei Viertel', color:2,
+    desc:'Es gibt <strong>4 Dreiecke</strong>. <strong>2 Dreiecke</strong> sind gefärbt. Das ist <strong>zwei Viertel (²⁄₄)</strong>.' },
+];
+
+function svgFor(item, small=false) {
+  const c = COLORS[item.color];
+  const size = small ? '70px' : '80px';
+  let svg;
+  if (item.shape === 'circle') svg = makeCircle(item.num, item.den, c.fill, c.bg);
+  else if (item.shape === 'rect') svg = makeRect(item.num, item.den, c.fill, c.bg);
+  else if (item.shape === 'hex') svg = makeHexagon(item.num, item.den, c.fill, c.bg);
+  else if (item.shape === 'triangle') svg = makeTriangles(item.num, item.den, c.fill, c.bg);
+  else svg = makeCircle(item.num, item.den, c.fill, c.bg);
+  return svg.replace('width="80"', `width="${size}"`).replace('height="80"', `height="${size}"`);
+}
+
+// ─────────────────────────────────────────
+// ERKUNDEN
+// ─────────────────────────────────────────
+
+let selectedExplorer = null;
+
+function buildExplorer() {
+  const grid = document.getElementById('explorerGrid');
+  grid.innerHTML = '';
+  explorerData.forEach((item, i) => {
+    const card = document.createElement('div');
+    card.className = 'frac-card';
+    card.innerHTML = svgFor(item) + `<div class="frac-label">${item.label}</div><div class="frac-name">${item.name}</div>`;
+    card.onclick = () => selectExplorer(i, card);
+    grid.appendChild(card);
+  });
+}
+
+function selectExplorer(i, card) {
+  document.querySelectorAll('.frac-card').forEach(c => c.classList.remove('selected'));
+  const item = explorerData[i];
+  const panel = document.getElementById('detailPanel');
+  if (selectedExplorer === i) {
+    selectedExplorer = null;
+    panel.classList.remove('visible');
+    return;
+  }
+  selectedExplorer = i;
+  card.classList.add('selected');
+  document.getElementById('detailTitle').textContent = item.num + '/' + item.den + ' – ' + item.name;
+  document.getElementById('detailText').innerHTML = item.desc +
+    `<br><br>🧮 Zähler: <strong>${item.num}</strong> &nbsp;|&nbsp; Nenner: <strong>${item.den}</strong><br>` +
+    `✅ Echter Bruch? <strong>${item.num < item.den ? 'Ja! ' + item.num + ' < ' + item.den : 'Nein'}</strong>`;
+  panel.classList.add('visible');
+  setTimeout(() => panel.scrollIntoView({behavior:'smooth', block:'nearest'}), 50);
+}
+
+// ─────────────────────────────────────────
+// ZUORDNEN
+// ─────────────────────────────────────────
+
+const matchPool = [
+  { num:1, den:2, shape:'circle', color:0 },
+  { num:3, den:4, shape:'rect',   color:2 },
+  { num:2, den:3, shape:'circle', color:5 },
+  { num:1, den:3, shape:'rect',   color:1 },
+  { num:2, den:5, shape:'circle', color:3 },
+  { num:4, den:6, shape:'hex',    color:4 },
+  { num:1, den:4, shape:'rect',   color:0 },
+  { num:3, den:5, shape:'circle', color:1 },
+  { num:2, den:4, shape:'triangle', color:2 },
+];
+
+function shuffle(arr) {
+  return [...arr].sort(() => Math.random() - 0.5);
+}
+
+function fracStr(num, den) { return num + '/' + den; }
+
+function buildMatch() {
+  const container = document.getElementById('matchContainer');
+  container.innerHTML = '';
+  const items = shuffle(matchPool).slice(0, 4);
+  items.forEach(item => {
+    const row = document.createElement('div');
+    row.className = 'match-row';
+    row.dataset.correct = fracStr(item.num, item.den);
+
+    // Wrong options
+    let wrongs = matchPool.filter(x => fracStr(x.num,x.den) !== fracStr(item.num,item.den));
+    wrongs = shuffle(wrongs).slice(0,3).map(x=>fracStr(x.num,x.den));
+    const opts = shuffle([fracStr(item.num,item.den), ...wrongs]);
+
+    const chips = opts.map(o => {
+      return `<button class="match-chip" onclick="checkMatch(this, '${o}', '${fracStr(item.num,item.den)}')">${o}</button>`;
+    }).join('');
+
+    row.innerHTML = `
+      <div class="match-visual">${svgFor(item, true)}</div>
+      <div class="match-options">${chips}</div>
+      <div class="match-result"></div>
+    `;
+    container.appendChild(row);
+  });
+}
+
+function checkMatch(btn, chosen, correct) {
+  const row = btn.closest('.match-row');
+  if (row.dataset.done) return;
+  row.dataset.done = 'true';
+  const chips = row.querySelectorAll('.match-chip');
+  chips.forEach(c => {
+    c.classList.add('disabled');
+    c.style.pointerEvents = 'none';
+  });
+  if (chosen === correct) {
+    btn.classList.add('correct-chip');
+    row.querySelector('.match-result').textContent = '✅';
+  } else {
+    btn.classList.add('wrong-chip');
+    row.querySelector('.match-result').textContent = '❌';
+    chips.forEach(c => {
+      if (c.textContent === correct) c.classList.add('correct-chip');
+    });
+  }
+}
+
+function resetMatch() { buildMatch(); }
+
+// ─────────────────────────────────────────
+// QUIZ
+// ─────────────────────────────────────────
+
+const quizPool = [
+  { num:1, den:2, shape:'circle', color:0, opts:['1/2','1/3','2/3','1/4'] },
+  { num:3, den:4, shape:'circle', color:2, opts:['2/4','3/4','1/4','3/5'] },
+  { num:2, den:3, shape:'rect',   color:5, opts:['1/3','2/3','2/5','3/4'] },
+  { num:1, den:4, shape:'rect',   color:0, opts:['1/3','1/5','1/4','2/4'] },
+  { num:3, den:5, shape:'circle', color:1, opts:['2/5','3/5','3/4','4/5'] },
+  { num:4, den:6, shape:'hex',    color:4, opts:['3/6','5/6','4/6','2/6'] },
+  { num:1, den:3, shape:'circle', color:3, opts:['1/2','1/4','2/3','1/3'] },
+  { num:2, den:5, shape:'rect',   color:3, opts:['2/4','3/5','2/5','1/5'] },
+  { num:2, den:4, shape:'triangle',color:2,opts:['1/4','3/4','2/4','2/3'] },
+  { num:5, den:6, shape:'circle', color:4, opts:['4/6','5/6','3/6','1/6'] },
+];
+
+let quizOrder = [];
+let quizIndex = 0;
+let quizCorrect = 0;
+let quizTotal = 0;
+let answered = false;
+
+function buildQuiz() {
+  quizOrder = shuffle(quizPool);
+  quizIndex = 0;
+  quizCorrect = 0;
+  quizTotal = 0;
+  answered = false;
+  updateScore();
+  renderQuizQuestion();
+  document.getElementById('btnNext').disabled = true;
+}
+
+function renderQuizQuestion() {
+  if (quizIndex >= quizOrder.length) {
+    document.getElementById('quizContainer').innerHTML = `
+      <div class="quiz-card" style="text-align:center">
+        <div style="font-size:3rem">🎉</div>
+        <div style="font-family:'Fredoka One',cursive; font-size:1.4rem; color:var(--primary); margin:10px 0">Super gemacht!</div>
+        <div style="font-size:1rem">Du hast <strong>${quizCorrect} von ${quizTotal}</strong> Fragen richtig beantwortet.</div>
+        <button class="btn-next" onclick="buildQuiz()" style="margin-top:16px">🔄 Nochmal spielen</button>
+      </div>`;
+    document.getElementById('btnNext').disabled = true;
+    return;
+  }
+  const q = quizOrder[quizIndex];
+  answered = false;
+  const opts = shuffle(q.opts);
+  const correct = fracStr(q.num, q.den);
+  const container = document.getElementById('quizContainer');
+  container.innerHTML = `
+    <div class="quiz-card">
+      <div class="quiz-question">Welcher Bruch ist dargestellt?</div>
+      <div class="quiz-visual">${svgFor(q)}</div>
+      <div class="quiz-options">
+        ${opts.map(o=>`<button class="quiz-opt" onclick="answerQuiz(this,'${o}','${correct}')">${o}</button>`).join('')}
+      </div>
+      <div class="quiz-feedback" id="qFeedback"></div>
+    </div>`;
+  document.getElementById('btnNext').disabled = true;
+}
+
+function answerQuiz(btn, chosen, correct) {
+  if (answered) return;
+  answered = true;
+  quizTotal++;
+  const opts = document.querySelectorAll('.quiz-opt');
+  opts.forEach(o => o.classList.add('disabled'));
+  const fb = document.getElementById('qFeedback');
+  if (chosen === correct) {
+    btn.classList.add('correct');
+    quizCorrect++;
+    fb.textContent = '✅ Richtig! Super!';
+    fb.className = 'quiz-feedback';
+  } else {
+    btn.classList.add('wrong');
+    opts.forEach(o => { if (o.textContent === correct) o.classList.add('correct'); });
+    fb.textContent = '❌ Fast! Richtig wäre: ' + correct;
+    fb.className = 'quiz-feedback wrong';
+  }
+  updateScore();
+  document.getElementById('btnNext').disabled = false;
+}
+
+function nextQuiz() {
+  quizIndex++;
+  renderQuizQuestion();
+  document.getElementById('btnNext').disabled = true;
+}
+
+function updateScore() {
+  const pct = quizTotal > 0 ? (quizCorrect / quizTotal * 100) : 0;
+  document.getElementById('scoreFill').style.width = pct + '%';
+  document.getElementById('scoreNum').textContent = quizCorrect + ' / ' + quizTotal;
+}
+
+// ─────────────────────────────────────────
+// TABS
+// ─────────────────────────────────────────
+
+function showTab(name) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// ─────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────
+buildExplorer();
+buildMatch();
+buildQuiz();
+</script>
+</body>
+</html>
