@@ -1,0 +1,1337 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Brüche multiplizieren – Klasse 6</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Nunito+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #2563EB;
+    --primary-light: #DBEAFE;
+    --secondary: #7C3AED;
+    --secondary-light: #EDE9FE;
+    --accent: #F59E0B;
+    --accent-light: #FEF3C7;
+    --success: #10B981;
+    --success-light: #D1FAE5;
+    --danger: #EF4444;
+    --danger-light: #FEE2E2;
+    --neutral: #6B7280;
+    --bg: #F8FAFC;
+    --card: #FFFFFF;
+    --text: #1E293B;
+    --text-muted: #64748B;
+    --border: #E2E8F0;
+    --radius: 16px;
+    --shadow: 0 4px 24px rgba(37,99,235,0.10);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'Nunito Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 18px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* ── TOP NAV ── */
+  .topbar {
+    background: var(--primary);
+    color: white;
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 12px rgba(37,99,235,0.25);
+  }
+  .topbar h1 { font-family: 'Nunito', sans-serif; font-size: 20px; font-weight: 800; }
+  .topbar .subtitle { font-size: 13px; opacity: 0.85; }
+  .topbar-right { font-size: 13px; opacity: 0.85; text-align: right; }
+
+  /* ── PROGRESS BAR ── */
+  .progress-wrap { background: rgba(255,255,255,0.25); height: 6px; border-radius: 3px; margin-top: 10px; }
+  .progress-bar { background: #FCD34D; height: 6px; border-radius: 3px; transition: width .4s ease; }
+
+  /* ── CHAPTER TABS ── */
+  .tabs {
+    display: flex;
+    overflow-x: auto;
+    background: white;
+    border-bottom: 2px solid var(--border);
+    padding: 0 12px;
+    gap: 4px;
+    scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab-btn {
+    padding: 12px 16px;
+    border: none;
+    background: none;
+    font-family: 'Nunito', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-muted);
+    cursor: pointer;
+    white-space: nowrap;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    transition: all .2s;
+    min-height: 48px;
+  }
+  .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
+  .tab-btn:active { background: var(--primary-light); border-radius: 8px 8px 0 0; }
+
+  /* ── MAIN CONTENT ── */
+  .chapter { display: none; padding: 20px 16px; max-width: 900px; margin: 0 auto; }
+  .chapter.active { display: block; }
+
+  /* ── CARDS / KARTEIKARTEN ── */
+  .flashcard-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .card-counter { font-size: 14px; color: var(--text-muted); font-weight: 600; }
+  .nav-btn {
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: 700;
+    font-family: 'Nunito', sans-serif;
+    cursor: pointer;
+    min-width: 44px;
+    min-height: 44px;
+    display: flex; align-items: center; gap: 6px;
+    transition: transform .1s, background .2s;
+  }
+  .nav-btn:active { transform: scale(.95); background: #1D4ED8; }
+  .nav-btn:disabled { background: var(--border); color: var(--text-muted); cursor: default; }
+
+  .flashcard {
+    background: white;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 28px 24px;
+    border: 1.5px solid var(--border);
+    min-height: 260px;
+    animation: slideIn .3s ease;
+  }
+  @keyframes slideIn { from { opacity:0; transform: translateX(30px); } to { opacity:1; transform: none; } }
+
+  .card-tag {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    padding: 4px 10px;
+    border-radius: 20px;
+    margin-bottom: 14px;
+  }
+  .tag-explore { background: var(--accent-light); color: #92400E; }
+  .tag-rule { background: var(--secondary-light); color: #5B21B6; }
+  .tag-exercise { background: var(--primary-light); color: #1E40AF; }
+  .tag-task { background: var(--success-light); color: #065F46; }
+
+  .card-title {
+    font-family: 'Nunito', sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    margin-bottom: 12px;
+    color: var(--text);
+  }
+  .card-body { font-size: 17px; line-height: 1.7; }
+  .card-body p { margin-bottom: 10px; }
+
+  /* ── FRACTION DISPLAY ── */
+  .frac {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    vertical-align: middle;
+    margin: 0 3px;
+    font-weight: 700;
+    line-height: 1.1;
+  }
+  .frac span { display: block; text-align: center; padding: 0 2px; }
+  .frac .num { border-bottom: 2px solid currentColor; min-width: 18px; }
+  .frac .den { min-width: 18px; }
+
+  .math-box {
+    background: var(--primary-light);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin: 12px 0;
+    font-size: 18px;
+    font-weight: 600;
+    font-family: 'Nunito', sans-serif;
+    text-align: center;
+  }
+  .math-box.rule-box {
+    background: var(--secondary-light);
+    border-left: 4px solid var(--secondary);
+  }
+  .math-box.success-box { background: var(--success-light); border-left: 4px solid var(--success); }
+  .math-box.warn-box { background: var(--accent-light); border-left: 4px solid var(--accent); }
+
+  .step {
+    display: flex;
+    gap: 12px;
+    margin: 10px 0;
+    padding: 12px;
+    background: var(--bg);
+    border-radius: 10px;
+  }
+  .step-num {
+    background: var(--primary);
+    color: white;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800;
+    font-size: 15px;
+    flex-shrink: 0;
+  }
+
+  /* ── VISUAL AREA MODEL ── */
+  .area-model {
+    display: inline-grid;
+    gap: 2px;
+    margin: 16px auto;
+    display: block;
+    max-width: 260px;
+  }
+
+  /* ── INTERACTIVE QUIZ ── */
+  .quiz-area { margin-top: 8px; }
+  .quiz-question {
+    font-size: 20px;
+    font-weight: 700;
+    font-family: 'Nunito', sans-serif;
+    margin-bottom: 16px;
+    text-align: center;
+  }
+
+  /* Multiple Choice */
+  .mc-options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; }
+  .mc-btn {
+    background: white;
+    border: 2.5px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 12px;
+    font-size: 18px;
+    font-weight: 700;
+    font-family: 'Nunito', sans-serif;
+    cursor: pointer;
+    min-height: 56px;
+    text-align: center;
+    transition: all .15s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .mc-btn:active { transform: scale(.97); }
+  .mc-btn.correct { background: var(--success-light); border-color: var(--success); color: #065F46; }
+  .mc-btn.wrong { background: var(--danger-light); border-color: var(--danger); color: #991B1B; }
+  .mc-btn.disabled { pointer-events: none; opacity: .5; }
+
+  /* Input */
+  .input-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin: 12px 0;
+  }
+  .frac-input {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+  }
+  .frac-input input {
+    width: 52px;
+    height: 44px;
+    font-size: 20px;
+    font-weight: 700;
+    font-family: 'Nunito', sans-serif;
+    text-align: center;
+    border: 2.5px solid var(--border);
+    border-radius: 10px;
+    background: white;
+    color: var(--text);
+    outline: none;
+    -webkit-appearance: none;
+  }
+  .frac-input input:focus { border-color: var(--primary); }
+  .frac-input .frac-line { width: 52px; height: 2.5px; background: var(--text); border-radius: 2px; }
+
+  .check-btn {
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 12px 28px;
+    font-size: 17px;
+    font-weight: 700;
+    font-family: 'Nunito', sans-serif;
+    cursor: pointer;
+    min-height: 48px;
+    transition: transform .1s;
+    margin-top: 8px;
+  }
+  .check-btn:active { transform: scale(.97); background: #1D4ED8; }
+
+  .feedback {
+    border-radius: 12px;
+    padding: 12px 16px;
+    margin-top: 12px;
+    font-weight: 700;
+    font-size: 16px;
+    display: none;
+  }
+  .feedback.show { display: block; }
+  .feedback.ok { background: var(--success-light); color: #065F46; }
+  .feedback.fail { background: var(--danger-light); color: #991B1B; }
+
+  /* ── DRAG/TAP SORTING ── */
+  .sort-pool {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 12px 0;
+    min-height: 56px;
+  }
+  .sort-item {
+    background: white;
+    border: 2.5px solid var(--primary);
+    border-radius: 10px;
+    padding: 10px 18px;
+    font-size: 18px;
+    font-weight: 700;
+    font-family: 'Nunito', sans-serif;
+    cursor: pointer;
+    min-height: 48px;
+    display: flex; align-items: center;
+    transition: all .15s;
+  }
+  .sort-item.selected { background: var(--primary); color: white; }
+  .sort-item:active { transform: scale(.96); }
+
+  .sort-slots { display: flex; flex-wrap: wrap; gap: 10px; margin: 12px 0; }
+  .sort-slot {
+    border: 2.5px dashed var(--border);
+    border-radius: 10px;
+    padding: 10px 18px;
+    font-size: 18px;
+    font-weight: 700;
+    font-family: 'Nunito', sans-serif;
+    cursor: pointer;
+    min-height: 48px;
+    min-width: 100px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-muted);
+    transition: all .15s;
+  }
+  .sort-slot.filled { border-style: solid; border-color: var(--primary); color: var(--text); background: var(--primary-light); }
+  .sort-slot.correct-slot { border-color: var(--success); background: var(--success-light); color: #065F46; }
+  .sort-slot.wrong-slot { border-color: var(--danger); background: var(--danger-light); color: #991B1B; }
+
+  /* ── SECTION HEADERS ── */
+  .section-header {
+    font-family: 'Nunito', sans-serif;
+    font-size: 13px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    color: var(--text-muted);
+    margin: 20px 0 10px;
+  }
+
+  /* ── EXERCISE GRID ── */
+  .ex-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .ex-card {
+    background: white;
+    border-radius: 12px;
+    border: 1.5px solid var(--border);
+    padding: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.05);
+  }
+  .ex-card .ex-label { font-size: 13px; font-weight: 700; color: var(--text-muted); margin-bottom: 6px; }
+  .ex-card .ex-task { font-size: 20px; font-weight: 700; font-family: 'Nunito', sans-serif; margin-bottom: 10px; }
+
+  /* ── TOOLTIP ── */
+  [data-tip] { position: relative; border-bottom: 2px dotted var(--primary); cursor: help; }
+  [data-tip]::after {
+    content: attr(data-tip);
+    position: absolute;
+    bottom: 130%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1E293B;
+    color: white;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 8px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .2s;
+    z-index: 200;
+  }
+  [data-tip]:hover::after, [data-tip]:focus::after { opacity: 1; }
+
+  /* ── SCORE BADGE ── */
+  .score-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--accent-light);
+    color: #92400E;
+    font-weight: 800;
+    font-size: 15px;
+    padding: 5px 12px;
+    border-radius: 20px;
+  }
+
+  /* ── STORY ── */
+  .story-box {
+    background: linear-gradient(135deg, #EFF6FF 0%, #F5F3FF 100%);
+    border-radius: 14px;
+    padding: 18px 20px;
+    border: 1.5px solid var(--primary-light);
+    margin-bottom: 14px;
+    font-size: 17px;
+  }
+  .story-box .emoji { font-size: 32px; margin-bottom: 8px; display: block; }
+
+  /* ── SVG FRACTION VIZ ── */
+  .frac-viz { text-align: center; margin: 12px 0; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 480px) {
+    .mc-options { grid-template-columns: 1fr; }
+    .ex-grid { grid-template-columns: 1fr; }
+    .card-title { font-size: 19px; }
+    .flashcard { padding: 20px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div>
+    <div class="topbar h1" style="font-family:'Nunito',sans-serif;font-size:20px;font-weight:800;">🔢 Brüche multiplizieren</div>
+    <div class="subtitle">Klasse 6 · Interaktives Lernheft</div>
+    <div class="progress-wrap">
+      <div class="progress-bar" id="mainProgress" style="width:10%"></div>
+    </div>
+  </div>
+  <div class="topbar-right" id="scoreDisplay">⭐ 0 Punkte</div>
+</div>
+
+<div class="tabs" role="tablist">
+  <button class="tab-btn active" onclick="showChapter(0)" id="tab0">🔍 Erkunden</button>
+  <button class="tab-btn" onclick="showChapter(1)" id="tab1">📏 Bruch · Zahl</button>
+  <button class="tab-btn" onclick="showChapter(2)" id="tab2">✂️ Kürzen</button>
+  <button class="tab-btn" onclick="showChapter(3)" id="tab3">✖️ Bruch · Bruch</button>
+  <button class="tab-btn" onclick="showChapter(4)" id="tab4">🧩 Üben</button>
+  <button class="tab-btn" onclick="showChapter(5)" id="tab5">📖 Sachaufgaben</button>
+</div>
+
+<!-- ════════════════════════════════ KAPITEL 0: ERKUNDEN ════════════════════════════════ -->
+<div class="chapter active" id="ch0">
+  <div class="flashcard-nav">
+    <button class="nav-btn" onclick="prevCard(0)" id="prev0">← Zurück</button>
+    <span class="card-counter" id="counter0">Karte 1 von 5</span>
+    <button class="nav-btn" onclick="nextCard(0)" id="next0">Weiter →</button>
+  </div>
+
+  <!-- KARTE 0-0 -->
+  <div class="flashcard" id="card0-0">
+    <span class="card-tag tag-explore">🔍 Erkunden</span>
+    <div class="card-title">Pizza für die Klasse 🍕</div>
+    <div class="card-body">
+      <div class="story-box">
+        <span class="emoji">🍕</span>
+        Tom backt Pizzen für seine Freunde. Jeder isst <strong><span class="frac"><span class="num">3</span><span class="den">4</span></span> einer Pizza</strong>. Tom hat <strong>5 Freunde</strong> eingeladen. Wie viel Pizza braucht er insgesamt?
+      </div>
+      <p>Man muss <strong>5 × <span class="frac"><span class="num">3</span><span class="den">4</span></span></strong> rechnen – also einen Bruch mit einer natürlichen Zahl multiplizieren.</p>
+      <div class="math-box">
+        5 · <span class="frac"><span class="num">3</span><span class="den">4</span></span>
+        = <span class="frac"><span class="num">3</span><span class="den">4</span></span> + 
+          <span class="frac"><span class="num">3</span><span class="den">4</span></span> + 
+          <span class="frac"><span class="num">3</span><span class="den">4</span></span> + 
+          <span class="frac"><span class="num">3</span><span class="den">4</span></span> + 
+          <span class="frac"><span class="num">3</span><span class="den">4</span></span>
+        = <span class="frac"><span class="num">15</span><span class="den">4</span></span>
+        = 3<span class="frac"><span class="num">3</span><span class="den">4</span></span>
+      </div>
+      <p>Tom braucht also mindestens <strong>4 Pizzen</strong>!</p>
+    </div>
+  </div>
+
+  <!-- KARTE 0-1 -->
+  <div class="flashcard" id="card0-1" style="display:none">
+    <span class="card-tag tag-explore">🔍 Erkunden</span>
+    <div class="card-title">Was bedeutet „3 mal <span class="frac"><span class="num">3</span><span class="den">4</span></span>"?</div>
+    <div class="card-body">
+      <p>Stell dir Pizzen als Kreise vor, die in <strong>Viertel</strong> geteilt sind:</p>
+      <!-- 3 Pizzen, je <span class="frac"><span class="num">3</span><span class="den">4</span></span> orange (oben, rechts, unten = 3 Viertel), links = hell -->
+      <svg width="310" height="90" viewBox="0 0 310 90" style="display:block;margin:10px auto;">
+        <!-- Pizza 1 -->
+        <circle cx="40" cy="45" r="35" fill="#FEF9C3" stroke="#D97706" stroke-width="2"/>
+        <!-- 3 orangene Viertel: oben (270→0), rechts (0→90), unten (90→180) -->
+        <path d="M40,45 L40,10 A35,35 0 0,1 75,45 Z" fill="#F59E0B"/>
+        <path d="M40,45 L75,45 A35,35 0 0,1 40,80 Z" fill="#F59E0B"/>
+        <path d="M40,45 L40,80 A35,35 0 0,1 5,45 Z" fill="#F59E0B"/>
+        <!-- Gitternetz -->
+        <line x1="40" y1="10" x2="40" y2="80" stroke="#D97706" stroke-width="1.5"/>
+        <line x1="5" y1="45" x2="75" y2="45" stroke="#D97706" stroke-width="1.5"/>
+        <text x="40" y="88" text-anchor="middle" font-size="12" fill="#92400E" font-weight="bold">¾</text>
+        <!-- Pizza 2 -->
+        <circle cx="120" cy="45" r="35" fill="#FEF9C3" stroke="#D97706" stroke-width="2"/>
+        <path d="M120,45 L120,10 A35,35 0 0,1 155,45 Z" fill="#F59E0B"/>
+        <path d="M120,45 L155,45 A35,35 0 0,1 120,80 Z" fill="#F59E0B"/>
+        <path d="M120,45 L120,80 A35,35 0 0,1 85,45 Z" fill="#F59E0B"/>
+        <line x1="120" y1="10" x2="120" y2="80" stroke="#D97706" stroke-width="1.5"/>
+        <line x1="85" y1="45" x2="155" y2="45" stroke="#D97706" stroke-width="1.5"/>
+        <text x="120" y="88" text-anchor="middle" font-size="12" fill="#92400E" font-weight="bold">¾</text>
+        <!-- Pizza 3 -->
+        <circle cx="200" cy="45" r="35" fill="#FEF9C3" stroke="#D97706" stroke-width="2"/>
+        <path d="M200,45 L200,10 A35,35 0 0,1 235,45 Z" fill="#F59E0B"/>
+        <path d="M200,45 L235,45 A35,35 0 0,1 200,80 Z" fill="#F59E0B"/>
+        <path d="M200,45 L200,80 A35,35 0 0,1 165,45 Z" fill="#F59E0B"/>
+        <line x1="200" y1="10" x2="200" y2="80" stroke="#D97706" stroke-width="1.5"/>
+        <line x1="165" y1="45" x2="235" y2="45" stroke="#D97706" stroke-width="1.5"/>
+        <text x="200" y="88" text-anchor="middle" font-size="12" fill="#92400E" font-weight="bold">¾</text>
+        <!-- = 9/4 -->
+        <text x="252" y="50" font-size="22" fill="#2563EB" font-weight="bold">=</text>
+        <text x="270" y="42" font-size="16" fill="#2563EB" font-weight="bold">9</text>
+        <line x1="268" y1="47" x2="288" y2="47" stroke="#2563EB" stroke-width="2"/>
+        <text x="270" y="60" font-size="16" fill="#2563EB" font-weight="bold">4</text>
+      </svg>
+      <p>3 × <span class="frac"><span class="num">3</span><span class="den">4</span></span> = <strong>9 Viertel</strong> = <strong>2<span class="frac"><span class="num">1</span><span class="den">4</span></span></strong></p>
+      <div class="math-box">
+        3 · <span class="frac"><span class="num">3</span><span class="den">4</span></span>
+        = <span class="frac"><span class="num">3 · 3</span><span class="den">4</span></span>
+        = <span class="frac"><span class="num">9</span><span class="den">4</span></span>
+        = 2<span class="frac"><span class="num">1</span><span class="den">4</span></span>
+      </div>
+      <p>👉 Der <span data-tip="untere Zahl im Bruch">Nenner</span> bleibt gleich – nur der <span data-tip="obere Zahl im Bruch">Zähler</span> wird multipliziert!</p>
+    </div>
+  </div>
+
+  <!-- KARTE 0-2 -->
+  <div class="flashcard" id="card0-2" style="display:none">
+    <span class="card-tag tag-explore">🔍 Erkunden</span>
+    <div class="card-title">Teilen durch eine Zahl</div>
+    <div class="card-body">
+      <div class="story-box">
+        <span class="emoji">🍫</span>
+        Von einer Tafel Schokolade bleibt <strong><span class="frac"><span class="num">8</span><span class="den">9</span></span></strong> übrig. Diese soll auf <strong>4 Personen</strong> aufgeteilt werden. Wie viel bekommt jede Person?
+      </div>
+      <p>Man teilt: <span class="frac"><span class="num">8</span><span class="den">9</span></span> ÷ 4</p>
+      <div class="step">
+        <div class="step-num">1</div>
+        <div>Man multipliziert den <strong>Nenner</strong> mit 4:<br>
+        <span class="frac"><span class="num">8</span><span class="den">9</span></span> ÷ 4 = <span class="frac"><span class="num">8</span><span class="den">9 · 4</span></span> = <span class="frac"><span class="num">8</span><span class="den">36</span></span> = <span class="frac"><span class="num">2</span><span class="den">9</span></span></div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div>Wenn die Zahl den Zähler teilt, kann man auch den <strong>Zähler teilen</strong>:<br>
+        <span class="frac"><span class="num">8</span><span class="den">9</span></span> ÷ 4 = <span class="frac"><span class="num">8 ÷ 4</span><span class="den">9</span></span> = <span class="frac"><span class="num">2</span><span class="den">9</span></span></div>
+      </div>
+      <p>Jede Person bekommt <strong><span class="frac"><span class="num">2</span><span class="den">9</span></span></strong> der Schokolade.</p>
+    </div>
+  </div>
+
+  <!-- KARTE 0-3: Quiz -->
+  <div class="flashcard" id="card0-3" style="display:none">
+    <span class="card-tag tag-explore">🔍 Verstehen</span>
+    <div class="card-title">Teste dein Verständnis</div>
+    <div class="quiz-area">
+      <div class="quiz-question">Was passiert beim Multiplizieren von <span class="frac" style="font-size:22px"><span class="num">2</span><span class="den">5</span></span> · 3?</div>
+      <div class="mc-options" id="mc0">
+        <button class="mc-btn" onclick="checkMC(0,0,false)">Zähler bleibt, Nenner wird mit 3 multipliziert</button>
+        <button class="mc-btn" onclick="checkMC(0,1,true)">Zähler wird mit 3 multipliziert, Nenner bleibt</button>
+        <button class="mc-btn" onclick="checkMC(0,2,false)">Beide werden mit 3 multipliziert</button>
+        <button class="mc-btn" onclick="checkMC(0,3,false)">Der Bruch ändert sich nicht</button>
+      </div>
+      <div class="feedback" id="fb0"></div>
+    </div>
+  </div>
+
+  <!-- KARTE 0-4: Sortier -->
+  <div class="flashcard" id="card0-4" style="display:none">
+    <span class="card-tag tag-explore">🔍 Erkunden</span>
+    <div class="card-title">Rechenwege ordnen</div>
+    <div class="card-body">
+      <p>Ordne die Schritte für <strong>4 · <span class="frac"><span class="num">3</span><span class="den">7</span></span></strong> in die richtige Reihenfolge. Tippe zuerst auf einen Schritt, dann auf die Lücke:</p>
+    </div>
+    <div class="sort-pool" id="pool0-4">
+      <div class="sort-item" onclick="selectSortItem(this,'s04')">= 1<span class="frac" style="font-size:16px"><span class="num">5</span><span class="den">7</span></span></div>
+      <div class="sort-item" onclick="selectSortItem(this,'s04')">4 · <span class="frac" style="font-size:16px"><span class="num">3</span><span class="den">7</span></span></div>
+      <div class="sort-item" onclick="selectSortItem(this,'s04')">= <span class="frac" style="font-size:16px"><span class="num">4·3</span><span class="den">7</span></span></div>
+      <div class="sort-item" onclick="selectSortItem(this,'s04')">= <span class="frac" style="font-size:16px"><span class="num">12</span><span class="den">7</span></span></div>
+    </div>
+    <div class="section-header">Richtige Reihenfolge:</div>
+    <div class="sort-slots" id="slots0-4">
+      <div class="sort-slot" onclick="placeItem(this,'s04',0)" data-correct="1">(1)</div>
+      <div class="sort-slot" onclick="placeItem(this,'s04',1)" data-correct="2">(2)</div>
+      <div class="sort-slot" onclick="placeItem(this,'s04',2)" data-correct="3">(3)</div>
+      <div class="sort-slot" onclick="placeItem(this,'s04',3)" data-correct="0">(4)</div>
+    </div>
+    <button class="check-btn" onclick="checkSort('s04',0)" style="margin-top:10px">Prüfen ✓</button>
+    <div class="feedback" id="fb-s04"></div>
+  </div>
+
+</div><!-- /ch0 -->
+
+<!-- ════════════════════════════════ KAPITEL 1: BRUCH · ZAHL ════════════════════════════════ -->
+<div class="chapter" id="ch1">
+  <div class="flashcard-nav">
+    <button class="nav-btn" onclick="prevCard(1)" id="prev1">← Zurück</button>
+    <span class="card-counter" id="counter1">Karte 1 von 5</span>
+    <button class="nav-btn" onclick="nextCard(1)" id="next1">Weiter →</button>
+  </div>
+
+  <!-- KARTE 1-0: Regel -->
+  <div class="flashcard" id="card1-0">
+    <span class="card-tag tag-rule">📏 Regel</span>
+    <div class="card-title">Bruch mal natürliche Zahl</div>
+    <div class="card-body">
+      <div class="math-box rule-box">
+        <strong>Regel:</strong> Man multipliziert den <span data-tip="obere Zahl im Bruch">Zähler</span> mit der natürlichen Zahl.<br>
+        Der <span data-tip="untere Zahl im Bruch">Nenner</span> bleibt unverändert.<br><br>
+        <span class="frac" style="font-size:22px"><span class="num">a</span><span class="den">b</span></span> · n = <span class="frac" style="font-size:22px"><span class="num">a · n</span><span class="den">b</span></span>
+      </div>
+      <p><strong>Beispiele:</strong></p>
+      <div class="step">
+        <div class="step-num">a</div>
+        <div>3 · <span class="frac"><span class="num">2</span><span class="den">7</span></span> = <span class="frac"><span class="num">3 · 2</span><span class="den">7</span></span> = <span class="frac"><span class="num">6</span><span class="den">7</span></span></div>
+      </div>
+      <div class="step">
+        <div class="step-num">b</div>
+        <div>7 · <span class="frac"><span class="num">5</span><span class="den">9</span></span> = <span class="frac"><span class="num">7 · 5</span><span class="den">9</span></span> = <span class="frac"><span class="num">35</span><span class="den">9</span></span> = 3<span class="frac"><span class="num">8</span><span class="den">9</span></span></div>
+      </div>
+      <div class="math-box warn-box">
+        ⚠️ Ergibt sich ein <span data-tip="Zähler > Nenner">unechter Bruch</span>, immer in eine gemischte Zahl umwandeln!
+      </div>
+    </div>
+  </div>
+
+  <!-- KARTE 1-1: Bruch durch Zahl -->
+  <div class="flashcard" id="card1-1" style="display:none">
+    <span class="card-tag tag-rule">📏 Regel</span>
+    <div class="card-title">Bruch dividiert durch natürliche Zahl</div>
+    <div class="card-body">
+      <div class="math-box rule-box">
+        <strong>Methode 1:</strong> Nenner · n<br>
+        <span class="frac" style="font-size:20px"><span class="num">a</span><span class="den">b</span></span> ÷ n = <span class="frac" style="font-size:20px"><span class="num">a</span><span class="den">b · n</span></span>
+      </div>
+      <div class="math-box rule-box" style="margin-top:8px">
+        <strong>Methode 2</strong> (wenn n den Zähler teilt):<br>
+        <span class="frac" style="font-size:20px"><span class="num">a</span><span class="den">b</span></span> ÷ n = <span class="frac" style="font-size:20px"><span class="num">a ÷ n</span><span class="den">b</span></span>
+      </div>
+      <p><strong>Beispiele:</strong></p>
+      <div class="step">
+        <div class="step-num">a</div>
+        <div><span class="frac"><span class="num">6</span><span class="den">7</span></span> ÷ 5 = <span class="frac"><span class="num">6</span><span class="den">35</span></span></div>
+      </div>
+      <div class="step">
+        <div class="step-num">b</div>
+        <div><span class="frac"><span class="num">8</span><span class="den">11</span></span> ÷ 4 = <span class="frac"><span class="num">8 ÷ 4</span><span class="den">11</span></span> = <span class="frac"><span class="num">2</span><span class="den">11</span></span> ✓ einfacher!</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- KARTE 1-2: Gemischte Zahlen -->
+  <div class="flashcard" id="card1-2" style="display:none">
+    <span class="card-tag tag-rule">📏 Regel</span>
+    <div class="card-title">Gemischte Zahlen multiplizieren</div>
+    <div class="card-body">
+      <div class="math-box warn-box">
+        ⚠️ Gemischte Zahlen zuerst in <strong>unechte Brüche</strong> umwandeln!
+      </div>
+      <p><strong>Beispiel:</strong> 2<span class="frac"><span class="num">1</span><span class="den">3</span></span> · 5</p>
+      <div class="step">
+        <div class="step-num">1</div>
+        <div>Umwandeln: 2<span class="frac"><span class="num">1</span><span class="den">3</span></span> = <span class="frac"><span class="num">7</span><span class="den">3</span></span></div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div>Multiplizieren: <span class="frac"><span class="num">7</span><span class="den">3</span></span> · 5 = <span class="frac"><span class="num">35</span><span class="den">3</span></span></div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div>Zurückwandeln: <span class="frac"><span class="num">35</span><span class="den">3</span></span> = 11<span class="frac"><span class="num">2</span><span class="den">3</span></span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- KARTE 1-3: Übung MC -->
+  <div class="flashcard" id="card1-3" style="display:none">
+    <span class="card-tag tag-exercise">🖊️ Übung</span>
+    <div class="card-title">Aufgabe: Wähle das richtige Ergebnis</div>
+    <div class="quiz-area">
+      <div class="math-box warn-box" style="margin-bottom:14px;font-size:15px">
+        ⚠️ Das Ergebnis muss immer vollständig <strong>gekürzt</strong> angegeben werden!
+      </div>
+      <div class="quiz-question">
+        <span class="frac" style="font-size:24px"><span class="num">5</span><span class="den">8</span></span> · 4 = ?
+      </div>
+      <div class="mc-options" id="mc1">
+        <button class="mc-btn" onclick="checkMC(1,0,false)"><span class="frac" style="font-size:20px"><span class="num">5</span><span class="den">32</span></span></button>
+        <button class="mc-btn" onclick="checkMC(1,1,false)">2<span class="frac" style="font-size:20px"><span class="num">1</span><span class="den">4</span></span></button>
+        <button class="mc-btn" onclick="checkMC(1,2,true)">2<span class="frac" style="font-size:20px"><span class="num">1</span><span class="den">2</span></span></button>
+        <button class="mc-btn" onclick="checkMC(1,3,false)"><span class="frac" style="font-size:20px"><span class="num">9</span><span class="den">8</span></span></button>
+      </div>
+      <div class="feedback" id="fb1"></div>
+    </div>
+  </div>
+
+  <!-- KARTE 1-4: Eingabe-Übung -->
+  <div class="flashcard" id="card1-4" style="display:none">
+    <span class="card-tag tag-exercise">🖊️ Übung</span>
+    <div class="card-title">Rechne selbst!</div>
+    <div class="quiz-area">
+      <div class="quiz-question">
+        3 · <span class="frac" style="font-size:24px"><span class="num">4</span><span class="den">9</span></span> = ?
+      </div>
+      <p style="text-align:center;color:var(--text-muted);font-size:15px">Gib den gekürzten Bruch ein:</p>
+      <div class="input-row">
+        <div class="frac-input">
+          <input type="text" inputmode="numeric" id="in1-num" placeholder="?" maxlength="3">
+          <div class="frac-line"></div>
+          <input type="text" inputmode="numeric" id="in1-den" placeholder="?" maxlength="3">
+        </div>
+      </div>
+      <div style="text-align:center">
+        <button class="check-btn" onclick="checkFrac('in1','4','3')">Prüfen ✓</button>
+      </div>
+      <div class="feedback" id="fb-in1"></div>
+    </div>
+  </div>
+
+</div><!-- /ch1 -->
+
+<!-- ════════════════════════════════ KAPITEL 2: KÜRZEN ════════════════════════════════ -->
+<div class="chapter" id="ch2">
+  <div class="flashcard-nav">
+    <button class="nav-btn" onclick="prevCard(2)" id="prev2">← Zurück</button>
+    <span class="card-counter" id="counter2">Karte 1 von 4</span>
+    <button class="nav-btn" onclick="nextCard(2)" id="next2">Weiter →</button>
+  </div>
+
+  <!-- KARTE 2-0 -->
+  <div class="flashcard" id="card2-0">
+    <span class="card-tag tag-rule">✂️ Kürzen</span>
+    <div class="card-title">Warum früh kürzen?</div>
+    <div class="card-body">
+      <p>Manchmal kann man <strong>vor dem Multiplizieren kürzen</strong> – das macht die Rechnung einfacher!</p>
+      <div class="math-box warn-box">
+        Beispiel: 25 · <span class="frac"><span class="num">2</span><span class="den">10</span></span>
+      </div>
+      <div class="step">
+        <div class="step-num">❌</div>
+        <div><strong>Erst multiplizieren, dann kürzen:</strong><br>
+          25 · <span class="frac"><span class="num">2</span><span class="den">10</span></span> = <span class="frac"><span class="num">50</span><span class="den">10</span></span> = 5 (umständlich)</div>
+      </div>
+      <div class="step">
+        <div class="step-num">✓</div>
+        <div><strong>Erst kürzen, dann multiplizieren:</strong><br>
+          25 · <span class="frac"><span class="num">2</span><span class="den">10</span></span> = 25 · <span class="frac"><span class="num">1</span><span class="den">5</span></span> = <span class="frac"><span class="num">25</span><span class="den">5</span></span> = 5 (einfacher!)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- KARTE 2-1 -->
+  <div class="flashcard" id="card2-1" style="display:none">
+    <span class="card-tag tag-rule">✂️ Kürzen</span>
+    <div class="card-title">„Über Kreuz" kürzen</div>
+    <div class="card-body">
+      <p>Beim Multiplizieren zweier Brüche kann man <strong>diagonal kürzen</strong> – also Zähler des einen Bruchs mit dem Nenner des anderen:</p>
+      <div class="math-box warn-box" style="font-size:15px">
+        💡 Man sucht eine Zahl, durch die sich <strong>Zähler links und Nenner rechts</strong> (oder umgekehrt) teilen lassen.
+      </div>
+
+      <!-- SVG Überkreuz-Visualisierung -->
+      <svg width="260" height="110" viewBox="0 0 260 110" style="display:block;margin:12px auto;">
+        <!-- Bruch 1: 2/5 -->
+        <text x="40" y="38" text-anchor="middle" font-size="26" font-weight="bold" fill="#1E293B">2</text>
+        <line x1="18" y1="48" x2="62" y2="48" stroke="#1E293B" stroke-width="2.5"/>
+        <text x="40" y="72" text-anchor="middle" font-size="26" font-weight="bold" fill="#1E293B">5</text>
+        <!-- · -->
+        <text x="90" y="58" text-anchor="middle" font-size="28" fill="#64748B">·</text>
+        <!-- Bruch 2: 15/16 -->
+        <text x="140" y="38" text-anchor="middle" font-size="26" font-weight="bold" fill="#1E293B">15</text>
+        <line x1="115" y1="48" x2="165" y2="48" stroke="#1E293B" stroke-width="2.5"/>
+        <text x="140" y="72" text-anchor="middle" font-size="26" font-weight="bold" fill="#1E293B">16</text>
+        <!-- Pfeil: 2 ↘ 16 (÷2) -->
+        <line x1="52" y1="30" x2="118" y2="64" stroke="#7C3AED" stroke-width="2" stroke-dasharray="4,3" marker-end="url(#arr1)"/>
+        <text x="72" y="38" font-size="13" fill="#7C3AED" font-weight="bold">÷ 2</text>
+        <!-- Pfeil: 5 ↗ 15 (÷5) -->
+        <line x1="52" y1="66" x2="118" y2="34" stroke="#2563EB" stroke-width="2" stroke-dasharray="4,3" marker-end="url(#arr2)"/>
+        <text x="72" y="78" font-size="13" fill="#2563EB" font-weight="bold">÷ 5</text>
+        <!-- Ergebnis -->
+        <text x="185" y="58" text-anchor="middle" font-size="22" fill="#64748B">=</text>
+        <text x="220" y="38" text-anchor="middle" font-size="26" font-weight="bold" fill="#10B981">1</text>
+        <line x1="200" y1="48" x2="240" y2="48" stroke="#10B981" stroke-width="2.5"/>
+        <text x="220" y="72" text-anchor="middle" font-size="26" font-weight="bold" fill="#10B981">8</text>
+        <!-- Pfeil-Marker -->
+        <defs>
+          <marker id="arr1" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L8,3 Z" fill="#7C3AED"/>
+          </marker>
+          <marker id="arr2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L8,3 Z" fill="#2563EB"/>
+          </marker>
+        </defs>
+        <!-- Schritt-Labels -->
+        <text x="40" y="100" text-anchor="middle" font-size="12" fill="#7C3AED">→ wird 1</text>
+        <text x="140" y="100" text-anchor="middle" font-size="12" fill="#2563EB">15→3 · 16→8</text>
+      </svg>
+
+      <div class="step">
+        <div class="step-num">1</div>
+        <div><strong>Zähler links (2) und Nenner rechts (16):</strong><br>
+          Haben sie einen gemeinsamen Teiler? Ja: beide durch <strong>2</strong> teilbar!<br>
+          2 ÷ 2 = 1 &nbsp;&nbsp; 16 ÷ 2 = 8</div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div><strong>Nenner links (5) und Zähler rechts (15):</strong><br>
+          Haben sie einen gemeinsamen Teiler? Ja: beide durch <strong>5</strong> teilbar!<br>
+          5 ÷ 5 = 1 &nbsp;&nbsp; 15 ÷ 5 = 3</div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div>Jetzt erst multiplizieren:<br>
+          <span class="frac"><span class="num">1</span><span class="den">1</span></span> · <span class="frac"><span class="num">3</span><span class="den">8</span></span> = <span class="frac"><span class="num">3</span><span class="den">8</span></span></div>
+      </div>
+      <div class="math-box success-box">
+        Ergebnis: <span class="frac" style="font-size:20px"><span class="num">3</span><span class="den">8</span></span> ✓ &nbsp; Viel einfacher als erst multiplizieren!
+      </div>
+    </div>
+  </div>
+
+  <!-- KARTE 2-2: Quiz Kürzen -->
+  <div class="flashcard" id="card2-2" style="display:none">
+    <span class="card-tag tag-exercise">🖊️ Übung</span>
+    <div class="card-title">Kann man hier kürzen?</div>
+    <div class="quiz-area">
+      <div class="quiz-question">
+        <span class="frac" style="font-size:22px"><span class="num">4</span><span class="den">9</span></span> · <span class="frac" style="font-size:22px"><span class="num">3</span><span class="den">8</span></span>
+        – Welche Zahlen kann man über Kreuz kürzen?
+      </div>
+      <div class="mc-options" id="mc2">
+        <button class="mc-btn" onclick="checkMC(2,0,false)">Nichts – einfach multiplizieren</button>
+        <button class="mc-btn" onclick="checkMC(2,1,false)">4 und 3 (beide durch 2?)</button>
+        <button class="mc-btn" onclick="checkMC(2,2,true)">4 und 8 (÷ 4) &amp; 9 und 3 (÷ 3)</button>
+        <button class="mc-btn" onclick="checkMC(2,3,false)">9 und 8 – haben einen gemeinsamen Teiler</button>
+      </div>
+      <div class="feedback" id="fb2"></div>
+    </div>
+  </div>
+
+  <!-- KARTE 2-3: Eingabe Kürzen -->
+  <div class="flashcard" id="card2-3" style="display:none">
+    <span class="card-tag tag-exercise">🖊️ Übung</span>
+    <div class="card-title">Kürze vor dem Multiplizieren!</div>
+    <div class="quiz-area">
+      <div class="quiz-question">
+        <span class="frac" style="font-size:22px"><span class="num">3</span><span class="den">4</span></span> · <span class="frac" style="font-size:22px"><span class="num">8</span><span class="den">9</span></span> = ?
+      </div>
+      <p style="color:var(--text-muted);font-size:15px;text-align:center">Kürze erst, dann gib das Ergebnis ein:</p>
+      <div class="input-row">
+        <div class="frac-input">
+          <input type="text" inputmode="numeric" id="in2-num" placeholder="?" maxlength="3">
+          <div class="frac-line"></div>
+          <input type="text" inputmode="numeric" id="in2-den" placeholder="?" maxlength="3">
+        </div>
+      </div>
+      <div style="text-align:center">
+        <button class="check-btn" onclick="checkFrac('in2','2','3')">Prüfen ✓</button>
+      </div>
+      <div class="feedback" id="fb-in2"></div>
+    </div>
+  </div>
+
+</div><!-- /ch2 -->
+
+<!-- ════════════════════════════════ KAPITEL 3: BRUCH · BRUCH ════════════════════════════════ -->
+<div class="chapter" id="ch3">
+  <div class="flashcard-nav">
+    <button class="nav-btn" onclick="prevCard(3)" id="prev3">← Zurück</button>
+    <span class="card-counter" id="counter3">Karte 1 von 5</span>
+    <button class="nav-btn" onclick="nextCard(3)" id="next3">Weiter →</button>
+  </div>
+
+  <!-- KARTE 3-0: Erkunden mit Rechteck -->
+  <div class="flashcard" id="card3-0">
+    <span class="card-tag tag-explore">🔍 Erkunden</span>
+    <div class="card-title"><span class="frac"><span class="num">2</span><span class="den">3</span></span> von <span class="frac"><span class="num">3</span><span class="den">4</span></span> – Was bedeutet das?</div>
+    <div class="card-body">
+      <div class="story-box">
+        <span class="emoji">🌿</span>
+        Im Schulgarten werden auf <span class="frac"><span class="num">3</span><span class="den">4</span></span> der Fläche Obst und Gemüse angebaut. Davon werden <span class="frac"><span class="num">2</span><span class="den">3</span></span> mit Erdbeeren bepflanzt. Welcher Anteil der Gesamtfläche ist das?
+      </div>
+      <p>„<span class="frac"><span class="num">2</span><span class="den">3</span></span> von <span class="frac"><span class="num">3</span><span class="den">4</span></span>" bedeutet: <span class="frac"><span class="num">2</span><span class="den">3</span></span> · <span class="frac"><span class="num">3</span><span class="den">4</span></span></p>
+      <svg width="200" height="160" viewBox="0 0 200 160" style="display:block;margin:10px auto;">
+        <!-- 4 Spalten, 3 Zeilen = 12 Felder -->
+        <!-- ¾ = 3 Spalten. ⅔ davon = 2 Zeilen in 3 Spalten = 6 von 12 = ½ -->
+        <rect x="10" y="10" width="45" height="45" fill="#BBF7D0" stroke="#6EE7B7" stroke-width="1.5"/>
+        <rect x="57" y="10" width="45" height="45" fill="#BBF7D0" stroke="#6EE7B7" stroke-width="1.5"/>
+        <rect x="104" y="10" width="45" height="45" fill="#BBF7D0" stroke="#6EE7B7" stroke-width="1.5"/>
+        <rect x="151" y="10" width="45" height="45" fill="#F1F5F9" stroke="#CBD5E1" stroke-width="1.5"/>
+        <rect x="10" y="57" width="45" height="45" fill="#BBF7D0" stroke="#6EE7B7" stroke-width="1.5"/>
+        <rect x="57" y="57" width="45" height="45" fill="#BBF7D0" stroke="#6EE7B7" stroke-width="1.5"/>
+        <rect x="104" y="57" width="45" height="45" fill="#BBF7D0" stroke="#6EE7B7" stroke-width="1.5"/>
+        <rect x="151" y="57" width="45" height="45" fill="#F1F5F9" stroke="#CBD5E1" stroke-width="1.5"/>
+        <rect x="10" y="104" width="45" height="45" fill="#FEF9C3" stroke="#FCD34D" stroke-width="1.5"/>
+        <rect x="57" y="104" width="45" height="45" fill="#FEF9C3" stroke="#FCD34D" stroke-width="1.5"/>
+        <rect x="104" y="104" width="45" height="45" fill="#FEF9C3" stroke="#FCD34D" stroke-width="1.5"/>
+        <rect x="151" y="104" width="45" height="45" fill="#F1F5F9" stroke="#CBD5E1" stroke-width="1.5"/>
+        <!-- Overlay Erdbeer-Felder (⅔ von ¾ = 6 Felder) -->
+        <rect x="10" y="10" width="45" height="45" fill="#4ADE80" opacity="0.6"/>
+        <rect x="57" y="10" width="45" height="45" fill="#4ADE80" opacity="0.6"/>
+        <rect x="104" y="10" width="45" height="45" fill="#4ADE80" opacity="0.6"/>
+        <rect x="10" y="57" width="45" height="45" fill="#4ADE80" opacity="0.6"/>
+        <rect x="57" y="57" width="45" height="45" fill="#4ADE80" opacity="0.6"/>
+        <rect x="104" y="57" width="45" height="45" fill="#4ADE80" opacity="0.6"/>
+        <text x="100" y="152" text-anchor="middle" font-size="13" fill="#065F46" font-weight="bold">6 von 12 Feldern = ½</text>
+      </svg>
+      <div class="math-box">
+        <span class="frac"><span class="num">2</span><span class="den">3</span></span> · <span class="frac"><span class="num">3</span><span class="den">4</span></span> = <span class="frac"><span class="num">6</span><span class="den">12</span></span> = <span class="frac"><span class="num">1</span><span class="den">2</span></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- KARTE 3-1: Regel -->
+  <div class="flashcard" id="card3-1" style="display:none">
+    <span class="card-tag tag-rule">📏 Regel</span>
+    <div class="card-title">Multiplikation zweier Brüche</div>
+    <div class="card-body">
+      <div class="math-box rule-box">
+        <strong>Regel:</strong><br><br>
+        <span class="frac" style="font-size:22px"><span class="num">a</span><span class="den">b</span></span> · <span class="frac" style="font-size:22px"><span class="num">c</span><span class="den">d</span></span> = <span class="frac" style="font-size:22px"><span class="num">a · c</span><span class="den">b · d</span></span><br><br>
+        Zähler mal Zähler, Nenner mal Nenner.
+      </div>
+      <p><strong>Beispiele:</strong></p>
+      <div class="step">
+        <div class="step-num">a</div>
+        <div><span class="frac"><span class="num">3</span><span class="den">5</span></span> · <span class="frac"><span class="num">5</span><span class="den">7</span></span> = <span class="frac"><span class="num">3 · 5</span><span class="den">5 · 7</span></span> = <span class="frac"><span class="num">15</span><span class="den">35</span></span> = <span class="frac"><span class="num">3</span><span class="den">7</span></span></div>
+      </div>
+      <div class="step">
+        <div class="step-num">b</div>
+        <div><span class="frac"><span class="num">5</span><span class="den">12</span></span> · <span class="frac"><span class="num">5</span><span class="den">25</span></span> = <span class="frac"><span class="num">25</span><span class="den">300</span></span> = <span class="frac"><span class="num">1</span><span class="den">12</span></span></div>
+      </div>
+      <div class="step">
+        <div class="step-num">c</div>
+        <div>2<span class="frac"><span class="num">1</span><span class="den">4</span></span> · <span class="frac"><span class="num">2</span><span class="den">3</span></span> = <span class="frac"><span class="num">9</span><span class="den">4</span></span> · <span class="frac"><span class="num">2</span><span class="den">3</span></span> = <span class="frac"><span class="num">18</span><span class="den">12</span></span> = 1<span class="frac"><span class="num">1</span><span class="den">2</span></span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- KARTE 3-2: Prozentzahl -->
+  <div class="flashcard" id="card3-2" style="display:none">
+    <span class="card-tag tag-rule">📏 Regel</span>
+    <div class="card-title">Anteil einer Größe berechnen</div>
+    <div class="card-body">
+      <p><strong>Anteile bei Größen</strong> berechnet man genauso!</p>
+      <div class="step">
+        <div class="step-num">a</div>
+        <div><span class="frac"><span class="num">2</span><span class="den">3</span></span> von 3 kg = <span class="frac"><span class="num">2</span><span class="den">3</span></span> · 3 kg = <span class="frac"><span class="num">6</span><span class="den">3</span></span> kg = <strong>2 kg</strong></div>
+      </div>
+      <div class="step">
+        <div class="step-num">b</div>
+        <div>30% von 8 t = <span class="frac"><span class="num">30</span><span class="den">100</span></span> · 8 t = <span class="frac"><span class="num">240</span><span class="den">100</span></span> t = <strong>2,4 t</strong></div>
+      </div>
+      <div class="math-box warn-box">
+        💡 <strong>Prozent = Bruch mit Nenner 100</strong><br>
+        30% = <span class="frac"><span class="num">30</span><span class="den">100</span></span> = <span class="frac"><span class="num">3</span><span class="den">10</span></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- KARTE 3-3: MC Quiz -->
+  <div class="flashcard" id="card3-3" style="display:none">
+    <span class="card-tag tag-exercise">🖊️ Übung</span>
+    <div class="card-title">Welches Ergebnis stimmt?</div>
+    <div class="quiz-area">
+      <div class="quiz-question">
+        <span class="frac" style="font-size:22px"><span class="num">3</span><span class="den">4</span></span> · <span class="frac" style="font-size:22px"><span class="num">2</span><span class="den">5</span></span> = ?
+      </div>
+      <div class="mc-options" id="mc3">
+        <button class="mc-btn" onclick="checkMC(3,0,false)"><span class="frac" style="font-size:20px"><span class="num">5</span><span class="den">9</span></span></button>
+        <button class="mc-btn" onclick="checkMC(3,1,true)"><span class="frac" style="font-size:20px"><span class="num">3</span><span class="den">10</span></span></button>
+        <button class="mc-btn" onclick="checkMC(3,2,false)"><span class="frac" style="font-size:20px"><span class="num">1</span><span class="den">5</span></span></button>
+        <button class="mc-btn" onclick="checkMC(3,3,false)"><span class="frac" style="font-size:20px"><span class="num">1</span><span class="den">2</span></span></button>
+      </div>
+      <div class="feedback" id="fb3"></div>
+    </div>
+  </div>
+
+  <!-- KARTE 3-4: Eingabe -->
+  <div class="flashcard" id="card3-4" style="display:none">
+    <span class="card-tag tag-exercise">🖊️ Übung</span>
+    <div class="card-title">Rechne – und kürze!</div>
+    <div class="quiz-area">
+      <div class="quiz-question">
+        <span class="frac" style="font-size:22px"><span class="num">5</span><span class="den">6</span></span> · <span class="frac" style="font-size:22px"><span class="num">3</span><span class="den">10</span></span> = ?
+      </div>
+      <p style="color:var(--text-muted);font-size:15px;text-align:center">Kürze über Kreuz und gib das Ergebnis ein:</p>
+      <div class="input-row">
+        <div class="frac-input">
+          <input type="text" inputmode="numeric" id="in3-num" placeholder="?" maxlength="3">
+          <div class="frac-line"></div>
+          <input type="text" inputmode="numeric" id="in3-den" placeholder="?" maxlength="3">
+        </div>
+      </div>
+      <div style="text-align:center">
+        <button class="check-btn" onclick="checkFrac('in3','1','4')">Prüfen ✓</button>
+      </div>
+      <div class="feedback" id="fb-in3"></div>
+    </div>
+  </div>
+
+</div><!-- /ch3 -->
+
+<!-- ════════════════════════════════ KAPITEL 4: ÜBEN ════════════════════════════════ -->
+<div class="chapter" id="ch4">
+  <h2 style="font-family:'Nunito',sans-serif;font-size:22px;font-weight:800;margin-bottom:6px">🧩 Gemischte Übungen</h2>
+  <p style="color:var(--text-muted);margin-bottom:20px">Löse so viele Aufgaben wie du möchtest!</p>
+
+  <div id="ex-container">
+    <!-- Wird per JS befüllt -->
+  </div>
+  <div style="text-align:center;margin-top:20px">
+    <button class="check-btn" onclick="generateExercises()" style="background:var(--secondary)">🎲 Neue Aufgaben laden</button>
+  </div>
+</div><!-- /ch4 -->
+
+<!-- ════════════════════════════════ KAPITEL 5: SACHAUFGABEN ════════════════════════════════ -->
+<div class="chapter" id="ch5">
+  <div class="flashcard-nav">
+    <button class="nav-btn" onclick="prevCard(5)" id="prev5">← Zurück</button>
+    <span class="card-counter" id="counter5">Aufgabe 1 von 4</span>
+    <button class="nav-btn" onclick="nextCard(5)" id="next5">Weiter →</button>
+  </div>
+
+  <!-- Sachaufgabe 0 -->
+  <div class="flashcard" id="card5-0">
+    <span class="card-tag tag-task">📖 Sachaufgabe</span>
+    <div class="card-title">🍕 Pizzaabend</div>
+    <div class="card-body">
+      <div class="story-box">
+        Für einen Pizzaabend braucht jede Person <span class="frac"><span class="num">3</span><span class="den">4</span></span> einer Pizza. Es kommen 8 Personen.
+        Wie viele Pizzen muss man mindestens backen?
+      </div>
+      <div class="quiz-question" style="font-size:18px">Wie lautet die Rechnung?</div>
+      <div class="mc-options" id="mc5-0">
+        <button class="mc-btn" onclick="checkMC('5-0',0,false)"><span class="frac"><span class="num">3</span><span class="den">4</span></span> + 8</button>
+        <button class="mc-btn" onclick="checkMC('5-0',1,true)">8 · <span class="frac"><span class="num">3</span><span class="den">4</span></span></button>
+        <button class="mc-btn" onclick="checkMC('5-0',2,false)">8 ÷ <span class="frac"><span class="num">3</span><span class="den">4</span></span></button>
+        <button class="mc-btn" onclick="checkMC('5-0',3,false)"><span class="frac"><span class="num">3</span><span class="den">4</span></span> ÷ 8</button>
+      </div>
+      <div class="feedback" id="fb5-0"></div>
+    </div>
+  </div>
+
+  <!-- Sachaufgabe 1 -->
+  <div class="flashcard" id="card5-1" style="display:none">
+    <span class="card-tag tag-task">📖 Sachaufgabe</span>
+    <div class="card-title">🌿 Schulgarten</div>
+    <div class="card-body">
+      <div class="story-box">
+        Der Schulgarten hat eine Fläche von 120 m². Auf <span class="frac"><span class="num">3</span><span class="den">4</span></span> der Fläche werden Gemüse und Obst angebaut. Davon sind <span class="frac"><span class="num">2</span><span class="den">3</span></span> mit Erdbeeren bepflanzt. Wie groß ist die Erdbeerfläche?
+      </div>
+    </div>
+    <div class="quiz-area">
+      <div class="quiz-question" style="font-size:18px">Erdbeerfläche = ?</div>
+      <div class="mc-options" id="mc5-1">
+        <button class="mc-btn" onclick="checkMC('5-1',0,false)">45 m²</button>
+        <button class="mc-btn" onclick="checkMC('5-1',1,true)">60 m²</button>
+        <button class="mc-btn" onclick="checkMC('5-1',2,false)">80 m²</button>
+        <button class="mc-btn" onclick="checkMC('5-1',3,false)">90 m²</button>
+      </div>
+      <div class="feedback" id="fb5-1"></div>
+      <div id="solution5-1" style="display:none" class="math-box success-box" style="margin-top:12px">
+        <strong>Lösung:</strong><br>
+        <span class="frac"><span class="num">2</span><span class="den">3</span></span> · <span class="frac"><span class="num">3</span><span class="den">4</span></span> = <span class="frac"><span class="num">1</span><span class="den">2</span></span> &nbsp;→&nbsp;
+        <span class="frac"><span class="num">1</span><span class="den">2</span></span> · 120 m² = <strong>60 m²</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sachaufgabe 2 -->
+  <div class="flashcard" id="card5-2" style="display:none">
+    <span class="card-tag tag-task">📖 Sachaufgabe</span>
+    <div class="card-title">🚶 Schrittlänge</div>
+    <div class="card-body">
+      <div class="story-box">
+        Ein Erwachsener hat eine Schrittlänge von <span class="frac"><span class="num">3</span><span class="den">4</span></span> m. Maximilian braucht 16 Schritte, um quer über das Grundstück zu gehen. Sein Vater nur 12 Schritte.
+        <br>Max behauptet, seine Schrittlänge sei <span class="frac" style="font-size:16px"><span class="num">5</span><span class="den">8</span></span> m. Stimmt das?
+      </div>
+      <div class="quiz-question" style="font-size:17px">Wie groß ist Maximilians Schrittlänge wirklich?</div>
+      <div class="mc-options" id="mc5-2">
+        <button class="mc-btn" onclick="checkMC('5-2',0,false)"><span class="frac" style="font-size:18px"><span class="num">5</span><span class="den">8</span></span> m – Max hat recht</button>
+        <button class="mc-btn" onclick="checkMC('5-2',1,true)"><span class="frac" style="font-size:18px"><span class="num">9</span><span class="den">16</span></span> m – Max irrt sich</button>
+        <button class="mc-btn" onclick="checkMC('5-2',2,false)"><span class="frac" style="font-size:18px"><span class="num">3</span><span class="den">4</span></span> m – genauso wie sein Vater</button>
+        <button class="mc-btn" onclick="checkMC('5-2',3,false)">Man kann das nicht berechnen</button>
+      </div>
+      <div class="feedback" id="fb5-2"></div>
+      <div id="solution5-2" style="display:none" class="math-box success-box" style="margin-top:12px">
+        <strong>Lösung:</strong><br>
+        Breite des Grundstücks: 12 · <span class="frac"><span class="num">3</span><span class="den">4</span></span> m = 9 m<br>
+        Maximilians Schrittlänge: 9 m ÷ 16 = <span class="frac"><span class="num">9</span><span class="den">16</span></span> m<br>
+        <span class="frac"><span class="num">9</span><span class="den">16</span></span> ≠ <span class="frac"><span class="num">5</span><span class="den">8</span></span> → Max irrt sich!
+      </div>
+    </div>
+  </div>
+
+  <!-- Sachaufgabe 3 -->
+  <div class="flashcard" id="card5-3" style="display:none">
+    <span class="card-tag tag-task">📖 Sachaufgabe</span>
+    <div class="card-title">🍫 Schokolade teilen</div>
+    <div class="card-body">
+      <div class="story-box">
+        Von einer Tafel Schokolade ist noch <span class="frac"><span class="num">8</span><span class="den">9</span></span> übrig. Diese soll auf 4 Kinder aufgeteilt werden. Jedes Kind bekommt gleichviel. Wie viel bekommt jedes Kind?
+      </div>
+    </div>
+    <div class="quiz-area">
+      <div class="quiz-question" style="font-size:18px">Anteil je Kind = ?</div>
+      <div class="input-row">
+        <div class="frac-input">
+          <input type="text" inputmode="numeric" id="in5-num" placeholder="?" maxlength="3">
+          <div class="frac-line"></div>
+          <input type="text" inputmode="numeric" id="in5-den" placeholder="?" maxlength="3">
+        </div>
+        <span>der Tafel</span>
+      </div>
+      <div style="text-align:center">
+        <button class="check-btn" onclick="checkFrac('in5','2','9')">Prüfen ✓</button>
+      </div>
+      <div class="feedback" id="fb-in5"></div>
+    </div>
+  </div>
+
+</div><!-- /ch5 -->
+
+<script>
+// ─────────────── STATE ───────────────
+let scores = 0;
+const cardIdx = [0,0,0,0,0,0]; // current card per chapter
+const cardMax = [5,5,4,5,0,4];
+
+// ─────────────── CHAPTER NAV ───────────────
+function showChapter(n) {
+  document.querySelectorAll('.chapter').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('ch'+n).classList.add('active');
+  document.getElementById('tab'+n).classList.add('active');
+  if (n === 4) generateExercises();
+  updateProgress();
+}
+
+// ─────────────── CARD NAV ───────────────
+function showCard(ch, idx) {
+  const max = cardMax[ch];
+  for (let i = 0; i < max; i++) {
+    const c = document.getElementById('card'+ch+'-'+i);
+    if (c) c.style.display = (i === idx) ? 'block' : 'none';
+  }
+  document.getElementById('counter'+ch).textContent = `Karte ${idx+1} von ${max}`;
+  if (document.getElementById('prev'+ch)) {
+    document.getElementById('prev'+ch).disabled = (idx === 0);
+    document.getElementById('next'+ch).disabled = (idx === max-1);
+  }
+}
+
+function nextCard(ch) {
+  if (cardIdx[ch] < cardMax[ch]-1) { cardIdx[ch]++; showCard(ch, cardIdx[ch]); }
+}
+function prevCard(ch) {
+  if (cardIdx[ch] > 0) { cardIdx[ch]--; showCard(ch, cardIdx[ch]); }
+}
+
+// ─────────────── MC QUIZ ───────────────
+function checkMC(qid, btnIdx, correct) {
+  const container = document.getElementById('mc'+qid);
+  if (!container) return;
+  const btns = container.querySelectorAll('.mc-btn');
+  btns.forEach(b => b.classList.add('disabled'));
+  btns[btnIdx].classList.add(correct ? 'correct' : 'wrong');
+  const fb = document.getElementById('fb'+qid);
+  if (fb) {
+    fb.className = 'feedback show ' + (correct ? 'ok' : 'fail');
+    fb.textContent = correct
+      ? '✅ Richtig! Super gemacht!'
+      : '❌ Leider falsch. Schau dir die Erklärung nochmal an.';
+  }
+  // Lösung einblenden bei Sachaufgaben
+  const sol = document.getElementById('solution' + qid);
+  if (sol) sol.style.display = 'block';
+  if (correct) addScore(10);
+}
+
+// ─────────────── FRACTION INPUT CHECK ───────────────
+function checkFrac(id, correctNum, correctDen) {
+  const numEl = document.getElementById(id+'-num');
+  const denEl = document.getElementById(id+'-den');
+  const fb = document.getElementById('fb-'+id);
+  if (!numEl || !denEl || !fb) return;
+  const n = parseInt(numEl.value.trim());
+  const d = parseInt(denEl.value.trim());
+  const cn = parseInt(correctNum);
+  const cd = parseInt(correctDen);
+  // Cross-multiply for equivalence
+  const correct = (n * cd === cn * d) && d > 0;
+  fb.className = 'feedback show ' + (correct ? 'ok' : 'fail');
+  fb.textContent = correct
+    ? `✅ Richtig! Super gemacht!`
+    : `❌ Nicht ganz. Das richtige Ergebnis ist ${cd === 1 ? cn : cn + '/' + cd}. Versuch's nochmal!`;
+  if (correct) addScore(15);
+}
+
+// ─────────────── SORT / TAP ───────────────
+let selectedSortItem = null;
+let selectedSortKey = null;
+const slotData = {};
+
+function selectSortItem(el, key) {
+  if (selectedSortItem === el) {
+    el.classList.remove('selected');
+    selectedSortItem = null;
+    selectedSortKey = null;
+    return;
+  }
+  if (selectedSortItem) selectedSortItem.classList.remove('selected');
+  el.classList.add('selected');
+  selectedSortItem = el;
+  selectedSortKey = key;
+}
+
+function placeItem(slot, key, idx) {
+  if (!selectedSortItem || selectedSortKey !== key) return;
+  // Return old item if slot was filled
+  if (slotData[key+idx]) {
+    const old = slotData[key+idx];
+    old.el.style.display = 'flex';
+  }
+  slot.innerHTML = selectedSortItem.innerHTML;
+  slot.classList.add('filled');
+  slotData[key+idx] = { el: selectedSortItem, origHTML: selectedSortItem.innerHTML };
+  selectedSortItem.style.display = 'none';
+  selectedSortItem.classList.remove('selected');
+  selectedSortItem = null;
+  selectedSortKey = null;
+}
+
+// Sort order for card 0-4: correct answer sequence indices are 1,2,3,0
+const sortAnswers = { 's04': [1,2,3,0] }; // slot i should have item sortAnswers[key][i]
+
+function checkSort(key, ch) {
+  const slots = document.querySelectorAll('#slots0-4 .sort-slot');
+  const correct = sortAnswers[key];
+  let allOk = true;
+  slots.forEach((slot, i) => {
+    if (slot.classList.contains('filled')) {
+      const ok = parseInt(slot.dataset.correct) === correct[i];
+      slot.classList.remove('filled','correct-slot','wrong-slot');
+      slot.classList.add(ok ? 'correct-slot' : 'wrong-slot');
+      if (!ok) allOk = false;
+    } else {
+      slot.classList.add('wrong-slot');
+      allOk = false;
+    }
+  });
+  const fb = document.getElementById('fb-'+key);
+  fb.className = 'feedback show ' + (allOk ? 'ok' : 'fail');
+  fb.textContent = allOk
+    ? '✅ Perfekt! Die Reihenfolge stimmt!'
+    : '❌ Nicht ganz. Überprüfe die Reihenfolge nochmal!';
+  if (allOk) addScore(20);
+}
+
+// ─────────────── SCORE ───────────────
+function addScore(pts) {
+  scores += pts;
+  document.getElementById('scoreDisplay').textContent = `⭐ ${scores} Punkte`;
+  updateProgress();
+}
+
+function updateProgress() {
+  const pct = Math.min(100, 10 + scores / 2);
+  document.getElementById('mainProgress').style.width = pct + '%';
+}
+
+// ─────────────── EXERCISE GENERATOR ───────────────
+const exTemplates = [
+  // [type, label, question, num, den, display]
+  { label:'a', q:'4 · <span class="frac"><span class="num">1</span><span class="den">3</span></span>', num:4, den:3, mixed:true },
+  { label:'b', q:'5 · <span class="frac"><span class="num">2</span><span class="den">7</span></span>', num:10, den:7, mixed:true },
+  { label:'c', q:'6 · <span class="frac"><span class="num">5</span><span class="den">8</span></span>', num:30, den:8, simplify:true },
+  { label:'d', q:'<span class="frac"><span class="num">3</span><span class="den">5</span></span> · <span class="frac"><span class="num">5</span><span class="den">9</span></span>', num:15, den:45, simplify:true },
+  { label:'e', q:'<span class="frac"><span class="num">2</span><span class="den">3</span></span> · <span class="frac"><span class="num">4</span><span class="den">5</span></span>', num:8, den:15 },
+  { label:'f', q:'<span class="frac"><span class="num">12</span><span class="den">5</span></span> ÷ 3', num:4, den:5 },
+  { label:'g', q:'<span class="frac"><span class="num">7</span><span class="den">8</span></span> · <span class="frac"><span class="num">8</span><span class="den">14</span></span>', num:56, den:112, simplify:true },
+  { label:'h', q:'<span class="frac"><span class="num">3</span><span class="den">4</span></span> · 12', num:9, den:1 },
+];
+
+const simplifiedAnswers = {
+  '30/8': '15/4', '15/45': '1/3', '56/112': '1/2', '9/1': '9'
+};
+
+function gcd(a,b) { return b===0?a:gcd(b,a%b); }
+
+function generateExercises() {
+  const container = document.getElementById('ex-container');
+  const shuffled = [...exTemplates].sort(() => Math.random()-.5).slice(0,6);
+  container.innerHTML = '';
+  const grid = document.createElement('div');
+  grid.className = 'ex-grid';
+  shuffled.forEach((t, i) => {
+    const card = document.createElement('div');
+    card.className = 'ex-card';
+    const g = gcd(t.num, t.den);
+    const sn = t.num/g;
+    const sd = t.den/g;
+    const answerText = sd===1 ? `${sn}` : `${sn}/${sd}`;
+    card.innerHTML = `
+      <div class="ex-label">Aufgabe ${i+1}</div>
+      <div class="ex-task">${t.q} = ?</div>
+      <div class="input-row" style="justify-content:flex-start">
+        <div class="frac-input">
+          <input type="text" inputmode="numeric" id="exi${i}-num" placeholder="?" maxlength="4" style="width:44px">
+          <div class="frac-line" style="width:44px"></div>
+          <input type="text" inputmode="numeric" id="exi${i}-den" placeholder="?" maxlength="4" style="width:44px">
+        </div>
+        <button class="check-btn" onclick="checkFrac('exi${i}','${sn}','${sd}')" style="padding:8px 14px;font-size:15px">✓</button>
+      </div>
+      <div class="feedback" id="fb-exi${i}"></div>
+    `;
+    grid.appendChild(card);
+  });
+  container.appendChild(grid);
+}
+
+// ─────────────── INIT ───────────────
+[0,1,2,3,5].forEach(ch => showCard(ch, 0));
+generateExercises();
+</script>
+</body>
+</html>
