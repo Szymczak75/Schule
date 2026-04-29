@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wendepunkte – Schritt für Schritt</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,500;1,8..60,300&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #f0ebe0;
+  min-height: 100vh;
+  font-family: 'Source Serif 4', Georgia, serif;
+  color: #2c1f0a;
+  padding: 1.5rem 1rem 4rem;
+}
+
+.page-header { text-align: center; margin-bottom: 2rem; }
+h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(1.2rem, 3vw, 1.75rem);
+  color: #1a1209;
+  margin-bottom: 0.3rem;
+}
+.function-display {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+  font-style: italic;
+  color: #2a6070;
+  background: #fffdf8;
+  display: inline-block;
+  padding: 0.3rem 1.2rem;
+  border-radius: 4px;
+  border: 1.5px solid #e8dfc8;
+  margin-top: 0.3rem;
+}
+.subtitle { font-size: 0.80rem; color: #7a6a50; font-style: italic; margin-top: 0.4rem; }
+
+.outer { max-width: 720px; margin: 0 auto; }
+
+.alt-section { margin-top: 1.4rem; }
+.alt-section-head {
+  font-family: 'Playfair Display', serif;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: #e8dfc8;
+  background: #1e4a58;
+  border-radius: 5px 5px 0 0;
+  padding: 0.4rem 1rem;
+}
+.alt-section-head.alt2 { background: #2d6b55; }
+
+.step-card {
+  background: #fffdf8;
+  border: 1px solid #e8dfc8;
+  border-top: none;
+  padding: 1rem 1.1rem;
+}
+.step-card:last-child { border-radius: 0 0 5px 5px; }
+.step-card + .step-card { border-top: 1px solid #ede5d0; }
+
+.step-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  margin-bottom: 0.5rem;
+}
+.step-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #2a6070;
+  color: #fff;
+  font-family: 'Playfair Display', serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  border-radius: 3px;
+  padding: 0.12em 0.5em;
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin-top: 0.15rem;
+}
+.step-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1a1209;
+  line-height: 1.3;
+}
+
+.step-task {
+  font-size: 0.88rem;
+  color: #4a3a20;
+  line-height: 1.65;
+  margin-bottom: 0.8rem;
+  padding-left: 2.2rem;
+}
+.step-task .math { font-style: italic; color: #6b3a10; }
+.step-task strong { color: #1a1209; }
+
+.btn-reveal {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: 'Source Serif 4', serif;
+  font-size: 0.82rem;
+  background: #1a1209;
+  color: #e8dfc8;
+  border: none;
+  border-radius: 4px;
+  padding: 0.45rem 1rem;
+  cursor: pointer;
+  margin-left: 2.2rem;
+  transition: background .15s, transform .1s;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn-reveal:active { transform: scale(.97); }
+.btn-reveal.revealed { background: #4a7c3f; }
+
+.solution-box {
+  display: none;
+  margin-top: 0.85rem;
+  margin-left: 2.2rem;
+  background: #faf5ea;
+  border: 1.5px solid #e8dfc8;
+  border-radius: 5px;
+  padding: 0.85rem 1rem;
+  font-size: 0.86rem;
+  line-height: 1.75;
+  animation: revealIn .25s ease;
+}
+.solution-box.visible { display: block; }
+@keyframes revealIn { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:none; } }
+
+.solution-box .math { font-style: italic; color: #6b3a10; }
+.solution-box .result {
+  font-family: 'Playfair Display', serif;
+  font-size: 0.95rem;
+  color: #1a1209;
+  background: #fff;
+  border: 1.5px solid #2a6070;
+  border-radius: 4px;
+  padding: 0.35rem 0.8rem;
+  display: inline-block;
+  margin: 0.3rem 0;
+}
+.solution-box .step-line {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding: 0.15rem 0;
+}
+.solution-box .step-line .label {
+  font-size: 0.75rem;
+  color: #9a8060;
+  min-width: 5.5rem;
+  flex-shrink: 0;
+}
+.solution-box .divider { border: none; border-top: 1px solid #e8dfc8; margin: 0.5rem 0; }
+.solution-box .wp { color: #2a6070; font-weight: 600; }
+.solution-box .no-wp { color: #b03030; font-weight: 600; }
+
+.main-steps {
+  background: #fffdf8;
+  border: 1px solid #e8dfc8;
+  border-radius: 5px;
+  overflow: hidden;
+}
+.main-steps .step-card { border-top: 1px solid #ede5d0; border-left: none; border-right: none; border-bottom: none; }
+.main-steps .step-card:first-child { border-top: none; }
+
+.info-box {
+  background: #eef6f8;
+  border: 1.5px solid #2a6070;
+  border-radius: 5px;
+  padding: 0.6rem 0.9rem;
+  font-size: 0.83rem;
+  color: #1a3a45;
+  margin-bottom: 1.2rem;
+  line-height: 1.6;
+}
+.info-box .math { font-style: italic; color: #1a3a45; }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>Wendepunkte rechnerisch bestimmen</h1>
+  <div class="function-display">f(x) = x⁴ − 6x²</div>
+  <p class="subtitle">Rechne jeden Schritt selbst – dann decke die Lösung auf und kontrolliere dich.</p>
+</div>
+
+<div class="outer">
+
+  <div class="info-box">
+    💡 <strong>Idee:</strong> Wendepunkte von <span class="math">f(x)</span> sind Extrempunkte von <span class="math">f'(x)</span>.
+    Deshalb funktioniert dasselbe Verfahren wie bei Extrempunkten – nur eine Ableitung höher:
+    <span class="math">f''(x) = 0</span> statt <span class="math">f'(x) = 0</span>.
+  </div>
+
+  <!-- ── Schritte 1 & 2 ── -->
+  <div class="main-steps">
+
+    <div class="step-card">
+      <div class="step-header">
+        <span class="step-num">1</span>
+        <span class="step-title">Ableitungen bilden</span>
+      </div>
+      <p class="step-task">
+        Bilde die <strong>erste, zweite und dritte Ableitung</strong> von
+        <span class="math">f(x) = x⁴ − 6x²</span> mithilfe der Potenzregel.
+      </p>
+      <button class="btn-reveal" onclick="reveal(this)">
+        <span class="icon">▶</span> Lösung aufdecken
+      </button>
+      <div class="solution-box">
+        <div class="step-line"><span class="label">f(x) =</span><span><span class="math">x⁴ − 6x²</span></span></div>
+        <div class="step-line"><span class="label">f′(x) =</span><span><span class="math">4x³ − 12x</span></span></div>
+        <div class="step-line"><span class="label">f′′(x) =</span><span><span class="math">12x² − 12</span></span></div>
+        <div class="step-line"><span class="label">f′′′(x) =</span><span><span class="math">24x</span></span></div>
+      </div>
+    </div>
+
+    <div class="step-card">
+      <div class="step-header">
+        <span class="step-num">2</span>
+        <span class="step-title">Notwendige Bedingung – Kandidaten ermitteln</span>
+      </div>
+      <p class="step-task">
+        Setze <span class="math">f′′(x) = 0</span> und löse
+        <span class="math">12x² − 12 = 0</span>.
+        Notiere alle Kandidaten <span class="math">x₁, x₂</span>.
+      </p>
+      <button class="btn-reveal" onclick="reveal(this)">
+        <span class="icon">▶</span> Lösung aufdecken
+      </button>
+      <div class="solution-box">
+        <div class="step-line"><span class="label">Ansatz</span><span><span class="math">12x² − 12 = 0</span></span></div>
+        <div class="step-line"><span class="label">÷ 12</span><span><span class="math">x² − 1 = 0</span></span></div>
+        <div class="step-line"><span class="label">Umformen</span><span><span class="math">x² = 1</span></span></div>
+        <hr class="divider">
+        <div class="step-line">
+          <span class="label">Ergebnis</span>
+          <span class="result"><span class="math">x₁ = −1 &nbsp;&nbsp; x₂ = 1</span></span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── Alternative I ── -->
+  <div class="alt-section">
+    <div class="alt-section-head">Alternative I – Vorzeichenwechsel der 2. Ableitung</div>
+
+    <div class="step-card">
+      <div class="step-header">
+        <span class="step-num">3a</span>
+        <span class="step-title">Vorzeichenwechsel von f′′ prüfen</span>
+      </div>
+      <p class="step-task">
+        Wähle je einen Testwert <strong>links und rechts</strong> von
+        <span class="math">x₁ = −1</span> und <span class="math">x₂ = 1</span>
+        und setze sie in <span class="math">f′′(x) = 12x² − 12</span> ein.
+        Wechselt das Vorzeichen → Wendepunkt.
+      </p>
+      <button class="btn-reveal" onclick="reveal(this)">
+        <span class="icon">▶</span> Lösung aufdecken
+      </button>
+      <div class="solution-box">
+        <strong>Für x₁ = −1:</strong>
+        <div class="step-line">
+          <span class="label">x = −2 (links)</span>
+          <span><span class="math">f′′(−2) = 12·4 − 12 = 36 &gt; 0</span> → <strong>+</strong></span>
+        </div>
+        <div class="step-line">
+          <span class="label">x = 0 (rechts)</span>
+          <span><span class="math">f′′(0) = 0 − 12 = −12 &lt; 0</span> → <strong>−</strong></span>
+        </div>
+        <div class="step-line">
+          <span class="label">Wechsel</span>
+          <span><strong>+ → −</strong> → <span class="wp">Wendepunkt</span> bei x₁ = −1</span>
+        </div>
+        <hr class="divider">
+        <strong>Für x₂ = 1:</strong>
+        <div class="step-line">
+          <span class="label">x = 0 (links)</span>
+          <span><span class="math">f′′(0) = −12 &lt; 0</span> → <strong>−</strong></span>
+        </div>
+        <div class="step-line">
+          <span class="label">x = 2 (rechts)</span>
+          <span><span class="math">f′′(2) = 12·4 − 12 = 36 &gt; 0</span> → <strong>+</strong></span>
+        </div>
+        <div class="step-line">
+          <span class="label">Wechsel</span>
+          <span><strong>− → +</strong> → <span class="wp">Wendepunkt</span> bei x₂ = 1</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="step-card" style="border-radius:0 0 5px 5px; border:1px solid #e8dfc8; border-top:1px solid #ede5d0;">
+      <div class="step-header">
+        <span class="step-num">4a</span>
+        <span class="step-title">y-Koordinaten berechnen</span>
+      </div>
+      <p class="step-task">
+        Setze <span class="math">x₁ = −1</span> und <span class="math">x₂ = 1</span>
+        in <span class="math">f(x) = x⁴ − 6x²</span> ein und gib die Wendepunkte an.
+      </p>
+      <button class="btn-reveal" onclick="reveal(this)">
+        <span class="icon">▶</span> Lösung aufdecken
+      </button>
+      <div class="solution-box">
+        <div class="step-line"><span class="label">f(−1) =</span><span><span class="math">(−1)⁴ − 6·(−1)² = 1 − 6 = −5</span></span></div>
+        <div class="step-line"><span class="label">f(1) =</span><span><span class="math">1⁴ − 6·1² = 1 − 6 = −5</span></span></div>
+        <hr class="divider">
+        <div class="step-line">
+          <span class="label">Ergebnis</span>
+          <span>
+            <span class="result"><span class="wp">W₁(−1 | −5)</span></span>
+            &nbsp;
+            <span class="result"><span class="wp">W₂(1 | −5)</span></span>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Alternative II ── -->
+  <div class="alt-section">
+    <div class="alt-section-head alt2">Alternative II – Hinreichende Bedingung über die 3. Ableitung</div>
+
+    <div class="step-card">
+      <div class="step-header">
+        <span class="step-num">3b</span>
+        <span class="step-title">Kandidaten in die 3. Ableitung einsetzen</span>
+      </div>
+      <p class="step-task">
+        Setze <span class="math">x₁ = −1</span> und <span class="math">x₂ = 1</span>
+        in <span class="math">f′′′(x) = 24x</span> ein.
+        Ist <span class="math">f′′′(xᵢ) ≠ 0</span> → Wendepunkt bestätigt.
+      </p>
+      <button class="btn-reveal" onclick="reveal(this)">
+        <span class="icon">▶</span> Lösung aufdecken
+      </button>
+      <div class="solution-box">
+        <div class="step-line">
+          <span class="label">f′′′(−1) =</span>
+          <span><span class="math">24·(−1) = −24 ≠ 0</span> → <span class="wp">Wendepunkt</span></span>
+        </div>
+        <div class="step-line">
+          <span class="label">f′′′(1) =</span>
+          <span><span class="math">24·1 = 24 ≠ 0</span> → <span class="wp">Wendepunkt</span></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="step-card" style="border-radius:0 0 5px 5px; border:1px solid #e8dfc8; border-top:1px solid #ede5d0;">
+      <div class="step-header">
+        <span class="step-num">4b</span>
+        <span class="step-title">y-Werte mit der Funktion ausrechnen</span>
+      </div>
+      <p class="step-task">
+        Setze <span class="math">x₁ = −1</span> und <span class="math">x₂ = 1</span>
+        in <span class="math">f(x) = x⁴ − 6x²</span> ein und gib die vollständigen Wendepunkte an.
+      </p>
+      <button class="btn-reveal" onclick="reveal(this)">
+        <span class="icon">▶</span> Lösung aufdecken
+      </button>
+      <div class="solution-box">
+        <div class="step-line"><span class="label">f(−1) =</span><span><span class="math">(−1)⁴ − 6·(−1)² = 1 − 6 = −5</span></span></div>
+        <div class="step-line"><span class="label">f(1) =</span><span><span class="math">1⁴ − 6·1² = 1 − 6 = −5</span></span></div>
+        <hr class="divider">
+        <div class="step-line">
+          <span class="label">Ergebnis</span>
+          <span>
+            <span class="result"><span class="wp">W₁(−1 | −5)</span></span>
+            &nbsp;
+            <span class="result"><span class="wp">W₂(1 | −5)</span></span>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function reveal(btn) {
+  const box = btn.nextElementSibling;
+  const isVisible = box.classList.contains('visible');
+  box.classList.toggle('visible', !isVisible);
+  btn.classList.toggle('revealed', !isVisible);
+  btn.querySelector('.icon').textContent = isVisible ? '▶' : '▼';
+  btn.childNodes[2].textContent = isVisible ? ' Lösung aufdecken' : ' Lösung verbergen';
+}
+</script>
+</body>
+</html>
