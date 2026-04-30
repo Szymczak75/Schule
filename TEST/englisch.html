@@ -616,20 +616,42 @@ function buildGaps() {
   });
 }
 
+function applyInputStyle(inp, type) {
+  inp.style.removeProperty('background');
+  inp.style.removeProperty('border-color');
+  inp.style.removeProperty('color');
+  inp.style.removeProperty('font-weight');
+  inp.style.removeProperty('box-shadow');
+  if (type === 'ok') {
+    inp.style.background  = '#b8f0ce';
+    inp.style.borderColor = '#1a8a46';
+    inp.style.color       = '#0b5e2a';
+    inp.style.fontWeight  = '800';
+  } else if (type === 'err') {
+    inp.style.background  = '#ffd0d0';
+    inp.style.borderColor = '#c0392b';
+    inp.style.color       = '#7a0000';
+    inp.style.fontWeight  = '800';
+    inp.style.boxShadow   = '0 0 0 3px rgba(192,57,43,0.18)';
+  }
+}
+
 function checkGaps() {
   let ok = 0;
   document.querySelectorAll('#gap-area input.gap').forEach(inp => {
     const i   = parseInt(inp.dataset.i);
     const hit = gaps[i].alts.map(norm).includes(norm(inp.value));
     inp.classList.remove('s-ok','s-err');
-    const sol = document.getElementById('sol'+i);
+    const sol  = document.getElementById('sol'+i);
     const icon = document.getElementById('fbicon'+i);
     if (hit) {
-      inp.classList.add('s-ok'); sol.classList.remove('show');
+      applyInputStyle(inp, 'ok');
+      sol.classList.remove('show');
       if (icon) { icon.className='fb-icon ok'; icon.textContent='✔'; }
       ok++;
     } else {
-      inp.classList.add('s-err'); sol.classList.add('show');
+      applyInputStyle(inp, 'err');
+      sol.classList.add('show');
       if (icon) { icon.className='fb-icon err'; icon.textContent='✗'; }
     }
   });
@@ -638,7 +660,13 @@ function checkGaps() {
 
 function resetGaps() {
   document.querySelectorAll('#gap-area input.gap').forEach(inp => {
-    inp.value = ''; inp.classList.remove('s-ok','s-err');
+    inp.value = '';
+    inp.classList.remove('s-ok','s-err');
+    inp.style.removeProperty('background');
+    inp.style.removeProperty('border-color');
+    inp.style.removeProperty('color');
+    inp.style.removeProperty('font-weight');
+    inp.style.removeProperty('box-shadow');
     document.getElementById('sol'+inp.dataset.i).classList.remove('show');
     const icon = document.getElementById('fbicon'+inp.dataset.i);
     if (icon) { icon.className='fb-icon'; icon.textContent=''; }
@@ -664,10 +692,34 @@ function buildMC() {
 }
 
 function pickMC(qi, oi) {
-  if (document.getElementById(`mb${qi}_0`).disabled) return;
+  if (document.getElementById(`mb${qi}_0`).getAttribute('data-checked')) return;
   mcSel[qi] = oi;
   mcData[qi].opts.forEach((_,o) => document.getElementById(`mb${qi}_${o}`).classList.remove('sel'));
   document.getElementById(`mb${qi}_${oi}`).classList.add('sel');
+}
+
+/* Apply inline styles directly – bypasses Safari's :disabled override */
+function applyBtnStyle(b, type) {
+  b.style.removeProperty('background');
+  b.style.removeProperty('border-color');
+  b.style.removeProperty('color');
+  b.style.removeProperty('font-weight');
+  b.style.removeProperty('box-shadow');
+  b.style.removeProperty('border-width');
+  if (type === 'ok') {
+    b.style.background   = '#b8f0ce';
+    b.style.borderColor  = '#1a8a46';
+    b.style.borderWidth  = '3px';
+    b.style.color        = '#0b5e2a';
+    b.style.fontWeight   = '800';
+  } else if (type === 'err') {
+    b.style.background   = '#ffd0d0';
+    b.style.borderColor  = '#c0392b';
+    b.style.borderWidth  = '3px';
+    b.style.color        = '#7a0000';
+    b.style.fontWeight   = '800';
+    b.style.boxShadow    = '0 0 0 3px rgba(192,57,43,0.18)';
+  }
 }
 
 function checkMC() {
@@ -677,9 +729,14 @@ function checkMC() {
     item.opts.forEach((_,oi) => {
       const b = document.getElementById(`mb${qi}_${oi}`);
       b.classList.remove('sel','f-ok','f-err');
-      b.disabled = true;
-      if (oi === item.correct)  b.classList.add('f-ok');
-      else if (sel === oi)      b.classList.add('f-err');
+      b.setAttribute('data-checked','1');
+      if (oi === item.correct) {
+        applyBtnStyle(b, 'ok');
+        b.textContent = b.textContent.replace(/ [✔✗].*$/, '') + '  ✔ richtig';
+      } else if (sel === oi) {
+        applyBtnStyle(b, 'err');
+        b.textContent = b.textContent.replace(/ [✔✗].*$/, '') + '  ✗ falsch';
+      }
     });
     if (sel === item.correct) ok++;
   });
@@ -689,10 +746,17 @@ function checkMC() {
 function resetMC() {
   Object.keys(mcSel).forEach(k => delete mcSel[k]);
   mcData.forEach((item,qi) => {
-    item.opts.forEach((_,oi) => {
+    item.opts.forEach((o,oi) => {
       const b = document.getElementById(`mb${qi}_${oi}`);
       b.classList.remove('sel','f-ok','f-err');
-      b.disabled = false;
+      b.removeAttribute('data-checked');
+      b.style.removeProperty('background');
+      b.style.removeProperty('border-color');
+      b.style.removeProperty('border-width');
+      b.style.removeProperty('color');
+      b.style.removeProperty('font-weight');
+      b.style.removeProperty('box-shadow');
+      b.textContent = o;
     });
   });
   hideScore('mc-score');
@@ -861,8 +925,7 @@ function checkT6() {
     const inp1 = document.querySelector(`input[data-t6="${i}"][data-slot="1"]`);
     const tOk1 = t6Sel[i][1] === item.tense1;
     const fOk1 = item.form1.map(norm).includes(norm(inp1.value));
-    inp1.classList.remove('s-ok','s-err');
-    inp1.classList.add((tOk1 && fOk1) ? 's-ok' : 's-err');
+    applyInputStyle(inp1, (tOk1 && fOk1) ? 'ok' : 'err');
     const ic1 = document.getElementById(`t6icon${i}_1`);
     if (ic1) { ic1.className='fb-icon '+((tOk1&&fOk1)?'ok':'err'); ic1.textContent=(tOk1&&fOk1)?'✔':'✗'; }
     highlightPill(i, 1, item.tense1, t6Sel[i][1]);
@@ -871,8 +934,7 @@ function checkT6() {
     const inp2 = document.querySelector(`input[data-t6="${i}"][data-slot="2"]`);
     const tOk2 = t6Sel[i][2] === item.tense2;
     const fOk2 = item.form2.map(norm).includes(norm(inp2.value));
-    inp2.classList.remove('s-ok','s-err');
-    inp2.classList.add((tOk2 && fOk2) ? 's-ok' : 's-err');
+    applyInputStyle(inp2, (tOk2 && fOk2) ? 'ok' : 'err');
     const ic2 = document.getElementById(`t6icon${i}_2`);
     if (ic2) { ic2.className='fb-icon '+((tOk2&&fOk2)?'ok':'err'); ic2.textContent=(tOk2&&fOk2)?'✔':'✗'; }
     highlightPill(i, 2, item.tense2, t6Sel[i][2]);
@@ -887,12 +949,20 @@ function checkT6() {
 function highlightPill(i, slot, correct, chosen) {
   ['SP','PP'].forEach(t => {
     const b = document.getElementById(`t6p${i}_${slot}_${t}`);
+    if (!b) return;
     if (t === correct) {
-      b.style.background = 'var(--ok-bg)'; b.style.color = 'var(--ok)'; b.style.borderColor = 'var(--ok-bdr)';
+      b.style.background  = '#b8f0ce';
+      b.style.color       = '#0b5e2a';
+      b.style.borderColor = '#1a8a46';
+      b.style.borderWidth = '3px';
+      b.style.fontWeight  = '800';
     } else if (t === chosen && t !== correct) {
-      b.style.background = 'var(--err-bg)'; b.style.color = 'var(--err)'; b.style.borderColor = 'var(--err-bdr)';
+      b.style.background  = '#ffd0d0';
+      b.style.color       = '#7a0000';
+      b.style.borderColor = '#c0392b';
+      b.style.borderWidth = '3px';
+      b.style.fontWeight  = '800';
     }
-    b.disabled = true;
   });
 }
 
@@ -975,9 +1045,12 @@ function checkT7() {
     const hit    = alts.includes(placed);
     const slot   = document.getElementById('t7slot'+si);
     const sol    = document.getElementById('t7sol'+si);
-    slot.style.background   = hit ? 'var(--ok-bg)'  : 'var(--err-bg)';
-    slot.style.borderBottomColor = hit ? 'var(--ok-bdr)' : 'var(--err-bdr)';
-    slot.style.color        = hit ? 'var(--ok)'     : 'var(--err)';
+    slot.style.background        = hit ? '#b8f0ce'  : '#ffd0d0';
+    slot.style.borderBottomColor = hit ? '#1a8a46'  : '#c0392b';
+    slot.style.borderBottomWidth = '3px';
+    slot.style.color             = hit ? '#0b5e2a'  : '#7a0000';
+    slot.style.fontWeight        = '800';
+    if (!hit) slot.style.boxShadow = '0 0 0 3px rgba(192,57,43,0.18)';
     if (hit) { ok++; sol.classList.remove('show'); }
     else       sol.classList.add('show');
   });
@@ -1061,8 +1134,7 @@ function checkT8() {
     total++;
     const alts = JSON.parse(inp.dataset.ans).map(norm);
     const hit  = alts.includes(norm(inp.value));
-    inp.classList.remove('s-ok','s-err');
-    inp.classList.add(hit ? 's-ok' : 's-err');
+    applyInputStyle(inp, hit ? 'ok' : 'err');
     const icon = document.getElementById('t8icon'+inp.dataset.t8);
     if (icon) { icon.className='fb-icon '+(hit?'ok':'err'); icon.textContent=hit?'✔':'✗'; }
     if (hit) ok++;
@@ -1074,7 +1146,13 @@ function checkT8() {
 
 function resetT8() {
   document.querySelectorAll('input[data-t8]').forEach(inp => {
-    inp.value = ''; inp.classList.remove('s-ok','s-err');
+    inp.value = '';
+    inp.classList.remove('s-ok','s-err');
+    inp.style.removeProperty('background');
+    inp.style.removeProperty('border-color');
+    inp.style.removeProperty('color');
+    inp.style.removeProperty('font-weight');
+    inp.style.removeProperty('box-shadow');
     const icon = document.getElementById('t8icon'+inp.dataset.t8);
     if (icon) { icon.className='fb-icon'; icon.textContent=''; }
   });
