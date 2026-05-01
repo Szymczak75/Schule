@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,300&display=swap');
+
+  :root {
+    --bg: #faf7f2;
+    --ink: #1a1209;
+    --accent: #c0392b;
+    --accent2: #2c7a4b;
+    --gold: #d4a017;
+    --muted: #6b5f4e;
+    --card: #ffffff;
+    --border: #d6cfc4;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Source Serif 4', Georgia, serif;
+    background: var(--bg);
+    color: var(--ink);
+    min-height: 100vh;
+    padding-bottom: 60px;
+  }
+
+  header {
+    background: var(--ink);
+    color: var(--bg);
+    padding: 32px 28px 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: 'f\'(x)';
+    position: absolute; right: 20px; top: 10px;
+    font-size: 72px; opacity: 0.06;
+    font-family: 'Playfair Display', serif;
+    color: var(--gold);
+  }
+  .badge {
+    display: inline-block;
+    background: var(--accent);
+    color: white;
+    font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+    padding: 3px 10px; border-radius: 2px; margin-bottom: 10px;
+  }
+  header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(20px, 3.5vw, 30px);
+    font-weight: 900; line-height: 1.2; color: #faf7f2;
+  }
+  header p { margin-top: 6px; color: #b0a898; font-size: 13px; font-style: italic; }
+
+  /* LEGEND */
+  .legend {
+    display: flex; gap: 20px; flex-wrap: wrap;
+    background: #ede9e2; padding: 10px 20px;
+    border-bottom: 1px solid var(--border);
+    font-size: 12px; color: var(--muted);
+    align-items: center;
+  }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .leg-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .leg-both { background: var(--accent); }
+  .leg-hm { background: #888; }
+
+  /* TABS */
+  .nav-tabs {
+    display: flex; background: #ede9e2;
+    border-bottom: 2px solid var(--border);
+    overflow-x: auto; scrollbar-width: none;
+  }
+  .nav-tabs::-webkit-scrollbar { display: none; }
+  .tab-btn {
+    padding: 11px 18px;
+    font-family: 'Source Serif 4', serif;
+    font-size: 12.5px; font-weight: 600; color: var(--muted);
+    background: none; border: none; cursor: pointer;
+    border-bottom: 3px solid transparent; margin-bottom: -2px;
+    white-space: nowrap; transition: all 0.2s;
+  }
+  .tab-btn:hover { color: var(--ink); background: #e5e0d8; }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); background: var(--bg); }
+
+  /* SECTIONS */
+  .section { display: none; padding: 24px 18px; max-width: 840px; margin: 0 auto; animation: fadeIn 0.25s ease; }
+  .section.active { display: block; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+
+  /* OVERVIEW GRID */
+  .overview-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px; margin-bottom: 24px;
+  }
+  .ov-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 4px;
+    padding: 16px; cursor: pointer; transition: all 0.2s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .ov-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); border-color: var(--accent); }
+  .ov-icon { font-size: 24px; margin-bottom: 6px; }
+  .ov-card h3 { font-family: 'Playfair Display',serif; font-size: 14px; margin-bottom: 3px; }
+  .ov-card p { font-size: 11.5px; color: var(--muted); line-height: 1.5; }
+  .ov-tags { display: flex; gap: 4px; margin-top: 8px; flex-wrap: wrap; }
+  .ov-tag {
+    font-size: 9px; letter-spacing: 1px; text-transform: uppercase;
+    padding: 2px 6px; border-radius: 2px; font-weight: 700;
+  }
+  .t-ab { background: #c0392b18; color: var(--accent); border: 1px solid #c0392b30; }
+  .t-a { background: #88888818; color: #555; border: 1px solid #88888840; }
+
+  .info-box {
+    background: var(--card); border: 1px solid var(--border); border-radius: 4px;
+    padding: 16px 18px; font-size: 13px; line-height: 1.8; margin-bottom: 0;
+  }
+  .info-box strong { font-weight: 600; }
+  .info-box ul { padding-left: 18px; margin-top: 4px; }
+  .info-box li { margin-bottom: 2px; }
+
+  /* TOPIC CARDS */
+  .topic-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 4px;
+    margin-bottom: 14px; overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+
+  .topic-header {
+    padding: 14px 16px; display: flex; align-items: flex-start; gap: 12px;
+    cursor: pointer; user-select: none; transition: background 0.15s;
+  }
+  .topic-header:hover { background: #fdf9f5; }
+
+  .t-icon {
+    width: 34px; height: 34px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; flex-shrink: 0; margin-top: 1px;
+    font-family: 'Playfair Display', serif; font-weight: 700;
+  }
+  .icon-red { background: #c0392b18; color: var(--accent); }
+  .icon-green { background: #2c7a4b18; color: var(--accent2); }
+
+  .t-main { flex: 1; }
+  .t-title {
+    font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 700;
+    color: var(--ink); line-height: 1.3;
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  }
+  .hm-badge {
+    font-size: 9px; letter-spacing: 1.2px; text-transform: uppercase;
+    padding: 2px 6px; border-radius: 2px; font-weight: 700;
+    background: #c0392b18; color: var(--accent); border: 1px solid #c0392b30;
+    font-family: 'Source Serif 4', serif;
+  }
+  .hm-badge.both { background: #c0392b18; color: var(--accent); }
+  .t-preview { font-size: 12px; color: var(--muted); margin-top: 3px; font-style: italic; line-height: 1.5; }
+
+  .chevron { font-size: 16px; color: var(--muted); transition: transform 0.25s; flex-shrink: 0; margin-top: 6px; }
+  .topic-card.open .chevron { transform: rotate(180deg); }
+
+  .topic-body { display: none; padding: 0 16px 18px 62px; }
+  .topic-card.open .topic-body { display: block; }
+
+  .info-block {
+    background: #fdf9f4; border-left: 3px solid var(--gold); border-radius: 0 4px 4px 0;
+    padding: 11px 13px; margin-bottom: 12px;
+    font-size: 13px; line-height: 1.7; color: var(--ink);
+  }
+  .info-block strong { font-weight: 600; }
+
+  /* DEEP DIVE */
+  details.deep {
+    margin-bottom: 12px; border: 1px solid var(--border); border-radius: 4px; overflow: hidden;
+  }
+  details.deep summary {
+    padding: 9px 13px; cursor: pointer; font-size: 11.5px; font-weight: 700;
+    letter-spacing: 0.5px; background: #f3ede5; color: var(--muted);
+    text-transform: uppercase; list-style: none;
+    display: flex; align-items: center; gap: 7px; user-select: none;
+  }
+  details.deep summary::-webkit-details-marker { display: none; }
+  details.deep summary::before { content: '▶'; font-size: 8px; transition: transform 0.2s; }
+  details.deep[open] summary::before { transform: rotate(90deg); }
+  details.deep summary:hover { background: #ebe3d8; }
+
+  .dc { padding: 13px 15px; font-size: 13px; line-height: 1.75; background: white; }
+  .dc h4 { font-family: 'Playfair Display',serif; font-size: 13.5px; margin: 12px 0 5px; color: var(--ink); }
+  .dc h4:first-child { margin-top: 0; }
+  .dc ul { padding-left: 17px; }
+  .dc li { margin-bottom: 3px; }
+  .dc .f {
+    background: #f5f0e8; border-radius: 3px; padding: 7px 11px;
+    font-family: 'Courier New', monospace; font-size: 12.5px; margin: 7px 0;
+    display: block; border-left: 3px solid var(--gold);
+  }
+  .dc .ex {
+    background: #eef6f1; border-radius: 3px; padding: 8px 12px;
+    margin: 8px 0; font-size: 12px; border-left: 3px solid var(--accent2); line-height: 1.6;
+  }
+  .dc .warn {
+    background: #fff8ec; border-radius: 3px; padding: 8px 12px;
+    margin: 8px 0; font-size: 12px; border-left: 3px solid var(--gold); line-height: 1.6;
+  }
+  .dc table { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 12px; }
+  .dc th { background: #f3ede5; padding: 6px 10px; text-align: left; font-weight: 600; border: 1px solid var(--border); }
+  .dc td { padding: 5px 10px; border: 1px solid var(--border); }
+
+  /* EXERCISES */
+  .ex-title {
+    font-size: 10.5px; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--accent); font-weight: 700; margin: 14px 0 8px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .ex-title::after { content: ''; flex: 1; height: 1px; background: #e2d8cc; }
+
+  .exercise { border: 1px solid var(--border); border-radius: 4px; margin-bottom: 8px; overflow: hidden; }
+  .ex-q {
+    padding: 9px 13px; font-size: 12.5px; line-height: 1.6;
+    background: white; cursor: pointer;
+    display: flex; align-items: flex-start; gap: 9px;
+  }
+  .ex-q:hover { background: #fdf9f5; }
+  .ex-num {
+    background: var(--ink); color: var(--bg); font-size: 9.5px; font-weight: 700;
+    padding: 2px 6px; border-radius: 2px; flex-shrink: 0; margin-top: 2px;
+  }
+  .ex-text { flex: 1; }
+  .sol-btn { font-size: 9.5px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; border: none; background: none; cursor: pointer; flex-shrink: 0; padding: 2px 4px; font-family: 'Source Serif 4',serif; }
+  .sol-btn:hover { color: var(--accent); }
+  .ex-sol { display: none; padding: 9px 13px; font-size: 12.5px; background: #f0f7f3; border-top: 1px solid #d0e8da; color: #1a3a28; line-height: 1.7; }
+  .ex-sol.vis { display: block; }
+
+  /* SECTION INTRO */
+  .sec-intro {
+    font-size: 13.5px; color: var(--muted); line-height: 1.8;
+    margin-bottom: 20px; font-style: italic;
+    border-left: 3px solid var(--border); padding-left: 14px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="badge">Mathematik · EF · Zentrale Klausur 2026</div>
+  <h1>Lerneinheit zur Zentralen Klausur<br>am Ende der Einführungsphase</h1>
+  <p>Alle Themen kompakt erklärt – mit aufklappbaren Vertiefungen und Übungsaufgaben</p>
+</header>
+
+<div class="legend">
+  <span style="font-weight:600;font-size:11px;letter-spacing:.5px;text-transform:uppercase;">Klausurteile:</span>
+  <div class="legend-item"><div class="leg-dot" style="background:var(--accent)"></div><span><strong>Teil A + B</strong> – Hilfsmittelfrei und mit Hilfsmitteln</span></div>
+  <div class="legend-item"><div class="leg-dot" style="background:var(--accent)"></div><span><strong>Nur Teil A</strong> – Hilfsmittelfrei</span></div>
+</div>
+
+<div class="nav-tabs">
+  <button class="tab-btn active" onclick="showTab('overview',this)">📋 Übersicht</button>
+  <button class="tab-btn" onclick="showTab('funktionen',this)">ƒ Funktionen & Eigenschaften</button>
+  <button class="tab-btn" onclick="showTab('transformationen',this)">↔ Transformationen</button>
+  <button class="tab-btn" onclick="showTab('ableitung',this)">∂ Ableitung</button>
+  <button class="tab-btn" onclick="showTab('kurven',this)">📈 Kurvenanalyse</button>
+  <button class="tab-btn" onclick="showTab('vektoren',this)">→ Vektoren</button>
+</div>
+
+<!-- ÜBERSICHT -->
+<div class="section active" id="overview">
+  <div class="sec-intro">
+    Die Klausur gliedert sich in <strong>Teil A</strong> (hilfsmittelfrei) und <strong>Teil B</strong> (mit Hilfsmitteln). Die inhaltlichen Themen sind dieselben – nur die Hilfsmittel und Aufgabenformate unterscheiden sich. Alle Bereiche aus Funktionen & Analysis kommen in beiden Teilen vor; Analytische Geometrie nur in Teil A.
+  </div>
+
+  <div class="overview-grid">
+    <div class="ov-card" onclick="showTabById('funktionen')">
+      <div class="ov-icon">ƒ</div>
+      <h3>Funktionen & Eigenschaften</h3>
+      <p>Potenz- und ganzrationale Funktionen, Verlauf, Nullstellen, Symmetrie</p>
+      <div class="ov-tags"><span class="ov-tag t-ab">Teil A + B</span></div>
+    </div>
+    <div class="ov-card" onclick="showTabById('transformationen')">
+      <div class="ov-icon">↔</div>
+      <h3>Transformationen</h3>
+      <p>Spiegelung, Verschiebung, Streckung von Graphen</p>
+      <div class="ov-tags"><span class="ov-tag t-ab">Teil A + B</span></div>
+    </div>
+    <div class="ov-card" onclick="showTabById('ableitung')">
+      <div class="ov-icon">∂</div>
+      <h3>Ableitungsbegriff & Regeln</h3>
+      <p>Änderungsraten, Sekante, Tangente, Ableitungsregeln</p>
+      <div class="ov-tags"><span class="ov-tag t-ab">Teil A + B</span></div>
+    </div>
+    <div class="ov-card" onclick="showTabById('kurven')">
+      <div class="ov-icon">📈</div>
+      <h3>Kurvenanalyse</h3>
+      <p>Monotonie, Extrema, Krümmung, Wendepunkte</p>
+      <div class="ov-tags"><span class="ov-tag t-ab">Teil A + B</span></div>
+    </div>
+    <div class="ov-card" onclick="showTabById('vektoren')">
+      <div class="ov-icon">→</div>
+      <h3>Analytische Geometrie</h3>
+      <p>Punkte, Vektoren, Operationen, Länge, Kollinearität</p>
+      <div class="ov-tags"><span class="ov-tag t-a">Nur Teil A</span></div>
+    </div>
+  </div>
+
+  <div class="info-box">
+    <strong style="font-family:'Playfair Display',serif;font-size:15px;display:block;margin-bottom:10px;">Hinweise zur Klausurstruktur</strong>
+    <ul>
+      <li><strong>Teil A (hilfsmittelfrei):</strong> Aufgaben aus Funktionen & Analysis <em>und</em> Analytische Geometrie. Kein Taschenrechner, kein Formelblatt.</li>
+      <li><strong>Teil B (mit Hilfsmitteln):</strong> Eine innermathematische Argumentationsaufgabe und eine Aufgabe mit realitätsnahem Kontext – beide aus Funktionen & Analysis.</li>
+      <li>Die inhaltlichen Themen der Klausur sind in beiden Teilen dieselben; die Anforderungen und Aufgabenformate unterscheiden sich.</li>
+    </ul>
+  </div>
+</div>
+
+<!-- FUNKTIONEN & EIGENSCHAFTEN -->
+<div class="section" id="funktionen">
+  <div class="sec-intro">
+    Potenzfunktionen sind die Bausteine ganzrationaler Funktionen. Das Verständnis ihres Verlaufs, ihrer Symmetrie und ihres Verhaltens im Unendlichen ist Grundlage für alle weiteren Themen.
+  </div>
+
+  <!-- Potenzfunktionen -->
+  <div class="topic-card" id="c-pot">
+    <div class="topic-header" onclick="tog('c-pot')">
+      <div class="t-icon icon-red">xⁿ</div>
+      <div class="t-main">
+        <div class="t-title">Potenzfunktionen <span class="hm-badge both">Teil A + B</span></div>
+        <div class="t-preview">f(x) = xⁿ – Grundformen, Symmetrie, Verhalten</div>
+      </div>
+      <div class="chevron">▾</div>
+    </div>
+    <div class="topic-body">
+      <div class="info-block">
+        Potenzfunktionen haben die Form <strong>f(x) = xⁿ</strong> mit n ∈ ℤ. Ihr Verlauf hängt stark davon ab, ob n gerade oder ungerade ist.
+      </div>
+      <details class="deep">
+        <summary>📖 Vertiefung & Lernmaterial</summary>
+        <div class="dc">
+          <h4>Gerade Exponenten (n = 2, 4, 6, …)</h4>
+          <ul>
+            <li>Graph ist <strong>achsensymmetrisch</strong> zur y-Achse: f(−x) = f(x)</li>
+            <li>U-förmiger Verlauf, Minimum bei x = 0</li>
+            <li>Verhalten: x → ±∞ ⇒ f(x) → +∞</li>
+          </ul>
+          <h4>Ungerade Exponenten (n = 1, 3, 5, …)</h4>
+          <ul>
+            <li>Graph ist <strong>punktsymmetrisch</strong> zum Ursprung: f(−x) = −f(x)</li>
+            <li>S-förmiger Verlauf, streng monoton steigend</li>
+            <li>Verhalten: x → +∞ ⇒ f(x) → +∞, x → −∞ ⇒ f(x) → −∞</li>
+          </ul>
+          <h4>Negative Exponenten</h4>
+          <span class="f">f(x) = x⁻¹ = 1/x → Hyperbel, nicht definiert bei x = 0</span>
+          <div class="warn">💡 Gerade n: Graph kehrt um (Minimum). Ungerade n: Graph schneidet die x-Achse und läuft durch.</div>
+        </div>
+      </details>
+      <div class="ex-title">Übungsaufgaben</div>
+      <div class="exercise">
+        <div class="ex-q" onclick="togSol(this)">
+          <span class="ex-num">1</span>
+          <span class="ex-text">Prüfe, ob f(x) = x⁴ − 2x² achsen- oder punktsymmetrisch ist.</span>
+          <button class="sol-btn">Lösung</button>
+        </div>
+        <div class="ex-sol">f(−x) = (−x)⁴ − 2(−x)² = x⁴ − 2x² = f(x) → <strong>achsensymmetrisch</strong> zur y-Achse.</div>
+      </div>
+      <div class="exercise">
+        <div class="ex-q" onclick="togSol(this)">
+          <span class="ex-num">2</span>
+          <span class="ex-text">Beschreibe den Verlauf von f(x) = x⁵ für x → ±∞.</span>
+          <button class="sol-btn">Lösung</button>
+        </div>
+        <div class="ex-sol">Ungerade, positiver Leitkoeffizient: x → +∞ ⇒ f(x) → +∞ | x → −∞ ⇒ f(x) → −∞.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ganzrationale Funktionen -->
+  <div class="topic-card" id="c-poly">
+    <div class="topic-header" onclick="tog('c-poly')">
+      <div class="t-icon icon-red">P(x)</div>
+      <div class="t-main">
+        <div class="t-title">Ganzrationale Funktionen (Polynome) <span class="hm-badge both">Teil A + B</span></div>
+        <div class="t-preview">Grad, Leitkoeffizient, Verhalten im Unendlichen</div>
+      </div>
+      <div class="chevron">▾</div>
+    </div>
+    <div class="topic-body">
+      <div class="info-block">
+        Ganzrationale Funktionen sind Summen von Potenzfunktionen: <strong>f(x) = aₙxⁿ + … + a₁x + a₀</strong>. Der Grad n und der Leitkoeffizient aₙ bestimmen das grundlegende Verhalten.
+      </div>
+      <details class="deep">
+        <summary>📖 Vertiefung & Lernmaterial</summary>
+        <div class="dc">
+          <h4>Wichtige Begriffe</h4>
+          <ul>
+            <li><strong>Grad n</strong> = höchster Exponent</li>
+            <li><strong>Leitkoeffizient aₙ</strong> = Koeffizient vor xⁿ (bestimmt Öffnungsrichtung)</li>
+            <li><strong>y-Achsenabschnitt</strong> = f(0) = a₀</li>
+          </ul>
+          <h4>Langzeitverhalten (Leitterm-Analyse)</h4>
+          <table>
+            <tr><th>Grad</th><th>aₙ &gt; 0</th><th>aₙ &lt; 0</th></tr>
+            <tr><td>gerade</td><td>beide Seiten → +∞</td><td>beide Seiten → −∞</td></tr>
+            <tr><td>ungerade</td><td>links −∞, rechts +∞</td><td>links +∞, rechts −∞</td></tr>
+          </table>
+          <div class="ex">💡 Grad n → höchstens n Nullstellen, höchstens n−1 Extremstellen, höchstens n−2 Wendepunkte.</div>
+        </div>
+      </details>
+      <div class="ex-title">Übungsaufgaben</div>
+      <div class="exercise">
+        <div class="ex-q" onclick="togSol(this)">
+          <span class="ex-num">1</span>
+          <span class="ex-text">Bestimme Grad, Leitkoeffizient und y-Achsenabschnitt von f(x) = −3x⁴ + 2x² − 7.</span>
+          <button class="sol-btn">Lösung</button>
+        </div>
+        <div class="ex-sol">Grad = 4 | Leitkoeffizient aₙ = −3 | y-Achsenabschnitt: f(0) = −7</div>
+      </div>
+      <div class="exercise">
+        <div class="ex-q" onclick="togSol(this)">
+          <span class="ex-num">2</span>
+          <span class="ex-text">Beschreibe das Verhalten für x → ±∞ von f(x) = 2x⁵ − 3x + 1.</span>
+          <button class="sol-btn">Lösung</button>
+        </div>
+        <div class="ex-sol">Grad 5 (ungerade), aₙ = 2 &gt; 0 → x → −∞: f(x) → −∞ | x → +∞: f(x) → +∞</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Eigenschaften -->
+  <div class="topic-card" id="c-eig">
+    <div class="topic-header" onclick="tog('c-eig')">
+      <div class="t-icon icon-red">?</div>
+      <div class="t-main">
+        <div class="t-title">Eigenschaften analysieren <span class="hm-badge both">Teil A + B</span></div>
+        <div class="t-preview">Definitionsbereich, Wertebereich, Nullstellen, Symmetrie, Verhalten für x → ±∞</div>
+      </div>
+      <div class="chevron">▾</div>
+    </div>
+    <div class="topic-body">
+      <div class="info-block">
+        Die vollständige Analyse einer Funktion folgt einem festen Schema: Definitionsbereich – Symmetrie – Nullstellen – Verhalten im Unendlichen – Wertebereich.
+      </div>
+      <details class="deep">
+        <summary>📖 Vertiefung & Lernmaterial</summary>
+        <div class="dc">
+          <h4>Definitionsbereich D</h4>
+          <p>Alle x-Werte, für die f definiert ist. Bei Polynomen immer D = ℝ.</p>
+          <h4>Symmetrie prüfen</h4>
+          <span class="f">Achsensymmetrie: f(−x) = f(x) &nbsp;|&nbsp; Punktsymmetrie: f(−x) = −f(x)</span>
+          <h4>Nullstellen bestimmen</h4>
+          <p>f(x) = 0 lösen: Ausklammern, Substitution (z = x²), pq-Formel, Satz von Vieta.</p>
+          <span class="f">pq-Formel: x = −p/2 ± √((p/2)² − q) &nbsp; für x² + px + q = 0</span>
+          <h4>Wertebereich W</h4>
+          <p>Ergibt sich aus Extremwerten (Kurvenanalyse) und dem Verhalten im Unendlichen.</p>
+          <div class="warn">⚡ Reihenfolge einhalten: D → Symmetrie → Nullstellen → Verhalten → erst dann Extrema bestimmen.</div>
+        </div>
+      </details>
+      <div class="ex-title">Übungsaufgaben</div>
+      <div class="exercise">
+        <div class="ex-q" onclick="togSol(this)">
+          <span class="ex-num">1</span>
+          <span class="ex-text">Bestimme die Nullstellen von f(x) = x³ − 4x.</span>
+          <button class="sol-btn">Lösung</button>
+        </div>
+        <div class="ex-sol">f(x) = x(x² − 4) = x(x−2)(x+2) → Nullstellen: x₁ = 0, x₂ = 2, x₃ = −2</div>
+      </div>
+      <div class="exercise">
+        <div class="ex-q" onclick="togSol(this)">
+          <span class="ex-num">2</span>
+          <span class="ex-text">Analysiere g(x) = x⁴ − 3x²: Symmetrie, Nullstellen und Verhalten für x → ±∞.</span>
+          <button class="sol-btn">Lösung</button>
+        </div>
+        <div class="ex-sol">
+          Symmetrie: g(−x) = g(x) → achsensymmetrisch.<br>
+          Nullstellen: x²(x²−3) = 0 → x = 0 (doppelt), x = ±√3.<br>
+          Verhalten: Grad 4, aₙ = 1 &gt; 0 → beide Seiten → +∞.
+        </div>
+      </div>
+      <div class="exercise">
+        <div class="ex-q" onclick="togSol(this)">
+          <span class="ex-num">3</span>
+          <span class="ex-text">Bestimme die Nullstellen von h(x) = x² − 3x + 2 mit der pq-Formel.</span>
+          <button class="sol-btn">Lösung</button>
+        </div>
+        <div class="ex-sol">p = −3, q = 2 | x = 3/2 ± √(9/4 − 2) = 3/2 ± √(1/4) = 3/2 ± 1/2 → <strong>x₁ = 2, x₂ = 1</strong></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TRANSFORMATIONEN -->
+<div class="section" id="transformationen">
+  <div class="sec-intro">
+    Transformationen verändern die Lage oder Größe eines Graphen, ohne seine grundlegende Form zu ändern. Man kann sie direkt aus der Funktionsvorschrift ablesen – wenn man die Regeln kennt.
+  </div>
+
+  <div class="topic-card" id="c-trans">
+    <div class="topic-header" onclick="tog('c-trans')">
+      <div class="t-icon icon-red">↔</div>
+      <div class="t-main">
+        <div class="t-title">Spiegelung, Verschiebung, Streckung <span class="hm-badge both">Teil A + B</span></div>
+        <div class="t-preview">Aus f(x) wird g(x) = a · f(b · (x − d)) + c</div>
+      </div>
+      <div class="chevron">▾</div>
+    </div>
+    <div class="topic-body">
+      <div class="info-block">
+        Jede Transformation lässt sich als Veränderung der Funktionsvorschrift schreiben. Die allgemeine Form ist <strong>g(x) = a · f(b · (x − d)) + c</strong>.
+      </div>
+      <details class="deep">
+        <summary>📖 Vertiefung & Lernmaterial</summary>
+        <div class="dc">
+          <h4>Spiegelungen</h4>
+          <table>
+            <tr><th>Transformation</th><th>Schreibweise</th><th>Wirkung</th></tr>
+            <tr><td>An der x-Achse</td><td>g(x) = −f(x)</td><td>y-Werte werden negiert</td></tr>
+            <tr><td>An der y-Achse</td><td>g(x) = f(−x)</td><td>x-Werte werden negiert</td></tr>
+          </table>
+          <h4>Verschiebungen</h4>
+          <span class="f">g(x) = f(x − d) + c</span>
+          <ul>
+            <li>+c → nach oben, −c → nach unten</li>
+            <li>x−d → nach rechts (Achtung: Vorzeichen!), x+d → nach links</li>
+          </ul>
+          <h4>Streckungen</h4>
+          <span class="f">g(x) = a · f(b · x)</span>
+          <ul>
+            <li>|a| &gt; 1: Streckung in y-Richtung (Stauchung bei 0 &lt; |a| &lt; 1)</li>
+            <li>|b| &gt; 1: Stauchung in x-Richtung</li>
+            <li>Negatives a oder b bewirkt zusätzlich Spiegelung</li>
+          </ul>
+          <div class="warn">⚡ Verschiebung in x-Richtung wirkt entgegen der Intuition: f(x − 2) verschiebt nach <em>rechts</em>!</div>
+          <h4>Beispiel</h4>
+          <div class="ex">g(x) = −(x+3)² + 1 aus f(x) = x²:<br>
+          Spiegelung an x-Achse (−), Verschiebung 3 nach links (+3), Verschiebung 1 nach oben (+1).</div>
+        </div>
+      </details>
+      <div class="ex-title">Übungsaufgaben</div>
+      <div class="exercise">
+        <div class="ex-q" onclick="togSol(this)">
+          <span class="ex-num">1</span>
+          <span class="ex-text">Wie entsteht g(x) = 2(x − 1)³ + 3 aus f(x) = x³?</span>
+          <button class="sol-btn">Lösung</button>
+        </div>
+        <div class="ex-sol">Streckung in y-Richtung um Faktor 2 (a=2), Verschiebung 1 nach rechts (d=1), Verschiebung 3 nach oben (c=3).</div>
+      </div>
+      <div class="exercise">
+        <div class="ex-q" onclick="togSol(this)">
+          <span class="ex-num">2</span>
+          <span class="ex-text">Gib die Funktionsvorschrift für f(x) = x² an, verschoben um 4 nach rechts, 2 nach unten, gespiegelt an der x-Achse.</span>
+          <button class="sol-btn">Lösung</button>
+        </div>
+        <div class="ex-sol">g(x) = −(x − 4)² − 2</div>
+      </div>
+      <div class="exercise">
+        <div class="ex-q" onclick="togSol(this)">
+          <span class="ex-num">3</span>
+          <span class="ex-text">Wo liegt der Scheitelpunkt von h(x) = (x + 2)² − 5?</span>
+          <button class="sol-btn">Lösung</button>
+        </div>
+        <div class="ex-sol">Verschiebung: x+2 → 2 nach links, −5 → 5 nach unten. Scheitelpunkt: <strong>S(−2 | −5)</strong></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ABLEITUNG -->
+<div class="section" id="ableitung">
+  <div class="sec-intro">
+    Die Ableitung beschreibt, wie schnell sich eine Funktion ändert. Vom anschaulichen Begriff der Änderungsrate bis zu den konkreten Rechenregeln – dieser Abschnitt legt das Fundament für die Kurvenanalyse.
+  </div>
+
+  <!-- Änderungsraten -->
+  <div class="topic-card" id="c-aend">
+    <div class="topic-header" onclick="tog('c-aend')">
+      <div class="t-icon icon-red">Δ</div>
+      <div class="t-main">
+        <div class="t-title">Änderungsraten, Sekante & Tangente <span class="hm-badge both">Teil A + B</span></div>
+        <div class="t-preview">Mittlere und lokale Änderungsrate, graphisches Ableiten</div>
+      </div>
+      <div class="chevron">▾</div>
+    </div>
+    <div class="topic-body">
+      <div class="info-block">
+        Die <strong>mittlere Änderungsrate</strong> beschreibt die durchschnittliche Steigung über ein Intervall (Sekante). Die <strong>lokale Änderungsrate</strong> (Ableitung) ist die momentane Steigung an einem Punkt (Tangente).
+      </div>
+      <details class="deep">
+        <summary>📖 Vertiefung & Lernmaterial</summary>
+        <div class="dc">
+          <h4>Mittlere Änderungsrate (Sekantensteigung)</h4>
+          <span class="f">mₛ = [f(b) − f(a)] / (b − a) = Δy / Δx</span>
+          <p>Steigung der Geraden durch P(a | f(a)) und Q(b | f(b)).</p>
+          <h4>Lokale Änderungsrate (Tangentensteigung / Ableitung)</h4>
+          <span class="f">f'(x₀) = lim[h→0] [f(x₀ + h) − f(x₀)] / h</span>
+          <p>Grenzwert der Sekantensteigung, wenn der zweite Punkt gegen x₀ rückt.</p>
+          <h4>Tangentengleichung</h4>
+          <span class="f">t(x) = f'(x₀) · (x − x₀) + f(x₀)</span>
+          <h4>Graphisches Ableiten</h4>
+          <table>
+            <tr><th>Wenn f …</th><th>dann f' …</th></tr>
+            <tr><td>steigt</td><td>ist positiv</td></tr>
+            <tr><td>fällt</td><td>ist negativ</td></tr>
+            <tr><td>hat ein Extremum</td><td>hat eine Nullstelle</td></tr>
+            <tr><td>hat einen Wendepunkt</td><td>hat ein Extremum</td></tr>
+          </table>
+          <div class="ex">💡 Die Tangente berührt den Graphen in genau einem Punkt und hat dort dieselbe Steigung wie f.</div>
+        </div>
+      </details>
+      <div class="ex-title">Übungsaufgaben</div>
+      <div class="exercise">
+        <div class="ex-q" onclick="togSol(this)">
+          <span class="ex-num">1</span>
+          <span class="ex-text">Berechne die mittlere Änderungsrate von f(x) = x² auf [1; 4].</span>
+          <button class="sol-btn">Lösung</button>
+        </div>
+        <div class="ex-sol">mₛ = [f(4) − f(1)] / (4 − 1) = (16 − 1) / 3 = 15/3 = <strong>5</strong></div>
+      </div>
+      <div class="exercise">
+        <div class="ex-q" onclick="togSol(this)">
+          <span class="ex-num">2</span>
+          <span class="ex-text">Bestimme die Tangentengleichung an f(x) = x³ − x in x₀ = 1.</span>
+          <button class="sol-btn">Lösung</button>
+        </div>
+        <div class="ex-sol">f'(x) = 3x² − 1 → f'(1) = 2 | f(1) = 0 | t(x) = 2(x − 1) + 0 = <strong>2x − 2</strong></div>
+      </div>
+      <div class="exercise">
+        <div class="ex-q" onclick="togSol(this)">
+          <span class="ex-num">3</span>
+          <span class="ex-text">f' hat bei x = 2 eine Nullstelle mit Vorzeichenwechsel von − nach +. Was gilt für f?</span>
+          <button class="sol-btn">Lösung</button>
+        </div>
+        <div class="ex-sol">f hat bei x = 2 ein <strong>lokales Minimum</strong>. Davor fällt f (f' &lt; 0), danach steigt f (f' &gt; 0).</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ableitungsregeln -->
+  <div class="topic-card" id="c-regeln">
+    <div class="topic-header" onclick="tog('c-regeln')">
+      <div class="t-icon icon-red">f'</div>
+      <div class="t-main">
+        <div class="t-title">Ableitungsregeln <span class="hm-badge both">Teil A + B</span></div>
+        <div class="t-preview">Potenz-, Faktor- und Summenregel – alle ganzrationalen Funktionen ableiten</div>
+      </div>
+      <div class="chevron">▾</div>
+    </div>
+    <div class="topic-body">
+      <div class="info-block">
+        Mit drei Regeln lässt sich jede ganzrationale Funktion ableiten: <strong>Potenzregel</strong>, <strong>Faktorregel</strong>, <strong>Summenregel</strong>. Sie werden in der Klausur immer gebraucht.
+      </div>
+      <details class="deep">
+        <summary>📖 Vertiefung & Lernmaterial</summary>
+        <div class="dc">
+          <h4>Potenzregel</h4>
+          <span class="f">f(x) = xⁿ → f'(x) = n · xⁿ⁻¹</span>
+          <h4>Faktorregel</h4>
+          <span class="f">f(x) = c · g(x) → f'(x) = c · g'(x)</span>
+          <h4>Summenregel</h4>
+          <span class="f">f(x) = g(x) + h(x) → f'(x) = g'(x) + h'(x)</span>
+          <h4>Sonderfälle</h4>
+          <ul>
+            <li>Konstante: f(x) = c → f'(x) = 0</li>
+            <li>Lineare Funktion: f(x) = mx + b → f'(x) = m</li>
+          </ul>
+          <h4>Vollständiges Beispiel</h4>
+          <div class="ex">f(x) = 3x⁴ − 2x² + 5x − 1<br>
+          f'(x) = 12x³ − 4x + 5<br>
+          f''(x) = 36x² − 4</div>
+          <div class="warn">⚡ Bei Teil A (hilfsmittelfrei) musst du diese Regeln sicher auswendig können und schnell anwenden!</div>
+        </div>
+      </details>
+      <div class="ex-title">Übungsaufgaben</div>
+      <div class="exercise">
+        <div class="ex-q" onclick="togSol(this)">
+          <span class="ex-num">1</span>
+          <span class="ex-text">Leite ab: f(x) = 4x³ − 3x² + 7x − 2</span>
+          <button class="sol-btn">Lösung</button>
+        </div>
+        <div class="ex-sol">f'(x) = 12x² − 6x + 7</div>
+      </div>
+      <div class="exercise">
+        <div class="ex-q" onclick="togSol(this)">
+          <span class="ex-num">2</span>
+          <span class="ex-text">Leite zweimal ab: g(x) = −x⁴ + 6x²</span>
+          <button class="sol-btn">Lösung</button>
+        </div>
+        <div class="ex-sol">g'(x) = −4x³ + 12x | g''(x) = −12x² + 12</div>
+      </div>
+      <div class="exercise">
+        <div class="ex-q" onclick="togSol(this)">
+          <span class="ex-num">3</span>
+          <span class="ex-text">Für welchen Punkt auf f(x) = x² hat die Tangente die Steigung 6?</span>
+          <button class="sol-btn">Lösung</button>
+        </div>
+        <div class="ex-sol">f'(x) = 2x = 6 → x = 3 | f(3) = 9 → Punkt: <strong>(3 | 9)</strong></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- KURVENANALYSE -->
+<div class="section" id="kurven">
+  <div class="sec-intro">
+    Mit der Ableitung lässt sich das Verhalten einer Funktion vollständig beschreiben: Wo steigt sie, wo fällt sie, wo liegen Hoch- und Tiefpunkte, wo ändert sich die Krümmung?
+  </div>
+
+  <!-- Monotonie & Extrema -->
+  <div class="topic-card" id="c-ext">
+    <div class="topic-header" onclick="tog('c-ext')">
+      <div class="t-icon icon-red">↑↓</div>
+      <div class="t-main">
+        <div class="t-title">Monotonie & Extrempunkte <span class="hm-badge both">Teil A + B</span></div>
+        <div class="t-preview">Wann steigt/fällt f? Lokale und globale Hoch-/Tiefpunkte</div>
+      </div>
+      <div class="chevron">▾</div>
+    </div>
+    <div class="topic-body">
+      <div class="info-block">
+        Das <strong>Vorzeichen von f'</strong> entscheidet über Monotonie. <strong>Nullstellen von f'</strong> sind Kandidaten für Extremstellen – ob es wirklich eine ist, muss mit der 2. Ableitung oder dem Vorzeichenwechsel von f' geprüft werden.
+      </div>
+      <details class="deep">
+        <summary>📖 Vertiefung & Lernmaterial</summary>
+        <div class="dc">
+          <h4>Monotonie</h4>
+          <span class="f">f'(x) &gt; 0 auf (a,b) → f streng monoton steigend</span>
+          <span class="f">f'(x) &lt; 0 auf (a,b) → f streng monoton fallend</span>
+          <h4>Notwendige Bedingung für Extremstellen</h4>
+          <span class="f">f'(x₀) = 0</span>
+          <p>Achtung: Nicht jede Nullstelle von f' ist eine Extremstelle (z.B. Sattelpunkt)!</p>
+          <h4>Hinreichende Bedingung</h4>
+          <table>
+            <tr><th>Bedingung</th><th>Typ</th></tr>
+            <tr><td>f''(x₀) &gt; 0</td><td>lokales Minimum</td></tr>
+            <tr><td>f''(x₀) &lt; 0</td><td>lokales Maximum</td></tr>
+            <tr><td>f''(x₀) = 0</td><td>keine Aussage → VZW von f' prüfen!</td></tr>
+          </table>
+          <h4>Vorzeichenwechsel von f' (VZW)</h4>
+          <ul>
+            <li>f' wechselt von + nach −: lokales Maximum</li>
+            <li>f' wechselt von − nach +: lokales Minimum</li>
+            <li>Kein VZW: Sattelpunkt (kein Extremum)</li>
+          </ul>
+          <h4>Globale Extrema</h4>
+          <p>Alle lokalen Extremwerte und den Wertebereich vergleichen. Bei unbeschränktem D = ℝ haben Polynome mit ungeradem Grad keine globalen Extrema.</p>
+        </div>
+      </details>
+      <div class="ex-title">Übungsaufgaben</div>
+      <div class="exercise">
+        <div class="ex-q" onclick="togSol(this)">
+          <span class="ex-num">1</span>
+          <span class="ex-text">Bestimme und klassifiziere die Extremstellen von f(x) = x³ − 3x.</span>
+          <button class="sol-btn">Lösung</button>
+        </div>
+        <div class="ex-sol">f'(x) = 3x² − 3 = 0 → x = ±1 | f''(x) = 6x | f''(1) = 6 &gt; 0 → <strong>lokales Minimum bei (1|−2)</strong> | f''(−1) = −6 &lt; 0 → <strong>lokales Maximum bei (−1|2)</strong></div>
+      </div>
+      <div class="exercise">
+        <div class="ex-q" onclick="togSol(this)">
+          <span class="ex-num">2</span>
+          <span class="ex-text">Für welche x-Werte ist f(x) = x⁴ − 4x² monoton steigend?</span>
+          <button class="sol-btn">Lösung</button>
+        </div>
+        <div class="ex-sol">f'(x) = 4x³ − 8x = 4x(x²−2) = 0 → x = 0, x = ±√2 | f'(x) &gt; 0 für x ∈ (−√2, 0) ∪ (√2, +∞)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Krümmung & Wendepunkte -->
+  <div class="topic-card" id="c-wend">
+    <div class="topic-header" onclick="tog('c-wend')">
+      <div class="t-icon icon-red">∫</div>
+      <div class="t-main">
+        <div class="t-title">Krümmungsverhalten & Wendepunkte <span class="hm-badge both">Teil A + B</span></div>
+        <div class="t-preview">Links-/Rechtskurve, Wendepunkte mit f''</div>
+      </div>
+      <div class="chevron">▾</div>
+    </div>
+    <div class="topic-body">
+      <div class="info-block">
+        Das <strong>Vorzeichen von f''</strong> beschreibt das Krümmungsverhalten. Ein <strong>Wendepunkt</strong> ist ein Punkt, an dem sich das Krümmungsverhalten ändert.
+      </div>
+      <details class="deep">
+        <summary>📖 Vertiefung & Lernmaterial</summary>
+        <div class="dc">
+          <h4>Krümmungsverhalten</h4>
+          <table>
+            <tr><th>f''(x)</th><th>Krümmung</th><th>Merkhilfe</th></tr>
+            <tr><td>&gt; 0</td><td>Linkskurve (∪)</td><td>„lächelt"</td></tr>
+            <tr><td>&lt; 0</td><td>Rechtskurve (∩)</td><td>„trauert"</td></tr>
+          </table>
+          <h4>Wendepunkte – notwendige Bedingung</h4>
+          <span class="f">f''(x₀) = 0</span>
+          <h4>Wendepunkte – hinreichende Bedingung</h4>
+          <span class="f">f'''(x₀) ≠ 0 &nbsp; oder &nbsp; Vorzeichenwechsel von f'' bei x₀</span>
+          <div class="warn">⚡ f''(x₀) = 0 allein reicht nicht – auch f''' = 0 wäre möglich (dann kein Wendepunkt). Immer Vorzeichenwechsel prüfen!</div>
+          <h4>Zusammenhang f – f' – f''</h4>
+          <div class="ex">Extremstelle von f → Nullstelle von f'<br>Wendepunkt von f → Extremstelle von f' → Nullstelle von f''</div>
+        </div>
+      </details>
+      <div class="ex-title">Übungsaufgaben</div>
+      <div class="exercise">
+        <div class="ex-q" onclick="togSol(this)">
+          <span class="ex-num">1</span>
+          <span class="ex-text">Bestimme den Wendepunkt von f(x) = x³ − 3x.</span>
+          <button class="sol-btn">Lösung</button>
+        </div>
+        <div class="ex-sol">f''(x) = 6x = 0 → x = 0 | f'''(x) = 6 ≠ 0 → Wendepunkt. f(0) = 0 → <strong>W(0|0)</strong></div>
+      </div>
+      <div class="exercise">
+        <div class="ex-q" onclick="togSol(this)">
+          <span class="ex-num">2</span>
+          <span class="ex-text">Für welche x ist f(x) = −x⁴ + 6x² linksgekrümmt?</span>
+          <button class="sol-btn">Lösung</button>
+        </div>
+        <div class="ex-sol">f''(x) = −12x² + 12 &gt; 0 → 12 &gt; 12x² → x² &lt; 1 → <strong>x ∈ (−1; 1)</strong></div>
+      </div>
+      <div class="exercise">
+        <div class="ex-q" onclick="togSol(this)">
+          <span class="ex-num">3</span>
+          <span class="ex-text">Führe eine vollständige Kurvendiskussion von f(x) = x³ − 3x² durch (D, Symm., NS, Extrema, Wendepunkt).</span>
+          <button class="sol-btn">Lösung</button>
+        </div>
+        <div class="ex-sol">
+          D = ℝ | Symmetrie: f(−x) ≠ f(x), ≠ −f(x) → keine Symmetrie<br>
+          NS: x²(x−3) = 0 → x₁ = 0 (doppelt), x₂ = 3<br>
+          f'(x) = 3x² − 6x = 3x(x−2) = 0 → x = 0, x = 2<br>
+          f''(x) = 6x − 6: f''(0) = −6 &lt; 0 → <strong>Max (0|0)</strong>; f''(2) = 6 &gt; 0 → <strong>Min (2|−4)</strong><br>
+          f''(x) = 0: x = 1 → f'''(1) = 6 ≠ 0 → <strong>Wendepunkt (1|−2)</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- VEKTOREN -->
+<div class="section" id="vektoren">
+  <div class="sec-intro">
+    Die Analytische Geometrie kommt <strong>nur in Teil A</strong> (hilfsmittelfrei) vor. Vektoren beschreiben Richtungen und Abstände im Raum – mit überschaubaren Rechenregeln.
+  </div>
+
+  <div class="topic-card" id="c-punk">
+    <div class="topic-header" onclick="tog('c-punk')">
+      <div class="t-icon icon-green">P</div>
+      <div class="t-main">
+        <div class="t-title">Punkte, Ortsvektoren & Verbindungsvektoren <span class="hm-badge" style="background:#88888818;color:#555;border:1px solid #88888840;">Nur Teil A</span></div>
+        <div class="t-preview">Koordinatisierung des Raumes im ℝ³</div>
+      </div>
+      <div class="chevron">▾</div>
+    </div>
+    <div class="topic-body">
+      <div class="info-block">
+        Punkte im Raum haben drei Koordinaten. Der <strong>Ortsvektor</strong> zeigt vom Ursprung zum Punkt. Der <strong>Verbindungsvektor AB⃗</strong> zeigt von A nach B und ist die Differenz der Ortsvektoren.
+      </div>
+      <details class="deep">
+        <summary>📖 Vertiefung & Lernmaterial</summary>
+        <div class="dc">
+          <h4>Punkt und Ortsvektor</h4>
+          <span class="f">Punkt P(x|y|z) &nbsp;→&nbsp; Ortsvektor OP⃗ = (x, y, z)ᵀ</span>
+          <h4>Verbindungsvektor</h4>
+          <span class="f">AB⃗ = OB⃗ − OA⃗ = (b₁−a₁ | b₂−a₂ | b₃−a₃)ᵀ</span>
+          <div class="ex">Beispiel: A(1|2|3), B(4|0|1) → AB⃗ = (3|−2|−2)ᵀ</div>
+          <h4>Mittelpunkt einer Strecke</h4>
+          <span class="f">M = ½ · (OA⃗ + OB⃗)</span>
+        </div>
+      </details>
+      <div class="ex-title">Übungsaufgaben</div>
+      <div class="exercise">
+        <div class="ex-q" onclick="togSol(this)">
+          <span class="ex-num">1</span>
+          <span class="ex-text">Berechne AB⃗ für A(2|0|−1) und B(5|3|2).</span>
+          <button class="sol-btn">Lösung</button>
+        </div>
+        <div class="ex-sol">AB⃗ = (5−2 | 3−0 | 2−(−1))ᵀ = <strong>(3|3|3)ᵀ</strong></div>
+      </div>
+      <div class="exercise">
+        <div class="ex-q" onclick="togSol(this)">
+          <span class="ex-num">2</span>
+          <span class="ex-text">Bestimme den Mittelpunkt der Strecke AB mit A(0|4|2) und B(6|0|−2).</span>
+          <button class="sol-btn">Lösung</button>
+        </div>
+        <div class="ex-sol">M = ½ · (0+6 | 4+0 | 2+(−2))ᵀ = <strong>(3|2|0)</strong></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="topic-card" id="c-vop">
+    <div class="topic-header" onclick="tog('c-vop')">
+      <div class="t-icon icon-green">⊕</div>
+      <div class="t-main">
+        <div class="t-title">Vektoroperationen: Addition & Skalarmultiplikation <span class="hm-badge" style="background:#88888818;color:#555;border:1px solid #88888840;">Nur Teil A</span></div>
+        <div class="t-preview">Komponentenweise rechnen mit Vektoren</div>
+      </div>
+      <div class="chevron">▾</div>
+    </div>
+    <div class="topic-body">
+      <div class="info-block">
+        Vektoren werden <strong>komponentenweise</strong> addiert und subtrahiert. Bei der <strong>Skalarmultiplikation</strong> wird jede Komponente mit der Zahl multipliziert.
+      </div>
+      <details class="deep">
+        <summary>📖 Vertiefung & Lernmaterial</summary>
+        <div class="dc">
+          <h4>Addition und Subtraktion</h4>
+          <span class="f">a⃗ ± b⃗ = (a₁±b₁ | a₂±b₂ | a₃±b₃)ᵀ</span>
+          <h4>Skalarmultiplikation</h4>
+          <span class="f">λ · a⃗ = (λ·a₁ | λ·a₂ | λ·a₃)ᵀ</span>
+          <ul>
+            <li>|λ| &gt; 1: Vektor wird länger</li>
+            <li>0 &lt; |λ| &lt; 1: Vektor wird kürzer</li>
+            <li>λ &lt; 0: Richtung wird umgekehrt</li>
+          </ul>
+          <div class="ex">Beispiel: 3 · (2|−1|4)ᵀ = (6|−3|12)ᵀ</div>
+        </div>
+      </details>
+      <div class="ex-title">Übungsaufgaben</div>
+      <div class="exercise">
+        <div class="ex-q" onclick="togSol(this)">
+          <span class="ex-num">1</span>
+          <span class="ex-text">Berechne a⃗ + b⃗ für a⃗ = (1|2|3)ᵀ und b⃗ = (4|−1|2)ᵀ.</span>
+          <button class="sol-btn">Lösung</button>
+        </div>
+        <div class="ex-sol">(1+4 | 2+(−1) | 3+2)ᵀ = <strong>(5|1|5)ᵀ</strong></div>
+      </div>
+      <div class="exercise">
+        <div class="ex-q" onclick="togSol(this)">
+          <span class="ex-num">2</span>
+          <span class="ex-text">Berechne −2 · v⃗ für v⃗ = (3|0|−1)ᵀ.</span>
+          <button class="sol-btn">Lösung</button>
+        </div>
+        <div class="ex-sol"><strong>(−6|0|2)ᵀ</strong></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="topic-card" id="c-veig">
+    <div class="topic-header" onclick="tog('c-veig')">
+      <div class="t-icon icon-green">|v|</div>
+      <div class="t-main">
+        <div class="t-title">Länge & Kollinearität <span class="hm-badge" style="background:#88888818;color:#555;border:1px solid #88888840;">Nur Teil A</span></div>
+        <div class="t-preview">Betrag eines Vektors und Parallelität prüfen</div>
+      </div>
+      <div class="chevron">▾</div>
+    </div>
+    <div class="topic-body">
+      <div class="info-block">
+        Der <strong>Betrag</strong> eines Vektors ist seine Länge (Pythagoras im Raum). Zwei Vektoren sind <strong>kollinear</strong> (parallel), wenn einer ein skalares Vielfaches des anderen ist.
+      </div>
+      <details class="deep">
+        <summary>📖 Vertiefung & Lernmaterial</summary>
+        <div class="dc">
+          <h4>Betrag (Länge)</h4>
+          <span class="f">|v⃗| = √(v₁² + v₂² + v₃²)</span>
+          <div class="ex">Beispiel: v⃗ = (3|4|0)ᵀ → |v⃗| = √(9+16+0) = 5</div>
+          <h4>Einheitsvektor (Länge = 1)</h4>
+          <span class="f">ê = v⃗ / |v⃗|</span>
+          <h4>Kollinearität prüfen</h4>
+          <p>a⃗ und b⃗ sind kollinear, wenn gilt: <strong>a⃗ = λ · b⃗</strong> für ein λ ∈ ℝ.</p>
+          <p>Vorgehen: λ aus erster Komponente berechnen, dann bei allen anderen Komponenten prüfen.</p>
+          <div class="warn">⚡ Wenn auch nur eine Komponente nicht passt: die Vektoren sind <em>nicht</em> kollinear!</div>
+        </div>
+      </details>
+      <div class="ex-title">Übungsaufgaben</div>
+      <div class="exercise">
+        <div class="ex-q" onclick="togSol(this)">
+          <span class="ex-num">1</span>
+          <span class="ex-text">Berechne die Länge von v⃗ = (1|2|2)ᵀ.</span>
+          <button class="sol-btn">Lösung</button>
+        </div>
+        <div class="ex-sol">|v⃗| = √(1+4+4) = √9 = <strong>3</strong></div>
+      </div>
+      <div class="exercise">
+        <div class="ex-q" onclick="togSol(this)">
+          <span class="ex-num">2</span>
+          <span class="ex-text">Sind a⃗ = (2|−4|6)ᵀ und b⃗ = (1|−2|3)ᵀ kollinear?</span>
+          <button class="sol-btn">Lösung</button>
+        </div>
+        <div class="ex-sol">λ = 2 aus 1. Komponente. 2·(−2)=−4 ✓ | 2·3=6 ✓ → <strong>Ja, kollinear</strong> (λ = 2).</div>
+      </div>
+      <div class="exercise">
+        <div class="ex-q" onclick="togSol(this)">
+          <span class="ex-num">3</span>
+          <span class="ex-text">Sind c⃗ = (1|2|3)ᵀ und d⃗ = (2|4|7)ᵀ kollinear?</span>
+          <button class="sol-btn">Lösung</button>
+        </div>
+        <div class="ex-sol">λ = 2 (1. Komponente). 2·2=4 ✓ | 2·3=6 ≠ 7 ✗ → <strong>Nicht kollinear.</strong></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function showTab(id, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+function showTabById(id) {
+  const btn = document.querySelector(`.tab-btn[onclick="showTab('${id}',this)"]`);
+  if (btn) { showTab(id, btn); window.scrollTo(0,0); }
+}
+function tog(id) {
+  document.getElementById(id).classList.toggle('open');
+}
+function togSol(el) {
+  el.nextElementSibling.classList.toggle('vis');
+}
+</script>
+</body>
+</html>
