@@ -1,0 +1,1359 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Dramenvergleich – Wissenstest</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Source+Serif+4:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1108;
+    --paper: #f5f0e8;
+    --paper-dark: #ede5d4;
+    --accent: #8b1a1a;
+    --accent2: #1a4a8b;
+    --gold: #c8922a;
+    --correct: #1a6b2a;
+    --correct-bg: #d4f0da;
+    --wrong: #8b0000;
+    --wrong-bg: #f5d0d0;
+    --border: #c4b89a;
+    --shadow: rgba(26,17,8,0.15);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'Source Serif 4', Georgia, serif;
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+    padding-bottom: 80px;
+    background-image:
+      repeating-linear-gradient(0deg, transparent, transparent 27px, rgba(180,160,120,0.12) 27px, rgba(180,160,120,0.12) 28px);
+  }
+
+  /* HEADER */
+  header {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 24px 20px 20px;
+    text-align: center;
+    position: relative;
+    border-bottom: 4px solid var(--gold);
+  }
+  header .eyebrow {
+    font-family: 'Source Serif 4', serif;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    opacity: 0.6;
+    margin-bottom: 8px;
+  }
+  header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(22px, 5vw, 32px);
+    font-weight: 700;
+    line-height: 1.2;
+  }
+  header .subtitle {
+    font-size: 13px;
+    opacity: 0.7;
+    margin-top: 8px;
+  }
+
+  /* PROGRESS BAR */
+  .progress-container {
+    background: var(--paper-dark);
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--ink);
+    opacity: 0.7;
+    margin-bottom: 6px;
+  }
+  .progress-bar {
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--gold));
+    border-radius: 3px;
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+
+  /* CARD NAVIGATION */
+  .card-nav {
+    display: flex;
+    gap: 6px;
+    padding: 14px 16px;
+    overflow-x: auto;
+    border-bottom: 1px solid var(--border);
+    background: var(--paper);
+    -webkit-overflow-scrolling: touch;
+  }
+  .card-nav::-webkit-scrollbar { display: none; }
+  .nav-dot {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    background: transparent;
+    font-size: 12px;
+    font-family: 'Source Serif 4', serif;
+    color: var(--ink);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+  }
+  .nav-dot.active { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .nav-dot.answered { border-color: var(--gold); color: var(--gold); }
+
+  /* MAIN CONTENT */
+  main { padding: 24px 16px; max-width: 760px; margin: 0 auto; }
+
+  /* CARD */
+  .card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    box-shadow: 0 2px 12px var(--shadow);
+    margin-bottom: 20px;
+    display: none;
+    animation: fadeIn 0.3s ease;
+  }
+  .card.visible { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  .card-header {
+    padding: 16px 20px 12px;
+    border-bottom: 1px solid var(--paper-dark);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .card-number {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--ink);
+    color: var(--paper);
+    font-family: 'Playfair Display', serif;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .card-title-block { flex: 1; }
+  .card-topic {
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--gold);
+    font-weight: 600;
+  }
+  .card-question {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(16px, 3vw, 19px);
+    line-height: 1.4;
+    margin-top: 2px;
+  }
+
+  .card-body { padding: 20px; }
+
+  /* EXCERPT BOX */
+  .excerpt {
+    background: var(--paper-dark);
+    border-left: 4px solid var(--gold);
+    padding: 14px 16px;
+    font-size: 14px;
+    line-height: 1.7;
+    margin-bottom: 20px;
+    font-style: italic;
+    border-radius: 0 4px 4px 0;
+  }
+  .excerpt .meta { font-style: normal; font-size: 12px; opacity: 0.6; margin-bottom: 6px; }
+
+  /* MULTIPLE CHOICE */
+  .choices { display: flex; flex-direction: column; gap: 10px; }
+  .choice-btn {
+    display: block;
+    width: 100%;
+    padding: 14px 18px;
+    background: var(--paper);
+    border: 2px solid var(--border);
+    border-radius: 4px;
+    font-family: 'Source Serif 4', serif;
+    font-size: 16px;
+    color: var(--ink);
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.15s;
+    line-height: 1.4;
+    min-height: 44px;
+  }
+  .choice-btn:active { transform: scale(0.98); }
+  .choice-btn.selected { border-color: var(--accent2); background: #e8f0fc; }
+  .choice-btn.locked { cursor: default; pointer-events: none; }
+
+  /* MATCH / ASSIGN */
+  .match-area { display: flex; flex-direction: column; gap: 12px; }
+  .match-row {
+    display: grid;
+    grid-template-columns: 1fr 12px 1fr;
+    gap: 8px;
+    align-items: center;
+  }
+  .match-label {
+    background: var(--paper-dark);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 10px 12px;
+    font-size: 14px;
+    text-align: center;
+    line-height: 1.3;
+  }
+  .match-label.source { border-color: var(--accent); }
+  .match-label.target-slot {
+    border: 2px dashed var(--border);
+    min-height: 44px;
+    cursor: pointer;
+    background: white;
+    color: #888;
+    font-style: italic;
+    font-size: 13px;
+    transition: all 0.15s;
+  }
+  .match-label.target-slot.has-value {
+    border-style: solid;
+    border-color: var(--accent2);
+    background: #e8f0fc;
+    color: var(--ink);
+    font-style: normal;
+  }
+  .match-arrow { text-align: center; color: var(--border); font-size: 16px; }
+
+  .option-pool {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
+    padding: 12px;
+    background: var(--paper-dark);
+    border-radius: 4px;
+    border: 1px solid var(--border);
+  }
+  .pool-chip {
+    padding: 8px 14px;
+    background: white;
+    border: 2px solid var(--border);
+    border-radius: 20px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.15s;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+  }
+  .pool-chip.selected-chip { opacity: 0.35; pointer-events: none; }
+  .pool-chip:active { transform: scale(0.96); }
+  .pool-chip.highlighted { border-color: var(--accent2); background: #e8f0fc; }
+
+  /* SORT / SEQUENCE */
+  .sort-container { display: flex; flex-direction: column; gap: 8px; }
+  .sort-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: white;
+    border: 2px solid var(--border);
+    border-radius: 4px;
+    padding: 12px 14px;
+    cursor: grab;
+    min-height: 52px;
+    transition: all 0.15s;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: none;
+  }
+  .sort-item.dragging { opacity: 0.5; border-color: var(--gold); }
+  .sort-handle { color: var(--border); font-size: 18px; flex-shrink: 0; }
+  .sort-text { font-size: 15px; line-height: 1.3; }
+
+  /* TEXT INPUT */
+  .text-inputs { display: flex; flex-direction: column; gap: 12px; }
+  .input-row { display: flex; flex-direction: column; gap: 4px; }
+  .input-label { font-size: 13px; opacity: 0.7; }
+  .text-input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 2px solid var(--border);
+    border-radius: 4px;
+    font-family: 'Source Serif 4', serif;
+    font-size: 16px;
+    background: white;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.2s;
+    -webkit-appearance: none;
+  }
+  .text-input:focus { border-color: var(--accent2); }
+
+  /* TABLE FILL */
+  .table-fill { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .table-fill th {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 10px 12px;
+    text-align: left;
+    font-family: 'Playfair Display', serif;
+    font-weight: 600;
+  }
+  .table-fill td {
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    vertical-align: top;
+  }
+  .table-fill tr:nth-child(even) td { background: var(--paper-dark); }
+  .table-fill .fill-cell {
+    padding: 4px;
+  }
+  .fill-input {
+    width: 100%;
+    padding: 8px 10px;
+    border: 2px solid var(--border);
+    border-radius: 3px;
+    font-family: 'Source Serif 4', serif;
+    font-size: 14px;
+    background: white;
+    outline: none;
+    -webkit-appearance: none;
+  }
+  .fill-input:focus { border-color: var(--accent2); }
+
+  /* SUBMIT BUTTON */
+  .submit-btn {
+    width: 100%;
+    padding: 16px;
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    border-radius: 4px;
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    cursor: pointer;
+    margin-top: 16px;
+    transition: all 0.2s;
+    min-height: 52px;
+  }
+  .submit-btn:active { transform: scale(0.98); background: var(--accent); }
+  .submit-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+  /* NAVIGATION BUTTONS */
+  .nav-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+  }
+  .nav-btn {
+    flex: 1;
+    padding: 14px;
+    border: 2px solid var(--border);
+    background: white;
+    border-radius: 4px;
+    font-family: 'Source Serif 4', serif;
+    font-size: 16px;
+    cursor: pointer;
+    color: var(--ink);
+    transition: all 0.2s;
+    min-height: 52px;
+  }
+  .nav-btn.primary { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .nav-btn:active { transform: scale(0.97); }
+
+  /* RESULT FEEDBACK */
+  .result-box {
+    border-radius: 4px;
+    padding: 16px;
+    margin-top: 16px;
+    font-size: 15px;
+    line-height: 1.6;
+    display: none;
+  }
+  .result-box.correct {
+    display: block;
+    background: var(--correct-bg);
+    border: 2px solid var(--correct);
+    color: #0a3a15;
+  }
+  .result-box.wrong {
+    display: block;
+    background: var(--wrong-bg);
+    border: 2px solid var(--wrong);
+    color: #4a0000;
+  }
+  .result-icon { font-size: 22px; margin-bottom: 6px; }
+  .result-explanation { margin-top: 8px; font-size: 14px; opacity: 0.85; }
+
+  /* FINAL RESULTS */
+  #results-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    box-shadow: 0 4px 20px var(--shadow);
+    padding: 0;
+    display: none;
+  }
+  .results-header {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 24px 20px;
+    text-align: center;
+    border-radius: 4px 4px 0 0;
+  }
+  .results-header h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px;
+    margin-bottom: 8px;
+  }
+  .score-display {
+    font-size: 56px;
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    color: var(--gold);
+    line-height: 1;
+  }
+  .score-label { font-size: 14px; opacity: 0.7; margin-top: 6px; }
+  .results-body { padding: 20px; }
+  .result-summary { display: flex; flex-direction: column; gap: 12px; }
+  .result-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 14px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    font-size: 15px;
+  }
+  .result-row.ok { background: var(--correct-bg); border-color: var(--correct); }
+  .result-row.bad { background: var(--wrong-bg); border-color: var(--wrong); }
+  .result-row .icon { font-size: 20px; }
+  .restart-btn {
+    width: 100%;
+    margin-top: 20px;
+    padding: 16px;
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    border-radius: 4px;
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    cursor: pointer;
+  }
+
+  /* WIEDERHOLUNGSKARTE */
+  .wiederholung-badge {
+    display: inline-block;
+    background: var(--gold);
+    color: white;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 2px;
+    font-family: 'Source Serif 4', serif;
+    font-weight: 600;
+    margin-left: 8px;
+  }
+
+  /* FREYTAG PYRAMID SVG */
+  .pyramid-container { margin-bottom: 20px; }
+
+  /* TOOLTIP */
+  .has-tooltip { text-decoration: underline; text-decoration-style: dotted; cursor: help; }
+
+  /* T-REX */
+  .trex {
+    position: fixed;
+    bottom: 16px;
+    right: 16px;
+    font-size: 24px;
+    opacity: 0.5;
+    z-index: 100;
+    pointer-events: none;
+    line-height: 1;
+  }
+
+  /* COMPARISON TABLE */
+  .compare-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .compare-table th {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 8px 10px;
+    font-family: 'Playfair Display', serif;
+  }
+  .compare-table td {
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    vertical-align: top;
+  }
+  .compare-table tr:nth-child(even) td { background: var(--paper-dark); }
+
+  /* DRAG LABEL */
+  .drag-instructions { font-size: 13px; color: #666; margin-bottom: 10px; font-style: italic; }
+
+  @media (min-width: 600px) {
+    .choices { display: grid; grid-template-columns: 1fr 1fr; }
+    .choices.single { display: flex; flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="eyebrow">Deutsch · Jahrgangsstufe 12 · Berufskolleg</div>
+  <h1>Klassisches und modernes Drama<br>vergleichen</h1>
+  <div class="subtitle">Wissenstest · 10 Aufgaben</div>
+</header>
+
+<div class="progress-container">
+  <div class="progress-label">
+    <span id="prog-text">Aufgabe 1 von 10</span>
+    <span id="prog-pct">0 %</span>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+</div>
+
+<div class="card-nav" id="card-nav">
+  <!-- filled by JS -->
+</div>
+
+<main>
+
+<!-- ═══════════════════════════════════════════
+     KARTE 1 – Multiple Choice: Dramenform
+═══════════════════════════════════════════ -->
+<div class="card visible" id="card-1" data-card="1">
+  <div class="card-header">
+    <div class="card-number">1</div>
+    <div class="card-title-block">
+      <div class="card-topic">Dramenformen</div>
+      <div class="card-question">Welche Aussage beschreibt das <em>klassische Drama der geschlossenen Form</em> korrekt?</div>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="choices single" id="q1-choices">
+      <button class="choice-btn" data-val="a">Es verwendet Zwischenspiele und wendet sich direkt ans Publikum.</button>
+      <button class="choice-btn" data-val="b">Die Handlung folgt dem Freytag'schen Schema: Exposition, steigende Handlung, Höhepunkt, fallende Handlung, Katastrophe.</button>
+      <button class="choice-btn" data-val="c">Die Orte und Zeiten sind bewusst vielfältig und die Kausalität wird aufgelöst.</button>
+      <button class="choice-btn" data-val="d">Das Publikum soll emotional distanziert bleiben und selbst urteilen.</button>
+    </div>
+    <div class="result-box" id="q1-result"></div>
+    <div class="nav-buttons">
+      <button class="nav-btn primary" id="q1-next" onclick="goTo(2)" style="display:none">Weiter →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     KARTE 2 – Zuordnung Aristoteles vs. Brecht
+═══════════════════════════════════════════ -->
+<div class="card" id="card-2" data-card="2">
+  <div class="card-header">
+    <div class="card-number">2</div>
+    <div class="card-title-block">
+      <div class="card-topic">Aristoteles vs. Brecht</div>
+      <div class="card-question">Ordne die Merkmale der richtigen Theaterform zu.</div>
+    </div>
+  </div>
+  <div class="card-body">
+    <p class="drag-instructions">Tippe zuerst auf ein Merkmal (unten), dann auf das passende Feld.</p>
+    <div class="option-pool" id="q2-pool">
+      <div class="pool-chip" data-id="m1" onclick="selectChip(this,'q2')">Einfühlung & Katharsis</div>
+      <div class="pool-chip" data-id="m2" onclick="selectChip(this,'q2')">Verfremdungseffekt</div>
+      <div class="pool-chip" data-id="m3" onclick="selectChip(this,'q2')">Zuschauer urteilt</div>
+      <div class="pool-chip" data-id="m4" onclick="selectChip(this,'q2')">Spannung auf den Ausgang</div>
+      <div class="pool-chip" data-id="m5" onclick="selectChip(this,'q2')">jede Szene für sich</div>
+      <div class="pool-chip" data-id="m6" onclick="selectChip(this,'q2')">eine Szene für die andere</div>
+    </div>
+    <div class="match-area">
+      <div style="font-weight:600; font-family:'Playfair Display',serif; margin-bottom:4px; color: var(--accent);">Aristotelisches Theater</div>
+      <div class="match-row">
+        <div class="match-label target-slot" data-group="q2" data-correct="m4" onclick="placeChip(this,'q2')">–</div>
+        <div class="match-arrow">→</div>
+        <div class="match-label">Spannung auf den Ausgang</div>
+      </div>
+      <div class="match-row">
+        <div class="match-label target-slot" data-group="q2" data-correct="m1" onclick="placeChip(this,'q2')">–</div>
+        <div class="match-arrow">→</div>
+        <div class="match-label">Einfühlung & Katharsis</div>
+      </div>
+      <div class="match-row">
+        <div class="match-label target-slot" data-group="q2" data-correct="m6" onclick="placeChip(this,'q2')">–</div>
+        <div class="match-arrow">→</div>
+        <div class="match-label">eine Szene für die andere</div>
+      </div>
+      <div style="font-weight:600; font-family:'Playfair Display',serif; margin: 12px 0 4px; color: var(--accent2);">Episches Theater (Brecht)</div>
+      <div class="match-row">
+        <div class="match-label target-slot" data-group="q2" data-correct="m2" onclick="placeChip(this,'q2')">–</div>
+        <div class="match-arrow">→</div>
+        <div class="match-label">Verfremdungseffekt</div>
+      </div>
+      <div class="match-row">
+        <div class="match-label target-slot" data-group="q2" data-correct="m3" onclick="placeChip(this,'q2')">–</div>
+        <div class="match-arrow">→</div>
+        <div class="match-label">Zuschauer urteilt</div>
+      </div>
+      <div class="match-row">
+        <div class="match-label target-slot" data-group="q2" data-correct="m5" onclick="placeChip(this,'q2')">–</div>
+        <div class="match-arrow">→</div>
+        <div class="match-label">jede Szene für sich</div>
+      </div>
+    </div>
+    <div class="result-box" id="q2-result"></div>
+    <div class="nav-buttons">
+      <button class="nav-btn" onclick="goTo(1)">← Zurück</button>
+      <button class="nav-btn primary" id="q2-submit" onclick="checkQ2()">Auswertung</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     KARTE 3 – Freytag Pyramide sortieren
+═══════════════════════════════════════════ -->
+<div class="card" id="card-3" data-card="3">
+  <div class="card-header">
+    <div class="card-number">3</div>
+    <div class="card-title-block">
+      <div class="card-topic">Freytag'sches Schema</div>
+      <div class="card-question">Bringe die Stufen der Freytag-Pyramide in die richtige Reihenfolge.</div>
+    </div>
+  </div>
+  <div class="card-body">
+    <p class="drag-instructions">Ziehe die Felder in die richtige Reihenfolge (oben = 1. Stufe).</p>
+    <div class="sort-container" id="q3-sort">
+      <div class="sort-item" data-correct="3" draggable="true" id="si-hoehepunkt" ontouchstart="sortTouchStart(event,this)" ontouchend="sortTouchEnd(event,this)">
+        <span class="sort-handle">⠿</span>
+        <span class="sort-text">III. Höhepunkt und Peripetie (Wendepunkt)</span>
+      </div>
+      <div class="sort-item" data-correct="5" draggable="true" id="si-katastrophe" ontouchstart="sortTouchStart(event,this)" ontouchend="sortTouchEnd(event,this)">
+        <span class="sort-handle">⠿</span>
+        <span class="sort-text">V. Katastrophe</span>
+      </div>
+      <div class="sort-item" data-correct="1" draggable="true" id="si-exposition" ontouchstart="sortTouchStart(event,this)" ontouchend="sortTouchEnd(event,this)">
+        <span class="sort-handle">⠿</span>
+        <span class="sort-text">I. Exposition (Einführung)</span>
+      </div>
+      <div class="sort-item" data-correct="4" draggable="true" id="si-fallend" ontouchstart="sortTouchStart(event,this)" ontouchend="sortTouchEnd(event,this)">
+        <span class="sort-handle">⠿</span>
+        <span class="sort-text">IV. Fallende Handlung mit retardierendem Moment</span>
+      </div>
+      <div class="sort-item" data-correct="2" draggable="true" id="si-steigend" ontouchstart="sortTouchStart(event,this)" ontouchend="sortTouchEnd(event,this)">
+        <span class="sort-handle">⠿</span>
+        <span class="sort-text">II. Steigende Handlung mit erregendem Moment</span>
+      </div>
+    </div>
+    <div class="result-box" id="q3-result"></div>
+    <div class="nav-buttons">
+      <button class="nav-btn" onclick="goTo(2)">← Zurück</button>
+      <button class="nav-btn primary" id="q3-submit" onclick="checkQ3()">Auswertung</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     KARTE 4 – Multiple Choice: Kabale & Liebe Figuren
+═══════════════════════════════════════════ -->
+<div class="card" id="card-4" data-card="4">
+  <div class="card-header">
+    <div class="card-number">4</div>
+    <div class="card-title-block">
+      <div class="card-topic">Kabale und Liebe · Figuren</div>
+      <div class="card-question">Welche Charakterisierung passt zu <em>Luise</em> in der Szene I/4?</div>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="excerpt">
+      <div class="meta">Schiller, Kabale und Liebe (1784), I/4</div>
+      »Dass du doch wüsstest, wie schön die Sprache das bürgerliche Mädchen sich nimmt.«
+    </div>
+    <div class="choices single" id="q4-choices">
+      <button class="choice-btn" data-val="a">schwärmerisch, impulsiv, idealistisch – sie ignoriert den Standesunterschied</button>
+      <button class="choice-btn" data-val="b">vernünftig, ängstlich, realistisch – sie sieht die gesellschaftlichen Grenzen klar</button>
+      <button class="choice-btn" data-val="c">selbstbewusst, dominant – sie übernimmt die Gesprächsinitiative</button>
+      <button class="choice-btn" data-val="d">gleichgültig und distanziert – ihr fehlt echtes Gefühl für Ferdinand</button>
+    </div>
+    <div class="result-box" id="q4-result"></div>
+    <div class="nav-buttons">
+      <button class="nav-btn" onclick="goTo(3)">← Zurück</button>
+      <button class="nav-btn primary" id="q4-next" onclick="goTo(5)" style="display:none">Weiter →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     KARTE 5 – Tabelle ausfüllen: Strukturvergleich
+═══════════════════════════════════════════ -->
+<div class="card" id="card-5" data-card="5">
+  <div class="card-header">
+    <div class="card-number">5</div>
+    <div class="card-title-block">
+      <div class="card-topic">Strukturvergleich</div>
+      <div class="card-question">Ergänze die Tabelle zum Vergleich der beiden Dramen.</div>
+    </div>
+  </div>
+  <div class="card-body">
+    <table class="table-fill">
+      <thead>
+        <tr>
+          <th>Aspekt</th>
+          <th>Kabale und Liebe</th>
+          <th>Der gute Mensch von Sezuan</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Äußerer Aufbau</td>
+          <td class="fill-cell"><input class="fill-input" id="t1a" placeholder="…" type="text"></td>
+          <td class="fill-cell"><input class="fill-input" id="t1b" placeholder="…" type="text"></td>
+        </tr>
+        <tr>
+          <td>Handlungsführung</td>
+          <td class="fill-cell"><input class="fill-input" id="t2a" placeholder="…" type="text"></td>
+          <td class="fill-cell"><input class="fill-input" id="t2b" placeholder="…" type="text"></td>
+        </tr>
+        <tr>
+          <td>Schluss</td>
+          <td class="fill-cell"><input class="fill-input" id="t3a" placeholder="…" type="text"></td>
+          <td class="fill-cell"><input class="fill-input" id="t3b" placeholder="…" type="text"></td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="result-box" id="q5-result"></div>
+    <div class="nav-buttons">
+      <button class="nav-btn" onclick="goTo(4)">← Zurück</button>
+      <button class="nav-btn primary" onclick="checkQ5()">Auswertung</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     KARTE 6 – MC: Verfremdungseffekt
+═══════════════════════════════════════════ -->
+<div class="card" id="card-6" data-card="6">
+  <div class="card-header">
+    <div class="card-number">6</div>
+    <div class="card-title-block">
+      <div class="card-topic">Episches Theater · Brecht</div>
+      <div class="card-question">Was bewirkt der <em>Verfremdungseffekt</em> bei Brecht?</div>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="choices single" id="q6-choices">
+      <button class="choice-btn" data-val="a">Er steigert die emotionale Einfühlung des Publikums in die Figuren.</button>
+      <button class="choice-btn" data-val="b">Er bricht die Bühnenillusion, damit das Publikum distanziert nachdenkt und urteilt.</button>
+      <button class="choice-btn" data-val="c">Er verlagert die Handlung in eine andere Zeit, um historische Genauigkeit zu gewährleisten.</button>
+      <button class="choice-btn" data-val="d">Er vermeidet Konflikte auf der Bühne, um das Publikum zu unterhalten.</button>
+    </div>
+    <div class="result-box" id="q6-result"></div>
+    <div class="nav-buttons">
+      <button class="nav-btn" onclick="goTo(5)">← Zurück</button>
+      <button class="nav-btn primary" id="q6-next" onclick="goTo(7)" style="display:none">Weiter →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     KARTE 7 – MC: Shen Te / Sun
+═══════════════════════════════════════════ -->
+<div class="card" id="card-7" data-card="7">
+  <div class="card-header">
+    <div class="card-number">7</div>
+    <div class="card-title-block">
+      <div class="card-topic">Der gute Mensch von Sezuan · Figuren</div>
+      <div class="card-question">Warum unternimmt Sun in Bild 3 einen Selbstmordversuch?</div>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="excerpt">
+      <div class="meta">Brecht, Der gute Mensch von Sezuan (1943), Bild 3</div>
+      »Ich bin ein Flieger geworden, ein Postflieger ohne Post.«
+    </div>
+    <div class="choices single" id="q7-choices">
+      <button class="choice-btn" data-val="a">Sun hat seinen Lebensinhalt verloren, weil Postflieger nicht mehr gebraucht werden und er keine Anstellung findet.</button>
+      <button class="choice-btn" data-val="b">Sun ist unglücklich verliebt und wurde von seiner Familie verstoßen.</button>
+      <button class="choice-btn" data-val="c">Sun hat Schulden und fürchtet die Konsequenzen seiner Gläubiger.</button>
+      <button class="choice-btn" data-val="d">Sun will die Götter herausfordern und einen Skandal provozieren.</button>
+    </div>
+    <div class="result-box" id="q7-result"></div>
+    <div class="nav-buttons">
+      <button class="nav-btn" onclick="goTo(6)">← Zurück</button>
+      <button class="nav-btn primary" id="q7-next" onclick="goTo(8)" style="display:none">Weiter →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     KARTE 8 – Texteingabe: Sprechweise
+═══════════════════════════════════════════ -->
+<div class="card" id="card-8" data-card="8">
+  <div class="card-header">
+    <div class="card-number">8</div>
+    <div class="card-title-block">
+      <div class="card-topic">Sprachvergleich</div>
+      <div class="card-question">Beschreibe den Unterschied im Sprachstil der beiden Dramen mit je einem Stichwort.</div>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="text-inputs">
+      <div class="input-row">
+        <div class="input-label">Schiller (Kabale und Liebe) – Sprachstil:</div>
+        <input class="text-input" id="q8a" type="text" placeholder="z. B. …" autocomplete="off" autocorrect="off" spellcheck="false">
+      </div>
+      <div class="input-row">
+        <div class="input-label">Brecht (Der gute Mensch von Sezuan) – Sprachstil:</div>
+        <input class="text-input" id="q8b" type="text" placeholder="z. B. …" autocomplete="off" autocorrect="off" spellcheck="false">
+      </div>
+    </div>
+    <div class="result-box" id="q8-result"></div>
+    <div class="nav-buttons">
+      <button class="nav-btn" onclick="goTo(7)">← Zurück</button>
+      <button class="nav-btn primary" onclick="checkQ8()">Auswertung</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     KARTE 9 – MC: Gemeinsamkeit der Liebesbeziehungen
+═══════════════════════════════════════════ -->
+<div class="card" id="card-9" data-card="9">
+  <div class="card-header">
+    <div class="card-number">9</div>
+    <div class="card-title-block">
+      <div class="card-topic">Vergleich der Liebesbeziehungen</div>
+      <div class="card-question">Was ist die zentrale Gemeinsamkeit beider Liebesbeziehungen?</div>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="choices single" id="q9-choices">
+      <button class="choice-btn" data-val="a">Beide Liebespaare scheitern an persönlichen Charakterschwächen.</button>
+      <button class="choice-btn" data-val="b">In beiden Stücken scheitert die Liebe an gesellschaftlichen Verhältnissen, nicht am Willen der Liebenden.</button>
+      <button class="choice-btn" data-val="c">Beide Dramen enden mit dem Selbstmord beider Partner.</button>
+      <button class="choice-btn" data-val="d">Die Liebe triumphiert in beiden Dramen über alle Hindernisse.</button>
+    </div>
+    <div class="result-box" id="q9-result"></div>
+    <div class="nav-buttons">
+      <button class="nav-btn" onclick="goTo(8)">← Zurück</button>
+      <button class="nav-btn primary" id="q9-next" onclick="goTo(10)" style="display:none">Weiter →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     KARTE 10 – WIEDERHOLUNGSKARTE: Aristoteles
+═══════════════════════════════════════════ -->
+<div class="card" id="card-10" data-card="10">
+  <div class="card-header">
+    <div class="card-number">10</div>
+    <div class="card-title-block">
+      <div class="card-topic">Wiederholung: Dramentheorie <span class="wiederholung-badge">↩ Vorwissen</span></div>
+      <div class="card-question">Welcher Begriff bezeichnet bei Aristoteles die emotionale Reinigung des Zuschauers durch Mitleid und Furcht?</div>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="choices single" id="q10-choices">
+      <button class="choice-btn" data-val="a">Peripetie</button>
+      <button class="choice-btn" data-val="b">Anagnorisis</button>
+      <button class="choice-btn" data-val="c">Katharsis</button>
+      <button class="choice-btn" data-val="d">Hybris</button>
+    </div>
+    <div class="result-box" id="q10-result"></div>
+    <div class="nav-buttons">
+      <button class="nav-btn" onclick="goTo(9)">← Zurück</button>
+      <button class="nav-btn primary" id="q10-finish" onclick="showResults()" style="display:none">Auswertung anzeigen →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     ERGEBNIS-KARTE
+═══════════════════════════════════════════ -->
+<div id="results-card">
+  <div class="results-header">
+    <h2>Auswertung</h2>
+    <div class="score-display" id="score-display">–</div>
+    <div class="score-label" id="score-label">Aufgaben korrekt</div>
+  </div>
+  <div class="results-body">
+    <div class="result-summary" id="results-list"></div>
+    <button class="restart-btn" onclick="restartTest()">Test wiederholen</button>
+  </div>
+</div>
+
+</main>
+
+<div class="trex">🦖</div>
+
+<script>
+// ═══════════════════════════════
+//  STATE
+// ═══════════════════════════════
+const TOTAL = 10;
+const answers = {}; // card# -> boolean
+let currentCard = 1;
+
+// ═══════════════════════════════
+//  NAVIGATION
+// ═══════════════════════════════
+function buildNav() {
+  const nav = document.getElementById('card-nav');
+  nav.innerHTML = '';
+  for (let i = 1; i <= TOTAL; i++) {
+    const btn = document.createElement('button');
+    btn.className = 'nav-dot' + (i === 1 ? ' active' : '');
+    btn.textContent = i;
+    btn.id = 'nav-' + i;
+    btn.onclick = () => goTo(i);
+    nav.appendChild(btn);
+  }
+}
+
+function goTo(n) {
+  document.getElementById('card-' + currentCard).classList.remove('visible');
+  document.getElementById('nav-' + currentCard).classList.remove('active');
+  currentCard = n;
+  document.getElementById('card-' + n).classList.add('visible');
+  document.getElementById('nav-' + n).classList.add('active');
+  document.getElementById('results-card').style.display = 'none';
+  updateProgress();
+  window.scrollTo(0, 0);
+}
+
+function updateProgress() {
+  const done = Object.keys(answers).length;
+  const pct = Math.round(done / TOTAL * 100);
+  document.getElementById('prog-text').textContent = `Aufgabe ${currentCard} von ${TOTAL}`;
+  document.getElementById('prog-pct').textContent = pct + ' %';
+  document.getElementById('prog-fill').style.width = pct + '%';
+}
+
+function markNavAnswered(n, correct) {
+  const dot = document.getElementById('nav-' + n);
+  if (dot) { dot.classList.add('answered'); dot.style.background = correct ? '#d4f0da' : '#f5d0d0'; }
+}
+
+// ═══════════════════════════════
+//  FEEDBACK HELPERS
+// ═══════════════════════════════
+function showCorrect(id, text) {
+  const box = document.getElementById(id + '-result');
+  box.className = 'result-box correct';
+  box.innerHTML = `<div class="result-icon">✅</div><strong>Richtig!</strong><div class="result-explanation">${text}</div>`;
+}
+function showWrong(id, text) {
+  const box = document.getElementById(id + '-result');
+  box.className = 'result-box wrong';
+  box.innerHTML = `<div class="result-icon">❌</div><strong>Leider falsch.</strong><div class="result-explanation">${text}</div>`;
+}
+
+// ═══════════════════════════════
+//  Q1 – MC Dramenform
+// ═══════════════════════════════
+document.querySelectorAll('#q1-choices .choice-btn').forEach(btn => {
+  btn.addEventListener('pointerup', () => {
+    if (answers[1] !== undefined) return;
+    document.querySelectorAll('#q1-choices .choice-btn').forEach(b => { b.classList.add('locked'); });
+    btn.classList.add('selected');
+    const correct = btn.dataset.val === 'b';
+    answers[1] = correct;
+    markNavAnswered(1, correct);
+    if (correct) showCorrect('q1', 'Das Freytag\'sche Schema (Exposition → steigende Handlung → Höhepunkt → fallende Handlung → Katastrophe) ist das Kennzeichen der <em>geschlossenen Form</em>.');
+    else showWrong('q1', 'Richtig wäre: <em>Die Handlung folgt dem Freytag\'schen Schema.</em> Die anderen Optionen beschreiben das epische Theater Brechts oder sind frei erfunden.');
+    document.getElementById('q1-next').style.display = 'block';
+    updateProgress();
+  });
+});
+
+// ═══════════════════════════════
+//  Q2 – MATCH Aristoteles/Brecht
+// ═══════════════════════════════
+let selectedChipId = null;
+let selectedChipGroup = null;
+let selectedChipEl = null;
+const chipPlacements = {}; // slotEl -> chipId
+
+function selectChip(el, group) {
+  if (answers[2] !== undefined) return;
+  // deselect previous
+  document.querySelectorAll(`#q2-pool .pool-chip`).forEach(c => c.classList.remove('highlighted'));
+  if (selectedChipEl === el) { selectedChipId = null; selectedChipEl = null; return; }
+  selectedChipId = el.dataset.id;
+  selectedChipGroup = group;
+  selectedChipEl = el;
+  el.classList.add('highlighted');
+}
+
+function placeChip(slotEl, group) {
+  if (answers[2] !== undefined) return;
+  if (!selectedChipId) return;
+  // remove previous value from this slot
+  const prevId = slotEl.dataset.placed;
+  if (prevId) {
+    const prevChip = document.querySelector(`[data-id="${prevId}"]`);
+    if (prevChip) { prevChip.classList.remove('selected-chip'); }
+  }
+  slotEl.dataset.placed = selectedChipId;
+  slotEl.textContent = selectedChipEl.textContent;
+  slotEl.classList.add('has-value');
+  selectedChipEl.classList.add('selected-chip');
+  selectedChipEl.classList.remove('highlighted');
+  // reset
+  selectedChipId = null; selectedChipEl = null;
+  // check if all slots filled
+  const slots = document.querySelectorAll('[data-group="q2"]');
+  const filled = [...slots].every(s => s.dataset.placed);
+  // auto-enable submit (it's always enabled, just check)
+}
+
+function checkQ2() {
+  if (answers[2] !== undefined) return;
+  const slots = document.querySelectorAll('[data-group="q2"]');
+  let correct = 0;
+  slots.forEach(s => {
+    if (s.dataset.placed === s.dataset.correct) correct++;
+  });
+  const allCorrect = correct === slots.length;
+  answers[2] = allCorrect;
+  markNavAnswered(2, allCorrect);
+  if (allCorrect) showCorrect('q2', 'Alle 6 Merkmale korrekt zugeordnet! Das sind die zentralen Unterschiede zwischen aristotelischem und epischem Theater.');
+  else showWrong('q2', `${correct} von ${slots.length} Zuordnungen korrekt.<br><strong>Lösung:</strong> Aristotelisches Theater: Spannung auf den Ausgang, Einfühlung & Katharsis, eine Szene für die andere. Episches Theater: Verfremdungseffekt, Zuschauer urteilt, jede Szene für sich.`);
+  document.getElementById('q2-submit').disabled = true;
+  updateProgress();
+}
+
+// ═══════════════════════════════
+//  Q3 – SORT Freytag
+// ═══════════════════════════════
+let dragSrc = null;
+document.querySelectorAll('#q3-sort .sort-item').forEach(item => {
+  item.addEventListener('dragstart', e => { dragSrc = item; item.classList.add('dragging'); });
+  item.addEventListener('dragend', () => item.classList.remove('dragging'));
+  item.addEventListener('dragover', e => { e.preventDefault(); });
+  item.addEventListener('drop', e => {
+    e.preventDefault();
+    if (dragSrc !== item) {
+      const container = document.getElementById('q3-sort');
+      const items = [...container.querySelectorAll('.sort-item')];
+      const srcIdx = items.indexOf(dragSrc);
+      const tgtIdx = items.indexOf(item);
+      if (srcIdx < tgtIdx) container.insertBefore(dragSrc, item.nextSibling);
+      else container.insertBefore(dragSrc, item);
+    }
+  });
+});
+
+// Touch sort
+let touchSortSrc = null;
+let touchClone = null;
+function sortTouchStart(e, el) {
+  if (answers[3] !== undefined) return;
+  touchSortSrc = el;
+  el.classList.add('dragging');
+  e.preventDefault();
+}
+function sortTouchEnd(e, el) {
+  if (!touchSortSrc) return;
+  el.classList.remove('dragging');
+  const touch = e.changedTouches[0];
+  const target = document.elementFromPoint(touch.clientX, touch.clientY);
+  const destItem = target ? target.closest('.sort-item') : null;
+  if (destItem && destItem !== touchSortSrc) {
+    const container = document.getElementById('q3-sort');
+    const items = [...container.querySelectorAll('.sort-item')];
+    const srcIdx = items.indexOf(touchSortSrc);
+    const tgtIdx = items.indexOf(destItem);
+    if (srcIdx < tgtIdx) container.insertBefore(touchSortSrc, destItem.nextSibling);
+    else container.insertBefore(touchSortSrc, destItem);
+  }
+  touchSortSrc.classList.remove('dragging');
+  touchSortSrc = null;
+}
+
+function checkQ3() {
+  if (answers[3] !== undefined) return;
+  const container = document.getElementById('q3-sort');
+  const items = [...container.querySelectorAll('.sort-item')];
+  const positions = items.map((item, i) => parseInt(item.dataset.correct));
+  const isCorrect = positions.every((val, i) => val === i + 1);
+  answers[3] = isCorrect;
+  markNavAnswered(3, isCorrect);
+  if (isCorrect) showCorrect('q3', 'Perfekt! Die Reihenfolge stimmt: I. Exposition → II. Steigende Handlung → III. Höhepunkt/Peripetie → IV. Fallende Handlung → V. Katastrophe.');
+  else showWrong('q3', 'Nicht ganz. Die richtige Reihenfolge: <br><strong>I. Exposition → II. Steigende Handlung → III. Höhepunkt/Peripetie → IV. Fallende Handlung → V. Katastrophe</strong>');
+  document.getElementById('q3-submit').disabled = true;
+  updateProgress();
+  setTimeout(() => goTo(4), 1600);
+}
+
+// ═══════════════════════════════
+//  Q4 – MC Luise
+// ═══════════════════════════════
+document.querySelectorAll('#q4-choices .choice-btn').forEach(btn => {
+  btn.addEventListener('pointerup', () => {
+    if (answers[4] !== undefined) return;
+    document.querySelectorAll('#q4-choices .choice-btn').forEach(b => b.classList.add('locked'));
+    btn.classList.add('selected');
+    const correct = btn.dataset.val === 'b';
+    answers[4] = correct;
+    markNavAnswered(4, correct);
+    if (correct) showCorrect('q4', 'Richtig! Luise ist vernünftig und realistisch – sie erkennt die Standeshindernisse klar, auch wenn sie Ferdinand liebt. Ihr Ausruf zeigt ihre innere Zerrissen­heit.');
+    else showWrong('q4', 'Richtig wäre: <em>vernünftig, ängstlich, realistisch – sie sieht die gesellschaftlichen Grenzen klar.</em> Im Gegensatz zu Ferdinand, der die Hindernisse ignoriert.');
+    document.getElementById('q4-next').style.display = 'block';
+    updateProgress();
+  });
+});
+
+// ═══════════════════════════════
+//  Q5 – Tabelle
+// ═══════════════════════════════
+const q5answers = {
+  t1a: ['5 akte', '5 akte geschlossene form', 'fünf akte', 'geschlossen', '5 akte, geschlossene form'],
+  t1b: ['episodisch', 'offen', 'episodisch offene form', 'vor- und zwischenspiele'],
+  t2a: ['linear', 'linear-kausal', 'kausal', 'linear kausal'],
+  t2b: ['episodisch', 'keine kausalität', 'in kurven', 'episodisch, keine kausalität'],
+  t3a: ['katastrophe', 'tragisch', 'tod', 'katastrophe/tod'],
+  t3b: ['offen', 'offener schluss', 'publikum denkt selbst']
+};
+
+function checkQ5() {
+  if (answers[5] !== undefined) return;
+  let score = 0;
+  const total = Object.keys(q5answers).length;
+  Object.entries(q5answers).forEach(([id, accepted]) => {
+    const val = document.getElementById(id).value.toLowerCase().trim();
+    if (accepted.some(a => val.includes(a.split(',')[0].trim()))) score++;
+  });
+  const ok = score >= 4;
+  answers[5] = ok;
+  markNavAnswered(5, ok);
+  if (ok) showCorrect('q5', `${score}/${total} Felder korrekt ausgefüllt. ✔`);
+  else showWrong('q5', `Nur ${score}/${total} Felder korrekt.<br><strong>Lösungen:</strong><br>
+    Aufbau: <em>5 Akte, geschlossene Form</em> | <em>episodisch, offene Form</em><br>
+    Handlung: <em>linear-kausal</em> | <em>episodisch, keine durchgehende Kausalität</em><br>
+    Schluss: <em>Katastrophe</em> | <em>offener Schluss – Publikum denkt selbst</em>`);
+  updateProgress();
+  setTimeout(() => goTo(6), 1800);
+}
+
+// ═══════════════════════════════
+//  Q6 – MC Verfremdungseffekt
+// ═══════════════════════════════
+document.querySelectorAll('#q6-choices .choice-btn').forEach(btn => {
+  btn.addEventListener('pointerup', () => {
+    if (answers[6] !== undefined) return;
+    document.querySelectorAll('#q6-choices .choice-btn').forEach(b => b.classList.add('locked'));
+    btn.classList.add('selected');
+    const correct = btn.dataset.val === 'b';
+    answers[6] = correct;
+    markNavAnswered(6, correct);
+    if (correct) showCorrect('q6', 'Genau! Der Verfremdungseffekt bricht die Illusion, damit das Publikum nicht mitfühlt, sondern nachdenkt und gesellschaftliche Zustände hinterfragt.');
+    else showWrong('q6', 'Richtig: <em>Er bricht die Bühnenillusion, damit das Publikum distanziert nachdenkt und urteilt.</em> Das ist das Gegenteil zur aristotelischen Katharsis durch Einfühlung.');
+    document.getElementById('q6-next').style.display = 'block';
+    updateProgress();
+  });
+});
+
+// ═══════════════════════════════
+//  Q7 – MC Sun
+// ═══════════════════════════════
+document.querySelectorAll('#q7-choices .choice-btn').forEach(btn => {
+  btn.addEventListener('pointerup', () => {
+    if (answers[7] !== undefined) return;
+    document.querySelectorAll('#q7-choices .choice-btn').forEach(b => b.classList.add('locked'));
+    btn.classList.add('selected');
+    const correct = btn.dataset.val === 'a';
+    answers[7] = correct;
+    markNavAnswered(7, correct);
+    if (correct) showCorrect('q7', 'Richtig! Sun ist arbeitsloser Flieger – sein Beruf und Lebenssinn existieren nicht mehr, weil Postflieger durch neue Verhältnisse überflüssig wurden. Das ist Brechts gesellschaftskritischer Kommentar.');
+    else showWrong('q7', 'Richtig: <em>Sun hat seinen Lebensinhalt verloren, weil Postflieger nicht mehr gebraucht werden.</em> Dies ist Brechts Kritik an gesellschaftlichen Verhältnissen, die Menschen in Hoffnungslosigkeit treiben.');
+    document.getElementById('q7-next').style.display = 'block';
+    updateProgress();
+  });
+});
+
+// ═══════════════════════════════
+//  Q8 – Texteingabe Sprachstil
+// ═══════════════════════════════
+const schillerTerms = ['pathetisch','rhetorisch','schwülstig','hochsprache','bildreich','überhöht','poetisch'];
+const brechtTerms = ['lakonisch','nüchtern','direkt','alltagssprache','knapp','prosaisch','schlicht'];
+
+function checkQ8() {
+  if (answers[8] !== undefined) return;
+  const a = document.getElementById('q8a').value.toLowerCase().trim();
+  const b = document.getElementById('q8b').value.toLowerCase().trim();
+  const aOk = schillerTerms.some(t => a.includes(t));
+  const bOk = brechtTerms.some(t => b.includes(t));
+  const correct = aOk && bOk;
+  answers[8] = correct;
+  markNavAnswered(8, correct);
+  if (correct) showCorrect('q8', `Beides korrekt! Schiller: pathetisch/rhetorisch – Brecht: nüchtern/lakonisch. Der Sprachstil ist ein Spiegel der Dramenform.`);
+  else showWrong('q8', `<strong>Musterlösung:</strong><br>Schiller: <em>pathetisch, rhetorisch, bildreich, Hochsprache</em><br>Brecht: <em>nüchtern, lakonisch, Alltagssprache, direkt</em>`);
+  updateProgress();
+  setTimeout(() => goTo(9), 1800);
+}
+
+// ═══════════════════════════════
+//  Q9 – MC Gemeinsamkeit
+// ═══════════════════════════════
+document.querySelectorAll('#q9-choices .choice-btn').forEach(btn => {
+  btn.addEventListener('pointerup', () => {
+    if (answers[9] !== undefined) return;
+    document.querySelectorAll('#q9-choices .choice-btn').forEach(b => b.classList.add('locked'));
+    btn.classList.add('selected');
+    const correct = btn.dataset.val === 'b';
+    answers[9] = correct;
+    markNavAnswered(9, correct);
+    if (correct) showCorrect('q9', 'Genau das ist die Kernthese für den Vergleich: In beiden Stücken verhindern gesellschaftliche Verhältnisse die Liebe – bei Schiller die Feudalordnung, bei Brecht kapitalistische Strukturen.');
+    else showWrong('q9', 'Richtig: <em>In beiden Stücken scheitert die Liebe an gesellschaftlichen Verhältnissen, nicht am Willen der Liebenden.</em>');
+    document.getElementById('q9-next').style.display = 'block';
+    updateProgress();
+  });
+});
+
+// ═══════════════════════════════
+//  Q10 – MC Katharsis (Wiederholung)
+// ═══════════════════════════════
+document.querySelectorAll('#q10-choices .choice-btn').forEach(btn => {
+  btn.addEventListener('pointerup', () => {
+    if (answers[10] !== undefined) return;
+    document.querySelectorAll('#q10-choices .choice-btn').forEach(b => b.classList.add('locked'));
+    btn.classList.add('selected');
+    const correct = btn.dataset.val === 'c';
+    answers[10] = correct;
+    markNavAnswered(10, correct);
+    if (correct) showCorrect('q10', '<strong>Katharsis</strong> (griech. Reinigung) ist der Kernbegriff der aristotelischen Dramentheorie: Das Publikum erlebt durch Mitleid und Furcht eine emotionale Reinigung. Brecht lehnte diesen Effekt bewusst ab.');
+    else showWrong('q10', 'Richtig: <em>Katharsis.</em> Peripetie = Wendepunkt, Anagnorisis = Wiedererkennung, Hybris = Übermut/Hochmut.');
+    document.getElementById('q10-finish').style.display = 'block';
+    updateProgress();
+  });
+});
+
+// ═══════════════════════════════
+//  RESULTS
+// ═══════════════════════════════
+const qTitles = {
+  1: 'Geschlossene Dramenform',
+  2: 'Aristoteles vs. Brecht – Zuordnung',
+  3: 'Freytag-Pyramide – Reihenfolge',
+  4: 'Figur: Luise (Kabale und Liebe)',
+  5: 'Strukturvergleich – Tabelle',
+  6: 'Verfremdungseffekt',
+  7: 'Figur: Sun (Guter Mensch)',
+  8: 'Sprachstil-Vergleich',
+  9: 'Gemeinsamkeit der Liebesbeziehungen',
+  10: 'Wiederholung: Katharsis (Aristoteles)'
+};
+
+function showResults() {
+  document.getElementById('card-' + currentCard).classList.remove('visible');
+  document.getElementById('nav-' + currentCard).classList.remove('active');
+  const resultsCard = document.getElementById('results-card');
+  resultsCard.style.display = 'block';
+
+  const correct = Object.values(answers).filter(Boolean).length;
+  const total = Object.keys(answers).length;
+  document.getElementById('score-display').textContent = correct + ' / ' + total;
+  const pct = Math.round(correct / total * 100);
+  let note = pct >= 90 ? '🏆 Ausgezeichnet!' : pct >= 70 ? '👍 Gut gemacht!' : pct >= 50 ? '📖 Noch etwas üben.' : '💪 Nicht aufgeben – nochmal versuchen!';
+  document.getElementById('score-label').textContent = `von ${total} Aufgaben korrekt · ${note}`;
+
+  const list = document.getElementById('results-list');
+  list.innerHTML = '';
+  for (let i = 1; i <= TOTAL; i++) {
+    const ok = answers[i];
+    const row = document.createElement('div');
+    row.className = 'result-row ' + (ok ? 'ok' : 'bad');
+    row.innerHTML = `<span>${i}. ${qTitles[i]}</span><span class="icon">${ok ? '✅' : '❌'}</span>`;
+    list.appendChild(row);
+  }
+  window.scrollTo(0, 0);
+}
+
+function restartTest() {
+  Object.keys(answers).forEach(k => delete answers[k]);
+  // reset Q1
+  document.querySelectorAll('#q1-choices .choice-btn').forEach(b => { b.classList.remove('locked','selected'); });
+  document.getElementById('q1-result').className = 'result-box';
+  document.getElementById('q1-next').style.display = 'none';
+  // reset Q2
+  document.querySelectorAll('[data-group="q2"]').forEach(s => { s.textContent = '–'; s.classList.remove('has-value'); delete s.dataset.placed; });
+  document.querySelectorAll('#q2-pool .pool-chip').forEach(c => c.classList.remove('selected-chip','highlighted'));
+  document.getElementById('q2-result').className = 'result-box';
+  document.getElementById('q2-submit').disabled = false;
+  // reset Q3
+  const sortContainer = document.getElementById('q3-sort');
+  const items = [...sortContainer.querySelectorAll('.sort-item')];
+  items.sort(() => Math.random() - 0.5);
+  items.forEach(item => sortContainer.appendChild(item));
+  document.getElementById('q3-result').className = 'result-box';
+  document.getElementById('q3-submit').disabled = false;
+  // reset Q4
+  document.querySelectorAll('#q4-choices .choice-btn').forEach(b => { b.classList.remove('locked','selected'); });
+  document.getElementById('q4-result').className = 'result-box';
+  document.getElementById('q4-next').style.display = 'none';
+  // reset Q5
+  ['t1a','t1b','t2a','t2b','t3a','t3b'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('q5-result').className = 'result-box';
+  // reset Q6
+  document.querySelectorAll('#q6-choices .choice-btn').forEach(b => { b.classList.remove('locked','selected'); });
+  document.getElementById('q6-result').className = 'result-box';
+  document.getElementById('q6-next').style.display = 'none';
+  // reset Q7
+  document.querySelectorAll('#q7-choices .choice-btn').forEach(b => { b.classList.remove('locked','selected'); });
+  document.getElementById('q7-result').className = 'result-box';
+  document.getElementById('q7-next').style.display = 'none';
+  // reset Q8
+  document.getElementById('q8a').value = '';
+  document.getElementById('q8b').value = '';
+  document.getElementById('q8-result').className = 'result-box';
+  // reset Q9
+  document.querySelectorAll('#q9-choices .choice-btn').forEach(b => { b.classList.remove('locked','selected'); });
+  document.getElementById('q9-result').className = 'result-box';
+  document.getElementById('q9-next').style.display = 'none';
+  // reset Q10
+  document.querySelectorAll('#q10-choices .choice-btn').forEach(b => { b.classList.remove('locked','selected'); });
+  document.getElementById('q10-result').className = 'result-box';
+  document.getElementById('q10-finish').style.display = 'none';
+
+  // reset nav dots
+  for (let i = 1; i <= TOTAL; i++) {
+    const dot = document.getElementById('nav-' + i);
+    dot.classList.remove('answered');
+    dot.style.background = '';
+  }
+  document.getElementById('results-card').style.display = 'none';
+  currentCard = 1;
+  goTo(1);
+}
+
+// ═══════════════════════════════
+//  INIT
+// ═══════════════════════════════
+buildNav();
+updateProgress();
+</script>
+</body>
+</html>
