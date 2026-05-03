@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Rechengesetze üben – Klasse 5</title>
+<style>
+  :root {
+    --blau: #1a56a0;
+    --blau-hell: #e8f0fb;
+    --blau-mid: #3a7bd5;
+    --basis: #2e7d32;
+    --basis-hell: #e8f5e9;
+    --standard: #1565c0;
+    --standard-hell: #e3f2fd;
+    --erw: #6a1b9a;
+    --erw-hell: #f3e5f5;
+    --orange: #e07b00;
+    --orange-hell: #fff3e0;
+    --gruen: #1a7a3a;
+    --gruen-hell: #e6f5eb;
+    --rot: #c0392b;
+    --rot-hell: #fdecea;
+    --grau: #f4f5f7;
+    --text: #2c3345;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    font-size: 18px;
+    background: var(--grau);
+    min-height: 100vh;
+    color: var(--text);
+  }
+
+  .header {
+    background: linear-gradient(135deg, #1a56a0 0%, #3a7bd5 100%);
+    color: white;
+    padding: 18px 20px 14px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+  }
+  .header h1 { font-size: 1.3rem; font-weight: 700; }
+  .header p { font-size: 0.85rem; color: #c8d8f5; margin-top: 3px; }
+
+  /* NIVEAU SWITCHER */
+  .niveau-bar {
+    display: flex;
+    padding: 14px 16px 4px;
+    gap: 10px;
+  }
+  .niveau-btn {
+    flex: 1;
+    padding: 12px 8px;
+    border-radius: 12px;
+    border: 2px solid transparent;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    text-align: center;
+    min-height: 52px;
+    transition: all 0.2s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .niveau-btn:active { transform: scale(0.97); }
+  .niveau-btn.basis { background: var(--basis-hell); color: var(--basis); border-color: var(--basis); }
+  .niveau-btn.standard { background: var(--standard-hell); color: var(--standard); border-color: var(--standard); }
+  .niveau-btn.erw { background: var(--erw-hell); color: var(--erw); border-color: var(--erw); }
+  .niveau-btn.aktiv.basis { background: var(--basis); color: white; }
+  .niveau-btn.aktiv.standard { background: var(--standard); color: white; }
+  .niveau-btn.aktiv.erw { background: var(--erw); color: white; }
+
+  /* KARTENWECHSEL */
+  .karten-tabs {
+    display: flex;
+    overflow-x: auto;
+    padding: 6px 16px;
+    gap: 8px;
+    scrollbar-width: none;
+  }
+  .karten-tabs::-webkit-scrollbar { display: none; }
+  .tab-btn {
+    flex-shrink: 0;
+    padding: 9px 16px;
+    border-radius: 20px;
+    border: 2px solid #c5d3e8;
+    background: white;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--blau);
+    cursor: pointer;
+    min-height: 44px;
+    -webkit-tap-highlight-color: transparent;
+    transition: all 0.2s;
+  }
+  .tab-btn.aktiv { background: var(--blau); color: white; border-color: var(--blau); }
+
+  /* KARTE */
+  .karte {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 3px 14px rgba(26,86,160,0.11);
+    margin: 10px 16px;
+    padding: 20px 18px;
+    display: none;
+  }
+  .karte.aktiv { display: block; }
+
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 10px;
+  }
+  .badge.basis { background: var(--basis); color: white; }
+  .badge.standard { background: var(--standard); color: white; }
+  .badge.erw { background: var(--erw); color: white; }
+  .badge.orange { background: var(--orange); color: white; }
+  .badge.gruen { background: var(--gruen); color: white; }
+
+  .karte h2 { font-size: 1.15rem; color: var(--blau); margin-bottom: 10px; }
+
+  /* AUFGABEN */
+  .aufgabe {
+    background: var(--grau);
+    border-radius: 12px;
+    padding: 14px 15px;
+    margin: 12px 0;
+  }
+  .aufgabe p { font-weight: 600; margin-bottom: 10px; line-height: 1.4; }
+
+  .eingabe-reihe {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin: 8px 0;
+  }
+  .eingabe-reihe .label { flex: 1; min-width: 150px; font-size: 0.95rem; }
+
+  input[type="number"], input[type="text"] {
+    font-size: 1.1rem;
+    padding: 10px 12px;
+    border: 2px solid #c5d3e8;
+    border-radius: 10px;
+    width: 110px;
+    min-width: 110px;
+    text-align: center;
+    -webkit-appearance: none;
+    transition: border-color 0.2s;
+  }
+  input:focus { border-color: var(--blau); outline: none; }
+  input.richtig { border-color: var(--gruen); background: var(--gruen-hell); }
+  input.falsch { border-color: var(--rot); background: var(--rot-hell); }
+
+  /* MC BUTTONS */
+  .mc-optionen {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  .mc-btn {
+    padding: 14px 10px;
+    border-radius: 12px;
+    border: 2px solid #c5d3e8;
+    background: white;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    min-height: 52px;
+    text-align: center;
+    transition: all 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .mc-btn:active { transform: scale(0.97); }
+  .mc-btn.gewaehlt { border-color: var(--blau); background: var(--blau-hell); color: var(--blau); }
+  .mc-btn.richtig { border-color: var(--gruen); background: var(--gruen); color: white; }
+  .mc-btn.falsch { border-color: var(--rot); background: var(--rot); color: white; }
+
+  /* FEEDBACK */
+  .feedback {
+    display: none;
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin: 10px 0;
+    font-weight: 600;
+    font-size: 0.92rem;
+    line-height: 1.4;
+  }
+  .feedback.richtig { display: block; background: var(--gruen); color: white; }
+  .feedback.falsch { display: block; background: var(--rot); color: white; }
+
+  /* PRÜF BUTTON */
+  .btn {
+    display: inline-block;
+    font-size: 1rem;
+    font-weight: 700;
+    padding: 13px 22px;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    min-height: 48px;
+    transition: transform 0.1s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn-blau { background: var(--blau); color: white; box-shadow: 0 3px 10px rgba(26,86,160,0.25); }
+  .btn-grau { background: #dde3f0; color: var(--text); }
+  .btn-voll { width: 100%; margin-top: 12px; }
+
+  /* HINWEIS */
+  .hinweis-box {
+    background: var(--orange-hell);
+    border-left: 4px solid var(--orange);
+    border-radius: 8px;
+    padding: 11px 14px;
+    margin: 10px 0;
+    font-size: 0.9rem;
+    display: none;
+  }
+  .hinweis-box.sichtbar { display: block; }
+
+  /* ERGEBNIS */
+  .ergebnis-box {
+    background: linear-gradient(135deg, var(--blau), var(--blau-mid));
+    color: white;
+    border-radius: 14px;
+    padding: 16px;
+    margin: 14px 0;
+    text-align: center;
+  }
+  .ergebnis-box .punkte { font-size: 2rem; font-weight: 700; }
+  .ergebnis-box p { color: #e8f0fb; margin-top: 6px; font-size: 0.95rem; }
+
+  /* WIEDERHOLUNG */
+  .wdh-box {
+    background: linear-gradient(135deg, #ff6f00, #f9a825);
+    color: white;
+    border-radius: 16px;
+    padding: 18px;
+    margin: 12px 0;
+  }
+  .wdh-box h2 { font-size: 1.1rem; margin-bottom: 8px; }
+  .wdh-box .frage { background: rgba(0,0,0,0.2); border-radius: 10px; padding: 12px; margin: 10px 0; font-weight: 600; color: #ffffff; }
+
+  /* WEITER */
+  .weiter-bereich {
+    padding: 14px 16px 20px;
+    position: sticky;
+    bottom: 0;
+    background: linear-gradient(to top, rgba(244,245,247,1) 70%, transparent);
+  }
+  .btn-weiter {
+    width: 100%; font-size: 1.1rem; font-weight: 700; padding: 16px;
+    border-radius: 14px; border: none; cursor: pointer;
+    background: var(--blau); color: white;
+    box-shadow: 0 4px 14px rgba(26,86,160,0.3);
+    min-height: 56px; display: flex; align-items: center; justify-content: center; gap: 8px;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.1s;
+  }
+  .btn-weiter:active { transform: scale(0.98); }
+
+  .divider { height: 1px; background: #dde3f0; margin: 14px 0; }
+
+  /* SORTIER-AUFGABE */
+  .sortier-container {
+    display: flex; flex-wrap: wrap; gap: 10px; margin: 12px 0;
+    min-height: 50px;
+    border: 2px dashed #c5d3e8;
+    border-radius: 10px;
+    padding: 10px;
+    align-items: center;
+  }
+  .sortier-chip {
+    background: var(--blau);
+    color: white;
+    padding: 10px 14px;
+    border-radius: 20px;
+    font-weight: 700;
+    cursor: pointer;
+    min-height: 44px;
+    display: flex; align-items: center;
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .sortier-chip:active { transform: scale(0.95); }
+  .sortier-chip.gewaehlt { background: var(--orange); }
+  .sortier-chip.platziert { background: var(--gruen); }
+
+  .trex {
+    position: fixed; bottom: 75px; right: 14px;
+    font-size: 1.5rem; opacity: 0.3;
+    pointer-events: none; z-index: 999;
+    user-select: none;
+  }
+
+  .rechen-zeile { font-family: 'Courier New', monospace; font-size: 1rem; margin: 4px 0; }
+  .rechen-hervor { color: var(--orange); font-weight: 700; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🏋️ Rechengesetze üben</h1>
+  <p>Klasse 5 · Kommutativgesetz &amp; Assoziativgesetz · Wähle dein Niveau</p>
+</div>
+
+<!-- NIVEAU WAHL -->
+<div class="niveau-bar">
+  <button class="niveau-btn basis aktiv" id="btnBasis" onclick="setzeNiveau('basis')">⭐ Basis</button>
+  <button class="niveau-btn standard" id="btnStandard" onclick="setzeNiveau('standard')">⭐⭐ Standard</button>
+  <button class="niveau-btn erw" id="btnErw" onclick="setzeNiveau('erweitert')">⭐⭐⭐ Erweitert</button>
+</div>
+
+<!-- KARTEN TABS -->
+<div class="karten-tabs" id="kartenTabs"></div>
+
+<!-- ===== BASIS KARTEN ===== -->
+<div class="karte aktiv" id="basis-karte-1" data-niveau="basis">
+  <span class="badge basis">Basis · Karte 1</span>
+  <h2>🔀 Kommutativgesetz – stimmt das?</h2>
+  <p>Tippe auf <strong>Richtig</strong> oder <strong>Falsch</strong>!</p>
+
+  <div class="aufgabe" id="b1-a1">
+    <p>Die Aussage: „15 + 27 = 27 + 15" ist …</p>
+    <div class="mc-optionen">
+      <button class="mc-btn" onclick="mcAntwort('b1-a1','richtig','✅ Richtig! Summanden darf man vertauschen – das ist das Kommutativgesetz.')">✅ Richtig</button>
+      <button class="mc-btn" onclick="mcAntwort('b1-a1','falsch','')">❌ Falsch</button>
+    </div>
+    <div class="feedback" id="fb-b1-a1"></div>
+  </div>
+
+  <div class="aufgabe" id="b1-a2">
+    <p>Die Aussage: „20 − 8 = 8 − 20" ist …</p>
+    <div class="mc-optionen">
+      <button class="mc-btn" onclick="mcAntwort('b1-a2','falsch','✅ Richtig! Subtraktion ist NICHT kommutativ: 20−8=12, aber 8−20=−12.')">✅ Richtig</button>
+      <button class="mc-btn" onclick="mcAntwort('b1-a2','richtig','')">❌ Falsch</button>
+    </div>
+    <div class="feedback" id="fb-b1-a2"></div>
+  </div>
+
+  <div class="aufgabe" id="b1-a3">
+    <p>Die Aussage: „6 · 9 = 9 · 6" ist …</p>
+    <div class="mc-optionen">
+      <button class="mc-btn" onclick="mcAntwort('b1-a3','richtig','✅ Richtig! 6·9 = 54 und 9·6 = 54. Faktoren darf man vertauschen!')">✅ Richtig</button>
+      <button class="mc-btn" onclick="mcAntwort('b1-a3','falsch','')">❌ Falsch</button>
+    </div>
+    <div class="feedback" id="fb-b1-a3"></div>
+  </div>
+</div>
+
+<div class="karte" id="basis-karte-2" data-niveau="basis">
+  <span class="badge basis">Basis · Karte 2</span>
+  <h2>🔗 Assoziativgesetz – Klammern</h2>
+  <p>Berechne beide Seiten und prüfe, ob sie gleich sind:</p>
+
+  <div class="aufgabe">
+    <p>Berechne:</p>
+    <div class="eingabe-reihe"><span class="label">(10 + 20) + 30 =</span><input type="number" id="b2-l" inputmode="numeric" placeholder="?"></div>
+    <div class="eingabe-reihe"><span class="label">10 + (20 + 30) =</span><input type="number" id="b2-r" inputmode="numeric" placeholder="?"></div>
+    <button class="btn btn-blau btn-voll" onclick="pruefePaar('b2-l','b2-r',60,60,'fb-b2')">Prüfen ✓</button>
+    <div class="feedback" id="fb-b2"></div>
+  </div>
+
+  <div class="aufgabe">
+    <p>Berechne:</p>
+    <div class="eingabe-reihe"><span class="label">(5 · 4) · 2 =</span><input type="number" id="b3-l" inputmode="numeric" placeholder="?"></div>
+    <div class="eingabe-reihe"><span class="label">5 · (4 · 2) =</span><input type="number" id="b3-r" inputmode="numeric" placeholder="?"></div>
+    <button class="btn btn-blau btn-voll" onclick="pruefePaar('b3-l','b3-r',40,40,'fb-b3')">Prüfen ✓</button>
+    <div class="feedback" id="fb-b3"></div>
+  </div>
+</div>
+
+<div class="karte" id="basis-karte-3" data-niveau="basis">
+  <span class="badge basis">Basis · Karte 3</span>
+  <h2>🧮 Einfach geschickt rechnen</h2>
+  <p>Nutze das Kommutativgesetz um die passenden Zahlen zuerst zu addieren:</p>
+
+  <div class="aufgabe">
+    <p>1. &nbsp; 22 + 17 + 13 = ?</p>
+    <p style="font-size:0.88rem;color:#666;font-weight:400">Tipp: Welche zwei Zahlen ergeben zusammen 30?</p>
+    <div class="eingabe-reihe"><span class="label">Ergebnis:</span><input type="number" id="ba1" inputmode="numeric" placeholder="?"></div>
+    <button class="btn btn-blau btn-voll" onclick="pruefeEinzel('ba1',52,'fb-ba1','22+13=35, dann 35+17=52')">Prüfen ✓</button>
+    <div class="feedback" id="fb-ba1"></div>
+  </div>
+
+  <div class="aufgabe">
+    <p>2. &nbsp; 46 + 14 + 27 = ?</p>
+    <p style="font-size:0.88rem;color:#666;font-weight:400">Tipp: Welche zwei Zahlen ergeben 60?</p>
+    <div class="eingabe-reihe"><span class="label">Ergebnis:</span><input type="number" id="ba2" inputmode="numeric" placeholder="?"></div>
+    <button class="btn btn-blau btn-voll" onclick="pruefeEinzel('ba2',87,'fb-ba2','46+14=60, dann 60+27=87')">Prüfen ✓</button>
+    <div class="feedback" id="fb-ba2"></div>
+  </div>
+
+  <div class="aufgabe">
+    <p>3. &nbsp; 83 + 37 + 46 = ?</p>
+    <div class="eingabe-reihe"><span class="label">Ergebnis:</span><input type="number" id="ba3" inputmode="numeric" placeholder="?"></div>
+    <button class="btn btn-blau btn-voll" onclick="pruefeEinzel('ba3',166,'fb-ba3','83+37=120, dann 120+46=166')">Prüfen ✓</button>
+    <div class="feedback" id="fb-ba3"></div>
+  </div>
+</div>
+
+<!-- ===== STANDARD KARTEN ===== -->
+<div class="karte" id="standard-karte-1" data-niveau="standard">
+  <span class="badge standard">Standard · Karte 1</span>
+  <h2>⚡ Geschickt rechnen – Schritt für Schritt</h2>
+  <p>Nutze Kommutativ- und Assoziativgesetz. Welche Umformung macht das Rechnen einfacher?</p>
+
+  <div class="aufgabe">
+    <p>a) &nbsp; 338 + 489 + 162 = ?</p>
+    <p style="font-size:0.88rem;color:#666;font-weight:400">Schreibe zuerst: 338 + 162 + 489 = ___ + 489 = ___</p>
+    <div class="eingabe-reihe"><span class="label">Zwischenschritt (338+162):</span><input type="number" id="s1a-z" inputmode="numeric" placeholder="?"></div>
+    <div class="eingabe-reihe"><span class="label">Ergebnis:</span><input type="number" id="s1a-e" inputmode="numeric" placeholder="?"></div>
+    <button class="btn btn-blau btn-voll" onclick="pruefZwei('s1a-z','s1a-e',500,989,'fb-s1a')">Prüfen ✓</button>
+    <div class="feedback" id="fb-s1a"></div>
+  </div>
+
+  <div class="aufgabe">
+    <p>b) &nbsp; 4 · 35 · 2 · 25 = ?</p>
+    <p style="font-size:0.88rem;color:#666;font-weight:400">Tipp: Rechne zuerst 4·25 und 2·35</p>
+    <div class="eingabe-reihe"><span class="label">4 · 25 =</span><input type="number" id="s1b-z" inputmode="numeric" placeholder="?"></div>
+    <div class="eingabe-reihe"><span class="label">2 · 35 =</span><input type="number" id="s1b-z2" inputmode="numeric" placeholder="?"></div>
+    <div class="eingabe-reihe"><span class="label">Ergebnis:</span><input type="number" id="s1b-e" inputmode="numeric" placeholder="?"></div>
+    <button class="btn btn-blau btn-voll" onclick="pruefDrei('s1b-z','s1b-z2','s1b-e',100,70,7000,'fb-s1b')">Prüfen ✓</button>
+    <div class="feedback" id="fb-s1b"></div>
+  </div>
+</div>
+
+<div class="karte" id="standard-karte-2" data-niveau="standard">
+  <span class="badge standard">Standard · Karte 2</span>
+  <h2>🏷️ Gesetz benennen</h2>
+  <p>Welches Gesetz wurde hier genutzt? Tippe auf die richtige Antwort!</p>
+
+  <div class="aufgabe" id="s2-a1">
+    <div class="rechen-zeile">344 + (156 + 65) + 28</div>
+    <div class="rechen-zeile">= 344 + 156 + 65 + 28</div>
+    <p style="margin-top:8px">Das ist …</p>
+    <div class="mc-optionen">
+      <button class="mc-btn" onclick="mcAntwort('s2-a1','richtig','✅ Richtig! Klammern wurden weggelassen – das ist das Assoziativgesetz.')">Assoziativgesetz</button>
+      <button class="mc-btn" onclick="mcAntwort('s2-a1','falsch','')">Kommutativgesetz</button>
+    </div>
+    <div class="feedback" id="fb-s2-a1"></div>
+  </div>
+
+  <div class="aufgabe" id="s2-a2">
+    <div class="rechen-zeile">25 · 8 · 4 · 125</div>
+    <div class="rechen-zeile">= 25 · 4 · 8 · 125</div>
+    <p style="margin-top:8px">Das ist …</p>
+    <div class="mc-optionen">
+      <button class="mc-btn" onclick="mcAntwort('s2-a2','falsch','')">Assoziativgesetz</button>
+      <button class="mc-btn" onclick="mcAntwort('s2-a2','richtig','✅ Richtig! Die Faktoren wurden vertauscht – das ist das Kommutativgesetz.')">Kommutativgesetz</button>
+    </div>
+    <div class="feedback" id="fb-s2-a2"></div>
+  </div>
+
+  <div class="aufgabe" id="s2-a3">
+    <div class="rechen-zeile">13 · 25 · 8 = 13 · (25 · 8)</div>
+    <p style="margin-top:8px">Das ist …</p>
+    <div class="mc-optionen">
+      <button class="mc-btn" onclick="mcAntwort('s2-a3','richtig','✅ Richtig! Klammern wurden gesetzt – das ist das Assoziativgesetz.')">Assoziativgesetz</button>
+      <button class="mc-btn" onclick="mcAntwort('s2-a3','falsch','')">Kommutativgesetz</button>
+    </div>
+    <div class="feedback" id="fb-s2-a3"></div>
+  </div>
+</div>
+
+<div class="karte" id="standard-karte-3" data-niveau="standard">
+  <span class="badge standard">Standard · Karte 3</span>
+  <h2>📝 Aufgaben aus dem Buch (S. 92–93)</h2>
+
+  <div class="aufgabe">
+    <p>Aufgabe 4a: &nbsp; 34 + 20 + 56 + 80 = ?</p>
+    <div class="eingabe-reihe"><span class="label">Ergebnis:</span><input type="number" id="sb1" inputmode="numeric" placeholder="?"></div>
+    <button class="btn btn-blau btn-voll" onclick="pruefeEinzel('sb1',190,'fb-sb1','34+56=90 und 20+80=100 → 90+100=190')">Prüfen ✓</button>
+    <div class="feedback" id="fb-sb1"></div>
+  </div>
+
+  <div class="aufgabe">
+    <p>Aufgabe 4b: &nbsp; 890 + 190 + 110 = ?</p>
+    <div class="eingabe-reihe"><span class="label">Ergebnis:</span><input type="number" id="sb2" inputmode="numeric" placeholder="?"></div>
+    <button class="btn btn-blau btn-voll" onclick="pruefeEinzel('sb2',1190,'fb-sb2','190+110=300 → 890+300=1190')">Prüfen ✓</button>
+    <div class="feedback" id="fb-sb2"></div>
+  </div>
+
+  <div class="aufgabe">
+    <p>Aufgabe 4e: &nbsp; 3 · 25 · 7 · 4 = ?</p>
+    <div class="eingabe-reihe"><span class="label">Ergebnis:</span><input type="number" id="sb3" inputmode="numeric" placeholder="?"></div>
+    <button class="btn btn-blau btn-voll" onclick="pruefeEinzel('sb3',2100,'fb-sb3','25·4=100, 3·7=21 → 100·21=2100')">Prüfen ✓</button>
+    <div class="feedback" id="fb-sb3"></div>
+  </div>
+
+  <div class="aufgabe">
+    <p>Aufgabe 4f: &nbsp; 8 · 7 · 250 = ?</p>
+    <div class="eingabe-reihe"><span class="label">Ergebnis:</span><input type="number" id="sb4" inputmode="numeric" placeholder="?"></div>
+    <button class="btn btn-blau btn-voll" onclick="pruefeEinzel('sb4',14000,'fb-sb4','8·250=2000 → 2000·7=14000')">Prüfen ✓</button>
+    <div class="feedback" id="fb-sb4"></div>
+  </div>
+</div>
+
+<!-- ===== ERWEITERT KARTEN ===== -->
+<div class="karte" id="erweitert-karte-1" data-niveau="erweitert">
+  <span class="badge erw">Erweitert · Karte 1</span>
+  <h2>🚀 Schwierige Aufgaben – Testet euch!</h2>
+  <p>Diese Aufgaben brauchen mehrere Schritte. Schreibt den Rechenweg auf!</p>
+
+  <div class="aufgabe">
+    <p>a) &nbsp; 77 + 25 + 23 + 7 · 8 = ?</p>
+    <p style="font-size:0.88rem;color:#666;font-weight:400">Tipp: Erst die Punkt-vor-Strich-Regel beachten, dann geschickt rechnen!</p>
+    <div class="eingabe-reihe"><span class="label">7 · 8 =</span><input type="number" id="e1-z" inputmode="numeric" placeholder="?"></div>
+    <div class="eingabe-reihe"><span class="label">77+25+23 =</span><input type="number" id="e1-z2" inputmode="numeric" placeholder="?"></div>
+    <div class="eingabe-reihe"><span class="label">Ergebnis gesamt:</span><input type="number" id="e1-e" inputmode="numeric" placeholder="?"></div>
+    <button class="btn btn-blau btn-voll" onclick="pruefDrei('e1-z','e1-z2','e1-e',56,125,181,'fb-e1')">Prüfen ✓</button>
+    <div class="feedback" id="fb-e1"></div>
+  </div>
+
+  <div class="aufgabe">
+    <p>b) &nbsp; 511 + (3 · 8 · 125) + 7000 = ?</p>
+    <p style="font-size:0.88rem;color:#666;font-weight:400">Tipp: 8·125 ist ein bekannter Trick!</p>
+    <div class="eingabe-reihe"><span class="label">8 · 125 =</span><input type="number" id="e2-z" inputmode="numeric" placeholder="?"></div>
+    <div class="eingabe-reihe"><span class="label">3 · 1000 =</span><input type="number" id="e2-z2" inputmode="numeric" placeholder="?"></div>
+    <div class="eingabe-reihe"><span class="label">Ergebnis:</span><input type="number" id="e2-e" inputmode="numeric" placeholder="?"></div>
+    <button class="btn btn-blau btn-voll" onclick="pruefDrei('e2-z','e2-z2','e2-e',1000,3000,10511,'fb-e2')">Prüfen ✓</button>
+    <div class="feedback" id="fb-e2"></div>
+  </div>
+</div>
+
+<div class="karte" id="erweitert-karte-2" data-niveau="erweitert">
+  <span class="badge erw">Erweitert · Karte 2</span>
+  <h2>💭 Gilt das immer?</h2>
+  <p>Überprüfe jede Aussage mit einem eigenen Beispiel!</p>
+
+  <div class="aufgabe" id="ea-1">
+    <p>„In dem Term 3 · 4 · 5 darf man eine Klammer beliebig setzen, ohne dass sich der Wert ändert."</p>
+    <p>Diese Aussage ist …</p>
+    <div class="mc-optionen">
+      <button class="mc-btn" onclick="mcAntwort('ea-1','richtig','✅ Richtig! Das ist das Assoziativgesetz. (3·4)·5 = 60 und 3·(4·5) = 60.')">Wahr ✅</button>
+      <button class="mc-btn" onclick="mcAntwort('ea-1','falsch','')">Falsch ❌</button>
+    </div>
+    <div class="feedback" id="fb-ea-1"></div>
+  </div>
+
+  <div class="aufgabe" id="ea-2">
+    <p>„In dem Term 3 · 4 + 5 darf man eine Klammer beliebig setzen, ohne dass sich der Wert ändert."</p>
+    <div class="mc-optionen">
+      <button class="mc-btn" onclick="mcAntwort('ea-2','falsch','')">Wahr ✅</button>
+      <button class="mc-btn" onclick="mcAntwort('ea-2','richtig','✅ Richtig – Falsch! 3·4+5 = 17, aber 3·(4+5) = 27. Bei verschiedenen Operationen gilt das Assoziativgesetz NICHT!')">Falsch ❌</button>
+    </div>
+    <div class="feedback" id="fb-ea-2"></div>
+  </div>
+
+  <div class="aufgabe">
+    <p>Überprüfe: Gilt das Kommutativgesetz für die Division?</p>
+    <p style="font-size:0.88rem;color:#666;font-weight:400">Rechne: 12 ÷ 4 = ? und 4 ÷ 12 = ? (als Dezimalzahl: 0,33...)</p>
+    <div class="eingabe-reihe"><span class="label">12 ÷ 4 =</span><input type="number" id="div1" inputmode="numeric" placeholder="?"></div>
+    <button class="btn btn-blau btn-voll" onclick="pruefeEinzel('div1',3,'fb-div1','12÷4=3 und 4÷12≠3 – Das Kommutativgesetz gilt NICHT für die Division!')">Prüfen ✓</button>
+    <div class="feedback" id="fb-div1"></div>
+  </div>
+</div>
+
+<div class="karte" id="erweitert-karte-3" data-niveau="erweitert">
+  <span class="badge erw">Erweitert · Karte 3</span>
+  <h2>🔢 Variablen und Gesetze</h2>
+  <p>Das Kommutativgesetz gilt für alle Zahlen – auch für Variablen!</p>
+
+  <div class="aufgabe" id="ev-1">
+    <p>Welcher Ausdruck ist gleich „a + 7"?</p>
+    <div class="mc-optionen">
+      <button class="mc-btn" onclick="mcAntwort('ev-1','falsch','')">7 − a</button>
+      <button class="mc-btn" onclick="mcAntwort('ev-1','richtig','✅ Richtig! a+7 = 7+a nach dem Kommutativgesetz.')">7 + a</button>
+      <button class="mc-btn" onclick="mcAntwort('ev-1','falsch','')">a · 7</button>
+      <button class="mc-btn" onclick="mcAntwort('ev-1','falsch','')">a − 7</button>
+    </div>
+    <div class="feedback" id="fb-ev-1"></div>
+  </div>
+
+  <div class="aufgabe" id="ev-2">
+    <p>Welcher Ausdruck ist gleich „(a · b) · c"?</p>
+    <div class="mc-optionen">
+      <button class="mc-btn" onclick="mcAntwort('ev-2','richtig','✅ Richtig! Das Assoziativgesetz: (a·b)·c = a·(b·c)')">a · (b · c)</button>
+      <button class="mc-btn" onclick="mcAntwort('ev-2','falsch','')">a · b + c</button>
+      <button class="mc-btn" onclick="mcAntwort('ev-2','falsch','')">a + b · c</button>
+      <button class="mc-btn" onclick="mcAntwort('ev-2','falsch','')">a · b − c</button>
+    </div>
+    <div class="feedback" id="fb-ev-2"></div>
+  </div>
+</div>
+
+<!-- ===== WIEDERHOLUNGSKARTE ===== -->
+<div class="karte" id="wdh-karte" data-niveau="alle">
+  <div class="wdh-box">
+    <h2>🔁 Wiederholung: Rechengesetze – Kahoot!</h2>
+    <p style="font-size:0.9rem;color:#ffe0b2">Ein früheres Thema – kurz aufgefrischt!</p>
+  </div>
+  <div style="margin-top:14px">
+    <p style="font-weight:700;margin-bottom:10px">Übe Kommutativ- und Assoziativgesetz mit Kahoot:</p>
+
+    <a style="display:flex;align-items:center;gap:14px;background:#e8f0fb;border:2px solid #3a7bd5;border-radius:14px;padding:16px;text-decoration:none;color:var(--text);margin-bottom:12px" href="https://create.kahoot.it/share/geschickt-rechnen-kommutativ-assoziativgesetz/1e57da1b-bf98-4a8a-be68-bf25460e8b98" target="_blank">
+      <span style="font-size:2rem">🎮</span>
+      <div>
+        <strong style="color:var(--blau);display:block">Geschickt rechnen – Kahoot!</strong>
+        <span style="font-size:0.85rem;color:#555">Kommutativ- &amp; Assoziativgesetz spielerisch üben</span>
+      </div>
+      <span style="font-size:1.5rem;color:var(--blau-mid);margin-left:auto">›</span>
+    </a>
+
+    <a style="display:flex;align-items:center;gap:14px;background:#e8f0fb;border:2px solid #3a7bd5;border-radius:14px;padding:16px;text-decoration:none;color:var(--text)" href="https://create.kahoot.it/share/rechengesetze/6e6f6a38-9351-4c07-a406-51a0825c38d9" target="_blank">
+      <span style="font-size:2rem">🎮</span>
+      <div>
+        <strong style="color:var(--blau);display:block">Rechengesetze Quiz – Kahoot!</strong>
+        <span style="font-size:0.85rem;color:#555">Kommutativ-, Assoziativ- und Rechenregeln</span>
+      </div>
+      <span style="font-size:1.5rem;color:var(--blau-mid);margin-left:auto">›</span>
+    </a>
+  </div>
+
+  <div class="divider"></div>
+  <p style="font-weight:700;margin-bottom:8px">Oder beantworte diese Fragen ohne Hilfsmittel:</p>
+
+  <div class="aufgabe" id="wdh-1">
+    <p>Welches Gesetz erlaubt es, Summanden zu vertauschen?</p>
+    <div class="mc-optionen">
+      <button class="mc-btn" onclick="mcAntwort('wdh-1','richtig','✅ Richtig! Das Kommutativgesetz: a+b = b+a')">Kommutativgesetz</button>
+      <button class="mc-btn" onclick="mcAntwort('wdh-1','falsch','')">Assoziativgesetz</button>
+    </div>
+    <div class="feedback" id="fb-wdh-1"></div>
+  </div>
+
+  <div class="aufgabe" id="wdh-2">
+    <p>Welches Gesetz erlaubt es, Klammern zu setzen?</p>
+    <div class="mc-optionen">
+      <button class="mc-btn" onclick="mcAntwort('wdh-2','falsch','')">Kommutativgesetz</button>
+      <button class="mc-btn" onclick="mcAntwort('wdh-2','richtig','✅ Richtig! Das Assoziativgesetz: (a+b)+c = a+(b+c)')">Assoziativgesetz</button>
+    </div>
+    <div class="feedback" id="fb-wdh-2"></div>
+  </div>
+
+  <div class="aufgabe">
+    <p>Berechne geschickt: 125 · 8 · 7 = ?</p>
+    <div class="eingabe-reihe"><span class="label">Ergebnis:</span><input type="number" id="wdh-r" inputmode="numeric" placeholder="?"></div>
+    <button class="btn btn-blau btn-voll" onclick="pruefeEinzel('wdh-r',7000,'fb-wdh-r','125·8=1000, dann 1000·7=7000!')">Prüfen ✓</button>
+    <div class="feedback" id="fb-wdh-r"></div>
+  </div>
+</div>
+
+<!-- ===== AUSWERTUNGSKARTE ===== -->
+<div class="karte" id="auswertung-karte">
+  <div id="auswertung-inhalt"></div>
+</div>
+
+<!-- WEITER BUTTON -->
+<div class="weiter-bereich">
+  <button class="btn-weiter" id="weiterBtn" onclick="naechsteKarte()">
+    <span id="weiterText">Weiter →</span>
+  </button>
+</div>
+
+<div class="trex">🦖</div>
+
+<script>
+  let aktuellesNiveau = 'basis';
+  let aktuelleKarteNr = 1;
+
+  const niveauKarten = {
+    basis:     ['basis-karte-1','basis-karte-2','basis-karte-3','wdh-karte','auswertung-karte'],
+    standard:  ['standard-karte-1','standard-karte-2','standard-karte-3','wdh-karte','auswertung-karte'],
+    erweitert: ['erweitert-karte-1','erweitert-karte-2','erweitert-karte-3','wdh-karte','auswertung-karte']
+  };
+
+  const tabNamen = {
+    basis:     ['MC-Quiz','Klammern','Rechnen','Wiederholung','🏆 Auswertung'],
+    standard:  ['Schritte','Gesetze','Buchaufgaben','Wiederholung','🏆 Auswertung'],
+    erweitert: ['Schwer','Gilt immer?','Variablen','Wiederholung','🏆 Auswertung']
+  };
+
+  // Punktezählung
+  let punkte = 0;
+  let maxPunkte = 0;
+  const beantwortet = new Set();
+
+  function gibPunkt(id) {
+    if (!beantwortet.has(id)) {
+      beantwortet.add(id);
+      maxPunkte++;
+      punkte++;
+    }
+  }
+  function zaehleFehler(id) {
+    if (!beantwortet.has(id)) {
+      beantwortet.add(id);
+      maxPunkte++;
+    }
+  }
+
+  function zeigeAuswertung() {
+    // Alle sichtbaren richtigen Feedbacks zählen
+    let richtig = document.querySelectorAll('.feedback.richtig').length;
+    let gesamt  = document.querySelectorAll('.feedback.richtig, .feedback.falsch').length;
+    // MC-Buttons richtig zählen
+    let mcRichtig = document.querySelectorAll('.mc-btn.richtig').length;
+    let mcGesamt  = document.querySelectorAll('.mc-btn.richtig, .mc-btn.falsch').length;
+    richtig += mcRichtig;
+    gesamt  += mcGesamt;
+    if (gesamt === 0) { richtig = 0; gesamt = 1; }
+
+    const prozent = Math.round(richtig / gesamt * 100);
+    let stern, farbe, text;
+    if (prozent >= 90)      { stern='⭐⭐⭐'; farbe='#1a7a3a'; text='Ausgezeichnet! Ihr habt die Rechengesetze super drauf!'; }
+    else if (prozent >= 70) { stern='⭐⭐';   farbe='#1565c0'; text='Sehr gut! Ein paar Aufgaben nochmal anschauen.'; }
+    else if (prozent >= 50) { stern='⭐';     farbe='#e07b00'; text='Gut angefangen! Wiederholt die schwierigen Aufgaben.'; }
+    else                    { stern='🔁';     farbe='#c0392b'; text='Nochmal üben! Schaut euch die Erklärseite nochmal an.'; }
+
+    const niveauLabel = {basis:'Basis',standard:'Standard',erweitert:'Erweitert'}[aktuellesNiveau];
+
+    document.getElementById('auswertung-inhalt').innerHTML = `
+      <div style="text-align:center;padding:10px 0 20px">
+        <div style="font-size:3rem;margin-bottom:6px">${stern}</div>
+        <div style="font-size:1.6rem;font-weight:700;color:${farbe};margin-bottom:4px">${richtig} von ${gesamt} richtig</div>
+        <div style="font-size:1rem;color:#555;margin-bottom:16px">Niveau: ${niveauLabel}</div>
+        <div style="background:${farbe};color:white;border-radius:14px;padding:16px 18px;font-size:1rem;font-weight:600;margin-bottom:18px">${text}</div>
+      </div>
+      <div style="background:#f4f5f7;border-radius:12px;padding:14px 16px;margin-bottom:14px">
+        <div style="font-weight:700;margin-bottom:10px;color:#1a1f2e">Was habt ihr gelernt?</div>
+        <p>🔀 <strong>Kommutativgesetz:</strong> Summanden und Faktoren darf man vertauschen</p>
+        <p style="margin-top:6px">🔗 <strong>Assoziativgesetz:</strong> Klammern darf man beliebig setzen</p>
+        <p style="margin-top:6px;font-size:0.9rem;color:#555">Beide Gesetze gelten für + und · – nicht für − und ÷</p>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button onclick="setzeNiveau(aktuellesNiveau)" style="flex:1;padding:13px;border-radius:12px;border:2px solid #1a56a0;background:#e8f0fb;color:#1a56a0;font-weight:700;font-size:0.95rem;min-height:48px;cursor:pointer">
+          🔄 Nochmal üben
+        </button>
+        <a href="rechengesetze_textaufgaben.html" style="flex:1;padding:13px;border-radius:12px;background:#1a56a0;color:white;font-weight:700;font-size:0.95rem;min-height:48px;cursor:pointer;text-decoration:none;display:flex;align-items:center;justify-content:center;text-align:center">
+          📖 Zu den Textaufgaben
+        </a>
+      </div>
+    `;
+  }
+  const niveauBtnIds = {
+    basis:     'btnBasis',
+    standard:  'btnStandard',
+    erweitert: 'btnErw'
+  };
+
+  function setzeNiveau(niveau) {
+    aktuellesNiveau = niveau;
+    // Kartennummer beibehalten, aber nicht über die neue Länge hinaus
+    const neueKarten = niveauKarten[niveau];
+    if (aktuelleKarteNr > neueKarten.length) aktuelleKarteNr = neueKarten.length;
+    // Alle Niveau-Buttons deaktivieren
+    Object.values(niveauBtnIds).forEach(id => {
+      document.getElementById(id).classList.remove('aktiv');
+    });
+    // Gewählten Button aktivieren
+    document.getElementById(niveauBtnIds[niveau]).classList.add('aktiv');
+    bauteTabs();
+    zeigeKarte(aktuelleKarteNr);
+  }
+
+  function bauteTabs() {
+    const tabs = document.getElementById('kartenTabs');
+    tabs.innerHTML = '';
+    const namen = tabNamen[aktuellesNiveau];
+    namen.forEach((name, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'tab-btn' + (i === 0 ? ' aktiv' : '');
+      btn.textContent = (i + 1) + '. ' + name;
+      const idx = i + 1;
+      btn.onclick = () => { aktuelleKarteNr = idx; zeigeKarte(idx); };
+      tabs.appendChild(btn);
+    });
+  }
+
+  function zeigeKarte(nr) {
+    // Alle Karten verstecken
+    document.querySelectorAll('.karte').forEach(k => k.classList.remove('aktiv'));
+    // Richtige Karte zeigen
+    const karten = niveauKarten[aktuellesNiveau];
+    const karteId = karten[nr - 1];
+    if (karteId) {
+      const el = document.getElementById(karteId);
+      if (el) el.classList.add('aktiv');
+      if (karteId === 'auswertung-karte') zeigeAuswertung();
+    }
+    // Tabs aktualisieren
+    document.querySelectorAll('.tab-btn').forEach((t, i) => {
+      t.classList.toggle('aktiv', i === nr - 1);
+    });
+    // Weiter-Button
+    const weiterBtn = document.getElementById('weiterBtn');
+    const weiterText = document.getElementById('weiterText');
+    if (nr >= karten.length) {
+      weiterText.textContent = 'Fertig! 🎉';
+      weiterBtn.onclick = null;
+    } else {
+      weiterText.textContent = 'Weiter →';
+      weiterBtn.onclick = naechsteKarte;
+    }
+    window.scrollTo(0, 0);
+  }
+
+  function naechsteKarte() {
+    const karten = niveauKarten[aktuellesNiveau];
+    if (aktuelleKarteNr < karten.length) {
+      aktuelleKarteNr++;
+      zeigeKarte(aktuelleKarteNr);
+    }
+  }
+
+  // MC-Antworten
+  function mcAntwort(aufgabeId, gewaehlt, erfolgMsg) {
+    const aufgabe = document.getElementById(aufgabeId);
+    const fb = document.getElementById('fb-' + aufgabeId);
+    const btns = aufgabe.querySelectorAll('.mc-btn');
+    btns.forEach(b => b.style.pointerEvents = 'none');
+    const geklickt = event.currentTarget;
+    if (gewaehlt === 'richtig') {
+      geklickt.classList.add('richtig');
+      fb.className = 'feedback richtig';
+      fb.textContent = erfolgMsg;
+    } else {
+      geklickt.classList.add('falsch');
+      fb.className = 'feedback falsch';
+      fb.textContent = '❌ Leider falsch. ' + (erfolgMsg ? erfolgMsg : 'Probiere es nochmal!');
+      // Beim nächsten Tap freigeben
+      setTimeout(() => {
+        btns.forEach(b => { b.style.pointerEvents = ''; b.classList.remove('falsch','richtig','gewaehlt'); });
+        fb.className = 'feedback';
+      }, 2000);
+    }
+  }
+
+  function pruefeEinzel(id, richtig, fbId, hinweis) {
+    const val = parseInt(document.getElementById(id).value);
+    const fb = document.getElementById(fbId);
+    const inp = document.getElementById(id);
+    if (val === richtig) {
+      inp.classList.add('richtig'); inp.classList.remove('falsch');
+      fb.className = 'feedback richtig';
+      fb.textContent = '✅ Richtig! Das Ergebnis ist ' + richtig + '. ' + (hinweis ? 'Rechenweg: ' + hinweis : '');
+    } else {
+      inp.classList.add('falsch'); inp.classList.remove('richtig');
+      fb.className = 'feedback falsch';
+      fb.textContent = '❌ Leider falsch. Das richtige Ergebnis ist ' + richtig + '. ' + (hinweis ? 'Tipp: ' + hinweis : '');
+    }
+  }
+
+  function pruefePaar(id1, id2, r1, r2, fbId) {
+    const v1 = parseInt(document.getElementById(id1).value);
+    const v2 = parseInt(document.getElementById(id2).value);
+    const fb = document.getElementById(fbId);
+    if (v1 === r1 && v2 === r2) {
+      fb.className = 'feedback richtig';
+      fb.textContent = '✅ Richtig! Beide Ergebnisse sind ' + r1 + ' – das zeigt das Assoziativgesetz!';
+    } else {
+      fb.className = 'feedback falsch';
+      fb.textContent = '❌ Nicht ganz. Beide Ergebnisse sollten ' + r1 + ' sein.';
+    }
+  }
+
+  function pruefZwei(id1, id2, r1, r2, fbId) {
+    const v1 = parseInt(document.getElementById(id1).value);
+    const v2 = parseInt(document.getElementById(id2).value);
+    const fb = document.getElementById(fbId);
+    if (v1 === r1 && v2 === r2) {
+      fb.className = 'feedback richtig';
+      fb.textContent = '✅ Super! ' + r1 + ' + 489 = ' + r2 + ' – klasse geschickt gerechnet!';
+    } else {
+      fb.className = 'feedback falsch';
+      fb.textContent = '❌ Schau nochmal. Erster Schritt: ' + r1 + ', Ergebnis: ' + r2;
+    }
+  }
+
+  function pruefDrei(id1, id2, id3, r1, r2, r3, fbId) {
+    const v1 = parseInt(document.getElementById(id1).value);
+    const v2 = parseInt(document.getElementById(id2).value);
+    const v3 = parseInt(document.getElementById(id3).value);
+    const fb = document.getElementById(fbId);
+    if (v1 === r1 && v2 === r2 && v3 === r3) {
+      fb.className = 'feedback richtig';
+      fb.textContent = '✅ Perfekt! Alle Schritte richtig. Endergebnis: ' + r3;
+    } else {
+      fb.className = 'feedback falsch';
+      let msg = '❌ Schau nochmal: ';
+      if (v1 !== r1) msg += 'Schritt 1 = ' + r1 + '. ';
+      if (v2 !== r2) msg += 'Schritt 2 = ' + r2 + '. ';
+      if (v3 !== r3) msg += 'Ergebnis = ' + r3 + '.';
+      fb.textContent = msg;
+    }
+  }
+
+  // Init
+  bauteTabs();
+  zeigeKarte(1);
+</script>
+</body>
+</html>
