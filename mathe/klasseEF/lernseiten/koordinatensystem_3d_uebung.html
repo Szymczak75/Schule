@@ -1,0 +1,1758 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>3D-Koordinatensystem & Vektoren – Übung</title>
+<script>
+  MathJax = {
+    tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+    svg: { fontCache: 'global' }
+  };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+:root {
+  --bg: #0f1117;
+  --bg2: #181c27;
+  --bg3: #1e2333;
+  --card: #232a3e;
+  --card2: #2a3248;
+  --accent: #4f8ef7;
+  --accent2: #7c5cfc;
+  --teal: #2dd4bf;
+  --amber: #f59e0b;
+  --green: #22c55e;
+  --green-bg: #14532d;
+  --red: #ef4444;
+  --red-bg: #450a0a;
+  --text: #e2e8f0;
+  --text2: #94a3b8;
+  --border: rgba(255,255,255,0.08);
+  --border2: rgba(255,255,255,0.14);
+  --radius: 14px;
+  --radius-sm: 8px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'SF Pro Display', -apple-system, 'Segoe UI', sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+header {
+  background: linear-gradient(135deg, #1a2040 0%, #0f1117 100%);
+  border-bottom: 1px solid var(--border2);
+  padding: 1.2rem 1.5rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-left h1 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+
+.header-left p {
+  font-size: 0.78rem;
+  color: var(--text2);
+  margin-top: 2px;
+}
+
+.trex { font-size: 1.4rem; user-select: none; }
+
+
+/* Karten-Navigation */
+.karten-nav {
+  display: flex;
+  gap: 0.5rem;
+  padding: 1rem 1.5rem 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.nav-btn {
+  flex-shrink: 0;
+  padding: 0.45rem 1rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border2);
+  background: var(--card);
+  color: var(--text2);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.18s;
+  min-height: 36px;
+  touch-action: manipulation;
+}
+
+.nav-btn.active {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(79,142,247,0.1);
+}
+
+.nav-btn.done {
+  border-color: var(--green);
+  color: var(--green);
+  background: rgba(34,197,94,0.08);
+}
+
+/* Main Content */
+main { padding: 1.25rem 1.5rem 2rem; max-width: 860px; margin: 0 auto; }
+
+/* Karten */
+.karte { display: none; animation: fadeIn 0.22s ease; }
+.karte.active { display: block; }
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+.karte-titel {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 0.4rem;
+  letter-spacing: -0.02em;
+}
+
+.karte-untertitel {
+  font-size: 0.85rem;
+  color: var(--text2);
+  margin-bottom: 1.5rem;
+}
+
+/* Aufgaben-Boxen */
+.aufgabe {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.2rem;
+  margin-bottom: 1rem;
+  transition: border-color 0.2s;
+}
+
+.aufgabe-nr {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text2);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.5rem;
+}
+
+.aufgabe-text {
+  font-size: 0.95rem;
+  margin-bottom: 1rem;
+  line-height: 1.7;
+}
+
+/* GeoGebra-Container */
+.ggb-container {
+  background: var(--card);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.ggb-label {
+  font-size: 0.8rem;
+  color: var(--text2);
+  margin-bottom: 0.6rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.ggb-label::before {
+  content: '';
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--teal);
+}
+
+#ggb-applet {
+  width: 100%;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: white;
+}
+
+/* MC-Buttons */
+.mc-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+}
+
+.mc-btn {
+  padding: 0.8rem 1rem;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border2);
+  background: var(--card2);
+  color: var(--text);
+  font-size: 0.9rem;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s;
+  min-height: 48px;
+  touch-action: manipulation;
+  line-height: 1.4;
+}
+
+.mc-btn:active { transform: scale(0.97); }
+.mc-btn:hover { border-color: var(--accent); }
+.mc-btn.correct { background: var(--green-bg); border-color: var(--green); color: #86efac; }
+.mc-btn.wrong { background: var(--red-bg); border-color: var(--red); color: #fca5a5; }
+.mc-btn.disabled { cursor: default; }
+.mc-btn.disabled:hover { border-color: var(--border2); }
+.mc-btn.correct.disabled, .mc-btn.wrong.disabled { border-color: inherit; }
+
+/* Text-Eingaben */
+.eingabe-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.eingabe-label {
+  font-size: 0.9rem;
+  min-width: 60px;
+  color: var(--text2);
+}
+
+.eingabe-gruppe {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+input[type="number"], input[type="text"] {
+  background: var(--bg3);
+  border: 1.5px solid var(--border2);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-size: 1rem;
+  padding: 0.5rem 0.65rem;
+  width: 64px;
+  text-align: center;
+  outline: none;
+  transition: border-color 0.15s;
+  min-height: 44px;
+}
+
+input:focus { border-color: var(--accent); }
+input.correct { border-color: var(--green); background: rgba(34,197,94,0.1); }
+input.wrong { border-color: var(--red); background: rgba(239,68,68,0.1); }
+
+/* Bruch als div */
+.frac {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  vertical-align: middle;
+  margin: 0 2px;
+  font-size: 0.85em;
+}
+.frac span:first-child {
+  border-bottom: 1.5px solid currentColor;
+  padding: 0 2px 1px;
+  line-height: 1.3;
+}
+.frac span:last-child { padding: 1px 2px 0; line-height: 1.3; }
+
+/* Punkt-Notation */
+.pkt {
+  font-style: italic;
+  font-weight: 600;
+}
+
+.vektor-box {
+  display: inline-flex;
+  flex-direction: column;
+  background: var(--card2);
+  border: 1px solid var(--border2);
+  border-radius: 4px;
+  padding: 0.3rem 0.5rem;
+  margin: 0 4px;
+  vertical-align: middle;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+/* Feedback */
+.feedback {
+  border-radius: var(--radius-sm);
+  padding: 0.7rem 1rem;
+  margin-top: 0.8rem;
+  font-size: 0.9rem;
+  display: none;
+  line-height: 1.5;
+}
+.feedback.show { display: block; }
+.feedback.correct {
+  background: var(--green-bg);
+  border: 1px solid rgba(34,197,94,0.4);
+  color: #86efac;
+}
+.feedback.wrong {
+  background: var(--red-bg);
+  border: 1px solid rgba(239,68,68,0.4);
+  color: #fca5a5;
+}
+
+/* Prüf-Buttons */
+.prüf-btn {
+  padding: 0.6rem 1.5rem;
+  background: var(--accent2);
+  border: none;
+  border-radius: var(--radius-sm);
+  color: white;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  min-height: 44px;
+  min-width: 44px;
+  touch-action: manipulation;
+  transition: opacity 0.15s, transform 0.1s;
+  margin-top: 0.5rem;
+}
+.prüf-btn:active { transform: scale(0.97); }
+.prüf-btn:disabled { opacity: 0.4; cursor: default; }
+
+/* Hinweis-Box */
+.tipp-btn {
+  background: transparent;
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-sm);
+  color: var(--text2);
+  font-size: 0.82rem;
+  padding: 0.4rem 0.8rem;
+  cursor: pointer;
+  min-height: 36px;
+  touch-action: manipulation;
+  margin-top: 0.6rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: border-color 0.15s;
+}
+.tipp-btn:hover { border-color: var(--amber); color: var(--amber); }
+
+.tipp-inhalt {
+  background: rgba(245,158,11,0.08);
+  border: 1px solid rgba(245,158,11,0.3);
+  border-radius: var(--radius-sm);
+  padding: 0.7rem 1rem;
+  margin-top: 0.5rem;
+  font-size: 0.87rem;
+  color: #fcd34d;
+  display: none;
+  line-height: 1.6;
+}
+.tipp-inhalt.show { display: block; }
+
+/* Fortschrittsbalken */
+.progress-wrap {
+  background: var(--bg3);
+  border-radius: 4px;
+  height: 4px;
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+}
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent2), var(--teal));
+  border-radius: 4px;
+  transition: width 0.4s ease;
+  width: 0%;
+}
+
+/* Auswertung */
+.auswertung-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.75rem;
+  margin: 1.2rem 0;
+}
+
+.stat-card {
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem;
+  text-align: center;
+}
+.stat-zahl {
+  font-size: 2.2rem;
+  font-weight: 700;
+  line-height: 1;
+  margin-bottom: 0.3rem;
+}
+.stat-label { font-size: 0.78rem; color: var(--text2); }
+
+/* Weiter-Button */
+#weiter-btn {
+  display: none;
+  width: 100%;
+  padding: 1rem;
+  background: linear-gradient(135deg, var(--accent2), var(--accent));
+  border: none;
+  border-radius: var(--radius);
+  color: white;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 1.5rem;
+  min-height: 54px;
+  letter-spacing: 0.01em;
+  touch-action: manipulation;
+  transition: opacity 0.2s, transform 0.1s;
+}
+#weiter-btn:active { transform: scale(0.98); }
+#weiter-btn.sichtbar { display: block; animation: fadeIn 0.4s ease; }
+
+/* Wiederholung-Badge */
+.wdh-badge {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.2rem 0.55rem;
+  border-radius: 99px;
+  background: rgba(245,158,11,0.15);
+  color: var(--amber);
+  border: 1px solid rgba(245,158,11,0.35);
+  margin-left: 0.4rem;
+  vertical-align: middle;
+  letter-spacing: 0.03em;
+}
+
+/* Koordinaten-Eingabe */
+.koord-eingabe {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+  font-size: 0.95rem;
+}
+
+/* SVG 3D-Koordinatensystem */
+.koordinaten-svg {
+  width: 100%;
+  max-width: 360px;
+  margin: 0.8rem auto;
+  display: block;
+}
+
+/* Responsive */
+@media (max-width: 540px) {
+  main { padding: 1rem 1rem 2rem; }
+  header { padding: 1rem 1rem 0.8rem; }
+  .mc-grid { grid-template-columns: 1fr; }
+  .karte-titel { font-size: 1.1rem; }
+}
+
+/* Tooltip */
+[data-tooltip] {
+  position: relative;
+  border-bottom: 1px dashed var(--text2);
+  cursor: help;
+}
+[data-tooltip]:after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--card2);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-sm);
+  padding: 0.4rem 0.7rem;
+  font-size: 0.78rem;
+  white-space: nowrap;
+  z-index: 10;
+  color: var(--text);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+[data-tooltip]:hover:after,
+[data-tooltip]:focus:after { opacity: 1; }
+
+/* Schieberegler */
+input[type="range"] {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 6px;
+  background: var(--card2);
+  border-radius: 4px;
+  outline: none;
+  margin: 0.6rem 0;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--accent2);
+  cursor: pointer;
+}
+
+.slider-row {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-bottom: 0.5rem;
+}
+.slider-val {
+  font-size: 1.1rem;
+  font-weight: 700;
+  min-width: 32px;
+  text-align: center;
+  color: var(--accent);
+}
+
+/* Antippen-Prinzip */
+.antippen-item {
+  display: inline-block;
+  padding: 0.4rem 0.8rem;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border2);
+  background: var(--card2);
+  margin: 0.3rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.15s;
+  min-height: 44px;
+  touch-action: manipulation;
+  display: inline-flex;
+  align-items: center;
+}
+.antippen-item.selected {
+  border-color: var(--accent2);
+  background: rgba(124,92,252,0.15);
+  color: var(--accent2);
+}
+.antippen-item.placed {
+  border-color: var(--teal);
+  background: rgba(45,212,191,0.1);
+  color: var(--teal);
+}
+.antippen-item.placed-wrong {
+  border-color: var(--red);
+  background: rgba(239,68,68,0.1);
+  color: var(--red);
+}
+
+.ziel-feld {
+  display: inline-block;
+  min-width: 80px;
+  min-height: 40px;
+  border: 2px dashed var(--border2);
+  border-radius: var(--radius-sm);
+  padding: 0.3rem 0.6rem;
+  margin: 0.3rem;
+  cursor: pointer;
+  text-align: center;
+  font-size: 0.88rem;
+  transition: all 0.15s;
+  touch-action: manipulation;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.ziel-feld.ready {
+  border-color: var(--accent);
+  background: rgba(79,142,247,0.06);
+}
+.ziel-feld.filled {
+  border-style: solid;
+  border-color: var(--teal);
+  background: rgba(45,212,191,0.06);
+  color: var(--teal);
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <h1>3D-Koordinatensystem & Vektoren</h1>
+    <p>Klasse 10 · Analytische Geometrie</p>
+  </div>
+  <span class="trex">🦖</span>
+</header>
+
+
+<!-- Karten-Navigation -->
+<div class="karten-nav">
+  <button class="nav-btn active" onclick="zeigeKarte(0)" id="nav-0">📍 Koordinaten ablesen</button>
+  <button class="nav-btn" onclick="zeigeKarte(1)" id="nav-1">✏️ Punkte einzeichnen</button>
+  <button class="nav-btn" onclick="zeigeKarte(2)" id="nav-2">➡️ Vektoren</button>
+  <button class="nav-btn" onclick="zeigeKarte(3)" id="nav-3">🧮 Rechnen mit Vektoren</button>
+  <button class="nav-btn" onclick="zeigeKarte(4)" id="nav-4">⚡ Kombiniert</button>
+  <button class="nav-btn" onclick="zeigeKarte(5)" id="nav-5">↩️ Wiederholung</button>
+  <button class="nav-btn" onclick="zeigeKarte(6)" id="nav-6">🏆 Auswertung</button>
+</div>
+
+<main>
+
+<!-- ======================= KARTE 0: KOORDINATEN ABLESEN ======================= -->
+<div class="karte active" id="karte-0">
+  <div class="karte-titel">📍 Koordinaten ablesen</div>
+  <div class="karte-untertitel">Lies Punkte im 3D-Koordinatensystem ab und gib ihre Koordinaten an.</div>
+
+  <div class="progress-wrap"><div class="progress-bar" id="pb-0"></div></div>
+
+  <!-- GeoGebra -->
+  <div class="ggb-container">
+    <div class="ggb-label">Interaktives 3D-Modell – drehen mit einem Finger</div>
+    <div id="ggb-applet" style="height:340px;"></div>
+  </div>
+
+  <p style="font-size:0.85rem;color:var(--text2);margin-bottom:1rem;">
+    Tipp: Im Modell siehst du eine <strong>Pyramide</strong>. Drehe das Koordinatensystem, um die Punkte besser zu erkennen.
+  </p>
+
+  <!-- Aufgabe 3 – MC -->
+  <div class="aufgabe" id="a0-3">
+    <div class="aufgabe-nr">Aufgabe 1</div>
+    <div class="aufgabe-text" id="a0-3-text"></div>
+    <div class="mc-grid" id="a0-3-mc"></div>
+    <div class="feedback" id="fb-a0-3"></div>
+  </div>
+
+</div>
+
+<!-- ======================= KARTE 1: PUNKTE EINZEICHNEN ======================= -->
+<div class="karte" id="karte-1">
+  <div class="karte-titel">✏️ Punkte und Vektoren</div>
+  <div class="karte-untertitel">Ordne Punkte ihren Ortsvektoren zu und übe das Ablesen im Grundriss.</div>
+
+  <div class="progress-wrap"><div class="progress-bar" id="pb-1"></div></div>
+
+  <!-- Antippen-Zuordnung: Ortsvektor → Punkt -->
+  <div class="aufgabe" id="a1-1">
+    <div class="aufgabe-nr">Aufgabe 4 – Zuordnung</div>
+    <div class="aufgabe-text">
+      Tippe erst auf einen <strong>Ortsvektor</strong>, dann auf das passende Punktesymbol. Bei einer richtigen Zuordnung bleibt das Paar markiert.
+    </div>
+    <div id="a1-zuordnung"></div>
+    <div class="feedback" id="fb-a1-1"></div>
+  </div>
+
+  <!-- Aufgabe: Welche Koordinate hat der Punkt auf der x₂-Achse? -->
+  <div class="aufgabe" id="a1-2">
+    <div class="aufgabe-nr">Aufgabe 5</div>
+    <div class="aufgabe-text" id="a1-2-text"></div>
+    <div id="a1-2-input"></div>
+    <button class="prüf-btn" onclick="prüfe('a1-2')">Prüfen</button>
+    <button class="tipp-btn" onclick="toggleTipp('t1-2')">💡 Hinweis</button>
+    <div class="tipp-inhalt" id="t1-2">Punkte <strong>auf der x₂-Achse</strong> haben x₁ = 0 und x₃ = 0. Nur die x₂-Koordinate ist von null verschieden.</div>
+    <div class="feedback" id="fb-a1-2"></div>
+  </div>
+
+  <!-- MC: Was ist ein Ortsvektor? -->
+  <div class="aufgabe" id="a1-3">
+    <div class="aufgabe-nr">Aufgabe 6</div>
+    <div class="aufgabe-text" id="a1-3-text"></div>
+    <div class="mc-grid" id="a1-3-mc"></div>
+    <div class="feedback" id="fb-a1-3"></div>
+  </div>
+</div>
+
+<!-- ======================= KARTE 2: VEKTOREN ======================= -->
+<div class="karte" id="karte-2">
+  <div class="karte-titel">➡️ Verbindungsvektoren</div>
+  <div class="karte-untertitel">Berechne den Vektor \(\overrightarrow{AB}\) von Punkt A nach Punkt B.</div>
+
+  <div class="progress-wrap"><div class="progress-bar" id="pb-2"></div></div>
+
+  <!-- Erklärungsbox -->
+  <div style="background:rgba(79,142,247,0.08);border:1px solid rgba(79,142,247,0.25);border-radius:var(--radius);padding:1rem;margin-bottom:1rem;font-size:0.9rem;line-height:1.8;">
+    <strong>Merke:</strong> Der Vektor von A nach B ergibt sich als:<br>
+    \(\overrightarrow{AB} = \vec{b} - \vec{a} = \begin{pmatrix} b_1 - a_1 \\ b_2 - a_2 \\ b_3 - a_3 \end{pmatrix}\)
+    <br>wobei \(\vec{a}\) und \(\vec{b}\) die Ortsvektoren von A und B sind.
+  </div>
+
+  <!-- Aufgabe 7 -->
+  <div class="aufgabe" id="a2-1">
+    <div class="aufgabe-nr">Aufgabe 7</div>
+    <div class="aufgabe-text" id="a2-1-text"></div>
+    <div id="a2-1-input"></div>
+    <button class="prüf-btn" onclick="prüfe('a2-1')">Prüfen</button>
+    <button class="tipp-btn" onclick="toggleTipp('t2-1')">💡 Hinweis</button>
+    <div class="tipp-inhalt" id="t2-1"></div>
+    <div class="feedback" id="fb-a2-1"></div>
+  </div>
+
+  <!-- Aufgabe 8 -->
+  <div class="aufgabe" id="a2-2">
+    <div class="aufgabe-nr">Aufgabe 8</div>
+    <div class="aufgabe-text" id="a2-2-text"></div>
+    <div id="a2-2-input"></div>
+    <button class="prüf-btn" onclick="prüfe('a2-2')">Prüfen</button>
+    <button class="tipp-btn" onclick="toggleTipp('t2-2')">💡 Hinweis</button>
+    <div class="tipp-inhalt" id="t2-2"></div>
+    <div class="feedback" id="fb-a2-2"></div>
+  </div>
+
+  <!-- Aufgabe 9 – MC -->
+  <div class="aufgabe" id="a2-3">
+    <div class="aufgabe-nr">Aufgabe 9</div>
+    <div class="aufgabe-text" id="a2-3-text"></div>
+    <div class="mc-grid" id="a2-3-mc"></div>
+    <div class="feedback" id="fb-a2-3"></div>
+  </div>
+</div>
+
+<!-- ======================= KARTE 3: RECHNEN MIT VEKTOREN ======================= -->
+<div class="karte" id="karte-3">
+  <div class="karte-titel">🧮 Rechnen mit Vektoren</div>
+  <div class="karte-untertitel">Vektoraddition, Gegenvektor und Länge von Vektoren.</div>
+
+  <div class="progress-wrap"><div class="progress-bar" id="pb-3"></div></div>
+
+  <!-- Aufgabe 10 – Addition -->
+  <div class="aufgabe" id="a3-1">
+    <div class="aufgabe-nr">Aufgabe 10</div>
+    <div class="aufgabe-text" id="a3-1-text"></div>
+    <div id="a3-1-input"></div>
+    <button class="prüf-btn" onclick="prüfe('a3-1')">Prüfen</button>
+    <button class="tipp-btn" onclick="toggleTipp('t3-1')">💡 Hinweis</button>
+    <div class="tipp-inhalt" id="t3-1">Addiere die Komponenten einzeln: \(\vec{a} + \vec{b} = \begin{pmatrix} a_1 + b_1 \\ a_2 + b_2 \\ a_3 + b_3 \end{pmatrix}\)</div>
+    <div class="feedback" id="fb-a3-1"></div>
+  </div>
+
+  <!-- Aufgabe 11 – Gegenvektor -->
+  <div class="aufgabe" id="a3-2">
+    <div class="aufgabe-nr">Aufgabe 11 – MC</div>
+    <div class="aufgabe-text" id="a3-2-text"></div>
+    <div class="mc-grid" id="a3-2-mc"></div>
+    <div class="feedback" id="fb-a3-2"></div>
+  </div>
+
+  <!-- Aufgabe 12 – Länge -->
+  <div class="aufgabe" id="a3-3">
+    <div class="aufgabe-nr">Aufgabe 12</div>
+    <div class="aufgabe-text" id="a3-3-text"></div>
+    <div id="a3-3-input"></div>
+    <button class="prüf-btn" onclick="prüfe('a3-3')">Prüfen</button>
+    <button class="tipp-btn" onclick="toggleTipp('t3-3')">💡 Hinweis</button>
+    <div class="tipp-inhalt" id="t3-3"></div>
+    <div class="feedback" id="fb-a3-3"></div>
+  </div>
+</div>
+
+<!-- ======================= KARTE 4: WIEDERHOLUNG ======================= -->
+
+<!-- ======================= KARTE 4: SKALARE MULT. + KOMBINIERT ======================= -->
+<div class="karte" id="karte-4">
+  <div class="karte-titel">⚡ Skalare Multiplikation &amp; Kombiniert</div>
+  <div class="karte-untertitel">Skalare Multiplikation und gemischte Aufgaben mit Addition, Subtraktion und Vielfachen.</div>
+
+  <div class="progress-wrap"><div class="progress-bar" id="pb-4"></div></div>
+
+  <!-- Merke-Box -->
+  <div style="background:rgba(45,212,191,0.08);border:1px solid rgba(45,212,191,0.25);border-radius:var(--radius);padding:1rem;margin-bottom:1rem;font-size:0.9rem;line-height:1.9;">
+    <strong>Skalare Multiplikation:</strong><br>
+    \(r \cdot \vec{v} = r \cdot \begin{pmatrix} v_1 \\ v_2 \\ v_3 \end{pmatrix} = \begin{pmatrix} r \cdot v_1 \\ r \cdot v_2 \\ r \cdot v_3 \end{pmatrix}\)<br>
+    Jede Komponente wird mit dem Skalar \(r\) multipliziert.
+  </div>
+
+  <!-- Aufgabe A – reine skalare Mult. -->
+  <div class="aufgabe" id="a4-1">
+    <div class="aufgabe-nr">Aufgabe 1 – Skalare Multiplikation</div>
+    <div class="aufgabe-text">
+      Gegeben: \(\vec{v} = \begin{pmatrix} 2 \\ -1 \\ 4 \end{pmatrix}\)<br>
+      Berechne \(3 \cdot \vec{v}\).
+    </div>
+    <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;margin-top:0.5rem;">
+      <span style="font-size:0.9rem;">Ergebnis:</span>
+      <div style="display:flex;flex-direction:column;gap:0.2rem;border:1px solid var(--border2);border-radius:6px;padding:0.4rem 0.6rem;">
+        <input type="number" id="a4-1-v1" inputmode="numeric" placeholder="?" step="1" style="width:65px">
+        <input type="number" id="a4-1-v2" inputmode="numeric" placeholder="?" step="1" style="width:65px">
+        <input type="number" id="a4-1-v3" inputmode="numeric" placeholder="?" step="1" style="width:65px">
+      </div>
+    </div>
+    <button class="prüf-btn" onclick="prüfeA4(1, [6,-3,12])">Prüfen</button>
+    <button class="tipp-btn" onclick="toggleTipp('t4-1k')">💡 Hinweis</button>
+    <div class="tipp-inhalt" id="t4-1k">Multipliziere jede Komponente mit 3: \(3 \cdot 2 = 6\), \(3 \cdot (-1) = -3\), \(3 \cdot 4 = 12\).</div>
+    <div class="feedback" id="fb-a4-1"></div>
+  </div>
+
+  <!-- Aufgabe B – MC skalare Mult. -->
+  <div class="aufgabe" id="a4-2">
+    <div class="aufgabe-nr">Aufgabe 2 – MC</div>
+    <div class="aufgabe-text">
+      Welches Ergebnis hat \(-2 \cdot \begin{pmatrix} 3 \\ -5 \\ 1 \end{pmatrix}\)?
+    </div>
+    <div class="mc-grid" id="a4-2-mc">
+      <button class="mc-btn" onclick="mcKombiniert(this,'a4-2',false)">\(\begin{pmatrix} -6 \\ -10 \\ -2 \end{pmatrix}\)</button>
+      <button class="mc-btn" onclick="mcKombiniert(this,'a4-2',true)">\(\begin{pmatrix} -6 \\ 10 \\ -2 \end{pmatrix}\)</button>
+      <button class="mc-btn" onclick="mcKombiniert(this,'a4-2',false)">\(\begin{pmatrix} 6 \\ 10 \\ 2 \end{pmatrix}\)</button>
+      <button class="mc-btn" onclick="mcKombiniert(this,'a4-2',false)">\(\begin{pmatrix} 3 \\ -5 \\ 1 \end{pmatrix}\)</button>
+    </div>
+    <div class="feedback" id="fb-a4-2"></div>
+  </div>
+
+  <!-- Aufgabe C – kombiniert: Skalar + Addition -->
+  <div class="aufgabe" id="a4-3">
+    <div class="aufgabe-nr">Aufgabe 3 – Kombiniert</div>
+    <div class="aufgabe-text">
+      Gegeben: \(\vec{a} = \begin{pmatrix} 1 \\ 3 \\ -2 \end{pmatrix}\) und \(\vec{b} = \begin{pmatrix} 4 \\ -1 \\ 5 \end{pmatrix}\)<br>
+      Berechne \(2 \cdot \vec{a} + \vec{b}\).
+    </div>
+    <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;margin-top:0.5rem;">
+      <span style="font-size:0.9rem;">Ergebnis:</span>
+      <div style="display:flex;flex-direction:column;gap:0.2rem;border:1px solid var(--border2);border-radius:6px;padding:0.4rem 0.6rem;">
+        <input type="number" id="a4-3-v1" inputmode="numeric" placeholder="?" step="1" style="width:65px">
+        <input type="number" id="a4-3-v2" inputmode="numeric" placeholder="?" step="1" style="width:65px">
+        <input type="number" id="a4-3-v3" inputmode="numeric" placeholder="?" step="1" style="width:65px">
+      </div>
+    </div>
+    <button class="prüf-btn" onclick="prüfeA4(3, [6,5,1])">Prüfen</button>
+    <button class="tipp-btn" onclick="toggleTipp('t4-3k')">💡 Hinweis</button>
+    <div class="tipp-inhalt" id="t4-3k">
+      Schritt 1: \(2 \cdot \vec{a} = \begin{pmatrix} 2 \\ 6 \\ -4 \end{pmatrix}\)<br>
+      Schritt 2: Addiere \(\vec{b}\) komponentenweise.
+    </div>
+    <div class="feedback" id="fb-a4-3"></div>
+  </div>
+
+  <!-- Aufgabe D – kombiniert: Skalar + Subtraktion (Fortgeschritten) -->
+  <div class="aufgabe" id="a4-4" style="border-color:rgba(124,92,252,0.35);background:rgba(124,92,252,0.05);">
+    <div class="aufgabe-nr" style="color:var(--accent2);">Aufgabe 4 – Fortgeschritten ⚡</div>
+    <div class="aufgabe-text">
+      Gegeben: \(\vec{u} = \begin{pmatrix} 6 \\ -2 \\ 4 \end{pmatrix}\) und \(\vec{w} = \begin{pmatrix} -1 \\ 3 \\ 2 \end{pmatrix}\)<br>
+      Berechne \(3 \cdot \vec{u} - 2 \cdot \vec{w}\).
+    </div>
+    <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;margin-top:0.5rem;">
+      <span style="font-size:0.9rem;">Ergebnis:</span>
+      <div style="display:flex;flex-direction:column;gap:0.2rem;border:1px solid var(--border2);border-radius:6px;padding:0.4rem 0.6rem;">
+        <input type="number" id="a4-4-v1" inputmode="numeric" placeholder="?" step="1" style="width:65px">
+        <input type="number" id="a4-4-v2" inputmode="numeric" placeholder="?" step="1" style="width:65px">
+        <input type="number" id="a4-4-v3" inputmode="numeric" placeholder="?" step="1" style="width:65px">
+      </div>
+    </div>
+    <button class="prüf-btn" onclick="prüfeA4(4, [20,-12,8])">Prüfen</button>
+    <button class="tipp-btn" onclick="toggleTipp('t4-4k')">💡 Hinweis</button>
+    <div class="tipp-inhalt" id="t4-4k">
+      Schritt 1: \(3 \cdot \vec{u} = \begin{pmatrix} 18 \\ -6 \\ 12 \end{pmatrix}\)<br>
+      Schritt 2: \(2 \cdot \vec{w} = \begin{pmatrix} -2 \\ 6 \\ 4 \end{pmatrix}\)<br>
+      Schritt 3: Subtrahiere komponentenweise.
+    </div>
+    <div class="feedback" id="fb-a4-4"></div>
+  </div>
+
+</div>
+
+<div class="karte" id="karte-5">
+  <div class="karte-titel">↩️ Wiederholung <span class="wdh-badge">Pythagoras</span></div>
+  <div class="karte-untertitel">Aufgaben zu einem früheren Lehrplanthema.</div>
+
+  <div class="progress-wrap"><div class="progress-bar" id="pb-5"></div></div>
+
+  <!-- Aufgabe 13 – Pythagoras 2D -->
+  <div class="aufgabe" id="a4-1">
+    <div class="aufgabe-nr">Aufgabe 13 – Pythagoras</div>
+    <div class="aufgabe-text">
+      Ein rechtwinkliges Dreieck hat die Katheten \(a = 3\) und \(b = 4\).<br>
+      Berechne die Länge der Hypotenuse \(c\).
+    </div>
+    <div class="eingabe-row">
+      <span class="eingabe-label">\(c =\)</span>
+      <input type="number" id="wdh-1" inputmode="numeric" placeholder="?" step="0.1">
+    </div>
+    <button class="prüf-btn" onclick="prüfeWdh1()">Prüfen</button>
+    <button class="tipp-btn" onclick="toggleTipp('t4-1')">💡 Hinweis</button>
+    <div class="tipp-inhalt" id="t4-1">Formel: \(c = \sqrt{a^2 + b^2}\). Berechne zuerst \(a^2 + b^2\).</div>
+    <div class="feedback" id="fb-a4-1"></div>
+  </div>
+
+  <!-- Aufgabe 14 – Distanz zweier Punkte -->
+  <div class="aufgabe" id="a4-2">
+    <div class="aufgabe-nr">Aufgabe 14 – Abstand zweier Punkte im Raum</div>
+    <div class="aufgabe-text">
+      Gegeben: \(A(1|2|2)\) und \(B(4|6|2)\).<br>
+      Berechne den Abstand \(|AB|\). (Ergebnis auf eine Dezimalstelle runden)
+    </div>
+    <div class="eingabe-row">
+      <span class="eingabe-label">\(|AB| =\)</span>
+      <input type="number" id="wdh-2" inputmode="numeric" placeholder="?" step="0.1">
+    </div>
+    <button class="prüf-btn" onclick="prüfeWdh2()">Prüfen</button>
+    <button class="tipp-btn" onclick="toggleTipp('t4-2')">💡 Hinweis</button>
+    <div class="tipp-inhalt" id="t4-2">Berechne zuerst \(\overrightarrow{AB}\), dann \(|\overrightarrow{AB}| = \sqrt{(b_1-a_1)^2 + (b_2-a_2)^2 + (b_3-a_3)^2}\).</div>
+    <div class="feedback" id="fb-a4-2"></div>
+  </div>
+
+  <!-- Aufgabe 15 – MC Pythagoras -->
+  <div class="aufgabe" id="a4-3">
+    <div class="aufgabe-nr">Aufgabe 15 – Richtig oder Falsch?</div>
+    <div class="aufgabe-text">
+      Der Vektor \(\vec{v} = \begin{pmatrix} 3 \\ 0 \\ 4 \end{pmatrix}\) hat die Länge …
+    </div>
+    <div class="mc-grid">
+      <button class="mc-btn" onclick="mcWdh(this, false)">3</button>
+      <button class="mc-btn" onclick="mcWdh(this, true)">\(|\vec{v}| = 5\)</button>
+      <button class="mc-btn" onclick="mcWdh(this, false)">\(|\vec{v}| = 7\)</button>
+      <button class="mc-btn" onclick="mcWdh(this, false)">\(|\vec{v}| = 25\)</button>
+    </div>
+    <div class="feedback" id="fb-a4-3"></div>
+  </div>
+</div>
+
+<!-- ======================= KARTE 5: AUSWERTUNG ======================= -->
+<div class="karte" id="karte-6">
+  <div class="karte-titel">🏆 Auswertung</div>
+  <div class="karte-untertitel">Dein Ergebnis im Überblick.</div>
+
+  <div class="auswertung-grid">
+    <div class="stat-card">
+      <div class="stat-zahl" id="stat-richtig" style="color:var(--green)">–</div>
+      <div class="stat-label">Richtig</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-zahl" id="stat-falsch" style="color:var(--red)">–</div>
+      <div class="stat-label">Falsch</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-zahl" id="stat-prozent" style="color:var(--accent)">–</div>
+      <div class="stat-label">Richtig</div>
+    </div>
+  </div>
+
+  <div id="auswertung-text" style="background:var(--card);border-radius:var(--radius);padding:1rem;font-size:0.92rem;line-height:1.8;"></div>
+</div>
+
+<!-- Weiter-Button -->
+<button id="weiter-btn" onclick="window.location.href='#'">Weiter →</button>
+
+</main>
+
+<!-- GeoGebra -->
+<script src="https://www.geogebra.org/apps/deployggb.js"></script>
+
+<script>
+// ==================== STATE ====================
+let niveau = 'G';
+let aktiveKarte = 0;
+let aufgabenStatus = {}; // id -> 'richtig' | 'falsch'
+let wdhDone = 0;
+
+// ==================== AUFGABENDATEN ====================
+const aufgaben = {
+  G: {
+    // Karte 0
+    'a0-1': {
+      text: 'Gib die Koordinaten des Punktes <span class="pkt">A(x₁|x₂|x₃)</span> an, wenn A bei x₁ = <strong>3</strong>, x₂ = <strong>2</strong> und x₃ = <strong>1</strong> liegt.',
+      antwort: [3, 2, 1],
+      tipp: 'Gehe entlang der x₁-Achse 3 Einheiten, dann 2 entlang x₂, dann 1 nach oben (x₃).',
+      typ: 'koord'
+    },
+    'a0-2': {
+      text: 'Welche Koordinaten hat der Punkt <span class="pkt">B</span> bei x₁ = <strong>−1</strong>, x₂ = <strong>4</strong>, x₃ = <strong>0</strong>?',
+      antwort: [-1, 4, 0],
+      tipp: 'x₃ = 0 bedeutet: der Punkt liegt in der x₁x₂-Ebene (auf dem „Boden").',
+      typ: 'koord'
+    },
+    'a0-3': {
+      text: 'Der Punkt <span class="pkt">C(0|0|5)</span> liegt auf …',
+      optionen: ['der x₁-Achse', 'der x₂-Achse', 'der x₃-Achse', 'im Ursprung'],
+      richtig: 2
+    },
+    // Karte 1
+    'a1-2': {
+      text: 'Der Punkt <span class="pkt">D</span> liegt auf der <strong>x₂-Achse</strong> mit x₂ = 6. Gib alle drei Koordinaten von D an.',
+      antwort: [0, 6, 0],
+      tipp: 'Punkte auf der x₂-Achse haben x₁ = 0 und x₃ = 0.',
+      typ: 'koord'
+    },
+    'a1-3': {
+      text: 'Was ist der <span data-tooltip="Verbindet den Ursprung O mit dem Punkt P">Ortsvektor</span> des Punktes <span class="pkt">P(2|−3|1)</span>?',
+      optionen: [
+        '\\(\\overrightarrow{OP} = \\begin{pmatrix} -2 \\\\ 3 \\\\ -1 \\end{pmatrix}\\)',
+        '\\(\\overrightarrow{OP} = \\begin{pmatrix} 2 \\\\ -3 \\\\ 1 \\end{pmatrix}\\)',
+        '\\(\\overrightarrow{OP} = \\begin{pmatrix} 3 \\\\ 2 \\\\ 1 \\end{pmatrix}\\)',
+        '\\(\\overrightarrow{OP} = \\begin{pmatrix} 1 \\\\ 2 \\\\ 3 \\end{pmatrix}\\)'
+      ],
+      richtig: 1
+    },
+    // Karte 2
+    'a2-1': {
+      text: 'Berechne den Vektor \\(\\overrightarrow{AB}\\) für <span class="pkt">A(1|2|3)</span> und <span class="pkt">B(4|5|7)</span>.',
+      antwort: [3, 3, 4],
+      tipp: '\\(\\overrightarrow{AB} = \\begin{pmatrix} b_1 - a_1 \\\\ b_2 - a_2 \\\\ b_3 - a_3 \\end{pmatrix} = \\begin{pmatrix} 4-1 \\\\ 5-2 \\\\ 7-3 \\end{pmatrix}\\)',
+      typ: 'vektor'
+    },
+    'a2-2': {
+      text: 'Berechne \\(\\overrightarrow{PQ}\\) für <span class="pkt">P(0|3|−1)</span> und <span class="pkt">Q(2|0|4)</span>.',
+      antwort: [2, -3, 5],
+      tipp: '\\(\\overrightarrow{PQ} = \\begin{pmatrix} 2-0 \\\\ 0-3 \\\\ 4-(-1) \\end{pmatrix}\\)',
+      typ: 'vektor'
+    },
+    'a2-3': {
+      text: 'Was gilt für \\(\\overrightarrow{AB}\\) und \\(\\overrightarrow{BA}\\)?',
+      optionen: [
+        'Sie sind gleich',
+        'Sie sind entgegengesetzt: \\(\\overrightarrow{BA} = -\\overrightarrow{AB}\\)',
+        'Ihre Längen sind verschieden',
+        'Sie haben dieselbe Richtung'
+      ],
+      richtig: 1
+    },
+    // Karte 3
+    'a3-1': {
+      text: 'Berechne \\(\\vec{a} + \\vec{b}\\) für \\(\\vec{a} = \\begin{pmatrix} 1 \\\\ -2 \\\\ 3 \\end{pmatrix}\\) und \\(\\vec{b} = \\begin{pmatrix} 4 \\\\ 5 \\\\ -1 \\end{pmatrix}\\).',
+      antwort: [5, 3, 2],
+      tipp: 'Addiere komponentenweise: \\(\\begin{pmatrix} 1+4 \\\\ -2+5 \\\\ 3+(-1) \\end{pmatrix}\\)',
+      typ: 'vektor'
+    },
+    'a3-2': {
+      text: 'Was ist der Gegenvektor von \\(\\vec{v} = \\begin{pmatrix} 2 \\\\ -5 \\\\ 3 \\end{pmatrix}\\)?',
+      optionen: [
+        '\\(\\begin{pmatrix} 2 \\\\ -5 \\\\ 3 \\end{pmatrix}\\)',
+        '\\(\\begin{pmatrix} -2 \\\\ 5 \\\\ -3 \\end{pmatrix}\\)',
+        '\\(\\begin{pmatrix} 5 \\\\ 2 \\\\ 3 \\end{pmatrix}\\)',
+        '\\(\\begin{pmatrix} 1 \\\\ -2.5 \\\\ 1.5 \\end{pmatrix}\\)'
+      ],
+      richtig: 1
+    },
+    'a3-3': {
+      text: 'Berechne die Länge \\(|\\vec{v}|\\) für \\(\\vec{v} = \\begin{pmatrix} 0 \\\\ 4 \\\\ 3 \\end{pmatrix}\\).',
+      antwort: [5],
+      tipp: '\\(|\\vec{v}| = \\sqrt{0^2 + 4^2 + 3^2} = \\sqrt{0 + 16 + 9} = \\sqrt{25}\\)',
+      typ: 'zahl'
+    }
+  },
+
+  F: {
+    'a0-1': {
+      text: 'Ein Punkt liegt bei x₁ = <strong>−2</strong>, x₂ = <strong>0</strong>, x₃ = <strong>3</strong>. Gib die Koordinaten an.',
+      antwort: [-2, 0, 3],
+      tipp: 'x₂ = 0 bedeutet: der Punkt liegt in der x₁x₃-Ebene.',
+      typ: 'koord'
+    },
+    'a0-2': {
+      text: 'Welche Koordinaten hat der Punkt <span class="pkt">E</span> mit x₁ = <strong>−3</strong>, x₂ = <strong>−3</strong>, x₃ = <strong>4</strong>?',
+      antwort: [-3, -3, 4],
+      tipp: 'Negative Koordinaten: Gehe in die negative Richtung der jeweiligen Achse.',
+      typ: 'koord'
+    },
+    'a0-3': {
+      text: 'Welcher Punkt liegt in der <span data-tooltip="Ebene mit x₃ = 0">x₁x₂-Ebene</span>?',
+      optionen: ['\\(A(1|2|3)\\)', '\\(B(0|4|0)\\)', '\\(C(3|1|0)\\)', '\\(D(0|0|2)\\)'],
+      richtig: 2
+    },
+    'a1-2': {
+      text: 'Der Punkt <span class="pkt">F</span> liegt in der x₁x₃-Ebene mit x₁ = −2 und x₃ = 5. Gib alle Koordinaten an.',
+      antwort: [-2, 0, 5],
+      tipp: 'In der x₁x₃-Ebene gilt: x₂ = 0.',
+      typ: 'koord'
+    },
+    'a1-3': {
+      text: 'Welcher Ortsvektor gehört zu <span class="pkt">P(−4|0|7)</span>?',
+      optionen: [
+        '\\(\\begin{pmatrix} 4 \\\\ 0 \\\\ 7 \\end{pmatrix}\\)',
+        '\\(\\begin{pmatrix} -4 \\\\ 0 \\\\ 7 \\end{pmatrix}\\)',
+        '\\(\\begin{pmatrix} 7 \\\\ 0 \\\\ -4 \\end{pmatrix}\\)',
+        '\\(\\begin{pmatrix} 0 \\\\ -4 \\\\ 7 \\end{pmatrix}\\)'
+      ],
+      richtig: 1
+    },
+    'a2-1': {
+      text: 'Berechne \\(\\overrightarrow{AB}\\) für <span class="pkt">A(−3|1|2)</span> und <span class="pkt">B(0|−2|5)</span>.',
+      antwort: [3, -3, 3],
+      tipp: '\\(b_1 - a_1 = 0-(-3) = 3\\)',
+      typ: 'vektor'
+    },
+    'a2-2': {
+      text: 'Berechne \\(\\overrightarrow{MN}\\) für <span class="pkt">M(2|−4|6)</span> und <span class="pkt">N(−1|0|−2)</span>.',
+      antwort: [-3, 4, -8],
+      tipp: 'Achtung: \\(-1 - 2 = -3\\) und \\(-2 - 6 = -8\\).',
+      typ: 'vektor'
+    },
+    'a2-3': {
+      text: 'Welcher Vektor führt von <span class="pkt">A(2|−1|3)</span> zurück zum Ursprung <span class="pkt">O(0|0|0)</span>?',
+      optionen: [
+        '\\(\\begin{pmatrix} 2 \\\\ -1 \\\\ 3 \\end{pmatrix}\\)',
+        '\\(\\begin{pmatrix} -2 \\\\ 1 \\\\ -3 \\end{pmatrix}\\)',
+        '\\(\\begin{pmatrix} 1 \\\\ -2 \\\\ 3 \\end{pmatrix}\\)',
+        '\\(\\begin{pmatrix} 0 \\\\ 0 \\\\ 0 \\end{pmatrix}\\)'
+      ],
+      richtig: 1
+    },
+    'a3-1': {
+      text: 'Berechne \\(\\vec{u} - \\vec{w}\\) für \\(\\vec{u} = \\begin{pmatrix} 3 \\\\ 0 \\\\ -5 \\end{pmatrix}\\) und \\(\\vec{w} = \\begin{pmatrix} -1 \\\\ 4 \\\\ 2 \\end{pmatrix}\\).',
+      antwort: [4, -4, -7],
+      tipp: '\\(\\vec{u} - \\vec{w} = \\begin{pmatrix} 3-(-1) \\\\ 0-4 \\\\ -5-2 \\end{pmatrix}\\)',
+      typ: 'vektor'
+    },
+    'a3-2': {
+      text: 'Der Gegenvektor von \\(\\vec{a} = \\begin{pmatrix} -3 \\\\ 1 \\\\ 0 \\end{pmatrix}\\) ist …',
+      optionen: [
+        '\\(\\begin{pmatrix} 3 \\\\ -1 \\\\ 0 \\end{pmatrix}\\)',
+        '\\(\\begin{pmatrix} -3 \\\\ -1 \\\\ 0 \\end{pmatrix}\\)',
+        '\\(\\begin{pmatrix} 1 \\\\ -3 \\\\ 0 \\end{pmatrix}\\)',
+        '\\(\\begin{pmatrix} 0 \\\\ 1 \\\\ -3 \\end{pmatrix}\\)'
+      ],
+      richtig: 0
+    },
+    'a3-3': {
+      text: 'Berechne die Länge des Vektors \\(\\vec{a} = \\begin{pmatrix} 2 \\\\ 3 \\\\ 6 \\end{pmatrix}\\). (Ergebnis als ganze Zahl)',
+      antwort: [7],
+      tipp: '\\(|\\vec{a}| = \\sqrt{4 + 9 + 36} = \\sqrt{49} = ?\\)',
+      typ: 'zahl'
+    }
+  },
+
+  P: {
+    'a0-1': {
+      text: 'Die drei Eckpunkte eines Dreiecks haben die Koordinaten<br><span class="pkt">A(1|2|3)</span>, <span class="pkt">B(4|1|3)</span>, <span class="pkt">C(1|2|6)</span>.<br>Welche zwei Punkte haben dieselbe x₁x₂-Projektionslage?',
+      optionen: ['A und B', 'A und C', 'B und C', 'Alle drei'],
+      richtig: 1
+    },
+    'a0-2': {
+      text: 'Gib die Koordinaten des Punktes an, der durch x₁ = <strong>−5</strong>, x₂ = <strong>2</strong>, x₃ = <strong>−3</strong> beschrieben wird.',
+      antwort: [-5, 2, -3],
+      tipp: 'Achte auf die Vorzeichen.',
+      typ: 'koord'
+    },
+    'a0-3': {
+      text: 'Ein Punkt hat x₁ = x₂ = x₃. Er liegt auf …',
+      optionen: [
+        'einer Koordinatenachse',
+        'der Raumdiagonale des Einheitswürfels',
+        'der x₁x₂-Ebene',
+        'keiner besonderen Lage'
+      ],
+      richtig: 1
+    },
+    'a1-2': {
+      text: 'Die Punkte A, B, C und D sollen ein Quadrat bilden. Drei Punkte sind bekannt:<br><span class="pkt">A(1|1|0)</span>, <span class="pkt">B(4|1|0)</span>, <span class="pkt">C(4|4|0)</span>.<br>Gib die Koordinaten von D an.',
+      antwort: [1, 4, 0],
+      tipp: 'Beim Quadrat müssen die Seiten parallel und gleich lang sein.',
+      typ: 'koord'
+    },
+    'a1-3': {
+      text: 'Welche Aussage über Ortsvektoren ist richtig?',
+      optionen: [
+        'Zwei verschiedene Punkte können denselben Ortsvektor haben',
+        'Der Ortsvektor zeigt immer vom Punkt zum Ursprung',
+        'Der Ortsvektor von \\(P(a|b|c)\\) ist \\(\\begin{pmatrix} a \\\\ b \\\\ c \\end{pmatrix}\\)',
+        'Ortsvektoren haben immer die Länge 1'
+      ],
+      richtig: 2
+    },
+    'a2-1': {
+      text: 'Berechne \\(\\overrightarrow{AB}\\) für <span class="pkt">A(−4|7|−2)</span> und <span class="pkt">B(1|−3|8)</span>.',
+      antwort: [5, -10, 10],
+      tipp: '\\(b_1 - a_1 = 1-(-4) = 5\\)',
+      typ: 'vektor'
+    },
+    'a2-2': {
+      text: 'Punkt <span class="pkt">A(3|−1|4)</span> und <span class="pkt">B(x₁|2|0)</span>. Der Vektor \\(\\overrightarrow{AB}\\) hat die erste Komponente <strong>−5</strong>. Wie lautet x₁?',
+      antwort: [-2, null, null],
+      tipp: '\\(x_1 - 3 = -5 \\Rightarrow x_1 = ?\\)',
+      typ: 'zahl'
+    },
+    'a2-3': {
+      text: 'Welche Aussage ist über \\(\\overrightarrow{AB} + \\overrightarrow{BC}\\) richtig?',
+      optionen: [
+        '\\(\\overrightarrow{AB} + \\overrightarrow{BC} = \\overrightarrow{BA}\\)',
+        '\\(\\overrightarrow{AB} + \\overrightarrow{BC} = \\overrightarrow{AC}\\)',
+        '\\(\\overrightarrow{AB} + \\overrightarrow{BC} = \\overrightarrow{CB}\\)',
+        'Das ist nicht definiert'
+      ],
+      richtig: 1
+    },
+    'a3-1': {
+      text: 'Berechne \\(2 \\cdot \\vec{u} + \\vec{w}\\) für \\(\\vec{u} = \\begin{pmatrix} 1 \\\\ -2 \\\\ 3 \\end{pmatrix}\\) und \\(\\vec{w} = \\begin{pmatrix} 4 \\\\ 1 \\\\ -1 \\end{pmatrix}\\).',
+      antwort: [6, -3, 5],
+      tipp: 'Berechne erst \\(2 \\cdot \\vec{u} = \\begin{pmatrix} 2 \\\\ -4 \\\\ 6 \\end{pmatrix}\\), dann addiere \\(\\vec{w}\\).',
+      typ: 'vektor'
+    },
+    'a3-2': {
+      text: 'Der Vektor \\(\\vec{v}\\) hat den Gegenvektor \\(\\begin{pmatrix} 5 \\\\ -2 \\\\ 0 \\end{pmatrix}\\). Was ist \\(\\vec{v}\\)?',
+      optionen: [
+        '\\(\\begin{pmatrix} 5 \\\\ -2 \\\\ 0 \\end{pmatrix}\\)',
+        '\\(\\begin{pmatrix} -5 \\\\ 2 \\\\ 0 \\end{pmatrix}\\)',
+        '\\(\\begin{pmatrix} -2 \\\\ 5 \\\\ 0 \\end{pmatrix}\\)',
+        '\\(\\begin{pmatrix} 0 \\\\ 2 \\\\ -5 \\end{pmatrix}\\)'
+      ],
+      richtig: 1
+    },
+    'a3-3': {
+      text: 'Berechne \\(|\\vec{v}|\\) für \\(\\vec{v} = \\begin{pmatrix} 1 \\\\ 2 \\\\ 2 \\end{pmatrix}\\). (Ganze Zahl)',
+      antwort: [3],
+      tipp: '\\(\\sqrt{1+4+4} = \\sqrt{9} = ?\\)',
+      typ: 'zahl'
+    }
+  }
+};
+
+// ==================== AUFGABEN RENDERN ====================
+function renderAufgaben() {
+  const d = aufgaben[niveau];
+  if (!d) return;
+
+  // Karte 0
+  renderMCAufgabe('a0-3', d['a0-3']);
+
+  // Karte 1 – Zuordnung
+  renderZuordnung();
+  renderTextAufgabe('a1-2', d['a1-2']);
+  renderMCAufgabe('a1-3', d['a1-3']);
+
+  // Karte 2
+  renderTextAufgabe('a2-1', d['a2-1']);
+  renderTextAufgabe('a2-2', d['a2-2']);
+  renderMCAufgabe('a2-3', d['a2-3']);
+
+  // Karte 3
+  renderTextAufgabe('a3-1', d['a3-1']);
+  renderMCAufgabe('a3-2', d['a3-2']);
+  renderTextAufgabe('a3-3', d['a3-3']);
+
+  // Tipps befüllen
+  const tippMap = {
+    'a1-2': 't1-2',
+    'a2-1': 't2-1', 'a2-2': 't2-2',
+    'a3-1': 't3-1', 'a3-3': 't3-3'
+  };
+  for (const [aid, tid] of Object.entries(tippMap)) {
+    const el = document.getElementById(tid);
+    if (el && d[aid] && d[aid].tipp) el.innerHTML = d[aid].tipp;
+  }
+
+  if (window.MathJax) MathJax.typesetPromise().catch(e => {});
+}
+
+function renderTextAufgabe(id, aufg) {
+  if (!aufg) return;
+  const textEl = document.getElementById(id + '-text');
+  const inputEl = document.getElementById(id + '-input');
+  if (!textEl || !inputEl) return;
+
+  textEl.innerHTML = aufg.text;
+
+  if (aufg.typ === 'koord') {
+    inputEl.innerHTML = `
+      <div class="eingabe-row">
+        <span class="eingabe-label">Koordinaten:</span>
+        <div class="koord-eingabe">
+          <span>(</span>
+          <input type="number" id="${id}-x1" inputmode="numeric" placeholder="x₁" step="1" style="width:60px">
+          <span>|</span>
+          <input type="number" id="${id}-x2" inputmode="numeric" placeholder="x₂" step="1" style="width:60px">
+          <span>|</span>
+          <input type="number" id="${id}-x3" inputmode="numeric" placeholder="x₃" step="1" style="width:60px">
+          <span>)</span>
+        </div>
+      </div>`;
+  } else if (aufg.typ === 'vektor') {
+    inputEl.innerHTML = `
+      <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;margin-top:0.5rem;">
+        <span style="font-size:0.9rem;">Ergebnis:</span>
+        <div style="display:flex;flex-direction:column;gap:0.2rem;border:1px solid var(--border2);border-radius:6px;padding:0.4rem 0.6rem;">
+          <input type="number" id="${id}-v1" inputmode="numeric" placeholder="?" step="1" style="width:65px">
+          <input type="number" id="${id}-v2" inputmode="numeric" placeholder="?" step="1" style="width:65px">
+          <input type="number" id="${id}-v3" inputmode="numeric" placeholder="?" step="1" style="width:65px">
+        </div>
+      </div>`;
+  } else if (aufg.typ === 'zahl') {
+    inputEl.innerHTML = `
+      <div class="eingabe-row">
+        <span class="eingabe-label">Antwort:</span>
+        <input type="number" id="${id}-val" inputmode="numeric" placeholder="?" step="0.1" style="width:80px">
+      </div>`;
+  }
+}
+
+function renderMCAufgabe(id, aufg) {
+  if (!aufg) return;
+  const textEl = document.getElementById(id + '-text');
+  const mcEl = document.getElementById(id + '-mc');
+  if (!textEl || !mcEl) return;
+  textEl.innerHTML = aufg.text;
+  mcEl.innerHTML = '';
+  aufg.optionen.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'mc-btn';
+    btn.innerHTML = opt;
+    btn.onclick = () => mcAntwort(id, i, aufg.richtig, btn, mcEl);
+    mcEl.appendChild(btn);
+  });
+}
+
+// ==================== PRÜFEN ====================
+function prüfe(id) {
+  const d = aufgaben[niveau][id];
+  if (!d) return;
+  if (aufgabenStatus[id]) return;
+
+  let korrekt = false;
+
+  if (d.typ === 'koord') {
+    const x1 = parseFloat(document.getElementById(id+'-x1')?.value);
+    const x2 = parseFloat(document.getElementById(id+'-x2')?.value);
+    const x3 = parseFloat(document.getElementById(id+'-x3')?.value);
+    korrekt = x1 === d.antwort[0] && x2 === d.antwort[1] && x3 === d.antwort[2];
+
+    ['-x1','-x2','-x3'].forEach((s,i) => {
+      const el = document.getElementById(id+s);
+      if (el) {
+        const v = parseFloat(el.value);
+        el.className = v === d.antwort[i] ? 'correct' : 'wrong';
+      }
+    });
+  } else if (d.typ === 'vektor') {
+    const v1 = parseFloat(document.getElementById(id+'-v1')?.value);
+    const v2 = parseFloat(document.getElementById(id+'-v2')?.value);
+    const v3 = parseFloat(document.getElementById(id+'-v3')?.value);
+    korrekt = v1 === d.antwort[0] && v2 === d.antwort[1] && v3 === d.antwort[2];
+    ['-v1','-v2','-v3'].forEach((s,i) => {
+      const el = document.getElementById(id+s);
+      if (!el) return;
+      const v = parseFloat(el.value);
+      el.className = (v === d.antwort[i]) ? 'correct' : 'wrong';
+    });
+  } else if (d.typ === 'zahl') {
+    const val = parseFloat(document.getElementById(id+'-val')?.value);
+    korrekt = Math.abs(val - d.antwort[0]) < 0.05;
+    const el = document.getElementById(id+'-val');
+    if (el) el.className = korrekt ? 'correct' : 'wrong';
+  }
+
+  zeigeFeedback(id, korrekt, d);
+  document.querySelector(`#${id.replace('-','-')} .prüf-btn`).disabled = true;
+}
+
+function zeigeFeedback(id, korrekt, d) {
+  aufgabenStatus[id] = korrekt ? 'richtig' : 'falsch';
+  const fb = document.getElementById('fb-' + id);
+  if (!fb) return;
+  fb.className = 'feedback show ' + (korrekt ? 'correct' : 'wrong');
+
+  if (korrekt) {
+    fb.innerHTML = '✅ Richtig! Sehr gut.';
+  } else {
+    let aw = '';
+    if (d.antwort) {
+      if (d.typ === 'koord') aw = `(${d.antwort[0]}|${d.antwort[1]}|${d.antwort[2]})`;
+      else if (d.typ === 'vektor') aw = `\\(\\begin{pmatrix}${d.antwort[0]}\\\\${d.antwort[1]}\\\\${d.antwort[2]}\\end{pmatrix}\\)`;
+      else if (d.typ === 'zahl') aw = d.antwort[0];
+    }
+    fb.innerHTML = `❌ Falsch. Richtige Antwort: <strong>${aw}</strong>`;
+  }
+
+  updateProgress();
+  prüfeWeiterButton();
+  if (window.MathJax) MathJax.typesetPromise().catch(e => {});
+}
+
+function mcAntwort(id, gewählt, richtig, btn, container) {
+  if (aufgabenStatus[id]) return;
+  aufgabenStatus[id] = gewählt === richtig ? 'richtig' : 'falsch';
+
+  container.querySelectorAll('.mc-btn').forEach((b, i) => {
+    b.classList.add('disabled');
+    if (i === richtig) b.classList.add('correct');
+    else if (b === btn && gewählt !== richtig) b.classList.add('wrong');
+  });
+
+  const fb = document.getElementById('fb-' + id);
+  if (fb) {
+    fb.className = 'feedback show ' + (gewählt === richtig ? 'correct' : 'wrong');
+    fb.innerHTML = gewählt === richtig ? '✅ Richtig!' : '❌ Falsch. Die markierte Antwort ist korrekt.';
+  }
+  updateProgress();
+  prüfeWeiterButton();
+}
+
+// ==================== ZUORDNUNG (Antippen) ====================
+const zuordnungDaten = {
+  G: [
+    { punkt: 'A(3|1|2)', ov: '\\(\\begin{pmatrix}3\\\\1\\\\2\\end{pmatrix}\\)', id: 'a' },
+    { punkt: 'B(0|4|−1)', ov: '\\(\\begin{pmatrix}0\\\\4\\\\-1\\end{pmatrix}\\)', id: 'b' },
+    { punkt: 'C(−2|3|0)', ov: '\\(\\begin{pmatrix}-2\\\\3\\\\0\\end{pmatrix}\\)', id: 'c' },
+  ],
+  F: [
+    { punkt: 'A(−1|5|3)', ov: '\\(\\begin{pmatrix}-1\\\\5\\\\3\\end{pmatrix}\\)', id: 'a' },
+    { punkt: 'B(4|−2|1)', ov: '\\(\\begin{pmatrix}4\\\\-2\\\\1\\end{pmatrix}\\)', id: 'b' },
+    { punkt: 'C(0|−3|−4)', ov: '\\(\\begin{pmatrix}0\\\\-3\\\\-4\\end{pmatrix}\\)', id: 'c' },
+  ],
+  P: [
+    { punkt: 'A(−4|2|−1)', ov: '\\(\\begin{pmatrix}-4\\\\2\\\\-1\\end{pmatrix}\\)', id: 'a' },
+    { punkt: 'B(3|0|−5)', ov: '\\(\\begin{pmatrix}3\\\\0\\\\-5\\end{pmatrix}\\)', id: 'b' },
+    { punkt: 'C(−2|−3|6)', ov: '\\(\\begin{pmatrix}-2\\\\-3\\\\6\\end{pmatrix}\\)', id: 'c' },
+  ]
+};
+
+let zuordnungSelektion = null;
+let zuordnungFertig = 0;
+
+function renderZuordnung() {
+  const data = zuordnungDaten[niveau];
+  const el = document.getElementById('a1-zuordnung');
+  if (!el) return;
+
+  // Mische Punkte und Ortsvektoren unabhängig
+  const punkte = [...data].sort(() => Math.random() - 0.5);
+  const vektoren = [...data].sort(() => Math.random() - 0.5);
+
+  let html = `<div style="display:flex;gap:1.5rem;flex-wrap:wrap;margin-top:0.5rem;">
+    <div>
+      <div style="font-size:0.78rem;color:var(--text2);margin-bottom:0.4rem;">Ortsvektoren</div>
+      <div id="ov-spalte">`;
+  vektoren.forEach(v => {
+    html += `<button class="antippen-item" data-typ="ov" data-id="${v.id}" onclick="zuordnungTipp(this)">${v.ov}</button><br>`;
+  });
+  html += `</div></div>
+    <div>
+      <div style="font-size:0.78rem;color:var(--text2);margin-bottom:0.4rem;">Punkte</div>
+      <div id="pkt-spalte">`;
+  punkte.forEach(p => {
+    html += `<button class="antippen-item" data-typ="pkt" data-id="${p.id}" onclick="zuordnungTipp(this)">${p.punkt}</button><br>`;
+  });
+  html += `</div></div></div>`;
+
+  el.innerHTML = html;
+  zuordnungFertig = 0;
+  zuordnungSelektion = null;
+  if (window.MathJax) MathJax.typesetPromise().catch(e => {});
+}
+
+function zuordnungTipp(btn) {
+  if (btn.classList.contains('placed') || btn.classList.contains('placed-wrong')) return;
+  if (aufgabenStatus['a1-1'] === 'richtig') return;
+
+  if (!zuordnungSelektion) {
+    zuordnungSelektion = btn;
+    btn.classList.add('selected');
+    return;
+  }
+
+  if (btn === zuordnungSelektion) {
+    btn.classList.remove('selected');
+    zuordnungSelektion = null;
+    return;
+  }
+
+  const first = zuordnungSelektion;
+  first.classList.remove('selected');
+  zuordnungSelektion = null;
+
+  // Prüfe ob ein OV und ein PKT gewählt
+  const a = first, b = btn;
+  const isOV = a.dataset.typ === 'ov' || b.dataset.typ === 'ov';
+  const isPKT = a.dataset.typ === 'pkt' || b.dataset.typ === 'pkt';
+  if (!isOV || !isPKT) {
+    // Falsche Kombination – zeige kurz Hinweis
+    a.classList.add('selected');
+    b.classList.add('selected');
+    setTimeout(() => { a.classList.remove('selected'); b.classList.remove('selected'); }, 400);
+    return;
+  }
+
+  const korrekt = a.dataset.id === b.dataset.id;
+  [a, b].forEach(el => {
+    el.classList.add(korrekt ? 'placed' : 'placed-wrong');
+    el.disabled = true;
+  });
+
+  if (!korrekt) {
+    setTimeout(() => {
+      [a, b].forEach(el => {
+        el.classList.remove('placed-wrong');
+        el.disabled = false;
+      });
+    }, 1200);
+    return;
+  }
+
+  zuordnungFertig++;
+  if (zuordnungFertig >= zuordnungDaten[niveau].length) {
+    aufgabenStatus['a1-1'] = 'richtig';
+    const fb = document.getElementById('fb-a1-1');
+    if (fb) {
+      fb.className = 'feedback show correct';
+      fb.innerHTML = '✅ Alle Paare korrekt zugeordnet!';
+    }
+    updateProgress();
+    prüfeWeiterButton();
+  }
+}
+
+// ==================== WIEDERHOLUNG ====================
+function prüfeWdh1() {
+  const val = parseFloat(document.getElementById('wdh-1').value);
+  const korrekt = Math.abs(val - 5) < 0.05;
+  document.getElementById('wdh-1').className = korrekt ? 'correct' : 'wrong';
+  const fb = document.getElementById('fb-a4-1');
+  fb.className = 'feedback show ' + (korrekt ? 'correct' : 'wrong');
+  fb.innerHTML = korrekt ? '✅ Richtig! \\(c = \\sqrt{9+16} = \\sqrt{25} = 5\\)' : '❌ Falsch. \\(c = \\sqrt{3^2 + 4^2} = \\sqrt{25} = 5\\)';
+  aufgabenStatus['a4-1'] = korrekt ? 'richtig' : 'falsch';
+  document.querySelectorAll('#a4-1 .prüf-btn')[0].disabled = true;
+  updateProgress(); prüfeWeiterButton();
+  if (window.MathJax) MathJax.typesetPromise().catch(e => {});
+}
+
+function prüfeWdh2() {
+  const val = parseFloat(document.getElementById('wdh-2').value);
+  const korrekt = Math.abs(val - 5) < 0.1;
+  document.getElementById('wdh-2').className = korrekt ? 'correct' : 'wrong';
+  const fb = document.getElementById('fb-a4-2');
+  fb.className = 'feedback show ' + (korrekt ? 'correct' : 'wrong');
+  fb.innerHTML = korrekt ? '✅ Richtig! \\(|AB| = \\sqrt{9+16+0} = 5\\)' : '❌ Falsch. \\(\\overrightarrow{AB} = \\begin{pmatrix}3\\\\4\\\\0\\end{pmatrix}\\), \\(|\\overrightarrow{AB}| = \\sqrt{9+16} = 5\\)';
+  aufgabenStatus['a4-2'] = korrekt ? 'richtig' : 'falsch';
+  document.querySelectorAll('#a4-2 .prüf-btn')[0].disabled = true;
+  updateProgress(); prüfeWeiterButton();
+  if (window.MathJax) MathJax.typesetPromise().catch(e => {});
+}
+
+function mcWdh(btn, korrekt) {
+  if (aufgabenStatus['a4-3']) return;
+  aufgabenStatus['a4-3'] = korrekt ? 'richtig' : 'falsch';
+  // finde den richtigen Button (der mit true übergeben wurde)
+  btn.closest('.mc-grid').querySelectorAll('.mc-btn').forEach(b => {
+    b.classList.add('disabled');
+    // korrekte Antwort ist Index 1 (|v|=5)
+    if (b.textContent.includes('5')) b.classList.add('correct');
+    else if (b === btn && !korrekt) b.classList.add('wrong');
+  });
+  const fb = document.getElementById('fb-a4-3');
+  fb.className = 'feedback show ' + (korrekt ? 'correct' : 'wrong');
+  fb.innerHTML = korrekt ? '✅ Richtig! \\(\\sqrt{9+0+16} = 5\\)' : '❌ Falsch. Die richtige Antwort ist \\(|\\vec{v}| = 5\\).';
+  updateProgress(); prüfeWeiterButton();
+  if (window.MathJax) MathJax.typesetPromise().catch(e => {});
+}
+
+
+// ==================== KARTE 4: SKALARE MULT. + KOMBINIERT ====================
+function prüfeA4(nr, lösung) {
+  const id = 'a4-' + nr;
+  if (aufgabenStatus[id]) return;
+  const v1 = parseFloat(document.getElementById(id+'-v1').value);
+  const v2 = parseFloat(document.getElementById(id+'-v2').value);
+  const v3 = parseFloat(document.getElementById(id+'-v3').value);
+  const korrekt = v1 === lösung[0] && v2 === lösung[1] && v3 === lösung[2];
+  aufgabenStatus[id] = korrekt ? 'richtig' : 'falsch';
+
+  [['-v1',0],['-v2',1],['-v3',2]].forEach(([s,i]) => {
+    const el = document.getElementById(id+s);
+    if (el) el.className = parseFloat(el.value) === lösung[i] ? 'correct' : 'wrong';
+  });
+
+  const fb = document.getElementById('fb-' + id);
+  if (fb) {
+    fb.className = 'feedback show ' + (korrekt ? 'correct' : 'wrong');
+    fb.innerHTML = korrekt
+      ? '✅ Richtig! Gut gemacht.'
+      : `❌ Falsch. Richtige Antwort: \(\begin{pmatrix}${lösung[0]}\\${lösung[1]}\\${lösung[2]}\end{pmatrix}\)`;
+  }
+  document.querySelectorAll(`#${id} .prüf-btn`)[0].disabled = true;
+  updateProgress(); prüfeWeiterButton();
+  if (window.MathJax) MathJax.typesetPromise().catch(e => {});
+}
+
+function mcKombiniert(btn, id, korrekt) {
+  if (aufgabenStatus[id]) return;
+  aufgabenStatus[id] = korrekt ? 'richtig' : 'falsch';
+  btn.closest('.mc-grid').querySelectorAll('.mc-btn').forEach(b => {
+    b.classList.add('disabled');
+    if (b === btn) b.classList.add(korrekt ? 'correct' : 'wrong');
+    if (!korrekt && b.getAttribute('onclick').includes(',true)')) b.classList.add('correct');
+  });
+  const fb = document.getElementById('fb-' + id);
+  if (fb) {
+    fb.className = 'feedback show ' + (korrekt ? 'correct' : 'wrong');
+    fb.innerHTML = korrekt ? '✅ Richtig!' : '❌ Falsch. Die markierte Antwort ist korrekt.';
+  }
+  updateProgress(); prüfeWeiterButton();
+  if (window.MathJax) MathJax.typesetPromise().catch(e => {});
+}
+
+// ==================== FORTSCHRITT ====================
+const karteAufgaben = {
+  0: ['a0-3'],
+  1: ['a1-1','a1-2','a1-3'],
+  2: ['a2-1','a2-2','a2-3'],
+  3: ['a3-1','a3-2','a3-3'],
+  4: ['a4-1','a4-2','a4-3','a4-4'],
+  5: ['a5-1','a5-2','a5-3']
+};
+
+function updateProgress() {
+  for (let k = 0; k <= 5; k++) {
+    const ids = karteAufgaben[k];
+    const done = ids.filter(id => aufgabenStatus[id]).length;
+    const pb = document.getElementById('pb-' + k);
+    if (pb) pb.style.width = (done / ids.length * 100) + '%';
+
+    const nav = document.getElementById('nav-' + k);
+    if (nav && done === ids.length) nav.classList.add('done');
+  }
+
+  // Auswertung
+  const alleIds = Object.values(karteAufgaben).flat();
+  const richtig = alleIds.filter(id => aufgabenStatus[id] === 'richtig').length;
+  const falsch = alleIds.filter(id => aufgabenStatus[id] === 'falsch').length;
+  const total = alleIds.filter(id => aufgabenStatus[id]).length;
+  document.getElementById('stat-richtig').textContent = richtig;
+  document.getElementById('stat-falsch').textContent = falsch;
+  document.getElementById('stat-prozent').textContent = total > 0 ? Math.round(richtig/total*100) + '%' : '–';
+
+  const textEl = document.getElementById('auswertung-text');
+  if (total > 0) {
+    const pct = Math.round(richtig/total*100);
+    let msg = '';
+    if (pct >= 80) msg = '🎉 Hervorragend! Du hast das Thema gut verstanden.';
+    else if (pct >= 60) msg = '👍 Gut gemacht! Übe noch etwas die Fehleraufgaben.';
+    else msg = '📚 Weiterüben! Schaue dir die Tipps nochmal an.';
+    textEl.innerHTML = msg;
+  }
+}
+
+function prüfeWeiterButton() {
+  // Alle Aufgaben der aktuellen Karte (0-4) fertig?
+  const alleKartenFertig = [0,1,2,3,4].every(k => {
+    const ids = karteAufgaben[k];
+    return ids.every(id => aufgabenStatus[id]);
+  });
+
+  const btn = document.getElementById('weiter-btn');
+  if (alleKartenFertig) {
+    zeigeKarte(6); // Auswertung
+    btn.classList.add('sichtbar');
+  } else if (aktiveKarte === 5) {
+    btn.classList.add('sichtbar');
+  } else {
+    // Zeige Weiter-Button wenn aktuelle Karte komplett
+    const ids = karteAufgaben[aktiveKarte];
+    if (ids && ids.every(id => aufgabenStatus[id])) {
+      btn.classList.add('sichtbar');
+      btn.textContent = 'Nächste Karte →';
+      btn.onclick = () => {
+        if (aktiveKarte < 5) zeigeKarte(aktiveKarte + 1);
+        else zeigeKarte(6);
+        btn.classList.remove('sichtbar');
+      };
+    }
+  }
+}
+
+// ==================== NAVIGATION ====================
+function zeigeKarte(nr) {
+  aktiveKarte = nr;
+  document.querySelectorAll('.karte').forEach((el, i) => {
+    el.classList.toggle('active', i === nr);
+  });
+  document.querySelectorAll('.nav-btn').forEach((el, i) => {
+    el.classList.toggle('active', i === nr);
+  });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ==================== NIVEAU ====================
+function setNiveau(n) {
+  niveau = n;
+  aufgabenStatus = {};
+  document.querySelectorAll('.niveau-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('btn-' + n).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('done'));
+
+  // Reset Fortschrittsbalken
+  for (let i = 0; i <= 4; i++) {
+    const pb = document.getElementById('pb-' + i);
+    if (pb) pb.style.width = '0%';
+  }
+
+  // Reset Inputs und Feedback
+  document.querySelectorAll('input[type="number"]').forEach(el => {
+    el.value = '';
+    el.className = '';
+  });
+  document.querySelectorAll('.feedback').forEach(el => {
+    el.className = 'feedback';
+  });
+  document.querySelectorAll('.mc-btn').forEach(el => {
+    el.className = 'mc-btn';
+  });
+  document.querySelectorAll('.prüf-btn').forEach(el => {
+    el.disabled = false;
+  });
+  document.getElementById('weiter-btn').classList.remove('sichtbar');
+
+  renderAufgaben();
+  zeigeKarte(aktiveKarte);
+}
+
+// ==================== TIPP ====================
+function toggleTipp(id) {
+  const el = document.getElementById(id);
+  if (el) el.classList.toggle('show');
+}
+
+// ==================== GEOGEBRA ====================
+function ladeGeoGebra() {
+  if (typeof GGBApplet === 'undefined') {
+    setTimeout(ladeGeoGebra, 500);
+    return;
+  }
+
+  const params = {
+    appName: '3d',
+    width: '100%',
+    height: 340,
+    showToolBar: false,
+    showAlgebraInput: false,
+    showMenuBar: false,
+    enableLabelDrags: false,
+    enableShiftDragZoom: true,
+    enableRightClick: false,
+    errorDialogsActive: false,
+    useBrowserForJS: false,
+    allowStyleBar: false,
+    preventFocus: false,
+    showZoomButtons: true,
+    capturingThreshold: 3,
+    showFullscreenButton: true,
+    scale: 1,
+    disableAutoScale: false,
+    allowUpscale: false,
+    clickToLoad: false,
+    filename: 'Was_bin_ich.ggb'
+  };
+
+  const applet = new GGBApplet(params, true);
+  applet.inject('ggb-applet');
+}
+
+// ==================== INIT ====================
+document.addEventListener('DOMContentLoaded', function() {
+  renderAufgaben();
+  ladeGeoGebra();
+
+  // MathJax nach kurzem Delay
+  setTimeout(() => {
+    if (window.MathJax) MathJax.typesetPromise().catch(e => {});
+  }, 800);
+});
+</script>
+</body>
+</html>
