@@ -1,0 +1,1326 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Gleichungen lösen – Äquivalenzumformungen</title>
+<script>
+  MathJax = {
+    tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+    svg: { fontCache: 'global' }
+  };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Nunito+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f0e8;
+    --card: #fffdf8;
+    --primary: #e07b39;
+    --primary-dark: #c45f20;
+    --accent: #3b82c4;
+    --accent-dark: #2a62a0;
+    --green: #1a8a3c;
+    --green-bg: #d4f0de;
+    --red: #c0392b;
+    --red-bg: #fde8e6;
+    --yellow: #e8a020;
+    --yellow-bg: #fef3d0;
+    --text: #2c2c2c;
+    --text-light: #666;
+    --border: #ddd5c0;
+    --shadow: 0 4px 20px rgba(0,0,0,0.10);
+    --radius: 16px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'Nunito Sans', sans-serif;
+    font-size: 17px;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding-bottom: 100px;
+  }
+
+  header {
+    background: linear-gradient(135deg, #e07b39 0%, #c45f20 50%, #a04a10 100%);
+    color: white;
+    padding: 20px 24px 16px;
+    text-align: center;
+    position: relative;
+  }
+  header .label {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    opacity: 0.8;
+    margin-bottom: 6px;
+  }
+  header h1 {
+    font-family: 'Nunito', sans-serif;
+    font-size: 22px;
+    font-weight: 900;
+    line-height: 1.2;
+  }
+  header .sub {
+    font-size: 14px;
+    opacity: 0.85;
+    margin-top: 4px;
+  }
+
+  /* Progress bar */
+  .progress-bar {
+    background: rgba(255,255,255,0.25);
+    height: 6px;
+    margin-top: 14px;
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    background: white;
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.5s ease;
+    width: 0%;
+  }
+
+  /* Card navigation dots */
+  .nav-dots {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    padding: 14px 0 8px;
+  }
+  .nav-dot {
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: var(--border);
+    transition: all 0.3s;
+    cursor: pointer;
+  }
+  .nav-dot.active { background: var(--primary); transform: scale(1.3); }
+  .nav-dot.done { background: var(--green); }
+
+  /* Cards container */
+  .cards-wrapper {
+    overflow: hidden;
+    position: relative;
+  }
+  .cards-track {
+    display: flex;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .card {
+    min-width: 100%;
+    padding: 16px 16px 24px;
+  }
+
+  /* Card box */
+  .card-box {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    border: 2px solid var(--border);
+    padding: 22px 20px;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  .card-tag {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    background: var(--primary);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 12px;
+  }
+  .card-tag.blue { background: var(--accent); }
+  .card-tag.green { background: var(--green); }
+  .card-tag.gold { background: var(--yellow); color: #3a2000; }
+
+  .card-title {
+    font-family: 'Nunito', sans-serif;
+    font-size: 20px;
+    font-weight: 900;
+    margin-bottom: 14px;
+    line-height: 1.3;
+    color: var(--text);
+  }
+
+  p { line-height: 1.65; margin-bottom: 10px; }
+  .text-light { color: var(--text-light); font-size: 15px; }
+
+  /* ===== SCALE SVG ===== */
+  .scale-container {
+    text-align: center;
+    margin: 16px 0;
+    position: relative;
+  }
+  .scale-svg { max-width: 100%; overflow: visible; }
+
+  /* ===== EQUATION DISPLAY ===== */
+  .equation-display {
+    background: #f0f4ff;
+    border: 2px solid #b0c4e8;
+    border-radius: 12px;
+    padding: 14px 18px;
+    text-align: center;
+    margin: 14px 0;
+    font-family: 'Nunito', sans-serif;
+    font-size: 19px;
+    font-weight: 700;
+  }
+
+  /* ===== STEP DISPLAY ===== */
+  .steps-box {
+    background: #f8f5ee;
+    border-left: 4px solid var(--primary);
+    border-radius: 0 12px 12px 0;
+    padding: 14px 16px;
+    margin: 14px 0;
+    font-family: 'Nunito', sans-serif;
+  }
+  .step-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 0;
+    border-bottom: 1px solid #e8e0d0;
+    font-size: 16px;
+  }
+  .step-row:last-child { border-bottom: none; }
+  .step-eq { flex: 1; font-weight: 700; }
+  .step-action {
+    font-size: 13px;
+    color: var(--primary-dark);
+    font-weight: 800;
+    background: #ffe8d5;
+    border: 1px solid #f0c8a0;
+    border-radius: 8px;
+    padding: 3px 8px;
+    white-space: nowrap;
+  }
+  .step-highlight { color: var(--primary-dark); }
+
+  /* ===== INTERACTIVE BUTTONS ===== */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 48px;
+    padding: 10px 22px;
+    border-radius: 12px;
+    border: none;
+    font-family: 'Nunito', sans-serif;
+    font-size: 16px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.18s;
+    text-align: center;
+    line-height: 1.3;
+  }
+  .btn:active { transform: scale(0.96); }
+  .btn-primary { background: var(--primary); color: white; }
+  .btn-primary:active { background: var(--primary-dark); }
+  .btn-blue { background: var(--accent); color: white; }
+  .btn-blue:active { background: var(--accent-dark); }
+  .btn-outline {
+    background: white;
+    color: var(--text);
+    border: 2px solid var(--border);
+  }
+  .btn-outline:active { background: #f0ede6; }
+  .btn-full { display: flex; width: 100%; margin-top: 10px; }
+
+  /* ===== CHOICE BUTTONS ===== */
+  .choices {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 14px 0;
+  }
+  .choice-btn {
+    min-height: 52px;
+    padding: 12px 18px;
+    border-radius: 12px;
+    border: 2px solid var(--border);
+    background: white;
+    text-align: left;
+    font-family: 'Nunito', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.18s;
+    line-height: 1.4;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .choice-btn:active { transform: scale(0.98); }
+  .choice-btn.selected { border-color: var(--accent); background: #e8f0fb; }
+  .choice-btn.correct { border-color: var(--green); background: var(--green-bg); color: var(--green); }
+  .choice-btn.wrong { border-color: var(--red); background: var(--red-bg); color: var(--red); }
+  .choice-btn .icon { font-size: 22px; flex-shrink: 0; }
+
+  /* ===== FEEDBACK ===== */
+  .feedback {
+    display: none;
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin: 12px 0;
+    font-weight: 700;
+    font-size: 16px;
+    line-height: 1.5;
+  }
+  .feedback.show { display: block; }
+  .feedback.correct { background: var(--green-bg); border: 2px solid var(--green); color: var(--green); }
+  .feedback.wrong { background: var(--red-bg); border: 2px solid var(--red); color: var(--red); }
+  .feedback.info { background: var(--yellow-bg); border: 2px solid var(--yellow); color: #5a3a00; }
+
+  /* ===== TIP BOX ===== */
+  .tip-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--accent-dark);
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 2px dashed var(--accent);
+    background: #f0f5ff;
+    transition: all 0.2s;
+    min-height: 44px;
+    margin: 8px 0;
+  }
+  .tip-toggle:active { background: #dce8ff; }
+  .tip-content {
+    display: none;
+    background: #eef5ff;
+    border-left: 4px solid var(--accent);
+    border-radius: 0 10px 10px 0;
+    padding: 12px 14px;
+    margin-top: 6px;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+  .tip-content.visible { display: block; }
+
+  /* ===== INPUT FIELDS ===== */
+  .input-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin: 12px 0;
+  }
+  .math-input {
+    font-family: 'Nunito', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    width: 90px;
+    height: 50px;
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    text-align: center;
+    background: white;
+    transition: border-color 0.2s;
+    -webkit-appearance: none;
+  }
+  .math-input:focus { outline: none; border-color: var(--accent); }
+  .math-input.correct { border-color: var(--green); background: var(--green-bg); }
+  .math-input.wrong { border-color: var(--red); background: var(--red-bg); }
+  .input-label { font-weight: 700; font-size: 17px; }
+
+  /* ===== BALANCE SCALE ANIMATION ===== */
+  @keyframes sway-left {
+    0% { transform: rotate(0deg); }
+    50% { transform: rotate(-5deg); }
+    100% { transform: rotate(0deg); }
+  }
+  @keyframes sway-right {
+    0% { transform: rotate(0deg); }
+    50% { transform: rotate(5deg); }
+    100% { transform: rotate(0deg); }
+  }
+  .balance-sway { transform-origin: center top; }
+
+  /* ===== GROUP TASK BADGE ===== */
+  .group-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, #3b82c4, #2a62a0);
+    color: white;
+    padding: 10px 16px;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 700;
+    margin: 14px 0;
+  }
+  .group-badge .emoji { font-size: 20px; }
+
+  /* ===== SUMMARY BOX ===== */
+  .summary-box {
+    background: linear-gradient(135deg, #fffdf2, #fff8e0);
+    border: 2px solid var(--yellow);
+    border-radius: var(--radius);
+    padding: 18px;
+    margin: 14px 0;
+  }
+  .summary-box h3 {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 900;
+    font-size: 17px;
+    margin-bottom: 10px;
+    color: #5a3a00;
+  }
+  .summary-rule {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid #f0d890;
+    font-size: 15px;
+    line-height: 1.5;
+  }
+  .summary-rule:last-child { border-bottom: none; }
+  .rule-num {
+    background: var(--yellow);
+    color: #3a2000;
+    font-weight: 900;
+    font-size: 13px;
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  /* ===== REFERENCE BOX ===== */
+  .book-ref {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #f5f5f5;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin-top: 14px;
+    font-size: 14px;
+    color: var(--text-light);
+  }
+
+  /* ===== NEXT BUTTON ===== */
+  .next-btn-wrap {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    padding: 12px 16px;
+    background: linear-gradient(to top, rgba(245,240,232,1) 70%, rgba(245,240,232,0));
+    display: none;
+    z-index: 100;
+  }
+  .next-btn-wrap.visible { display: block; }
+  .next-btn {
+    display: flex;
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    min-height: 56px;
+    background: linear-gradient(135deg, var(--green) 0%, #0f6e2e 100%);
+    color: white;
+    border-radius: 14px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 18px;
+    font-weight: 900;
+    border: none;
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    box-shadow: 0 4px 16px rgba(26,138,60,0.4);
+    transition: all 0.2s;
+  }
+  .next-btn:active { transform: scale(0.97); }
+
+  /* ===== CARD NAV BUTTONS ===== */
+  .card-nav {
+    display: flex;
+    gap: 10px;
+    margin-top: 18px;
+    flex-wrap: wrap;
+  }
+  .btn-next-card {
+    flex: 1;
+    min-height: 52px;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 16px;
+    font-weight: 800;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s;
+  }
+  .btn-next-card:active { transform: scale(0.97); }
+  .btn-next-card:disabled { background: #ccc; cursor: default; }
+
+  /* ===== DINO ===== */
+  #dino {
+    position: fixed;
+    bottom: 80px;
+    right: 14px;
+    font-size: 26px;
+    cursor: pointer;
+    z-index: 200;
+    line-height: 1;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+    transition: transform 0.2s;
+  }
+  #dino:active { transform: scale(1.2); }
+  #dino-tooltip {
+    display: none;
+    position: fixed;
+    bottom: 114px;
+    right: 14px;
+    background: #2c2c2c;
+    color: white;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 6px 10px;
+    border-radius: 8px;
+    white-space: nowrap;
+    z-index: 201;
+  }
+  #dino-tooltip.show { display: block; }
+
+  /* ===== HIGHLIGHT ===== */
+  .hl-orange { color: var(--primary-dark); font-weight: 800; }
+  .hl-blue { color: var(--accent-dark); font-weight: 800; }
+  .hl-green { color: var(--green); font-weight: 800; }
+
+  /* ===== STEP-BY-STEP REVEAL ===== */
+  .reveal-step {
+    display: none;
+    animation: fadeInUp 0.4s ease;
+  }
+  .reveal-step.shown { display: block; }
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ===== SCALE ANIMATION STATES ===== */
+  .scale-beam { transform-origin: 50% 0; transition: transform 0.6s ease; }
+  .scale-balanced .scale-beam { transform: rotate(0deg); }
+  .scale-left .scale-beam { transform: rotate(-8deg); }
+  .scale-right .scale-beam { transform: rotate(8deg); }
+
+  hr { border: none; border-top: 2px dashed var(--border); margin: 16px 0; }
+
+  /* Tooltip for Fachbegriff */
+  .fachbegriff {
+    border-bottom: 2px dashed var(--accent);
+    cursor: help;
+    position: relative;
+  }
+  .fachbegriff::after {
+    content: attr(data-tip);
+    display: none;
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #2c2c2c;
+    color: white;
+    font-size: 13px;
+    padding: 6px 10px;
+    border-radius: 8px;
+    white-space: nowrap;
+    z-index: 50;
+    font-weight: 600;
+  }
+  .fachbegriff.active::after { display: block; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="label">Mathematik · Klasse 7 · Erarbeitung</div>
+  <h1>Gleichungen lösen mit<br>Äquivalenzumformungen</h1>
+  <div class="sub">4er-Gruppen · ca. 45 Minuten</div>
+  <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+</header>
+
+<div class="nav-dots" id="navDots"></div>
+
+<div class="cards-wrapper">
+  <div class="cards-track" id="cardsTrack">
+
+    <!-- ===== KARTE 1: Einstieg Waage ===== -->
+    <div class="card" id="card-0">
+      <div class="card-box">
+        <span class="card-tag">🎯 Einstieg</span>
+        <h2 class="card-title">Die Gerechtigkeitswaage</h2>
+
+        <p>Eine Waage ist im Gleichgewicht, wenn <strong>auf beiden Seiten gleich viel Gewicht</strong> liegt. Genau so funktioniert eine Gleichung!</p>
+
+        <!-- Animated scale -->
+        <div class="scale-container" id="introScale">
+          <svg class="scale-svg" viewBox="0 0 400 240" width="100%" xmlns="http://www.w3.org/2000/svg" style="max-width:420px; display:block; margin:0 auto;">
+            <!-- Base plate -->
+            <rect x="140" y="218" width="120" height="14" rx="7" fill="#6B4F10"/>
+            <rect x="155" y="210" width="90" height="10" rx="5" fill="#8B6614"/>
+            <!-- Stand column -->
+            <rect x="192" y="100" width="16" height="115" rx="6" fill="#8B6614"/>
+            <!-- Stand top decorative cap -->
+            <rect x="182" y="96" width="36" height="10" rx="5" fill="#a07820"/>
+            <!-- Pivot pin -->
+            <circle cx="200" cy="93" r="13" fill="#c45f20"/>
+            <circle cx="200" cy="93" r="7" fill="#fff"/>
+            <circle cx="200" cy="93" r="3" fill="#c45f20"/>
+
+            <!-- BEAM group – rotates around pivot -->
+            <g id="scaleBeam" style="transform-origin:200px 93px; transform:rotate(0deg); transition:transform 0.8s cubic-bezier(.4,0,.2,1)">
+              <!-- Beam bar -->
+              <rect x="42" y="87" width="316" height="12" rx="6" fill="#8B6614"/>
+              <!-- Left arm end cap -->
+              <circle cx="50" cy="93" r="7" fill="#a07820"/>
+              <!-- Right arm end cap -->
+              <circle cx="350" cy="93" r="7" fill="#a07820"/>
+
+              <!-- === LEFT PAN HANGING === -->
+              <!-- 4 strings from beam end to pan corners -->
+              <line x1="36" y1="100" x2="20" y2="145" stroke="#7a6030" stroke-width="2.5"/>
+              <line x1="64" y1="100" x2="80" y2="145" stroke="#7a6030" stroke-width="2.5"/>
+              <line x1="36" y1="100" x2="70" y2="145" stroke="#7a6030" stroke-width="2.5"/>
+              <line x1="64" y1="100" x2="30" y2="145" stroke="#7a6030" stroke-width="2.5"/>
+              <!-- Pan shadow -->
+              <ellipse cx="50" cy="158" rx="42" ry="7" fill="#b08820" opacity="0.5"/>
+              <!-- Pan body -->
+              <path d="M10,148 Q10,162 50,162 Q90,162 90,148 Z" fill="#d4a843"/>
+              <ellipse cx="50" cy="148" rx="40" ry="8" fill="#f0c850"/>
+
+              <!-- Left weights on pan: 5z block + 2 small blocks -->
+              <!-- Big z-block -->
+              <rect x="25" y="118" width="32" height="28" rx="5" fill="#e07b39" stroke="#c45f20" stroke-width="2"/>
+              <text x="41" y="136" text-anchor="middle" font-family="Nunito" font-weight="900" font-size="13" fill="white">5·z</text>
+              <!-- Small +2 block -->
+              <rect x="60" y="128" width="22" height="18" rx="4" fill="#3b82c4" stroke="#2a62a0" stroke-width="1.5"/>
+              <text x="71" y="141" text-anchor="middle" font-family="Nunito" font-weight="900" font-size="10" fill="white">+2</text>
+
+              <!-- === RIGHT PAN HANGING === -->
+              <line x1="336" y1="100" x2="320" y2="145" stroke="#7a6030" stroke-width="2.5"/>
+              <line x1="364" y1="100" x2="380" y2="145" stroke="#7a6030" stroke-width="2.5"/>
+              <line x1="336" y1="100" x2="370" y2="145" stroke="#7a6030" stroke-width="2.5"/>
+              <line x1="364" y1="100" x2="330" y2="145" stroke="#7a6030" stroke-width="2.5"/>
+              <!-- Pan shadow -->
+              <ellipse cx="350" cy="158" rx="42" ry="7" fill="#b08820" opacity="0.5"/>
+              <!-- Pan body -->
+              <path d="M310,148 Q310,162 350,162 Q390,162 390,148 Z" fill="#d4a843"/>
+              <ellipse cx="350" cy="148" rx="40" ry="8" fill="#f0c850"/>
+
+              <!-- Right weights on pan: 2z block + 8 block -->
+              <rect x="325" y="118" width="32" height="28" rx="5" fill="#e07b39" stroke="#c45f20" stroke-width="2"/>
+              <text x="341" y="136" text-anchor="middle" font-family="Nunito" font-weight="900" font-size="13" fill="white">2·z</text>
+              <rect x="360" y="122" width="22" height="24" rx="4" fill="#3b82c4" stroke="#2a62a0" stroke-width="1.5"/>
+              <text x="371" y="138" text-anchor="middle" font-family="Nunito" font-weight="900" font-size="10" fill="white">+8</text>
+            </g>
+
+            <!-- Balance indicator label -->
+            <text x="200" y="235" text-anchor="middle" font-family="Nunito" font-weight="800" font-size="12" fill="#8B6614">⚖ Gleichgewicht</text>
+          </svg>
+        </div>
+
+        <div class="equation-display">
+          \( 5 \cdot z + 2 = 2 \cdot z + 8 \)
+        </div>
+
+        <p>Die Waage steht im Gleichgewicht. Das bedeutet: <strong>Linke Seite = Rechte Seite</strong>.<br>
+        Gesucht: Wie schwer ist ein Ziegelstein <strong>z</strong>?</p>
+
+        <div class="group-badge">
+          <span class="emoji">👥</span>
+          <span>Gruppenaufgabe: Schaut euch die Waage an. Was könntet ihr tun, damit weniger auf der Waage liegt – aber das Gleichgewicht bleibt?</span>
+        </div>
+
+        <button class="tip-toggle" onclick="toggleTip('tip0')">💡 Tipp anzeigen</button>
+        <div class="tip-content" id="tip0">
+          Wenn du auf <em>beiden</em> Seiten der Waage das Gleiche wegnimmst oder drauflegst, bleibt die Waage im Gleichgewicht! Was würdest du als erstes von beiden Seiten wegnehmen?
+        </div>
+
+        <div class="card-nav">
+          <button class="btn-next-card" onclick="goToCard(1)">Weiter: Das Verfahren →</button>
+        </div>
+
+        <div class="book-ref">📖 Lambacher Schweizer 7, S. 141–142
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== KARTE 2: Das Verfahren Schritt für Schritt ===== -->
+    <div class="card" id="card-1">
+      <div class="card-box">
+        <span class="card-tag blue">🔢 Schritt für Schritt</span>
+        <h2 class="card-title">So wird die Gleichung gelöst</h2>
+
+        <p>Wir lösen gemeinsam: &nbsp;<strong>\( 5 \cdot z + 2 = 2 \cdot z + 8 \)</strong></p>
+        <p class="text-light">Das Ziel: <em>z</em> allein auf einer Seite!</p>
+
+        <div id="stepReveal">
+
+          <!-- Step 1 -->
+          <div class="steps-box">
+            <div class="step-row">
+              <div class="step-eq">\( 5 \cdot z + 2 = 2 \cdot z + 8 \)</div>
+              <div style="font-size:13px; color:#888">Start</div>
+            </div>
+          </div>
+
+          <p><strong>Schritt 1:</strong> Wir nehmen von <em>beiden Seiten</em> 2 weg (subtrahieren 2).</p>
+          <p class="text-light">Auf der Waage: Auf jeder Seite zwei 1-kg-Gewichte entfernen.</p>
+
+          <div id="step1reveal" class="reveal-step">
+            <div class="steps-box">
+              <div class="step-row">
+                <div class="step-eq">\( 5 \cdot z + 2 = 2 \cdot z + 8 \)</div>
+                <div class="step-action">– 2</div>
+              </div>
+              <div class="step-row">
+                <div class="step-eq">\( 5 \cdot z \phantom{+2} = 2 \cdot z + 6 \)</div>
+                <div style="font-size:13px; color:#888">✓</div>
+              </div>
+            </div>
+          </div>
+
+          <button class="btn btn-primary btn-full" id="btnStep1" onclick="showStep1()">🔍 Zeig mir Schritt 1</button>
+
+          <!-- Step 2 -->
+          <div id="step2area" class="reveal-step">
+            <hr>
+            <p><strong>Schritt 2:</strong> Jetzt nehmen wir von <em>beiden Seiten</em> \(2 \cdot z\) weg.</p>
+            <p class="text-light">Auf der Waage: Auf jeder Seite zwei Ziegelsteine entfernen.</p>
+
+            <div id="step2reveal" class="reveal-step">
+              <div class="steps-box">
+                <div class="step-row">
+                  <div class="step-eq">\( 5 \cdot z = 2 \cdot z + 6 \)</div>
+                  <div class="step-action">– 2·z</div>
+                </div>
+                <div class="step-row">
+                  <div class="step-eq">\( 3 \cdot z = 6 \)</div>
+                  <div style="font-size:13px; color:#888">✓</div>
+                </div>
+              </div>
+            </div>
+            <button class="btn btn-primary btn-full" id="btnStep2" onclick="showStep2()">🔍 Zeig mir Schritt 2</button>
+          </div>
+
+          <!-- Step 3 -->
+          <div id="step3area" class="reveal-step">
+            <hr>
+            <p><strong>Schritt 3:</strong> Wir teilen <em>beide Seiten</em> durch 3.</p>
+            <p class="text-light">Auf der Waage: Alles in 3 gleiche Gruppen aufteilen.</p>
+
+            <div id="step3reveal" class="reveal-step">
+              <div class="steps-box">
+                <div class="step-row">
+                  <div class="step-eq">\( 3 \cdot z = 6 \)</div>
+                  <div class="step-action">: 3</div>
+                </div>
+                <div class="step-row">
+                  <div class="step-eq"><span class="hl-green">\( z = 2 \)</span></div>
+                  <div style="font-size:13px; color:var(--green)">🎉</div>
+                </div>
+              </div>
+            </div>
+            <button class="btn btn-primary btn-full" id="btnStep3" onclick="showStep3()">🔍 Zeig mir Schritt 3</button>
+          </div>
+
+          <!-- Probe -->
+          <div id="probeArea" class="reveal-step">
+            <hr>
+            <div class="feedback info show">
+              <strong>🔎 Die Probe:</strong><br>
+              Links: \( 5 \cdot 2 + 2 = 10 + 2 = 12 \)<br>
+              Rechts: \( 2 \cdot 2 + 8 = 4 + 8 = 12 \) ✅<br>
+              Die Lösung ist \( z = 2 \).
+            </div>
+
+            <div class="group-badge">
+              <span class="emoji">👥</span>
+              <span>Erklärt euch gegenseitig: Warum dürfen wir das bei jedem Schritt machen?</span>
+            </div>
+
+            <div class="card-nav">
+              <button class="btn-next-card" onclick="goToCard(2)">Weiter: Ihr seid dran! →</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== KARTE 3: Gruppenaufgabe ===== -->
+    <div class="card" id="card-2">
+      <div class="card-box">
+        <span class="card-tag blue">👥 Gruppenaufgabe</span>
+        <h2 class="card-title">Löst die Gleichung gemeinsam!</h2>
+
+        <div class="group-badge">
+          <span class="emoji">🎯</span>
+          <span>Jede Person in der Gruppe löst einen Schritt und erklärt ihn den anderen.</span>
+        </div>
+
+        <div class="equation-display">
+          \( 2 \cdot b - 2 = 5 + 4 \cdot b \)
+        </div>
+
+        <p>Schreibt die Lösung in euer Heft. Dann tragt hier die Ergebnisse der Zwischenschritte ein:</p>
+
+        <!-- Interactive step inputs -->
+        <div style="margin: 16px 0;">
+          <p><strong>Nach Schritt 1</strong> (beide Seiten + 2):</p>
+          <div class="input-row">
+            <span class="input-label">\( 2 \cdot b = \)</span>
+            <input class="math-input" id="g3s1" type="number" inputmode="numeric" placeholder="?">
+            <span class="input-label">\( + \phantom{0} 4 \cdot b \)</span>
+          </div>
+          <button class="btn btn-outline" style="min-height:44px; padding: 8px 16px;" onclick="checkG3S1()">Prüfen</button>
+          <div class="feedback" id="fb-g3s1"></div>
+        </div>
+
+        <div id="g3step2" class="reveal-step">
+          <hr>
+          <p><strong>Nach Schritt 2</strong> (beide Seiten − 4·b):</p>
+          <div class="input-row">
+            <input class="math-input" id="g3s2" type="number" inputmode="numeric" placeholder="?">
+            <span class="input-label">\( \cdot b = \)</span>
+            <input class="math-input" id="g3s2b" type="number" inputmode="numeric" placeholder="?">
+          </div>
+          <p class="text-light" style="font-size:14px;">Welche Zahl steht vor dem b, welche auf der rechten Seite?</p>
+          <button class="btn btn-outline" style="min-height:44px; padding: 8px 16px;" onclick="checkG3S2()">Prüfen</button>
+          <div class="feedback" id="fb-g3s2"></div>
+        </div>
+
+        <div id="g3step3" class="reveal-step">
+          <hr>
+          <p><strong>Schritt 3:</strong> Durch welche Zahl muss man teilen?</p>
+          <div class="choices" id="choices-g3">
+            <button class="choice-btn" onclick="chooseDiv(2, this)"><span class="icon">➗</span>Beide Seiten durch 2 teilen</button>
+            <button class="choice-btn" onclick="chooseDiv(-2, this)"><span class="icon">➗</span>Beide Seiten durch (–2) teilen</button>
+            <button class="choice-btn" onclick="chooseDiv(4, this)"><span class="icon">➗</span>Beide Seiten durch 4 teilen</button>
+            <button class="choice-btn" onclick="chooseDiv(-4, this)"><span class="icon">➗</span>Beide Seiten durch (–4) teilen ← Warum geht das auch?</button>
+          </div>
+          <div class="feedback" id="fb-g3s3"></div>
+        </div>
+
+        <div id="g3lösung" class="reveal-step">
+          <div class="feedback correct show">
+            ✅ <strong>Super!</strong> Die Lösung ist \( b = -3{,}5 \).<br>
+            <span style="font-weight:400;">Probe: \( 2 \cdot (-3{,}5) - 2 = -7 - 2 = -9 \) und \( 5 + 4 \cdot (-3{,}5) = 5 - 14 = -9 \) ✓</span>
+          </div>
+
+          <button class="tip-toggle" onclick="toggleTip('tip3')">📖 Seitenreferenz</button>
+          <div class="tip-content" id="tip3">
+            Diese Aufgabe stammt aus Lambacher Schweizer 7, Seite 142, Beispielaufgabe a). Schaut dort nach, wie der Lösungsweg aufgeschrieben ist!
+          </div>
+
+          <div class="card-nav">
+            <button class="btn-next-card" onclick="goToCard(3)">Weiter: Die Regeln →</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ===== KARTE 4: Klammern ===== -->
+    <div class="card" id="card-3">
+      <div class="card-box">
+        <span class="card-tag blue">🧮 Erweiterung</span>
+        <h2 class="card-title">Was tun, wenn Klammern dabei sind?</h2>
+
+        <p>Manchmal stehen auf einer Seite der Gleichung Klammern. Die müssen <strong>zuerst aufgelöst</strong> werden!</p>
+
+        <div class="equation-display">
+          \( 2 \cdot x + 1 = 5 \cdot (x + 2) \)
+        </div>
+
+        <div class="group-badge">
+          <span class="emoji">👥</span>
+          <span>Diskutiert in der Gruppe: Was macht man zuerst? Notiert eure Antwort!</span>
+        </div>
+
+        <button class="tip-toggle" onclick="toggleTip('tip4a')">💡 Tipp: Was bedeutet 5·(x+2)?</button>
+        <div class="tip-content" id="tip4a">
+          Denkt an das Distributivgesetz: Man multipliziert die Zahl vor der Klammer mit <em>jedem</em> Term darin.<br>
+          Beispiel: \( 3 \cdot (a + 4) = 3 \cdot a + 3 \cdot 4 \)
+        </div>
+
+        <button class="btn btn-blue btn-full" id="btnBereit" onclick="showKlammerFrage()" style="margin-top:14px;">
+          ✋ Wir haben diskutiert – Aufgabe anzeigen
+        </button>
+
+        <div id="klammerFrage" class="reveal-step">
+          <hr>
+          <p><strong>Schritt 1:</strong> Löst die Klammer auf – was ergibt \( 5 \cdot (x + 2) \)?</p>
+          <div class="choices" id="choices-k1">
+            <button class="choice-btn" onclick="chooseKlammer(2, this)"><span class="icon">📝</span>\( 5 \cdot x + 2 \)</button>
+            <button class="choice-btn" onclick="chooseKlammer(1, this)"><span class="icon">📝</span>\( 5 \cdot x + 10 \)</button>
+            <button class="choice-btn" onclick="chooseKlammer(3, this)"><span class="icon">📝</span>\( 5 \cdot x + 7 \)</button>
+          </div>
+          <div class="feedback" id="fb-k1"></div>
+        </div>
+
+        <div id="k-rest" class="reveal-step">
+          <hr>
+          <div class="feedback correct show" style="margin-bottom:12px;">
+            ✅ Richtig! \( 5 \cdot (x + 2) = 5 \cdot x + 10 \) (Distributivgesetz)<br>
+            Die Gleichung lautet jetzt: \( 2 \cdot x + 1 = 5 \cdot x + 10 \)
+          </div>
+
+          <!-- Interactive steps box - grows line by line -->
+          <div class="steps-box" id="klammerStepsBox">
+            <div class="step-row">
+              <div class="step-eq">\( 2 \cdot x + 1 = 5 \cdot x + 10 \)</div>
+              <div style="font-size:13px;color:#888">nach Vereinfachen</div>
+            </div>
+          </div>
+
+          <!-- Step chooser area -->
+          <div id="kStep2area">
+            <p style="margin-top:12px;"><strong>Was ist sinnvoll als nächstes?</strong></p>
+            <div class="choices" id="choices-ks2">
+              <button class="choice-btn" onclick="chooseKS(2,'a',this)"><span class="icon">➡️</span>Beide Seiten – 10</button>
+              <button class="choice-btn" onclick="chooseKS(2,'b',this)"><span class="icon">➡️</span>Beide Seiten + 1</button>
+              <button class="choice-btn" onclick="chooseKS(2,'c',this)"><span class="icon">➡️</span>Beide Seiten · 5</button>
+            </div>
+            <div class="feedback" id="fb-ks2"></div>
+          </div>
+
+          <div id="kStep3area" class="reveal-step">
+            <p style="margin-top:12px;"><strong>Gut! Und jetzt?</strong></p>
+            <div class="choices" id="choices-ks3">
+              <button class="choice-btn" onclick="chooseKS(3,'a',this)"><span class="icon">➡️</span>Beide Seiten – 2·x</button>
+              <button class="choice-btn" onclick="chooseKS(3,'b',this)"><span class="icon">➡️</span>Beide Seiten + 5·x</button>
+              <button class="choice-btn" onclick="chooseKS(3,'c',this)"><span class="icon">➡️</span>Beide Seiten : 2</button>
+            </div>
+            <div class="feedback" id="fb-ks3"></div>
+          </div>
+
+          <div id="kStep4area" class="reveal-step">
+            <p style="margin-top:12px;"><strong>Fast da! Letzter Schritt:</strong></p>
+            <div class="choices" id="choices-ks4">
+              <button class="choice-btn" onclick="chooseKS(4,'a',this)"><span class="icon">➡️</span>Beide Seiten : 3</button>
+              <button class="choice-btn" onclick="chooseKS(4,'b',this)"><span class="icon">➡️</span>Beide Seiten : (–3)</button>
+              <button class="choice-btn" onclick="chooseKS(4,'c',this)"><span class="icon">➡️</span>Beide Seiten · (–1)</button>
+            </div>
+            <div class="feedback" id="fb-ks4"></div>
+          </div>
+
+          <div id="kLösung" class="reveal-step">
+            <div class="feedback correct show">
+              🎉 <strong>Perfekt! Die Lösung lautet \( x = -3 \).</strong><br>
+              <span style="font-weight:400;">Probe: \( 2 \cdot (-3) + 1 = -5 \) und \( 5 \cdot (-3 + 2) = -5 \) ✓</span><br>
+              <span style="font-size:14px; opacity:0.8;">Lambacher Schweizer 7, S. 142, Beispiel b)</span>
+            </div>
+
+            <div class="group-badge">
+              <span class="emoji">💬</span>
+              <span>Erklärt euch: Warum ist es egal, auf welche Seite man die x-Terme bringt?</span>
+            </div>
+
+            <div class="card-nav">
+              <button class="btn-next-card" onclick="goToCard(4)">Weiter: Die Regeln zusammengefasst →</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ===== KARTE 5: Zusammenfassung ===== -->
+    <div class="card" id="card-4">
+      <div class="card-box">
+        <span class="card-tag green">📋 Zusammenfassung</span>
+        <h2 class="card-title">Das Wichtigste auf einen Blick</h2>
+
+        <div class="summary-box">
+          <h3>⚖️ Das Waage-Prinzip</h3>
+          <p style="font-size:15px; color:#5a3a00;">Was du mit einer Seite machst, musst du immer <strong>auch mit der anderen</strong> machen – dann bleibt die Waage im Gleichgewicht!</p>
+        </div>
+
+        <div class="summary-box">
+          <h3>📐 <span class="fachbegriff" data-tip="Umformungen, die die Lösung nicht verändern">Äquivalenzumformungen</span> – erlaubte Operationen</h3>
+          <div class="summary-rule">
+            <div class="rule-num">+</div>
+            <div>Beide Seiten um dieselbe Zahl oder denselben Term <strong>addieren</strong></div>
+          </div>
+          <div class="summary-rule">
+            <div class="rule-num">−</div>
+            <div>Beide Seiten um dieselbe Zahl oder denselben Term <strong>subtrahieren</strong></div>
+          </div>
+          <div class="summary-rule">
+            <div class="rule-num">·</div>
+            <div>Beide Seiten mit derselben Zahl <strong>multiplizieren</strong> (≠ 0)</div>
+          </div>
+          <div class="summary-rule">
+            <div class="rule-num">÷</div>
+            <div>Beide Seiten durch dieselbe Zahl <strong>dividieren</strong> (≠ 0)</div>
+          </div>
+        </div>
+
+        <div class="summary-box">
+          <h3>🗺️ Vorgehen beim Lösen</h3>
+          <div class="summary-rule">
+            <div class="rule-num">1</div>
+            <div>Klammern auflösen und beide Seiten vereinfachen</div>
+          </div>
+          <div class="summary-rule">
+            <div class="rule-num">2</div>
+            <div>Alle Terme mit Variable auf eine Seite bringen</div>
+          </div>
+          <div class="summary-rule">
+            <div class="rule-num">3</div>
+            <div>Alle Zahlen auf die andere Seite bringen</div>
+          </div>
+          <div class="summary-rule">
+            <div class="rule-num">4</div>
+            <div>Durch den Vorfaktor dividieren → Variable „alleine"</div>
+          </div>
+          <div class="summary-rule">
+            <div class="rule-num">5</div>
+            <div>Probe: Lösung in die Ausgangsgleichung einsetzen</div>
+          </div>
+        </div>
+
+        <hr>
+
+        <!-- Mini quiz -->
+        <p><strong>🧠 Kurzer Check:</strong> Welche Operation ist bei Äquivalenzumformungen verboten?</p>
+        <div class="choices" id="choices-final">
+          <button class="choice-btn" onclick="chooseFinal(1, this)"><span class="icon">🔢</span>Beide Seiten + 5</button>
+          <button class="choice-btn" onclick="chooseFinal(2, this)"><span class="icon">🔢</span>Beide Seiten · 3</button>
+          <button class="choice-btn" onclick="chooseFinal(3, this)"><span class="icon">🔢</span>Beide Seiten : 0</button>
+          <button class="choice-btn" onclick="chooseFinal(4, this)"><span class="icon">🔢</span>Beide Seiten – 7</button>
+        </div>
+        <div class="feedback" id="fb-final"></div>
+
+        <div id="finalDone" class="reveal-step">
+          <div class="feedback correct show">
+            ✅ Genau! Durch 0 teilen ist verboten – das ist in der Mathematik nie erlaubt!
+          </div>
+
+          <div class="group-badge">
+            <span class="emoji">📖</span>
+            <span>Vergleicht eure Heft-Lösungen miteinander. Habt ihr alle dieselben Schritte aufgeschrieben?</span>
+          </div>
+
+          <div class="group-badge">
+            <span class="emoji">💡</span>
+            <span>Aufgaben zum Üben: Lambacher Schweizer 7, Seite 142–143, Aufgaben 4 und 5.</span>
+          </div>
+        </div>
+
+        <div class="book-ref">📖 Lambacher Schweizer 7, S. 141 (Infokasten „Äquivalenzumformungen")
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end cards-track -->
+</div><!-- end cards-wrapper -->
+
+<!-- Next button -->
+<div class="next-btn-wrap" id="nextBtnWrap">
+  <button class="next-btn" onclick="location.href='aequivalenzumformungen_ueben.html'">
+    🏆 Seite abgeschlossen! &#8594;
+  </button>
+</div>
+
+<!-- Dino -->
+<div id="dino" onclick="toggleDinoTip()" onmouseover="showDinoTip()" onmouseout="hideDinoTip()">🦖</div>
+<div id="dino-tooltip">Made by Mathedino</div>
+
+<script>
+  // ===== STATE =====
+  const totalCards = 5;
+  let currentCard = 0;
+  let cardDone = [false, false, false, false, false];
+
+  // card 0 is always "enterable" but done when user clicks next
+  // We track completion differently
+
+  // ===== NAV DOTS =====
+  function buildDots() {
+    const dots = document.getElementById('navDots');
+    dots.innerHTML = '';
+    for (let i = 0; i < totalCards; i++) {
+      const d = document.createElement('div');
+      d.className = 'nav-dot' + (i === currentCard ? ' active' : '') + (cardDone[i] ? ' done' : '');
+      d.onclick = () => { if (cardDone[i] || i <= currentCard) goToCard(i); };
+      dots.appendChild(d);
+    }
+  }
+
+  function updateProgress() {
+    const done = cardDone.filter(Boolean).length;
+    document.getElementById('progressFill').style.width = (done / totalCards * 100) + '%';
+  }
+
+  function goToCard(n) {
+    cardDone[currentCard] = true;
+    currentCard = n;
+    document.getElementById('cardsTrack').style.transform = `translateX(-${n * 100}%)`;
+    buildDots();
+    updateProgress();
+    window.scrollTo(0, 0);
+    if (n === totalCards - 1 && cardDone[n]) {
+      // last card
+    }
+  }
+
+  buildDots();
+
+  // ===== KARTE 1 STEPS =====
+  let step1done = false, step2done = false, step3done = false;
+
+  function showStep1() {
+    document.getElementById('step1reveal').classList.add('shown');
+    document.getElementById('btnStep1').style.display = 'none';
+    document.getElementById('step2area').classList.add('shown');
+    MathJax.typesetPromise();
+  }
+
+  function showStep2() {
+    document.getElementById('step2reveal').classList.add('shown');
+    document.getElementById('btnStep2').style.display = 'none';
+    document.getElementById('step3area').classList.add('shown');
+    MathJax.typesetPromise();
+  }
+
+  function showStep3() {
+    document.getElementById('step3reveal').classList.add('shown');
+    document.getElementById('btnStep3').style.display = 'none';
+    document.getElementById('probeArea').classList.add('shown');
+    MathJax.typesetPromise();
+  }
+
+  // ===== KARTE 2 GRUPPENAUFGABE =====
+  function checkG3S1() {
+    const v = parseInt(document.getElementById('g3s1').value);
+    const fb = document.getElementById('fb-g3s1');
+    const inp = document.getElementById('g3s1');
+    if (v === 7) {
+      fb.className = 'feedback correct show';
+      fb.innerHTML = '✅ Richtig! <br>\\( 2 \\cdot b - 2 + 2 = 5 + 2 + 4 \\cdot b \\) → \\( 2 \\cdot b = 7 + 4 \\cdot b \\)';
+      inp.classList.add('correct');
+      document.getElementById('g3step2').classList.add('shown');
+      MathJax.typesetPromise();
+    } else {
+      fb.className = 'feedback wrong show';
+      fb.innerHTML = '❌ Nicht ganz. Tipp: Addiere 2 auf beiden Seiten der Gleichung.';
+      inp.classList.add('wrong');
+      setTimeout(() => { inp.classList.remove('wrong'); }, 1500);
+    }
+  }
+
+  function checkG3S2() {
+    const a = parseInt(document.getElementById('g3s2').value);
+    const b = parseInt(document.getElementById('g3s2b').value);
+    const fb = document.getElementById('fb-g3s2');
+    if ((a === -2 && b === 7) || (a === -2 && b === 7)) {
+      fb.className = 'feedback correct show';
+      fb.innerHTML = '✅ Richtig! \\( -2 \\cdot b = 7 \\)';
+      document.getElementById('g3s2').classList.add('correct');
+      document.getElementById('g3s2b').classList.add('correct');
+      document.getElementById('g3step3').classList.add('shown');
+      MathJax.typesetPromise();
+    } else {
+      fb.className = 'feedback wrong show';
+      fb.innerHTML = '❌ Noch nicht ganz. Subtrahiere \\( 4 \\cdot b \\) auf beiden Seiten: \\( 2 \\cdot b - 4 \\cdot b = 7 + 4 \\cdot b - 4 \\cdot b \\)';
+      MathJax.typesetPromise();
+    }
+  }
+
+  function chooseDiv(val, btn) {
+    const fb = document.getElementById('fb-g3s3');
+    const btns = document.querySelectorAll('#choices-g3 .choice-btn');
+    btns.forEach(b => b.disabled = true);
+
+    if (val === -2) {
+      btn.classList.add('correct');
+      fb.className = 'feedback correct show';
+      fb.innerHTML = '✅ Genau! \\( -2 \\cdot b = 7 \\) ÷ (−2) → \\( b = -3{,}5 \\). <br>Auch durch (−4) zu teilen wäre möglich, ergibt aber eine andere Zwischenform.';
+      document.getElementById('g3lösung').classList.add('shown');
+      MathJax.typesetPromise();
+    } else if (val === -4) {
+      btn.classList.add('wrong');
+      btns.forEach(b => b.disabled = false);
+      fb.className = 'feedback info show';
+      fb.innerHTML = '🤔 Interessante Idee! Durch −4 teilen wäre theoretisch auch erlaubt – aber dann hättest du Dezimalzahlen auf beiden Seiten. Probiere −2.';
+    } else {
+      btn.classList.add('wrong');
+      btns.forEach(b => b.disabled = false);
+      fb.className = 'feedback wrong show';
+      fb.innerHTML = '❌ Schau: Die Gleichung lautet \\( -2 \\cdot b = 7 \\). Durch welche Zahl teilen, damit nur b übrig bleibt?';
+      MathJax.typesetPromise();
+    }
+  }
+
+  function showKlammerFrage() {
+    document.getElementById('btnBereit').style.display = 'none';
+    document.getElementById('klammerFrage').classList.add('shown');
+    MathJax.typesetPromise();
+  }
+
+  // ===== KARTE 3 KLAMMERN =====
+  function chooseKlammer(val, btn) {
+    const fb = document.getElementById('fb-k1');
+    const btns = document.querySelectorAll('#choices-k1 .choice-btn');
+    btns.forEach(b => b.disabled = true);
+
+    if (val === 1) {
+      btn.classList.add('correct');
+      fb.className = 'feedback correct show';
+      fb.innerHTML = '✅ Richtig! \\( 5 \\cdot (x + 2) = 5 \\cdot x + 5 \\cdot 2 = 5 \\cdot x + 10 \\)';
+      document.getElementById('k-rest').classList.add('shown');
+      MathJax.typesetPromise();
+    } else {
+      btn.classList.add('wrong');
+      btns.forEach(b => b.disabled = false);
+      fb.className = 'feedback wrong show';
+      if (val === 2) {
+        fb.innerHTML = '❌ Nicht ganz. Die 5 wird mit <em>jedem</em> Term in der Klammer multipliziert: auch mit der 2!';
+      } else {
+        fb.innerHTML = '❌ Achtung: \\( 5 \\cdot x + 7 \\) wäre \\( 5 \\cdot (x + 1{,}4) \\). Rechne: \\( 5 \\cdot 2 = ? \\)';
+      }
+      MathJax.typesetPromise();
+    }
+  }
+
+  // Klammer step-by-step chooser
+  const kStepData = {
+    2: {
+      correct: 'a',
+      rows: {
+        result: '<div class="step-row"><div class="step-eq">\\( 2 \\cdot x + 1 = 5 \\cdot x + 10 \\)</div><div class="step-action">– 10</div></div><div class="step-row"><div class="step-eq">\\( 2 \\cdot x - 9 = 5 \\cdot x \\)</div><div style="font-size:13px;color:#888">✓</div></div>'
+      },
+      fbCorrect: '✅ Richtig! Wir bringen die Zahlen auf eine Seite.',
+      fbWrong: { b: '❌ Das würde die Gleichung komplizierter machen. Ziel: Zahlen auf eine Seite!', c: '❌ Multiplizieren macht es hier komplizierter. Besser: Zahlen auf eine Seite bringen.' },
+      next: 'kStep3area'
+    },
+    3: {
+      correct: 'a',
+      rows: {
+        result: '<div class="step-row"><div class="step-eq">\\( 2 \\cdot x - 9 = 5 \\cdot x \\)</div><div class="step-action">– 2·x</div></div><div class="step-row"><div class="step-eq">\\( -9 = 3 \\cdot x \\)</div><div style="font-size:13px;color:#888">✓</div></div>'
+      },
+      fbCorrect: '✅ Super! Alle x-Terme auf eine Seite gebracht.',
+      fbWrong: { b: '❌ Das würde die x-Terme nicht zusammenbringen. Wir wollen x allein haben!', c: '❌ Teilen klappt noch nicht, weil x noch auf beiden Seiten steht.' },
+      next: 'kStep4area'
+    },
+    4: {
+      correct: 'a',
+      rows: {
+        result: '<div class="step-row"><div class="step-eq">\\( -9 = 3 \\cdot x \\)</div><div class="step-action">: 3</div></div><div class="step-row"><div class="step-eq"><span style="color:var(--green);font-weight:800;">\\( x = -3 \\)</span></div><div style="font-size:13px;color:var(--green)">🎉</div></div>'
+      },
+      fbCorrect: '🎉 Perfekt! Durch 3 geteilt, x ist allein!',
+      fbWrong: { b: '❌ Durch −3 ginge auch, ergibt aber hier \\( x = 3 \\) – das stimmt nicht. Probiere durch 3!', c: '❌ Das ändert nur das Vorzeichen, löst aber nicht nach x auf.' },
+      next: 'kLösung'
+    }
+  };
+
+  function chooseKS(step, choice, btn) {
+    const data = kStepData[step];
+    const fb = document.getElementById('fb-ks' + step);
+    const btns = document.querySelectorAll('#choices-ks' + step + ' .choice-btn');
+    btns.forEach(b => b.disabled = true);
+
+    if (choice === data.correct) {
+      btn.classList.add('correct');
+      fb.className = 'feedback correct show';
+      fb.innerHTML = data.fbCorrect;
+      // Append rows to steps box
+      const box = document.getElementById('klammerStepsBox');
+      box.innerHTML += data.rows.result;
+      document.getElementById(data.next).classList.add('shown');
+      MathJax.typesetPromise();
+    } else {
+      btn.classList.add('wrong');
+      btns.forEach(b => b.disabled = false);
+      fb.className = 'feedback wrong show';
+      fb.innerHTML = data.fbWrong[choice] || '❌ Das ist nicht der optimale nächste Schritt. Überlege nochmal!';
+      setTimeout(() => { btn.classList.remove('wrong'); }, 1500);
+      MathJax.typesetPromise();
+    }
+  }
+
+  // ===== KARTE 4 FINAL =====
+  function chooseFinal(val, btn) {
+    const fb = document.getElementById('fb-final');
+    const btns = document.querySelectorAll('#choices-final .choice-btn');
+    btns.forEach(b => b.disabled = true);
+
+    if (val === 3) {
+      btn.classList.add('correct');
+      fb.className = 'feedback correct show';
+      fb.innerHTML = '✅ Richtig! Division durch 0 ist verboten!';
+      document.getElementById('finalDone').classList.add('shown');
+      cardDone[4] = true;
+      document.getElementById('nextBtnWrap').classList.add('visible');
+      buildDots();
+      updateProgress();
+      MathJax.typesetPromise();
+    } else {
+      btn.classList.add('wrong');
+      btns.forEach(b => b.disabled = false);
+      fb.className = 'feedback wrong show';
+      fb.innerHTML = '❌ Das ist erlaubt! Denke: Was ist bei Division grundsätzlich nicht erlaubt?';
+    }
+  }
+
+  // ===== TIPS =====
+  function toggleTip(id) {
+    const el = document.getElementById(id);
+    el.classList.toggle('visible');
+  }
+
+  // ===== FACHBEGRIFFE =====
+  document.querySelectorAll('.fachbegriff').forEach(el => {
+    el.addEventListener('click', () => el.classList.toggle('active'));
+    el.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      el.classList.toggle('active');
+    });
+  });
+
+  // ===== DINO =====
+  function toggleDinoTip() {
+    document.getElementById('dino-tooltip').classList.toggle('show');
+  }
+  function showDinoTip() {
+    document.getElementById('dino-tooltip').classList.add('show');
+  }
+  function hideDinoTip() {
+    document.getElementById('dino-tooltip').classList.remove('show');
+  }
+
+  // Typeset on load
+  window.addEventListener('load', () => {
+    setTimeout(() => { if (window.MathJax) MathJax.typesetPromise(); }, 500);
+  });
+</script>
+
+</body>
+</html>

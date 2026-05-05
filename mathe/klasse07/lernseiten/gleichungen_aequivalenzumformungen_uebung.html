@@ -1,0 +1,1371 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Gleichungen lösen – Äquivalenzumformungen</title>
+
+<script>
+  MathJax = {
+    tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+    svg: { fontCache: 'global' }
+  };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fira+Mono:wght@500&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg: #f0f4ff;
+    --card: #ffffff;
+    --primary: #3b5bdb;
+    --primary-dark: #2f4ac4;
+    --accent: #f76707;
+    --accent2: #7950f2;
+    --text: #1a1a2e;
+    --muted: #6c757d;
+    --border: #dee2f0;
+    --correct: #2f9e44;
+    --correct-bg: #d3f9d8;
+    --wrong: #c92a2a;
+    --wrong-bg: #ffe3e3;
+    --hint: #e67700;
+    --hint-bg: #fff3bf;
+    --radius: 16px;
+    --shadow: 0 4px 20px rgba(59,91,219,0.10);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 17px;
+    line-height: 1.6;
+    min-height: 100vh;
+    padding-bottom: 120px;
+  }
+
+  /* HEADER */
+  .page-header {
+    background: linear-gradient(135deg, #3b5bdb 0%, #7950f2 100%);
+    color: white;
+    padding: 28px 20px 22px;
+    text-align: center;
+    position: relative;
+  }
+  .page-header h1 {
+    font-size: 1.5rem;
+    font-weight: 900;
+    letter-spacing: -0.5px;
+  }
+  .page-header .subtitle {
+    font-size: 0.95rem;
+    opacity: 0.85;
+    margin-top: 4px;
+  }
+  .fach-badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.2);
+    border: 1px solid rgba(255,255,255,0.35);
+    border-radius: 20px;
+    padding: 3px 14px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  /* NIVEAUSTUFEN */
+  .level-bar {
+    background: white;
+    border-bottom: 2px solid var(--border);
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .level-label { font-size: 0.85rem; font-weight: 700; color: var(--muted); white-space: nowrap; }
+  .level-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+  .level-btn {
+    padding: 7px 18px;
+    border-radius: 30px;
+    border: 2px solid var(--border);
+    background: white;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.18s;
+    min-height: 44px;
+    min-width: 44px;
+  }
+  .level-btn.active-G { background: #4dabf7; border-color: #339af0; color: white; }
+  .level-btn.active-F { background: #f76707; border-color: #e8590c; color: white; }
+  .level-btn.active-P { background: #7950f2; border-color: #6741d9; color: white; }
+  .level-btn:not(.active-G):not(.active-F):not(.active-P):hover { border-color: var(--primary); background: #eef2ff; }
+
+  /* KARTEN-NAVIGATION */
+  .card-nav {
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+    background: white;
+    border-bottom: 2px solid var(--border);
+    scrollbar-width: none;
+  }
+  .card-nav::-webkit-scrollbar { display: none; }
+  .nav-btn {
+    flex-shrink: 0;
+    padding: 12px 16px;
+    border: none;
+    border-bottom: 3px solid transparent;
+    background: white;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.18s;
+    white-space: nowrap;
+    min-height: 44px;
+    position: relative;
+  }
+  .nav-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
+  .nav-btn .nav-check {
+    display: inline-block;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: #dee2e6;
+    margin-left: 6px;
+    vertical-align: middle;
+    transition: background 0.2s;
+  }
+  .nav-btn .nav-check.done { background: var(--correct); }
+
+  /* HAUPTBEREICH */
+  .main { max-width: 780px; margin: 0 auto; padding: 20px 16px; }
+
+  /* KARTE */
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    display: none;
+    animation: fadeIn 0.25s ease;
+  }
+  .card.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  .card-header {
+    background: linear-gradient(90deg, #eef2ff 0%, #f8f0ff 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .card-icon {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+  }
+  .card-title { font-size: 1.05rem; font-weight: 800; }
+  .card-meta { font-size: 0.8rem; color: var(--muted); margin-top: 2px; }
+
+  .card-body { padding: 20px; }
+
+  /* AUFGABEN */
+  .aufgabe-block {
+    margin-bottom: 28px;
+    padding: 18px;
+    background: #f8f9ff;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    display: none;
+  }
+  .aufgabe-block.level-visible { display: block; }
+
+  .aufgabe-nr {
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: var(--primary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+  }
+  .aufgabe-text {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 14px;
+    line-height: 1.5;
+  }
+
+  /* GLEICHUNGS-DISPLAY */
+  .eq-display {
+    background: white;
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 18px;
+    font-size: 1.15rem;
+    text-align: center;
+    margin-bottom: 14px;
+    font-family: 'Fira Mono', monospace;
+    font-weight: 500;
+  }
+
+  /* INPUT */
+  .input-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+  }
+  .input-label { font-size: 0.95rem; font-weight: 700; white-space: nowrap; }
+  .answer-input {
+    font-family: 'Fira Mono', monospace;
+    font-size: 1.1rem;
+    font-weight: 500;
+    padding: 10px 14px;
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    width: 110px;
+    background: white;
+    transition: border-color 0.18s;
+    outline: none;
+    -webkit-appearance: none;
+  }
+  .answer-input:focus { border-color: var(--primary); }
+  .answer-input.correct { border-color: var(--correct); background: var(--correct-bg); }
+  .answer-input.wrong { border-color: var(--wrong); background: var(--wrong-bg); }
+
+  /* BUTTONS */
+  .check-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 20px;
+    border-radius: 30px;
+    border: none;
+    background: var(--primary);
+    color: white;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.92rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: background 0.18s, transform 0.1s;
+    min-height: 44px;
+    -webkit-appearance: none;
+  }
+  .check-btn:active { transform: scale(0.97); }
+  .check-btn:hover { background: var(--primary-dark); }
+  .check-btn:disabled { background: #adb5bd; cursor: default; }
+
+  .hint-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 8px 16px;
+    border-radius: 30px;
+    border: 2px solid var(--hint);
+    background: white;
+    color: var(--hint);
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.18s;
+    min-height: 44px;
+  }
+  .hint-btn:hover { background: var(--hint-bg); }
+
+  /* FEEDBACK */
+  .feedback {
+    margin-top: 10px;
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    display: none;
+    align-items: center;
+    gap: 10px;
+  }
+  .feedback.correct { background: var(--correct-bg); color: var(--correct); display: flex; }
+  .feedback.wrong { background: var(--wrong-bg); color: var(--wrong); display: flex; }
+  .feedback-icon { font-size: 1.3rem; flex-shrink: 0; }
+
+  /* HINWEIS */
+  .hint-box {
+    background: var(--hint-bg);
+    border: 2px solid #ffd43b;
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-top: 10px;
+    font-size: 0.92rem;
+    display: none;
+  }
+  .hint-box.visible { display: block; }
+  .hint-box strong { color: var(--hint); }
+
+  /* MULTIPLE CHOICE */
+  .mc-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .mc-btn {
+    padding: 13px 16px;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    background: white;
+    font-family: 'Nunito', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.18s;
+    min-height: 54px;
+    line-height: 1.3;
+  }
+  .mc-btn:active { transform: scale(0.97); }
+  .mc-btn:hover:not(:disabled) { border-color: var(--primary); background: #eef2ff; }
+  .mc-btn.selected { border-color: var(--primary); background: #eef2ff; }
+  .mc-btn.correct-ans { border-color: var(--correct) !important; background: var(--correct-bg) !important; color: var(--correct); }
+  .mc-btn.wrong-ans { border-color: var(--wrong) !important; background: var(--wrong-bg) !important; color: var(--wrong); }
+  .mc-btn:disabled { cursor: default; }
+
+  /* BRUCH */
+  .frac {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    vertical-align: middle;
+    margin: 0 3px;
+    font-size: 0.88em;
+  }
+  .frac span:first-child {
+    border-bottom: 2px solid currentColor;
+    padding-bottom: 1px;
+    line-height: 1.1;
+  }
+  .frac span:last-child { line-height: 1.1; }
+
+  /* AUSWERTUNGSKARTE */
+  .auswertung-box {
+    text-align: center;
+    padding: 30px 20px;
+  }
+  .score-circle {
+    width: 120px; height: 120px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), var(--accent2));
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    margin: 0 auto 20px;
+    color: white;
+    box-shadow: 0 8px 30px rgba(59,91,219,0.3);
+  }
+  .score-num { font-size: 2.2rem; font-weight: 900; line-height: 1; }
+  .score-of { font-size: 0.8rem; opacity: 0.85; }
+  .score-msg { font-size: 1.1rem; font-weight: 800; margin-bottom: 8px; }
+  .score-sub { font-size: 0.92rem; color: var(--muted); }
+
+  .result-list { text-align: left; margin-top: 20px; }
+  .result-item {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    margin-bottom: 8px;
+    font-size: 0.92rem;
+    font-weight: 600;
+  }
+  .result-item.ok { background: var(--correct-bg); color: #1e6e2e; }
+  .result-item.nok { background: var(--wrong-bg); color: #8b1a1a; }
+  .result-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+
+  /* WIEDERHOLUNG BADGE */
+  .repeat-badge {
+    display: inline-block;
+    background: linear-gradient(90deg, #f76707, #fd7e14);
+    color: white;
+    padding: 3px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+  }
+
+  /* WEITER-BUTTON */
+  .weiter-btn {
+    display: none;
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #2f9e44, #40c057);
+    color: white;
+    padding: 15px 40px;
+    border-radius: 50px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 900;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 6px 25px rgba(47,158,68,0.4);
+    text-decoration: none;
+    z-index: 100;
+    min-height: 54px;
+    min-width: 200px;
+    text-align: center;
+    animation: bounceIn 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  .weiter-btn.show { display: flex; align-items: center; gap: 8px; justify-content: center; }
+  @keyframes bounceIn {
+    from { opacity: 0; transform: translateX(-50%) translateY(20px) scale(0.8); }
+    to { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+  }
+
+  /* T-REX */
+  .trex-corner {
+    position: fixed;
+    bottom: 16px;
+    right: 16px;
+    z-index: 200;
+    cursor: pointer;
+    user-select: none;
+  }
+  .trex-corner svg { width: 44px; height: 44px; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.2)); }
+  .trex-tooltip {
+    position: absolute;
+    bottom: 52px;
+    right: 0;
+    background: #1a1a2e;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+  }
+  .trex-corner:hover .trex-tooltip,
+  .trex-corner.tap-show .trex-tooltip { opacity: 1; }
+
+  /* DIVIDER */
+  .section-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 20px 0;
+  }
+
+  .step-hint {
+    background: #eef2ff;
+    border-left: 4px solid var(--primary);
+    border-radius: 0 8px 8px 0;
+    padding: 10px 14px;
+    font-size: 0.88rem;
+    color: #364fc7;
+    margin-bottom: 12px;
+    font-weight: 600;
+  }
+
+  /* PROGRESS DOT ROW */
+  .progress-dots {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+  .pdot {
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: #dee2f0;
+    transition: background 0.25s;
+  }
+  .pdot.done { background: var(--correct); }
+  .pdot.current { background: var(--primary); }
+
+  @media (max-width: 500px) {
+    .mc-options { grid-template-columns: 1fr; }
+    .page-header h1 { font-size: 1.2rem; }
+    .card-body { padding: 14px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="page-header">
+  <div class="fach-badge">Mathematik · Klasse 7</div>
+  <h1>Gleichungen lösen</h1>
+  <div class="subtitle">Äquivalenzumformungen</div>
+</div>
+
+<!-- NIVEAUSTUFEN -->
+<div class="level-bar">
+  <span class="level-label">Niveau:</span>
+  <div class="level-btns">
+    <button class="level-btn active-G" onclick="setLevel('G')" id="btn-G">⚡ Grundlagen</button>
+    <button class="level-btn" onclick="setLevel('F')" id="btn-F">🔥 Fortgeschritten</button>
+    <button class="level-btn" onclick="setLevel('P')" id="btn-P">🚀 Profi</button>
+  </div>
+</div>
+
+<!-- KARTEN-NAVIGATION -->
+<div class="card-nav">
+  <button class="nav-btn active" onclick="showCard('k1')" id="nav-k1">
+    Aufgabe 1 <span class="nav-check" id="chk-k1"></span>
+  </button>
+  <button class="nav-btn" onclick="showCard('k2')" id="nav-k2">
+    Aufgabe 2 <span class="nav-check" id="chk-k2"></span>
+  </button>
+  <button class="nav-btn" onclick="showCard('k3')" id="nav-k3">
+    Zahlenrätsel <span class="nav-check" id="chk-k3"></span>
+  </button>
+  <button class="nav-btn" onclick="showCard('k4')" id="nav-k4">
+    Altersaufgabe <span class="nav-check" id="chk-k4"></span>
+  </button>
+  <button class="nav-btn" onclick="showCard('k5')" id="nav-k5">
+    🔄 Wiederholung <span class="nav-check" id="chk-k5"></span>
+  </button>
+  <button class="nav-btn" onclick="showCard('k6')" id="nav-k6">
+    📊 Auswertung <span class="nav-check" id="chk-k6"></span>
+  </button>
+</div>
+
+<div class="main">
+
+<!-- ====== KARTE 1: Kontextlose Aufgabe 1 ====== -->
+<div class="card active" id="k1">
+  <div class="card-header">
+    <div class="card-icon" style="background:#eef2ff;">🧮</div>
+    <div>
+      <div class="card-title">Aufgabe 1 – Lineare Gleichung</div>
+      <div class="card-meta">Löse mit Äquivalenzumformungen</div>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <!-- GRUNDLAGEN -->
+    <div class="aufgabe-block level-G level-visible" id="k1-G">
+      <div class="aufgabe-nr">Grundlagen</div>
+      <div class="step-hint">💡 Äquivalenzumformung: Was du auf einer Seite machst, machst du auf der anderen Seite auch!</div>
+      <div class="aufgabe-text">Löse die Gleichung:</div>
+      <div class="eq-display">\( 3 \cdot x + 5 = 20 \)</div>
+      <div class="aufgabe-text" style="font-size:0.92rem; color:var(--muted); margin-bottom:12px;">Tipp: Erst die 5 auf beiden Seiten abziehen, dann durch 3 teilen.</div>
+      <div class="input-row">
+        <span class="input-label">\( x = \)</span>
+        <input type="number" class="answer-input" id="k1G-inp" inputmode="numeric" placeholder="?">
+        <button class="check-btn" onclick="checkK1G()">✓ Prüfen</button>
+        <button class="hint-btn" onclick="toggleHint('k1G-hint')">💡 Hilfe</button>
+      </div>
+      <div class="hint-box" id="k1G-hint">
+        <strong>Schritt 1:</strong> \( 3 \cdot x + 5 - 5 = 20 - 5 \) → \( 3 \cdot x = 15 \)<br>
+        <strong>Schritt 2:</strong> \( 3 \cdot x \div 3 = 15 \div 3 \) → \( x = \; ? \)
+      </div>
+      <div class="feedback" id="k1G-fb"></div>
+    </div>
+
+    <!-- FORTGESCHRITTEN -->
+    <div class="aufgabe-block level-F" id="k1-F">
+      <div class="aufgabe-nr">Fortgeschritten</div>
+      <div class="aufgabe-text">Löse die Gleichung:</div>
+      <div class="eq-display">\( 5 \cdot x - 7 = 2 \cdot x + 14 \)</div>
+      <div class="input-row">
+        <span class="input-label">\( x = \)</span>
+        <input type="number" class="answer-input" id="k1F-inp" inputmode="numeric" placeholder="?">
+        <button class="check-btn" onclick="checkK1F()">✓ Prüfen</button>
+        <button class="hint-btn" onclick="toggleHint('k1F-hint')">💡 Hilfe</button>
+      </div>
+      <div class="hint-box" id="k1F-hint">
+        <strong>Schritt 1:</strong> Variable auf eine Seite bringen: \( 5 \cdot x - 2 \cdot x = 14 + 7 \)<br>
+        <strong>Schritt 2:</strong> Vereinfachen: \( 3 \cdot x = 21 \)
+      </div>
+      <div class="feedback" id="k1F-fb"></div>
+    </div>
+
+    <!-- PROFI -->
+    <div class="aufgabe-block level-P" id="k1-P">
+      <div class="aufgabe-nr">Profi</div>
+      <div class="aufgabe-text">Löse die Gleichung:</div>
+      <div class="eq-display">\( 3 \cdot (2 \cdot x - 4) = 4 \cdot (x + 1) - 2 \)</div>
+      <div class="input-row">
+        <span class="input-label">\( x = \)</span>
+        <input type="number" class="answer-input" id="k1P-inp" inputmode="numeric" placeholder="?">
+        <button class="check-btn" onclick="checkK1P()">✓ Prüfen</button>
+        <button class="hint-btn" onclick="toggleHint('k1P-hint')">💡 Hilfe</button>
+      </div>
+      <div class="hint-box" id="k1P-hint">
+        <strong>Schritt 1:</strong> Klammern auflösen:<br>
+        \( 6 \cdot x - 12 = 4 \cdot x + 4 - 2 \)<br>
+        <strong>Schritt 2:</strong> Terme zusammenfassen und Variable isolieren.
+      </div>
+      <div class="feedback" id="k1P-fb"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ====== KARTE 2: Kontextlose Aufgabe 2 ====== -->
+<div class="card" id="k2">
+  <div class="card-header">
+    <div class="card-icon" style="background:#fff0f6;">🧮</div>
+    <div>
+      <div class="card-title">Aufgabe 2 – Lineare Gleichung</div>
+      <div class="card-meta">Löse mit Äquivalenzumformungen</div>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <!-- GRUNDLAGEN -->
+    <div class="aufgabe-block level-G level-visible" id="k2-G">
+      <div class="aufgabe-nr">Grundlagen</div>
+      <div class="step-hint">💡 Negative Zahlen: Denk an die Vorzeichenregeln!</div>
+      <div class="aufgabe-text">Löse die Gleichung:</div>
+      <div class="eq-display">\( 2 \cdot x + 6 = 18 \)</div>
+      <div class="input-row">
+        <span class="input-label">\( x = \)</span>
+        <input type="number" class="answer-input" id="k2G-inp" inputmode="numeric" placeholder="?">
+        <button class="check-btn" onclick="checkK2G()">✓ Prüfen</button>
+        <button class="hint-btn" onclick="toggleHint('k2G-hint')">💡 Hilfe</button>
+      </div>
+      <div class="hint-box" id="k2G-hint">
+        <strong>Schritt 1:</strong> Subtrahiere 6 auf beiden Seiten: \( 2 \cdot x = 12 \)<br>
+        <strong>Schritt 2:</strong> Dividiere durch 2: \( x = \; ? \)
+      </div>
+      <div class="feedback" id="k2G-fb"></div>
+    </div>
+
+    <!-- FORTGESCHRITTEN -->
+    <div class="aufgabe-block level-F" id="k2-F">
+      <div class="aufgabe-nr">Fortgeschritten</div>
+      <div class="aufgabe-text">Löse die Gleichung (das Ergebnis kann auch negativ sein):</div>
+      <div class="eq-display">\( 3 \cdot x + 20 = x + 8 \)</div>
+      <div class="input-row">
+        <span class="input-label">\( x = \)</span>
+        <input type="number" class="answer-input" id="k2F-inp" inputmode="numeric" placeholder="?">
+        <button class="check-btn" onclick="checkK2F()">✓ Prüfen</button>
+        <button class="hint-btn" onclick="toggleHint('k2F-hint')">💡 Hilfe</button>
+      </div>
+      <div class="hint-box" id="k2F-hint">
+        <strong>Schritt 1:</strong> \( 3 \cdot x - x = 8 - 20 \)<br>
+        <strong>Schritt 2:</strong> \( 2 \cdot x = -12 \)<br>
+        <strong>Schritt 3:</strong> Durch 2 dividieren – negative Zahlen sind erlaubt!
+      </div>
+      <div class="feedback" id="k2F-fb"></div>
+    </div>
+
+    <!-- PROFI -->
+    <div class="aufgabe-block level-P" id="k2-P">
+      <div class="aufgabe-nr">Profi</div>
+      <div class="aufgabe-text">Löse die Gleichung (negative Ergebnisse möglich):</div>
+      <div class="eq-display">\( 7 \cdot x - 4 \cdot (x - 3) = 2 \cdot (x + 9) \)</div>
+      <div class="input-row">
+        <span class="input-label">\( x = \)</span>
+        <input type="number" class="answer-input" id="k2P-inp" inputmode="numeric" placeholder="?">
+        <button class="check-btn" onclick="checkK2P()">✓ Prüfen</button>
+        <button class="hint-btn" onclick="toggleHint('k2P-hint')">💡 Hilfe</button>
+      </div>
+      <div class="hint-box" id="k2P-hint">
+        <strong>Klammern auflösen (Achtung Vorzeichen!):</strong><br>
+        Links: \( 7 \cdot x - 4 \cdot x + 12 = 3 \cdot x + 12 \)<br>
+        Rechts: \( 2 \cdot x + 18 \)<br>
+        Jetzt Variable isolieren: \( 3 \cdot x + 12 = 2 \cdot x + 18 \)
+      </div>
+      <div class="feedback" id="k2P-fb"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ====== KARTE 3: Zahlenrätsel ====== -->
+<div class="card" id="k3">
+  <div class="card-header">
+    <div class="card-icon" style="background:#fff9db;">🔢</div>
+    <div>
+      <div class="card-title">Zahlenrätsel</div>
+      <div class="card-meta">Stelle zuerst eine Gleichung auf</div>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <!-- GRUNDLAGEN -->
+    <div class="aufgabe-block level-G level-visible" id="k3-G">
+      <div class="aufgabe-nr">Grundlagen</div>
+      <div class="aufgabe-text">
+        Ich denke mir eine Zahl. Wenn ich sie verdopple und dann 4 addiere, erhalte ich 18.<br>
+        <strong>Welche Zahl habe ich mir gedacht?</strong>
+      </div>
+      <div class="step-hint">📝 Schreibe zuerst eine Gleichung auf! Nenne die gesuchte Zahl \(x\).</div>
+
+      <div style="margin-bottom:14px;">
+        <div class="aufgabe-text" style="font-size:0.92rem;">Welche Gleichung passt?</div>
+        <div class="mc-options" id="k3G-mc">
+          <button class="mc-btn" onclick="mcSelect('k3G', 'a', true,  0, 'Zahlenrätsel Gleichung')">
+            \( 2 \cdot x + 4 = 18 \)
+          </button>
+          <button class="mc-btn" onclick="mcSelect('k3G', 'b', false, 0, 'Zahlenrätsel Gleichung')">
+            \( x + 4 = 18 \)
+          </button>
+          <button class="mc-btn" onclick="mcSelect('k3G', 'c', false, 0, 'Zahlenrätsel Gleichung')">
+            \( 2 \cdot x - 4 = 18 \)
+          </button>
+          <button class="mc-btn" onclick="mcSelect('k3G', 'd', false, 0, 'Zahlenrätsel Gleichung')">
+            \( 4 \cdot x = 18 \)
+          </button>
+        </div>
+        <div class="feedback" id="k3G-mc-fb"></div>
+      </div>
+
+      <div id="k3G-part2" style="display:none;">
+        <div class="section-divider"></div>
+        <div class="aufgabe-text">Jetzt löse die Gleichung: Wie lautet \(x\)?</div>
+        <div class="input-row">
+          <span class="input-label">\( x = \)</span>
+          <input type="number" class="answer-input" id="k3G-inp" inputmode="numeric" placeholder="?">
+          <button class="check-btn" onclick="checkK3G()">✓ Prüfen</button>
+        </div>
+        <div class="feedback" id="k3G-fb"></div>
+      </div>
+    </div>
+
+    <!-- FORTGESCHRITTEN -->
+    <div class="aufgabe-block level-F" id="k3-F">
+      <div class="aufgabe-nr">Fortgeschritten</div>
+      <div class="aufgabe-text">
+        Ich denke mir eine Zahl. Das Dreifache dieser Zahl, vermindert um 9, ergibt dasselbe wie die Zahl, um 7 vergrößert.<br>
+        <strong>Welche Zahl habe ich mir gedacht?</strong>
+      </div>
+      <div class="step-hint">📝 Stelle zuerst eine Gleichung auf. Nenne die Zahl \(x\).</div>
+      <div class="input-row">
+        <span class="input-label">\( x = \)</span>
+        <input type="number" class="answer-input" id="k3F-inp" inputmode="numeric" placeholder="?">
+        <button class="check-btn" onclick="checkK3F()">✓ Prüfen</button>
+        <button class="hint-btn" onclick="toggleHint('k3F-hint')">💡 Hilfe</button>
+      </div>
+      <div class="hint-box" id="k3F-hint">
+        <strong>Gleichung aufstellen:</strong> \( 3 \cdot x - 9 = x + 7 \)<br>
+        Jetzt mit Äquivalenzumformungen lösen!
+      </div>
+      <div class="feedback" id="k3F-fb"></div>
+    </div>
+
+    <!-- PROFI -->
+    <div class="aufgabe-block level-P" id="k3-P">
+      <div class="aufgabe-nr">Profi</div>
+      <div class="aufgabe-text">
+        Die Summe dreier aufeinanderfolgender gerader Zahlen ist 78.<br>
+        <strong>Welche drei Zahlen sind das?</strong>
+      </div>
+      <div class="step-hint">📝 Nenne die kleinste Zahl \(x\). Aufeinanderfolgende gerade Zahlen: \(x\), \(x+2\), \(x+4\).</div>
+      <div class="aufgabe-text" style="font-size:0.92rem; margin-top:8px;">Gib die kleinste der drei Zahlen ein:</div>
+      <div class="input-row">
+        <span class="input-label">\( x = \)</span>
+        <input type="number" class="answer-input" id="k3P-inp" inputmode="numeric" placeholder="?">
+        <button class="check-btn" onclick="checkK3P()">✓ Prüfen</button>
+        <button class="hint-btn" onclick="toggleHint('k3P-hint')">💡 Hilfe</button>
+      </div>
+      <div class="hint-box" id="k3P-hint">
+        <strong>Gleichung:</strong> \( x + (x+2) + (x+4) = 78 \)<br>
+        <strong>Vereinfachen:</strong> \( 3 \cdot x + 6 = 78 \)
+      </div>
+      <div class="feedback" id="k3P-fb"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ====== KARTE 4: Altersaufgabe ====== -->
+<div class="card" id="k4">
+  <div class="card-header">
+    <div class="card-icon" style="background:#f3fbe3;">👥</div>
+    <div>
+      <div class="card-title">Altersaufgabe</div>
+      <div class="card-meta">Sachsituation → Gleichung → Lösung</div>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <!-- GRUNDLAGEN -->
+    <div class="aufgabe-block level-G level-visible" id="k4-G">
+      <div class="aufgabe-nr">Grundlagen</div>
+      <div class="aufgabe-text">
+        Leon ist 3 Jahre älter als Emma. Zusammen sind sie 25 Jahre alt.<br>
+        <strong>Wie alt ist Emma?</strong>
+      </div>
+      <div class="step-hint">📝 Sei \(x\) das Alter von Emma. Dann ist Leon \(x + 3\) Jahre alt.</div>
+
+      <div style="margin-bottom:14px;">
+        <div class="aufgabe-text" style="font-size:0.92rem;">Welche Gleichung beschreibt die Situation?</div>
+        <div class="mc-options" id="k4G-mc">
+          <button class="mc-btn" onclick="mcSelect('k4G', 'a', true,  0, 'Altersaufgabe Gleichung')">
+            \( x + (x+3) = 25 \)
+          </button>
+          <button class="mc-btn" onclick="mcSelect('k4G', 'b', false, 0, 'Altersaufgabe Gleichung')">
+            \( x + 3 = 25 \)
+          </button>
+          <button class="mc-btn" onclick="mcSelect('k4G', 'c', false, 0, 'Altersaufgabe Gleichung')">
+            \( 2 \cdot x = 25 \)
+          </button>
+          <button class="mc-btn" onclick="mcSelect('k4G', 'd', false, 0, 'Altersaufgabe Gleichung')">
+            \( x + (x-3) = 25 \)
+          </button>
+        </div>
+        <div class="feedback" id="k4G-mc-fb"></div>
+      </div>
+
+      <div id="k4G-part2" style="display:none;">
+        <div class="section-divider"></div>
+        <div class="aufgabe-text">Wie alt ist Emma? (Löse die Gleichung)</div>
+        <div class="input-row">
+          <span class="input-label">Emma: </span>
+          <input type="number" class="answer-input" id="k4G-inp" inputmode="numeric" placeholder="?">
+          <span style="font-weight:600;">Jahre</span>
+          <button class="check-btn" onclick="checkK4G()">✓ Prüfen</button>
+        </div>
+        <div class="feedback" id="k4G-fb"></div>
+      </div>
+    </div>
+
+    <!-- FORTGESCHRITTEN -->
+    <div class="aufgabe-block level-F" id="k4-F">
+      <div class="aufgabe-nr">Fortgeschritten</div>
+      <div class="aufgabe-text">
+        Anna ist doppelt so alt wie ihr Bruder Tom. In 6 Jahren ist Anna genauso alt wie Tom jetzt plus 18 Jahre.<br>
+        <strong>Wie alt ist Tom heute?</strong>
+      </div>
+      <div class="step-hint">📝 Sei \(x\) Toms heutiges Alter. Dann ist Anna heute \(2 \cdot x\) Jahre alt.</div>
+      <div class="input-row">
+        <span class="input-label">Tom: </span>
+        <input type="number" class="answer-input" id="k4F-inp" inputmode="numeric" placeholder="?">
+        <span style="font-weight:600;">Jahre</span>
+        <button class="check-btn" onclick="checkK4F()">✓ Prüfen</button>
+        <button class="hint-btn" onclick="toggleHint('k4F-hint')">💡 Hilfe</button>
+      </div>
+      <div class="hint-box" id="k4F-hint">
+        <strong>Annas Alter in 6 Jahren:</strong> \( 2 \cdot x + 6 \)<br>
+        <strong>Gleichung:</strong> \( 2 \cdot x + 6 = x + 18 \)
+      </div>
+      <div class="feedback" id="k4F-fb"></div>
+    </div>
+
+    <!-- PROFI -->
+    <div class="aufgabe-block level-P" id="k4-P">
+      <div class="aufgabe-nr">Profi</div>
+      <div class="aufgabe-text">
+        Mias Vater ist heute viermal so alt wie Mia. Vor 5 Jahren war der Vater siebenmal so alt wie Mia.<br>
+        <strong>Wie alt ist Mia heute?</strong>
+      </div>
+      <div class="step-hint">📝 Sei \(x\) Mias heutiges Alter. Vor 5 Jahren war Mia \(x - 5\) Jahre alt.</div>
+      <div class="input-row">
+        <span class="input-label">Mia: </span>
+        <input type="number" class="answer-input" id="k4P-inp" inputmode="numeric" placeholder="?">
+        <span style="font-weight:600;">Jahre</span>
+        <button class="check-btn" onclick="checkK4P()">✓ Prüfen</button>
+        <button class="hint-btn" onclick="toggleHint('k4P-hint')">💡 Hilfe</button>
+      </div>
+      <div class="hint-box" id="k4P-hint">
+        <strong>Vater heute:</strong> \( 4 \cdot x \)<br>
+        <strong>Vor 5 Jahren:</strong> Mia: \( x-5 \), Vater: \( 4 \cdot x - 5 \)<br>
+        <strong>Gleichung:</strong> \( 4 \cdot x - 5 = 7 \cdot (x - 5) \)
+      </div>
+      <div class="feedback" id="k4P-fb"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ====== KARTE 5: Wiederholung Zinsrechnung ====== -->
+<div class="card" id="k5">
+  <div class="card-header">
+    <div class="card-icon" style="background:#f3fbe3;">🔄</div>
+    <div>
+      <div class="repeat-badge">Wiederholung</div>
+      <div class="card-title">Zinsrechnung – Jahreszinsen</div>
+      <div class="card-meta">Thema aus Klasse 7 · Kapitel III</div>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <div class="step-hint">
+      📐 <strong>Formel:</strong> Zinsen \( Z = \) Kapital \( \cdot \) Zinssatz \( \div 100 \)<br>
+      Oder mit Prozentzahl: \( Z = K \cdot p \% \)
+    </div>
+
+    <!-- Alle Niveaus sehen die gleichen Fragen, aber unterschiedlich viele -->
+
+    <!-- Frage 1 – alle -->
+    <div class="aufgabe-block level-G level-F level-P level-visible" id="k5-q1" style="display:block;">
+      <div class="aufgabe-nr">Frage 1</div>
+      <div class="aufgabe-text">
+        Lena legt 800 € auf ein Sparkonto mit einem Zinssatz von 3 % pro Jahr.<br>
+        <strong>Wie viel Zinsen erhält sie nach einem Jahr?</strong>
+      </div>
+      <div class="mc-options" id="k5q1-mc">
+        <button class="mc-btn" onclick="mcSelect('k5q1', 'a', true,  0, 'Wiederholung Zins Frage 1')">24 €</button>
+        <button class="mc-btn" onclick="mcSelect('k5q1', 'b', false, 0, 'Wiederholung Zins Frage 1')">240 €</button>
+        <button class="mc-btn" onclick="mcSelect('k5q1', 'c', false, 0, 'Wiederholung Zins Frage 1')">30 €</button>
+        <button class="mc-btn" onclick="mcSelect('k5q1', 'd', false, 0, 'Wiederholung Zins Frage 1')">8 €</button>
+      </div>
+      <div class="feedback" id="k5q1-fb"></div>
+    </div>
+
+    <!-- Frage 2 – alle -->
+    <div class="aufgabe-block level-G level-F level-P level-visible" id="k5-q2" style="display:block;">
+      <div class="aufgabe-nr">Frage 2</div>
+      <div class="aufgabe-text">
+        Markus leiht sich 1 200 € und zahlt nach einem Jahr 54 € Zinsen zurück.<br>
+        <strong>Wie hoch ist der Zinssatz?</strong>
+      </div>
+      <div class="input-row">
+        <span class="input-label">Zinssatz:</span>
+        <input type="number" class="answer-input" id="k5q2-inp" inputmode="numeric" placeholder="?">
+        <span style="font-weight:700;">%</span>
+        <button class="check-btn" onclick="checkK5q2()">✓ Prüfen</button>
+        <button class="hint-btn" onclick="toggleHint('k5q2-hint')">💡 Hilfe</button>
+      </div>
+      <div class="hint-box" id="k5q2-hint">
+        <strong>Formel umstellen:</strong> \( Z = K \cdot p \div 100 \)<br>
+        → \( p = Z \cdot 100 \div K = 54 \cdot 100 \div 1200 \)
+      </div>
+      <div class="feedback" id="k5q2-fb"></div>
+    </div>
+
+    <!-- Frage 3 – nur F und P -->
+    <div class="aufgabe-block level-F level-P" id="k5-q3">
+      <div class="aufgabe-nr">Frage 3 (Fortgeschritten &amp; Profi)</div>
+      <div class="aufgabe-text">
+        Sara erhält nach einem Jahr 90 € Zinsen bei einem Zinssatz von 2,5 %.<br>
+        <strong>Wie viel Kapital hat Sara angelegt?</strong>
+      </div>
+      <div class="input-row">
+        <span class="input-label">Kapital:</span>
+        <input type="number" class="answer-input" id="k5q3-inp" inputmode="numeric" placeholder="?">
+        <span style="font-weight:700;">€</span>
+        <button class="check-btn" onclick="checkK5q3()">✓ Prüfen</button>
+        <button class="hint-btn" onclick="toggleHint('k5q3-hint')">💡 Hilfe</button>
+      </div>
+      <div class="hint-box" id="k5q3-hint">
+        <strong>Formel umstellen:</strong> \( K = Z \cdot 100 \div p \)<br>
+        \( K = 90 \cdot 100 \div 2{,}5 \)
+      </div>
+      <div class="feedback" id="k5q3-fb"></div>
+    </div>
+
+    <!-- Auswertungsbutton Wiederholung -->
+    <button class="check-btn" onclick="auswertungWiederholung()" id="k5-auswbtn" style="width:100%; margin-top:8px;">
+      📊 Wiederholung auswerten
+    </button>
+    <div class="feedback" id="k5-gesamt-fb" style="margin-top:10px;"></div>
+
+  </div>
+</div>
+
+<!-- ====== KARTE 6: Auswertung ====== -->
+<div class="card" id="k6">
+  <div class="card-header">
+    <div class="card-icon" style="background:#d3f9d8;">📊</div>
+    <div>
+      <div class="card-title">Auswertung</div>
+      <div class="card-meta">Dein Ergebnis im Überblick</div>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="auswertung-box" id="auswertung-content">
+      <div style="color:var(--muted); padding:30px 0;">
+        Bearbeite zuerst alle Aufgaben, dann erscheint hier deine Auswertung.
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /main -->
+
+<!-- WEITER BUTTON -->
+<a href="#" class="weiter-btn" id="weiter-btn">
+  Weiter →
+</a>
+
+<!-- T-REX -->
+<div class="trex-corner" id="trex" onclick="trexTap()" onmouseover="trexShow()" onmouseout="trexHide()">
+  <span style="font-size:2rem; line-height:1;">🦖</span>
+  <div class="trex-tooltip">Made by Mathedino 🦖</div>
+</div>
+
+<script>
+// ==================== STATE ====================
+let currentLevel = 'G';
+let cardDone = { k1: false, k2: false, k3: false, k4: false, k5: false };
+let totalCorrect = 0;
+let totalAttempted = 0;
+let resultLog = [];
+let k5WiederholungDone = false;
+
+// MC states
+let mcDone = {};
+
+// ==================== LEVEL ====================
+function setLevel(lv) {
+  currentLevel = lv;
+  ['G','F','P'].forEach(l => {
+    const btn = document.getElementById('btn-' + l);
+    btn.className = 'level-btn' + (l === lv ? ' active-' + l : '');
+  });
+  // Show/hide aufgabe-blocks
+  document.querySelectorAll('.aufgabe-block').forEach(el => {
+    const isForLevel = el.classList.contains('level-' + lv);
+    el.classList.toggle('level-visible', isForLevel);
+  });
+  // MathJax re-render
+  if (window.MathJax) MathJax.typesetPromise();
+}
+
+// ==================== NAVIGATION ====================
+function showCard(id) {
+  document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.getElementById('nav-' + id).classList.add('active');
+
+  if (id === 'k6') buildAuswertung();
+  if (window.MathJax) MathJax.typesetPromise();
+}
+
+// ==================== HINT ====================
+function toggleHint(id) {
+  const el = document.getElementById(id);
+  el.classList.toggle('visible');
+}
+
+// ==================== FEEDBACK HELPER ====================
+function showFeedback(fbId, correct, msg) {
+  const el = document.getElementById(fbId);
+  el.className = 'feedback ' + (correct ? 'correct' : 'wrong');
+  el.innerHTML = (correct ? '<span class="feedback-icon">✅</span>' : '<span class="feedback-icon">❌</span>') + '<span>' + msg + '</span>';
+  el.style.display = 'flex';
+}
+
+function markInput(inputEl, correct) {
+  inputEl.classList.remove('correct', 'wrong');
+  inputEl.classList.add(correct ? 'correct' : 'wrong');
+  inputEl.disabled = true;
+}
+
+function markCardDone(cardId) {
+  if (!cardDone[cardId]) {
+    cardDone[cardId] = true;
+    const chk = document.getElementById('chk-' + cardId);
+    if (chk) chk.classList.add('done');
+    checkAllDone();
+  }
+}
+
+function checkAllDone() {
+  const allDone = Object.values(cardDone).every(Boolean);
+  if (allDone) {
+    const weiter = document.getElementById('weiter-btn');
+    weiter.classList.add('show');
+    buildAuswertung();
+  }
+}
+
+function logResult(label, correct) {
+  // Avoid duplicate logs
+  if (!resultLog.find(r => r.label === label)) {
+    resultLog.push({ label, correct });
+  }
+}
+
+// ==================== KARTE 1 ====================
+function checkK1G() {
+  const inp = document.getElementById('k1G-inp');
+  const val = parseFloat(inp.value);
+  const correct = val === 5;
+  markInput(inp, correct);
+  showFeedback('k1G-fb', correct,
+    correct ? 'Richtig! \\( x = 5 \\) – gut gemacht!' :
+    'Nicht ganz. Lösung: \\(3 \\cdot x = 15\\), also \\(x = 5\\).');
+  logResult('Aufg. 1 (Grundlagen)', correct);
+  if (correct) markCardDone('k1');
+  if (window.MathJax) MathJax.typesetPromise();
+}
+function checkK1F() {
+  const inp = document.getElementById('k1F-inp');
+  const val = parseFloat(inp.value);
+  const correct = val === 7;
+  markInput(inp, correct);
+  showFeedback('k1F-fb', correct,
+    correct ? 'Richtig! \\( x = 7 \\)' :
+    'Nicht ganz. \\(3 \\cdot x = 21\\), also \\(x = 7\\).');
+  logResult('Aufg. 1 (Fortgeschritten)', correct);
+  if (correct) markCardDone('k1');
+  if (window.MathJax) MathJax.typesetPromise();
+}
+function checkK1P() {
+  const inp = document.getElementById('k1P-inp');
+  const val = parseFloat(inp.value);
+  // 3(2x-4)=4(x+1)-2 → 6x-12=4x+2 → 2x=14 → x=7
+  const correct = val === 7;
+  markInput(inp, correct);
+  showFeedback('k1P-fb', correct,
+    correct ? 'Richtig! \\(6x - 12 = 4x + 2 \\Rightarrow 2x = 14 \\Rightarrow x = 7\\)' :
+    'Nicht ganz. Auflösen: \\(6x - 12 = 4x + 2 \\Rightarrow 2x = 14 \\Rightarrow x = 7\\)');
+  logResult('Aufg. 1 (Profi)', correct);
+  if (correct) markCardDone('k1');
+  if (window.MathJax) MathJax.typesetPromise();
+}
+
+// ==================== KARTE 2 ====================
+function checkK2G() {
+  const inp = document.getElementById('k2G-inp');
+  const val = parseFloat(inp.value);
+  const correct = val === 6;
+  markInput(inp, correct);
+  showFeedback('k2G-fb', correct,
+    correct ? 'Richtig! \\( x = 6 \\)' :
+    'Nicht ganz. \\(2x = 12\\), also \\(x = 6\\).');
+  logResult('Aufg. 2 (Grundlagen)', correct);
+  if (correct) markCardDone('k2');
+  if (window.MathJax) MathJax.typesetPromise();
+}
+function checkK2F() {
+  const inp = document.getElementById('k2F-inp');
+  const val = parseFloat(inp.value);
+  const correct = val === -6;
+  markInput(inp, correct);
+  showFeedback('k2F-fb', correct,
+    correct ? 'Richtig! \\( x = -6 \\) – negative Zahlen sind völlig in Ordnung!' :
+    'Nicht ganz. \\(2x = -12\\), also \\(x = -6\\).');
+  logResult('Aufg. 2 (Fortgeschritten)', correct);
+  if (correct) markCardDone('k2');
+  if (window.MathJax) MathJax.typesetPromise();
+}
+function checkK2P() {
+  const inp = document.getElementById('k2P-inp');
+  const val = parseFloat(inp.value);
+  // 7x-4(x-3)=2(x+9) → 7x-4x+12=2x+18 → 3x+12=2x+18 → x=6
+  const correct = val === 6;
+  markInput(inp, correct);
+  showFeedback('k2P-fb', correct,
+    correct ? 'Richtig! \\(3x + 12 = 2x + 18 \\Rightarrow x = 6\\)' :
+    'Nicht ganz. Vereinfachen: \\(3x + 12 = 2x + 18 \\Rightarrow x = 6\\)');
+  logResult('Aufg. 2 (Profi)', correct);
+  if (correct) markCardDone('k2');
+  if (window.MathJax) MathJax.typesetPromise();
+}
+
+// ==================== MULTIPLE CHOICE HELPER ====================
+// correctIndex: which button index (0-based) holds the right answer
+function mcSelect(groupId, choice, isCorrect, correctIndex, logLabel) {
+  if (mcDone[groupId]) return;
+  mcDone[groupId] = true;
+
+  const container = document.getElementById(groupId + '-mc');
+  if (!container) return;
+  const buttons = container.querySelectorAll('.mc-btn');
+
+  // Disable all buttons
+  buttons.forEach(btn => { btn.disabled = true; });
+
+  // Mark clicked button
+  const clickedIndex = ['a','b','c','d'].indexOf(choice);
+  if (buttons[clickedIndex]) {
+    buttons[clickedIndex].classList.add(isCorrect ? 'correct-ans' : 'wrong-ans');
+  }
+
+  // If wrong: also highlight the correct answer
+  if (!isCorrect && buttons[correctIndex]) {
+    buttons[correctIndex].classList.add('correct-ans');
+  }
+
+  // Show feedback – try both -mc-fb and -fb
+  const fb = document.getElementById(groupId + '-mc-fb') || document.getElementById(groupId + '-fb');
+  if (fb) {
+    fb.className = 'feedback ' + (isCorrect ? 'correct' : 'wrong');
+    fb.innerHTML = (isCorrect
+      ? '<span class="feedback-icon">✅</span><span>Richtig!</span>'
+      : '<span class="feedback-icon">❌</span><span>Leider falsch – die richtige Antwort ist grün markiert.</span>');
+    fb.style.display = 'flex';
+  }
+
+  // Show part2 if it exists
+  const p2 = document.getElementById(groupId + '-part2');
+  if (p2) { p2.style.display = 'block'; }
+
+  // Log result
+  if (logLabel) logResult(logLabel, isCorrect);
+
+  if (window.MathJax) MathJax.typesetPromise();
+}
+
+// ==================== KARTE 3 ====================
+function checkK3G() {
+  const inp = document.getElementById('k3G-inp');
+  const val = parseFloat(inp.value);
+  const correct = val === 7;
+  markInput(inp, correct);
+  showFeedback('k3G-fb', correct,
+    correct ? 'Richtig! \\( 2 \\cdot 7 + 4 = 18 \\) ✓' :
+    'Nicht ganz. \\(2x = 14\\), also \\(x = 7\\).');
+  logResult('Zahlenrätsel', correct);
+  if (correct) markCardDone('k3');
+  if (window.MathJax) MathJax.typesetPromise();
+}
+function checkK3F() {
+  const inp = document.getElementById('k3F-inp');
+  const val = parseFloat(inp.value);
+  const correct = val === 8; // 3x-9=x+7 → 2x=16 → x=8
+  markInput(inp, correct);
+  showFeedback('k3F-fb', correct,
+    correct ? 'Richtig! \\(3 \\cdot 8 - 9 = 15 = 8 + 7\\) ✓' :
+    'Nicht ganz. \\(3x - 9 = x + 7 \\Rightarrow 2x = 16 \\Rightarrow x = 8\\).');
+  logResult('Zahlenrätsel', correct);
+  if (correct) markCardDone('k3');
+  if (window.MathJax) MathJax.typesetPromise();
+}
+function checkK3P() {
+  const inp = document.getElementById('k3P-inp');
+  const val = parseFloat(inp.value);
+  const correct = val === 24; // 3x+6=78 → 3x=72 → x=24; numbers: 24,26,28
+  markInput(inp, correct);
+  showFeedback('k3P-fb', correct,
+    correct ? 'Richtig! Die drei Zahlen sind 24, 26 und 28. ✓' :
+    'Nicht ganz. \\(3x + 6 = 78 \\Rightarrow 3x = 72 \\Rightarrow x = 24\\). Zahlen: 24, 26, 28.');
+  logResult('Zahlenrätsel', correct);
+  if (correct) markCardDone('k3');
+  if (window.MathJax) MathJax.typesetPromise();
+}
+
+// ==================== KARTE 4 ====================
+function checkK4G() {
+  const inp = document.getElementById('k4G-inp');
+  const val = parseFloat(inp.value);
+  const correct = val === 11; // 2x+3=25 → 2x=22 → x=11
+  markInput(inp, correct);
+  showFeedback('k4G-fb', correct,
+    correct ? 'Richtig! Emma ist 11 Jahre alt, Leon ist 14. ✓' :
+    'Nicht ganz. \\(2x + 3 = 25 \\Rightarrow 2x = 22 \\Rightarrow x = 11\\)');
+  logResult('Altersaufgabe', correct);
+  if (correct) markCardDone('k4');
+  if (window.MathJax) MathJax.typesetPromise();
+}
+function checkK4F() {
+  const inp = document.getElementById('k4F-inp');
+  const val = parseFloat(inp.value);
+  const correct = val === 12; // 2x+6=x+18 → x=12
+  markInput(inp, correct);
+  showFeedback('k4F-fb', correct,
+    correct ? 'Richtig! Tom ist 12 Jahre alt, Anna ist 24. ✓' :
+    'Nicht ganz. \\(2x + 6 = x + 18 \\Rightarrow x = 12\\)');
+  logResult('Altersaufgabe', correct);
+  if (correct) markCardDone('k4');
+  if (window.MathJax) MathJax.typesetPromise();
+}
+function checkK4P() {
+  const inp = document.getElementById('k4P-inp');
+  const val = parseFloat(inp.value);
+  // 4x-5 = 7(x-5) → 4x-5=7x-35 → 30=3x → x=10
+  const correct = val === 10;
+  markInput(inp, correct);
+  showFeedback('k4P-fb', correct,
+    correct ? 'Richtig! Mia ist 10 Jahre alt, Vater ist 40. Vor 5 Jahren: Mia 5, Vater 35 = 7·5 ✓' :
+    'Nicht ganz. \\(4x - 5 = 7(x-5) \\Rightarrow 4x - 5 = 7x - 35 \\Rightarrow 30 = 3x \\Rightarrow x = 10\\)');
+  logResult('Altersaufgabe', correct);
+  if (correct) markCardDone('k4');
+  if (window.MathJax) MathJax.typesetPromise();
+}
+
+// ==================== KARTE 5 WIEDERHOLUNG ====================
+function checkK5q2() {
+  const inp = document.getElementById('k5q2-inp');
+  const val = parseFloat(inp.value);
+  const correct = val === 4.5 || val === 4; // 54*100/1200 = 4.5
+  // Actually 54/1200*100 = 4.5
+  const realCorrect = Math.abs(val - 4.5) < 0.1;
+  markInput(inp, realCorrect);
+  showFeedback('k5q2-fb', realCorrect,
+    realCorrect ? 'Richtig! \\(p = 54 \\cdot 100 \\div 1200 = 4{,}5\\%\\)' :
+    'Nicht ganz. \\(p = \\frac{Z \\cdot 100}{K} = \\frac{54 \\cdot 100}{1200} = 4{,}5\\%\\)');
+  logResult('Wiederholung Zins Frage 2', realCorrect);
+  if (window.MathJax) MathJax.typesetPromise();
+}
+function checkK5q3() {
+  const inp = document.getElementById('k5q3-inp');
+  const val = parseFloat(inp.value);
+  const correct = val === 3600; // 90*100/2.5=3600
+  markInput(inp, correct);
+  showFeedback('k5q3-fb', correct,
+    correct ? 'Richtig! \\(K = 90 \\cdot 100 \\div 2{,}5 = 3600\\) €' :
+    'Nicht ganz. \\(K = \\frac{90 \\cdot 100}{2{,}5} = 3600\\) €');
+  logResult('Wiederholung Zins Frage 3', correct);
+  if (window.MathJax) MathJax.typesetPromise();
+}
+
+function auswertungWiederholung() {
+  k5WiederholungDone = true;
+  markCardDone('k5');
+  const fb = document.getElementById('k5-gesamt-fb');
+  fb.className = 'feedback correct';
+  fb.innerHTML = '<span class="feedback-icon">✅</span><span>Wiederholung abgeschlossen! Wechsle zur <strong>Auswertungskarte</strong>.</span>';
+  fb.style.display = 'flex';
+  document.getElementById('k5-auswbtn').disabled = true;
+}
+
+// ==================== AUSWERTUNG ====================
+function buildAuswertung() {
+  const total = resultLog.length;
+  const correct = resultLog.filter(r => r.correct).length;
+
+  let pct = total > 0 ? Math.round(correct/total*100) : 0;
+  let msg = pct >= 80 ? '🏆 Ausgezeichnet!' : pct >= 60 ? '👍 Gut gemacht!' : pct >= 40 ? '💪 Weiter üben!' : '🔁 Nochmal versuchen';
+
+  let html = `
+    <div class="score-circle">
+      <div class="score-num">${correct}/${total}</div>
+      <div class="score-of">Richtig</div>
+    </div>
+    <div class="score-msg">${msg}</div>
+    <div class="score-sub">Niveau: ${currentLevel === 'G' ? 'Grundlagen' : currentLevel === 'F' ? 'Fortgeschritten' : 'Profi'}</div>
+    <div class="result-list">
+  `;
+
+  resultLog.forEach(r => {
+    html += `
+      <div class="result-item ${r.correct ? 'ok' : 'nok'}">
+        <span class="result-icon">${r.correct ? '✅' : '❌'}</span>
+        <span>${r.label}</span>
+      </div>`;
+  });
+
+  html += `</div>`;
+  document.getElementById('auswertung-content').innerHTML = html;
+  if (window.MathJax) MathJax.typesetPromise();
+}
+
+// ==================== T-REX ====================
+function trexShow() { document.getElementById('trex').querySelector('.trex-tooltip').style.opacity='1'; }
+function trexHide() { document.getElementById('trex').querySelector('.trex-tooltip').style.opacity='0'; }
+function trexTap() {
+  const trex = document.getElementById('trex');
+  trex.classList.add('tap-show');
+  setTimeout(() => trex.classList.remove('tap-show'), 2000);
+}
+
+// Init
+setLevel('G');
+</script>
+
+</body>
+</html>
