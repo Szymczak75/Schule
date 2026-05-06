@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cybergrooming – Was du wissen musst</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0b0e18;
+  --surface: #13172a;
+  --surface2: #1c2138;
+  --accent: #5b9bff;
+  --accent2: #ff9a5b;
+  --accent3: #5bffb0;
+  --warn: #ff6060;
+  --text: #eceef7;
+  --muted: #707898;
+  --border: rgba(255,255,255,0.07);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Outfit', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background:
+    radial-gradient(ellipse 60% 40% at 20% 0%, rgba(91,155,255,0.07) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 30% at 80% 100%, rgba(91,255,176,0.05) 0%, transparent 60%);
+  pointer-events: none; z-index: 0;
+}
+
+/* TOP */
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 24px; border-bottom: 1px solid var(--border);
+  background: rgba(11,14,24,0.95); position: sticky; top: 0; z-index: 20;
+}
+.top-left { display: flex; align-items: center; gap: 10px; }
+.badge-schüler {
+  background: linear-gradient(135deg, var(--accent), var(--accent3));
+  color: #0b0e18; font-family: 'Syne', sans-serif; font-weight: 800;
+  font-size: 11px; padding: 4px 11px; border-radius: 6px;
+}
+.top-title { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 15px; }
+
+/* STEP DOTS */
+.step-dots-bar {
+  display: flex; gap: 6px; align-items: center;
+}
+.sdot {
+  width: 26px; height: 26px; border-radius: 50%;
+  border: 1.5px solid var(--border); background: var(--surface2); color: var(--muted);
+  font-size: 11px; font-weight: 700; font-family: 'Syne', sans-serif;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: all 0.2s;
+}
+.sdot:hover { border-color: var(--accent); color: var(--accent); }
+.sdot.active { background: var(--accent); border-color: var(--accent); color: white; box-shadow: 0 0 12px rgba(91,155,255,0.5); }
+.sdot.done { background: var(--accent3); border-color: var(--accent3); color: #0b0e18; }
+
+/* PROGRESS BAR */
+.prog-bar { height: 3px; background: var(--surface2); }
+.prog-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent3)); transition: width 0.4s ease; width: 0%; }
+
+/* MAIN WRAPPER */
+.wrapper { max-width: 760px; margin: 0 auto; padding: 0 20px 80px; position: relative; z-index: 1; }
+
+/* PANELS */
+.panel { display: none; padding-top: 40px; animation: fadeUp 0.25s ease; }
+.panel.active { display: block; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ── START PANEL ── */
+.hero { text-align: center; margin-bottom: 40px; }
+.hero-emoji { font-size: 56px; margin-bottom: 16px; display: block; animation: pulse 3s ease infinite; }
+@keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+.hero-title {
+  font-family: 'Syne', sans-serif; font-size: clamp(28px, 5vw, 48px); font-weight: 800;
+  background: linear-gradient(135deg, #eceef7 20%, #5b9bff 60%, #5bffb0);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  line-height: 1.1; margin-bottom: 12px;
+}
+.hero-sub { color: var(--muted); font-size: 15px; line-height: 1.7; max-width: 520px; margin: 0 auto; }
+
+.topic-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 32px; }
+.topic-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+  padding: 18px 20px; cursor: pointer; transition: all 0.2s;
+  display: flex; align-items: flex-start; gap: 14px;
+}
+.topic-card:hover { border-color: rgba(91,155,255,0.3); transform: translateY(-2px); background: rgba(91,155,255,0.06); }
+.topic-card.done { border-color: rgba(91,255,176,0.3); background: rgba(91,255,176,0.05); }
+.topic-card.done:hover { background: rgba(91,255,176,0.1); }
+.tc-emoji { font-size: 28px; flex-shrink: 0; margin-top: 1px; }
+.tc-num { font-family: 'Syne', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 3px; }
+.topic-card.done .tc-num { color: var(--accent3); }
+.tc-title { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 800; color: var(--text); line-height: 1.3; }
+.tc-desc { font-size: 12px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+.tc-done-tag { display: none; font-size: 11px; color: var(--accent3); font-weight: 600; margin-top: 5px; }
+.topic-card.done .tc-done-tag { display: block; }
+
+.start-btn {
+  display: block; width: 100%; padding: 16px; border-radius: 14px;
+  background: linear-gradient(135deg, var(--accent), #3d78e8);
+  color: white; font-family: 'Syne', sans-serif; font-weight: 800; font-size: 17px;
+  text-align: center; border: none; cursor: pointer; transition: all 0.2s;
+  box-shadow: 0 6px 24px rgba(91,155,255,0.3);
+}
+.start-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(91,155,255,0.4); }
+
+/* ── CONTENT PANELS ── */
+.panel-header { margin-bottom: 24px; }
+.panel-chip {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 10px;
+}
+.chip-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+.panel-title { font-family: 'Syne', sans-serif; font-size: clamp(22px, 4vw, 34px); font-weight: 800; color: var(--text); line-height: 1.15; margin-bottom: 10px; }
+.panel-intro { font-size: 15px; color: var(--muted); line-height: 1.75; }
+
+/* Info boxes */
+.info-box {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+  padding: 20px 22px; margin-bottom: 16px;
+}
+.info-box-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.info-box-icon { font-size: 22px; flex-shrink: 0; }
+.info-box-title { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 15px; }
+.info-box-body { font-size: 14px; color: var(--muted); line-height: 1.7; }
+.info-box.highlight { border-color: rgba(91,155,255,0.3); background: rgba(91,155,255,0.06); }
+.info-box.warn-box { border-color: rgba(255,96,96,0.3); background: rgba(255,96,96,0.06); }
+.info-box.green-box { border-color: rgba(91,255,176,0.3); background: rgba(91,255,176,0.06); }
+.info-box.orange-box { border-color: rgba(255,154,91,0.3); background: rgba(255,154,91,0.06); }
+
+/* Lists */
+.check-list { list-style: none; display: flex; flex-direction: column; gap: 9px; margin-top: 10px; }
+.check-list li { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; color: var(--muted); line-height: 1.5; }
+.check-list li::before { content: '→'; color: var(--accent); font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+.check-list.green li::before { color: var(--accent3); content: '✓'; }
+.check-list.warn li::before { color: var(--warn); content: '⚠'; }
+
+/* Link buttons - bigger for students */
+.link-section { margin-top: 20px; margin-bottom: 24px; }
+.link-section-title { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+.s-link-group { display: flex; flex-wrap: wrap; gap: 10px; }
+.s-link {
+  display: inline-flex; align-items: center; gap: 8px; padding: 11px 18px; border-radius: 12px;
+  font-size: 14px; font-weight: 600; text-decoration: none; transition: all 0.2s; border: 1px solid;
+  font-family: 'Outfit', sans-serif;
+}
+.s-link.blue { background: rgba(91,155,255,0.12); border-color: rgba(91,155,255,0.35); color: var(--accent); }
+.s-link.blue:hover { background: rgba(91,155,255,0.22); transform: translateY(-2px); }
+.s-link.orange { background: rgba(255,154,91,0.1); border-color: rgba(255,154,91,0.3); color: var(--accent2); }
+.s-link.orange:hover { background: rgba(255,154,91,0.2); transform: translateY(-2px); }
+.s-link.green { background: rgba(91,255,176,0.1); border-color: rgba(91,255,176,0.3); color: var(--accent3); }
+.s-link.green:hover { background: rgba(91,255,176,0.2); transform: translateY(-2px); }
+
+/* Know-box – did you know */
+.did-you-know {
+  background: linear-gradient(135deg, rgba(91,155,255,0.1), rgba(91,255,176,0.06));
+  border: 1px solid rgba(91,155,255,0.25); border-radius: 14px;
+  padding: 18px 20px; margin-bottom: 16px;
+  display: flex; gap: 14px; align-items: flex-start;
+}
+.dyk-icon { font-size: 28px; flex-shrink: 0; }
+.dyk-label { font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); margin-bottom: 4px; }
+.dyk-text { font-size: 14px; line-height: 1.65; color: var(--muted); }
+.dyk-text strong { color: var(--text); }
+
+/* Bottom nav */
+.bottom-nav {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  margin-top: 32px; padding-top: 20px; border-top: 1px solid var(--border); flex-wrap: wrap;
+}
+.nav-pill {
+  display: flex; align-items: center; gap: 7px; padding: 11px 22px; border-radius: 12px;
+  font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; border: 1px solid;
+}
+.nav-pill.back { background: transparent; border-color: var(--border); color: var(--muted); }
+.nav-pill.back:hover { border-color: rgba(255,255,255,0.2); color: var(--text); }
+.nav-pill.forward { background: var(--accent); border-color: var(--accent); color: white; box-shadow: 0 4px 16px rgba(91,155,255,0.3); }
+.nav-pill.forward:hover { background: #7ab3ff; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(91,155,255,0.4); }
+.nav-pill.finish { background: var(--accent3); border-color: var(--accent3); color: #0b0e18; }
+.nav-pill.finish:hover { background: #7affca; transform: translateY(-1px); }
+
+.done-check {
+  display: flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 12px;
+  background: transparent; border: 1.5px solid var(--border); color: var(--muted);
+  font-size: 13px; font-family: 'Outfit', sans-serif; cursor: pointer; transition: all 0.2s;
+}
+.done-check:hover { border-color: var(--accent3); color: var(--accent3); background: rgba(91,255,176,0.08); }
+.done-check.done { background: var(--accent3); border-color: var(--accent3); color: #0b0e18; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="top-left">
+    <div class="badge-schüler">Klasse 6</div>
+    <div class="top-title">Sicher im Netz 🔐</div>
+  </div>
+  <div class="step-dots-bar" id="stepDots"></div>
+</div>
+<div class="prog-bar"><div class="prog-fill" id="progFill"></div></div>
+
+<div class="wrapper">
+
+  <!-- ── PANEL 0: START ── -->
+  <div class="panel active" id="p-0">
+    <div class="hero">
+      <span class="hero-emoji">🛡️</span>
+      <div class="hero-title">Sicher im Netz –<br>Was du wissen musst</div>
+      <p class="hero-sub">Heute lernst du, was Cybergrooming ist, wie du Gefahren erkennst und was du tun kannst, wenn etwas passiert. Klick dich einfach durch!</p>
+    </div>
+
+    <div class="topic-grid">
+      <div class="topic-card" id="tc-1" onclick="goTo(1)">
+        <div class="tc-emoji">🤔</div>
+        <div><div class="tc-num">Teil 1</div><div class="tc-title">Was ist Cybergrooming?</div><div class="tc-desc">Erklärung & Video von logo!</div><div class="tc-done-tag">✓ Geschafft!</div></div>
+      </div>
+      <div class="topic-card" id="tc-2" onclick="goTo(2)">
+        <div class="tc-emoji">🎬</div>
+        <div><div class="tc-num">Teil 2</div><div class="tc-title">Wie läuft das ab?</div><div class="tc-desc">Film & echte Strategien</div><div class="tc-done-tag">✓ Geschafft!</div></div>
+      </div>
+      <div class="topic-card" id="tc-3" onclick="goTo(3)">
+        <div class="tc-emoji">⚠️</div>
+        <div><div class="tc-num">Teil 3</div><div class="tc-title">Warnzeichen erkennen</div><div class="tc-desc">Was ist komisch im Chat?</div><div class="tc-done-tag">✓ Geschafft!</div></div>
+      </div>
+      <div class="topic-card" id="tc-4" onclick="goTo(4)">
+        <div class="tc-emoji">⚖️</div>
+        <div><div class="tc-num">Teil 4</div><div class="tc-title">Das Gesetz</div><div class="tc-desc">Warum das strafbar ist</div><div class="tc-done-tag">✓ Geschafft!</div></div>
+      </div>
+      <div class="topic-card" id="tc-5" onclick="goTo(5)">
+        <div class="tc-emoji">🦸</div>
+        <div><div class="tc-num">Teil 5</div><div class="tc-title">Was tun & wo Hilfe?</div><div class="tc-desc">Deine Schutzregeln</div><div class="tc-done-tag">✓ Geschafft!</div></div>
+      </div>
+      <div class="topic-card" id="tc-6" onclick="goTo(6)">
+        <div class="tc-emoji">🎯</div>
+        <div><div class="tc-num">Teil 6</div><div class="tc-title">Zusammenfassung</div><div class="tc-desc">Das Wichtigste nochmal</div><div class="tc-done-tag">✓ Geschafft!</div></div>
+      </div>
+    </div>
+
+    <button class="start-btn" onclick="goTo(1)">→ Jetzt starten</button>
+  </div>
+
+  <!-- ── PANEL 1: Was ist Cybergrooming ── -->
+  <div class="panel" id="p-1">
+    <div class="panel-header">
+      <div class="panel-chip"><div class="chip-dot"></div> Teil 1 von 6</div>
+      <div class="panel-title">Was ist Cybergrooming?</div>
+      <p class="panel-intro">Manchmal schreibt dir online jemand Fremdes – und meint es gar nicht gut. Das nennt man Cybergrooming. Hier erfährst du, was dahintersteckt.</p>
+    </div>
+
+    <div class="did-you-know">
+      <div class="dyk-icon">💡</div>
+      <div><div class="dyk-label">Wusstest du?</div><div class="dyk-text">Jedes vierte Kind in Deutschland hat online schon mal Kontakt mit einer <strong>fremden erwachsenen Person</strong> gehabt, die schlechte Absichten hatte. Das klingt viel – aber du kannst dich schützen!</div></div>
+    </div>
+
+    <div class="info-box highlight">
+      <div class="info-box-head"><div class="info-box-icon">🎯</div><div class="info-box-title">Was bedeutet "Cybergrooming"?</div></div>
+      <div class="info-box-body">Cybergrooming passiert, wenn Erwachsene online so tun, als wären sie nette Freunde – aber dabei böse Absichten haben. Sie wollen Vertrauen aufbauen und Kinder dazu bringen, intime Fotos zu schicken oder sich zu treffen.</div>
+    </div>
+
+    <div class="info-box">
+      <div class="info-box-head"><div class="info-box-icon">📍</div><div class="info-box-title">Wo passiert das?</div></div>
+      <div class="info-box-body">
+        <ul class="check-list">
+          <li>In Online-Spielen wie Fortnite, Roblox, Minecraft</li>
+          <li>In sozialen Netzwerken wie TikTok, Instagram, Snapchat</li>
+          <li>In Chats und Messengern wie WhatsApp oder Discord</li>
+          <li>Überall, wo man mit Fremden schreiben kann</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="link-section">
+      <div class="link-section-title">📺 Videos zum Anschauen</div>
+      <div class="s-link-group">
+        <a class="s-link blue" href="https://www.zdf.de/video/magazine/logo-154/logo-erklaert-cybergrooming-100" target="_blank">📺 logo! erklärt Cybergrooming (ZDF)</a>
+        <a class="s-link orange" href="https://www.handysektor.de/artikel/video-das-musst-du-ueber-cybergrooming-wissen" target="_blank">🎬 Video: Was du wissen musst (handysektor)</a>
+      </div>
+    </div>
+
+    <div class="bottom-nav">
+      <button class="done-check" id="dc-1" onclick="markDone(1)">✓ Verstanden!</button>
+      <div style="display:flex;gap:9px">
+        <button class="nav-pill back" onclick="goTo(0)">← Übersicht</button>
+        <button class="nav-pill forward" onclick="goTo(2)">Weiter →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── PANEL 2: Wie läuft das ab ── -->
+  <div class="panel" id="p-2">
+    <div class="panel-header">
+      <div class="panel-chip"><div class="chip-dot"></div> Teil 2 von 6</div>
+      <div class="panel-title">Wie läuft das ab?</div>
+      <p class="panel-intro">Täter gehen immer nach dem gleichen Muster vor. Wenn du das kennst, kannst du es früh erkennen.</p>
+    </div>
+
+    <div class="info-box warn-box">
+      <div class="info-box-head"><div class="info-box-icon">🎭</div><div class="info-box-title">Das typische Muster</div></div>
+      <div class="info-box-body">
+        <ul class="check-list warn">
+          <li><strong style="color:var(--text)">Schritt 1 – Kontakt:</strong> Eine fremde Person schreibt dir, ist super nett und versteht dich.</li>
+          <li><strong style="color:var(--text)">Schritt 2 – Vertrauen:</strong> Sie macht viele Komplimente, hat angeblich die gleichen Interessen.</li>
+          <li><strong style="color:var(--text)">Schritt 3 – Druck:</strong> Sie fragt nach privaten Fotos oder will, dass du etwas geheim hältst.</li>
+          <li><strong style="color:var(--text)">Schritt 4 – Erpressung:</strong> Falls du Fotos geschickt hast, droht sie dir damit.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="did-you-know">
+      <div class="dyk-icon">🎮</div>
+      <div><div class="dyk-label">Wichtig!</div><div class="dyk-text">Das passiert auch beim Zocken! Täter geben sich oft als <strong>gleichaltrige Gamer</strong> aus. Du weißt nie, wer wirklich hinter dem Account steckt.</div></div>
+    </div>
+
+    <div class="link-section">
+      <div class="link-section-title">🎬 Film dazu</div>
+      <div class="s-link-group">
+        <a class="s-link blue" href="https://www.medienanstalt-nrw.de/themen/cybergrooming.html" target="_blank">🎬 Aufklärungsfilm (Medienanstalt NRW)</a>
+        <a class="s-link orange" href="https://www.juuuport.de/infos/news/white-tiger-fall" target="_blank">🐯 Der Fall „White Tiger" erklärt</a>
+      </div>
+    </div>
+
+    <div class="bottom-nav">
+      <button class="done-check" id="dc-2" onclick="markDone(2)">✓ Verstanden!</button>
+      <div style="display:flex;gap:9px">
+        <button class="nav-pill back" onclick="goTo(1)">← Zurück</button>
+        <button class="nav-pill forward" onclick="goTo(3)">Weiter →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── PANEL 3: Warnzeichen ── -->
+  <div class="panel" id="p-3">
+    <div class="panel-header">
+      <div class="panel-chip"><div class="chip-dot"></div> Teil 3 von 6</div>
+      <div class="panel-title">⚠️ Warnzeichen erkennen</div>
+      <p class="panel-intro">Mach dich misstrauisch, wenn online jemand Fremdes diese Dinge tut. Das ist kein Zufall – das ist Absicht!</p>
+    </div>
+
+    <div class="info-box warn-box">
+      <div class="info-box-head"><div class="info-box-icon">🚨</div><div class="info-box-title">Stop! Das ist ein Warnsignal</div></div>
+      <div class="info-box-body">
+        <ul class="check-list warn">
+          <li>Die Person will sofort deine Handynummer oder zu WhatsApp wechseln</li>
+          <li>Sie macht ständig Komplimente über dein Aussehen</li>
+          <li>Sie fragt nach privaten oder freizügigen Fotos</li>
+          <li>Sie will, dass du es <strong style="color:var(--text)">geheim hältst</strong> – vor Eltern oder Freunden</li>
+          <li>Sie droht dir, wenn du nicht antwortest</li>
+          <li>Sie behauptet, euch zu kennen oder dich schon länger zu beobachten</li>
+          <li>Sie gibt vor, berühmt zu sein (Model-Agent, Pro-Gamer, Influencer)</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="did-you-know">
+      <div class="dyk-icon">🧠</div>
+      <div><div class="dyk-label">Merke dir!</div><div class="dyk-text">Wenn sich etwas <strong>komisch anfühlt</strong> – dann ist es komisch. Du musst niemandem antworten. Du hast das Recht, einfach <strong>aufzuhören</strong>.</div></div>
+    </div>
+
+    <div class="link-section">
+      <div class="link-section-title">📋 Plakat zu Warnsignalen</div>
+      <div class="s-link-group">
+        <a class="s-link blue" href="https://www.klicksafe.de/materialien/wehr-dich-gegen-sexualisierte-gewalt-im-netz-warnsignale-im-chat" target="_blank">🛡️ Warnsignale im Chat (klicksafe)</a>
+        <a class="s-link green" href="https://www.medienanstalt-nrw.de/publikationen/warnsignale-im-chat.html" target="_blank">📋 Plakat als Download</a>
+      </div>
+    </div>
+
+    <div class="bottom-nav">
+      <button class="done-check" id="dc-3" onclick="markDone(3)">✓ Verstanden!</button>
+      <div style="display:flex;gap:9px">
+        <button class="nav-pill back" onclick="goTo(2)">← Zurück</button>
+        <button class="nav-pill forward" onclick="goTo(4)">Weiter →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── PANEL 4: Gesetz ── -->
+  <div class="panel" id="p-4">
+    <div class="panel-header">
+      <div class="panel-chip"><div class="chip-dot"></div> Teil 4 von 6</div>
+      <div class="panel-title">⚖️ Das ist eine Straftat!</div>
+      <p class="panel-intro">Cybergrooming ist kein Spaß und kein normales Verhalten – es ist verboten. Täter können dafür ins Gefängnis kommen.</p>
+    </div>
+
+    <div class="info-box warn-box">
+      <div class="info-box-head"><div class="info-box-icon">🚔</div><div class="info-box-title">Was passiert mit Tätern?</div></div>
+      <div class="info-box-body">
+        <ul class="check-list warn">
+          <li>Cybergrooming ist nach §§ 176a/176b Strafgesetzbuch (StGB) <strong style="color:var(--text)">strafbar</strong></li>
+          <li>Täter können mit bis zu <strong style="color:var(--text)">5 Jahren Gefängnis</strong> bestraft werden</li>
+          <li>Sogar der <strong style="color:var(--text)">Versuch</strong> ist strafbar – auch wenn du nicht mitgemacht hast</li>
+          <li>2024 gab es 3.457 Fälle bei der Polizei – und viele weitere wurden gar nicht gemeldet</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="did-you-know">
+      <div class="dyk-icon">💪</div>
+      <div><div class="dyk-label">Du trägst keine Schuld!</div><div class="dyk-text">Wenn dir sowas passiert, ist es <strong>niemals deine Schuld</strong>. Täter sind clever und manipulativ. Du bist das Opfer – nicht das Problem.</div></div>
+    </div>
+
+    <div class="link-section">
+      <div class="link-section-title">🔍 Mehr dazu</div>
+      <div class="s-link-group">
+        <a class="s-link blue" href="https://www.handysektor.de/artikel/ist-cybergrooming-strafbar" target="_blank">⚖️ Ist Cybergrooming strafbar? (handysektor)</a>
+      </div>
+    </div>
+
+    <div class="bottom-nav">
+      <button class="done-check" id="dc-4" onclick="markDone(4)">✓ Verstanden!</button>
+      <div style="display:flex;gap:9px">
+        <button class="nav-pill back" onclick="goTo(3)">← Zurück</button>
+        <button class="nav-pill forward" onclick="goTo(5)">Weiter →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── PANEL 5: Was tun ── -->
+  <div class="panel" id="p-5">
+    <div class="panel-header">
+      <div class="panel-chip"><div class="chip-dot"></div> Teil 5 von 6</div>
+      <div class="panel-title">🦸 Was tun &amp; wo Hilfe?</div>
+      <p class="panel-intro">Du bist nicht allein! Hier sind deine Schutzregeln – und wo du sofort Hilfe bekommst, wenn du sie brauchst.</p>
+    </div>
+
+    <div class="info-box green-box">
+      <div class="info-box-head"><div class="info-box-icon">🛡️</div><div class="info-box-title">Deine 5 Schutzregeln</div></div>
+      <div class="info-box-body">
+        <ul class="check-list green">
+          <li>Schick keine privaten oder freizügigen Fotos an Fremde – niemals</li>
+          <li>Wenn etwas komisch ist: Chat sofort beenden und Person blockieren</li>
+          <li>Mach einen Screenshot als Beweis</li>
+          <li>Rede mit einer Vertrauensperson – Eltern, Lehrer:in, Freund:in</li>
+          <li>Du kannst es auch anonym melden – niemand muss deinen Namen erfahren</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="info-box highlight">
+      <div class="info-box-head"><div class="info-box-icon">📞</div><div class="info-box-title">Hier bekommst du Hilfe</div></div>
+      <div class="info-box-body">
+        <ul class="check-list">
+          <li><strong style="color:var(--text)">116 111</strong> – Nummer gegen Kummer (kostenlos, anonym)</li>
+          <li><strong style="color:var(--text)">juuuport.de</strong> – Online-Beratung von Jugendlichen für Jugendliche</li>
+          <li><strong style="color:var(--text)">fragzebra.de</strong> – Cybergrooming direkt melden</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="link-section">
+      <div class="link-section-title">🆘 Hilfsangebote</div>
+      <div class="s-link-group">
+        <a class="s-link green" href="https://www.nummergegenkummer.de" target="_blank">📞 Nummer gegen Kummer (116 111)</a>
+        <a class="s-link blue" href="https://www.juuuport.de" target="_blank">💬 juuuport – Online-Beratung</a>
+        <a class="s-link orange" href="https://www.fragzebra.de/cybergrooming" target="_blank">🦓 ZEBRA – Jetzt melden</a>
+      </div>
+    </div>
+
+    <div class="bottom-nav">
+      <button class="done-check" id="dc-5" onclick="markDone(5)">✓ Verstanden!</button>
+      <div style="display:flex;gap:9px">
+        <button class="nav-pill back" onclick="goTo(4)">← Zurück</button>
+        <button class="nav-pill forward" onclick="goTo(6)">Fast fertig →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── PANEL 6: Zusammenfassung ── -->
+  <div class="panel" id="p-6">
+    <div class="panel-header">
+      <div class="panel-chip"><div class="chip-dot"></div> Teil 6 von 6</div>
+      <div class="panel-title">🎯 Das Wichtigste – nochmal kurz</div>
+      <p class="panel-intro">Du hast heute viel gelernt. Hier ist noch einmal das Wichtigste auf einen Blick.</p>
+    </div>
+
+    <div class="info-box green-box">
+      <div class="info-box-head"><div class="info-box-icon">✅</div><div class="info-box-title">Das nimmst du heute mit</div></div>
+      <div class="info-box-body">
+        <ul class="check-list green">
+          <li>Cybergrooming = Fremde bauen online Vertrauen auf, um Kinder auszunutzen</li>
+          <li>Es passiert in Games, TikTok, Instagram, WhatsApp und überall im Netz</li>
+          <li>Warnsignal: Geheimhaltung, Komplimente, Drohungen, Fotos</li>
+          <li>Cybergrooming ist eine Straftat – Täter kommen ins Gefängnis</li>
+          <li>Reden schützt: Vertrauensperson ansprechen oder anonym melden</li>
+          <li>Es ist NIEMALS deine Schuld!</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="did-you-know">
+      <div class="dyk-icon">🌟</div>
+      <div><div class="dyk-label">Gut gemacht!</div><div class="dyk-text">Du weißt jetzt mehr als die meisten! <strong>Teile dein Wissen</strong> mit Freunden – denn je mehr Kinder informiert sind, desto schwerer haben es Täter.</div></div>
+    </div>
+
+    <div class="link-section">
+      <div class="link-section-title">📚 Noch mehr erfahren</div>
+      <div class="s-link-group">
+        <a class="s-link blue" href="https://www.youtube.com/watch?v=3mdgneP5iwE" target="_blank">🎬 Film „Netzangriff" (YouTube, 45 Min.)</a>
+        <a class="s-link orange" href="https://www.klicksafe.de/materialien/wehr-dich-gegen-sexualisierte-gewalt-im-netz-warnsignale-im-chat" target="_blank">🛡️ Mehr Infos bei klicksafe</a>
+        <a class="s-link green" href="https://www.handysektor.de/artikel/video-das-musst-du-ueber-cybergrooming-wissen" target="_blank">📱 handysektor – Tipps für dich</a>
+      </div>
+    </div>
+
+    <div class="bottom-nav">
+      <button class="done-check" id="dc-6" onclick="markDone(6)">✓ Alles erledigt!</button>
+      <div style="display:flex;gap:9px">
+        <button class="nav-pill back" onclick="goTo(5)">← Zurück</button>
+        <button class="nav-pill finish" onclick="goTo(0)">🏠 Zur Startseite</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /wrapper -->
+
+<script>
+  const TOTAL = 6;
+  const done = new Set();
+  let current = 0;
+
+  function buildDots() {
+    const c = document.getElementById('stepDots');
+    c.innerHTML = '';
+    const d0 = document.createElement('div');
+    d0.className = 'sdot' + (current === 0 ? ' active' : '');
+    d0.textContent = '☰'; d0.style.fontSize = '12px'; d0.title = 'Übersicht';
+    d0.onclick = () => goTo(0); c.appendChild(d0);
+    for (let i = 1; i <= TOTAL; i++) {
+      const d = document.createElement('div');
+      d.className = 'sdot' + (done.has(i) ? ' done' : (current === i ? ' active' : ''));
+      d.textContent = done.has(i) ? '✓' : i;
+      d.onclick = () => goTo(i); c.appendChild(d);
+    }
+  }
+
+  function goTo(index) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('p-' + index).classList.add('active');
+    current = index;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    buildDots();
+    updateProg();
+  }
+
+  function markDone(i) {
+    const btn = document.getElementById('dc-' + i);
+    const tc = document.getElementById('tc-' + i);
+    if (done.has(i)) {
+      done.delete(i);
+      btn.classList.remove('done'); btn.textContent = '✓ Verstanden!';
+      if (tc) tc.classList.remove('done');
+    } else {
+      done.add(i);
+      btn.classList.add('done'); btn.textContent = '✓ Super!';
+      if (tc) tc.classList.add('done');
+      if (i < TOTAL) setTimeout(() => goTo(i + 1), 450);
+    }
+    buildDots(); updateProg();
+  }
+
+  function updateProg() {
+    document.getElementById('progFill').style.width = (done.size / TOTAL * 100) + '%';
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight') { if (current < TOTAL) goTo(current + 1); }
+    if (e.key === 'ArrowLeft') { if (current > 0) goTo(current - 1); }
+    if (e.key === 'Home') goTo(0);
+  });
+
+  buildDots(); updateProg();
+</script>
+</body>
+</html>
