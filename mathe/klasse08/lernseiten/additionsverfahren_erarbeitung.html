@@ -303,6 +303,9 @@ transition: transform 0.1s, opacity 0.2s;
 .btn:active { transform: scale(0.97); }
 .btn-primary { background: var(–accent2); color: white; }
 .btn-check { background: var(–teal); color: white; }
+.btn-check.mc-selected-correct { background: var(–green-ok) !important; color: white; outline: 3px solid #15803d; }
+.btn-check.mc-selected-wrong   { background: var(–red-err) !important;  color: white; outline: 3px solid #b91c1c; }
+.btn-check.mc-dimmed           { background: #cbd5e1 !important; color: #94a3b8; cursor: default; }
 .btn-reset { background: #f1f5f9; color: var(–muted); border: 2px solid var(–border); }
 
 /* Feedback */
@@ -921,16 +924,16 @@ header h1 { font-size: 21px; }
   function mcAnswer(btn, correct, fbId) {
     const val = btn.getAttribute('data-val');
     const fb = document.getElementById(fbId);
-    // Alle Buttons in dieser Gruppe zurücksetzen, dann den angeklickten markieren
-    const allBtns = btn.closest('div').querySelectorAll('.btn-check');
+    // Alle Buttons in dieser Gruppe: angeklickten markieren, Rest abdunkeln
+    const allBtns = btn.closest('div').querySelectorAll('[data-val]');
     allBtns.forEach(b => {
-      b.style.outline = 'none';
-      b.style.background = '';
-      b.style.transform = '';
+      b.classList.remove('mc-selected-correct', 'mc-selected-wrong');
+      b.classList.add('mc-dimmed');
+      b.disabled = true;
     });
     if (val === correct) {
-      btn.style.background = '#16a34a';
-      btn.style.outline = '3px solid #15803d';
+      btn.classList.remove('mc-dimmed');
+      btn.classList.add('mc-selected-correct');
       fb.className = 'feedback correct';
       if (fbId === 'mc1') {
         fb.textContent = '✅ Richtig! +2y und −2y heben sich auf – y fällt weg!';
@@ -943,8 +946,8 @@ header h1 { font-size: 21px; }
         setTimeout(() => document.getElementById('t1-p2').style.display = 'block', 800);
       }
     } else {
-      btn.style.background = '#dc2626';
-      btn.style.outline = '3px solid #b91c1c';
+      btn.classList.remove('mc-dimmed');
+      btn.classList.add('mc-selected-wrong');
       fb.className = 'feedback wrong';
       if (fbId === 'mc1') {
         fb.textContent = '❌ Schau auf die y-Terme: +2y in (I) und −2y in (II). Was passiert, wenn man die addiert?';
