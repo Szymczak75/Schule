@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lehrer | Hormone – Klasse 9</title>
+<style>
+  :root {
+    --blue: #1a4a8a; --blue-light: #e8f0fa; --blue-mid: #2d6abf;
+    --green: #1a6a1a; --green-light: #e0f5e0;
+    --orange: #d4570a; --orange-light: #fff0e0;
+    --red: #b00000; --red-light: #fcd4d4;
+    --purple: #6a1a8a; --purple-light: #f0e0fa;
+    --grey: #f4f4f4; --border: #ccc;
+    --text: #1a1a1a;
+    --shadow: 0 2px 12px rgba(0,0,0,0.12);
+  }
+  * { box-sizing: border-box; margin:0; padding:0; }
+  body { font-family: -apple-system, Arial, sans-serif; font-size:16px; background:#e8ecf4; color:var(--text); }
+
+  /* Header */
+  header { background: linear-gradient(135deg, #0d2a55, #1a4a8a); color:white; padding:16px 24px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; position:sticky; top:0; z-index:100; box-shadow: 0 2px 10px rgba(0,0,0,0.3); }
+  header h1 { font-size:18px; font-weight:700; }
+  header .meta { font-size:13px; opacity:0.8; }
+  .master-timer { font-size:26px; font-weight:700; font-variant-numeric:tabular-nums; background:rgba(255,255,255,0.15); border-radius:8px; padding:6px 16px; }
+  .master-timer.warning { background: rgba(180,0,0,0.5); }
+
+  /* Phase tabs */
+  .phase-nav { display:flex; background:white; border-bottom:2px solid var(--border); overflow-x:auto; -webkit-overflow-scrolling:touch; position:sticky; top:72px; z-index:90; }
+  .phase-tab { flex:none; padding:12px 20px; font-size:14px; font-weight:600; color:#666; background:none; border:none; border-bottom:3px solid transparent; cursor:pointer; white-space:nowrap; transition:all 0.2s; min-height:44px; }
+  .phase-tab.active { color:var(--blue); border-bottom-color:var(--blue); }
+  .phase-tab .badge { display:inline-block; background:#dde; border-radius:10px; padding:1px 7px; font-size:11px; margin-left:5px; }
+  .phase-tab.active .badge { background:var(--blue); color:white; }
+
+  /* Cards */
+  .phase-card { display:none; margin:16px; background:white; border-radius:14px; box-shadow:var(--shadow); overflow:hidden; }
+  .phase-card.active { display:block; }
+
+  .card-header { padding:18px 20px; display:flex; align-items:flex-start; justify-content:space-between; flex-wrap:wrap; gap:10px; }
+  .card-header-left { flex:1; }
+  .phase-name { font-size:20px; font-weight:700; }
+  .phase-meta { font-size:13px; color:#666; margin-top:4px; }
+  .sozialform-badge { display:inline-block; border-radius:20px; padding:4px 12px; font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; }
+  .ea { background:#e8f0fa; color:var(--blue); }
+  .pa { background:#e0f5e0; color:var(--green); }
+  .pl { background:#fff0e0; color:var(--orange); }
+  .tps { background:#f0e0fa; color:var(--purple); }
+
+  /* Phase timer */
+  .phase-timer-row { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .phase-timer-display { font-size:28px; font-weight:700; color:var(--blue); font-variant-numeric:tabular-nums; }
+  .phase-timer-display.warning { color:var(--red); }
+  .timer-btn { border:none; border-radius:8px; padding:8px 16px; font-size:14px; font-weight:600; cursor:pointer; min-height:40px; }
+  .timer-btn.start { background:var(--green); color:white; }
+  .timer-btn.stop { background:var(--red); color:white; }
+  .timer-btn.reset { background:#aaa; color:white; }
+  .timer-btn:active { opacity:0.8; }
+
+  .card-body { padding:20px; }
+
+  /* Blocks */
+  .block { border-radius:10px; padding:16px; margin-bottom:14px; }
+  .block-lehrkraft { background:var(--blue-light); border-left:4px solid var(--blue); }
+  .block-sus { background:var(--green-light); border-left:4px solid var(--green); }
+  .block-diff { background:var(--orange-light); border-left:4px solid var(--orange); }
+  .block-tafelbild { background:#f9f9f9; border:2px dashed #aaa; }
+  .block-impuls { background:var(--purple-light); border-left:4px solid var(--purple); }
+
+  .block-title { font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:8px; }
+  .block-title.blue { color:var(--blue); }
+  .block-title.green { color:var(--green); }
+  .block-title.orange { color:var(--orange); }
+  .block-title.purple { color:var(--purple); }
+  .block-title.grey { color:#666; }
+
+  .block ul { padding-left:18px; }
+  .block li { margin:5px 0; line-height:1.5; font-size:15px; }
+  .block p { font-size:15px; line-height:1.6; margin-bottom:6px; }
+
+  /* Collapsible diff */
+  .diff-header { display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:600; font-size:15px; min-height:44px; user-select:none; }
+  .diff-arrow { transition:transform 0.25s; }
+  .diff-content { display:none; margin-top:10px; }
+  .diff-content.open { display:block; }
+
+  /* Tafelbild */
+  .tafelbild-area { background:#1a1a2e; border-radius:8px; padding:16px; color:#d4e0ff; font-family:monospace; font-size:14px; line-height:1.8; min-height:100px; margin-top:8px; white-space:pre-wrap; }
+
+  /* Impulsfragen */
+  .impuls-list { list-style:none; padding:0; }
+  .impuls-list li { padding:10px 14px; background:white; border-radius:8px; margin:6px 0; font-size:15px; border-left:3px solid var(--purple); }
+  .impuls-list li::before { content:'❓ '; }
+
+  /* Material refs */
+  .material-ref { display:flex; align-items:center; gap:10px; background:white; border:2px solid var(--border); border-radius:8px; padding:10px 14px; margin:6px 0; font-size:14px; }
+  .material-ref .icon { font-size:20px; }
+
+  /* Progress overview */
+  .overview { background:white; border-radius:12px; padding:16px; margin:16px; box-shadow:var(--shadow); }
+  .overview h2 { font-size:16px; font-weight:700; margin-bottom:12px; color:var(--blue); }
+  .overview-grid { display:flex; gap:8px; flex-wrap:wrap; }
+  .ov-item { flex:1 1 140px; border-radius:8px; padding:10px 12px; font-size:13px; font-weight:600; cursor:pointer; text-align:center; border:2px solid; }
+  .ov-item.done { background:var(--green-light); border-color:var(--green); color:var(--green); }
+  .ov-item.current { background:var(--blue-light); border-color:var(--blue); color:var(--blue); }
+  .ov-item.todo { background:#f4f4f4; border-color:#bbb; color:#888; }
+
+  hr { border:none; border-top:1px solid #dde; margin:14px 0; }
+
+  #dino { position:fixed; bottom:16px; right:16px; font-size:24px; cursor:pointer; z-index:300; }
+  #dino-label { display:none; position:fixed; bottom:50px; right:14px; background:#333; color:white; font-size:11px; border-radius:6px; padding:3px 8px; z-index:301; }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="meta">🖥️ Lehrerversion · Biologie · Klasse 9 · 90 min</div>
+    <h1>Hormone – Was sind Botenstoffe?</h1>
+  </div>
+  <div>
+    <div style="font-size:12px; color:rgba(255,255,255,0.7); text-align:center; margin-bottom:3px;">Gesamtzeit</div>
+    <div class="master-timer" id="master-timer">90:00</div>
+    <div style="display:flex; gap:6px; margin-top:6px;">
+      <button class="timer-btn start" onclick="startMaster()">▶</button>
+      <button class="timer-btn stop" onclick="stopMaster()">⏹</button>
+      <button class="timer-btn reset" onclick="resetMaster()">↺</button>
+    </div>
+  </div>
+</header>
+
+<!-- Phase overview -->
+<div class="overview">
+  <h2>📋 Stundenübersicht</h2>
+  <div class="overview-grid">
+    <div class="ov-item current" onclick="showPhase(0)">① Einstieg<br>~10 min<br>Plenum + TPS</div>
+    <div class="ov-item todo" onclick="showPhase(1)">② Was ist Hormon?<br>~20 min<br>Lückentext + Sort</div>
+    <div class="ov-item todo" onclick="showPhase(2)">③ Drüsen<br>~20 min<br>Zuordnung + Buch</div>
+    <div class="ov-item todo" onclick="showPhase(3)">④ Schlüssel-Schloss<br>~25 min<br>TPS + Lückentext</div>
+    <div class="ov-item todo" onclick="showPhase(4)">⑤ Sicherung<br>~15 min<br>Wissenstest</div>
+  </div>
+</div>
+
+<nav class="phase-nav">
+  <button class="phase-tab active" onclick="showPhase(0)" id="ptab0">① Einstieg <span class="badge">10'</span></button>
+  <button class="phase-tab" onclick="showPhase(1)" id="ptab1">② Hormone <span class="badge">20'</span></button>
+  <button class="phase-tab" onclick="showPhase(2)" id="ptab2">③ Drüsen <span class="badge">20'</span></button>
+  <button class="phase-tab" onclick="showPhase(3)" id="ptab3">④ Schlüssel-Schloss <span class="badge">25'</span></button>
+  <button class="phase-tab" onclick="showPhase(4)" id="ptab4">⑤ Sicherung <span class="badge">15'</span></button>
+</nav>
+
+<!-- ══════════ PHASE 1: EINSTIEG ══════════ -->
+<div class="phase-card active" id="phase0">
+  <div class="card-header" style="background:var(--blue-light);">
+    <div class="card-header-left">
+      <div class="phase-name">① Einstieg – Vorwissen aktivieren</div>
+      <div class="phase-meta">Sozialform: <span class="sozialform-badge pl">Plenum</span> → <span class="sozialform-badge tps">Think–Pair–Share</span></div>
+    </div>
+    <div>
+      <div class="phase-timer-row">
+        <div class="phase-timer-display" id="pt0">10:00</div>
+        <button class="timer-btn start" onclick="startPhaseTimer('pt0', 600)">▶</button>
+        <button class="timer-btn stop" onclick="stopPhaseTimer()">⏹</button>
+        <button class="timer-btn reset" onclick="resetPhaseTimer('pt0','10:00')">↺</button>
+      </div>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <div class="block block-lehrkraft">
+      <div class="block-title blue">🎓 Lehrkraft</div>
+      <ul>
+        <li>SuS begrüßen, iPads öffnen lassen</li>
+        <li>Schüler-Website zeigen: <strong>schueler_hormone_kl9.html</strong></li>
+        <li>Einstiegsbild kurz besprechen: „Was seht ihr?" (Signalstoffe im Blut)</li>
+        <li>Think-Phase starten lassen (2 min Timer auf iPads)</li>
+        <li>Pair-Phase: Austausch in Zweierteams (2 min)</li>
+        <li>Ergebnisse im Plenum kurz sichern → an Tafel schreiben</li>
+      </ul>
+    </div>
+
+    <div class="block block-impuls">
+      <div class="block-title purple">❓ Impulsfragen fürs Unterrichtsgespräch</div>
+      <ul class="impuls-list">
+        <li>„Was passiert in deinem Körper, wenn du aufgeregt bist?"</li>
+        <li>„Woher weiß ein Organ, was es tun soll?"</li>
+        <li>„Kennt ihr schon den Begriff ‚Hormon'? Was verbindet ihr damit?"</li>
+        <li>„Wer steuert euren Körper – Gehirn, Blut, beides?"</li>
+      </ul>
+    </div>
+
+    <div class="block block-sus">
+      <div class="block-title green">👩‍🎓 Schülerinnen und Schüler</div>
+      <ul>
+        <li>Think-Phase: Frage notieren und Idee ins Heft schreiben</li>
+        <li>Pair-Phase: Idee mit Sitznachbar*in vergleichen</li>
+        <li>Multiple-Choice-Frage auf iPad beantworten</li>
+        <li>Einzelne SuS tragen ihre Idee im Plenum vor</li>
+      </ul>
+    </div>
+
+    <div class="block block-tafelbild">
+      <div class="block-title grey">🖊️ Tafelbild (Vorschlag – eigene Struktur ergänzen)</div>
+      <div class="tafelbild-area">Hormone – Was sind Botenstoffe?
+
+→ Signalstoffe im Körper
+→ Transport: ???
+→ Wirkungsort: ???
+
+(Schülerideen sammeln – noch offen lassen)</div>
+    </div>
+
+    <div class="block block-diff">
+      <div class="diff-header" onclick="toggleDiff(this)">
+        <span>🎯 Differenzierung</span>
+        <span class="diff-arrow">▶</span>
+      </div>
+      <div class="diff-content">
+        <p><strong>Förderbedarf:</strong> Partnerarbeit schon beim Think erlauben; Vorlesen der Frage anbieten.</p>
+        <p><strong>Schnelle SuS:</strong> Zusatzfrage: „Nenne ein Beispiel aus dem Alltag, das ohne Steuersystem im Körper nicht funktionieren würde."</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════ PHASE 2: WAS IST EIN HORMON ══════════ -->
+<div class="phase-card" id="phase1">
+  <div class="card-header" style="background:#e8f5e9;">
+    <div class="card-header-left">
+      <div class="phase-name">② Was ist ein Hormon?</div>
+      <div class="phase-meta">Sozialform: <span class="sozialform-badge ea">Einzelarbeit</span> + <span class="sozialform-badge pl">Plenum</span></div>
+    </div>
+    <div>
+      <div class="phase-timer-row">
+        <div class="phase-timer-display" id="pt1">20:00</div>
+        <button class="timer-btn start" onclick="startPhaseTimer('pt1', 1200)">▶</button>
+        <button class="timer-btn stop" onclick="stopPhaseTimer()">⏹</button>
+        <button class="timer-btn reset" onclick="resetPhaseTimer('pt1','20:00')">↺</button>
+      </div>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <div class="block block-lehrkraft">
+      <div class="block-title blue">🎓 Lehrkraft</div>
+      <ul>
+        <li>SuS zur Karte 2 der Schüler-Website führen</li>
+        <li>Hinweis: blau markierte Fachbegriffe beim Antippen erklären sich selbst</li>
+        <li>Lückentext: Einzelarbeit (~ 5 min)</li>
+        <li>Zuordnungsaufgabe: Hormone vs. Nervensystem (~ 5 min)</li>
+        <li>Ergebnisse gemeinsam besprechen – Merksatz zusammen erarbeiten</li>
+        <li>Verweis auf Lehrbuch S. 334 f. (Fließtext links)</li>
+      </ul>
+    </div>
+
+    <div class="material-ref"><span class="icon">📖</span><span><strong>Buch S. 334</strong> – Fließtext „Hormone als Botenstoffe" (linke Seite)</span></div>
+    <div class="material-ref"><span class="icon">📱</span><span>Schüler-Website, Karte 2: Lückentext + Sortierspiel</span></div>
+
+    <div class="block block-impuls">
+      <div class="block-title purple">❓ Impulsfragen</div>
+      <ul class="impuls-list">
+        <li>„Warum ist das Hormonsystem langsamer als das Nervensystem – aber trotzdem nützlich?"</li>
+        <li>„Warum müssen Hormone ständig neu gebildet werden?"</li>
+        <li>„Was würde passieren, wenn ein Hormon auf alle Zellen gleichzeitig wirken würde?"</li>
+      </ul>
+    </div>
+
+    <div class="block block-tafelbild">
+      <div class="block-title grey">🖊️ Tafelbild ergänzen</div>
+      <div class="tafelbild-area">Hormone:
+• chemische Signalstoffe
+• gebildet in → Drüsen
+• Transport via → Blut
+• wirken nur auf → Zielzellen (mit Rezeptoren)
+• Abbau in → Leber
+
+Vergleich:
+Nervensystem: schnell, kurz, lokal
+Hormonsystem: langsam, lang, körperweit</div>
+    </div>
+
+    <div class="block block-diff">
+      <div class="diff-header" onclick="toggleDiff(this)">
+        <span>🎯 Differenzierung</span>
+        <span class="diff-arrow">▶</span>
+      </div>
+      <div class="diff-content">
+        <p><strong>Förderbedarf:</strong> Lückentext mit Wortliste anbieten (direkt im Tipp auf der Website).</p>
+        <p><strong>Schnelle SuS:</strong> Eigene Tabelle zu Nervensystem vs. Hormonsystem im Heft anlegen.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════ PHASE 3: DRÜSEN ══════════ -->
+<div class="phase-card" id="phase2">
+  <div class="card-header" style="background:#fff3e0;">
+    <div class="card-header-left">
+      <div class="phase-name">③ Hormondrüsen und ihre Hormone</div>
+      <div class="phase-meta">Sozialform: <span class="sozialform-badge pa">Partnerarbeit</span> + <span class="sozialform-badge pl">Plenum</span></div>
+    </div>
+    <div>
+      <div class="phase-timer-row">
+        <div class="phase-timer-display" id="pt2">20:00</div>
+        <button class="timer-btn start" onclick="startPhaseTimer('pt2', 1200)">▶</button>
+        <button class="timer-btn stop" onclick="stopPhaseTimer()">⏹</button>
+        <button class="timer-btn reset" onclick="resetPhaseTimer('pt2','20:00')">↺</button>
+      </div>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <div class="block block-lehrkraft">
+      <div class="block-title blue">🎓 Lehrkraft</div>
+      <ul>
+        <li>SuS zur Karte 3 führen</li>
+        <li>Hinweis: Tabelle im Buch S. 334 (Abb. 1) als Referenz nutzen</li>
+        <li>Zuordnungsaufgabe zu zweit bearbeiten lassen</li>
+        <li>Adrenalin-Frage: Diskussion im Plenum</li>
+        <li>Adrenalin-Effekte am Alltagsbeispiel besprechen: Angst, Sport, Prüfung</li>
+        <li>Ergebnisse kontrollieren und Tabelle im Heft vervollständigen lassen</li>
+      </ul>
+    </div>
+
+    <div class="material-ref"><span class="icon">📖</span><span><strong>Buch S. 334</strong> – Abb. 1: Tabelle Drüsen, Hormone, Wirkung</span></div>
+    <div class="material-ref"><span class="icon">📱</span><span>Schüler-Website, Karte 3: Zuordnungsspiel Drüse → Hormon</span></div>
+
+    <div class="block block-sus">
+      <div class="block-title green">👩‍🎓 Schülerinnen und Schüler</div>
+      <ul>
+        <li>Schauen gemeinsam Tabelle S. 334 an</li>
+        <li>Ordnen auf dem iPad: Hormon zu Drüse</li>
+        <li>Frage zu Adrenalin beantworten (MC)</li>
+        <li>Heft: Tabelle mit 3 Drüsen, Hormon, Wirkung anlegen</li>
+      </ul>
+    </div>
+
+    <div class="block block-tafelbild">
+      <div class="block-title grey">🖊️ Hefteintrag (SuS anlegen lassen)</div>
+      <div class="tafelbild-area">Wichtige Hormondrüsen (Auswahl):
+
+Drüse            | Hormon              | Wirkung
+─────────────────|─────────────────────|──────────────────────────
+Schilddrüse      | Thyroxin            | Sauerstoffaufnahme ↑
+Bauchspeicheldr. | Insulin / Glukagon  | Blutzucker ↕
+Nebennierenmark  | Adrenalin           | Stressreaktion
+Hypophyse        | Somatotropin        | Wachstum</div>
+    </div>
+
+    <div class="block block-diff">
+      <div class="diff-header" onclick="toggleDiff(this)">
+        <span>🎯 Differenzierung</span>
+        <span class="diff-arrow">▶</span>
+      </div>
+      <div class="diff-content">
+        <p><strong>Förderbedarf:</strong> Tabelle darf geöffnet bleiben (kein Auswendiglernen nötig). Nur 3 Drüsen hervorheben.</p>
+        <p><strong>Schnelle SuS:</strong> Recherche: Welche Wirkung hat Thyroxin auf den Energiestoffwechsel? (Vorbereitung auf nächste Einheit)</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════ PHASE 4: SCHLÜSSEL-SCHLOSS ══════════ -->
+<div class="phase-card" id="phase3">
+  <div class="card-header" style="background:var(--purple-light);">
+    <div class="card-header-left">
+      <div class="phase-name">④ Das Schlüssel-Schloss-Prinzip</div>
+      <div class="phase-meta">Sozialform: <span class="sozialform-badge tps">Think–Pair–Share</span> + <span class="sozialform-badge ea">Einzelarbeit</span></div>
+    </div>
+    <div>
+      <div class="phase-timer-row">
+        <div class="phase-timer-display" id="pt3">25:00</div>
+        <button class="timer-btn start" onclick="startPhaseTimer('pt3', 1500)">▶</button>
+        <button class="timer-btn stop" onclick="stopPhaseTimer()">⏹</button>
+        <button class="timer-btn reset" onclick="resetPhaseTimer('pt3','25:00')">↺</button>
+      </div>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <div class="block block-lehrkraft">
+      <div class="block-title blue">🎓 Lehrkraft</div>
+      <ul>
+        <li>Bild S. 335 (Abb. b) gemeinsam betrachten – Was ist das Schlüssel-Schloss-Prinzip?</li>
+        <li>Think-Phase: SuS erklären in Heft (~3 min, Timer auf iPad)</li>
+        <li>Pair-Phase: Austausch im Zweierteam</li>
+        <li>Share: Ein Paar trägt vor – ergänzen im Plenum</li>
+        <li>MC-Fragen selbstständig bearbeiten lassen</li>
+        <li>Gemeinsam auswerten und Modell-Begriff einführen</li>
+      </ul>
+    </div>
+
+    <div class="material-ref"><span class="icon">📖</span><span><strong>Buch S. 335</strong> – Basiskonzept: Spezifische Hormonwirkung (Abb. a + b)</span></div>
+    <div class="material-ref"><span class="icon">📱</span><span>Schüler-Website, Karte 4: SVG-Illustration + Lückentext</span></div>
+
+    <div class="block block-impuls">
+      <div class="block-title purple">❓ Impulsfragen</div>
+      <ul class="impuls-list">
+        <li>„Was passiert mit dem Hormon in Zellen, die keinen passenden Rezeptor haben?"</li>
+        <li>„Warum ist das ein ‚Modell' – und kein ‚Beweis'?"</li>
+        <li>„Was wäre, wenn zwei verschiedene Hormone an denselben Rezeptor passen?"</li>
+      </ul>
+    </div>
+
+    <div class="block block-tafelbild">
+      <div class="block-title grey">🖊️ Tafelbild</div>
+      <div class="tafelbild-area">Das Schlüssel-Schloss-Prinzip:
+
+Hormon  →  bindet an  →  Rezeptor  →  Reaktion in Zelle
+
+• Rezeptor: Molekül auf der Zelloberfläche
+• Nur passende Hormone binden (spezifisch)
+• Ohne Rezeptor: keine Wirkung
+• Wichtig: Es ist ein MODELL – vereinfacht die Realität</div>
+    </div>
+
+    <div class="block block-diff">
+      <div class="diff-header" onclick="toggleDiff(this)">
+        <span>🎯 Differenzierung</span>
+        <span class="diff-arrow">▶</span>
+      </div>
+      <div class="diff-content">
+        <p><strong>Förderbedarf:</strong> Illustration auf der Website als Starthilfe zeigen. Gemeinsam Abb. S. 335 besprechen.</p>
+        <p><strong>Schnelle SuS:</strong> „Beschreibe eine Situation, in der das Schlüssel-Schloss-Modell an seine Grenzen stößt." (→ Diabetes Typ 2 als Ausblick)</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════ PHASE 5: SICHERUNG ══════════ -->
+<div class="phase-card" id="phase4">
+  <div class="card-header" style="background:var(--red-light);">
+    <div class="card-header-left">
+      <div class="phase-name">⑤ Sicherung und Auswertung</div>
+      <div class="phase-meta">Sozialform: <span class="sozialform-badge ea">Einzelarbeit</span> → <span class="sozialform-badge pl">Plenum</span></div>
+    </div>
+    <div>
+      <div class="phase-timer-row">
+        <div class="phase-timer-display" id="pt4">15:00</div>
+        <button class="timer-btn start" onclick="startPhaseTimer('pt4', 900)">▶</button>
+        <button class="timer-btn stop" onclick="stopPhaseTimer()">⏹</button>
+        <button class="timer-btn reset" onclick="resetPhaseTimer('pt4','15:00')">↺</button>
+      </div>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <div class="block block-lehrkraft">
+      <div class="block-title blue">🎓 Lehrkraft</div>
+      <ul>
+        <li>Mini-Test ankündigen: 5 Fragen, alleine, kein Buch</li>
+        <li>SuS bearbeiten Karte 5 selbstständig</li>
+        <li>Auswertung gemeinsam im Plenum – jede Frage kurz besprechen</li>
+        <li>Ergebnisse: Wer hat ≥4/5? → zeigt, dass Ziele erreicht sind</li>
+        <li>Ausblick: nächste Stunde → Blutzuckerregulation (UV 9.8 Hauptthema)</li>
+        <li>HA aufgeben (s. unten)</li>
+      </ul>
+    </div>
+
+    <div class="block block-sus">
+      <div class="block-title green">👩‍🎓 Schülerinnen und Schüler</div>
+      <ul>
+        <li>Mini-Test (5 MC-Fragen) ohne Hilfsmittel bearbeiten</li>
+        <li>Ergebnis anzeigen lassen – selber auswerten</li>
+        <li>Fehlerhafte Antworten im Heft korrigieren</li>
+      </ul>
+    </div>
+
+    <div style="background:#f0fff4; border:2px solid var(--green); border-radius:10px; padding:14px; margin:10px 0;">
+      <div style="font-weight:700; color:var(--green); margin-bottom:6px;">📚 Hausaufgabe</div>
+      <p style="font-size:15px;">Buch S. 334, Aufgabe a) – schriftlich im Heft bearbeiten (Beschreiben, was man unter einem Hormon versteht). Ggf. Tabelle S. 334 Abb. 1 nochmals durchlesen.</p>
+    </div>
+
+    <div class="block block-diff">
+      <div class="diff-header" onclick="toggleDiff(this)">
+        <span>🎯 Differenzierung</span>
+        <span class="diff-arrow">▶</span>
+      </div>
+      <div class="diff-content">
+        <p><strong>Förderbedarf:</strong> HA alternativ: Nur 3 Drüsen mit Hormon im Heft notieren.</p>
+        <p><strong>Schnelle SuS:</strong> Buch S. 335 – Fragen c) und e) zum Schlüssel-Schloss-Modell lesen und Antworten vorbereiten.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div id="dino" onclick="toggleDino()" title="Made by Mathedino">🦖</div>
+<div id="dino-label">Made by Mathedino</div>
+
+<script>
+// ── Phase navigation ──
+function showPhase(i) {
+  document.querySelectorAll('.phase-card').forEach((c,j) => c.classList.toggle('active', j===i));
+  document.querySelectorAll('.phase-tab').forEach((t,j) => t.classList.toggle('active', j===i));
+  const ovItems = document.querySelectorAll('.ov-item');
+  ovItems.forEach((item, j) => {
+    item.className = 'ov-item ' + (j < i ? 'done' : j === i ? 'current' : 'todo');
+  });
+}
+
+// ── Master timer ──
+let masterInterval = null;
+let masterRemaining = 5400;
+function startMaster() {
+  if (masterInterval) return;
+  masterInterval = setInterval(() => {
+    masterRemaining--;
+    updateMasterDisplay();
+    if (masterRemaining <= 0) { clearInterval(masterInterval); masterInterval = null; }
+  }, 1000);
+  updateMasterDisplay();
+}
+function stopMaster() { clearInterval(masterInterval); masterInterval = null; }
+function resetMaster() { stopMaster(); masterRemaining = 5400; updateMasterDisplay(); document.getElementById('master-timer').classList.remove('warning'); }
+function updateMasterDisplay() {
+  const m = Math.floor(masterRemaining/60);
+  const s = masterRemaining%60;
+  const el = document.getElementById('master-timer');
+  el.textContent = `${m}:${s.toString().padStart(2,'0')}`;
+  el.classList.toggle('warning', masterRemaining <= 300);
+}
+
+// ── Phase timers ──
+let phaseInterval = null;
+let phaseTarget = null;
+let phaseRemaining = 0;
+function startPhaseTimer(id, seconds) {
+  if (phaseInterval) clearInterval(phaseInterval);
+  phaseTarget = id;
+  phaseRemaining = seconds;
+  function tick() {
+    const m = Math.floor(phaseRemaining/60);
+    const s = phaseRemaining%60;
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = `${m}:${s.toString().padStart(2,'0')}`;
+    el.classList.toggle('warning', phaseRemaining <= 60);
+    if (phaseRemaining <= 0) { clearInterval(phaseInterval); el.textContent='⏰ Zeit!'; }
+    phaseRemaining--;
+  }
+  tick();
+  phaseInterval = setInterval(tick, 1000);
+}
+function stopPhaseTimer() { if(phaseInterval) clearInterval(phaseInterval); phaseInterval = null; }
+function resetPhaseTimer(id, display) { stopPhaseTimer(); document.getElementById(id).textContent = display; document.getElementById(id).classList.remove('warning'); }
+
+// ── Collapsible diff ──
+function toggleDiff(header) {
+  const content = header.nextElementSibling;
+  content.classList.toggle('open');
+  header.querySelector('.diff-arrow').style.transform = content.classList.contains('open') ? 'rotate(90deg)' : '';
+}
+
+// ── Dino ──
+function toggleDino() {
+  const l = document.getElementById('dino-label');
+  l.style.display = l.style.display==='block' ? 'none' : 'block';
+  setTimeout(() => l.style.display='none', 2500);
+}
+</script>
+</body>
+</html>

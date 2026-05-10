@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Hormone – Was sind Botenstoffe? | Klasse 9</title>
+<style>
+  :root {
+    --green: #1a7a1a; --green-bg: #c8f5c8;
+    --red: #b00000;   --red-bg: #fcd4d4;
+    --blue: #1a4a8a;  --blue-light: #e8f0fa;
+    --tip-bg: #fff8e1; --tip-border: #f9a825;
+    --shadow: 0 2px 12px rgba(0,0,0,0.13);
+    --radius: 14px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body { font-family: -apple-system, "Helvetica Neue", Arial, sans-serif; font-size: 17px;
+         color: #1a1a1a; background: #eef2f8; min-height: 100vh; padding-bottom: 90px; }
+
+  header { background: linear-gradient(135deg, #1a4a8a, #2d6abf); color: white;
+           padding: 16px 20px 12px; position: sticky; top: 0; z-index: 100;
+           box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+  header h1 { font-size: 19px; font-weight: 700; }
+  header p  { font-size: 13px; opacity: .85; margin-top: 2px; }
+
+  .tabs { display: flex; background: #fff; border-bottom: 2px solid #ccc;
+          overflow-x: auto; -webkit-overflow-scrolling: touch;
+          position: sticky; top: 66px; z-index: 90; }
+  .tab-btn { flex: none; padding: 12px 18px; font-size: 14px; font-weight: 600;
+             color: #666; background: none; border: none;
+             border-bottom: 3px solid transparent; cursor: pointer;
+             white-space: nowrap; min-height: 44px; }
+  .tab-btn.active { color: var(--blue); border-bottom-color: var(--blue); }
+  .tab-btn:active { background: var(--blue-light); }
+
+  .card { background: white; border-radius: var(--radius); box-shadow: var(--shadow);
+          margin: 16px; padding: 20px; display: none; }
+  .card.active { display: block; }
+  .card-title { font-size: 20px; font-weight: 700; color: var(--blue); margin-bottom: 4px; }
+  .card-sub   { font-size: 14px; color: #666; margin-bottom: 16px; }
+  .phase-badge { display: inline-block; background: var(--blue-light); color: var(--blue);
+                 font-size: 12px; font-weight: 700; border-radius: 20px;
+                 padding: 3px 10px; margin-bottom: 10px; text-transform: uppercase; letter-spacing: .5px; }
+
+  .info-box { background: var(--blue-light); border-left: 4px solid var(--blue);
+              border-radius: 8px; padding: 13px 16px; margin: 12px 0; font-size: 15px; line-height: 1.6; }
+  .info-box strong { color: var(--blue); }
+
+  .tip-box { background: var(--tip-bg); border: 2px solid var(--tip-border);
+             border-radius: 10px; margin: 12px 0; overflow: hidden; }
+  .tip-header { display: flex; align-items: center; gap: 8px; padding: 12px 16px;
+                cursor: pointer; font-weight: 600; font-size: 15px; min-height: 44px; user-select: none; }
+  .tip-header .arr { transition: transform .25s; font-size: 12px; }
+  .tip-header.open .arr { transform: rotate(90deg); }
+  .tip-content { display: none; padding: 0 16px 14px; font-size: 15px; line-height: 1.7; }
+  .tip-content.vis { display: block; }
+
+  .sec { font-size: 16px; font-weight: 700; color: #333; margin: 18px 0 10px;
+         display: flex; align-items: center; gap: 8px; }
+  .sec::before { content: ""; display: block; width: 4px; height: 20px;
+                 background: var(--blue); border-radius: 2px; }
+
+  .feedback { margin-top: 10px; border-radius: 10px; padding: 12px 16px; font-size: 15px;
+              font-weight: 600; display: none; }
+  .feedback.ok  { background: var(--green-bg); color: #124a12; border: 2px solid var(--green);
+                  display: flex; align-items: flex-start; gap: 8px; }
+  .feedback.err { background: var(--red-bg);   color: var(--red);  border: 2px solid var(--red);
+                  display: flex; flex-direction: column; gap: 4px; }
+
+  .mc-options { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
+  .mc-btn { background: #f5f7fb; border: 2px solid #c5cfe8; border-radius: 10px;
+            padding: 13px 16px; font-size: 16px; text-align: left; cursor: pointer;
+            min-height: 50px; line-height: 1.5; width: 100%; }
+  .mc-btn:active { background: #dde8ff; }
+  .mc-btn.ok  { background: var(--green-bg); border-color: var(--green); color: #124a12; font-weight: 600; }
+  .mc-btn.err { background: var(--red-bg);   border-color: var(--red);   color: var(--red);   font-weight: 600; }
+  .mc-btn:disabled { cursor: default; }
+
+  .gap-text { line-height: 2.4; font-size: 16px; }
+  .gi { border: none; border-bottom: 2px solid var(--blue); background: transparent;
+        font-size: 16px; width: 120px; padding: 2px 4px; outline: none; text-align: center; }
+  .gi.ok  { border-bottom-color: var(--green); color: var(--green); font-weight: 600; }
+  .gi.err { border-bottom-color: var(--red);   color: var(--red); }
+
+  .btn-row { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+  .btn-check { background: var(--blue); color: white; border: none; border-radius: 10px;
+               padding: 11px 18px; font-size: 16px; font-weight: 600; min-height: 44px; cursor: pointer; }
+  .btn-reset { background: #888; color: white; border: none; border-radius: 10px;
+               padding: 11px 18px; font-size: 16px; font-weight: 600; min-height: 44px; cursor: pointer; }
+
+  .word-bank { background: #f0f4ff; border: 2px solid #c5cfe8; border-radius: 10px;
+               padding: 12px; margin-bottom: 14px; }
+  .wb-title { font-size: 13px; font-weight: 700; color: var(--blue); margin-bottom: 8px;
+              text-transform: uppercase; letter-spacing: .5px; }
+  .chip-pool { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { background: #e8f0fa; border: 2px solid #b0c4e8; border-radius: 20px;
+          padding: 8px 14px; font-size: 15px; cursor: pointer; min-height: 40px;
+          display: flex; align-items: center; user-select: none; }
+  .chip.sel  { background: var(--blue); color: white; border-color: var(--blue); }
+  .chip.used { opacity: .35; pointer-events: none; }
+
+  .drop-zones { display: flex; flex-direction: column; gap: 10px; }
+  .dz-row { display: flex; align-items: flex-start; gap: 10px; flex-wrap: wrap; }
+  .dz-label { font-size: 15px; font-weight: 700; min-width: 155px; padding-top: 10px; flex-shrink: 0; }
+  .dz-slot { border: 2px dashed #b0c4e8; border-radius: 10px; min-height: 48px;
+             min-width: 100px; padding: 6px 10px; flex: 1;
+             display: flex; flex-wrap: wrap; align-items: center; gap: 6px;
+             background: #f8faff; cursor: pointer; }
+  .dz-slot:active { background: #dde8ff; }
+  .pc { background: var(--blue); color: white; border-radius: 14px;
+        padding: 4px 12px; font-size: 14px; cursor: pointer; white-space: nowrap; }
+  .dz-ph { color: #aaa; font-size: 13px; font-style: italic; }
+
+  .tps-box { border-radius: 12px; padding: 14px 16px; margin: 12px 0; border: 2px solid; }
+  .tps-think { background: #f0fff4; border-color: #4caf50; }
+  .tps-pair  { background: #f0f4ff; border-color: var(--blue); }
+  .tps-lbl { font-weight: 700; font-size: 15px; margin-bottom: 6px; }
+  .tps-think .tps-lbl { color: var(--green); }
+  .tps-pair  .tps-lbl { color: var(--blue); }
+  .t-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
+  .td { font-size: 28px; font-weight: 700; color: var(--blue); font-variant-numeric: tabular-nums; }
+  .td.warn { color: var(--red); }
+  .t-go   { background: var(--green); color: white; border: none; border-radius: 8px;
+             padding: 9px 16px; font-size: 14px; font-weight: 600; min-height: 40px; cursor: pointer; }
+  .t-stop { background: var(--red); color: white; border: none; border-radius: 8px;
+             padding: 9px 16px; font-size: 14px; font-weight: 600; min-height: 40px; cursor: pointer; }
+
+  .pair-hint { background: #fff3e0; border: 2px solid #ff9800; border-radius: 10px;
+               padding: 12px 16px; font-size: 15px; margin: 12px 0; }
+  .pair-hint::before { content: "👥 "; }
+
+  .img-ph { border: 3px dashed #b0c4e8; border-radius: 12px; background: #f5f7fb;
+            padding: 20px; text-align: center; color: #666; font-size: 14px;
+            margin: 12px 0; line-height: 1.7; }
+  .img-ph .icon { font-size: 36px; display: block; margin-bottom: 8px; }
+  .img-ph strong { color: var(--blue); display: block; font-size: 15px; margin-bottom: 4px; }
+
+  .scenario { background: #f9f6ff; border-left: 5px solid #7c3aed;
+              border-radius: 0 10px 10px 0; padding: 14px 16px; margin: 10px 0;
+              font-size: 15px; line-height: 1.7; }
+  .sc-lbl { font-size: 12px; font-weight: 700; color: #7c3aed; text-transform: uppercase;
+            letter-spacing: .5px; margin-bottom: 6px; }
+
+  .next-btn { display: block; width: 100%; margin-top: 20px; padding: 14px;
+              background: linear-gradient(135deg, #1a4a8a, #2d6abf); color: white;
+              border: none; border-radius: 12px; font-size: 17px; font-weight: 700;
+              cursor: pointer; min-height: 50px; text-align: center; }
+  .next-btn:active { opacity: .85; }
+
+  .q-nr { display: inline-flex; align-items: center; justify-content: center;
+          background: var(--blue); color: white; border-radius: 50%;
+          width: 26px; height: 26px; font-size: 13px; font-weight: 700; margin-right: 6px; flex-shrink: 0; }
+  .q-txt { font-size: 16px; font-weight: 600; margin-bottom: 10px; line-height: 1.5; }
+
+  .fin-btn { background: #f5f7fb; border: 2px solid #c5cfe8; border-radius: 10px;
+             padding: 13px 16px; font-size: 16px; text-align: left; cursor: pointer;
+             min-height: 50px; line-height: 1.5; width: 100%; margin-bottom: 8px; }
+  .fin-btn.sel { background: var(--blue-light); border-color: var(--blue); }
+  .fin-btn.ok  { background: var(--green-bg); border-color: var(--green); color: #124a12; font-weight:600; }
+  .fin-btn.err { background: var(--red-bg);   border-color: var(--red);   color: var(--red); font-weight:600; }
+  .fin-btn:disabled { cursor: default; }
+
+  hr { border: none; border-top: 1px solid #dde; margin: 18px 0; }
+
+  #dino       { position: fixed; bottom: 16px; right: 14px; font-size: 22px;
+                cursor: pointer; z-index: 300; user-select: none; }
+  #dino-lbl   { display: none; position: fixed; bottom: 46px; right: 14px;
+                background: #333; color: white; font-size: 11px; border-radius: 6px;
+                padding: 3px 8px; z-index: 301; white-space: nowrap; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🔬 Hormone – Was sind Botenstoffe?</h1>
+  <p>Biologie · Klasse 9 · Erarbeitung</p>
+</header>
+
+<nav class="tabs">
+  <button class="tab-btn active" onclick="goTab(0)" id="tab0">1 · Einstieg</button>
+  <button class="tab-btn" onclick="goTab(1)" id="tab1">2 · Was ist Hormon?</button>
+  <button class="tab-btn" onclick="goTab(2)" id="tab2">3 · Drüsen</button>
+  <button class="tab-btn" onclick="goTab(3)" id="tab3">4 · Schlüssel-Schloss</button>
+  <button class="tab-btn" onclick="goTab(4)" id="tab4">5 · Teste dich</button>
+</nav>
+
+
+<!-- ════ KARTE 1 – EINSTIEG ════ -->
+<div class="card active" id="card0">
+  <div class="phase-badge">⏱ ~10 min · Einstieg</div>
+  <div class="card-title">Wie steuert dein Körper sich selbst?</div>
+  <div class="card-sub">Denke nach – bevor du weiterklickst.</div>
+
+  <div class="img-ph">
+    <h1>Hormone als Botenstoffe - Hormondrüsen</h1>
+  <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Endocrine_English.svg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=original" style="width:50%; border-radius:10px;">
+<p style="font-size:12px; color:#888; margin-top:6px; text-align:center;">
+  Quelle: <a href="https://commons.wikimedia.org/wiki/File:Endocrine_English.svg" target="_blank" style="color:#1a4a8a;">Endocrine system (Wikimedia Commons)</a>, Lizenz: <a href="https://creativecommons.org/licenses/by-sa/3.0/" target="_blank" style="color:#1a4a8a;">CC BY-SA 3.0</a>
+</p>
+  </div>
+
+  <div class="tps-box tps-think">
+    <div class="tps-lbl">🤔 Think (2 min) – alleine ins Heft</div>
+    <p style="font-size:15px; margin-bottom:10px;">Lies den Text und die Frage und schreib deine Idee auf:</p>
+    <p style="font-style:italic; font-size:16px;">
+     <p style="font-size:15px; line-height:1.8; margin-bottom:10px;">
+  Du chillst mit deiner besten Freundin gemütlich auf dem Sofa, esst ein großes Stück Kuchen und trinkt Cola. Euer Blutzucker steigt dadurch schnell an – eine gefährliche Überzuckerung droht.
+</p>
+<p style="font-size:15px; line-height:1.8; margin-bottom:10px;">
+  <strong>Bei dir:</strong> Kurze Zeit später – ohne dass du irgendetwas tust und obwohl ihr weiter nur chillt – sinkt dein Blutzucker ganz von selbst wieder auf einen normalen Wert. Du merkst davon nichts.
+</p>
+<p style="font-size:15px; line-height:1.8; margin-bottom:14px;">
+  <strong>Bei deiner Freundin:</strong> Ihr Smartphone vibriert – die Glukosemess-App zeigt eine Überzuckerung an. Sie seufzt, holt ihr Insulin-Pen aus der Tasche, spritzt sich eine kleine Dosis Insulin in den Bauch und trinkt ein Glas Wasser. Ihrem Körper fehlt das Insulin, das deiner automatisch produziert hätte.
+</p>
+<b>„Was ist bei dir anders als bei deiner Freundin – und warum sinkt dein Blutzucker von selbst, ihrer aber nicht?"</b>
+    </p>
+    <div class="t-row">
+      <div class="td" id="td1">2:00</div>
+      <button class="t-go"  onclick="startT('td1',120)">▶ Start</button>
+      <button class="t-stop" onclick="stopT()">⏹ Stop</button>
+    </div>
+  </div>
+
+  <div class="tps-box tps-pair">
+    <div class="tps-lbl">👥 Pair (2 min) – mit Sitznachbar*in vergleichen</div>
+    <p style="font-size:15px; margin-bottom:8px;">Was habt ihr beide geschrieben? Wo stimmt ihr überein, wo nicht?</p>
+    <div class="t-row">
+      <div class="td" id="td2">2:00</div>
+      <button class="t-go"  onclick="startT('td2',120)">▶ Start</button>
+      <button class="t-stop" onclick="stopT()">⏹ Stop</button>
+    </div>
+  </div>
+
+  <hr>
+  <div class="q-txt"><span class="q-nr">?</span>
+    Wie können Informationen von einem Ort im Körper zu einem anderen Ort gelangen?
+    Wähle die <strong>zwei richtigen</strong> Antworten aus – tippe sie nacheinander an.
+  </div>
+  <div class="mc-options" id="mc1">
+    <button class="mc-btn" onclick="mc2(this,'mc1',false,'fb1','Körperwärme verteilt sich gleichmäßig – sie kann keine gezielten Informationen übertragen.')">
+      Über Körperwärme – Wärme breitet sich im ganzen Körper aus
+    </button>
+    <button class="mc-btn" onclick="mc2(this,'mc1',true,'fb1','')">
+      Über das Blut – im Blut gelöste Stoffe können zu weit entfernten Zellen transportiert werden
+    </button>
+    <button class="mc-btn" onclick="mc2(this,'mc1',false,'fb1','Muskeln empfangen Signale und reagieren auf sie – sie senden selbst keine Nachrichten an andere Organe.')">
+      Über Muskeln – Muskeln schicken Signale an andere Organe weiter
+    </button>
+    <button class="mc-btn" onclick="mc2(this,'mc1',true,'fb1','')">
+      Über Nervenbahnen – elektrische Impulse werden entlang von Nervenzellen weitergeleitet
+    </button>
+    <button class="mc-btn" onclick="mc2(this,'mc1',false,'fb1','Knochen transportieren keine Informationen zu anderen Organen.')">
+      Über Knochen – Knochen leiten Signale durch den Körper
+    </button>
+  </div>
+  <div class="feedback" id="fb1"></div>
+
+  <button class="next-btn" onclick="unlock(1)">Weiter →</button>
+</div>
+
+
+<!-- ════ KARTE 2 – WAS IST EIN HORMON? ════ -->
+<div class="card" id="card1">
+  <div class="phase-badge">⏱ ~20 min · Erarbeitung I</div>
+  <div class="card-title">Was ist ein Hormon?</div>
+  <div class="card-sub">Lese zuerst den Text auf S. 334 deines Buches – dann bearbeite die Aufgaben.</div>
+
+  <div class="info-box">
+    <strong>Vier Merkmale im Überblick:</strong><br>
+    Wo werden Hormone gebildet? &nbsp;·&nbsp; Wie werden sie transportiert? &nbsp;·&nbsp; Auf wen wirken sie? &nbsp;·&nbsp; Wo werden sie abgebaut?
+  </div>
+
+  <div class="sec">Aufgabe 1 – Lückentext</div>
+  <p style="font-size:14px; color:#555; margin-bottom:8px;">
+    Nutze den Text auf S. 334. Bei Bedarf gibt es einen Tipp zum Aufklappen.
+  </p>
+  <div class="gap-text">
+    Hormone sind chemische
+    <input class="gi" id="g1" data-ans="signalstoffe" placeholder="…" autocomplete="off" autocorrect="off" spellcheck="false">.
+    Sie werden in spezialisierten
+    <input class="gi" id="g2" data-ans="drüsen" placeholder="…" autocomplete="off" autocorrect="off" spellcheck="false">
+    produziert und gelangen direkt ins
+    <input class="gi" id="g3" data-ans="blut" placeholder="…" autocomplete="off" autocorrect="off" spellcheck="false">,
+    ohne einen Ausführungsgang zu nutzen.
+    Im Körper wirken Hormone nur auf bestimmte
+    <input class="gi" id="g4" data-ans="zielzellen" placeholder="…" autocomplete="off" autocorrect="off" spellcheck="false">.
+    Anschließend werden sie in der
+    <input class="gi" id="g5" data-ans="leber" placeholder="…" autocomplete="off" autocorrect="off" spellcheck="false">
+    abgebaut – deshalb müssen Drüsen sie ständig neu herstellen.
+  </div>
+  <div class="btn-row">
+    <button class="btn-check" onclick="checkGaps('g1,g2,g3,g4,g5','gfb1')">Auswerten ✓</button>
+    <button class="btn-reset" onclick="resetGaps('g1,g2,g3,g4,g5','gfb1')">Leeren ✕</button>
+  </div>
+<br>
+<p>Alles OK? Vergiss nicht die Ergebnisse für dich in eigenen Worten zu sichern.</p>
+  <div class="feedback" id="gfb1"></div>
+
+  <div class="tip-box">
+    <div class="tip-header" onclick="tt(this)"><span>💡 Tipp – Wörter anzeigen</span><span class="arr">▶</span></div>
+    <div class="tip-content">
+      Diese Wörter kannst du einsetzen – aber in welcher Lücke steckt welches?<br><br>
+      <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:4px;">
+        <span style="background:#e8f0fa; border:2px solid #b0c4e8; border-radius:20px; padding:6px 14px; font-size:15px;">Signalstoffe</span>
+        <span style="background:#e8f0fa; border:2px solid #b0c4e8; border-radius:20px; padding:6px 14px; font-size:15px;">Drüsen</span>
+        <span style="background:#e8f0fa; border:2px solid #b0c4e8; border-radius:20px; padding:6px 14px; font-size:15px;">Blut</span>
+        <span style="background:#e8f0fa; border:2px solid #b0c4e8; border-radius:20px; padding:6px 14px; font-size:15px;">Zielzellen</span>
+        <span style="background:#e8f0fa; border:2px solid #b0c4e8; border-radius:20px; padding:6px 14px; font-size:15px;">Leber</span>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+  <div class="sec">Aufgabe 2 – Nervensystem vs. Hormonsystem zuordnen</div>
+  <p style="font-size:14px; color:#555; margin-bottom:10px;">
+    Ordne <strong>alle sechs</strong> Eigenschaften zu – tippe erst auf eine Karte, dann auf das passende Feld.
+  </p>
+
+  <div class="word-bank">
+    <div class="wb-title">Eigenschaften (alle müssen platziert werden)</div>
+    <div class="chip-pool" id="pool-hvn">
+      <div class="chip" onclick="pick(this,'hvn')">Reaktion in Millisekunden</div>
+      <div class="chip" onclick="pick(this,'hvn')">Wirkung über Stunden/Tage</div>
+      <div class="chip" onclick="pick(this,'hvn')">Transport durch das Blut</div>
+      <div class="chip" onclick="pick(this,'hvn')">elektrische Weiterleitung</div>
+      <div class="chip" onclick="pick(this,'hvn')">wirkt auf den ganzen Körper</div>
+      <div class="chip" onclick="pick(this,'hvn')">Wirkung endet schnell</div>
+    </div>
+  </div>
+
+  <div class="drop-zones">
+    <div class="dz-row">
+      <div class="dz-label">🧠 Nervensystem</div>
+      <div class="dz-slot" id="zn-nerv"
+           data-correct="Reaktion in Millisekunden,elektrische Weiterleitung,Wirkung endet schnell"
+           onclick="drop(this,'hvn')"><span class="dz-ph">Hierher tippen →</span></div>
+    </div>
+    <div class="dz-row">
+      <div class="dz-label">🩸 Hormonsystem</div>
+      <div class="dz-slot" id="zn-horm"
+           data-correct="Wirkung über Stunden/Tage,Transport durch das Blut,wirkt auf den ganzen Körper"
+           onclick="drop(this,'hvn')"><span class="dz-ph">Hierher tippen →</span></div>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn-check" onclick="evalSort(['zn-nerv','zn-horm'],'sfb1')">Auswerten ✓</button>
+    <button class="btn-reset" onclick="resetSort(['zn-nerv','zn-horm'],'pool-hvn','sfb1')">Leeren ✕</button>
+  </div>
+  <div class="feedback" id="sfb1"></div>
+
+  <button class="next-btn" onclick="unlock(2)">Weiter →</button>
+</div>
+
+
+<!-- ════ KARTE 3 – DRÜSEN ════ -->
+<div class="card" id="card2">
+  <div class="phase-badge">⏱ ~20 min · Erarbeitung II</div>
+  <div class="card-title">Hormondrüsen und ihre Hormone</div>
+  <div class="card-sub">Schaut gemeinsam in euer Buch (S. 334, Abb. 1)</div>
+
+  <div class="pair-hint">Lest gemeinsam die Tabelle auf S. 334. Schaut euch die Drüsen und die zugehörigen Hormone an.</div>
+
+  <div class="sec">Aufgabe 1 – Zuordnung: Hormon → Drüse</div>
+  <p style="font-size:14px; color:#555; margin-bottom:10px;">
+    Tippe erst auf ein Hormon, dann auf die zugehörige Drüse. Alle Karten müssen platziert werden.
+  </p>
+
+  <div class="word-bank">
+    <div class="wb-title">Hormone</div>
+    <div class="chip-pool" id="pool-dr">
+      <div class="chip" onclick="pick(this,'dr')">Thyroxin</div>
+      <div class="chip" onclick="pick(this,'dr')">Insulin & Glukagon</div>
+      <div class="chip" onclick="pick(this,'dr')">Adrenalin</div>
+      <div class="chip" onclick="pick(this,'dr')">Testosteron</div>
+      <div class="chip" onclick="pick(this,'dr')">Östrogene</div>
+      <div class="chip" onclick="pick(this,'dr')">Somatotropin</div>
+    </div>
+  </div>
+
+  <div class="drop-zones">
+    <div class="dz-row"><div class="dz-label">Schilddrüse</div>
+      <div class="dz-slot" id="zd-s" data-correct="Thyroxin" onclick="drop(this,'dr')"><span class="dz-ph">→</span></div></div>
+    <div class="dz-row"><div class="dz-label">Bauchspeicheldrüse</div>
+      <div class="dz-slot" id="zd-b" data-correct="Insulin & Glukagon" onclick="drop(this,'dr')"><span class="dz-ph">→</span></div></div>
+    <div class="dz-row"><div class="dz-label">Nebennierenmark</div>
+      <div class="dz-slot" id="zd-n" data-correct="Adrenalin" onclick="drop(this,'dr')"><span class="dz-ph">→</span></div></div>
+    <div class="dz-row"><div class="dz-label">Hoden</div>
+      <div class="dz-slot" id="zd-h" data-correct="Testosteron" onclick="drop(this,'dr')"><span class="dz-ph">→</span></div></div>
+    <div class="dz-row"><div class="dz-label">Eierstöcke</div>
+      <div class="dz-slot" id="zd-e" data-correct="Östrogene" onclick="drop(this,'dr')"><span class="dz-ph">→</span></div></div>
+    <div class="dz-row"><div class="dz-label">Hypophyse</div>
+      <div class="dz-slot" id="zd-hy" data-correct="Somatotropin" onclick="drop(this,'dr')"><span class="dz-ph">→</span></div></div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn-check" onclick="evalSort(['zd-s','zd-b','zd-n','zd-h','zd-e','zd-hy'],'sfb2')">Auswerten ✓</button>
+    <button class="btn-reset" onclick="resetSort(['zd-s','zd-b','zd-n','zd-h','zd-e','zd-hy'],'pool-dr','sfb2')">Leeren ✕</button>
+  </div>
+  <div class="feedback" id="sfb2"></div>
+
+  <div class="tip-box">
+    <div class="tip-header" onclick="tt(this)"><span>💡 Eselsbrücken</span><span class="arr">▶</span></div>
+    <div class="tip-content">
+      Schilddrüse → „Thyr" = Griechisch für Schild.<br>
+      Bauchspeicheldrüse → steuert Blutzucker: Insulin und Glukagon.<br>
+      Hypophyse = Chefdrüse → Wachstum: Somatotropin.<br>
+      Nebennierenmark → Stresshormon: Adrenalin.
+    </div>
+  </div>
+
+  <hr>
+  <div class="sec">Aufgabe 2 – Adrenalin: Welches Szenario?</div>
+  <p style="font-size:15px; margin-bottom:12px;">
+    Du bist mit einer Freundin auf einem ruhigen Spaziergang. Ihr redet, lacht, genießt den Morgen.
+    Dann passiert – je nach Szenario – etwas Unterschiedliches:
+  </p>
+
+  <div class="scenario">
+    <div class="sc-lbl">Szenario A</div>
+    Aus einer Einfahrt kommt plötzlich ein großer, laut bellender Hund auf euch zugerannt.
+    Er kommt sehr schnell näher. Dein Herz wird beschleunigt, deine Muskeln spannen sich an,
+    dein Atem wird schneller – alles in einem Bruchteil einer Sekunde.
+  </div>
+
+  <div class="scenario">
+    <div class="sc-lbl">Szenario B</div>
+    Am Wegrand entdeckst du eine ungewöhnliche, sehr schöne Blume, die du noch nie gesehen hast.
+    Du bleibst stehen, bückst dich neugierig herunter, betrachtest sie genau und nimmst ihren Duft wahr. 
+    Du wirst neugierig und Du fragst dich, wie sie wohl heißen mag.
+  </div>
+
+  <div class="q-txt" style="margin-top:14px;"><span class="q-nr">?</span>
+    In welchem Szenario wird in deinem Körper mehr Adrenalin ausgeschüttet?
+  </div>
+  <div class="mc-options" id="mc3">
+    <button class="mc-btn" onclick="doMC(this,true,'mc3','fb3','')">
+      In Szenario A – der Körper bereitet sich blitzschnell auf eine mögliche Gefahr vor
+    </button>
+    <button class="mc-btn" onclick="doMC(this,false,'mc3','fb3','Neugier ist kein Stresssignal für den Körper. Überlege: Welches Szenario löst beim Körper eine Alarmreaktion aus?')">
+      In Szenario B – unbekannte Eindrücke regen den Körper besonders an
+    </button>
+    <button class="mc-btn" onclick="doMC(this,false,'mc3','fb3','In beiden Situationen bist du in Bewegung – das allein erklärt keine unterschiedliche Adrenalinausschüttung.')">
+      In beiden Szenarien gleich viel – du bist in beiden Situationen körperlich aktiv
+    </button>
+    <button class="mc-btn" onclick="doMC(this,false,'mc3','fb3','Adrenalin reagiert auf Bedrohung, nicht auf Schönheit oder Neugier.')">
+      Keines von beiden – Adrenalin wird nur beim Sport ausgeschüttet
+    </button>
+  </div>
+  <div class="feedback" id="fb3"></div>
+
+  <button class="next-btn" onclick="unlock(3)">Weiter →</button>
+</div>
+
+
+<!-- ════ KARTE 4 – SCHLÜSSEL-SCHLOSS ════ -->
+<div class="card" id="card3">
+  <div class="phase-badge">⏱ ~25 min · Erarbeitung III</div>
+  <div class="card-title">Das Schlüssel-Schloss-Prinzip</div>
+  <div class="card-sub">Wie findet ein Hormon seine Zielzelle?</div>
+
+  <div class="img-ph">
+<img src="schluessel_schloss.png" style="width:30%; border-radius:10px;">   
+ <p> Schau dir auf Seite 335 die Abbildungen a) und b) im Material 1 an.
+  </div>
+
+  <div class="tps-box tps-think">
+    <div class="tps-lbl">🤔 Think (3 min) – ins Heft schreiben</div>
+    <p style="font-size:15px; margin-bottom:8px;">
+      Erkläre mit eigenen Worten: Warum wirkt ein Hormon nicht auf <em>alle</em> Körperzellen –
+      obwohl es überall im Blut vorhanden ist? Und warum ein Hormon an vielen Stellen im Körper gleichzeitig wirken kann. 
+    </p>
+    <div class="t-row">
+      <div class="td" id="td3">3:00</div>
+      <button class="t-go"  onclick="startT('td3',180)">▶ Start</button>
+      <button class="t-stop" onclick="stopT()">⏹ Stop</button>
+    </div>
+  </div>
+
+  <div class="pair-hint">Vergleiche mit deiner Partnerin / deinem Partner. Was habt ihr gleich formuliert? Was unterscheidet sich?</div>
+
+  <hr>
+  <div class="sec">Aufgabe – Lückentext mit Wortfeld</div>
+  <p style="font-size:14px; color:#555; margin-bottom:10px;">
+    Setze die richtigen Wörter aus dem Wortfeld in die Lücken ein.
+  </p>
+
+  <div class="tip-box">
+    <div class="tip-header" onclick="tt(this)"><span>💡 Tipp – Wortfeld anzeigen</span><span class="arr">▶</span></div>
+    <div class="tip-content">
+      Diese Wörter brauchst du – aber in welcher Reihenfolge?<br><br>
+      <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:4px;">
+        <span style="background:#e8f0fa; border:2px solid #b0c4e8; border-radius:20px; padding:6px 14px; font-size:15px;">Blut</span>
+        <span style="background:#e8f0fa; border:2px solid #b0c4e8; border-radius:20px; padding:6px 14px; font-size:15px;">Rezeptor</span>
+        <span style="background:#e8f0fa; border:2px solid #b0c4e8; border-radius:20px; padding:6px 14px; font-size:15px;">Zielzelle</span>
+        <span style="background:#e8f0fa; border:2px solid #b0c4e8; border-radius:20px; padding:6px 14px; font-size:15px;">Reaktion</span>
+        <span style="background:#e8f0fa; border:2px solid #b0c4e8; border-radius:20px; padding:6px 14px; font-size:15px;">Modell</span>
+        <span style="background:#e8f0fa; border:2px solid #b0c4e8; border-radius:20px; padding:6px 14px; font-size:15px;">passt</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="gap-text">
+    Ein Hormon wird ins
+    <input class="gi" id="s1" data-ans="blut" style="width:75px" placeholder="…" autocomplete="off" autocorrect="off" spellcheck="false">
+    abgegeben und erreicht so viele verschiedene Körperzellen.
+    Es bindet aber nur an eine
+    <input class="gi" id="s2" data-ans="zielzelle" style="width:105px" placeholder="…" autocomplete="off" autocorrect="off" spellcheck="false">,
+    denn nur dort gibt es einen
+    <input class="gi" id="s3" data-ans="rezeptor" style="width:100px" placeholder="…" autocomplete="off" autocorrect="off" spellcheck="false">,
+    der zur Form des Hormons
+    <input class="gi" id="s4" data-ans="passt" style="width:80px" placeholder="…" autocomplete="off" autocorrect="off" spellcheck="false">.
+    Erst durch diese Bindung wird eine
+    <input class="gi" id="s5" data-ans="reaktion" style="width:100px" placeholder="…" autocomplete="off" autocorrect="off" spellcheck="false">
+    in der Zelle ausgelöst.
+    Dieses Prinzip nennt man das Schlüssel-Schloss-
+    <input class="gi" id="s6" data-ans="modell" style="width:90px" placeholder="…" autocomplete="off" autocorrect="off" spellcheck="false">.
+  </div>
+
+  <div class="btn-row">
+    <button class="btn-check" onclick="checkGaps('s1,s2,s3,s4,s5,s6','gfb2')">Auswerten ✓</button>
+    <button class="btn-reset" onclick="resetGaps('s1,s2,s3,s4,s5,s6','gfb2')">Leeren ✕</button>
+  </div>
+  <div class="feedback" id="gfb2"></div>
+
+  <div class="tip-box">
+    <div class="tip-header" onclick="tt(this)"><span>💡 Warum „Modell"?</span><span class="arr">▶</span></div>
+    <div class="tip-content">
+      Ein Modell vereinfacht die Wirklichkeit – es erklärt ein Prinzip, bildet aber nicht alle Details ab.
+      In der Realität sind Rezeptoren komplexe Proteine. Das Bild vom Schlüssel und Schloss macht verständlich,
+      warum ein Hormon <em>spezifisch</em> wirkt – das ist der entscheidende Gedanke.
+    </div>
+  </div>
+
+  <button class="next-btn" onclick="unlock(4)">Weiter →</button>
+</div>
+
+
+<!-- ════ KARTE 5 – TESTE DICH ════ -->
+<div class="card" id="card4">
+  <div class="phase-badge">⏱ ~15 min · Teste dich</div>
+  <div class="card-title">Teste dich!</div>
+  <div class="card-sub">Bearbeite alleine – ohne Buch und Heft. Feedback gibt es erst am Ende.</div>
+
+  <div class="q-txt" style="margin-top:6px;"><span class="q-nr">1</span>
+    Wodurch unterscheidet sich das Hormonsystem am deutlichsten vom Nervensystem?
+  </div>
+  <div id="f1">
+    <button class="fin-btn" data-ok="false" onclick="sel(this)">Hormone sind schneller als elektrische Nervenimpulse</button>
+    <button class="fin-btn" data-ok="true"  onclick="sel(this)">Hormone wirken langsamer, aber länger und werden über das Blut im gesamten Körper verteilt</button>
+    <button class="fin-btn" data-ok="false" onclick="sel(this)">Das Nervensystem transportiert Moleküle durch das Blut</button>
+    <button class="fin-btn" data-ok="false" onclick="sel(this)">Hormone senden elektrische Impulse zwischen Nervenzellen</button>
+  </div>
+
+  <div class="q-txt" style="margin-top:14px;"><span class="q-nr">2</span>
+    Warum müssen Drüsen Hormone ständig neu produzieren?
+  </div>
+  <div id="f2">
+    <button class="fin-btn" data-ok="false" onclick="sel(this)">Weil Hormone sich sehr langsam im Körper verteilen</button>
+    <button class="fin-btn" data-ok="true"  onclick="sel(this)">Weil Hormone nach ihrer Wirkung in der Leber abgebaut werden</button>
+    <button class="fin-btn" data-ok="false" onclick="sel(this)">Weil nur junge Zellen Hormone aufnehmen können</button>
+    <button class="fin-btn" data-ok="false" onclick="sel(this)">Weil das Gehirn die Produktion täglich zurücksetzt</button>
+  </div>
+
+  <div class="q-txt" style="margin-top:14px;"><span class="q-nr">3</span>
+    Was besagt das Schlüssel-Schloss-Prinzip bei Hormonen?
+  </div>
+  <div id="f3">
+    <button class="fin-btn" data-ok="false" onclick="sel(this)">Hormone wirken gleichzeitig auf alle Körperzellen</button>
+    <button class="fin-btn" data-ok="true"  onclick="sel(this)">Ein Hormon bindet nur an Zellen, die einen passenden Rezeptor besitzen</button>
+    <button class="fin-btn" data-ok="false" onclick="sel(this)">Hormone werden wie Schlüssel im Blut gespeichert</button>
+    <button class="fin-btn" data-ok="false" onclick="sel(this)">Zellen öffnen sich mechanisch, wenn ein Hormon andockt</button>
+  </div>
+
+  <div class="q-txt" style="margin-top:14px;"><span class="q-nr">4</span>
+    Welches Hormon wird von der Schilddrüse gebildet?
+  </div>
+  <div id="f4">
+    <button class="fin-btn" data-ok="false" onclick="sel(this)">Insulin</button>
+    <button class="fin-btn" data-ok="false" onclick="sel(this)">Adrenalin</button>
+    <button class="fin-btn" data-ok="true"  onclick="sel(this)">Thyroxin</button>
+    <button class="fin-btn" data-ok="false" onclick="sel(this)">Somatotropin</button>
+  </div>
+
+  <div class="q-txt" style="margin-top:14px;"><span class="q-nr">5</span>
+    In welcher Situation schüttet der Körper Adrenalin aus?
+  </div>
+  <div id="f5">
+    <button class="fin-btn" data-ok="false" onclick="sel(this)">Du liest entspannt ein Buch auf dem Sofa</button>
+    <button class="fin-btn" data-ok="true"  onclick="sel(this)">Du hörst plötzlich einen lauten Knall direkt hinter dir</button>
+    <button class="fin-btn" data-ok="false" onclick="sel(this)">Du schläfst tief und fest</button>
+    <button class="fin-btn" data-ok="false" onclick="sel(this)">Du isst in Ruhe zu Mittag</button>
+  </div>
+
+  <button class="btn-check" id="fin-btn" style="width:100%; margin-top:20px; font-size:17px;" onclick="evalFin()">
+    Ergebnis anzeigen ✓
+  </button>
+  <div class="feedback" id="fin-fb" style="margin-top:12px;"></div>
+  <div id="score-box" style="display:none; background:var(--blue-light); border:2px solid var(--blue);
+       border-radius:12px; padding:16px; margin-top:14px; text-align:center;">
+    <div style="font-size:30px; font-weight:700; color:var(--blue);" id="score-num"></div>
+    <div style="font-size:15px; color:#333; margin-top:4px;" id="score-msg"></div>
+    <p style="font-size:14px; color:#555; margin-top:10px;">
+      Lege das iPad zur Seite und warte auf die gemeinsame Auswertung im Plenum. ✓
+    </p>
+  </div>
+</div>
+
+<div id="dino" onclick="toggleDino()">🦖</div>
+<div id="dino-lbl">Made by Mathedino</div>
+
+<script>
+// ── Navigation ──────────────────────────────
+const unlocked = [true,false,false,false,false];
+function goTab(i) {
+  if (!unlocked[i]) return;
+  document.querySelectorAll('.card').forEach((c,j)    => c.classList.toggle('active',j===i));
+  document.querySelectorAll('.tab-btn').forEach((b,j) => b.classList.toggle('active',j===i));
+}
+function unlock(i) { unlocked[i]=true; goTab(i); }
+
+// ── Timer ───────────────────────────────────
+let _ti=null;
+function startT(id,sec){
+  if(_ti) clearInterval(_ti); let r=sec;
+  const el=document.getElementById(id);
+  function tick(){ const m=Math.floor(r/60),s=r%60;
+    el.textContent=`${m}:${s.toString().padStart(2,'0')}`;
+    el.classList.toggle('warn',r<=30);
+    if(r<=0){clearInterval(_ti);el.textContent='⏰ Zeit!';return;} r--; }
+  tick(); _ti=setInterval(tick,1000);
+}
+function stopT(){ if(_ti) clearInterval(_ti); _ti=null; }
+
+// ── Standard MC ─────────────────────────────
+function doMC(btn,ok,optsId,fbId,hint){
+  const opts=document.getElementById(optsId);
+  if(opts.dataset.done) return; opts.dataset.done='1';
+  opts.querySelectorAll('.mc-btn').forEach(b=>b.disabled=true);
+  btn.classList.add(ok?'ok':'err');
+  if(!ok) opts.querySelectorAll('.mc-btn').forEach(b=>{
+    if(b.getAttribute('onclick')&&b.getAttribute('onclick').includes(',true,')) b.classList.add('ok'); });
+  const fb=document.getElementById(fbId);
+  fb.className='feedback '+(ok?'ok':'err'); fb.style.display='flex';
+  fb.innerHTML=ok?'<span>Richtig! ✓</span>':
+    `<span>Leider falsch.</span>${hint?`<span style="font-weight:400;font-size:14px">${hint}</span>`:''}`;
+}
+
+// ── Two-correct MC (Karte 1) ─────────────────
+const mc1sel=[];
+function mc2(btn,grp,ok,fbId,hint){
+  if(btn.classList.contains('ok')||btn.classList.contains('err')) return;
+  if(mc1sel.length>=2&&!mc1sel.includes(btn)) return;
+  if(mc1sel.includes(btn)){
+    mc1sel.splice(mc1sel.indexOf(btn),1);
+    btn.classList.remove('ok','err'); btn.style.border='';
+    document.getElementById(fbId).style.display='none'; return; }
+  btn.classList.add(ok?'ok':'err'); mc1sel.push(btn);
+  if(!ok){
+    const fb=document.getElementById(fbId);
+    fb.className='feedback err'; fb.style.display='flex';
+    fb.innerHTML=`<span>Diese Antwort stimmt nicht.</span>${hint?`<span style="font-weight:400;font-size:14px">${hint}</span>`:'`'}`;
+  }
+  if(mc1sel.filter(b=>b.classList.contains('ok')).length===2){
+    document.querySelectorAll('#mc1 .mc-btn').forEach(b=>b.disabled=true);
+    const fb=document.getElementById(fbId);
+    fb.className='feedback ok'; fb.style.display='flex';
+    fb.innerHTML='<span>Beide richtigen Antworten gefunden! ✓</span>';
+  }
+}
+
+// ── Gap fill ─────────────────────────────────
+function checkGaps(idStr,fbId){
+  const ids=idStr.split(','); let ok=0;
+  ids.forEach(id=>{
+    const inp=document.getElementById(id);
+    const val=inp.value.trim().toLowerCase();
+    const ans=inp.dataset.ans.toLowerCase();
+    const match=val===ans||(inp.dataset.alt||'').toLowerCase().split(',').some(a=>val===a.trim());
+    inp.classList.toggle('ok',match); inp.classList.toggle('err',!match);
+    if(match) ok++;
+  });
+  const fb=document.getElementById(fbId);
+  if(ok===ids.length){ fb.className='feedback ok'; fb.style.display='flex';
+    fb.innerHTML='<span>Alle Lücken richtig! ✓</span>'; }
+  else { fb.className='feedback err'; fb.style.display='flex';
+    fb.innerHTML=`<span>${ok} von ${ids.length} richtig – rot markierte Felder nochmals prüfen.</span>`; }
+}
+function resetGaps(idStr,fbId){
+  idStr.split(',').forEach(id=>{const i=document.getElementById(id);
+    i.value=''; i.classList.remove('ok','err');});
+  document.getElementById(fbId).style.display='none';
+}
+
+// ── Chip sort ────────────────────────────────
+let _sc=null,_sg=null;
+function pick(el,grp){
+  if(el.classList.contains('used')) return;
+  if(_sc===el){el.classList.remove('sel');_sc=null;_sg=null;return;}
+  if(_sc&&_sg===grp) _sc.classList.remove('sel');
+  _sc=el; _sg=grp; el.classList.add('sel');
+}
+function drop(zone,grp){
+  if(!_sc||_sg!==grp) return;
+  const text=_sc.textContent;
+  const ph=zone.querySelector('.dz-ph'); if(ph) ph.style.display='none';
+  const pc=document.createElement('span'); pc.className='pc'; pc.textContent=text;
+  pc.onclick=function(){
+    zone.removeChild(pc); if(!zone.querySelector('.pc')&&ph) ph.style.display='';
+    const pool=document.getElementById('pool-'+grp);
+    const orig=[...pool.querySelectorAll('.chip')].find(c=>c.textContent===text);
+    if(orig){orig.classList.remove('used','sel');}
+    zone.style.background=''; zone.style.borderColor='';
+    _sc=null; _sg=null;
+  };
+  zone.appendChild(pc);
+  _sc.classList.add('used'); _sc.classList.remove('sel'); _sc=null; _sg=null;
+}
+function evalSort(zids,fbId){
+  let ok=0;
+  zids.forEach(zid=>{
+    const z=document.getElementById(zid);
+    const correct=z.dataset.correct.split(',').map(s=>s.trim());
+    const placed=[...z.querySelectorAll('.pc')].map(c=>c.textContent.trim());
+    const allOk=placed.length>0&&placed.every(p=>correct.includes(p))&&placed.length>=correct.length;
+    z.style.background=allOk?'var(--green-bg)':'var(--red-bg)';
+    z.style.borderColor=allOk?'var(--green)':'var(--red)';
+    if(allOk) ok++;
+  });
+  const fb=document.getElementById(fbId); fb.style.display='flex';
+  if(ok===zids.length){ fb.className='feedback ok'; fb.innerHTML='<span>Alle richtig zugeordnet! ✓</span>'; }
+  else { fb.className='feedback err'; fb.innerHTML=`<span>${ok} von ${zids.length} Felder richtig – rot markierte korrigieren.</span>`; }
+}
+function resetSort(zids,poolId,fbId){
+  const pool=document.getElementById(poolId);
+  zids.forEach(zid=>{
+    const z=document.getElementById(zid);
+    [...z.querySelectorAll('.pc')].forEach(pc=>{
+      const t=pc.textContent; z.removeChild(pc);
+      const orig=[...pool.querySelectorAll('.chip')].find(c=>c.textContent===t);
+      if(orig) orig.classList.remove('used','sel');
+    });
+    const ph=z.querySelector('.dz-ph'); if(ph) ph.style.display='';
+    z.style.background=''; z.style.borderColor='';
+  });
+  if(fbId) document.getElementById(fbId).style.display='none';
+  _sc=null; _sg=null;
+}
+
+// ── Final quiz ───────────────────────────────
+function sel(btn){
+  const g=btn.parentElement; if(g.dataset.done) return;
+  [...g.querySelectorAll('.fin-btn')].forEach(b=>{b.classList.remove('sel');b.style.borderColor='';b.style.background='';});
+  btn.classList.add('sel'); btn.style.borderColor='var(--blue)'; btn.style.background='var(--blue-light)';
+}
+function evalFin(){
+  const gs=['f1','f2','f3','f4','f5']; let score=0;
+  gs.forEach(gid=>{
+    const g=document.getElementById(gid); if(g.dataset.done) return; g.dataset.done='1';
+    const s=g.querySelector('.fin-btn.sel');
+    [...g.querySelectorAll('.fin-btn')].forEach(b=>{b.disabled=true;b.classList.remove('sel');b.style.borderColor='';b.style.background='';});
+    if(s){ const ok=s.dataset.ok==='true'; s.classList.add(ok?'ok':'err'); if(ok) score++;
+      else [...g.querySelectorAll('.fin-btn')].forEach(b=>{if(b.dataset.ok==='true') b.classList.add('ok');}); }
+    else [...g.querySelectorAll('.fin-btn')].forEach(b=>{if(b.dataset.ok==='true') b.classList.add('ok');});
+  });
+  document.getElementById('fin-btn').style.display='none';
+  const fb=document.getElementById('fin-fb');
+  fb.style.display='flex'; fb.className='feedback '+(score>=4?'ok':'err');
+  fb.innerHTML=score>=4?`<span>${score}/5 richtig – sehr gut! ✓</span>`:`<span>${score}/5 richtig – schau dir die rot markierten Antworten an.</span>`;
+  document.getElementById('score-box').style.display='block';
+  document.getElementById('score-num').textContent=`${score} / 5`;
+  const m=['Noch Übungsbedarf – lies S. 334 nochmal.','Grundlagen vorhanden!','Fast alles verstanden!','Prima!','Alles verstanden! 🎉'];
+  document.getElementById('score-msg').textContent=m[score]||'';
+}
+
+// ── Tip toggle ───────────────────────────────
+function tt(h){ h.classList.toggle('open'); h.nextElementSibling.classList.toggle('vis'); }
+
+// ── Dino ─────────────────────────────────────
+function toggleDino(){
+  const l=document.getElementById('dino-lbl');
+  l.style.display=l.style.display==='block'?'none':'block';
+  setTimeout(()=>l.style.display='none',2500);
+}
+</script>
+</body>
+</html>
