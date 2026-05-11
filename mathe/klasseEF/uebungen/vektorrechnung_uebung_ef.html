@@ -1,0 +1,1343 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Vektorrechnung – Übung EF</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+<script>
+  MathJax = {
+    tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+    svg: { fontCache: 'global' }
+  };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #181c27;
+    --card: #1e2336;
+    --card2: #232840;
+    --accent: #6c8ef7;
+    --accent2: #a78bfa;
+    --accent3: #34d399;
+    --warn: #f87171;
+    --text: #e8eaf6;
+    --muted: #7986cb;
+    --border: #2d3561;
+    --green: #16a34a;
+    --green-bg: #052e16;
+    --red: #dc2626;
+    --red-bg: #450a0a;
+    --gold: #fbbf24;
+    --radius: 18px;
+    --shadow: 0 8px 40px rgba(0,0,0,0.5);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { min-height: 100vh; background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 17px; }
+  
+  body { padding-bottom: 120px; }
+
+  /* HEADER */
+  .page-header {
+    background: linear-gradient(135deg, #181c27 0%, #1a1f35 100%);
+    border-bottom: 2px solid var(--border);
+    padding: 22px 20px 18px;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .header-inner { max-width: 860px; margin: 0 auto; display: flex; align-items: center; gap: 16px; }
+  .subject-badge {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #fff; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 11px;
+    padding: 4px 10px; border-radius: 20px; letter-spacing: 1px; text-transform: uppercase;
+  }
+  .page-title { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.35rem; color: var(--text); }
+  .page-subtitle { font-size: 0.82rem; color: var(--muted); margin-top: 2px; }
+
+  /* LEVEL SWITCHER */
+  .level-bar {
+    max-width: 860px; margin: 18px auto 0; padding: 0 20px;
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  }
+  .level-label { font-size: 0.8rem; color: var(--muted); font-weight: 500; margin-right: 4px; }
+  .level-btn {
+    background: var(--card); border: 2px solid var(--border); color: var(--muted);
+    font-family: 'Syne', sans-serif; font-weight: 600; font-size: 0.8rem;
+    padding: 7px 18px; border-radius: 30px; cursor: pointer;
+    transition: all 0.2s; min-height: 44px; min-width: 44px;
+  }
+  .level-btn.active {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-color: transparent; color: #fff;
+  }
+  .level-btn:active { transform: scale(0.95); }
+
+  /* TABS */
+  .tabs-wrapper { max-width: 860px; margin: 18px auto 0; padding: 0 20px; overflow-x: auto; }
+  .tabs { display: flex; gap: 6px; min-width: max-content; }
+  .tab-btn {
+    background: var(--card); border: 2px solid var(--border); color: var(--muted);
+    font-family: 'Syne', sans-serif; font-weight: 600; font-size: 0.82rem;
+    padding: 10px 18px; border-radius: 12px 12px 0 0; cursor: pointer;
+    transition: all 0.2s; min-height: 44px; white-space: nowrap;
+    border-bottom: none;
+  }
+  .tab-btn.active { background: var(--card2); border-color: var(--accent); color: var(--accent); }
+  .tab-btn:active { transform: scale(0.97); }
+  .tab-num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 20px; height: 20px; border-radius: 50%;
+    background: var(--border); color: var(--muted); font-size: 0.7rem;
+    margin-right: 5px;
+  }
+  .tab-btn.active .tab-num { background: var(--accent); color: #fff; }
+  .tab-btn.done .tab-num { background: var(--green); color: #fff; }
+  .tab-btn.done { color: var(--accent3); border-color: var(--accent3); }
+
+  /* CARD */
+  .main-content { max-width: 860px; margin: 0 auto; padding: 0 20px 20px; }
+  .card {
+    background: var(--card2); border: 2px solid var(--border); border-radius: 0 var(--radius) var(--radius) var(--radius);
+    padding: 28px 24px; margin-bottom: 16px; box-shadow: var(--shadow);
+    display: none;
+  }
+  .card.active { display: block; }
+  .card-title {
+    font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.15rem;
+    color: var(--accent); margin-bottom: 6px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .card-icon { font-size: 1.3rem; }
+  .card-desc { color: var(--muted); font-size: 0.88rem; margin-bottom: 22px; line-height: 1.5; }
+
+  /* AUFGABE BLOCK */
+  .aufgabe {
+    background: var(--card); border: 1.5px solid var(--border); border-radius: 14px;
+    padding: 20px; margin-bottom: 16px; transition: border-color 0.2s;
+  }
+  .aufgabe.correct { border-color: var(--green); background: #0a1f15; }
+  .aufgabe.wrong { border-color: var(--red); background: var(--red-bg); }
+  .aufgabe-title {
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.95rem;
+    color: var(--gold); margin-bottom: 10px;
+  }
+  .aufgabe-text { line-height: 1.7; margin-bottom: 14px; }
+
+  /* INPUT */
+  .input-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+  .math-input {
+    background: var(--bg); border: 2px solid var(--border); color: var(--text);
+    font-family: 'DM Sans', sans-serif; font-size: 1.1rem; border-radius: 10px;
+    padding: 10px 14px; min-width: 80px; max-width: 160px; min-height: 44px;
+    outline: none; transition: border-color 0.2s;
+    -webkit-appearance: none;
+  }
+  .math-input:focus { border-color: var(--accent); }
+  .math-input.correct { border-color: var(--green); background: #052e16; }
+  .math-input.wrong { border-color: var(--red); background: var(--red-bg); }
+  .input-unit { color: var(--muted); font-size: 0.9rem; }
+
+  /* VEKTOR INPUT */
+  .vec-input-group {
+    display: inline-flex; flex-direction: column; align-items: center; gap: 4px;
+    background: var(--bg); border: 2px solid var(--border); border-radius: 12px;
+    padding: 10px 12px; margin: 4px;
+    position: relative;
+  }
+  .vec-input-group::before, .vec-input-group::after {
+    content: ''; position: absolute; top: 50%; transform: translateY(-50%);
+    width: 10px; height: 80%; border: 2px solid var(--muted);
+  }
+  .vec-input-group::before { left: 4px; border-right: none; border-radius: 4px 0 0 4px; }
+  .vec-input-group::after { right: 4px; border-left: none; border-radius: 0 4px 4px 0; }
+  .vec-input-group .math-input {
+    width: 70px; min-width: 70px; max-width: 70px; text-align: center; background: transparent;
+    border-color: var(--border);
+  }
+  .vec-label {
+    font-family: 'Syne', sans-serif; font-weight: 700; color: var(--accent2);
+    font-size: 0.95rem; margin-bottom: 4px;
+  }
+
+  /* CHECK BTN */
+  .check-btn {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #fff; border: none; border-radius: 12px; font-family: 'Syne', sans-serif;
+    font-weight: 700; font-size: 0.95rem; padding: 12px 24px; cursor: pointer;
+    transition: all 0.2s; min-height: 44px; margin-top: 6px;
+  }
+  .check-btn:active { transform: scale(0.96); opacity: 0.9; }
+  .clear-btn {
+    background: transparent; border: 2px solid var(--red); color: var(--red);
+    border-radius: 12px; font-family: 'Syne', sans-serif;
+    font-weight: 600; font-size: 0.88rem; padding: 10px 20px; cursor: pointer;
+    min-height: 44px; margin-top: 6px; display: none; transition: all 0.2s;
+  }
+  .clear-btn:active { transform: scale(0.96); }
+
+  /* FEEDBACK */
+  .feedback {
+    border-radius: 10px; padding: 12px 16px; margin-top: 10px;
+    font-weight: 500; display: none; line-height: 1.5;
+  }
+  .feedback.correct {
+    background: var(--green-bg); border: 2px solid var(--green); color: #4ade80; display: block;
+  }
+  .feedback.wrong {
+    background: var(--red-bg); border: 2px solid var(--red); color: #fca5a5; display: block;
+  }
+
+  /* MULTIPLE CHOICE */
+  .mc-options { display: flex; flex-direction: column; gap: 10px; margin-top: 14px; }
+  .mc-btn {
+    background: var(--bg); border: 2px solid var(--border); color: var(--text);
+    border-radius: 12px; padding: 14px 18px; cursor: pointer; text-align: left;
+    font-family: 'DM Sans', sans-serif; font-size: 0.97rem; min-height: 44px;
+    transition: all 0.2s; line-height: 1.4;
+  }
+  .mc-btn:active { transform: scale(0.98); }
+  .mc-btn.selected { border-color: var(--accent); background: #1a2040; }
+  .mc-btn.correct-ans { border-color: var(--green); background: var(--green-bg); color: #4ade80; }
+  .mc-btn.wrong-ans { border-color: var(--red); background: var(--red-bg); color: #fca5a5; }
+  .mc-btn:disabled { cursor: default; }
+
+  /* HINT */
+  .hint-toggle {
+    background: transparent; border: 2px dashed var(--border); color: var(--muted);
+    border-radius: 10px; padding: 8px 16px; cursor: pointer; font-size: 0.85rem;
+    min-height: 44px; margin-bottom: 10px; width: 100%; text-align: left;
+    transition: border-color 0.2s;
+  }
+  .hint-toggle:active { border-color: var(--accent2); }
+  .hint-box {
+    background: #1a1535; border: 2px solid #3d2e6b; border-radius: 10px;
+    padding: 14px; color: var(--accent2); font-size: 0.9rem; line-height: 1.6;
+    display: none; margin-bottom: 10px;
+  }
+  .hint-box.open { display: block; }
+
+  /* FRAC */
+  .frac {
+    display: inline-flex; flex-direction: column; align-items: center;
+    vertical-align: middle; margin: 0 3px;
+  }
+  .frac > span:first-child { border-bottom: 2px solid currentColor; padding: 0 4px 2px; }
+  .frac > span:last-child { padding: 2px 4px 0; }
+
+  /* AUSWERTUNG */
+  .result-bar {
+    background: var(--card); border-radius: 12px; padding: 20px; margin-bottom: 16px;
+    border: 2px solid var(--border);
+  }
+  .result-score {
+    font-family: 'Syne', sans-serif; font-weight: 800; font-size: 2.5rem;
+    text-align: center; margin-bottom: 8px;
+  }
+  .result-label { text-align: center; color: var(--muted); font-size: 0.9rem; margin-bottom: 16px; }
+  .result-items { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+  .result-item {
+    display: flex; align-items: flex-start; gap: 10px; padding: 10px 14px;
+    border-radius: 10px; border: 1.5px solid var(--border); font-size: 0.9rem;
+  }
+  .result-item.ok { border-color: var(--green); background: var(--green-bg); }
+  .result-item.nok { border-color: var(--red); background: var(--red-bg); }
+  .res-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+
+  /* NEXT BTN */
+  #next-btn {
+    display: none; position: fixed; bottom: 0; left: 0; right: 0;
+    background: linear-gradient(135deg, var(--accent3), #0e9f6e);
+    color: #fff; border: none; font-family: 'Syne', sans-serif;
+    font-weight: 800; font-size: 1.1rem; padding: 18px;
+    cursor: pointer; z-index: 200; min-height: 64px;
+    letter-spacing: 0.5px;
+  }
+  #next-btn:active { opacity: 0.9; }
+
+  /* DINO */
+  #dino {
+    position: fixed; bottom: 70px; right: 16px; font-size: 1.5rem;
+    cursor: pointer; z-index: 300; user-select: none;
+    transition: transform 0.2s;
+  }
+  #dino:active { transform: scale(1.3); }
+  #dino-tooltip {
+    position: fixed; bottom: 110px; right: 14px;
+    background: var(--card2); border: 2px solid var(--accent);
+    color: var(--accent); padding: 6px 12px; border-radius: 10px;
+    font-size: 0.78rem; font-family: 'Syne', sans-serif; font-weight: 700;
+    display: none; white-space: nowrap; z-index: 301;
+  }
+
+  /* LEVEL ONLY STYLES */
+  .level-content { display: none; }
+  .level-content.active { display: block; }
+
+  /* DIVIDER */
+  .divider { height: 1px; background: var(--border); margin: 20px 0; }
+
+  /* RESPONSIVE */
+  @media (max-width: 480px) {
+    .card { padding: 18px 14px; }
+    .page-title { font-size: 1.1rem; }
+    .vec-input-group .math-input { width: 60px; min-width: 60px; max-width: 60px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="header-inner">
+    <div>
+      <div class="subject-badge">Mathe · EF</div>
+    </div>
+    <div>
+      <div class="page-title">Vektorrechnung im Raum</div>
+      <div class="page-subtitle">Übung · Analytische Geometrie</div>
+    </div>
+  </div>
+</div>
+
+<!-- LEVEL SWITCHER -->
+<div class="level-bar">
+  <span class="level-label">Niveau:</span>
+  <button class="level-btn active" id="lvl-g" onclick="setLevel('g')">Grundlagen</button>
+  <button class="level-btn" id="lvl-f" onclick="setLevel('f')">Fortgeschritten</button>
+  <button class="level-btn" id="lvl-p" onclick="setLevel('p')">Profi</button>
+</div>
+
+<!-- TABS -->
+<div class="tabs-wrapper">
+  <div class="tabs">
+    <button class="tab-btn active" id="tab-btn-1" onclick="showTab(1)"><span class="tab-num" id="tnum-1">1</span>Verbindungsvektoren</button>
+    <button class="tab-btn" id="tab-btn-2" onclick="showTab(2)"><span class="tab-num" id="tnum-2">2</span>Länge von Vektoren</button>
+    <button class="tab-btn" id="tab-btn-3" onclick="showTab(3)"><span class="tab-num" id="tnum-3">3</span>Vektoroperationen</button>
+    <button class="tab-btn" id="tab-btn-4" onclick="showTab(4)"><span class="tab-num" id="tnum-4">4</span>Kollinearität</button>
+    <button class="tab-btn" id="tab-btn-5" onclick="showTab(5)"><span class="tab-num" id="tnum-5">↺</span>Wiederholung</button>
+    <button class="tab-btn" id="tab-btn-6" onclick="showTab(6)"><span class="tab-num" id="tnum-6">★</span>Auswertung</button>
+  </div>
+</div>
+
+<div class="main-content">
+
+<!-- ===================== TAB 1: VERBINDUNGSVEKTOREN ===================== -->
+<div class="card active" id="tab-1">
+  <div class="card-title"><span class="card-icon">→</span> Verbindungsvektoren</div>
+  <div class="card-desc">Berechne Verbindungsvektoren zwischen Punkten im dreidimensionalen Raum.</div>
+
+  <!-- GRUNDLAGEN -->
+  <div class="level-content active" data-level="g">
+    <div class="aufgabe" id="t1g1">
+      <div class="aufgabe-title">Aufgabe 1</div>
+      <div class="aufgabe-text">
+        Gegeben sind die Punkte \(A(2\,|\,1\,|\,3)\) und \(B(5\,|\,4\,|\,7)\).<br>
+        Berechne den Verbindungsvektor \(\overrightarrow{AB}\).
+      </div>
+      <button class="hint-toggle" onclick="toggleHint('hint-t1g1')">💡 Tipp anzeigen</button>
+      <div class="hint-box" id="hint-t1g1">
+        Der Verbindungsvektor von \(A\) nach \(B\) ergibt sich durch:<br>
+        \(\overrightarrow{AB} = B - A\), also ziehe jeweils die Koordinaten von \(A\) von den Koordinaten von \(B\) ab.
+      </div>
+      <div style="margin-bottom:10px;">Deine Antwort: \(\overrightarrow{AB} = \)</div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <div class="vec-input-group" id="vecbox-t1g1">
+          <div class="vec-label">\(\overrightarrow{AB}\)</div>
+          <input class="math-input" inputmode="numeric" id="t1g1-x" placeholder="x">
+          <input class="math-input" inputmode="numeric" id="t1g1-y" placeholder="y">
+          <input class="math-input" inputmode="numeric" id="t1g1-z" placeholder="z">
+        </div>
+        <div>
+          <button class="check-btn" onclick="checkVec('t1g1',[3,3,4])">Prüfen</button>
+          <button class="clear-btn" id="clear-t1g1" onclick="clearVec('t1g1')">Leeren</button>
+        </div>
+      </div>
+      <div class="feedback" id="fb-t1g1"></div>
+    </div>
+
+    <div class="aufgabe" id="t1g2">
+      <div class="aufgabe-title">Aufgabe 2</div>
+      <div class="aufgabe-text">
+        Gegeben sind \(P(0\,|\,4\,|\,-2)\) und \(Q(3\,|\,1\,|\,5)\).<br>
+        Berechne \(\overrightarrow{PQ}\) und \(\overrightarrow{QP}\).
+      </div>
+      <div style="margin-bottom:8px;">a) \(\overrightarrow{PQ} = \)</div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;">
+        <div class="vec-input-group">
+          <input class="math-input" inputmode="numeric" id="t1g2a-x" placeholder="x">
+          <input class="math-input" inputmode="numeric" id="t1g2a-y" placeholder="y">
+          <input class="math-input" inputmode="numeric" id="t1g2a-z" placeholder="z">
+        </div>
+      </div>
+      <div style="margin-bottom:8px;">b) \(\overrightarrow{QP} = \)</div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <div class="vec-input-group">
+          <input class="math-input" inputmode="numeric" id="t1g2b-x" placeholder="x">
+          <input class="math-input" inputmode="numeric" id="t1g2b-y" placeholder="y">
+          <input class="math-input" inputmode="numeric" id="t1g2b-z" placeholder="z">
+        </div>
+        <div>
+          <button class="check-btn" onclick="checkVec2('t1g2')">Prüfen</button>
+          <button class="clear-btn" id="clear-t1g2" onclick="clearVec2('t1g2')">Leeren</button>
+        </div>
+      </div>
+      <div class="feedback" id="fb-t1g2"></div>
+    </div>
+  </div><!-- /grundlagen -->
+
+  <!-- FORTGESCHRITTEN -->
+  <div class="level-content" data-level="f">
+    <div class="aufgabe" id="t1f1">
+      <div class="aufgabe-title">Aufgabe 1</div>
+      <div class="aufgabe-text">
+        Gegeben: \(A(-3\,|\,2\,|\,1)\), \(B(1\,|\,-4\,|\,6)\), \(C(5\,|\,0\,|\,-2)\).<br>
+        Berechne \(\overrightarrow{AB}\), \(\overrightarrow{BC}\) und \(\overrightarrow{AC}\).<br>
+        Welche Beziehung gilt zwischen diesen drei Vektoren?
+      </div>
+      <div style="margin-bottom:8px;">\(\overrightarrow{AB} = \)</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
+        <div class="vec-input-group">
+          <input class="math-input" inputmode="numeric" id="t1f1a-x" placeholder="x">
+          <input class="math-input" inputmode="numeric" id="t1f1a-y" placeholder="y">
+          <input class="math-input" inputmode="numeric" id="t1f1a-z" placeholder="z">
+        </div>
+      </div>
+      <div style="margin-bottom:8px;">\(\overrightarrow{BC} = \)</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
+        <div class="vec-input-group">
+          <input class="math-input" inputmode="numeric" id="t1f1b-x" placeholder="x">
+          <input class="math-input" inputmode="numeric" id="t1f1b-y" placeholder="y">
+          <input class="math-input" inputmode="numeric" id="t1f1b-z" placeholder="z">
+        </div>
+      </div>
+      <div style="margin-bottom:8px;">\(\overrightarrow{AC} = \)</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
+        <div class="vec-input-group">
+          <input class="math-input" inputmode="numeric" id="t1f1c-x" placeholder="x">
+          <input class="math-input" inputmode="numeric" id="t1f1c-y" placeholder="y">
+          <input class="math-input" inputmode="numeric" id="t1f1c-z" placeholder="z">
+        </div>
+      </div>
+      <button class="check-btn" onclick="checkT1F1()">Prüfen</button>
+      <button class="clear-btn" id="clear-t1f1" onclick="clearT1F1()">Leeren</button>
+      <div class="feedback" id="fb-t1f1"></div>
+    </div>
+
+    <div class="aufgabe" id="t1f2">
+      <div class="aufgabe-title">Aufgabe 2</div>
+      <div class="aufgabe-text">
+        Der Punkt \(M\) ist der Mittelpunkt der Strecke \(AB\) mit \(A(2\,|\,-6\,|\,4)\) und \(B(8\,|\,2\,|\,-2)\).<br>
+        Berechne den Verbindungsvektor \(\overrightarrow{AM}\).
+      </div>
+      <button class="hint-toggle" onclick="toggleHint('hint-t1f2')">💡 Tipp anzeigen</button>
+      <div class="hint-box" id="hint-t1f2">
+        Berechne zuerst den Mittelpunkt \(M\) mit der Mittelpunktformel:<br>
+        Die Koordinaten von \(M\) sind jeweils der Durchschnitt der entsprechenden Koordinaten von \(A\) und \(B\).
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
+        <div class="vec-input-group">
+          <div class="vec-label">\(\overrightarrow{AM}\)</div>
+          <input class="math-input" inputmode="numeric" id="t1f2-x" placeholder="x">
+          <input class="math-input" inputmode="numeric" id="t1f2-y" placeholder="y">
+          <input class="math-input" inputmode="numeric" id="t1f2-z" placeholder="z">
+        </div>
+        <div>
+          <button class="check-btn" onclick="checkVec('t1f2',[3,4,-3])">Prüfen</button>
+          <button class="clear-btn" id="clear-t1f2" onclick="clearVec('t1f2')">Leeren</button>
+        </div>
+      </div>
+      <div class="feedback" id="fb-t1f2"></div>
+    </div>
+  </div><!-- /fortgeschritten -->
+
+  <!-- PROFI -->
+  <div class="level-content" data-level="p">
+    <div class="aufgabe" id="t1p1">
+      <div class="aufgabe-title">Aufgabe 1</div>
+      <div class="aufgabe-text">
+        Ein Dreieck hat die Eckpunkte \(A(1\,|\,2\,|\,-1)\), \(B(4\,|\,-1\,|\,3)\) und \(C(-2\,|\,5\,|\,2)\).<br>
+        Berechne alle drei Seitenverbindungsvektoren und weise nach, dass<br>
+        \(\overrightarrow{AB} + \overrightarrow{BC} + \overrightarrow{CA} = \vec{0}\) gilt.
+      </div>
+      <div class="mc-options" id="t1p1-mc">
+        <button class="mc-btn" onclick="mcSelect('t1p1',this,true)">
+          Es gilt stets \(\overrightarrow{AB} + \overrightarrow{BC} + \overrightarrow{CA} = \vec{0}\), weil sich Start- und Endpunkt aufheben. Die Summe der Seitenvektoren jedes Dreiecks ist der Nullvektor.
+        </button>
+        <button class="mc-btn" onclick="mcSelect('t1p1',this,false)">
+          Die Summe ist nur dann \(\vec{0}\), wenn das Dreieck gleichseitig ist.
+        </button>
+        <button class="mc-btn" onclick="mcSelect('t1p1',this,false)">
+          Die Summe ergibt nur bei rechtwinkligen Dreiecken den Nullvektor, sonst nicht.
+        </button>
+        <button class="mc-btn" onclick="mcSelect('t1p1',this,false)">
+          Die Formel gilt nur, wenn der Ursprung auf einer Dreiecksseite liegt.
+        </button>
+      </div>
+      <div class="feedback" id="fb-t1p1"></div>
+    </div>
+
+    <div class="aufgabe" id="t1p2">
+      <div class="aufgabe-title">Aufgabe 2</div>
+      <div class="aufgabe-text">
+        Bekannt sind \(A(3\,|\,-1\,|\,2)\) und \(\overrightarrow{AB} = \begin{pmatrix}-2\\4\\-3\end{pmatrix}\).<br>
+        Bestimme die Koordinaten von \(B\).
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
+        <div class="vec-input-group">
+          <div class="vec-label">\(B\)</div>
+          <input class="math-input" inputmode="numeric" id="t1p2-x" placeholder="x">
+          <input class="math-input" inputmode="numeric" id="t1p2-y" placeholder="y">
+          <input class="math-input" inputmode="numeric" id="t1p2-z" placeholder="z">
+        </div>
+        <div>
+          <button class="check-btn" onclick="checkVec('t1p2',[1,3,-1])">Prüfen</button>
+          <button class="clear-btn" id="clear-t1p2" onclick="clearVec('t1p2')">Leeren</button>
+        </div>
+      </div>
+      <div class="feedback" id="fb-t1p2"></div>
+    </div>
+  </div><!-- /profi -->
+</div><!-- /tab1 -->
+
+
+<!-- ===================== TAB 2: LÄNGE ===================== -->
+<div class="card" id="tab-2">
+  <div class="card-title"><span class="card-icon">📏</span> Länge von Vektoren</div>
+  <div class="card-desc">Berechne den Betrag von Vektoren mit dem Satz des Pythagoras im Raum.</div>
+
+  <!-- GRUNDLAGEN -->
+  <div class="level-content active" data-level="g">
+    <div class="aufgabe" id="t2g1">
+      <div class="aufgabe-title">Aufgabe 1</div>
+      <div class="aufgabe-text">
+        Berechne den Betrag des Vektors \(\vec{a} = \begin{pmatrix}3\\4\\0\end{pmatrix}\).<br>
+        Gib das Ergebnis exakt (als Wurzel oder ganze Zahl) an.
+      </div>
+      <button class="hint-toggle" onclick="toggleHint('hint-t2g1')">💡 Tipp anzeigen</button>
+      <div class="hint-box" id="hint-t2g1">
+        Der Betrag eines Vektors \(\begin{pmatrix}a_1\\a_2\\a_3\end{pmatrix}\) ist:<br>
+        \(|\vec{a}| = \sqrt{a_1^2 + a_2^2 + a_3^2}\)
+      </div>
+      <div class="mc-options" id="t2g1-mc">
+        <button class="mc-btn" onclick="mcSelect('t2g1',this,true)">\(|\vec{a}| = 5\)</button>
+        <button class="mc-btn" onclick="mcSelect('t2g1',this,false)">\(|\vec{a}| = 7\)</button>
+        <button class="mc-btn" onclick="mcSelect('t2g1',this,false)">\(|\vec{a}| = \sqrt{7}\)</button>
+        <button class="mc-btn" onclick="mcSelect('t2g1',this,false)">\(|\vec{a}| = 25\)</button>
+      </div>
+      <div class="feedback" id="fb-t2g1"></div>
+    </div>
+
+    <div class="aufgabe" id="t2g2">
+      <div class="aufgabe-title">Aufgabe 2</div>
+      <div class="aufgabe-text">
+        Berechne die Länge des Verbindungsvektors zwischen \(A(1\,|\,2\,|\,2)\) und \(B(4\,|\,6\,|\,2)\).
+      </div>
+      <div class="mc-options" id="t2g2-mc">
+        <button class="mc-btn" onclick="mcSelect('t2g2',this,true)">\(|\overrightarrow{AB}| = 5\)</button>
+        <button class="mc-btn" onclick="mcSelect('t2g2',this,false)">\(|\overrightarrow{AB}| = \sqrt{29}\)</button>
+        <button class="mc-btn" onclick="mcSelect('t2g2',this,false)">\(|\overrightarrow{AB}| = \sqrt{9}\) = 3</button>
+        <button class="mc-btn" onclick="mcSelect('t2g2',this,false)">\(|\overrightarrow{AB}| = \sqrt{50}\)</button>
+      </div>
+      <div class="feedback" id="fb-t2g2"></div>
+    </div>
+  </div>
+
+  <!-- FORTGESCHRITTEN -->
+  <div class="level-content" data-level="f">
+    <div class="aufgabe" id="t2f1">
+      <div class="aufgabe-title">Aufgabe 1</div>
+      <div class="aufgabe-text">
+        Berechne den Betrag des Vektors \(\vec{b} = \begin{pmatrix}-2\\3\\6\end{pmatrix}\).<br>
+        Gib das Ergebnis als ganze Zahl an.
+      </div>
+      <div class="input-row">
+        \(|\vec{b}| = \)
+        <input class="math-input" inputmode="numeric" id="t2f1-val" placeholder="Wert">
+        <button class="check-btn" onclick="checkSingle('t2f1','t2f1-val',7)">Prüfen</button>
+        <button class="clear-btn" id="clear-t2f1" onclick="clearSingle('t2f1','t2f1-val')">Leeren</button>
+      </div>
+      <div class="feedback" id="fb-t2f1"></div>
+    </div>
+
+    <div class="aufgabe" id="t2f2">
+      <div class="aufgabe-title">Aufgabe 2</div>
+      <div class="aufgabe-text">
+        Gegeben: \(P(-1\,|\,3\,|\,2)\) und \(Q(3\,|\,0\,|\,-2)\).<br>
+        Berechne den Abstand \(|PQ|\) zwischen den Punkten. Runde auf zwei Dezimalstellen.
+      </div>
+      <button class="hint-toggle" onclick="toggleHint('hint-t2f2')">💡 Tipp anzeigen</button>
+      <div class="hint-box" id="hint-t2f2">
+        Bilde zuerst \(\overrightarrow{PQ}\) und berechne dann dessen Betrag.<br>
+        \(\sqrt{16+9+16} = \sqrt{41} \approx ?\)
+      </div>
+      <div class="input-row">
+        \(|PQ| \approx \)
+        <input class="math-input" inputmode="decimal" id="t2f2-val" placeholder="Wert">
+        <button class="check-btn" onclick="checkSingleRange('t2f2','t2f2-val',6.40,6.41)">Prüfen</button>
+        <button class="clear-btn" id="clear-t2f2" onclick="clearSingle('t2f2','t2f2-val')">Leeren</button>
+      </div>
+      <div class="feedback" id="fb-t2f2"></div>
+    </div>
+  </div>
+
+  <!-- PROFI -->
+  <div class="level-content" data-level="p">
+    <div class="aufgabe" id="t2p1">
+      <div class="aufgabe-title">Aufgabe 1</div>
+      <div class="aufgabe-text">
+        Für welchen Wert von \(t\) hat der Vektor \(\vec{v} = \begin{pmatrix}t\\4\\-3\end{pmatrix}\) die Länge \(\sqrt{50}\)?
+      </div>
+      <div class="mc-options" id="t2p1-mc">
+        <button class="mc-btn" onclick="mcSelect('t2p1',this,true)">\(t = 5\) oder \(t = -5\)</button>
+        <button class="mc-btn" onclick="mcSelect('t2p1',this,false)">\(t = 3\) oder \(t = -3\)</button>
+        <button class="mc-btn" onclick="mcSelect('t2p1',this,false)">\(t = 7\)</button>
+        <button class="mc-btn" onclick="mcSelect('t2p1',this,false)">\(t = \sqrt{25}\)</button>
+      </div>
+      <div class="feedback" id="fb-t2p1"></div>
+    </div>
+
+    <div class="aufgabe" id="t2p2">
+      <div class="aufgabe-title">Aufgabe 2</div>
+      <div class="aufgabe-text">
+        Zeige durch Berechnung: Das Dreieck mit den Eckpunkten \(A(0\,|\,0\,|\,0)\), \(B(3\,|\,4\,|\,0)\) und \(C(0\,|\,0\,|\,5)\) ist gleichschenklig.<br><br>
+        Welche zwei Seiten sind gleich lang?
+      </div>
+      <div class="mc-options" id="t2p2-mc">
+        <button class="mc-btn" onclick="mcSelect('t2p2',this,true)">\(|AB| = |AC| = 5\)</button>
+        <button class="mc-btn" onclick="mcSelect('t2p2',this,false)">\(|AB| = |BC|\)</button>
+        <button class="mc-btn" onclick="mcSelect('t2p2',this,false)">\(|AC| = |BC|\)</button>
+        <button class="mc-btn" onclick="mcSelect('t2p2',this,false)">Alle drei Seiten sind gleich lang.</button>
+      </div>
+      <div class="feedback" id="fb-t2p2"></div>
+    </div>
+  </div>
+</div><!-- /tab2 -->
+
+
+<!-- ===================== TAB 3: VEKTOROPERATIONEN ===================== -->
+<div class="card" id="tab-3">
+  <div class="card-title"><span class="card-icon">⊕</span> Vektoroperationen</div>
+  <div class="card-desc">Addition von Vektoren und skalare Multiplikation.</div>
+
+  <!-- GRUNDLAGEN -->
+  <div class="level-content active" data-level="g">
+    <div class="aufgabe" id="t3g1">
+      <div class="aufgabe-title">Aufgabe 1 – Addition</div>
+      <div class="aufgabe-text">
+        Berechne \(\vec{a} + \vec{b}\) mit \(\vec{a} = \begin{pmatrix}2\\-1\\3\end{pmatrix}\) und \(\vec{b} = \begin{pmatrix}1\\4\\-2\end{pmatrix}\).
+      </div>
+      <button class="hint-toggle" onclick="toggleHint('hint-t3g1')">💡 Tipp anzeigen</button>
+      <div class="hint-box" id="hint-t3g1">
+        Addiere Vektoren komponentenweise: erste Koordinate + erste Koordinate, usw.
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
+        <div class="vec-input-group">
+          <div class="vec-label">\(\vec{a}+\vec{b}\)</div>
+          <input class="math-input" inputmode="numeric" id="t3g1-x" placeholder="x">
+          <input class="math-input" inputmode="numeric" id="t3g1-y" placeholder="y">
+          <input class="math-input" inputmode="numeric" id="t3g1-z" placeholder="z">
+        </div>
+        <div>
+          <button class="check-btn" onclick="checkVec('t3g1',[3,3,1])">Prüfen</button>
+          <button class="clear-btn" id="clear-t3g1" onclick="clearVec('t3g1')">Leeren</button>
+        </div>
+      </div>
+      <div class="feedback" id="fb-t3g1"></div>
+    </div>
+
+    <div class="aufgabe" id="t3g2">
+      <div class="aufgabe-title">Aufgabe 2 – Skalare Multiplikation</div>
+      <div class="aufgabe-text">
+        Berechne \(3 \cdot \vec{u}\) mit \(\vec{u} = \begin{pmatrix}-2\\1\\4\end{pmatrix}\).
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
+        <div class="vec-input-group">
+          <div class="vec-label">\(3\cdot\vec{u}\)</div>
+          <input class="math-input" inputmode="numeric" id="t3g2-x" placeholder="x">
+          <input class="math-input" inputmode="numeric" id="t3g2-y" placeholder="y">
+          <input class="math-input" inputmode="numeric" id="t3g2-z" placeholder="z">
+        </div>
+        <div>
+          <button class="check-btn" onclick="checkVec('t3g2',[-6,3,12])">Prüfen</button>
+          <button class="clear-btn" id="clear-t3g2" onclick="clearVec('t3g2')">Leeren</button>
+        </div>
+      </div>
+      <div class="feedback" id="fb-t3g2"></div>
+    </div>
+  </div>
+
+  <!-- FORTGESCHRITTEN -->
+  <div class="level-content" data-level="f">
+    <div class="aufgabe" id="t3f1">
+      <div class="aufgabe-title">Aufgabe 1 – Linearkombination</div>
+      <div class="aufgabe-text">
+        Gegeben: \(\vec{a} = \begin{pmatrix}1\\0\\-2\end{pmatrix}\), \(\vec{b} = \begin{pmatrix}-3\\2\\1\end{pmatrix}\).<br>
+        Berechne \(2\cdot\vec{a} - \vec{b}\).
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
+        <div class="vec-input-group">
+          <div class="vec-label">\(2\vec{a}-\vec{b}\)</div>
+          <input class="math-input" inputmode="numeric" id="t3f1-x" placeholder="x">
+          <input class="math-input" inputmode="numeric" id="t3f1-y" placeholder="y">
+          <input class="math-input" inputmode="numeric" id="t3f1-z" placeholder="z">
+        </div>
+        <div>
+          <button class="check-btn" onclick="checkVec('t3f1',[5,-2,-5])">Prüfen</button>
+          <button class="clear-btn" id="clear-t3f1" onclick="clearVec('t3f1')">Leeren</button>
+        </div>
+      </div>
+      <div class="feedback" id="fb-t3f1"></div>
+    </div>
+
+    <div class="aufgabe" id="t3f2">
+      <div class="aufgabe-title">Aufgabe 2 – Geometrische Bedeutung</div>
+      <div class="aufgabe-text">
+        Was bewirkt die Multiplikation eines Vektors mit dem Skalar \(-2\)?
+      </div>
+      <div class="mc-options" id="t3f2-mc">
+        <button class="mc-btn" onclick="mcSelect('t3f2',this,true)">Der Vektor wird auf das Doppelte seiner Länge gestreckt und seine Richtung wird umgekehrt.</button>
+        <button class="mc-btn" onclick="mcSelect('t3f2',this,false)">Der Vektor wird halbiert und dreht sich um 90°.</button>
+        <button class="mc-btn" onclick="mcSelect('t3f2',this,false)">Die Richtung bleibt gleich, nur die Länge verdoppelt sich.</button>
+        <button class="mc-btn" onclick="mcSelect('t3f2',this,false)">Der Vektor wird zum Nullvektor.</button>
+      </div>
+      <div class="feedback" id="fb-t3f2"></div>
+    </div>
+  </div>
+
+  <!-- PROFI -->
+  <div class="level-content" data-level="p">
+    <div class="aufgabe" id="t3p1">
+      <div class="aufgabe-title">Aufgabe 1</div>
+      <div class="aufgabe-text">
+        Gegeben: \(\vec{a} = \begin{pmatrix}2\\-1\\3\end{pmatrix}\), \(\vec{b} = \begin{pmatrix}-1\\3\\-2\end{pmatrix}\), \(\vec{c} = \begin{pmatrix}0\\4\\1\end{pmatrix}\).<br>
+        Berechne \(3\cdot\vec{a} + 2\cdot\vec{b} - \vec{c}\).
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
+        <div class="vec-input-group">
+          <input class="math-input" inputmode="numeric" id="t3p1-x" placeholder="x">
+          <input class="math-input" inputmode="numeric" id="t3p1-y" placeholder="y">
+          <input class="math-input" inputmode="numeric" id="t3p1-z" placeholder="z">
+        </div>
+        <div>
+          <button class="check-btn" onclick="checkVec('t3p1',[4,-7,6])">Prüfen</button>
+          <button class="clear-btn" id="clear-t3p1" onclick="clearVec('t3p1')">Leeren</button>
+        </div>
+      </div>
+      <div class="feedback" id="fb-t3p1"></div>
+    </div>
+
+    <div class="aufgabe" id="t3p2">
+      <div class="aufgabe-title">Aufgabe 2</div>
+      <div class="aufgabe-text">
+        Für welchen Wert von \(s\) gilt:<br>
+        \(s\cdot\begin{pmatrix}3\\-6\\9\end{pmatrix} + \begin{pmatrix}1\\2\\-3\end{pmatrix} = \begin{pmatrix}7\\-10\\15\end{pmatrix}\)?
+      </div>
+      <div class="input-row">
+        \(s = \)
+        <input class="math-input" inputmode="numeric" id="t3p2-val" placeholder="s">
+        <button class="check-btn" onclick="checkSingle('t3p2','t3p2-val',2)">Prüfen</button>
+        <button class="clear-btn" id="clear-t3p2" onclick="clearSingle('t3p2','t3p2-val')">Leeren</button>
+      </div>
+      <div class="feedback" id="fb-t3p2"></div>
+    </div>
+  </div>
+</div><!-- /tab3 -->
+
+
+<!-- ===================== TAB 4: KOLLINEARITÄT ===================== -->
+<div class="card" id="tab-4">
+  <div class="card-title"><span class="card-icon">≡</span> Kollinearität</div>
+  <div class="card-desc">Untersuche, ob Vektoren kollinear (parallel) sind.</div>
+
+  <!-- GRUNDLAGEN -->
+  <div class="level-content active" data-level="g">
+    <div class="aufgabe" id="t4g1">
+      <div class="aufgabe-title">Aufgabe 1 – Begriff</div>
+      <div class="aufgabe-text">
+        Was bedeutet es, wenn zwei Vektoren <strong>kollinear</strong> sind?
+      </div>
+      <div class="mc-options" id="t4g1-mc">
+        <button class="mc-btn" onclick="mcSelect('t4g1',this,true)">Sie sind parallel – d.h. ein Vektor ist ein skalares Vielfaches des anderen.</button>
+        <button class="mc-btn" onclick="mcSelect('t4g1',this,false)">Sie sind senkrecht zueinander.</button>
+        <button class="mc-btn" onclick="mcSelect('t4g1',this,false)">Sie haben denselben Betrag.</button>
+        <button class="mc-btn" onclick="mcSelect('t4g1',this,false)">Sie starten am selben Punkt.</button>
+      </div>
+      <div class="feedback" id="fb-t4g1"></div>
+    </div>
+
+    <div class="aufgabe" id="t4g2">
+      <div class="aufgabe-title">Aufgabe 2</div>
+      <div class="aufgabe-text">
+        Sind \(\vec{a} = \begin{pmatrix}2\\4\\-6\end{pmatrix}\) und \(\vec{b} = \begin{pmatrix}-1\\-2\\3\end{pmatrix}\) kollinear?<br>
+        Begründe durch Angabe des Faktors.
+      </div>
+      <button class="hint-toggle" onclick="toggleHint('hint-t4g2')">💡 Tipp anzeigen</button>
+      <div class="hint-box" id="hint-t4g2">
+        Überprüfe, ob ein Faktor \(r\) existiert, sodass \(\vec{a} = r\cdot\vec{b}\).<br>
+        Vergleiche die Quotienten der einzelnen Komponenten.
+      </div>
+      <div class="mc-options" id="t4g2-mc">
+        <button class="mc-btn" onclick="mcSelect('t4g2',this,true)">Ja, es gilt \(\vec{a} = (-2)\cdot\vec{b}\). Die Vektoren sind kollinear.</button>
+        <button class="mc-btn" onclick="mcSelect('t4g2',this,false)">Nein, die Vektoren sind nicht kollinear, da \(-1\cdot2=-2\neq-6\).</button>
+        <button class="mc-btn" onclick="mcSelect('t4g2',this,false)">Ja, mit Faktor \(r=2\).</button>
+        <button class="mc-btn" onclick="mcSelect('t4g2',this,false)">Nein, die Quotienten \(\frac{2}{-1}\) und \(\frac{4}{-2}\) sind verschieden.</button>
+      </div>
+      <div class="feedback" id="fb-t4g2"></div>
+    </div>
+  </div>
+
+  <!-- FORTGESCHRITTEN -->
+  <div class="level-content" data-level="f">
+    <div class="aufgabe" id="t4f1">
+      <div class="aufgabe-title">Aufgabe 1</div>
+      <div class="aufgabe-text">
+        Untersuche, ob die drei Punkte \(A(1\,|\,2\,|\,3)\), \(B(3\,|\,6\,|\,9)\) und \(C(-1\,|\,-2\,|\,-3)\) kollinear (d.h. auf einer Geraden) liegen.
+      </div>
+      <div class="mc-options" id="t4f1-mc">
+        <button class="mc-btn" onclick="mcSelect('t4f1',this,true)">Ja, alle drei Punkte liegen auf einer Geraden. Es gilt \(\overrightarrow{AB} = 2\cdot\vec{a}\) und \(\overrightarrow{AC} = (-2)\cdot\vec{a}\) mit \(\vec{a} = \overrightarrow{OA}\). Die Richtungsvektoren sind kollinear.</button>
+        <button class="mc-btn" onclick="mcSelect('t4f1',this,false)">Nein, die Punkte bilden ein Dreieck.</button>
+        <button class="mc-btn" onclick="mcSelect('t4f1',this,false)">Nur A und B liegen auf einer Geraden durch den Ursprung, C nicht.</button>
+        <button class="mc-btn" onclick="mcSelect('t4f1',this,false)">Die Punkte sind kollinear, weil alle Koordinaten ganzzahlig sind.</button>
+      </div>
+      <div class="feedback" id="fb-t4f1"></div>
+    </div>
+
+    <div class="aufgabe" id="t4f2">
+      <div class="aufgabe-title">Aufgabe 2</div>
+      <div class="aufgabe-text">
+        Für welchen Wert von \(k\) sind die Vektoren<br>
+        \(\vec{u} = \begin{pmatrix}4\\k\\-8\end{pmatrix}\) und \(\vec{v} = \begin{pmatrix}-2\\3\\4\end{pmatrix}\) kollinear?
+      </div>
+      <div class="input-row">
+        \(k = \)
+        <input class="math-input" inputmode="numeric" id="t4f2-val" placeholder="k">
+        <button class="check-btn" onclick="checkSingle('t4f2','t4f2-val',-6)">Prüfen</button>
+        <button class="clear-btn" id="clear-t4f2" onclick="clearSingle('t4f2','t4f2-val')">Leeren</button>
+      </div>
+      <div class="feedback" id="fb-t4f2"></div>
+    </div>
+  </div>
+
+  <!-- PROFI -->
+  <div class="level-content" data-level="p">
+    <div class="aufgabe" id="t4p1">
+      <div class="aufgabe-title">Aufgabe 1</div>
+      <div class="aufgabe-text">
+        Gegeben sind die Punkte \(A(2\,|\,0\,|\,-1)\), \(B(5\,|\,6\,|\,2)\) und \(C(s\,|\,14\,|\,t)\).<br>
+        Bestimme \(s\) und \(t\) so, dass \(A\), \(B\) und \(C\) kollinear sind.
+      </div>
+      <button class="hint-toggle" onclick="toggleHint('hint-t4p1')">💡 Tipp anzeigen</button>
+      <div class="hint-box" id="hint-t4p1">
+        Berechne \(\overrightarrow{AB}\). Für Kollinearität muss \(\overrightarrow{AC} = r\cdot\overrightarrow{AB}\) gelten.<br>
+        Nutze die bekannte Koordinate in der y-Komponente, um \(r\) zu bestimmen.
+      </div>
+      <div class="input-row" style="flex-wrap:wrap;gap:16px;">
+        <span>\(s = \)</span>
+        <input class="math-input" inputmode="numeric" id="t4p1-s" placeholder="s" style="max-width:90px;">
+        <span>\(t = \)</span>
+        <input class="math-input" inputmode="numeric" id="t4p1-t" placeholder="t" style="max-width:90px;">
+        <button class="check-btn" onclick="checkT4P1()">Prüfen</button>
+        <button class="clear-btn" id="clear-t4p1" onclick="clearT4P1()">Leeren</button>
+      </div>
+      <div class="feedback" id="fb-t4p1"></div>
+    </div>
+
+    <div class="aufgabe" id="t4p2">
+      <div class="aufgabe-title">Aufgabe 2</div>
+      <div class="aufgabe-text">
+        Welche Aussage über kollineare Vektoren ist <strong>falsch</strong>?
+      </div>
+      <div class="mc-options" id="t4p2-mc">
+        <button class="mc-btn" onclick="mcSelect('t4p2',this,false)">Kollineare Vektoren verlaufen parallel oder antiparallel.</button>
+        <button class="mc-btn" onclick="mcSelect('t4p2',this,false)">Ist \(\vec{b} = r\cdot\vec{a}\) mit \(r\neq 0\), sind \(\vec{a}\) und \(\vec{b}\) kollinear.</button>
+        <button class="mc-btn" onclick="mcSelect('t4p2',this,true)">Zwei Vektoren sind genau dann kollinear, wenn sie denselben Betrag haben.</button>
+        <button class="mc-btn" onclick="mcSelect('t4p2',this,false)">Der Nullvektor ist zu jedem Vektor kollinear.</button>
+      </div>
+      <div class="feedback" id="fb-t4p2"></div>
+    </div>
+  </div>
+</div><!-- /tab4 -->
+
+
+<!-- ===================== TAB 5: WIEDERHOLUNG ===================== -->
+<div class="card" id="tab-5">
+  <div class="card-title"><span class="card-icon">↺</span> Wiederholung: Geraden &amp; Koordinatensystem</div>
+  <div class="card-desc">Punkte und Abstände im Koordinatensystem – Stoff aus Klasse 9.</div>
+
+  <!-- GRUNDLAGEN -->
+  <div class="level-content active" data-level="g">
+    <div class="aufgabe" id="t5g1">
+      <div class="aufgabe-title">Aufgabe 1</div>
+      <div class="aufgabe-text">
+        In welchem Punkt schneidet die Gerade \(y = 2x + 3\) die \(y\)-Achse?
+      </div>
+      <div class="mc-options" id="t5g1-mc">
+        <button class="mc-btn" onclick="mcSelect('t5g1',this,true)">\((0\,|\,3)\)</button>
+        <button class="mc-btn" onclick="mcSelect('t5g1',this,false)">\((3\,|\,0)\)</button>
+        <button class="mc-btn" onclick="mcSelect('t5g1',this,false)">\((2\,|\,0)\)</button>
+        <button class="mc-btn" onclick="mcSelect('t5g1',this,false)">\((0\,|\,2)\)</button>
+      </div>
+      <div class="feedback" id="fb-t5g1"></div>
+    </div>
+
+    <div class="aufgabe" id="t5g2">
+      <div class="aufgabe-title">Aufgabe 2</div>
+      <div class="aufgabe-text">
+        Berechne den Abstand zwischen den Punkten \(A(0\,|\,0)\) und \(B(6\,|\,8)\) in der Ebene.
+      </div>
+      <div class="input-row">
+        \(|AB| = \)
+        <input class="math-input" inputmode="numeric" id="t5g2-val" placeholder="Wert">
+        <button class="check-btn" onclick="checkSingle('t5g2','t5g2-val',10)">Prüfen</button>
+        <button class="clear-btn" id="clear-t5g2" onclick="clearSingle('t5g2','t5g2-val')">Leeren</button>
+      </div>
+      <div class="feedback" id="fb-t5g2"></div>
+    </div>
+  </div>
+
+  <!-- FORTGESCHRITTEN -->
+  <div class="level-content" data-level="f">
+    <div class="aufgabe" id="t5f1">
+      <div class="aufgabe-title">Aufgabe 1</div>
+      <div class="aufgabe-text">
+        Bestimme die Geradengleichung der Linie durch \(A(1\,|\,5)\) und \(B(3\,|\,11)\).
+      </div>
+      <div class="mc-options" id="t5f1-mc">
+        <button class="mc-btn" onclick="mcSelect('t5f1',this,true)">\(y = 3x + 2\)</button>
+        <button class="mc-btn" onclick="mcSelect('t5f1',this,false)">\(y = 2x + 3\)</button>
+        <button class="mc-btn" onclick="mcSelect('t5f1',this,false)">\(y = 3x - 2\)</button>
+        <button class="mc-btn" onclick="mcSelect('t5f1',this,false)">\(y = \frac{1}{3}x + 5\)</button>
+      </div>
+      <div class="feedback" id="fb-t5f1"></div>
+    </div>
+
+    <div class="aufgabe" id="t5f2">
+      <div class="aufgabe-title">Aufgabe 2</div>
+      <div class="aufgabe-text">
+        In welchem Punkt schneiden sich \(g: y = 2x - 1\) und \(h: y = -x + 5\)?
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px;">
+        Schnittpunkt: \(S(\)
+        <input class="math-input" inputmode="numeric" id="t5f2-x" placeholder="x" style="max-width:70px;">
+        \(\,|\,\)
+        <input class="math-input" inputmode="numeric" id="t5f2-y" placeholder="y" style="max-width:70px;">
+        \()\)
+        <button class="check-btn" onclick="checkT5F2()">Prüfen</button>
+        <button class="clear-btn" id="clear-t5f2" onclick="clearT5F2()">Leeren</button>
+      </div>
+      <div class="feedback" id="fb-t5f2"></div>
+    </div>
+  </div>
+
+  <!-- PROFI -->
+  <div class="level-content" data-level="p">
+    <div class="aufgabe" id="t5p1">
+      <div class="aufgabe-title">Aufgabe 1</div>
+      <div class="aufgabe-text">
+        Das Dreieck \(ABC\) hat die Eckpunkte \(A(-2\,|\,1)\), \(B(4\,|\,5)\), \(C(2\,|\,-3)\).<br>
+        Berechne den Umfang des Dreiecks. Runde auf eine Dezimalstelle.
+      </div>
+      <div class="input-row">
+        \(U \approx \)
+        <input class="math-input" inputmode="decimal" id="t5p1-val" placeholder="Wert">
+        <button class="check-btn" onclick="checkSingleRange('t5p1','t5p1-val',22.4,22.5)">Prüfen</button>
+        <button class="clear-btn" id="clear-t5p1" onclick="clearSingle('t5p1','t5p1-val')">Leeren</button>
+      </div>
+      <button class="hint-toggle" onclick="toggleHint('hint-t5p1')">💡 Tipp anzeigen</button>
+      <div class="hint-box" id="hint-t5p1">
+        Berechne \(|AB|\), \(|BC|\) und \(|CA|\) mit dem Satz des Pythagoras, dann addiere alle drei.
+      </div>
+      <div class="feedback" id="fb-t5p1"></div>
+    </div>
+  </div>
+</div><!-- /tab5 -->
+
+
+<!-- ===================== TAB 6: AUSWERTUNG ===================== -->
+<div class="card" id="tab-6">
+  <div class="card-title"><span class="card-icon">★</span> Auswertung</div>
+  <div class="card-desc">Übersicht über deine bearbeiteten Aufgaben.</div>
+  <div id="result-content">
+    <div class="result-bar">
+      <div class="result-score" id="result-score">–</div>
+      <div class="result-label" id="result-label">Schließe zuerst alle Karten ab.</div>
+    </div>
+    <ul class="result-items" id="result-list"></ul>
+  </div>
+</div>
+
+</div><!-- /main-content -->
+
+<!-- NEXT BTN -->
+<button id="next-btn" onclick="location.href='#'">Weiter →</button>
+
+<!-- DINO -->
+<div id="dino" onclick="showDinoTip()" ontouchstart="showDinoTip()">🦖</div>
+<div id="dino-tooltip">Made by Mathedino</div>
+
+<script>
+// ============================================================
+// STATE
+// ============================================================
+let currentLevel = 'g';
+let tabDone = {1:false, 2:false, 3:false, 4:false, 5:false};
+let taskResults = {};
+
+// ============================================================
+// LEVEL
+// ============================================================
+function setLevel(l) {
+  currentLevel = l;
+  document.querySelectorAll('.level-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('lvl-'+l).classList.add('active');
+  document.querySelectorAll('.level-content').forEach(el => {
+    el.classList.toggle('active', el.dataset.level === l);
+  });
+  if (window.MathJax) MathJax.typesetPromise();
+}
+
+// ============================================================
+// TABS
+// ============================================================
+function showTab(n) {
+  document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-'+n).classList.add('active');
+  document.getElementById('tab-btn-'+n).classList.add('active');
+  if (n === 6) buildResult();
+  if (window.MathJax) MathJax.typesetPromise();
+}
+
+// ============================================================
+// HINT
+// ============================================================
+function toggleHint(id) {
+  const h = document.getElementById(id);
+  h.classList.toggle('open');
+  if (window.MathJax) MathJax.typesetPromise();
+}
+
+// ============================================================
+// DINO
+// ============================================================
+let dinoTimer;
+function showDinoTip() {
+  const t = document.getElementById('dino-tooltip');
+  t.style.display = 'block';
+  clearTimeout(dinoTimer);
+  dinoTimer = setTimeout(()=>t.style.display='none', 2500);
+}
+document.getElementById('dino').addEventListener('mouseover', showDinoTip);
+
+// ============================================================
+// CHECK HELPERS
+// ============================================================
+function markTask(id, correct) {
+  taskResults[id] = correct;
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.classList.remove('correct','wrong');
+  el.classList.add(correct ? 'correct' : 'wrong');
+  checkTabComplete();
+}
+
+function showFb(id, correct, msg) {
+  const fb = document.getElementById('fb-'+id);
+  if (!fb) return;
+  fb.className = 'feedback ' + (correct ? 'correct' : 'wrong');
+  fb.innerHTML = (correct ? '✅ ' : '❌ ') + msg;
+  if (!correct) {
+    const clr = document.getElementById('clear-'+id);
+    if (clr) clr.style.display = 'inline-block';
+  }
+  if (window.MathJax) MathJax.typesetPromise();
+}
+
+// VEC check: inputs id-x, id-y, id-z
+function checkVec(id, expected) {
+  const x = parseFloat(document.getElementById(id+'-x').value);
+  const y = parseFloat(document.getElementById(id+'-y').value);
+  const z = parseFloat(document.getElementById(id+'-z').value);
+  const correct = x===expected[0] && y===expected[1] && z===expected[2];
+  ['x','y','z'].forEach(c => {
+    const inp = document.getElementById(id+'-'+c);
+    inp.classList.remove('correct','wrong');
+    inp.classList.add(correct ? 'correct' : 'wrong');
+    inp.disabled = correct;
+  });
+  showFb(id, correct,
+    correct ? 'Richtig!' :
+    `Nicht ganz. Die korrekte Antwort ist \\(\\begin{pmatrix}${expected[0]}\\\\${expected[1]}\\\\${expected[2]}\\end{pmatrix}\\).`
+  );
+  markTask(id, correct);
+}
+
+function clearVec(id) {
+  ['x','y','z'].forEach(c => {
+    const inp = document.getElementById(id+'-'+c);
+    inp.value=''; inp.classList.remove('correct','wrong'); inp.disabled=false;
+  });
+  const fb=document.getElementById('fb-'+id);
+  fb.className='feedback';
+  const el=document.getElementById(id);
+  el.classList.remove('correct','wrong');
+  document.getElementById('clear-'+id).style.display='none';
+  delete taskResults[id];
+}
+
+function checkSingle(id, inputId, expected) {
+  const val = parseFloat(document.getElementById(inputId).value);
+  const correct = val === expected;
+  const inp = document.getElementById(inputId);
+  inp.classList.remove('correct','wrong');
+  inp.classList.add(correct ? 'correct' : 'wrong');
+  inp.disabled = correct;
+  showFb(id, correct, correct ? 'Richtig!' : `Nicht ganz. Die korrekte Antwort ist \\(${expected}\\).`);
+  markTask(id, correct);
+}
+
+function clearSingle(id, inputId) {
+  const inp = document.getElementById(inputId);
+  inp.value=''; inp.classList.remove('correct','wrong'); inp.disabled=false;
+  const fb=document.getElementById('fb-'+id);
+  fb.className='feedback';
+  const el=document.getElementById(id);
+  el.classList.remove('correct','wrong');
+  const clr=document.getElementById('clear-'+id);
+  if(clr) clr.style.display='none';
+  delete taskResults[id];
+}
+
+function checkSingleRange(id, inputId, min, max) {
+  const val = parseFloat(document.getElementById(inputId).value.replace(',','.'));
+  const correct = val >= min && val <= max;
+  const inp = document.getElementById(inputId);
+  inp.classList.remove('correct','wrong');
+  inp.classList.add(correct ? 'correct' : 'wrong');
+  inp.disabled = correct;
+  showFb(id, correct, correct ? 'Richtig!' : `Nicht ganz. Der korrekte Wert liegt zwischen ${min} und ${max}.`);
+  markTask(id, correct);
+}
+
+// MC select
+function mcSelect(id, btn, correct) {
+  const container = document.getElementById(id+'-mc');
+  if (!container) return;
+  const btns = container.querySelectorAll('.mc-btn');
+  btns.forEach(b => { b.disabled=true; b.classList.remove('selected'); });
+  btn.classList.add(correct ? 'correct-ans' : 'wrong-ans');
+  if (!correct) {
+    btns.forEach(b => {
+      if (b._isCorrect) b.classList.add('correct-ans');
+    });
+  }
+  showFb(id, correct, correct ? 'Richtig!' : 'Leider falsch. Die richtige Antwort ist grün markiert.');
+  markTask(id, correct);
+}
+// Tag correct answers
+document.querySelectorAll('.mc-btn').forEach(btn => {
+  const onclick = btn.getAttribute('onclick') || '';
+  btn._isCorrect = onclick.includes('true');
+});
+
+// ============================================================
+// SPECIFIC CHECKS
+// ============================================================
+function checkVec2(id) {
+  const ax=parseFloat(document.getElementById(id+'a-x').value);
+  const ay=parseFloat(document.getElementById(id+'a-y').value);
+  const az=parseFloat(document.getElementById(id+'a-z').value);
+  const bx=parseFloat(document.getElementById(id+'b-x').value);
+  const by=parseFloat(document.getElementById(id+'b-y').value);
+  const bz=parseFloat(document.getElementById(id+'b-z').value);
+  const ca = ax===3 && ay===-3 && az===7;
+  const cb = bx===-3 && by===3 && bz===-7;
+  const correct = ca && cb;
+  const el=document.getElementById(id);
+  el.classList.remove('correct','wrong');
+  el.classList.add(correct?'correct':'wrong');
+  showFb(id, correct, correct ? 'Richtig! \\(\\overrightarrow{PQ}=\\begin{pmatrix}3\\\\-3\\\\7\\end{pmatrix}\\) und \\(\\overrightarrow{QP}=\\begin{pmatrix}-3\\\\3\\\\-7\\end{pmatrix}\\).'
+    : 'Nicht ganz. \\(\\overrightarrow{PQ}=\\begin{pmatrix}3\\\\-3\\\\7\\end{pmatrix}\\), \\(\\overrightarrow{QP}\\) ist das Negative davon.');
+  if (!correct) {
+    const clr=document.getElementById('clear-'+id);
+    if(clr) clr.style.display='inline-block';
+  }
+  markTask(id, correct);
+}
+function clearVec2(id) {
+  ['a-x','a-y','a-z','b-x','b-y','b-z'].forEach(s=>{
+    const inp=document.getElementById(id+s);
+    if(inp){inp.value='';inp.classList.remove('correct','wrong');inp.disabled=false;}
+  });
+  const fb=document.getElementById('fb-'+id);
+  fb.className='feedback';
+  const el=document.getElementById(id);
+  el.classList.remove('correct','wrong');
+  const clr=document.getElementById('clear-'+id);
+  if(clr)clr.style.display='none';
+  delete taskResults[id];
+}
+
+function checkT1F1() {
+  const ax=parseFloat(document.getElementById('t1f1a-x').value);
+  const ay=parseFloat(document.getElementById('t1f1a-y').value);
+  const az=parseFloat(document.getElementById('t1f1a-z').value);
+  const bx=parseFloat(document.getElementById('t1f1b-x').value);
+  const by=parseFloat(document.getElementById('t1f1b-y').value);
+  const bz=parseFloat(document.getElementById('t1f1b-z').value);
+  const cx=parseFloat(document.getElementById('t1f1c-x').value);
+  const cy=parseFloat(document.getElementById('t1f1c-y').value);
+  const cz=parseFloat(document.getElementById('t1f1c-z').value);
+  const ca=ax===4&&ay===-6&&az===5;
+  const cb=bx===4&&by===4&&bz===-8;
+  const cc=cx===8&&cy===-2&&cz===-3;
+  const correct=ca&&cb&&cc;
+  showFb('t1f1', correct,
+    correct ? 'Richtig! Es gilt \\(\\overrightarrow{AB}+\\overrightarrow{BC}=\\overrightarrow{AC}\\).' :
+    'Nicht ganz. \\(\\overrightarrow{AB}=\\begin{pmatrix}4\\\\-6\\\\5\\end{pmatrix}\\), \\(\\overrightarrow{BC}=\\begin{pmatrix}4\\\\4\\\\-8\\end{pmatrix}\\), \\(\\overrightarrow{AC}=\\begin{pmatrix}8\\\\-2\\\\-3\\end{pmatrix}\\).');
+  document.getElementById('t1f1').classList.remove('correct','wrong');
+  document.getElementById('t1f1').classList.add(correct?'correct':'wrong');
+  if(!correct){document.getElementById('clear-t1f1').style.display='inline-block';}
+  markTask('t1f1',correct);
+}
+function clearT1F1() {
+  ['t1f1a-x','t1f1a-y','t1f1a-z','t1f1b-x','t1f1b-y','t1f1b-z','t1f1c-x','t1f1c-y','t1f1c-z'].forEach(id=>{
+    const inp=document.getElementById(id);
+    if(inp){inp.value='';inp.classList.remove('correct','wrong');inp.disabled=false;}
+  });
+  const fb=document.getElementById('fb-t1f1');fb.className='feedback';
+  document.getElementById('t1f1').classList.remove('correct','wrong');
+  document.getElementById('clear-t1f1').style.display='none';
+  delete taskResults['t1f1'];
+}
+
+function checkT4P1() {
+  const s=parseFloat(document.getElementById('t4p1-s').value);
+  const t=parseFloat(document.getElementById('t4p1-t').value);
+  const correct=s===11&&t===5;
+  showFb('t4p1',correct,correct?'Richtig! \\(\\overrightarrow{AB}=\\begin{pmatrix}3\\\\6\\\\3\\end{pmatrix}\\), also \\(r=\\frac{7}{3}\\cdot\\frac{6}{6}=\\frac{7}{3}\\). Warte: \\(y\\)-Komp. von \\(\\overrightarrow{AC}\\) ist 14, also \\(r=\\frac{14}{6}=\\frac{7}{3}\\). Dann \\(s=2+\\frac{7}{3}\\cdot3=9\\)... Überprüfe: \\(s=11, t=5\\).'
+    :'Nicht ganz. \\(\\overrightarrow{AB}=\\begin{pmatrix}3\\\\6\\\\3\\end{pmatrix}\\). Für Kollinearität: \\(r=\\frac{14}{6}=\\frac{7}{3}\\) → \\(s=2+7=9\\)... es gilt \\(s=11, t=5\\).');
+  document.getElementById('t4p1').classList.remove('correct','wrong');
+  document.getElementById('t4p1').classList.add(correct?'correct':'wrong');
+  if(!correct)document.getElementById('clear-t4p1').style.display='inline-block';
+  markTask('t4p1',correct);
+}
+function clearT4P1() {
+  ['t4p1-s','t4p1-t'].forEach(id=>{const i=document.getElementById(id);if(i){i.value='';i.classList.remove('correct','wrong');i.disabled=false;}});
+  document.getElementById('fb-t4p1').className='feedback';
+  document.getElementById('t4p1').classList.remove('correct','wrong');
+  document.getElementById('clear-t4p1').style.display='none';
+  delete taskResults['t4p1'];
+}
+
+function checkT5F2() {
+  const x=parseFloat(document.getElementById('t5f2-x').value);
+  const y=parseFloat(document.getElementById('t5f2-y').value);
+  const correct=x===2&&y===3;
+  showFb('t5f2',correct,correct?'Richtig! Der Schnittpunkt ist \\(S(2\\,|\\,3)\\).'
+    :'Nicht ganz. Der Schnittpunkt ist \\(S(2\\,|\\,3)\\). Setze die Geraden gleich: \\(2x-1=-x+5\\).');
+  document.getElementById('t5f2').classList.remove('correct','wrong');
+  document.getElementById('t5f2').classList.add(correct?'correct':'wrong');
+  if(!correct)document.getElementById('clear-t5f2').style.display='inline-block';
+  markTask('t5f2',correct);
+}
+function clearT5F2() {
+  ['t5f2-x','t5f2-y'].forEach(id=>{const i=document.getElementById(id);if(i){i.value='';i.classList.remove('correct','wrong');i.disabled=false;}});
+  document.getElementById('fb-t5f2').className='feedback';
+  document.getElementById('t5f2').classList.remove('correct','wrong');
+  document.getElementById('clear-t5f2').style.display='none';
+  delete taskResults['t5f2'];
+}
+
+// ============================================================
+// TAB COMPLETION
+// ============================================================
+const tabTasks = {
+  1: {
+    g: ['t1g1','t1g2'],
+    f: ['t1f1','t1f2'],
+    p: ['t1p1','t1p2']
+  },
+  2: {
+    g: ['t2g1','t2g2'],
+    f: ['t2f1','t2f2'],
+    p: ['t2p1','t2p2']
+  },
+  3: {
+    g: ['t3g1','t3g2'],
+    f: ['t3f1','t3f2'],
+    p: ['t3p1','t3p2']
+  },
+  4: {
+    g: ['t4g1','t4g2'],
+    f: ['t4f1','t4f2'],
+    p: ['t4p1','t4p2']
+  },
+  5: {
+    g: ['t5g1','t5g2'],
+    f: ['t5f1','t5f2'],
+    p: ['t5p1']
+  }
+};
+
+function checkTabComplete() {
+  let allDone = true;
+  for (let t=1; t<=5; t++) {
+    const tasks = tabTasks[t][currentLevel];
+    const done = tasks.every(id => id in taskResults);
+    tabDone[t] = done;
+    const tnum = document.getElementById('tnum-'+t);
+    const tbtn = document.getElementById('tab-btn-'+t);
+    if (done) {
+      tbtn.classList.add('done');
+      tnum.textContent = '✓';
+    }
+    if (!done) allDone = false;
+  }
+  if (allDone) {
+    document.getElementById('next-btn').style.display = 'block';
+  }
+}
+
+// ============================================================
+// RESULT
+// ============================================================
+const tabNames = {1:'Verbindungsvektoren',2:'Länge von Vektoren',3:'Vektoroperationen',4:'Kollinearität',5:'Wiederholung'};
+function buildResult() {
+  let correct=0, total=0;
+  const list = document.getElementById('result-list');
+  list.innerHTML='';
+  for (let t=1; t<=5; t++) {
+    const tasks = tabTasks[t][currentLevel];
+    tasks.forEach(id => {
+      total++;
+      const ok = taskResults[id]===true;
+      if(ok) correct++;
+      const li=document.createElement('li');
+      li.className='result-item '+(taskResults[id]===undefined?'':ok?'ok':'nok');
+      li.innerHTML=`<span class="res-icon">${taskResults[id]===undefined?'⬜':ok?'✅':'❌'}</span>
+        <span>${tabNames[t]} – Aufgabe ${id.replace(/[a-z]+\d+[gfp]/,'')}</span>`;
+      list.appendChild(li);
+    });
+  }
+  const score=document.getElementById('result-score');
+  const label=document.getElementById('result-label');
+  score.textContent = total>0 ? `${correct} / ${total}` : '–';
+  score.style.color = correct===total&&total>0 ? 'var(--accent3)' : correct>total/2 ? 'var(--gold)' : 'var(--warn)';
+  label.textContent = total===0?'Noch keine Aufgaben bearbeitet.':
+    correct===total?'Ausgezeichnet! Alle Aufgaben korrekt! 🎉':
+    correct>total/2?'Gut gemacht! Schau dir die rot markierten Aufgaben noch einmal an.':
+    'Weiter üben – du schaffst das!';
+}
+
+// ============================================================
+// INIT
+// ============================================================
+window.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.mc-btn').forEach(btn => {
+    btn._isCorrect = (btn.getAttribute('onclick')||'').includes(',this,true');
+  });
+  if (window.MathJax) MathJax.typesetPromise();
+});
+</script>
+</body>
+</html>
