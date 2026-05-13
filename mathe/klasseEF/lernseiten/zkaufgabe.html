@@ -1,0 +1,1486 @@
+<!DOCTYPE html>
+
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Wasserturm – Analysis im Sachkontext</title>
+<style>
+  :root {
+    --bg: #0f1923;
+    --surface: #162030;
+    --card: #1c2b3a;
+    --border: #2a3f55;
+    --accent: #3b9eff;
+    --accent2: #00d4aa;
+    --text: #e8f0fe;
+    --muted: #7a9bb5;
+    --green: #00c96e;
+    --green-bg: #002a1a;
+    --red: #ff4560;
+    --red-bg: #2a0010;
+    --yellow: #ffc34d;
+    --font-head: 'Sora', sans-serif;
+    --font-body: 'IBM Plex Sans', sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+  }
+
+@import url(‘https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono&display=swap’);
+
+- { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+body {
+background: var(–bg);
+color: var(–text);
+font-family: var(–font-body);
+font-size: 17px;
+line-height: 1.6;
+min-height: 100vh;
+}
+
+/* –– HEADER –– */
+.page-header {
+background: linear-gradient(135deg, #0a1520 0%, #162030 60%, #1a2a40 100%);
+border-bottom: 2px solid var(–border);
+padding: 1.5rem 1.25rem 1.25rem;
+position: relative;
+overflow: hidden;
+}
+.page-header::before {
+content: ‘’;
+position: absolute;
+top: -40px; right: -40px;
+width: 200px; height: 200px;
+background: radial-gradient(circle, rgba(59,158,255,0.12) 0%, transparent 70%);
+pointer-events: none;
+}
+.subject-badge {
+display: inline-block;
+background: var(–accent);
+color: #fff;
+font-family: var(–font-head);
+font-size: 0.7rem;
+font-weight: 700;
+letter-spacing: 0.12em;
+text-transform: uppercase;
+padding: 0.25rem 0.7rem;
+border-radius: 20px;
+margin-bottom: 0.6rem;
+}
+.page-header h1 {
+font-family: var(–font-head);
+font-size: 1.5rem;
+font-weight: 800;
+color: #fff;
+line-height: 1.2;
+}
+.page-header p {
+color: var(–muted);
+font-size: 0.9rem;
+margin-top: 0.4rem;
+}
+
+/* –– CONTEXT BOX –– */
+.context-box {
+margin: 1rem 1rem 0;
+background: var(–card);
+border: 1px solid var(–border);
+border-left: 4px solid var(–accent2);
+border-radius: 10px;
+padding: 1rem 1.1rem;
+}
+.context-box h2 {
+font-family: var(–font-head);
+font-size: 0.85rem;
+font-weight: 700;
+color: var(–accent2);
+text-transform: uppercase;
+letter-spacing: 0.1em;
+margin-bottom: 0.6rem;
+}
+.context-box p { font-size: 0.95rem; color: var(–text); margin-bottom: 0.5rem; }
+.context-box p:last-child { margin-bottom: 0; }
+
+.formula-display {
+background: #0a1520;
+border: 1px solid var(–border);
+border-radius: 8px;
+padding: 0.75rem 1rem;
+margin: 0.75rem 0;
+text-align: center;
+font-size: 1.05rem;
+}
+
+/* –– TABS –– */
+.tabs-wrapper {
+margin: 1rem 0 0;
+border-bottom: 2px solid var(–border);
+overflow-x: auto;
+-webkit-overflow-scrolling: touch;
+scrollbar-width: none;
+}
+.tabs-wrapper::-webkit-scrollbar { display: none; }
+.tabs {
+display: flex;
+padding: 0 0.75rem;
+gap: 0.25rem;
+min-width: max-content;
+}
+.tab-btn {
+background: none;
+border: none;
+border-bottom: 3px solid transparent;
+color: var(–muted);
+font-family: var(–font-head);
+font-size: 0.82rem;
+font-weight: 700;
+padding: 0.75rem 0.9rem;
+cursor: pointer;
+white-space: nowrap;
+transition: color 0.2s, border-color 0.2s;
+letter-spacing: 0.03em;
+min-height: 44px;
+}
+.tab-btn:active { opacity: 0.7; }
+.tab-btn.active {
+color: var(–accent);
+border-bottom-color: var(–accent);
+}
+.tab-btn.done {
+color: var(–green);
+}
+.tab-btn.done.active {
+border-bottom-color: var(–green);
+}
+
+/* –– PANELS –– */
+.panel { display: none; padding: 1rem; }
+.panel.active { display: block; }
+
+/* –– TASK CARD –– */
+.task-card {
+background: var(–card);
+border: 1px solid var(–border);
+border-radius: 12px;
+padding: 1.1rem;
+margin-bottom: 1rem;
+}
+.task-card h3 {
+font-family: var(–font-head);
+font-size: 1rem;
+font-weight: 700;
+color: var(–accent);
+margin-bottom: 0.75rem;
+display: flex;
+align-items: center;
+gap: 0.5rem;
+}
+.task-num {
+background: var(–accent);
+color: #fff;
+font-size: 0.75rem;
+font-weight: 800;
+width: 24px; height: 24px;
+border-radius: 50%;
+display: flex; align-items: center; justify-content: center;
+flex-shrink: 0;
+}
+.task-text {
+background: #0a1520;
+border-left: 3px solid var(–accent);
+border-radius: 0 8px 8px 0;
+padding: 0.75rem 1rem;
+margin-bottom: 1rem;
+font-size: 0.95rem;
+font-style: italic;
+color: #c8d8ee;
+}
+.task-text p { margin-bottom: 0.4rem; }
+.task-text p:last-child { margin-bottom: 0; }
+
+/* –– STEPS –– */
+.step {
+margin-bottom: 1.25rem;
+}
+.step-label {
+font-family: var(–font-head);
+font-size: 0.8rem;
+font-weight: 700;
+color: var(–muted);
+text-transform: uppercase;
+letter-spacing: 0.1em;
+margin-bottom: 0.5rem;
+}
+.step-prompt {
+font-size: 0.95rem;
+margin-bottom: 0.7rem;
+color: var(–text);
+}
+
+/* –– INPUT –– */
+.input-row {
+display: flex;
+gap: 0.5rem;
+align-items: center;
+flex-wrap: wrap;
+margin-bottom: 0.5rem;
+}
+.math-input {
+background: #0a1520;
+border: 2px solid var(–border);
+border-radius: 8px;
+color: var(–text);
+font-family: var(–font-mono);
+font-size: 1rem;
+padding: 0.6rem 0.8rem;
+min-height: 44px;
+flex: 1;
+min-width: 80px;
+-webkit-appearance: none;
+transition: border-color 0.2s;
+}
+.math-input:focus { outline: none; border-color: var(–accent); }
+.math-input.correct { border-color: var(–green); background: var(–green-bg); }
+.math-input.wrong { border-color: var(–red); background: var(–red-bg); }
+
+/* –– BUTTONS –– */
+.btn {
+background: var(–accent);
+border: none;
+border-radius: 8px;
+color: #fff;
+font-family: var(–font-head);
+font-size: 0.85rem;
+font-weight: 700;
+padding: 0.6rem 1.1rem;
+min-height: 44px;
+cursor: pointer;
+transition: opacity 0.15s, transform 0.1s;
+letter-spacing: 0.03em;
+}
+.btn:active { opacity: 0.8; transform: scale(0.97); }
+.btn-outline {
+background: transparent;
+border: 2px solid var(–border);
+color: var(–muted);
+}
+.btn-outline:active { border-color: var(–accent); color: var(–accent); }
+.btn-green { background: var(–green); }
+.btn-sm { font-size: 0.78rem; padding: 0.45rem 0.8rem; min-height: 36px; }
+
+/* –– FEEDBACK –– */
+.feedback {
+display: none;
+border-radius: 8px;
+padding: 0.7rem 1rem;
+margin-top: 0.5rem;
+font-size: 0.9rem;
+font-weight: 600;
+}
+.feedback.correct {
+display: flex;
+align-items: flex-start;
+gap: 0.5rem;
+background: var(–green-bg);
+border: 1px solid var(–green);
+color: var(–green);
+}
+.feedback.wrong {
+display: flex;
+align-items: flex-start;
+gap: 0.5rem;
+background: var(–red-bg);
+border: 1px solid var(–red);
+color: var(–red);
+}
+
+/* –– SOLUTION BOX –– */
+.solution-toggle {
+margin-top: 0.75rem;
+}
+.solution-btn {
+background: transparent;
+border: 2px dashed var(–border);
+border-radius: 8px;
+color: var(–muted);
+font-family: var(–font-head);
+font-size: 0.82rem;
+font-weight: 700;
+padding: 0.6rem 1rem;
+min-height: 44px;
+cursor: pointer;
+width: 100%;
+text-align: left;
+transition: border-color 0.2s, color 0.2s;
+display: flex;
+justify-content: space-between;
+align-items: center;
+}
+.solution-btn:active { border-color: var(–accent2); color: var(–accent2); }
+.solution-content {
+display: none;
+background: #0b1f14;
+border: 1px solid #1e4a30;
+border-radius: 0 0 8px 8px;
+padding: 1rem;
+margin-top: -2px;
+}
+.solution-content.open { display: block; }
+.solution-content .sol-step {
+margin-bottom: 0.8rem;
+padding-bottom: 0.8rem;
+border-bottom: 1px solid #1e4a30;
+}
+.solution-content .sol-step:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+.sol-label {
+font-family: var(–font-head);
+font-size: 0.75rem;
+font-weight: 700;
+color: var(–accent2);
+text-transform: uppercase;
+letter-spacing: 0.1em;
+margin-bottom: 0.4rem;
+}
+.sol-text { font-size: 0.92rem; color: #a8d8c0; line-height: 1.6; }
+
+/* –– HINT BOX –– */
+.hint-box {
+background: #1a1800;
+border: 1px solid #3a3000;
+border-radius: 8px;
+padding: 0.7rem 0.9rem;
+margin-top: 0.7rem;
+display: none;
+}
+.hint-box.open { display: block; }
+.hint-box p { font-size: 0.88rem; color: #c8b840; }
+
+/* –– INFO CHIP –– */
+.info-chip {
+display: inline-block;
+background: rgba(59,158,255,0.12);
+border: 1px solid rgba(59,158,255,0.3);
+border-radius: 20px;
+color: var(–accent);
+font-size: 0.78rem;
+font-weight: 600;
+padding: 0.2rem 0.65rem;
+margin: 0.15rem 0.15rem 0.15rem 0;
+}
+
+/* –– DIVIDER –– */
+.divider {
+height: 1px;
+background: var(–border);
+margin: 1.25rem 0;
+}
+
+/* –– PROGRESS BAR –– */
+.progress-bar-wrap {
+background: var(–border);
+border-radius: 4px;
+height: 4px;
+margin: 0 1rem 0;
+overflow: hidden;
+}
+.progress-bar-fill {
+height: 100%;
+background: linear-gradient(90deg, var(–accent), var(–accent2));
+border-radius: 4px;
+transition: width 0.4s ease;
+}
+
+/* –– MC BUTTONS –– */
+.mc-options { display: flex; flex-direction: column; gap: 0.6rem; margin: 0.75rem 0; }
+.mc-btn {
+background: var(–surface);
+border: 2px solid var(–border);
+border-radius: 10px;
+color: var(–text);
+font-family: var(–font-body);
+font-size: 0.93rem;
+padding: 0.75rem 1rem;
+min-height: 52px;
+cursor: pointer;
+text-align: left;
+transition: border-color 0.15s, background 0.15s;
+display: flex;
+align-items: center;
+gap: 0.75rem;
+}
+.mc-btn:active { border-color: var(–accent); }
+.mc-btn.selected { border-color: var(–accent); background: rgba(59,158,255,0.08); }
+.mc-btn.correct-ans { border-color: var(–green); background: var(–green-bg); color: var(–green); }
+.mc-btn.wrong-ans { border-color: var(–red); background: var(–red-bg); color: var(–red); }
+.mc-letter {
+background: var(–border);
+border-radius: 6px;
+font-family: var(–font-head);
+font-size: 0.75rem;
+font-weight: 800;
+width: 28px; height: 28px;
+display: flex; align-items: center; justify-content: center;
+flex-shrink: 0;
+}
+
+/* –– FRAC –– */
+.frac {
+display: inline-flex;
+flex-direction: column;
+align-items: center;
+vertical-align: middle;
+font-size: 0.9em;
+line-height: 1.1;
+margin: 0 2px;
+}
+.frac span:first-child {
+border-bottom: 1.5px solid currentColor;
+padding-bottom: 1px;
+min-width: 1em;
+text-align: center;
+}
+.frac span:last-child {
+padding-top: 1px;
+min-width: 1em;
+text-align: center;
+}
+
+/* –– DINO –– */
+.dino {
+position: fixed;
+bottom: 1rem;
+right: 1rem;
+font-size: 1.5rem;
+cursor: pointer;
+z-index: 100;
+user-select: none;
+transition: transform 0.2s;
+}
+.dino:active { transform: scale(1.3); }
+.dino-tooltip {
+display: none;
+position: fixed;
+bottom: 3.5rem;
+right: 1rem;
+background: var(–card);
+border: 1px solid var(–border);
+border-radius: 8px;
+padding: 0.4rem 0.8rem;
+font-size: 0.8rem;
+color: var(–muted);
+white-space: nowrap;
+z-index: 101;
+}
+.dino-tooltip.show { display: block; }
+
+/* –– BADGE –– */
+.badge-done {
+display: inline-block;
+background: var(–green);
+color: #fff;
+font-size: 0.7rem;
+font-weight: 800;
+border-radius: 4px;
+padding: 0.1rem 0.4rem;
+margin-left: 0.4rem;
+vertical-align: middle;
+}
+
+/* –– PANEL INTRO –– */
+.panel-intro {
+background: linear-gradient(135deg, rgba(59,158,255,0.07), rgba(0,212,170,0.05));
+border: 1px solid rgba(59,158,255,0.2);
+border-radius: 12px;
+padding: 1rem 1.1rem;
+margin-bottom: 1rem;
+}
+.panel-intro h3 {
+font-family: var(–font-head);
+font-size: 0.95rem;
+color: var(–accent);
+margin-bottom: 0.4rem;
+}
+.panel-intro p { font-size: 0.88rem; color: var(–muted); }
+
+/* –– GRAPH NOTE –– */
+.graph-note {
+background: #12202e;
+border: 1px dashed var(–border);
+border-radius: 8px;
+padding: 0.75rem 1rem;
+margin: 0.75rem 0;
+font-size: 0.88rem;
+color: var(–muted);
+}
+.graph-note strong { color: var(–yellow); }
+
+</style>
+
+<script>
+  MathJax = {
+    tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+    svg: { fontCache: 'global' }
+  };
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+</head>
+<body>
+
+<!-- HEADER -->
+
+<div class="page-header">
+  <div class="subject-badge">Mathematik · Abitur · Analysis</div>
+  <h1>Aufgabe 4: Wasserturm</h1>
+  <p>Differentialrechnung im Sachzusammenhang · ZK M HT – Teil II</p>
+</div>
+
+<!-- PROGRESS -->
+
+<div class="progress-bar-wrap" style="margin-top:0.75rem;">
+  <div class="progress-bar-fill" id="progressBar" style="width:0%"></div>
+</div>
+
+<!-- CONTEXT -->
+
+<div class="context-box">
+  <h2>📋 Kontext der Aufgabe</h2>
+  <p>Die Wassermenge im Speicher eines Wasserturms wird für den Zeitraum von 6:00 Uhr bis 7:30 Uhr (\(0 \leq t \leq 1{,}5\)) durch die Funktion \(f\) modelliert:</p>
+  <div class="formula-display">
+    \( f(t) = 1000 \cdot t^3 - 1000 \cdot t^2 - 687 \cdot t + 1467 \)
+  </div>
+  <p>Dabei ist \(t\) die Zeit in Stunden seit 6:00 Uhr und \(f(t)\) die Wassermenge in m³. Der Sollwert beträgt <strong>1000 m³</strong>, die maximale Füllmenge <strong>2000 m³</strong>.</p>
+</div>
+
+<!-- TABS -->
+
+<div class="tabs-wrapper">
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('a1')" id="tab-a1">a) (1) Nachweis</button>
+    <button class="tab-btn" onclick="switchTab('a2')" id="tab-a2">a) (2) Sollwert</button>
+    <button class="tab-btn" onclick="switchTab('b')" id="tab-b">b) Minimum</button>
+    <button class="tab-btn" onclick="switchTab('c')" id="tab-c">c) Differenzenquotient</button>
+    <button class="tab-btn" onclick="switchTab('d')" id="tab-d">d) Funktion g</button>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+
+<!--  PANEL A1  -->
+
+<!-- ============================================================ -->
+
+<div class="panel active" id="panel-a1">
+  <div class="panel-intro">
+    <h3>Aufgabenteil a) (1) – Nachweis</h3>
+    <p>Zeigen, dass um 7:00 Uhr nur noch 780 m³ im Speicher sind. <span class="info-chip">2 Punkte</span></p>
+  </div>
+
+  <div class="task-card">
+    <h3><div class="task-num">1</div>Aufgabenstellung</h3>
+    <div class="task-text">
+      <p>Zeigen Sie, dass um 7:00 Uhr nur noch 780 m³ Wasser im Speicher des Turmes vorhanden sind.</p>
+    </div>
+    <div class="step">
+      <div class="step-label">Schritt 1</div>
+      <div class="step-prompt">Welches \(t\) entspricht der Uhrzeit 7:00 Uhr? (Eingabe als Dezimalzahl)</div>
+      <div class="input-row">
+        <input class="math-input" type="text" inputmode="decimal" id="a1_t" placeholder="t = ?" style="max-width:120px;">
+        <button class="btn btn-sm" onclick="checkA1t()">Prüfen</button>
+      </div>
+      <div class="feedback" id="fb_a1_t"></div>
+    </div>
+
+```
+<div class="step" id="step_a1_2" style="display:none;">
+  <div class="step-label">Schritt 2</div>
+  <div class="step-prompt">Berechne \(f(1)\). Was ergibt die Rechnung?</div>
+  <div class="input-row">
+    <input class="math-input" type="text" inputmode="decimal" id="a1_f" placeholder="f(1) = ?" style="max-width:160px;">
+    <button class="btn btn-sm" onclick="checkA1f()">Prüfen</button>
+  </div>
+  <div class="feedback" id="fb_a1_f"></div>
+</div>
+
+<div class="step" id="step_a1_3" style="display:none;">
+  <div class="step-label">Schritt 3 – Aussage formulieren</div>
+  <div class="step-prompt">Was folgt aus dem Ergebnis für die Aufgabe? Welche der Aussagen ist korrekt?</div>
+  <div class="mc-options" id="mc_a1">
+    <button class="mc-btn" onclick="checkA1mc(this, false)">
+      <div class="mc-letter">A</div>
+      <span>Da \(f(1) = 780 > 0\), ist die Aussage falsch – der Speicher ist nicht leer.</span>
+    </button>
+    <button class="mc-btn" onclick="checkA1mc(this, true)">
+      <div class="mc-letter">B</div>
+      <span>Da \(t = 1\) für 7:00 Uhr gilt und \(f(1) = 780\) m³, ist gezeigt: Um 7:00 Uhr sind genau 780 m³ im Speicher.</span>
+    </button>
+    <button class="mc-btn" onclick="checkA1mc(this, false)">
+      <div class="mc-letter">C</div>
+      <span>Es fehlt noch eine zweite Gleichung, um die Aussage zu beweisen.</span>
+    </button>
+  </div>
+  <div class="feedback" id="fb_a1_mc"></div>
+</div>
+
+<div class="solution-toggle" id="sol_a1" style="display:none;">
+  <button class="solution-btn" onclick="toggleSol('sol_a1_content', this)">
+    <span>📖 Vollständige Lösung aufklappen</span>
+    <span>▼</span>
+  </button>
+  <div class="solution-content" id="sol_a1_content">
+    <div class="sol-step">
+      <div class="sol-label">Zeitpunkt bestimmen</div>
+      <div class="sol-text">7:00 Uhr liegt 1 Stunde nach 6:00 Uhr, also gilt \(t = 1\).</div>
+    </div>
+    <div class="sol-step">
+      <div class="sol-label">Einsetzen und ausrechnen</div>
+      <div class="sol-text">
+        \(f(1) = 1000 \cdot 1^3 - 1000 \cdot 1^2 - 687 \cdot 1 + 1467\)<br>
+        \(\phantom{f(1)} = 1000 - 1000 - 687 + 1467\)<br>
+        \(\phantom{f(1)} = 780\)
+      </div>
+    </div>
+    <div class="sol-step">
+      <div class="sol-label">Schlussfolgerung (Sachkontext)</div>
+      <div class="sol-text">Da \(f(1) = 780\) [m³] gilt, befinden sich um 7:00 Uhr genau 780 m³ Wasser im Speicher. Die Aussage ist damit gezeigt. ∎</div>
+    </div>
+  </div>
+</div>
+```
+
+  </div>
+</div>
+
+<!-- ============================================================ -->
+
+<!--  PANEL A2  -->
+
+<!-- ============================================================ -->
+
+<div class="panel" id="panel-a2">
+  <div class="panel-intro">
+    <h3>Aufgabenteil a) (2) – Zeiten über Sollwert</h3>
+    <p>Zeiträume ermitteln, in denen \(f(t) > 1000\) gilt. <span class="info-chip">4 Punkte</span> <span class="info-chip">GTR / CAS erlaubt</span></p>
+  </div>
+
+  <div class="task-card">
+    <h3><div class="task-num">1</div>Aufgabenstellung</h3>
+    <div class="task-text">
+      <p>Ermitteln Sie näherungsweise die Zeiträume, in denen die Wassermenge über dem Sollwert von 1000 m³ liegt.</p>
+    </div>
+
+```
+<div class="step">
+  <div class="step-label">Schritt 1 – Ungleichung aufstellen</div>
+  <div class="step-prompt">Welche Ungleichung muss gelöst werden?</div>
+  <div class="mc-options" id="mc_a2_1">
+    <button class="mc-btn" onclick="checkMC('mc_a2_1','fb_a2_1',this,false,'step_a2_2')">
+      <div class="mc-letter">A</div>
+      <span>\(f(t) = 1000\)</span>
+    </button>
+    <button class="mc-btn" onclick="checkMC('mc_a2_1','fb_a2_1',this,true,'step_a2_2')">
+      <div class="mc-letter">B</div>
+      <span>\(f(t) > 1000\)</span>
+    </button>
+    <button class="mc-btn" onclick="checkMC('mc_a2_1','fb_a2_1',this,false,'step_a2_2')">
+      <div class="mc-letter">C</div>
+      <span>\(f(t) \geq 1000\) und \(f(t) \leq 2000\)</span>
+    </button>
+  </div>
+  <div class="feedback" id="fb_a2_1"></div>
+</div>
+
+<div class="step" id="step_a2_2" style="display:none;">
+  <div class="step-label">Schritt 2 – Gleichung für die Grenzen</div>
+  <div class="step-prompt">Um die Zeiträume zu bestimmen, sucht man zunächst die Nullstellen von \(f(t) - 1000 = 0\). Was ergibt sich, wenn man umformt?</div>
+  <div class="task-text" style="font-style:normal;">
+    <p>\(f(t) - 1000 = 0\)</p>
+    <p>\(1000 \cdot t^3 - 1000 \cdot t^2 - 687 \cdot t + 1467 - 1000 = 0\)</p>
+    <p>\(1000 \cdot t^3 - 1000 \cdot t^2 - 687 \cdot t + 467 = 0\)</p>
+  </div>
+  <div class="step-prompt">Mit dem GTR/CAS findet man die drei Nullstellen. Zwei davon liegen im Intervall \([0; 1{,}5]\). Gib die kleinere Nullstelle auf 2 Dezimalstellen gerundet ein:</div>
+  <div class="input-row">
+    <span style="color:var(--muted);">\(t_1 \approx\)</span>
+    <input class="math-input" type="text" inputmode="decimal" id="a2_t1" placeholder="0,??" style="max-width:100px;">
+    <button class="btn btn-sm" onclick="checkA2t1()">Prüfen</button>
+  </div>
+  <div class="feedback" id="fb_a2_t1"></div>
+</div>
+
+<div class="step" id="step_a2_3" style="display:none;">
+  <div class="step-label">Schritt 3 – Zweite Nullstelle</div>
+  <div class="step-prompt">Gib die zweite (größere) Nullstelle auf 2 Dezimalstellen gerundet ein:</div>
+  <div class="input-row">
+    <span style="color:var(--muted);">\(t_2 \approx\)</span>
+    <input class="math-input" type="text" inputmode="decimal" id="a2_t2" placeholder="1,??" style="max-width:100px;">
+    <button class="btn btn-sm" onclick="checkA2t2()">Prüfen</button>
+  </div>
+  <div class="feedback" id="fb_a2_t2"></div>
+</div>
+
+<div class="step" id="step_a2_4" style="display:none;">
+  <div class="step-label">Schritt 4 – Ergebnis im Sachkontext</div>
+  <div class="step-prompt">Welche der folgenden Antworten beschreibt die Zeiträume korrekt im Sachkontext?</div>
+  <div class="mc-options" id="mc_a2_4">
+    <button class="mc-btn" onclick="checkMC('mc_a2_4','fb_a2_4',this,true,'sol_a2')">
+      <div class="mc-letter">A</div>
+      <span>Die Wassermenge liegt für \(0 \leq t \lesssim 0{,}53\) und für \(t \gtrsim 1{,}37\) über 1000 m³, also von 6:00 bis ca. 6:32 Uhr und von ca. 7:22 Uhr bis 7:30 Uhr.</span>
+    </button>
+    <button class="mc-btn" onclick="checkMC('mc_a2_4','fb_a2_4',this,false,'sol_a2')">
+      <div class="mc-letter">B</div>
+      <span>Die Wassermenge liegt nur in der Mitte des Zeitraums, von \(t_1\) bis \(t_2\), über dem Sollwert.</span>
+    </button>
+    <button class="mc-btn" onclick="checkMC('mc_a2_4','fb_a2_4',this,false,'sol_a2')">
+      <div class="mc-letter">C</div>
+      <span>Da \(f(0) = 1467 > 1000\), liegt die Wassermenge immer über dem Sollwert.</span>
+    </button>
+  </div>
+  <div class="feedback" id="fb_a2_4"></div>
+</div>
+
+<div class="solution-toggle" id="sol_a2" style="display:none;">
+  <button class="solution-btn" onclick="toggleSol('sol_a2_content', this)">
+    <span>📖 Vollständige Lösung aufklappen</span><span>▼</span>
+  </button>
+  <div class="solution-content" id="sol_a2_content">
+    <div class="sol-step">
+      <div class="sol-label">Gleichung</div>
+      <div class="sol-text">\(f(t) = 1000\) führt auf:<br>\(1000t^3 - 1000t^2 - 687t + 467 = 0\)</div>
+    </div>
+    <div class="sol-step">
+      <div class="sol-label">Nullstellen mit GTR / CAS</div>
+      <div class="sol-text">
+        Nullstellen: \(t_1 \approx 0{,}53\), \(t_2 \approx 1{,}37\), sowie eine dritte Nullstelle außerhalb des Definitionsbereichs.<br><br>
+        <strong>Hinweis zum Graphen:</strong> Kontrolliere dein Ergebnis am Graphen: Die Kurve \(f\) liegt zu Beginn (\(t=0\) → 1467 m³) über 1000, fällt dann unter 1000 und steigt am Ende wieder darüber. Ablesepunkte sollten die Schnittpunkte mit der horizontalen Linie bei 1000 m³ ergeben.
+      </div>
+    </div>
+    <div class="sol-step">
+      <div class="sol-label">Zeiträume (Sachkontext)</div>
+      <div class="sol-text">
+        Die Wassermenge übersteigt 1000 m³ in folgenden Zeiträumen:<br>
+        • Von 6:00 Uhr bis ca. 6:32 Uhr (\(0 \leq t \lesssim 0{,}53\))<br>
+        • Von ca. 7:22 Uhr bis 7:30 Uhr (\(1{,}37 \lesssim t \leq 1{,}5\))
+      </div>
+    </div>
+    <div class="sol-step">
+      <div class="sol-label">Hinweis zur Darstellung</div>
+      <div class="sol-text">Im Graphen ist das so zu erkennen: Der Graph liegt oberhalb der horizontalen Linie bei \(f(t) = 1000\) in zwei Bereichen am Anfang und Ende des Zeitintervalls – mit einem „Tal" dazwischen, wo die Wassermenge unter den Sollwert fällt.</div>
+    </div>
+  </div>
+</div>
+```
+
+  </div>
+</div>
+
+<!-- ============================================================ -->
+
+<!--  PANEL B  -->
+
+<!-- ============================================================ -->
+
+<div class="panel" id="panel-b">
+  <div class="panel-intro">
+    <h3>Aufgabenteil b) – Minimum und Sollwertunterschreitung</h3>
+    <p>Zeitpunkt des Minimums berechnen und Unterschreitung des Sollwerts ermitteln. <span class="info-chip">8 Punkte</span></p>
+  </div>
+
+  <div class="task-card">
+    <h3><div class="task-num">1</div>Aufgabenstellung</h3>
+    <div class="task-text">
+      <p>Ermitteln Sie rechnerisch den Zeitpunkt, zu dem die Wassermenge im Speicher des Turmes minimal ist.</p>
+      <p>Berechnen Sie, um wie viele m³ Wasser der Sollwert zu diesem Zeitpunkt unterschritten wird.</p>
+    </div>
+
+```
+<div class="step">
+  <div class="step-label">Schritt 1 – Strategie</div>
+  <div class="step-prompt">Was ist der erste mathematische Schritt, um ein Minimum zu finden?</div>
+  <div class="mc-options" id="mc_b1">
+    <button class="mc-btn" onclick="checkMC('mc_b1','fb_b1',this,false,'step_b2')">
+      <div class="mc-letter">A</div>
+      <span>\(f(t) = 0\) setzen und Nullstellen bestimmen</span>
+    </button>
+    <button class="mc-btn" onclick="checkMC('mc_b1','fb_b1',this,true,'step_b2')">
+      <div class="mc-letter">B</div>
+      <span>Erste Ableitung \(f'(t)\) bilden und \(f'(t) = 0\) setzen (notwendige Bedingung)</span>
+    </button>
+    <button class="mc-btn" onclick="checkMC('mc_b1','fb_b1',this,false,'step_b2')">
+      <div class="mc-letter">C</div>
+      <span>Den kleinsten Funktionswert aus einer Wertetabelle ablesen</span>
+    </button>
+  </div>
+  <div class="feedback" id="fb_b1"></div>
+</div>
+
+<div class="step" id="step_b2" style="display:none;">
+  <div class="step-label">Schritt 2 – Ableitung bilden</div>
+  <div class="step-prompt">Bestimme \(f'(t)\). Gib die fehlenden Koeffizienten ein:</div>
+  <div class="task-text" style="font-style:normal; display:flex; align-items:center; flex-wrap:wrap; gap:0.3rem;">
+    <span>\(f'(t) = \)</span>
+    <input class="math-input" type="text" inputmode="numeric" id="b_c3" placeholder="?" style="max-width:60px; display:inline-block;">
+    <span>\(\cdot\, t^2\)</span>
+    <input class="math-input" type="text" inputmode="numeric" id="b_c2" placeholder="?" style="max-width:80px; display:inline-block;">
+    <span>\(\cdot\, t\)</span>
+    <input class="math-input" type="text" inputmode="numeric" id="b_c1" placeholder="?" style="max-width:80px; display:inline-block;">
+  </div>
+  <button class="btn btn-sm" style="margin-top:0.5rem;" onclick="checkBDeriv()">Prüfen</button>
+  <div class="feedback" id="fb_b_deriv"></div>
+</div>
+
+<div class="step" id="step_b3" style="display:none;">
+  <div class="step-label">Schritt 3 – Nullstellen der Ableitung</div>
+  <div class="step-prompt">\(f'(t) = 3000t^2 - 2000t - 687 = 0\). Diese quadratische Gleichung wird mit der Lösungsformel oder dem GTR gelöst. Welche Nullstelle liegt im Intervall \([0; 1{,}5]\)?</div>
+  <div class="input-row">
+    <span style="color:var(--muted);">\(t^* \approx\)</span>
+    <input class="math-input" type="text" inputmode="decimal" id="b_t_star" placeholder="0,??" style="max-width:120px;">
+    <button class="btn btn-sm" onclick="checkBtStar()">Prüfen</button>
+  </div>
+  <div class="hint-box" id="hint_b3">
+    <p>💡 <strong>Lösungsformel:</strong> \(t = \dfrac{-b \pm \sqrt{b^2 - 4ac}}{2a}\) mit \(a=3000\), \(b=-2000\), \(c=-687\)</p>
+  </div>
+  <button class="btn btn-sm btn-outline" style="margin-top:0.5rem;" onclick="toggleHint('hint_b3')">Hinweis einblenden</button>
+  <div class="feedback" id="fb_b_t_star"></div>
+</div>
+
+<div class="step" id="step_b4" style="display:none;">
+  <div class="step-label">Schritt 4 – Nachweis: Minimum (hinreichende Bedingung)</div>
+  <div class="step-prompt">Warum handelt es sich bei \(t^* \approx 0{,}89\) um ein Minimum und nicht um ein Maximum?</div>
+  <div class="mc-options" id="mc_b4">
+    <button class="mc-btn" onclick="checkMC('mc_b4','fb_b4',this,true,'step_b5')">
+      <div class="mc-letter">A</div>
+      <span>Weil \(f''(t^*) > 0\) gilt: \(f''(t) = 6000t - 2000\), also \(f''(0{,}89) = 6000 \cdot 0{,}89 - 2000 = 3340 > 0\) → Linkskurve, Tiefpunkt.</span>
+    </button>
+    <button class="mc-btn" onclick="checkMC('mc_b4','fb_b4',this,false,'step_b5')">
+      <div class="mc-letter">B</div>
+      <span>Weil der Funktionswert bei \(t^*\) kleiner ist als an den Randpunkten des Intervalls.</span>
+    </button>
+    <button class="mc-btn" onclick="checkMC('mc_b4','fb_b4',this,false,'step_b5')">
+      <div class="mc-letter">C</div>
+      <span>Weil \(f'(t^*) = 0\) gilt – das ist schon hinreichend für ein Minimum.</span>
+    </button>
+  </div>
+  <div class="feedback" id="fb_b4"></div>
+</div>
+
+<div class="step" id="step_b5" style="display:none;">
+  <div class="step-label">Schritt 5 – Minimalwert berechnen</div>
+  <div class="step-prompt">Berechne \(f(0{,}89)\) näherungsweise und gib das Ergebnis auf ganze m³ gerundet ein:</div>
+  <div class="input-row">
+    <span style="color:var(--muted);">\(f(0{,}89) \approx\)</span>
+    <input class="math-input" type="text" inputmode="numeric" id="b_fmin" placeholder="???" style="max-width:120px;">
+    <span style="color:var(--muted);">m³</span>
+    <button class="btn btn-sm" onclick="checkBfmin()">Prüfen</button>
+  </div>
+  <div class="feedback" id="fb_b_fmin"></div>
+</div>
+
+<div class="step" id="step_b6" style="display:none;">
+  <div class="step-label">Schritt 6 – Sollwertunterschreitung</div>
+  <div class="step-prompt">Um wie viele m³ wird der Sollwert von 1000 m³ zum Zeitpunkt des Minimums unterschritten? (Auf ganze m³ gerundet)</div>
+  <div class="input-row">
+    <span style="color:var(--muted);">Unterschreitung ≈</span>
+    <input class="math-input" type="text" inputmode="numeric" id="b_diff" placeholder="???" style="max-width:120px;">
+    <span style="color:var(--muted);">m³</span>
+    <button class="btn btn-sm" onclick="checkBdiff()">Prüfen</button>
+  </div>
+  <div class="feedback" id="fb_b_diff"></div>
+</div>
+
+<div class="solution-toggle" id="sol_b" style="display:none;">
+  <button class="solution-btn" onclick="toggleSol('sol_b_content', this)">
+    <span>📖 Vollständige Lösung aufklappen</span><span>▼</span>
+  </button>
+  <div class="solution-content" id="sol_b_content">
+    <div class="sol-step">
+      <div class="sol-label">Erste Ableitung</div>
+      <div class="sol-text">\(f'(t) = 3000t^2 - 2000t - 687\)</div>
+    </div>
+    <div class="sol-step">
+      <div class="sol-label">Nullstellen (notwendige Bedingung)</div>
+      <div class="sol-text">
+        \(3000t^2 - 2000t - 687 = 0\)<br>
+        Mit Lösungsformel: \(t = \dfrac{2000 \pm \sqrt{4\,000\,000 + 4 \cdot 3000 \cdot 687}}{6000}\)<br>
+        \(\Rightarrow t_1 \approx 0{,}89\) und \(t_2 \approx -0{,}26\) (außerhalb des Definitionsbereichs)
+      </div>
+    </div>
+    <div class="sol-step">
+      <div class="sol-label">Hinreichende Bedingung (2. Ableitung)</div>
+      <div class="sol-text">
+        \(f''(t) = 6000t - 2000\)<br>
+        \(f''(0{,}89) = 6000 \cdot 0{,}89 - 2000 = 3340 > 0\)<br>
+        ✓ Linkskurve → lokales Minimum
+      </div>
+    </div>
+    <div class="sol-step">
+      <div class="sol-label">Minimalwert und Sachkontext</div>
+      <div class="sol-text">
+        \(f(0{,}89) = 1000 \cdot 0{,}89^3 - 1000 \cdot 0{,}89^2 - 687 \cdot 0{,}89 + 1467 \approx 764\) m³<br><br>
+        Zeitpunkt: \(t \approx 0{,}89\) h nach 6:00 Uhr ≈ 6:53 Uhr<br><br>
+        Unterschreitung: \(1000 - 764 \approx 236\) m³<br>
+        Um ca. 6:53 Uhr wird der Sollwert von 1000 m³ um etwa 236 m³ unterschritten.
+      </div>
+    </div>
+  </div>
+</div>
+```
+
+  </div>
+</div>
+
+<!-- ============================================================ -->
+
+<!--  PANEL C  -->
+
+<!-- ============================================================ -->
+
+<div class="panel" id="panel-c">
+  <div class="panel-intro">
+    <h3>Aufgabenteil c) – Differenzenquotient und Ableitung</h3>
+    <p>Berechnung und Interpretation von Differenzenquotient und Momentansteigung. <span class="info-chip">4 Punkte</span></p>
+  </div>
+
+  <div class="task-card">
+    <h3><div class="task-num">1</div>Aufgabenstellung</h3>
+    <div class="task-text">
+      <p>Berechnen Sie \(\dfrac{f(1) - f(0)}{1 - 0}\) und \(f'(1)\) und interpretieren Sie die berechneten Werte im Sachzusammenhang.</p>
+    </div>
+
+```
+<div class="step">
+  <div class="step-label">Schritt 1 – Differenzenquotient</div>
+  <div class="step-prompt">Berechne \(\dfrac{f(1) - f(0)}{1 - 0}\). Du kennst bereits \(f(1) = 780\). Wie groß ist \(f(0)\)?</div>
+  <div class="input-row">
+    <span style="color:var(--muted);">\(f(0) = \)</span>
+    <input class="math-input" type="text" inputmode="numeric" id="c_f0" placeholder="?" style="max-width:100px;">
+    <button class="btn btn-sm" onclick="checkCf0()">Prüfen</button>
+  </div>
+  <div class="feedback" id="fb_c_f0"></div>
+</div>
+
+<div class="step" id="step_c2" style="display:none;">
+  <div class="step-label">Schritt 2 – Differenzenquotient ausrechnen</div>
+  <div class="step-prompt">Berechne jetzt \(\dfrac{f(1) - f(0)}{1 - 0} = \dfrac{780 - 1467}{1}\):</div>
+  <div class="input-row">
+    <span style="color:var(--muted);">\(\dfrac{f(1)-f(0)}{1-0} = \)</span>
+    <input class="math-input" type="text" inputmode="numeric" id="c_dq" placeholder="?" style="max-width:120px;">
+    <button class="btn btn-sm" onclick="checkCdq()">Prüfen</button>
+  </div>
+  <div class="feedback" id="fb_c_dq"></div>
+</div>
+
+<div class="step" id="step_c3" style="display:none;">
+  <div class="step-label">Schritt 3 – Momentansteigung \(f'(1)\)</div>
+  <div class="step-prompt">Berechne \(f'(1)\) mit der bereits bekannten Ableitung \(f'(t) = 3000t^2 - 2000t - 687\):</div>
+  <div class="input-row">
+    <span style="color:var(--muted);">\(f'(1) = \)</span>
+    <input class="math-input" type="text" inputmode="numeric" id="c_f1" placeholder="?" style="max-width:120px;">
+    <button class="btn btn-sm" onclick="checkCf1()">Prüfen</button>
+  </div>
+  <div class="feedback" id="fb_c_f1"></div>
+</div>
+
+<div class="step" id="step_c4" style="display:none;">
+  <div class="step-label">Schritt 4 – Interpretation</div>
+  <div class="step-prompt">Welche Aussage interpretiert BEIDE Werte korrekt im Sachzusammenhang?</div>
+  <div class="mc-options" id="mc_c4">
+    <button class="mc-btn" onclick="checkMC('mc_c4','fb_c4',this,false,'sol_c')">
+      <div class="mc-letter">A</div>
+      <span>Beide Werte geben an, dass die Wassermenge im Laufe des Tages abnimmt.</span>
+    </button>
+    <button class="mc-btn" onclick="checkMC('mc_c4','fb_c4',this,true,'sol_c')">
+      <div class="mc-letter">B</div>
+      <span>Der Differenzenquotient (−687 m³/h) ist die durchschnittliche Änderungsrate von 6:00 bis 7:00 Uhr. \(f'(1) = 313\) m³/h ist die momentane Änderungsrate um 7:00 Uhr – das Wasser fließt zu diesem Zeitpunkt mit 313 m³/h zu.</span>
+    </button>
+    <button class="mc-btn" onclick="checkMC('mc_c4','fb_c4',this,false,'sol_c')">
+      <div class="mc-letter">C</div>
+      <span>\(f'(1) = 313\) bedeutet, dass um 7:00 Uhr noch 313 m³ im Speicher sind.</span>
+    </button>
+  </div>
+  <div class="feedback" id="fb_c4"></div>
+</div>
+
+<div class="solution-toggle" id="sol_c" style="display:none;">
+  <button class="solution-btn" onclick="toggleSol('sol_c_content', this)">
+    <span>📖 Vollständige Lösung aufklappen</span><span>▼</span>
+  </button>
+  <div class="solution-content" id="sol_c_content">
+    <div class="sol-step">
+      <div class="sol-label">Differenzenquotient</div>
+      <div class="sol-text">
+        \(f(0) = 1000 \cdot 0 - 1000 \cdot 0 - 687 \cdot 0 + 1467 = 1467\) m³<br>
+        \(\dfrac{f(1) - f(0)}{1 - 0} = \dfrac{780 - 1467}{1} = -687\) m³/h
+      </div>
+    </div>
+    <div class="sol-step">
+      <div class="sol-label">Momentansteigung</div>
+      <div class="sol-text">
+        \(f'(t) = 3000t^2 - 2000t - 687\)<br>
+        \(f'(1) = 3000 - 2000 - 687 = 313\) m³/h
+      </div>
+    </div>
+    <div class="sol-step">
+      <div class="sol-label">Interpretation</div>
+      <div class="sol-text">
+        <strong>Differenzenquotient (−687 m³/h):</strong> Im Durchschnitt nimmt die Wassermenge zwischen 6:00 Uhr und 7:00 Uhr um 687 m³ pro Stunde ab. Dies entspricht der mittleren Änderungsrate (Steigung der Sekante).<br><br>
+        <strong>\(f'(1) = 313\) m³/h:</strong> Um genau 7:00 Uhr steigt die Wassermenge momentan mit einer Rate von 313 m³/h – das Wasser fließt also zu diesem Zeitpunkt in den Speicher. Dies entspricht der Steigung der Tangente an den Graphen bei \(t = 1\).
+      </div>
+    </div>
+  </div>
+</div>
+```
+
+  </div>
+</div>
+
+<!-- ============================================================ -->
+
+<!--  PANEL D  -->
+
+<!-- ============================================================ -->
+
+<div class="panel" id="panel-d">
+  <div class="panel-intro">
+    <h3>Aufgabenteil d) – Funktion g</h3>
+    <p>Graphen zeichnen und Funktionswerte interpretieren. <span class="info-chip">4 + 2 Punkte</span> <span class="info-chip">GTR / CAS erlaubt</span></p>
+  </div>
+
+  <div class="task-card">
+    <h3><div class="task-num">1</div>Aufgabenstellung</h3>
+    <div class="task-text">
+      <p>Gegeben ist nun zusätzlich die Funktion \(g\) mit der Gleichung</p>
+      <p style="text-align:center; margin: 0.5rem 0;">\(g(t) = -1000 \cdot t^3 + 1000 \cdot t^2 + 687 \cdot t + 533\)</p>
+      <p>(1) Zeichnen Sie den Graphen von \(g\) in die Abbildung ein.</p>
+      <p>(2) Erklären Sie, welche Bedeutung die Funktionswerte \(g(t)\) mit \(0 \leq t \leq 1{,}5\) im Sachzusammenhang haben.</p>
+    </div>
+
+```
+<div class="step">
+  <div class="step-label">Schritt 1 – Wertetabelle für g aufstellen</div>
+  <div class="step-prompt">Berechne einige Werte für den Graphen von \(g\). Wähle dazu \(t \in \{0;\, 0{,}5;\, 1;\, 1{,}5\}\) und gib die Werte ein:</div>
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.6rem; margin:0.75rem 0;">
+    <div>
+      <div class="step-label" style="font-size:0.72rem;">g(0) =</div>
+      <div class="input-row">
+        <input class="math-input" type="text" inputmode="numeric" id="d_g0" placeholder="?" style="max-width:100px;">
+        <button class="btn btn-sm" onclick="checkDg(0)">✓</button>
+      </div>
+      <div class="feedback" id="fb_d_g0"></div>
+    </div>
+    <div>
+      <div class="step-label" style="font-size:0.72rem;">g(0,5) =</div>
+      <div class="input-row">
+        <input class="math-input" type="text" inputmode="numeric" id="d_g05" placeholder="?" style="max-width:100px;">
+        <button class="btn btn-sm" onclick="checkDg(0.5)">✓</button>
+      </div>
+      <div class="feedback" id="fb_d_g05"></div>
+    </div>
+    <div>
+      <div class="step-label" style="font-size:0.72rem;">g(1) =</div>
+      <div class="input-row">
+        <input class="math-input" type="text" inputmode="numeric" id="d_g1" placeholder="?" style="max-width:100px;">
+        <button class="btn btn-sm" onclick="checkDg(1)">✓</button>
+      </div>
+      <div class="feedback" id="fb_d_g1"></div>
+    </div>
+    <div>
+      <div class="step-label" style="font-size:0.72rem;">g(1,5) =</div>
+      <div class="input-row">
+        <input class="math-input" type="text" inputmode="numeric" id="d_g15" placeholder="?" style="max-width:100px;">
+        <button class="btn btn-sm" onclick="checkDg(1.5)">✓</button>
+      </div>
+      <div class="feedback" id="fb_d_g15"></div>
+    </div>
+  </div>
+</div>
+
+<div class="step" id="step_d2" style="display:none;">
+  <div class="step-label">Schritt 2 – Graph einzeichnen</div>
+  <div class="graph-note">
+    <strong>📐 Hinweis zum Graphen:</strong> Trage die berechneten Punkte in die Abbildung auf deinem Aufgabenblatt ein. Verbinde sie mit einer glatten Kurve. Beachte: Der Graph von \(g\) hat eine andere Krümmungsrichtung als \(f\) (negative Leitkoeffizient). Die Kurve steigt zunächst an, durchläuft ein Maximum und fällt dann wieder. Der Hochpunkt liegt im Bereich \(0{,}8 \leq t \leq 1\).
+  </div>
+  <button class="btn btn-sm" style="margin-top:0.5rem;" id="btn_d2" onclick="completeD2()">Ich habe den Graphen eingezeichnet ✓</button>
+</div>
+
+<div class="step" id="step_d3" style="display:none;">
+  <div class="step-label">Schritt 3 – Zusammenhang zwischen f und g</div>
+  <div class="step-prompt">Berechne \(f(t) + g(t)\). Was fällt dir auf?</div>
+  <div class="task-text" style="font-style:normal;">
+    <p>\(f(t) + g(t) = (1000t^3 - 1000t^2 - 687t + 1467) + (-1000t^3 + 1000t^2 + 687t + 533)\)</p>
+    <p>\(\phantom{f(t)+g(t)} = ?\)</p>
+  </div>
+  <div class="mc-options" id="mc_d3">
+    <button class="mc-btn" onclick="checkMC('mc_d3','fb_d3',this,false,'step_d4')">
+      <div class="mc-letter">A</div>
+      <span>\(f(t) + g(t) = 2000t^3 + 2000\) – die Summe ist eine kubische Funktion.</span>
+    </button>
+    <button class="mc-btn" onclick="checkMC('mc_d3','fb_d3',this,true,'step_d4')">
+      <div class="mc-letter">B</div>
+      <span>\(f(t) + g(t) = 2000\) – die Summe ist konstant und entspricht der maximalen Füllmenge!</span>
+    </button>
+    <button class="mc-btn" onclick="checkMC('mc_d3','fb_d3',this,false,'step_d4')">
+      <div class="mc-letter">C</div>
+      <span>\(f(t) + g(t) = 0\) – die Funktionen heben sich auf.</span>
+    </button>
+  </div>
+  <div class="feedback" id="fb_d3"></div>
+</div>
+
+<div class="step" id="step_d4" style="display:none;">
+  <div class="step-label">Schritt 4 – Bedeutung von g(t) im Sachkontext</div>
+  <div class="step-prompt">Da \(f(t) + g(t) = 2000\), gilt \(g(t) = 2000 - f(t)\). Was bedeutet das?</div>
+  <div class="mc-options" id="mc_d4">
+    <button class="mc-btn" onclick="checkMC('mc_d4','fb_d4',this,false,'sol_d')">
+      <div class="mc-letter">A</div>
+      <span>\(g(t)\) gibt die durchschnittliche Wassermenge im Tagesverlauf an.</span>
+    </button>
+    <button class="mc-btn" onclick="checkMC('mc_d4','fb_d4',this,false,'sol_d')">
+      <div class="mc-letter">B</div>
+      <span>\(g(t)\) beschreibt die Änderungsrate der Wassermenge in m³/h.</span>
+    </button>
+    <button class="mc-btn" onclick="checkMC('mc_d4','fb_d4',this,true,'sol_d')">
+      <div class="mc-letter">C</div>
+      <span>\(g(t)\) gibt den freien (leeren) Speicherraum an, also die Menge Wasser, die zum Zeitpunkt \(t\) noch eingefüllt werden könnte, bis der Speicher voll (2000 m³) ist.</span>
+    </button>
+  </div>
+  <div class="feedback" id="fb_d4"></div>
+</div>
+
+<div class="solution-toggle" id="sol_d" style="display:none;">
+  <button class="solution-btn" onclick="toggleSol('sol_d_content', this)">
+    <span>📖 Vollständige Lösung aufklappen</span><span>▼</span>
+  </button>
+  <div class="solution-content" id="sol_d_content">
+    <div class="sol-step">
+      <div class="sol-label">Wertetabelle für g</div>
+      <div class="sol-text">
+        \(g(0) = 533\)<br>
+        \(g(0{,}5) = -1000 \cdot 0{,}125 + 1000 \cdot 0{,}25 + 687 \cdot 0{,}5 + 533 = 1031{,}5\)<br>
+        \(g(1) = -1000 + 1000 + 687 + 533 = 1220\)<br>
+        \(g(1{,}5) = -3375 + 2250 + 1030{,}5 + 533 = 438{,}5\) ≈ 439
+      </div>
+    </div>
+    <div class="sol-step">
+      <div class="sol-label">Hinweis zum Graphen (d1)</div>
+      <div class="sol-text">
+        Trage die Punkte \((0|533)\), \((0{,}5|1031{,}5)\), \((1|1220)\), \((1{,}5|439)\) im Koordinatensystem ein. Die Kurve steigt zunächst, erreicht ein Maximum zwischen \(t = 0{,}8\) und \(t = 1{,}1\) und fällt dann stark ab. Da der Leitkoeffizient negativ ist (−1000), ist der Graph zu \(f\) an der Linie \(y = 1000\) gespiegelt.
+      </div>
+    </div>
+    <div class="sol-step">
+      <div class="sol-label">Bedeutung von g(t) (d2)</div>
+      <div class="sol-text">
+        Es gilt: \(f(t) + g(t) = 2000\), also \(g(t) = 2000 - f(t)\).<br><br>
+        Da \(f(t)\) die aktuelle Wassermenge im Speicher angibt und die maximale Füllmenge 2000 m³ beträgt, gibt \(g(t)\) den <strong>freien Speicherraum</strong> (die noch verfügbare Kapazität) zum Zeitpunkt \(t\) an.<br><br>
+        Beispiel: Um 7:00 Uhr (\(t=1\)) gilt \(g(1) = 2000 - 780 = 1220\) m³. Es könnten noch 1220 m³ Wasser eingefüllt werden, bis der Speicher voll ist.
+      </div>
+    </div>
+  </div>
+</div>
+```
+
+  </div>
+</div>
+
+<!-- DINO -->
+
+<div class="dino" id="dino" onclick="toggleDinoTip()" onmouseover="showDinoTip()" onmouseout="hideDinoTip()">🦖</div>
+<div class="dino-tooltip" id="dinoTip">Made by Mathedino</div>
+
+<script>
+// ---- UTILITY ----
+function norm(s) {
+  return s.trim().replace(',', '.');
+}
+function approxEq(a, b, tol) {
+  return Math.abs(parseFloat(a) - parseFloat(b)) <= (tol || 0.05);
+}
+
+function showFeedback(id, correct, msg) {
+  const el = document.getElementById(id);
+  el.className = 'feedback ' + (correct ? 'correct' : 'wrong');
+  el.innerHTML = (correct ? '✅ ' : '❌ ') + msg;
+  el.style.display = 'flex';
+}
+
+function showStep(id) {
+  const el = document.getElementById(id);
+  if (el) { el.style.display = 'block'; el.scrollIntoView({behavior:'smooth', block:'nearest'}); }
+}
+
+function toggleSol(id, btn) {
+  const el = document.getElementById(id);
+  el.classList.toggle('open');
+  btn.querySelector('span:last-child').textContent = el.classList.contains('open') ? '▲' : '▼';
+  if (el.classList.contains('open')) MathJax.typesetPromise([el]);
+}
+
+function toggleHint(id) {
+  const el = document.getElementById(id);
+  el.classList.toggle('open');
+}
+
+// ---- TABS ----
+let panelsDone = {};
+function switchTab(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  document.getElementById('tab-' + id).classList.add('active');
+  MathJax.typesetPromise();
+}
+
+function markTabDone(tabId) {
+  if (!panelsDone[tabId]) {
+    panelsDone[tabId] = true;
+    const t = document.getElementById('tab-' + tabId);
+    t.classList.add('done');
+    t.textContent += ' ✓';
+    updateProgress();
+  }
+}
+
+function updateProgress() {
+  const total = 5;
+  const done = Object.keys(panelsDone).length;
+  document.getElementById('progressBar').style.width = (done / total * 100) + '%';
+}
+
+// ---- MC HELPER ----
+function checkMC(containerId, fbId, btn, correct, nextId) {
+  const container = document.getElementById(containerId);
+  if (container.querySelector('.correct-ans')) return; // already answered
+  container.querySelectorAll('.mc-btn').forEach(b => b.onclick = null);
+  if (correct) {
+    btn.classList.add('correct-ans');
+    showFeedback(fbId, true, 'Richtig!');
+    if (nextId) setTimeout(() => showStep(nextId), 500);
+  } else {
+    btn.classList.add('wrong-ans');
+    showFeedback(fbId, false, 'Nicht ganz – schau dir die Optionen noch einmal an.');
+    container.querySelectorAll('.mc-btn').forEach(b => {
+      if (b !== btn) b.onclick = function() { checkMC(containerId, fbId, b, b.classList.contains('correct-ans') || /* re-evaluate */ false, nextId); };
+    });
+  }
+}
+
+// ---- PANEL A1 ----
+function checkA1t() {
+  const v = norm(document.getElementById('a1_t').value);
+  if (approxEq(v, 1, 0.01)) {
+    document.getElementById('a1_t').classList.add('correct');
+    showFeedback('fb_a1_t', true, '7:00 Uhr = 1 Stunde nach 6:00 Uhr → t = 1');
+    showStep('step_a1_2');
+  } else {
+    document.getElementById('a1_t').classList.add('wrong');
+    showFeedback('fb_a1_t', false, 'Überlege: Wie viele Stunden liegen zwischen 6:00 Uhr und 7:00 Uhr?');
+  }
+}
+function checkA1f() {
+  const v = norm(document.getElementById('a1_f').value);
+  if (approxEq(v, 780, 1)) {
+    document.getElementById('a1_f').classList.add('correct');
+    showFeedback('fb_a1_f', true, 'f(1) = 1000 − 1000 − 687 + 1467 = 780 ✓');
+    showStep('step_a1_3');
+  } else {
+    document.getElementById('a1_f').classList.add('wrong');
+    showFeedback('fb_a1_f', false, 'Setze t = 1 in f(t) ein und rechne Schritt für Schritt.');
+  }
+}
+function checkA1mc(btn, correct) {
+  const container = document.getElementById('mc_a1');
+  if (container.querySelector('.correct-ans')) return;
+  container.querySelectorAll('.mc-btn').forEach(b => b.onclick = null);
+  if (correct) {
+    btn.classList.add('correct-ans');
+    showFeedback('fb_a1_mc', true, 'Genau! Das ist ein vollständiger Nachweis: Zeitpunkt benennen, einsetzen, Ergebnis im Sachkontext deuten.');
+    showStep('sol_a1');
+    markTabDone('a1');
+  } else {
+    btn.classList.add('wrong-ans');
+    showFeedback('fb_a1_mc', false, 'Überlege: Ein Nachweis zeigt, dass genau dieser Wert herauskommt.');
+    container.querySelectorAll('.mc-btn').forEach(b => { if (b !== btn) b.onclick = function() { checkA1mc(b, b.dataset.correct === 'true'); }; });
+  }
+}
+
+// ---- PANEL A2 ----
+function checkA2t1() {
+  const v = parseFloat(norm(document.getElementById('a2_t1').value));
+  if (!isNaN(v) && v >= 0.50 && v <= 0.56) {
+    document.getElementById('a2_t1').classList.add('correct');
+    showFeedback('fb_a2_t1', true, `t₁ ≈ 0,53 ✓`);
+    showStep('step_a2_3');
+  } else {
+    document.getElementById('a2_t1').classList.add('wrong');
+    showFeedback('fb_a2_t1', false, 'Nutze den GTR/CAS für die Nullstellen von 1000t³ − 1000t² − 687t + 467 = 0. Der kleinere positive Wert liegt zwischen 0 und 1.');
+  }
+}
+function checkA2t2() {
+  const v = parseFloat(norm(document.getElementById('a2_t2').value));
+  if (!isNaN(v) && v >= 1.33 && v <= 1.41) {
+    document.getElementById('a2_t2').classList.add('correct');
+    showFeedback('fb_a2_t2', true, `t₂ ≈ 1,37 ✓`);
+    showStep('step_a2_4');
+  } else {
+    document.getElementById('a2_t2').classList.add('wrong');
+    showFeedback('fb_a2_t2', false, 'Die zweite Nullstelle liegt zwischen 1,3 und 1,4.');
+  }
+}
+
+// ---- PANEL B ----
+function checkBDeriv() {
+  const c3 = norm(document.getElementById('b_c3').value);
+  const c2 = document.getElementById('b_c2').value.trim();
+  const c1 = document.getElementById('b_c1').value.trim();
+  // Accept: 3000, -2000, -687
+  const ok3 = approxEq(c3, 3000, 1);
+  const ok2 = c2 === '-2000' || c2 === '– 2000' || approxEq(norm(c2), -2000, 1);
+  const ok1 = c1 === '-687' || c1 === '– 687' || approxEq(norm(c1), -687, 1);
+  if (ok3 && ok2 && ok1) {
+    showFeedback('fb_b_deriv', true, "f'(t) = 3000·t² − 2000·t − 687 ✓");
+    showStep('step_b3');
+  } else {
+    let hint = 'Fehler: ';
+    if (!ok3) hint += 'Koeffizient von t² ist falsch (Potenzregel: 3·1000 = 3000). ';
+    if (!ok2) hint += 'Koeffizient von t ist falsch (2·(−1000) = −2000). ';
+    if (!ok1) hint += 'Konstante ist falsch (Ableitung von −687t ist −687). ';
+    showFeedback('fb_b_deriv', false, hint);
+  }
+}
+function checkBtStar() {
+  const v = parseFloat(norm(document.getElementById('b_t_star').value));
+  if (!isNaN(v) && v >= 0.85 && v <= 0.93) {
+    document.getElementById('b_t_star').classList.add('correct');
+    showFeedback('fb_b_t_star', true, 't* ≈ 0,89 h ✓ (entspricht ca. 6:53 Uhr)');
+    showStep('step_b4');
+  } else {
+    document.getElementById('b_t_star').classList.add('wrong');
+    showFeedback('fb_b_t_star', false, 'Nur die positive Nullstelle liegt im Intervall [0; 1,5]. Nutze die Lösungsformel oder den GTR.');
+  }
+}
+function checkBfmin() {
+  const v = parseFloat(norm(document.getElementById('b_fmin').value));
+  if (!isNaN(v) && v >= 755 && v <= 773) {
+    document.getElementById('b_fmin').classList.add('correct');
+    showFeedback('fb_b_fmin', true, 'f(0,89) ≈ 764 m³ ✓');
+    showStep('step_b6');
+  } else {
+    document.getElementById('b_fmin').classList.add('wrong');
+    showFeedback('fb_b_fmin', false, 'Setze t = 0,89 in f(t) ein. Das Ergebnis liegt zwischen 755 und 773 m³.');
+  }
+}
+function checkBdiff() {
+  const v = parseFloat(norm(document.getElementById('b_diff').value));
+  if (!isNaN(v) && v >= 225 && v <= 245) {
+    document.getElementById('b_diff').classList.add('correct');
+    showFeedback('fb_b_diff', true, '1000 − 764 ≈ 236 m³ Unterschreitung ✓');
+    showStep('sol_b');
+    markTabDone('b');
+  } else {
+    document.getElementById('b_diff').classList.add('wrong');
+    showFeedback('fb_b_diff', false, 'Unterschreitung = Sollwert − Minimalwert = 1000 − f(t*)');
+  }
+}
+
+// ---- PANEL C ----
+function checkCf0() {
+  const v = norm(document.getElementById('c_f0').value);
+  if (approxEq(v, 1467, 1)) {
+    document.getElementById('c_f0').classList.add('correct');
+    showFeedback('fb_c_f0', true, 'f(0) = 0 − 0 − 0 + 1467 = 1467 m³ ✓');
+    showStep('step_c2');
+  } else {
+    document.getElementById('c_f0').classList.add('wrong');
+    showFeedback('fb_c_f0', false, 'Setze t = 0 ein: Alle Terme mit t werden 0.');
+  }
+}
+function checkCdq() {
+  const v = norm(document.getElementById('c_dq').value);
+  if (approxEq(v, -687, 1)) {
+    document.getElementById('c_dq').classList.add('correct');
+    showFeedback('fb_c_dq', true, '(780 − 1467) / 1 = −687 m³/h ✓');
+    showStep('step_c3');
+  } else {
+    document.getElementById('c_dq').classList.add('wrong');
+    showFeedback('fb_c_dq', false, '780 − 1467 = ? Achte auf das Vorzeichen!');
+  }
+}
+function checkCf1() {
+  const v = norm(document.getElementById('c_f1').value);
+  if (approxEq(v, 313, 1)) {
+    document.getElementById('c_f1').classList.add('correct');
+    showFeedback('fb_c_f1', true, "f'(1) = 3000 − 2000 − 687 = 313 m³/h ✓");
+    showStep('step_c4');
+  } else {
+    document.getElementById('c_f1').classList.add('wrong');
+    showFeedback('fb_c_f1', false, "Setze t = 1 in f'(t) = 3000t² − 2000t − 687 ein.");
+  }
+}
+
+// ---- PANEL D ----
+function gVal(t) {
+  return -1000*t*t*t + 1000*t*t + 687*t + 533;
+}
+const dgMap = {0: 'fb_d_g0', 0.5: 'fb_d_g05', 1: 'fb_d_g1', 1.5: 'fb_d_g15'};
+const dgInput = {0: 'd_g0', 0.5: 'd_g05', 1: 'd_g1', 1.5: 'd_g15'};
+let dgDone = 0;
+function checkDg(t) {
+  const expected = gVal(t);
+  const inputEl = document.getElementById(dgInput[t]);
+  const v = parseFloat(norm(inputEl.value));
+  const fbId = dgMap[t];
+  const tol = t === 0.5 ? 2 : 1;
+  if (!isNaN(v) && Math.abs(v - expected) <= tol) {
+    inputEl.classList.add('correct');
+    showFeedback(fbId, true, `g(${String(t).replace('.',',')}) = ${Math.round(expected * 10) / 10} ✓`);
+    dgDone++;
+    if (dgDone >= 3) showStep('step_d2');
+  } else {
+    inputEl.classList.add('wrong');
+    showFeedback(fbId, false, `Rechne: g(${String(t).replace('.',',')}) = −1000·${t}³ + 1000·${t}² + 687·${t} + 533`);
+  }
+}
+function completeD2() {
+  document.getElementById('btn_d2').textContent = '✅ Graph eingezeichnet';
+  document.getElementById('btn_d2').classList.add('btn-green');
+  document.getElementById('btn_d2').onclick = null;
+  showStep('step_d3');
+}
+
+// ---- DINO ----
+let dinoTimeout;
+function showDinoTip() { document.getElementById('dinoTip').classList.add('show'); }
+function hideDinoTip() { document.getElementById('dinoTip').classList.remove('show'); }
+function toggleDinoTip() {
+  const t = document.getElementById('dinoTip');
+  t.classList.toggle('show');
+  clearTimeout(dinoTimeout);
+  if (t.classList.contains('show')) dinoTimeout = setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+// Mark tabs done when solution shown
+function markDone(tabId) { markTabDone(tabId); }
+
+// Override checkMC for sol reveal + tab marking
+const origCheckMC = checkMC;
+window.checkMC = function(containerId, fbId, btn, correct, nextId) {
+  const container = document.getElementById(containerId);
+  if (container.querySelector('.correct-ans')) return;
+  container.querySelectorAll('.mc-btn').forEach(b => b.onclick = null);
+  if (correct) {
+    btn.classList.add('correct-ans');
+    showFeedback(fbId, true, 'Richtig!');
+    if (nextId) setTimeout(() => { showStep(nextId); if (nextId.startsWith('sol_')) { const tabId = nextId.replace('sol_',''); markTabDone(tabId.split('_')[0]); } }, 500);
+  } else {
+    btn.classList.add('wrong-ans');
+    showFeedback(fbId, false, 'Nicht ganz – schau dir die Optionen noch einmal an.');
+    setTimeout(() => container.querySelectorAll('.mc-btn').forEach(b => { if (!b.classList.contains('wrong-ans') && !b.classList.contains('correct-ans')) b.onclick = function() { window.checkMC(containerId, fbId, b, b === container.querySelectorAll('.mc-btn')[containerId === 'mc_a2_1' ? 1 : containerId === 'mc_b1' ? 1 : containerId === 'mc_b4' ? 0 : containerId === 'mc_c4' ? 1 : containerId === 'mc_d3' ? 1 : 2], nextId); }; }), 300);
+  }
+};
+
+// Init MathJax on first render
+window.addEventListener('load', () => { if (window.MathJax) MathJax.typesetPromise(); });
+</script>
+
+</body>
+</html>
