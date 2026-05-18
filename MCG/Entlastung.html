@@ -517,27 +517,31 @@
   <div class="card">
     <div class="section-title"><span class="section-num">II</span> Zu entlastende Sonderaufgaben</div>
 
-    <div class="sonder-item">
+    <div class="sonder-item" style="flex-wrap:wrap;gap:0.6rem;">
       <input type="checkbox" class="checkbox-custom" id="klass" onchange="calcAll()">
-      <label for="klass">Klassenleitung</label>
+      <label for="klass" style="flex:1;min-width:140px;">Klassenleitung</label>
       <span class="pts">16 Punkte</span>
+      <input type="text" id="klass-bez" placeholder="z.B. Klasse 8a" style="width:100%;margin-top:0.3rem;font-size:0.82rem;padding:0.4rem 0.6rem;border:1px solid var(--border);border-radius:3px;background:var(--input-bg);">
     </div>
 
-    <div class="sonder-item">
+    <div class="sonder-item" style="flex-wrap:wrap;gap:0.6rem;margin-top:0.6rem;">
       <input type="checkbox" class="checkbox-custom" id="fach-voll" onchange="calcAll()">
-      <label for="fach-voll">Fachvorsitz (vollständig)</label>
+      <label for="fach-voll" style="flex:1;min-width:140px;">Fachvorsitz (vollständig)</label>
       <span class="pts">8 Punkte</span>
+      <input type="text" id="fach-voll-bez" placeholder="z.B. Fachvorsitz Niederländisch" style="width:100%;margin-top:0.3rem;font-size:0.82rem;padding:0.4rem 0.6rem;border:1px solid var(--border);border-radius:3px;background:var(--input-bg);">
     </div>
 
-    <div class="sonder-item">
+    <div class="sonder-item" style="flex-wrap:wrap;gap:0.6rem;margin-top:0.6rem;">
       <input type="checkbox" class="checkbox-custom" id="fach-halb" onchange="calcAll()">
-      <label for="fach-halb">Fachvorsitz (gleichwertig geteilt)</label>
+      <label for="fach-halb" style="flex:1;min-width:140px;">Fachvorsitz (gleichwertig geteilt)</label>
       <span class="pts">4 Punkte</span>
+      <input type="text" id="fach-halb-bez" placeholder="z.B. Fachvorsitz Musik" style="width:100%;margin-top:0.3rem;font-size:0.82rem;padding:0.4rem 0.6rem;border:1px solid var(--border);border-radius:3px;background:var(--input-bg);">
     </div>
 
-    <div class="form-group" style="margin-top:1rem;">
-      <label>Bezeichnung Klassenleitung / Fachvorsitz <span class="tag">optional</span></label>
-      <input type="text" id="sonder-bezeichnung" placeholder="z.B. Klassenleitung 8a, Fachvorsitz Niederländisch">
+    <div class="form-group" style="margin-top:1.2rem;">
+      <label style="font-weight:600;">Sonstige Sonderbelastungen <span class="tag">optional</span></label>
+      <p style="font-size:0.75rem;color:var(--text-muted);margin:0.3rem 0 0.5rem 0;">Weitere besondere Aufgaben, die nicht durch die obigen Kategorien abgedeckt sind (zur Beurteilung durch den Lehrerrat).</p>
+      <textarea id="sonstige-belastungen" rows="3" placeholder="z.B. Koordination Schüleraustausch, Betreuung Schulpraktikanten, Steuergruppe..." style="width:100%;padding:0.6rem 0.8rem;border:1px solid var(--border);border-radius:3px;font-family:'IBM Plex Sans',sans-serif;font-size:0.84rem;background:var(--input-bg);resize:vertical;color:var(--text);"></textarea>
     </div>
 
     <div style="display:flex;justify-content:flex-end;align-items:center;gap:1rem;margin-top:0.5rem;padding-top:0.8rem;border-top:1px solid var(--border);">
@@ -713,7 +717,10 @@
   function generatePDF() {
     const name = document.getElementById('name').value || '___________________';
     const kuerzel = document.getElementById('kuerzel').value || '';
-    const bezeichnung = document.getElementById('sonder-bezeichnung').value || '';
+    const klassBez     = document.getElementById('klass-bez').value.trim();
+    const fachVollBez  = document.getElementById('fach-voll-bez').value.trim();
+    const fachHalbBez  = document.getElementById('fach-halb-bez').value.trim();
+    const sonstigeTxt  = document.getElementById('sonstige-belastungen').value.trim();
 
     // Zeilen sammeln
     const rows = document.querySelectorAll('#korrekturen-body tr');
@@ -748,21 +755,29 @@
     let sonderHTML = '';
     let sumSonder = 0;
     if (document.getElementById('klass').checked) {
-      const lbl = 'Klassenleitung' + (bezeichnung ? ' – ' + bezeichnung : '');
+      const lbl = 'Klassenleitung' + (klassBez ? ' – ' + klassBez : '');
       sonderHTML += `<tr><td>${lbl}</td><td style="text-align:right">16</td></tr>`;
       sumSonder += 16;
     }
     if (document.getElementById('fach-voll').checked) {
-      const lbl = 'Fachvorsitz' + (bezeichnung ? ' – ' + bezeichnung : '');
+      const lbl = 'Fachvorsitz (vollständig)' + (fachVollBez ? ' – ' + fachVollBez : '');
       sonderHTML += `<tr><td>${lbl}</td><td style="text-align:right">8</td></tr>`;
       sumSonder += 8;
     }
     if (document.getElementById('fach-halb').checked) {
-      const lbl = 'Fachvorsitz (geteilt)' + (bezeichnung ? ' – ' + bezeichnung : '');
+      const lbl = 'Fachvorsitz (geteilt)' + (fachHalbBez ? ' – ' + fachHalbBez : '');
       sonderHTML += `<tr><td>${lbl}</td><td style="text-align:right">4</td></tr>`;
       sumSonder += 4;
     }
-    if (!sonderHTML) sonderHTML = '<tr><td colspan="2" style="color:#999">(keine)</td></tr>';
+    if (!sonderHTML && !sonstigeTxt) sonderHTML = '<tr><td colspan="2" style="color:#999">(keine)</td></tr>';
+
+    // Sonstige Sonderbelastungen – separat, ohne Punkte
+    let sonstigeHTML = '';
+    if (sonstigeTxt) {
+      sonstigeHTML = `
+        <h2 style="margin-top:2mm;">Sonstige Sonderbelastungen</h2>
+        <div style="font-size:8pt;border:1px solid #ccc;border-radius:2px;padding:2mm 3mm;background:#fafaf8;white-space:pre-wrap;">${sonstigeTxt}</div>`;
+    }
 
     const gesamt = (sumKorr + sumSonder).toFixed(2);
 
@@ -847,6 +862,8 @@
     </tr>
   </tbody>
 </table>
+
+${sonstigeHTML}
 
 <div class="gesamt">
   <span class="gesamt-label">Gesamtsumme</span>
