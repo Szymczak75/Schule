@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Regulation des Blutzuckerspiegels | Klasse 9</title>
+<style>
+  :root{--green:#1a7a1a;--green-bg:#c8f5c8;--red:#b00000;--red-bg:#fcd4d4;--blue:#1a4a8a;--blue-light:#e8f0fa;--tip-bg:#fff8e1;--tip-border:#f9a825;--shadow:0 2px 12px rgba(0,0,0,.13);--radius:14px;}
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  body{font-family:-apple-system,"Helvetica Neue",Arial,sans-serif;font-size:17px;color:#1a1a1a;background:#eef2f8;min-height:100vh;padding-bottom:90px;}
+  header{background:linear-gradient(135deg,#1a4a8a,#2d6abf);color:white;padding:16px 20px 12px;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.2);}
+  header h1{font-size:19px;font-weight:700;}
+  header p{font-size:13px;opacity:.85;margin-top:2px;}
+  .tabs{display:flex;background:#fff;border-bottom:2px solid #ccc;overflow-x:auto;-webkit-overflow-scrolling:touch;position:sticky;top:66px;z-index:90;}
+  .tab-btn{flex:none;padding:12px 18px;font-size:14px;font-weight:600;color:#666;background:none;border:none;border-bottom:3px solid transparent;cursor:pointer;white-space:nowrap;min-height:44px;}
+  .tab-btn.active{color:var(--blue);border-bottom-color:var(--blue);}
+  .tab-btn:active{background:var(--blue-light);}
+  .card{background:white;border-radius:var(--radius);box-shadow:var(--shadow);margin:16px;padding:20px;display:none;}
+  .card.active{display:block;}
+  .card-title{font-size:20px;font-weight:700;color:var(--blue);margin-bottom:4px;}
+  .card-sub{font-size:14px;color:#666;margin-bottom:16px;}
+  .phase-badge{display:inline-block;background:var(--blue-light);color:var(--blue);font-size:12px;font-weight:700;border-radius:20px;padding:3px 10px;margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px;}
+  .info-box{background:var(--blue-light);border-left:4px solid var(--blue);border-radius:8px;padding:13px 16px;margin:12px 0;font-size:15px;line-height:1.6;}
+  .info-box strong{color:var(--blue);}
+  .tip-box{background:var(--tip-bg);border:2px solid var(--tip-border);border-radius:10px;margin:12px 0;overflow:hidden;}
+  .tip-hdr{display:flex;align-items:center;gap:8px;padding:12px 16px;cursor:pointer;font-weight:600;font-size:15px;min-height:44px;user-select:none;}
+  .tip-hdr .arr{transition:transform .25s;font-size:12px;}
+  .tip-hdr.open .arr{transform:rotate(90deg);}
+  .tip-body{display:none;padding:0 16px 14px;font-size:15px;line-height:1.7;}
+  .tip-body.vis{display:block;}
+  .sec{font-size:16px;font-weight:700;color:#333;margin:18px 0 10px;display:flex;align-items:center;gap:8px;}
+  .sec::before{content:"";display:block;width:4px;height:20px;background:var(--blue);border-radius:2px;}
+  .fb{margin-top:10px;border-radius:10px;padding:12px 16px;font-size:15px;font-weight:600;display:none;}
+  .fb.ok{background:var(--green-bg);color:#124a12;border:2px solid var(--green);display:flex;align-items:flex-start;gap:8px;}
+  .fb.err{background:var(--red-bg);color:var(--red);border:2px solid var(--red);display:flex;flex-direction:column;gap:4px;}
+  .mc-opts{display:flex;flex-direction:column;gap:10px;margin-top:8px;}
+  .mc-btn{background:#f5f7fb;border:2px solid #c5cfe8;border-radius:10px;padding:13px 16px;font-size:16px;text-align:left;cursor:pointer;min-height:50px;line-height:1.5;width:100%;}
+  .mc-btn:active{background:#dde8ff;}
+  .mc-btn.ok{background:var(--green-bg);border-color:var(--green);color:#124a12;font-weight:600;}
+  .mc-btn.err{background:var(--red-bg);border-color:var(--red);color:var(--red);font-weight:600;}
+  .mc-btn:disabled{cursor:default;}
+  .gap-text{line-height:2.8;font-size:16px;}
+  .gi{border:none;border-bottom:2px solid var(--blue);background:transparent;font-size:16px;width:130px;padding:2px 4px;outline:none;text-align:center;}
+  .gi.ok{border-bottom-color:var(--green);color:var(--green);font-weight:600;}
+  .gi.err{border-bottom-color:var(--red);color:var(--red);}
+  .word-hint{background:#fff8e1;border:2px solid #f9a825;border-radius:10px;margin:10px 0 4px;overflow:hidden;}
+  .word-hint-hdr{display:flex;align-items:center;gap:8px;padding:10px 14px;cursor:pointer;font-size:14px;font-weight:600;color:#8a6000;min-height:44px;user-select:none;}
+  .word-hint-hdr .arr{transition:transform .25s;font-size:11px;}
+  .word-hint-hdr.open .arr{transform:rotate(90deg);}
+  .word-hint-body{display:none;padding:4px 14px 12px;}
+  .word-hint-body.vis{display:flex;flex-wrap:wrap;gap:8px;}
+  .hint-chip{background:#fff3cc;border:1.5px solid #f9a825;border-radius:16px;padding:6px 13px;font-size:14px;font-weight:600;color:#6b4c00;}
+  .btn-row{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;}
+  .btn-check{background:var(--blue);color:white;border:none;border-radius:10px;padding:11px 18px;font-size:16px;font-weight:600;min-height:44px;cursor:pointer;}
+  .btn-reset{background:#888;color:white;border:none;border-radius:10px;padding:11px 18px;font-size:16px;font-weight:600;min-height:44px;cursor:pointer;}
+  .word-bank{background:#f0f4ff;border:2px solid #c5cfe8;border-radius:10px;padding:12px;margin-bottom:14px;}
+  .wb-title{font-size:13px;font-weight:700;color:var(--blue);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;}
+  .chip-pool{display:flex;flex-wrap:wrap;gap:8px;}
+  .chip{background:#e8f0fa;border:2px solid #b0c4e8;border-radius:20px;padding:8px 14px;font-size:15px;cursor:pointer;min-height:40px;display:flex;align-items:center;user-select:none;}
+  .chip.sel{background:var(--blue);color:white;border-color:var(--blue);}
+  .chip.used{opacity:.35;pointer-events:none;}
+  .drop-zones{display:flex;flex-direction:column;gap:10px;}
+  .dz-row{display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap;}
+  .dz-label{font-size:15px;font-weight:700;min-width:160px;padding-top:10px;flex-shrink:0;}
+  .dz-slot{border:2px dashed #b0c4e8;border-radius:10px;min-height:48px;min-width:100px;padding:6px 10px;flex:1;display:flex;flex-wrap:wrap;align-items:center;gap:6px;background:#f8faff;cursor:pointer;}
+  .dz-slot:active{background:#dde8ff;}
+  .placed-chip{background:var(--blue);color:white;border-radius:14px;padding:4px 12px;font-size:14px;cursor:pointer;white-space:nowrap;}
+  .dz-ph{color:#aaa;font-size:13px;font-style:italic;}
+  .cycle{display:flex;flex-direction:column;align-items:center;gap:0;margin:16px 0;}
+  .cyc-box{border-radius:10px;padding:11px 16px;font-size:15px;font-weight:600;text-align:center;width:86%;max-width:340px;border:2px solid;}
+  .cyc-arrow{font-size:20px;line-height:1.2;text-align:center;padding:3px 0;}
+  .cyc-arrow.p{color:#1a7a1a;} .cyc-arrow.m{color:#b00000;}
+  .cb-bz{background:#e8f0fa;border-color:var(--blue);color:var(--blue);}
+  .cb-ins{background:#fff0f0;border-color:#cc2200;color:#cc2200;}
+  .cb-glu{background:#f0fff4;border-color:#1a7a1a;color:#1a7a1a;}
+  .cb-org{background:#f5f0ff;border-color:#7c3aed;color:#5b21b6;}
+  .cb-meal{background:#fff8e1;border-color:#f9a825;color:#8a6000;}
+  .sort-item{display:flex;align-items:center;gap:10px;background:#f5f7fb;border:2px solid #c5cfe8;border-radius:10px;padding:12px 14px;cursor:pointer;min-height:50px;font-size:15px;margin-bottom:8px;}
+  .sort-item.sel{background:var(--blue-light);border-color:var(--blue);}
+  .sort-item.ok{background:var(--green-bg);border-color:var(--green);}
+  .sort-item.err{background:var(--red-bg);border-color:var(--red);}
+  .sign-q{background:#f8faff;border:2px solid #c5cfe8;border-radius:10px;padding:12px 14px;margin:8px 0;}
+  .sign-btns{display:flex;gap:10px;margin-top:10px;}
+  .sign-btn{flex:1;padding:12px;font-size:22px;font-weight:700;border:2px solid #c5cfe8;border-radius:10px;background:#f5f7fb;cursor:pointer;min-height:50px;}
+  .sign-btn:disabled{cursor:default;}
+  .sign-btn.ok{background:var(--green-bg);border-color:var(--green);}
+  .sign-btn.err{background:var(--red-bg);border-color:var(--red);}
+  .sign-expl{display:none;font-size:13px;margin-top:8px;padding:8px;border-radius:6px;}
+  .fin-btn{background:#f5f7fb;border:2px solid #c5cfe8;border-radius:10px;padding:13px 16px;font-size:16px;text-align:left;cursor:pointer;min-height:50px;line-height:1.5;width:100%;margin-bottom:8px;}
+  .fin-btn.sel{background:var(--blue-light);border-color:var(--blue);}
+  .fin-btn.ok{background:var(--green-bg);border-color:var(--green);color:#124a12;font-weight:600;}
+  .fin-btn.err{background:var(--red-bg);border-color:var(--red);color:var(--red);font-weight:600;}
+  .fin-btn:disabled{cursor:default;}
+  .next-btn{display:none;width:100%;margin-top:20px;padding:14px;background:linear-gradient(135deg,#1a4a8a,#2d6abf);color:white;border:none;border-radius:12px;font-size:17px;font-weight:700;cursor:pointer;min-height:50px;text-align:center;}
+  .next-btn:active{opacity:.85;}
+  .q-nr{display:inline-flex;align-items:center;justify-content:center;background:var(--blue);color:white;border-radius:50%;width:26px;height:26px;font-size:13px;font-weight:700;margin-right:6px;flex-shrink:0;}
+  .q-txt{font-size:16px;font-weight:600;margin-bottom:10px;line-height:1.5;}
+  hr{border:none;border-top:1px solid #dde;margin:18px 0;}
+  .slider-wrap{display:flex;flex-direction:column;gap:10px;margin:14px 0;}
+  .slider-labels{display:flex;justify-content:space-between;font-size:14px;color:#555;}
+  .slider-val{font-size:22px;font-weight:700;text-align:center;padding:10px;background:#f5f7fb;border-radius:8px;border:2px solid #c5cfe8;}
+  .slider-val.normal{color:var(--green);border-color:var(--green);}
+  .slider-val.high{color:var(--red);border-color:var(--red);}
+  .slider-val.low{color:#e67e00;border-color:#f9a825;}
+  input[type=range]{width:100%;height:36px;cursor:pointer;}
+  table.btab{width:100%;border-collapse:collapse;font-size:14px;margin:12px 0;}
+  table.btab th{background:var(--blue);color:white;padding:10px 12px;text-align:left;}
+  table.btab td{padding:9px 12px;border-bottom:1px solid #dde;vertical-align:top;}
+  table.btab tr:nth-child(even) td{background:#f5f7fb;}
+  .ad{background:#f8faff;border:2px solid #c5cfe8;border-radius:12px;padding:16px;margin:14px 0;}
+  .ad-row{display:flex;align-items:center;gap:8px;margin:8px 0;flex-wrap:wrap;}
+  .ad-item{background:white;border:2px solid #c5cfe8;border-radius:8px;padding:6px 12px;font-size:14px;font-weight:600;}
+  .ad-sign{font-size:20px;font-weight:700;width:30px;text-align:center;}
+  .ad-p{color:var(--green);} .ad-m{color:var(--red);}
+  #dino{position:fixed;bottom:16px;right:14px;font-size:22px;cursor:pointer;z-index:300;user-select:none;}
+  #dino-lbl{display:none;position:fixed;bottom:46px;right:14px;background:#333;color:white;font-size:11px;border-radius:6px;padding:3px 8px;z-index:301;white-space:nowrap;}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🩸 Regulation des Blutzuckerspiegels</h1>
+  <p>Biologie · Klasse 9 · Erarbeitung · Stunde 2</p>
+</header>
+
+<nav class="tabs">
+  <button class="tab-btn active" onclick="goTab(0)">1 · Einstieg</button>
+  <button class="tab-btn" onclick="goTab(1)">2 · Insulin &amp; Glukagon</button>
+  <button class="tab-btn" onclick="goTab(2)">3 · Regelkreis</button>
+  <button class="tab-btn" onclick="goTab(3)">4 · Pfeildiagramm</button>
+  <button class="tab-btn" onclick="goTab(4)">5 · Teste dich</button>
+</nav>
+
+<!-- KARTE 1 -->
+<div class="card active" id="card0">
+  <div class="phase-badge">⏱ ~8 min · Einstieg</div>
+  <div class="card-title">Warum braucht dein Körper Zucker im Blut?</div>
+  <div class="card-sub">Glucose als Energielieferant der Zellen</div>
+  <div class="info-box"><strong>Wusstest du?</strong> Nach einer Mahlzeit steigt der Glucosegehalt im Blut stark an. Ohne Regulation würde er auf gefährlich hohem Niveau bleiben – dein Körper regelt das in wenigen Minuten, ganz automatisch.</div>
+  <div class="sec">🍞 Was passiert nach dem Essen?</div>
+  <p style="line-height:1.7;font-size:15px;">Kohlenhydrate werden im Darm zu <strong>Glucose</strong> aufgespalten und ins Blut aufgenommen – der Blutzucker steigt. Die Zellen brauchen Glucose für die <strong>Zellatmung</strong>: Glucose + O₂ → Energie (ATP) + CO₂ + H₂O.</p>
+  <div class="tip-box" style="margin-top:14px;">
+    <div class="tip-hdr" onclick="tipToggle(this)">💡 Was ist der „Blutzuckerspiegel"? <span class="arr">▶</span></div>
+    <div class="tip-body">Der <strong>Blutzuckerspiegel</strong> ist die Glucosekonzentration im Blut. Er wird in <strong>mg/100 ml</strong> gemessen. Normalbereich (nüchtern): <strong>70–100 mg/100 ml</strong>.</div>
+  </div>
+  <div class="sec">🎯 Aufgabe 1 – Blutzuckerwert einschätzen</div>
+  <p style="font-size:15px;margin-bottom:12px;">Schiebe den Regler und beobachte, was dein Körper tut:</p>
+  <div class="slider-wrap">
+    <div class="slider-labels"><span>54 mg/100 ml</span><span>160 mg/100 ml</span></div>
+    <input type="range" min="54" max="160" value="90" id="bz-slider" oninput="sliderUpdate()">
+    <div class="slider-val normal" id="bz-val">90 mg/100 ml</div>
+    <div id="bz-status" style="font-size:14px;color:#555;text-align:center;min-height:22px;margin-top:4px;"></div>
+  </div>
+  <div class="sec">🧠 Aufgabe 2 – Wozu dient Glucose?</div>
+  <div class="q-txt"><span class="q-nr">2</span> Wähle die richtige Aussage:</div>
+  <div class="mc-opts" id="mc0">
+    <button class="mc-btn" onclick="mcCheck('mc0',this,false,'fb-mc0')">Glucose wird direkt in Muskeln verbrannt, ohne Sauerstoff zu benötigen.</button>
+    <button class="mc-btn" onclick="mcCheck('mc0',this,true,'fb-mc0')">Glucose wird in den Zellen durch Zellatmung mit Sauerstoff zu Energie (ATP), Wasser und CO₂ umgewandelt.</button>
+    <button class="mc-btn" onclick="mcCheck('mc0',this,false,'fb-mc0')">Glucose gelangt direkt in die Zellkerne und liefert dort Bauplan-Informationen.</button>
+    <button class="mc-btn" onclick="mcCheck('mc0',this,false,'fb-mc0')">Glucose wird ausschließlich in der Leber verwendet und nicht weitergegeben.</button>
+  </div>
+  <div class="fb" id="fb-mc0"></div>
+  <button class="next-btn" id="next0" onclick="goTab(1)">Weiter → Insulin &amp; Glukagon</button>
+</div>
+
+<!-- KARTE 2 -->
+<div class="card" id="card1">
+  <div class="phase-badge">⏱ ~10 min · Erarbeitung</div>
+  <div class="card-title">Insulin und Glukagon – die Gegenspieler</div>
+  <div class="card-sub">Die Bauchspeicheldrüse als Schaltzentrale</div>
+  <div class="info-box"><strong>Die Bauchspeicheldrüse</strong> enthält zwei Zelltypen:<br>→ <strong>β-Zellen</strong> produzieren <strong>Insulin</strong><br>→ <strong>α-Zellen</strong> produzieren <strong>Glukagon</strong><br>Beide Hormone gelangen ins Blut und wirken nach dem Schlüssel-Schloss-Prinzip an Zielzellen.</div>
+  <div class="sec">📋 Wirkungsübersicht</div>
+  <table class="btab">
+    <tr><th>Hormon</th><th>Auslöser</th><th>Wirkung</th></tr>
+    <tr><td><strong style="color:#cc2200;">Insulin</strong></td><td>Blutzucker ↑</td><td>Glucose-Aufnahme in Muskel-/Leberzellen ↑, Glykogenaufbau ↑ → BZ sinkt</td></tr>
+    <tr><td><strong style="color:#1a7a1a;">Glukagon</strong></td><td>Blutzucker ↓</td><td>Glykogenabbau in der Leber ↑, Glucose-Abgabe ins Blut ↑ → BZ steigt</td></tr>
+  </table>
+  <div class="tip-box">
+    <div class="tip-hdr" onclick="tipToggle(this)">💡 Was ist Glykogen? <span class="arr">▶</span></div>
+    <div class="tip-body"><strong>Glykogen</strong> ist die Speicherform von Glucose in Leber und Muskeln. Bei hohem Blutzucker wird Glucose zu Glykogen aufgebaut (Glykogensynthese). Bei Bedarf wird Glykogen wieder zu Glucose abgebaut (Glykogenolyse).</div>
+  </div>
+  <div class="sec">🎯 Aufgabe 1 – Hormon zuordnen</div>
+  <p style="font-size:15px;margin-bottom:12px;">Tippe zuerst auf ein <strong>Hormon</strong>, dann auf das passende Feld:</p>
+  <div class="word-bank">
+    <div class="wb-title">🔵 Hormone – antippen zum Auswählen</div>
+    <div class="chip-pool" id="pool1">
+      <div class="chip" id="chip-ins" onclick="chipSelect(this,'pool1')">Insulin</div>
+      <div class="chip" id="chip-glu" onclick="chipSelect(this,'pool1')">Glukagon</div>
+    </div>
+  </div>
+  <div class="drop-zones" id="dz1">
+    <div class="dz-row">
+      <div class="dz-label">Blutzucker steigt →</div>
+      <div class="dz-slot" data-ans="Insulin" onclick="chipDrop(this,'pool1','fb-dz1')"><span class="dz-ph">Hormon antippen</span></div>
+    </div>
+    <div class="dz-row">
+      <div class="dz-label">Blutzucker sinkt →</div>
+      <div class="dz-slot" data-ans="Glukagon" onclick="chipDrop(this,'pool1','fb-dz1')"><span class="dz-ph">Hormon antippen</span></div>
+    </div>
+  </div>
+  <div class="btn-row">
+    <button class="btn-check" onclick="dropCheck('dz1','fb-dz1','done-dz1','rst-dz1')">Überprüfen</button>
+    <button class="btn-reset" id="rst-dz1" style="display:none" onclick="dropReset('dz1','pool1','fb-dz1','done-dz1','rst-dz1')">Leeren</button>
+  </div>
+  <div class="fb" id="fb-dz1"></div>
+  <span id="done-dz1" style="display:none"></span>
+  <hr>
+  <div class="sec">🎯 Aufgabe 2 – Wirkungsort</div>
+  <div class="q-txt"><span class="q-nr">2</span> Insulin wirkt vor allem an welchen Zellen?</div>
+  <div class="mc-opts" id="mc1">
+    <button class="mc-btn" onclick="mcCheck('mc1',this,false,'fb-mc1')">Gehirnzellen und Nervenzellen</button>
+    <button class="mc-btn" onclick="mcCheck('mc1',this,true,'fb-mc1')">Muskelzellen und Leberzellen</button>
+    <button class="mc-btn" onclick="mcCheck('mc1',this,false,'fb-mc1')">Rote Blutkörperchen</button>
+    <button class="mc-btn" onclick="mcCheck('mc1',this,false,'fb-mc1')">Lungenzellen und Nierenzellen</button>
+  </div>
+  <div class="fb" id="fb-mc1"></div>
+  <hr>
+  <div class="sec">🎯 Aufgabe 3 – Lückentext</div>
+  <p style="font-size:15px;margin-bottom:8px;">Ergänze den Text:</p>
+  <div class="word-hint">
+    <div class="word-hint-hdr" onclick="tipToggle(this)">&#128161; Wortfeld aufklappen <span class="arr">&#9658;</span></div>
+    <div class="word-hint-body">
+      <span class="hint-chip">&#946;-Zellen</span>
+      <span class="hint-chip">Insulin</span>
+      <span class="hint-chip">Muskel- / Leber</span>
+      <span class="hint-chip">Glykogen</span>
+    </div>
+  </div>
+  <p class="gap-text">Steigt der Blutzucker an, schütten die <input class="gi" id="lt1a" placeholder="?" inputmode="text"> der Bauchspeicheldrüse das Hormon <input class="gi" id="lt1b" placeholder="?" inputmode="text"> aus. Es bewirkt, dass Glucose in <input class="gi" id="lt1c" placeholder="?" inputmode="text" style="width:150px;"> -Zellen aufgenommen und zu <input class="gi" id="lt1d" placeholder="?" inputmode="text"> umgebaut wird. Dadurch sinkt der Blutzucker wieder.</p>
+  <div class="btn-row">
+    <button class="btn-check" onclick="lt1Check()">Überprüfen</button>
+    <button class="btn-reset" id="rst-lt1" style="display:none" onclick="lt1Reset()">Leeren</button>
+  </div>
+  <div class="fb" id="fb-lt1"></div>
+  <button class="next-btn" id="next1" onclick="goTab(2)">Weiter → Regelkreis</button>
+</div>
+
+<!-- KARTE 3 -->
+<div class="card" id="card2">
+  <div class="phase-badge">⏱ ~10 min · Erarbeitung</div>
+  <div class="card-title">Der Regelkreis – negatives Feedback</div>
+  <div class="card-sub">Wie der Körper automatisch gegensteuert</div>
+  <div class="info-box"><strong>Negatives Feedback:</strong> Eine Abweichung vom Normalwert löst eine Reaktion aus, die der Abweichung <em>entgegenwirkt</em>. Der Blutzucker kehrt automatisch in den Normalbereich zurück – ähnlich wie ein Thermostat die Raumtemperatur regelt.</div>
+  <div class="sec">🔄 Regelkreis bei zu hohem Blutzucker</div>
+  <div class="cycle">
+    <div class="cyc-box cb-meal">🍞 Mahlzeit<br><small style="font-weight:400">Glucose gelangt ins Blut</small></div>
+    <div class="cyc-arrow p">↓ &nbsp;(+) gleichsinnig</div>
+    <div class="cyc-box cb-bz">Blutzucker steigt an<br><small style="font-weight:400">über Normalwert</small></div>
+    <div class="cyc-arrow p">↓ &nbsp;(+) gleichsinnig</div>
+    <div class="cyc-box cb-ins">β-Zellen: <strong>Insulin</strong> ausgeschüttet</div>
+    <div class="cyc-arrow m">↓ &nbsp;(–) gegensinnig</div>
+    <div class="cyc-box cb-org">Glucose-Aufnahme &amp; Glykogenaufbau in Muskel-/Leberzellen ↑</div>
+    <div class="cyc-arrow m">↓ &nbsp;(–) gegensinnig</div>
+    <div class="cyc-box cb-bz">Blutzucker sinkt auf Normalwert ✓</div>
+    <div class="cyc-arrow" style="color:#888;font-size:18px;">⟲ Rückkopplung</div>
+  </div>
+  <div class="tip-box">
+    <div class="tip-hdr" onclick="tipToggle(this)">💡 Was bedeuten (+) und (–)? <span class="arr">▶</span></div>
+    <div class="tip-body"><strong>(+) gleichsinnig:</strong> „je mehr … desto mehr"<br><br><strong>(–) gegensinnig:</strong> „je mehr … desto weniger"<br><br>Mindestens ein (–) im Kreislauf = <strong>negatives Feedback</strong> = stabile Regulation.</div>
+  </div>
+  <div class="sec">🎯 Aufgabe 1 – Regelkreis bei niedrigem Blutzucker</div>
+  <p style="font-size:15px;margin-bottom:12px;">Was passiert, wenn der Blutzucker <strong>zu niedrig</strong> sinkt? Bringe die Schritte in die richtige Reihenfolge – tippe sie der Reihe nach an:</p>
+  <div id="sort-box"></div>
+  <div class="btn-row">
+    <button class="btn-check" onclick="sortCheck()">Reihenfolge prüfen</button>
+    <button class="btn-reset" id="rst-sort" style="display:none" onclick="sortReset()">Leeren</button>
+  </div>
+  <div class="fb" id="fb-sort"></div>
+  <span id="done-sort" style="display:none"></span>
+  <hr>
+  <div class="sec">🎯 Aufgabe 2 – Thermostat-Analogie</div>
+  <div class="q-txt"><span class="q-nr">2</span> Was entspricht beim Heizungs-Thermostat dem Hormon Insulin?</div>
+  <div class="mc-opts" id="mc2">
+    <button class="mc-btn" onclick="mcCheck('mc2',this,false,'fb-mc2')">Der Temperatursensor, der die Raumtemperatur misst</button>
+    <button class="mc-btn" onclick="mcCheck('mc2',this,false,'fb-mc2')">Die gewünschte Solltemperatur (z. B. 20 °C)</button>
+    <button class="mc-btn" onclick="mcCheck('mc2',this,true,'fb-mc2')">Das Heizventil, das die Heizleistung reduziert, wenn es zu warm ist</button>
+    <button class="mc-btn" onclick="mcCheck('mc2',this,false,'fb-mc2')">Der Strom, der die Heizung antreibt</button>
+  </div>
+  <div class="fb" id="fb-mc2"></div>
+  <button class="next-btn" id="next2" onclick="goTab(3)">Weiter → Pfeildiagramm</button>
+</div>
+
+<!-- KARTE 4 -->
+<div class="card" id="card3">
+  <div class="phase-badge">⏱ ~10 min · Vertiefung</div>
+  <div class="card-title">Pfeildiagramme lesen &amp; erstellen</div>
+  <div class="card-sub">„je mehr … desto mehr/weniger" – Beziehungen erkennen</div>
+  <div class="info-box">In <strong>Pfeildiagrammen</strong> zeigen Vorzeichen die Art der Beziehung:<br><span style="color:var(--green)">⊕ gleichsinnig</span>: je mehr A → desto mehr B<br><span style="color:var(--red)">⊖ gegensinnig</span>: je mehr A → desto weniger B</div>
+  <div class="sec">📊 Pfeildiagramm zur Blutzuckerregulation</div>
+  <div class="ad">
+    <div class="ad-row">
+      <div class="ad-item" style="background:var(--blue-light);border-color:var(--blue);color:var(--blue)">Blutzucker ↑</div>
+      <div class="ad-sign ad-p">⊕</div>
+      <div class="ad-item" style="background:#fff0f0;border-color:#cc2200;color:#cc2200">Insulinproduktion ↑</div>
+    </div>
+    <div class="ad-row">
+      <div class="ad-item" style="background:#fff0f0;border-color:#cc2200;color:#cc2200">Insulinproduktion ↑</div>
+      <div class="ad-sign ad-m">⊖</div>
+      <div class="ad-item">Blutzucker ↓</div>
+    </div>
+    <div class="ad-row">
+      <div class="ad-item">Blutzucker ↓</div>
+      <div class="ad-sign ad-p">⊕</div>
+      <div class="ad-item" style="background:#f0fff4;border-color:var(--green);color:var(--green)">Glukagonproduktion ↑</div>
+    </div>
+    <div class="ad-row">
+      <div class="ad-item" style="background:#f0fff4;border-color:var(--green);color:var(--green)">Glukagonproduktion ↑</div>
+      <div class="ad-sign ad-p">⊕</div>
+      <div class="ad-item" style="background:var(--blue-light);border-color:var(--blue);color:var(--blue)">Blutzucker ↑</div>
+    </div>
+  </div>
+  <div class="tip-box">
+    <div class="tip-hdr" onclick="tipToggle(this)">💡 Warum muss mindestens ein ⊖ vorkommen? <span class="arr">▶</span></div>
+    <div class="tip-body">Wären alle Pfeile ⊕, würde jede Abweichung sich endlos verstärken. Das ⊖ bewirkt, dass das System korrigiert und zum Normalwert zurückfindet – das ist <strong>negatives Feedback</strong>.</div>
+  </div>
+  <div class="sec">🎯 Aufgabe 1 – Vorzeichen bestimmen</div>
+  <p style="font-size:15px;margin-bottom:4px;">Tippe auf <strong>⊕</strong> oder <strong>⊖</strong>:</p>
+  <div id="sign-quiz"></div>
+  <div class="btn-row">
+    <button class="btn-check" onclick="signCheck()">Überprüfen</button>
+    <button class="btn-reset" id="rst-sign" style="display:none" onclick="signReset()">Leeren</button>
+  </div>
+  <div class="fb" id="fb-sign"></div>
+  <span id="done-sign" style="display:none"></span>
+  <hr>
+  <div class="sec">🎯 Aufgabe 2 – Pfeil-Lücken ergänzen</div>
+  <p style="font-size:15px;margin-bottom:8px;">Ergänze die fehlenden Aussagen:</p>
+  <div class="word-hint">
+    <div class="word-hint-hdr" onclick="tipToggle(this)">&#128161; Wortfeld aufklappen <span class="arr">&#9658;</span></div>
+    <div class="word-hint-body">
+      <span class="hint-chip">sinkt</span>
+      <span class="hint-chip">Leber</span>
+      <span class="hint-chip">an</span>
+    </div>
+  </div>
+  <p class="gap-text">Wenn der Blutzucker <input class="gi" id="pa" placeholder="?" inputmode="text" style="width:90px;">, wird mehr Glukagon produziert. Glukagon bewirkt, dass in der <input class="gi" id="pb" placeholder="?" inputmode="text" style="width:90px;"> Glykogen zu Glucose abgebaut wird. Dadurch steigt der Blutzucker wieder <input class="gi" id="pc" placeholder="?" inputmode="text" style="width:80px;">.</p>
+  <div class="btn-row">
+    <button class="btn-check" onclick="lt2Check()">Überprüfen</button>
+    <button class="btn-reset" id="rst-lt2" style="display:none" onclick="lt2Reset()">Leeren</button>
+  </div>
+  <div class="fb" id="fb-lt2"></div>
+  <button class="next-btn" id="next3" onclick="goTab(4)">Weiter → Teste dich</button>
+</div>
+
+<!-- KARTE 5 -->
+<div class="card" id="card4">
+  <div class="phase-badge">⏱ ~8 min · Wissenscheck</div>
+  <div class="card-title">Teste dich – Blutzuckerregulation</div>
+  <div class="card-sub">5 Fragen zum Abschluss</div>
+  <div class="q-txt"><span class="q-nr">1</span> Welches Organ produziert sowohl Insulin als auch Glukagon?</div>
+  <div id="fin1">
+    <button class="fin-btn" data-ok="false" onclick="finSel(this)">Leber</button>
+    <button class="fin-btn" data-ok="true" onclick="finSel(this)">Bauchspeicheldrüse</button>
+    <button class="fin-btn" data-ok="false" onclick="finSel(this)">Schilddrüse</button>
+    <button class="fin-btn" data-ok="false" onclick="finSel(this)">Milz</button>
+  </div>
+  <hr>
+  <div class="q-txt"><span class="q-nr">2</span> Was bewirkt Insulin in Muskel- und Leberzellen?</div>
+  <div id="fin2">
+    <button class="fin-btn" data-ok="false" onclick="finSel(this)">Es fördert den Abbau von Glykogen zu Glucose.</button>
+    <button class="fin-btn" data-ok="false" onclick="finSel(this)">Es verhindert die Aufnahme von Glucose in die Zellen.</button>
+    <button class="fin-btn" data-ok="true" onclick="finSel(this)">Es fördert die Aufnahme von Glucose und den Aufbau von Glykogen.</button>
+    <button class="fin-btn" data-ok="false" onclick="finSel(this)">Es steigert den Blutzucker durch Freisetzung von Glucose.</button>
+  </div>
+  <hr>
+  <div class="q-txt"><span class="q-nr">3</span> Was versteht man unter „negativem Feedback" in der Blutzuckerregulation?</div>
+  <div id="fin3">
+    <button class="fin-btn" data-ok="false" onclick="finSel(this)">Ein Hormon wirkt immer schädigend auf den Körper.</button>
+    <button class="fin-btn" data-ok="true" onclick="finSel(this)">Eine Abweichung vom Sollwert löst eine Reaktion aus, die dieser Abweichung entgegenwirkt.</button>
+    <button class="fin-btn" data-ok="false" onclick="finSel(this)">Insulin und Glukagon arbeiten immer gemeinsam in dieselbe Richtung.</button>
+    <button class="fin-btn" data-ok="false" onclick="finSel(this)">Der Körper reagiert auf Abweichungen erst nach mehreren Stunden.</button>
+  </div>
+  <hr>
+  <div class="q-txt"><span class="q-nr">4</span> Glukagon wird ausgeschüttet, wenn …</div>
+  <div id="fin4">
+    <button class="fin-btn" data-ok="false" onclick="finSel(this)">… der Blutzucker nach einer Mahlzeit sehr hoch ist.</button>
+    <button class="fin-btn" data-ok="true" onclick="finSel(this)">… der Blutzucker zu niedrig sinkt, z. B. nach längerem Sport.</button>
+    <button class="fin-btn" data-ok="false" onclick="finSel(this)">… die Körpertemperatur ansteigt.</button>
+    <button class="fin-btn" data-ok="false" onclick="finSel(this)">… zu viel Insulin produziert wird.</button>
+  </div>
+  <hr>
+  <div class="q-txt"><span class="q-nr">5</span> Insulin und Glukagon sind „Antagonisten", weil …</div>
+  <div id="fin5">
+    <button class="fin-btn" data-ok="false" onclick="finSel(this)">… sie beide in der Bauchspeicheldrüse gebildet werden.</button>
+    <button class="fin-btn" data-ok="false" onclick="finSel(this)">… sie denselben Rezeptor an der Zielzelle nutzen.</button>
+    <button class="fin-btn" data-ok="true" onclick="finSel(this)">… sie entgegengesetzte Wirkungen auf den Blutzuckerspiegel haben.</button>
+    <button class="fin-btn" data-ok="false" onclick="finSel(this)">… sie aus denselben Bausteinen bestehen.</button>
+  </div>
+  <div class="btn-row" style="margin-top:18px;">
+    <button class="btn-check" id="fin-submit" onclick="finEval()">Auswerten</button>
+  </div>
+  <div class="fb" id="fb-fin" style="margin-top:12px;"></div>
+  <div id="score-box" style="display:none;background:#f5f7fb;border:2px solid #c5cfe8;border-radius:12px;padding:16px;margin-top:14px;text-align:center;">
+    <div style="font-size:32px;font-weight:700;color:var(--blue)" id="score-num"></div>
+    <div style="font-size:15px;color:#555;margin-top:4px;" id="score-msg"></div>
+  </div>
+  <button class="next-btn" id="next4" onclick="alert('Stunde 2 abgeschlossen! Super gemacht!')">Zur nächsten Stunde →</button>
+</div>
+
+<div id="dino" onclick="toggleDino()">🦖</div>
+<div id="dino-lbl">Made by Mathedino</div>
+
+<script>
+'use strict';
+
+function goTab(n){
+  document.querySelectorAll('.card').forEach(function(c,i){ c.classList.toggle('active',i===n); });
+  document.querySelectorAll('.tab-btn').forEach(function(b,i){ b.classList.toggle('active',i===n); });
+}
+
+function tipToggle(hdr){
+  hdr.classList.toggle('open');
+  hdr.nextElementSibling.classList.toggle('vis');
+}
+
+function showFb(id,ok,txt){
+  var el=document.getElementById(id);
+  if(!el) return;
+  el.className='fb '+(ok?'ok':'err');
+  el.style.display='flex';
+  el.textContent=txt;
+}
+
+function sliderUpdate(){
+  var v=parseInt(document.getElementById('bz-slider').value,10);
+  var d=document.getElementById('bz-val');
+  var s=document.getElementById('bz-status');
+  d.textContent=v+' mg/100 ml';
+  d.className='slider-val';
+  if(v>=70&&v<=100){
+    d.classList.add('normal');
+    s.textContent='✅ Normalbereich (70–100 mg/100 ml nüchtern)';
+    s.style.color='#1a7a1a';
+  } else if(v>100){
+    d.classList.add('high');
+    s.textContent='⚠️ Erhöht – Insulin wird ausgeschüttet';
+    s.style.color='#b00000';
+  } else {
+    d.classList.add('low');
+    s.textContent='⚠️ Niedrig – Glukagon wird ausgeschüttet';
+    s.style.color='#e67e00';
+  }
+}
+sliderUpdate();
+
+var mcDone={};
+function mcCheck(groupId,btn,isCorrect,fbId){
+  if(mcDone[groupId]) return;
+  mcDone[groupId]=true;
+  var btns=document.querySelectorAll('#'+groupId+' .mc-btn');
+  btns.forEach(function(b){ b.disabled=true; });
+  if(isCorrect){
+    btn.classList.add('ok');
+    showFb(fbId,true,'✅ Richtig!');
+  } else {
+    btn.classList.add('err');
+    btns.forEach(function(b){
+      if(b!==btn && b.getAttribute('onclick') && b.getAttribute('onclick').indexOf(',true,')!==-1){
+        b.classList.add('ok');
+      }
+    });
+    showFb(fbId,false,'❌ Nicht ganz – die richtige Antwort ist grün markiert.');
+  }
+  checkCardDone();
+}
+
+var selChip=null;
+function chipSelect(chip,poolId){
+  if(chip.classList.contains('used')) return;
+  var pool=document.getElementById(poolId);
+  pool.querySelectorAll('.chip').forEach(function(c){ c.classList.remove('sel'); });
+  if(selChip===chip){ selChip=null; return; }
+  chip.classList.add('sel');
+  selChip=chip;
+}
+function chipDrop(slot,poolId,fbId){
+  if(!selChip) return;
+  if(slot.querySelector('.placed-chip')) return;
+  var ph=slot.querySelector('.dz-ph');
+  if(ph) ph.style.display='none';
+  var pc=document.createElement('span');
+  pc.className='placed-chip';
+  pc.textContent=selChip.textContent;
+  pc.dataset.srcId=selChip.id;
+  var capturedPh=ph;
+  var capturedSlot=slot;
+  var capturedFbId=fbId;
+  pc.addEventListener('click',function(){
+    var orig=document.getElementById(this.dataset.srcId);
+    if(orig){ orig.classList.remove('used','sel'); }
+    this.remove();
+    if(capturedPh) capturedPh.style.display='';
+    capturedSlot.style.background='';
+    capturedSlot.style.borderColor='';
+    document.getElementById(capturedFbId).style.display='none';
+  });
+  slot.appendChild(pc);
+  selChip.classList.add('used');
+  selChip.classList.remove('sel');
+  selChip=null;
+}
+function dropCheck(dzId,fbId,doneId,rstId){
+  var slots=document.querySelectorAll('#'+dzId+' .dz-slot');
+  var allFilled=true,allOk=true;
+  slots.forEach(function(slot){
+    var pc=slot.querySelector('.placed-chip');
+    if(!pc){ allFilled=false; return; }
+    var ok=(pc.textContent.trim()===slot.dataset.ans.trim());
+    slot.style.background=ok?'#c8f5c8':'#fcd4d4';
+    slot.style.borderColor=ok?'#1a7a1a':'#b00000';
+    if(!ok) allOk=false;
+  });
+  if(!allFilled){ showFb(fbId,false,'❌ Bitte beide Felder ausfüllen.'); return; }
+  if(allOk){
+    showFb(fbId,true,'✅ Richtig! Insulin bei zu hohem, Glukagon bei zu niedrigem Blutzucker.');
+    document.getElementById(doneId).textContent='1';
+    document.getElementById(rstId).style.display='none';
+  } else {
+    showFb(fbId,false,'❌ Nicht ganz – schau dir die Tabelle nochmal an.');
+    document.getElementById(rstId).style.display='inline-block';
+  }
+  checkCardDone();
+}
+function dropReset(dzId,poolId,fbId,doneId,rstId){
+  document.querySelectorAll('#'+dzId+' .dz-slot').forEach(function(slot){
+    slot.querySelectorAll('.placed-chip').forEach(function(pc){
+      var orig=document.getElementById(pc.dataset.srcId);
+      if(orig){ orig.classList.remove('used','sel'); }
+      pc.remove();
+    });
+    var ph=slot.querySelector('.dz-ph'); if(ph) ph.style.display='';
+    slot.style.background=''; slot.style.borderColor='';
+  });
+  document.getElementById(fbId).style.display='none';
+  document.getElementById(doneId).textContent='';
+  document.getElementById(rstId).style.display='none';
+  checkCardDone();
+}
+
+function lt1Check(){
+  var fields=[
+    {id:'lt1a',ok:function(v){ return ['beta','β','betazellen','β-zellen'].some(function(a){return v.indexOf(a)!==-1;}); }},
+    {id:'lt1b',ok:function(v){ return v.indexOf('insulin')!==-1; }},
+    {id:'lt1c',ok:function(v){ return v.indexOf('muskel')!==-1||v.indexOf('leber')!==-1; }},
+    {id:'lt1d',ok:function(v){ return v.indexOf('glykogen')!==-1; }},
+  ];
+  var allOk=true;
+  fields.forEach(function(f){
+    var el=document.getElementById(f.id);
+    var ok=f.ok(el.value.trim().toLowerCase());
+    el.className='gi '+(ok?'ok':'err');
+    if(!ok) allOk=false;
+  });
+  if(allOk){
+    showFb('fb-lt1',true,'✅ Alles richtig!');
+    document.getElementById('rst-lt1').style.display='none';
+  } else {
+    showFb('fb-lt1',false,'❌ Noch nicht ganz – rote Felder korrigieren.');
+    document.getElementById('rst-lt1').style.display='inline-block';
+  }
+  checkCardDone();
+}
+function lt1Reset(){
+  ['lt1a','lt1b','lt1c','lt1d'].forEach(function(id){
+    var el=document.getElementById(id); el.value=''; el.className='gi';
+  });
+  document.getElementById('fb-lt1').style.display='none';
+  document.getElementById('rst-lt1').style.display='none';
+  checkCardDone();
+}
+
+var sortData=[
+  {text:'Blutzucker sinkt (z. B. nach Sport)',pos:0},
+  {text:'α-Zellen der Bauchspeicheldrüse schütten Glukagon aus',pos:1},
+  {text:'Leber baut Glykogen zu Glucose ab',pos:2},
+  {text:'Glucose wird ins Blut abgegeben',pos:3},
+  {text:'Blutzucker steigt wieder auf Normalwert',pos:4},
+];
+var sortTap=[];
+function sortBuild(){
+  var shuffled=sortData.slice().sort(function(){ return Math.random()-.5; });
+  var box=document.getElementById('sort-box');
+  box.innerHTML='';
+  sortTap=[];
+  shuffled.forEach(function(item,i){
+    var div=document.createElement('div');
+    div.className='sort-item';
+    div.dataset.pos=item.pos;
+    div.dataset.idx=i;
+    div.innerHTML='<span class="snr" style="font-size:18px;min-width:28px;text-align:center;color:#999">&#9675;</span><span>'+item.text+'</span>';
+    div.addEventListener('click',function(){ sortTapItem(this); });
+    box.appendChild(div);
+  });
+}
+function sortTapItem(el){
+  if(el.classList.contains('ok')||el.classList.contains('err')) return;
+  var idx=parseInt(el.dataset.idx,10);
+  var pos=sortTap.indexOf(idx);
+  if(pos!==-1){
+    sortTap.splice(pos,1);
+    el.classList.remove('sel');
+    el.querySelector('.snr').textContent='○';
+    sortTap.forEach(function(x,i){
+      var e=document.querySelector('[data-idx="'+x+'"] .snr');
+      if(e) e.textContent=(i+1)+'';
+    });
+    return;
+  }
+  sortTap.push(idx);
+  el.classList.add('sel');
+  el.querySelector('.snr').textContent=sortTap.length+'';
+}
+function sortCheck(){
+  if(sortTap.length<sortData.length){
+    showFb('fb-sort',false,'❌ Bitte alle '+sortData.length+' Schritte antippen.'); return;
+  }
+  var allOk=true;
+  sortTap.forEach(function(itemIdx,orderPos){
+    var el=document.querySelector('[data-idx="'+itemIdx+'"]');
+    var ok=(parseInt(el.dataset.pos,10)===orderPos);
+    el.classList.remove('sel');
+    el.classList.add(ok?'ok':'err');
+    if(!ok) allOk=false;
+  });
+  if(allOk){
+    showFb('fb-sort',true,'✅ Perfekt! Du kennst den Regelkreis bei niedrigem Blutzucker.');
+    document.getElementById('done-sort').textContent='1';
+    document.getElementById('rst-sort').style.display='none';
+  } else {
+    showFb('fb-sort',false,'❌ Die Reihenfolge stimmt noch nicht ganz.');
+    document.getElementById('rst-sort').style.display='inline-block';
+  }
+  checkCardDone();
+}
+function sortReset(){
+  sortBuild();
+  document.getElementById('fb-sort').style.display='none';
+  document.getElementById('done-sort').textContent='';
+  document.getElementById('rst-sort').style.display='none';
+  checkCardDone();
+}
+sortBuild();
+
+var signData=[
+  {q:'Blutzucker ↑ → Insulinproduktion ↑',ans:'p',expl:'Je mehr Blutzucker, desto mehr Insulin → gleichsinnig ⊕'},
+  {q:'Insulinproduktion ↑ → Blutzucker ↓',ans:'m',expl:'Insulin senkt den Blutzucker → gegensinnig ⊖'},
+  {q:'Blutzucker ↓ → Glukagonproduktion ↑',ans:'p',expl:'Je weniger Blutzucker, desto mehr Glukagon → gleichsinnig ⊕'},
+  {q:'Glukagonproduktion ↑ → Glykogenabbau ↑',ans:'p',expl:'Glukagon fördert den Glykogenabbau → gleichsinnig ⊕'},
+  {q:'Glykogenabbau ↑ → Blutzucker ↑',ans:'p',expl:'Mehr Abbau → mehr Glucose im Blut → gleichsinnig ⊕'},
+];
+var signDone={};
+function signBuild(){
+  var box=document.getElementById('sign-quiz');
+  box.innerHTML='';
+  signDone={};
+  signData.forEach(function(item,i){
+    var div=document.createElement('div');
+    div.className='sign-q';
+    var pBtn=document.createElement('button');
+    pBtn.className='sign-btn'; pBtn.textContent='⊕'; pBtn.dataset.v='p'; pBtn.dataset.idx=i;
+    pBtn.style.color='#1a7a1a';
+    pBtn.addEventListener('click',function(){ signAns(this); });
+    var mBtn=document.createElement('button');
+    mBtn.className='sign-btn'; mBtn.textContent='⊖'; mBtn.dataset.v='m'; mBtn.dataset.idx=i;
+    mBtn.style.color='#b00000';
+    mBtn.addEventListener('click',function(){ signAns(this); });
+    var qDiv=document.createElement('div');
+    qDiv.style.cssText='font-size:15px;font-weight:600;';
+    qDiv.textContent=item.q;
+    var btnWrap=document.createElement('div');
+    btnWrap.className='sign-btns';
+    btnWrap.appendChild(pBtn); btnWrap.appendChild(mBtn);
+    var expl=document.createElement('div');
+    expl.className='sign-expl'; expl.id='sign-expl-'+i;
+    div.appendChild(qDiv); div.appendChild(btnWrap); div.appendChild(expl);
+    box.appendChild(div);
+  });
+}
+function signAns(btn){
+  var i=parseInt(btn.dataset.idx,10);
+  if(signDone[i]) return;
+  signDone[i]=true;
+  var btns=btn.parentElement.querySelectorAll('.sign-btn');
+  btns.forEach(function(b){ b.disabled=true; });
+  var correct=(btn.dataset.v===signData[i].ans);
+  btn.classList.add(correct?'ok':'err');
+  if(!correct){
+    btns.forEach(function(b){
+      if(b.dataset.v===signData[i].ans) b.classList.add('ok');
+    });
+  }
+  var expl=document.getElementById('sign-expl-'+i);
+  expl.style.display='block';
+  expl.style.background=correct?'#c8f5c8':'#fcd4d4';
+  expl.style.border='1px solid '+(correct?'#1a7a1a':'#b00000');
+  expl.style.color=correct?'#124a12':'#b00000';
+  expl.textContent=(correct?'✅ ':'❌ ')+signData[i].expl;
+}
+function signCheck(){
+  if(Object.keys(signDone).length<signData.length){
+    showFb('fb-sign',false,'❌ Bitte alle '+signData.length+' Fragen beantworten.'); return;
+  }
+  showFb('fb-sign',true,'✅ Alle Vorzeichen überprüft!');
+  document.getElementById('done-sign').textContent='1';
+  document.getElementById('rst-sign').style.display='none';
+  checkCardDone();
+}
+function signReset(){
+  signBuild();
+  document.getElementById('fb-sign').style.display='none';
+  document.getElementById('done-sign').textContent='';
+  document.getElementById('rst-sign').style.display='none';
+  checkCardDone();
+}
+signBuild();
+
+function lt2Check(){
+  var fields=[
+    {id:'pa',ok:function(v){ return v.indexOf('sink')!==-1||v.indexOf('fäll')!==-1||v.indexOf('niedrig')!==-1||v.indexOf('ab')!==-1; }},
+    {id:'pb',ok:function(v){ return v.indexOf('leber')!==-1; }},
+    {id:'pc',ok:function(v){ return v.indexOf('an')!==-1||v.indexOf('hoch')!==-1||v.indexOf('ste')!==-1; }},
+  ];
+  var allOk=true;
+  fields.forEach(function(f){
+    var el=document.getElementById(f.id);
+    var ok=f.ok(el.value.trim().toLowerCase());
+    el.className='gi '+(ok?'ok':'err');
+    if(!ok) allOk=false;
+  });
+  if(allOk){
+    showFb('fb-lt2',true,'✅ Richtig!');
+    document.getElementById('rst-lt2').style.display='none';
+  } else {
+    showFb('fb-lt2',false,'❌ Noch nicht ganz.');
+    document.getElementById('rst-lt2').style.display='inline-block';
+  }
+  checkCardDone();
+}
+function lt2Reset(){
+  ['pa','pb','pc'].forEach(function(id){
+    var el=document.getElementById(id); el.value=''; el.className='gi';
+  });
+  document.getElementById('fb-lt2').style.display='none';
+  document.getElementById('rst-lt2').style.display='none';
+  checkCardDone();
+}
+
+function finSel(btn){
+  var g=btn.parentElement;
+  if(g.dataset.done) return;
+  g.querySelectorAll('.fin-btn').forEach(function(b){
+    b.classList.remove('sel');
+    b.style.background=''; b.style.borderColor='';
+  });
+  btn.classList.add('sel');
+}
+function finEval(){
+  var groups=['fin1','fin2','fin3','fin4','fin5'];
+  var score=0;
+  groups.forEach(function(gid){
+    var g=document.getElementById(gid);
+    if(g.dataset.done) return;
+    g.dataset.done='1';
+    var sel=g.querySelector('.fin-btn.sel');
+    g.querySelectorAll('.fin-btn').forEach(function(b){
+      b.disabled=true; b.classList.remove('sel');
+      b.style.background=''; b.style.borderColor='';
+    });
+    if(sel){
+      var ok=(sel.dataset.ok==='true');
+      sel.classList.add(ok?'ok':'err');
+      if(ok){ score++; }
+      else { g.querySelectorAll('.fin-btn').forEach(function(b){ if(b.dataset.ok==='true') b.classList.add('ok'); }); }
+    } else {
+      g.querySelectorAll('.fin-btn').forEach(function(b){ if(b.dataset.ok==='true') b.classList.add('ok'); });
+    }
+  });
+  document.getElementById('fin-submit').style.display='none';
+  var ok=(score>=4);
+  showFb('fb-fin',ok,(ok?'✅ ':'')+score+'/5 richtig'+(ok?' – sehr gut! 🎉':' – schau dir die rot markierten Antworten an.'));
+  document.getElementById('score-box').style.display='block';
+  document.getElementById('score-num').textContent=score+' / 5';
+  var msgs=['Nochmal nachlesen!','Grundlagen vorhanden.','Ganz gut!','Fast alles verstanden!','Alles richtig! 🎉'];
+  document.getElementById('score-msg').textContent=msgs[score]||'';
+  document.getElementById('next4').style.display='block';
+}
+
+function checkCardDone(){
+  if(mcDone['mc0']){
+    document.getElementById('next0').style.display='block';
+  }
+  if(document.getElementById('done-dz1').textContent &&
+     mcDone['mc1'] &&
+     document.getElementById('lt1a').classList.contains('ok')){
+    document.getElementById('next1').style.display='block';
+  }
+  if(document.getElementById('done-sort').textContent && mcDone['mc2']){
+    document.getElementById('next2').style.display='block';
+  }
+  if(document.getElementById('done-sign').textContent &&
+     document.getElementById('pa').classList.contains('ok')){
+    document.getElementById('next3').style.display='block';
+  }
+}
+
+function toggleDino(){
+  var l=document.getElementById('dino-lbl');
+  l.style.display=(l.style.display==='block')?'none':'block';
+  setTimeout(function(){ l.style.display='none'; },2500);
+}
+</script>
+</body>
+</html>

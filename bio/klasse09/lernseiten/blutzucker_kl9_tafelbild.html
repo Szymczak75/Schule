@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Tafelbild – Blutzuckerregulation Kl. 9</title>
+<style>
+  :root{--green:#1a7a1a;--green-bg:#c8f5c8;--red:#b00000;--red-bg:#fcd4d4;--blue:#1a4a8a;--blue-light:#e8f0fa;--yellow:#f9a825;--yellow-bg:#fff8e1;--purple:#6b21a8;--shadow:0 2px 12px rgba(0,0,0,.13);--radius:14px;}
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  body{font-family:-apple-system,"Helvetica Neue",Arial,sans-serif;font-size:16px;color:#1a1a1a;background:#1a1a2e;min-height:100vh;padding-bottom:60px;}
+
+  header{background:#0f0f1a;color:white;padding:14px 20px 10px;border-bottom:2px solid #333;}
+  header h1{font-size:18px;font-weight:700;color:#e2e8f0;}
+  header p{font-size:13px;color:#94a3b8;margin-top:2px;}
+
+  .tabs{display:flex;background:#0f0f1a;border-bottom:2px solid #333;overflow-x:auto;-webkit-overflow-scrolling:touch;position:sticky;top:0;z-index:90;}
+  .tab-btn{flex:none;padding:11px 16px;font-size:13px;font-weight:600;color:#94a3b8;background:none;border:none;border-bottom:3px solid transparent;cursor:pointer;white-space:nowrap;min-height:44px;}
+  .tab-btn.active{color:#f1f5f9;border-bottom-color:#f9a825;}
+  .tab-btn:active{background:#1e293b;}
+
+  .section{padding:16px;display:none;}
+  .section.active{display:block;}
+
+  /* Tafelbild-Karte */
+  .tb-card{background:#1e293b;border-radius:var(--radius);border:1px solid #334155;padding:20px;margin-bottom:14px;}
+  .tb-title{font-size:16px;font-weight:700;color:#f1f5f9;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+  .tb-title .num{background:var(--yellow);color:#1a1a1a;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;}
+
+  /* Aufdeckbare Felder */
+  .reveal-wrap{margin:6px 0;}
+  .reveal-label{font-size:13px;color:#94a3b8;margin-bottom:4px;}
+  .reveal-btn{width:100%;background:#0f172a;border:2px dashed #475569;border-radius:10px;padding:13px 16px;font-size:15px;color:#64748b;text-align:left;cursor:pointer;min-height:48px;font-style:italic;transition:all .2s;}
+  .reveal-btn:active{background:#1e293b;}
+  .reveal-btn.shown{background:#0f2d1f;border:2px solid var(--green);color:#4ade80;font-style:normal;font-weight:600;cursor:default;}
+  .reveal-btn.shown-blue{background:#0c1a3a;border:2px solid #60a5fa;color:#93c5fd;font-style:normal;font-weight:600;cursor:default;}
+  .reveal-btn.shown-red{background:#2d0f0f;border:2px solid #f87171;color:#fca5a5;font-style:normal;font-weight:600;cursor:default;}
+  .reveal-btn.shown-yellow{background:#2d2000;border:2px solid var(--yellow);color:#fcd34d;font-style:normal;font-weight:600;cursor:default;}
+  .reveal-btn.shown-green {background:#0f2d1f;border:2px solid #4ade80;color:#86efac;font-style:normal;font-weight:600;cursor:default;}
+
+  /* Regelkreis Tafelbild */
+  .cycle-tb{display:flex;flex-direction:column;align-items:center;gap:0;width:100%;}
+  .cyc-row{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin:3px 0;flex-wrap:wrap;}
+  .cyc-box-tb{border-radius:10px;padding:10px 14px;font-size:14px;font-weight:600;text-align:center;border:2px solid;flex:1;max-width:280px;}
+  .cyc-arrow-tb{font-size:18px;text-align:center;padding:2px 0;width:100%;}
+  .cbt-bz  {background:#0c1a3a;border-color:#60a5fa;color:#93c5fd;}
+  .cbt-ins {background:#2d0f0f;border-color:#f87171;color:#fca5a5;}
+  .cbt-glu {background:#0f2d1f;border-color:#4ade80;color:#86efac;}
+  .cbt-org {background:#1e0a3a;border-color:#c084fc;color:#d8b4fe;}
+  .cbt-meal{background:#2d200f;border-color:var(--yellow);color:#fcd34d;}
+  .sign-p{color:#4ade80;font-weight:700;}
+  .sign-m{color:#f87171;font-weight:700;}
+
+  /* Pfeildiagramm-Zeile */
+  .pf-row{display:flex;align-items:center;gap:8px;margin:6px 0;flex-wrap:wrap;}
+  .pf-item{border-radius:8px;padding:7px 12px;font-size:13px;font-weight:600;border:2px solid;flex:1;min-width:110px;text-align:center;}
+  .pf-sign{font-size:18px;font-weight:700;width:28px;text-align:center;flex-shrink:0;}
+  .pf-p{color:#4ade80;} .pf-m{color:#f87171;}
+  .pf-bz {background:#0c1a3a;border-color:#60a5fa;color:#93c5fd;}
+  .pf-ins{background:#2d0f0f;border-color:#f87171;color:#fca5a5;}
+  .pf-glu{background:#0f2d1f;border-color:#4ade80;color:#86efac;}
+  .pf-neu{background:#1e293b;border-color:#475569;color:#cbd5e1;}
+
+  /* Tabelle */
+  table.tt{width:100%;border-collapse:collapse;font-size:14px;margin:8px 0;}
+  table.tt th{background:#0f172a;color:#94a3b8;padding:8px 12px;text-align:left;font-size:12px;text-transform:uppercase;letter-spacing:.5px;}
+  table.tt td{padding:10px 12px;border-bottom:1px solid #334155;color:#e2e8f0;vertical-align:top;}
+
+  /* Begriff-Box */
+  .begriffe{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;}
+  .beg-chip{border-radius:20px;padding:7px 14px;font-size:14px;font-weight:600;border:2px solid;}
+  .beg-green{background:#0f2d1f;border-color:#4ade80;color:#86efac;}
+  .beg-blue {background:#0c1a3a;border-color:#60a5fa;color:#93c5fd;}
+  .beg-red  {background:#2d0f0f;border-color:#f87171;color:#fca5a5;}
+  .beg-yel  {background:#2d200f;border-color:var(--yellow);color:#fcd34d;}
+
+  /* Reveal-All Button */
+  .reveal-all-btn{width:100%;background:#1e293b;border:2px solid #475569;border-radius:10px;padding:12px;font-size:14px;font-weight:600;color:#94a3b8;cursor:pointer;margin-bottom:14px;min-height:44px;}
+  .reveal-all-btn:active{background:#334155;}
+
+  /* Fortschritt */
+  .progress-bar-wrap{background:#0f172a;border-radius:20px;height:8px;margin:10px 0;}
+  .progress-bar{background:var(--yellow);border-radius:20px;height:8px;transition:width .4s;}
+  .progress-txt{font-size:12px;color:#64748b;text-align:center;margin-top:4px;}
+
+  #dino{position:fixed;bottom:14px;right:14px;font-size:22px;cursor:pointer;z-index:300;user-select:none;}
+  #dino-lbl{display:none;position:fixed;bottom:44px;right:14px;background:#333;color:white;font-size:11px;border-radius:6px;padding:3px 8px;z-index:301;white-space:nowrap;}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🖼 Tafelbild – Regulation des Blutzuckerspiegels</h1>
+  <p>Biologie · Klasse 9 · Stunde 2 · Sicherung</p>
+</header>
+
+<nav class="tabs">
+  <button class="tab-btn active" onclick="goTab(0)">1 · Grundbegriffe</button>
+  <button class="tab-btn" onclick="goTab(1)">2 · Hormone</button>
+  <button class="tab-btn" onclick="goTab(2)">3 · Regelkreis</button>
+  <button class="tab-btn" onclick="goTab(3)">4 · Pfeildiagramm</button>
+  <button class="tab-btn" onclick="goTab(4)">5 · Merksätze</button>
+</nav>
+
+
+<!-- SECTION 1 – GRUNDBEGRIFFE -->
+<div class="section active" id="sec0">
+  <button class="reveal-all-btn" onclick="revealAll('sec0')">🔓 Alle Felder aufdecken</button>
+  <div class="progress-bar-wrap"><div class="progress-bar" id="pb0" style="width:0%"></div></div>
+  <div class="progress-txt" id="pt0">0 / 4 aufgedeckt</div>
+
+  <div class="tb-card">
+    <div class="tb-title"><span class="num">1</span>Was ist der Blutzuckerspiegel?</div>
+    <div class="reveal-wrap">
+      <div class="reveal-label">Definition</div>
+      <button class="reveal-btn" onclick="reveal(this,'shown-blue','sec0')">Tippen zum Aufdecken …</button>
+      <div style="display:none">Konzentration von Glucose im Blut · Einheit: mg/100 ml · Normalwert: 70–100 mg/100 ml (nüchtern)</div>
+    </div>
+    <div class="reveal-wrap" style="margin-top:10px;">
+      <div class="reveal-label">Wozu braucht der Körper Glucose?</div>
+      <button class="reveal-btn" onclick="reveal(this,'shown','sec0')">Tippen zum Aufdecken …</button>
+      <div style="display:none">Zellatmung: Glucose + O₂ → Energie (ATP) + CO₂ + H₂O</div>
+    </div>
+  </div>
+
+  <div class="tb-card">
+    <div class="tb-title"><span class="num">2</span>Schlüsselbegriffe</div>
+    <div class="begriffe">
+      <div class="reveal-wrap" style="width:100%;">
+        <div class="reveal-label" style="color:#fcd34d;font-weight:700;font-size:14px;margin-bottom:4px;">🟡 Bauchspeicheldrüse (Pankreas)</div>
+        <button class="reveal-btn" onclick="reveal(this,'shown-yellow','sec0')">Tippen zum Aufdecken …</button>
+        <div style="display:none">Produziert Insulin (β-Zellen) und Glukagon (α-Zellen)</div>
+      </div>
+      <div class="reveal-wrap" style="width:100%;">
+        <div class="reveal-label" style="color:#86efac;font-weight:700;font-size:14px;margin-bottom:4px;">🟢 Glykogen</div>
+        <button class="reveal-btn" onclick="reveal(this,'shown-green','sec0')">Tippen zum Aufdecken …</button>
+        <div style="display:none">Speicherform der Glucose in Leber und Muskeln · wird bei Bedarf zu Glucose abgebaut</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- SECTION 2 – HORMONE -->
+<div class="section" id="sec1">
+  <button class="reveal-all-btn" onclick="revealAll('sec1')">🔓 Alle Felder aufdecken</button>
+  <div class="progress-bar-wrap"><div class="progress-bar" id="pb1" style="width:0%"></div></div>
+  <div class="progress-txt" id="pt1">0 / 6 aufgedeckt</div>
+
+  <div class="tb-card">
+    <div class="tb-title"><span class="num">3</span>Insulin und Glukagon im Vergleich</div>
+    <table class="tt">
+      <tr>
+        <th>Hormon</th>
+        <th>Produziert von</th>
+        <th>Auslöser</th>
+        <th>Wirkung</th>
+      </tr>
+      <tr>
+        <td style="color:#fca5a5;font-weight:700;">Insulin</td>
+        <td>
+          <button class="reveal-btn" onclick="reveal(this,'shown-red','sec1')" style="padding:6px 10px;font-size:13px;">Tippen …</button>
+          <div style="display:none">β-Zellen</div>
+        </td>
+        <td>
+          <button class="reveal-btn" onclick="reveal(this,'shown-red','sec1')" style="padding:6px 10px;font-size:13px;">Tippen …</button>
+          <div style="display:none">Blutzucker ↑</div>
+        </td>
+        <td>
+          <button class="reveal-btn" onclick="reveal(this,'shown-red','sec1')" style="padding:6px 10px;font-size:13px;">Tippen …</button>
+          <div style="display:none">Glucose-Aufnahme ↑, Glykogenaufbau ↑ → BZ ↓</div>
+        </td>
+      </tr>
+      <tr>
+        <td style="color:#86efac;font-weight:700;">Glukagon</td>
+        <td>
+          <button class="reveal-btn" onclick="reveal(this,'shown','sec1')" style="padding:6px 10px;font-size:13px;">Tippen …</button>
+          <div style="display:none">α-Zellen</div>
+        </td>
+        <td>
+          <button class="reveal-btn" onclick="reveal(this,'shown','sec1')" style="padding:6px 10px;font-size:13px;">Tippen …</button>
+          <div style="display:none">Blutzucker ↓</div>
+        </td>
+        <td>
+          <button class="reveal-btn" onclick="reveal(this,'shown','sec1')" style="padding:6px 10px;font-size:13px;">Tippen …</button>
+          <div style="display:none">Glykogenabbau ↑, Glucose-Abgabe ins Blut ↑ → BZ ↑</div>
+        </td>
+      </tr>
+    </table>
+    <div style="margin-top:10px;">
+      <button class="reveal-btn" onclick="reveal(this,'shown-yellow','sec1')">Antagonisten bedeutet … Tippen</button>
+      <div style="display:none">Antagonisten = Gegenspieler: Insulin und Glukagon haben entgegengesetzte Wirkungen auf den Blutzucker</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- SECTION 3 – REGELKREIS -->
+<div class="section" id="sec2">
+  <button class="reveal-all-btn" onclick="revealAll('sec2')">🔓 Alle Felder aufdecken</button>
+  <div class="progress-bar-wrap"><div class="progress-bar" id="pb2" style="width:0%"></div></div>
+  <div class="progress-txt" id="pt2">0 / 7 aufgedeckt</div>
+
+  <div class="tb-card">
+    <div class="tb-title"><span class="num">4</span>Regelkreis – negatives Feedback</div>
+    <div class="cycle-tb">
+      <div class="cyc-row">
+        <button class="reveal-btn cbt-meal" style="max-width:300px;" onclick="reveal(this,'shown-yellow','sec2')">① Auslöser: Tippen …</button>
+        <div style="display:none">🍞 Mahlzeit → Glucose ins Blut</div>
+      </div>
+      <div class="cyc-arrow-tb"><span class="sign-p">↓ (+)</span></div>
+      <div class="cyc-row">
+        <button class="reveal-btn cbt-bz" style="max-width:300px;" onclick="reveal(this,'shown-blue','sec2')">② Blutzucker: Tippen …</button>
+        <div style="display:none">Blutzucker steigt über Normalwert</div>
+      </div>
+      <div class="cyc-arrow-tb"><span class="sign-p">↓ (+)</span></div>
+      <div class="cyc-row">
+        <button class="reveal-btn cbt-ins" style="max-width:300px;" onclick="reveal(this,'shown-red','sec2')">③ Reaktion: Tippen …</button>
+        <div style="display:none">β-Zellen schütten Insulin aus</div>
+      </div>
+      <div class="cyc-arrow-tb"><span class="sign-m">↓ (–)</span></div>
+      <div class="cyc-row">
+        <button class="reveal-btn cbt-org" style="max-width:300px;" onclick="reveal(this,'shown-blue','sec2')">④ Wirkung: Tippen …</button>
+        <div style="display:none">Glucose-Aufnahme &amp; Glykogenaufbau in Muskel-/Leberzellen ↑</div>
+      </div>
+      <div class="cyc-arrow-tb"><span class="sign-m">↓ (–)</span></div>
+      <div class="cyc-row">
+        <button class="reveal-btn cbt-bz" style="max-width:300px;" onclick="reveal(this,'shown-blue','sec2')">⑤ Ergebnis: Tippen …</button>
+        <div style="display:none">Blutzucker sinkt auf Normalwert ✓</div>
+      </div>
+      <div class="cyc-arrow-tb" style="color:#64748b;">⟲ Rückkopplung</div>
+    </div>
+  </div>
+
+  <div class="tb-card">
+    <div class="tb-title"><span class="num">5</span>Negatives Feedback – Definition</div>
+    <button class="reveal-btn" onclick="reveal(this,'shown-yellow','sec2')">Begriff aufdecken …</button>
+    <div style="display:none">Negatives Feedback: Eine Abweichung vom Sollwert löst eine Reaktion aus, die dieser Abweichung entgegenwirkt → System kehrt zum Normalwert zurück</div>
+    <div style="margin-top:8px;">
+      <button class="reveal-btn" onclick="reveal(this,'shown','sec2')">Analogie aufdecken …</button>
+      <div style="display:none">🌡 Wie ein Thermostat: Temperatur zu hoch → Heizventil dreht zu → Temperatur sinkt</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- SECTION 4 – PFEILDIAGRAMM -->
+<div class="section" id="sec3">
+  <button class="reveal-all-btn" onclick="revealAll('sec3')">🔓 Alle Felder aufdecken</button>
+  <div class="progress-bar-wrap"><div class="progress-bar" id="pb3" style="width:0%"></div></div>
+  <div class="progress-txt" id="pt3">0 / 7 aufgedeckt</div>
+
+  <div class="tb-card">
+    <div class="tb-title"><span class="num">6</span>Vorzeichen im Pfeildiagramm</div>
+    <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;">
+      <button class="reveal-btn" onclick="reveal(this,'shown','sec3')" style="flex:1;min-width:130px;">⊕ bedeutet … Tippen</button>
+      <div style="display:none">gleichsinnig: je mehr A → desto mehr B (oder je weniger → desto weniger)</div>
+      <button class="reveal-btn" onclick="reveal(this,'shown-red','sec3')" style="flex:1;min-width:130px;">⊖ bedeutet … Tippen</button>
+      <div style="display:none">gegensinnig: je mehr A → desto weniger B (oder umgekehrt)</div>
+    </div>
+  </div>
+
+  <div class="tb-card">
+    <div class="tb-title"><span class="num">7</span>Pfeildiagramm – Blutzuckerregulation</div>
+
+    <div class="pf-row">
+      <div class="pf-item pf-bz">Blutzucker ↑</div>
+      <div class="pf-sign pf-p">⊕</div>
+      <button class="reveal-btn pf-item" onclick="reveal(this,'shown-red','sec3')" style="padding:7px 12px;font-size:13px;">Tippen …</button>
+      <div style="display:none">Insulinproduktion ↑</div>
+    </div>
+
+    <div class="pf-row">
+      <div class="pf-item pf-ins">Insulinproduktion ↑</div>
+      <button class="reveal-btn" onclick="reveal(this,'shown-red','sec3')" style="width:36px;padding:7px 4px;font-size:18px;font-weight:700;text-align:center;flex-shrink:0;">?</button>
+      <div style="display:none">⊖</div>
+      <div class="pf-item pf-neu">Blutzucker ↓</div>
+    </div>
+
+    <div class="pf-row">
+      <div class="pf-item pf-neu">Blutzucker ↓</div>
+      <div class="pf-sign pf-p">⊕</div>
+      <button class="reveal-btn pf-item" onclick="reveal(this,'shown','sec3')" style="padding:7px 12px;font-size:13px;">Tippen …</button>
+      <div style="display:none">Glukagonproduktion ↑</div>
+    </div>
+
+    <div class="pf-row">
+      <div class="pf-item pf-glu">Glukagonproduktion ↑</div>
+      <div class="pf-sign pf-p">⊕</div>
+      <button class="reveal-btn pf-item" onclick="reveal(this,'shown','sec3')" style="padding:7px 12px;font-size:13px;">Tippen …</button>
+      <div style="display:none">Glykogenabbau in Leber ↑</div>
+    </div>
+
+    <div class="pf-row">
+      <div class="pf-item pf-glu">Glykogenabbau ↑</div>
+      <div class="pf-sign pf-p">⊕</div>
+      <button class="reveal-btn pf-item" onclick="reveal(this,'shown-blue','sec3')" style="padding:7px 12px;font-size:13px;">Tippen …</button>
+      <div style="display:none">Blutzucker ↑</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- SECTION 5 – MERKSÄTZE -->
+<div class="section" id="sec4">
+  <button class="reveal-all-btn" onclick="revealAll('sec4')">🔓 Alle Felder aufdecken</button>
+  <div class="progress-bar-wrap"><div class="progress-bar" id="pb4" style="width:0%"></div></div>
+  <div class="progress-txt" id="pt4">0 / 4 aufgedeckt</div>
+
+  <div class="tb-card">
+    <div class="tb-title"><span class="num">8</span>Merksätze zum Mitnehmen</div>
+
+    <div class="reveal-wrap">
+      <div class="reveal-label">Merksatz 1 – Insulin</div>
+      <button class="reveal-btn" onclick="reveal(this,'shown-red','sec4')">Tippen zum Aufdecken …</button>
+      <div style="display:none">🔴 Insulin senkt den Blutzucker: Es öffnet die Türen der Muskel- und Leberzellen für Glucose und lässt sie als Glykogen einspeichern.</div>
+    </div>
+
+    <div class="reveal-wrap" style="margin-top:10px;">
+      <div class="reveal-label">Merksatz 2 – Glukagon</div>
+      <button class="reveal-btn" onclick="reveal(this,'shown','sec4')">Tippen zum Aufdecken …</button>
+      <div style="display:none">🟢 Glukagon hebt den Blutzucker: Es gibt der Leber das Signal, Glykogen zu Glucose abzubauen und ins Blut abzugeben.</div>
+    </div>
+
+    <div class="reveal-wrap" style="margin-top:10px;">
+      <div class="reveal-label">Merksatz 3 – Antagonisten</div>
+      <button class="reveal-btn" onclick="reveal(this,'shown-yellow','sec4')">Tippen zum Aufdecken …</button>
+      <div style="display:none">⚖️ Insulin und Glukagon sind Antagonisten – sie wirken entgegengesetzt und halten den Blutzucker gemeinsam im Gleichgewicht.</div>
+    </div>
+
+    <div class="reveal-wrap" style="margin-top:10px;">
+      <div class="reveal-label">Merksatz 4 – Negatives Feedback</div>
+      <button class="reveal-btn" onclick="reveal(this,'shown-blue','sec4')">Tippen zum Aufdecken …</button>
+      <div style="display:none">🔄 Negatives Feedback: Die Wirkung eines Hormons hemmt indirekt seine eigene Produktion – das System reguliert sich selbst.</div>
+    </div>
+  </div>
+</div>
+
+
+<div id="dino" onclick="toggleDino()">🦖</div>
+<div id="dino-lbl">Made by Mathedino</div>
+
+<script>
+'use strict';
+
+// Zähler pro Sektion
+var totals={'sec0':4,'sec1':6,'sec2':7,'sec3':7,'sec4':4};
+var counts={'sec0':0,'sec1':0,'sec2':0,'sec3':0,'sec4':0};
+
+function goTab(n){
+  document.querySelectorAll('.section').forEach(function(s,i){ s.classList.toggle('active',i===n); });
+  document.querySelectorAll('.tab-btn').forEach(function(b,i){ b.classList.toggle('active',i===n); });
+}
+
+function reveal(btn, cls, secId){
+  if(btn.classList.contains('shown')||btn.classList.contains('shown-blue')||
+     btn.classList.contains('shown-red')||btn.classList.contains('shown-yellow')||
+     btn.classList.contains('shown-green')) return;
+  var answer=btn.nextElementSibling;
+  if(!answer) return;
+  btn.textContent=answer.textContent;
+  btn.className='reveal-btn '+cls;
+  btn.disabled=true;
+  // Fortschritt
+  counts[secId]=(counts[secId]||0)+1;
+  var n=parseInt(secId.replace('sec',''),10);
+  var total=totals[secId]||1;
+  var pct=Math.round((counts[secId]/total)*100);
+  var pb=document.getElementById('pb'+n);
+  var pt=document.getElementById('pt'+n);
+  if(pb) pb.style.width=pct+'%';
+  if(pt) pt.textContent=counts[secId]+' / '+total+' aufgedeckt';
+}
+
+function revealAll(secId){
+  var sec=document.getElementById(secId);
+  if(!sec) return;
+  sec.querySelectorAll('.reveal-btn:not(:disabled)').forEach(function(btn){
+    var cls='shown';
+    if(btn.classList.contains('cbt-bz')) cls='shown-blue';
+    else if(btn.classList.contains('cbt-ins')||btn.classList.contains('pf-ins')) cls='shown-red';
+    else if(btn.classList.contains('cbt-meal')) cls='shown-yellow';
+    reveal(btn, cls, secId);
+  });
+}
+
+function toggleDino(){
+  var l=document.getElementById('dino-lbl');
+  l.style.display=(l.style.display==='block')?'none':'block';
+  setTimeout(function(){ l.style.display='none'; },2500);
+}
+</script>
+</body>
+</html>

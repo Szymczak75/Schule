@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Lehrerversion – Blutzuckerregulation Kl. 9</title>
+<style>
+  :root{--green:#1a7a1a;--green-bg:#c8f5c8;--red:#b00000;--red-bg:#fcd4d4;--blue:#1a4a8a;--blue-light:#e8f0fa;--orange:#d35400;--orange-bg:#fef0e6;--purple:#6b21a8;--purple-bg:#f3e8ff;--shadow:0 2px 12px rgba(0,0,0,.13);--radius:14px;}
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  body{font-family:-apple-system,"Helvetica Neue",Arial,sans-serif;font-size:16px;color:#1a1a1a;background:#f0f0f0;min-height:100vh;padding-bottom:60px;}
+
+  header{background:linear-gradient(135deg,#6b21a8,#9333ea);color:white;padding:16px 20px 12px;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.25);}
+  header h1{font-size:18px;font-weight:700;}
+  header p{font-size:13px;opacity:.85;margin-top:2px;}
+  .lehrerbadge{display:inline-block;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.5);border-radius:20px;font-size:12px;font-weight:700;padding:2px 10px;margin-top:6px;letter-spacing:.5px;}
+
+  .tabs{display:flex;background:#fff;border-bottom:2px solid #ccc;overflow-x:auto;-webkit-overflow-scrolling:touch;position:sticky;top:68px;z-index:90;}
+  .tab-btn{flex:none;padding:12px 16px;font-size:13px;font-weight:600;color:#666;background:none;border:none;border-bottom:3px solid transparent;cursor:pointer;white-space:nowrap;min-height:44px;}
+  .tab-btn.active{color:var(--purple);border-bottom-color:var(--purple);}
+  .tab-btn:active{background:#f3e8ff;}
+
+  .card{background:white;border-radius:var(--radius);box-shadow:var(--shadow);margin:14px;padding:18px;display:none;}
+  .card.active{display:block;}
+
+  .card-title{font-size:19px;font-weight:700;color:var(--purple);margin-bottom:4px;}
+  .card-sub{font-size:13px;color:#666;margin-bottom:14px;}
+
+  /* Zeitplan */
+  .zeit-box{background:var(--purple-bg);border-left:4px solid var(--purple);border-radius:8px;padding:12px 16px;margin-bottom:14px;}
+  .zeit-box h3{font-size:14px;font-weight:700;color:var(--purple);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;}
+  .zeit-row{display:flex;align-items:center;gap:10px;padding:5px 0;border-bottom:1px solid #e9d5ff;font-size:14px;}
+  .zeit-row:last-child{border-bottom:none;}
+  .zeit-min{background:var(--purple);color:white;border-radius:20px;padding:2px 10px;font-size:12px;font-weight:700;white-space:nowrap;flex-shrink:0;}
+
+  /* Aufgaben-Block */
+  .aufg-block{border:2px solid #e2e8f0;border-radius:12px;margin:10px 0;overflow:hidden;}
+  .aufg-hdr{background:#f8faff;padding:12px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;min-height:44px;user-select:none;}
+  .aufg-hdr h3{font-size:15px;font-weight:700;color:#1a1a1a;flex:1;}
+  .aufg-hdr .arr{font-size:12px;color:#888;transition:transform .25s;}
+  .aufg-hdr.open .arr{transform:rotate(90deg);}
+  .aufg-body{display:none;padding:14px 16px;border-top:2px solid #e2e8f0;}
+  .aufg-body.vis{display:block;}
+
+  /* Lösung */
+  .loe-box{background:var(--green-bg);border:2px solid var(--green);border-radius:10px;padding:12px 14px;margin:8px 0;}
+  .loe-box h4{font-size:13px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;}
+  .loe-box p,.loe-box li{font-size:14px;line-height:1.7;color:#124a12;}
+  .loe-box ul{padding-left:18px;}
+
+  /* Schülerfehler */
+  .fehler-box{background:var(--red-bg);border:2px solid var(--red);border-radius:10px;padding:12px 14px;margin:8px 0;}
+  .fehler-box h4{font-size:13px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;}
+  .fehler-box p,.fehler-box li{font-size:14px;line-height:1.7;color:#7a0000;}
+  .fehler-box ul{padding-left:18px;}
+
+  /* Didaktik */
+  .did-box{background:var(--orange-bg);border:2px solid var(--orange);border-radius:10px;padding:12px 14px;margin:8px 0;}
+  .did-box h4{font-size:13px;font-weight:700;color:var(--orange);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;}
+  .did-box p{font-size:14px;line-height:1.7;color:#7a2e00;}
+
+  /* Info */
+  .info-box{background:var(--blue-light);border-left:4px solid var(--blue);border-radius:8px;padding:12px 14px;margin:8px 0;font-size:14px;line-height:1.6;}
+  .info-box strong{color:var(--blue);}
+
+  hr{border:none;border-top:1px solid #e2e8f0;margin:12px 0;}
+
+  /* Übersichtstabelle */
+  table.ot{width:100%;border-collapse:collapse;font-size:14px;margin:10px 0;}
+  table.ot th{background:var(--purple);color:white;padding:9px 12px;text-align:left;}
+  table.ot td{padding:8px 12px;border-bottom:1px solid #e2e8f0;vertical-align:top;}
+  table.ot tr:nth-child(even) td{background:#faf5ff;}
+  .badge{display:inline-block;border-radius:12px;font-size:12px;font-weight:700;padding:2px 8px;}
+  .badge-g{background:var(--green-bg);color:#124a12;border:1px solid var(--green);}
+  .badge-r{background:var(--red-bg);color:var(--red);border:1px solid var(--red);}
+  .badge-o{background:var(--orange-bg);color:var(--orange);border:1px solid var(--orange);}
+
+  #dino{position:fixed;bottom:14px;right:14px;font-size:22px;cursor:pointer;z-index:300;user-select:none;}
+  #dino-lbl{display:none;position:fixed;bottom:44px;right:14px;background:#333;color:white;font-size:11px;border-radius:6px;padding:3px 8px;z-index:301;white-space:nowrap;}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>📋 Lehrerversion – Regulation des Blutzuckerspiegels</h1>
+  <p>Biologie · Klasse 9 · Erarbeitung · Stunde 2</p>
+  <div class="lehrerbadge">🔐 NUR FÜR LEHRKRÄFTE</div>
+</header>
+
+<nav class="tabs">
+  <button class="tab-btn active" onclick="goTab(0)">Überblick</button>
+  <button class="tab-btn" onclick="goTab(1)">Karte 1 · Einstieg</button>
+  <button class="tab-btn" onclick="goTab(2)">Karte 2 · Insulin</button>
+  <button class="tab-btn" onclick="goTab(3)">Karte 3 · Regelkreis</button>
+  <button class="tab-btn" onclick="goTab(4)">Karte 4 · Pfeildiagramm</button>
+  <button class="tab-btn" onclick="goTab(5)">Karte 5 · Test</button>
+</nav>
+
+
+<!-- ÜBERBLICK -->
+<div class="card active" id="card0">
+  <div class="card-title">Stundenüberblick</div>
+  <div class="card-sub">Blutzuckerregulation – Erarbeitungsstunde (ca. 45 min)</div>
+
+  <div class="zeit-box">
+    <h3>⏱ Zeitplanung</h3>
+    <div class="zeit-row"><span class="zeit-min">0–5 min</span><span>Einstieg: Slider-Exploration + MC zur Zellatmung</span></div>
+    <div class="zeit-row"><span class="zeit-min">5–15 min</span><span>Karte 2: Insulin &amp; Glukagon – Tabelle lesen, Zuordnung, Lückentext</span></div>
+    <div class="zeit-row"><span class="zeit-min">15–25 min</span><span>Karte 3: Regelkreis – Diagramm erschließen, Sortieraufgabe, Analogie</span></div>
+    <div class="zeit-row"><span class="zeit-min">25–35 min</span><span>Karte 4: Pfeildiagramm – Vorzeichen bestimmen, Lückentext</span></div>
+    <div class="zeit-row"><span class="zeit-min">35–43 min</span><span>Karte 5: Selbsttest (5 Fragen), Auswertung</span></div>
+    <div class="zeit-row"><span class="zeit-min">43–45 min</span><span>Sicherung: Tafelbild besprechen / öffnen</span></div>
+  </div>
+
+  <div class="info-box"><strong>Lernziele der Stunde:</strong> SuS können (1) die Wirkung von Insulin und Glukagon erklären, (2) den Regelkreis der Blutzuckerregulation beschreiben, (3) Pfeildiagramme mit Vorzeichen lesen und ergänzen, (4) das Prinzip des negativen Feedbacks an einem Beispiel erläutern.</div>
+
+  <hr>
+  <div style="font-size:15px;font-weight:700;color:#333;margin-bottom:8px;">📊 Aufgaben auf einen Blick</div>
+  <table class="ot">
+    <tr><th>Karte</th><th>Aufgabe</th><th>Typ</th><th>Schwierigkeit</th></tr>
+    <tr><td>1</td><td>Slider: Blutzucker einschätzen</td><td>Exploration</td><td><span class="badge badge-g">leicht</span></td></tr>
+    <tr><td>1</td><td>MC: Zellatmung</td><td>Multiple Choice</td><td><span class="badge badge-g">leicht</span></td></tr>
+    <tr><td>2</td><td>Zuordnung: Hormon → Auslöser</td><td>Antippen</td><td><span class="badge badge-g">leicht</span></td></tr>
+    <tr><td>2</td><td>MC: Wirkungsort Insulin</td><td>Multiple Choice</td><td><span class="badge badge-g">leicht</span></td></tr>
+    <tr><td>2</td><td>Lückentext: Insulin-Regelung</td><td>Texteingabe</td><td><span class="badge badge-o">mittel</span></td></tr>
+    <tr><td>3</td><td>Sortierung: Regelkreis (niedriger BZ)</td><td>Reihenfolge</td><td><span class="badge badge-o">mittel</span></td></tr>
+    <tr><td>3</td><td>MC: Thermostat-Analogie</td><td>Multiple Choice</td><td><span class="badge badge-o">mittel</span></td></tr>
+    <tr><td>4</td><td>Vorzeichen bestimmen (5 Beziehungen)</td><td>Antippen</td><td><span class="badge badge-o">mittel</span></td></tr>
+    <tr><td>4</td><td>Lückentext: Glukagon-Schiene</td><td>Texteingabe</td><td><span class="badge badge-r">anspruchsvoll</span></td></tr>
+    <tr><td>5</td><td>Selbsttest (5 Fragen)</td><td>Multiple Choice</td><td><span class="badge badge-o">mittel</span></td></tr>
+  </table>
+</div>
+
+
+<!-- KARTE 1 -->
+<div class="card" id="card1">
+  <div class="card-title">Karte 1 – Einstieg (~8 min)</div>
+  <div class="card-sub">Glucose als Energielieferant · Blutzucker einschätzen</div>
+
+  <div class="aufg-block">
+    <div class="aufg-hdr" onclick="toggle(this)">
+      <h3>Aufgabe 1 – Slider: Blutzuckerwert einschätzen</h3><span class="arr">▶</span>
+    </div>
+    <div class="aufg-body">
+      <div class="loe-box">
+        <h4>✅ Lösung</h4>
+        <p>Normalbereich (nüchtern): <strong>70–100 mg/100 ml</strong><br>
+        Werte über 100 mg/100 ml → Insulin wird ausgeschüttet<br>
+        Werte unter 70 mg/100 ml → Glukagon wird ausgeschüttet</p>
+      </div>
+      <div class="did-box">
+        <h4>🎯 Didaktischer Hinweis</h4>
+        <p>Die Slider-Aufgabe ist bewusst eine freie Exploration ohne Benotung. SuS sollen intuitiv erleben, dass der Körper auf Grenzwerte reagiert. Kurzes Unterrichtsgespräch: „Was habt ihr beim Slider beobachtet?" kann die Brücke zur nächsten Karte bauen.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="aufg-block">
+    <div class="aufg-hdr" onclick="toggle(this)">
+      <h3>Aufgabe 2 – MC: Wozu dient Glucose?</h3><span class="arr">▶</span>
+    </div>
+    <div class="aufg-body">
+      <div class="loe-box">
+        <h4>✅ Lösung</h4>
+        <p>Richtige Antwort: <strong>„Glucose wird in den Zellen durch Zellatmung mit Sauerstoff zu Energie (ATP), Wasser und CO₂ umgewandelt."</strong></p>
+      </div>
+      <div class="fehler-box">
+        <h4>⚠️ Häufige Schülerfehler</h4>
+        <ul>
+          <li>SuS verwechseln Zellatmung mit Verbrennung/Verbrennen ohne O₂ (Gärung)</li>
+          <li>„Glucose gibt Energie direkt ab" – ohne Verständnis des Zwischenschritts ATP</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- KARTE 2 -->
+<div class="card" id="card2">
+  <div class="card-title">Karte 2 – Insulin &amp; Glukagon (~10 min)</div>
+  <div class="card-sub">Gegenspieler · Zuordnung · Lückentext</div>
+
+  <div class="aufg-block">
+    <div class="aufg-hdr" onclick="toggle(this)">
+      <h3>Aufgabe 1 – Zuordnung: Hormon → Auslöser</h3><span class="arr">▶</span>
+    </div>
+    <div class="aufg-body">
+      <div class="loe-box">
+        <h4>✅ Lösung</h4>
+        <p>Blutzucker steigt → <strong>Insulin</strong><br>
+        Blutzucker sinkt → <strong>Glukagon</strong></p>
+      </div>
+      <div class="fehler-box">
+        <h4>⚠️ Häufige Schülerfehler</h4>
+        <ul>
+          <li>Verwechslung von Insulin und Glukagon – die Namen klingen ähnlich</li>
+          <li>Merkhilfe anbieten: <em>„In-sulin senkt den Zucker" (I wie ↓)</em></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="aufg-block">
+    <div class="aufg-hdr" onclick="toggle(this)">
+      <h3>Aufgabe 2 – MC: Wirkungsort Insulin</h3><span class="arr">▶</span>
+    </div>
+    <div class="aufg-body">
+      <div class="loe-box">
+        <h4>✅ Lösung</h4>
+        <p>Richtige Antwort: <strong>Muskelzellen und Leberzellen</strong></p>
+      </div>
+      <div class="fehler-box">
+        <h4>⚠️ Häufige Schülerfehler</h4>
+        <ul>
+          <li>SuS nennen Gehirnzellen – da diese keine Insulinrezeptoren haben (glucoseunabhängige Aufnahme)</li>
+          <li>Erweiterung für starke SuS: Warum braucht das Gehirn kein Insulin?</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="aufg-block">
+    <div class="aufg-hdr" onclick="toggle(this)">
+      <h3>Aufgabe 3 – Lückentext: Insulin-Regelung</h3><span class="arr">▶</span>
+    </div>
+    <div class="aufg-body">
+      <div class="loe-box">
+        <h4>✅ Musterlösung</h4>
+        <p>Steigt der Blutzucker an, schütten die <strong>β-Zellen</strong> der Bauchspeicheldrüse das Hormon <strong>Insulin</strong> aus. Es bewirkt, dass Glucose in <strong>Muskel- / Leber</strong>-Zellen aufgenommen und zu <strong>Glykogen</strong> umgebaut wird. Dadurch sinkt der Blutzucker wieder.</p>
+      </div>
+      <div class="fehler-box">
+        <h4>⚠️ Häufige Schülerfehler</h4>
+        <ul>
+          <li>„Alpha-Zellen" statt Beta-Zellen für Insulin – Verwechslung der Zelltypen</li>
+          <li>„Glucose wird verbrannt" statt zu Glykogen umgebaut</li>
+          <li>Leber wird vergessen – nur Muskelzellen genannt</li>
+        </ul>
+      </div>
+      <div class="did-box">
+        <h4>🎯 Didaktischer Hinweis</h4>
+        <p>Das Wortfeld ist als Tipp aufklappbar. SuS die es nicht aufklappen haben den höchsten Lernerfolg. Empfehlung: erst selbst versuchen, dann bei Bedarf Wortfeld nutzen.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- KARTE 3 -->
+<div class="card" id="card3">
+  <div class="card-title">Karte 3 – Regelkreis (~10 min)</div>
+  <div class="card-sub">Negatives Feedback · Sortierung · Thermostat-Analogie</div>
+
+  <div class="aufg-block">
+    <div class="aufg-hdr" onclick="toggle(this)">
+      <h3>Aufgabe 1 – Sortierung: Regelkreis bei niedrigem Blutzucker</h3><span class="arr">▶</span>
+    </div>
+    <div class="aufg-body">
+      <div class="loe-box">
+        <h4>✅ Richtige Reihenfolge</h4>
+        <ol style="padding-left:18px;font-size:14px;line-height:2;">
+          <li>Blutzucker sinkt (z. B. nach Sport)</li>
+          <li>α-Zellen der Bauchspeicheldrüse schütten Glukagon aus</li>
+          <li>Leber baut Glykogen zu Glucose ab</li>
+          <li>Glucose wird ins Blut abgegeben</li>
+          <li>Blutzucker steigt wieder auf Normalwert</li>
+        </ol>
+      </div>
+      <div class="fehler-box">
+        <h4>⚠️ Häufige Schülerfehler</h4>
+        <ul>
+          <li>Schritt 3 und 4 werden vertauscht (Abbau und Abgabe als gleichzeitig gedacht)</li>
+          <li>„Insulin wird ausgeschüttet" statt Glukagon</li>
+          <li>Die Leber als Ort des Glykogenabbaus wird nicht genannt</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="aufg-block">
+    <div class="aufg-hdr" onclick="toggle(this)">
+      <h3>Aufgabe 2 – MC: Thermostat-Analogie</h3><span class="arr">▶</span>
+    </div>
+    <div class="aufg-body">
+      <div class="loe-box">
+        <h4>✅ Lösung</h4>
+        <p>Richtige Antwort: <strong>„Das Heizventil, das die Heizleistung reduziert, wenn es zu warm ist"</strong></p>
+        <p style="margin-top:6px;">Begründung: Insulin ist das Effektororgan des Regelkreises – es <em>bewirkt</em> die Gegensteuerung, genau wie das Heizventil die Temperatur senkt.</p>
+      </div>
+      <div class="fehler-box">
+        <h4>⚠️ Häufige Schülerfehler</h4>
+        <ul>
+          <li>SuS wählen den „Sensor" (β-Zellen messen den BZ, aber das ist nicht Insulin selbst)</li>
+          <li>Unterschied Sensor / Effektor ist zentral – ggf. im Plenum klären</li>
+        </ul>
+      </div>
+      <div class="did-box">
+        <h4>🎯 Didaktischer Hinweis</h4>
+        <p>Die Thermostat-Analogie bereitet den Begriff „Regelkreis" für die Oberstufe vor. Optional: Regelkreis-Schema an der Tafel skizzieren (Sollwert, Istwert, Regler, Stellgröße).</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- KARTE 4 -->
+<div class="card" id="card4">
+  <div class="card-title">Karte 4 – Pfeildiagramm (~10 min)</div>
+  <div class="card-sub">Vorzeichen · Lückentext Glukagon-Schiene</div>
+
+  <div class="aufg-block">
+    <div class="aufg-hdr" onclick="toggle(this)">
+      <h3>Aufgabe 1 – Vorzeichen bestimmen (5 Beziehungen)</h3><span class="arr">▶</span>
+    </div>
+    <div class="aufg-body">
+      <div class="loe-box">
+        <h4>✅ Lösung</h4>
+        <ul>
+          <li>Blutzucker ↑ → Insulinproduktion ↑ &nbsp;<strong>⊕</strong> gleichsinnig</li>
+          <li>Insulinproduktion ↑ → Blutzucker ↓ &nbsp;<strong>⊖</strong> gegensinnig</li>
+          <li>Blutzucker ↓ → Glukagonproduktion ↑ &nbsp;<strong>⊕</strong> gleichsinnig</li>
+          <li>Glukagonproduktion ↑ → Glykogenabbau ↑ &nbsp;<strong>⊕</strong> gleichsinnig</li>
+          <li>Glykogenabbau ↑ → Blutzucker ↑ &nbsp;<strong>⊕</strong> gleichsinnig</li>
+        </ul>
+      </div>
+      <div class="fehler-box">
+        <h4>⚠️ Häufige Schülerfehler</h4>
+        <ul>
+          <li>Beziehung 3 (BZ ↓ → Glukagon ↑) wird als ⊖ gelesen, weil BZ sinkt – SuS vergessen: ↓ auslöst ↑ = gleichsinnig (je weniger … desto mehr)</li>
+          <li>⊕/⊖ werden als „gut/schlecht" statt als Richtungsbeziehung verstanden</li>
+        </ul>
+      </div>
+      <div class="did-box">
+        <h4>🎯 Didaktischer Hinweis</h4>
+        <p>Vorzeichen-Logik explizit ansprechen: ⊕ bedeutet nicht „positiv/gut", sondern gleichsinnig. Konkrete Formulierung: „Je mehr/weniger A → desto mehr/weniger B" hilft beim Bestimmen.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="aufg-block">
+    <div class="aufg-hdr" onclick="toggle(this)">
+      <h3>Aufgabe 2 – Lückentext: Glukagon-Schiene</h3><span class="arr">▶</span>
+    </div>
+    <div class="aufg-body">
+      <div class="loe-box">
+        <h4>✅ Musterlösung</h4>
+        <p>Wenn der Blutzucker <strong>sinkt</strong>, wird mehr Glukagon produziert. Glukagon bewirkt, dass in der <strong>Leber</strong> Glykogen zu Glucose abgebaut wird. Dadurch steigt der Blutzucker wieder <strong>an</strong>.</p>
+      </div>
+      <div class="fehler-box">
+        <h4>⚠️ Häufige Schülerfehler</h4>
+        <ul>
+          <li>„fällt" / „wird niedriger" statt „sinkt" – inhaltlich korrekt, Akzeptanz empfohlen</li>
+          <li>Muskel statt Leber als Ort des Glykogenabbaus</li>
+          <li>„steigt" fehlt als Abschluss – SuS brechen den Satz zu früh ab</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- KARTE 5 -->
+<div class="card" id="card5">
+  <div class="card-title">Karte 5 – Selbsttest: Lösungen</div>
+  <div class="card-sub">5 Fragen zur Blutzuckerregulation</div>
+
+  <div class="info-box"><strong>Hinweis:</strong> Die Fragen sind so formuliert, dass plausible Distraktoren nicht durch bloße Ausschlusslogik eliminierbar sind. Auswertung erfolgt automatisch in der Schülerversion.</div>
+
+  <div class="aufg-block">
+    <div class="aufg-hdr" onclick="toggle(this)">
+      <h3>Frage 1 – Organ für Insulin und Glukagon</h3><span class="arr">▶</span>
+    </div>
+    <div class="aufg-body">
+      <div class="loe-box"><h4>✅ Lösung</h4><p><strong>Bauchspeicheldrüse</strong> (Pankreas)</p></div>
+      <div class="fehler-box"><h4>⚠️ Häufige Schülerfehler</h4><ul><li>„Leber" – da die Leber bei Glykogen eine Rolle spielt, wird sie fälschl. als produzierendes Organ gesehen</li></ul></div>
+    </div>
+  </div>
+
+  <div class="aufg-block">
+    <div class="aufg-hdr" onclick="toggle(this)">
+      <h3>Frage 2 – Wirkung Insulin</h3><span class="arr">▶</span>
+    </div>
+    <div class="aufg-body">
+      <div class="loe-box"><h4>✅ Lösung</h4><p><strong>Es fördert die Aufnahme von Glucose und den Aufbau von Glykogen.</strong></p></div>
+      <div class="fehler-box"><h4>⚠️ Häufige Schülerfehler</h4><ul><li>„Fördert den Abbau von Glykogen" – das ist Glukagons Aufgabe</li></ul></div>
+    </div>
+  </div>
+
+  <div class="aufg-block">
+    <div class="aufg-hdr" onclick="toggle(this)">
+      <h3>Frage 3 – Negatives Feedback</h3><span class="arr">▶</span>
+    </div>
+    <div class="aufg-body">
+      <div class="loe-box"><h4>✅ Lösung</h4><p><strong>Eine Abweichung vom Sollwert löst eine Reaktion aus, die dieser Abweichung entgegenwirkt.</strong></p></div>
+      <div class="fehler-box"><h4>⚠️ Häufige Schülerfehler</h4><ul><li>„Hormon wirkt schädigend" – Verwechslung mit „negativ" im Sinne von schlecht</li><li>Begriff „Sollwert" unbekannt → ggf. kurz klären</li></ul></div>
+    </div>
+  </div>
+
+  <div class="aufg-block">
+    <div class="aufg-hdr" onclick="toggle(this)">
+      <h3>Frage 4 – Auslöser Glukagon</h3><span class="arr">▶</span>
+    </div>
+    <div class="aufg-body">
+      <div class="loe-box"><h4>✅ Lösung</h4><p><strong>… der Blutzucker zu niedrig sinkt, z. B. nach längerem Sport.</strong></p></div>
+    </div>
+  </div>
+
+  <div class="aufg-block">
+    <div class="aufg-hdr" onclick="toggle(this)">
+      <h3>Frage 5 – Antagonisten</h3><span class="arr">▶</span>
+    </div>
+    <div class="aufg-body">
+      <div class="loe-box"><h4>✅ Lösung</h4><p><strong>… sie entgegengesetzte Wirkungen auf den Blutzuckerspiegel haben.</strong></p></div>
+      <div class="fehler-box"><h4>⚠️ Häufige Schülerfehler</h4><ul><li>„Beide in der Bauchspeicheldrüse gebildet" – richtig, aber nicht der Grund für den Begriff Antagonist</li></ul></div>
+      <div class="did-box"><h4>🎯 Didaktischer Hinweis</h4><p>Begriff „Antagonist" vernetzen: kommt auch in der Muskulatur vor (Bizeps/Trizeps) – fächerübergreifendes Prinzip.</p></div>
+    </div>
+  </div>
+</div>
+
+<div id="dino" onclick="toggleDino()">🦖</div>
+<div id="dino-lbl">Made by Mathedino</div>
+
+<script>
+'use strict';
+function goTab(n){
+  document.querySelectorAll('.card').forEach(function(c,i){ c.classList.toggle('active',i===n); });
+  document.querySelectorAll('.tab-btn').forEach(function(b,i){ b.classList.toggle('active',i===n); });
+}
+function toggle(hdr){
+  hdr.classList.toggle('open');
+  hdr.nextElementSibling.classList.toggle('vis');
+}
+function toggleDino(){
+  var l=document.getElementById('dino-lbl');
+  l.style.display=(l.style.display==='block')?'none':'block';
+  setTimeout(function(){ l.style.display='none'; },2500);
+}
+</script>
+</body>
+</html>
