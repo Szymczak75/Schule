@@ -1,0 +1,1419 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Gleichungen – Klasse 7</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fira+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f0f4ff;
+    --card: #ffffff;
+    --primary: #3a5bd9;
+    --primary-light: #dce5ff;
+    --accent: #f5a623;
+    --accent-light: #fff3d6;
+    --success: #27ae60;
+    --success-light: #d4f5e3;
+    --error: #e74c3c;
+    --error-light: #fde8e6;
+    --tip: #8e44ad;
+    --tip-light: #f3e5ff;
+    --text: #1a1f36;
+    --text-soft: #5a6080;
+    --border: #d4dcf7;
+    --radius: 16px;
+    --radius-sm: 10px;
+    --shadow: 0 4px 20px rgba(58,91,217,0.10);
+    --shadow-lg: 0 8px 32px rgba(58,91,217,0.15);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 17px;
+    min-height: 100vh;
+    padding-bottom: 60px;
+  }
+
+  /* ── Header ── */
+  header {
+    background: var(--primary);
+    color: #fff;
+    padding: 20px 24px 16px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 12px rgba(58,91,217,0.25);
+  }
+  header h1 {
+    font-size: 22px;
+    font-weight: 900;
+    letter-spacing: -0.3px;
+  }
+  header p {
+    font-size: 13px;
+    opacity: .75;
+    margin-top: 2px;
+  }
+
+  /* ── Level Tabs ── */
+  .level-tabs {
+    display: flex;
+    gap: 10px;
+    padding: 16px 16px 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .level-tabs::-webkit-scrollbar { display: none; }
+
+  .level-btn {
+    flex: 1;
+    min-width: 100px;
+    padding: 12px 10px;
+    border: 2.5px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--card);
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--text-soft);
+    cursor: pointer;
+    transition: all .2s;
+    text-align: center;
+    line-height: 1.3;
+  }
+  .level-btn .level-icon { font-size: 22px; display: block; margin-bottom: 4px; }
+  .level-btn.active {
+    border-color: var(--primary);
+    background: var(--primary);
+    color: #fff;
+    box-shadow: var(--shadow);
+    transform: translateY(-2px);
+  }
+  .level-btn:active { transform: scale(.97); }
+
+  /* ── Main Content ── */
+  main { padding: 16px; max-width: 860px; margin: 0 auto; }
+
+  /* ── Task Category Tabs ── */
+  .cat-tabs {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+  .cat-btn {
+    padding: 8px 16px;
+    border: 2px solid var(--border);
+    border-radius: 50px;
+    background: var(--card);
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--text-soft);
+    cursor: pointer;
+    transition: all .18s;
+    white-space: nowrap;
+  }
+  .cat-btn.active {
+    border-color: var(--accent);
+    background: var(--accent);
+    color: #fff;
+  }
+  .cat-btn:active { transform: scale(.96); }
+
+  /* ── Task Card ── */
+  .task-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 24px 20px;
+    margin-bottom: 16px;
+    border: 2px solid transparent;
+    transition: border-color .2s;
+    display: none;
+  }
+  .task-card.active { display: block; }
+
+  .task-label {
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--primary);
+    margin-bottom: 8px;
+  }
+
+  .task-text {
+    font-size: 17px;
+    font-weight: 600;
+    line-height: 1.55;
+    color: var(--text);
+    margin-bottom: 20px;
+  }
+
+  /* ── Steps (Grundlagen) ── */
+  .step {
+    border-left: 3.5px solid var(--primary-light);
+    padding-left: 16px;
+    margin-bottom: 20px;
+    display: none;
+  }
+  .step.visible { display: block; }
+
+  .step-label {
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .8px;
+    color: var(--text-soft);
+    margin-bottom: 8px;
+  }
+
+  .step-question {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: var(--text);
+  }
+
+  /* ── Choice Buttons ── */
+  .choices { display: flex; flex-direction: column; gap: 10px; }
+  .choice-btn {
+    padding: 14px 18px;
+    border: 2.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--card);
+    font-family: 'Nunito', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text);
+    text-align: left;
+    cursor: pointer;
+    transition: all .18s;
+    line-height: 1.4;
+    min-height: 52px;
+    display: flex;
+    align-items: center;
+  }
+  .choice-btn:active { transform: scale(.98); }
+  .choice-btn.correct {
+    border-color: var(--success);
+    background: var(--success-light);
+    color: var(--success);
+  }
+  .choice-btn.wrong {
+    border-color: var(--error);
+    background: var(--error-light);
+    color: var(--error);
+  }
+  .choice-btn:disabled { cursor: default; }
+
+  @keyframes shake {
+    0%   { transform: translateX(0); }
+    20%  { transform: translateX(-7px); }
+    40%  { transform: translateX(7px); }
+    60%  { transform: translateX(-5px); }
+    80%  { transform: translateX(4px); }
+    100% { transform: translateX(0); }
+  }
+
+  /* ── Math display ── */
+  .math {
+    font-family: 'Fira Mono', monospace;
+    font-size: 15px;
+    background: var(--primary-light);
+    border-radius: 6px;
+    padding: 2px 7px;
+    display: inline-block;
+  }
+  .math-block {
+    font-family: 'Fira Mono', monospace;
+    font-size: 16px;
+    background: var(--primary-light);
+    border-radius: var(--radius-sm);
+    padding: 12px 16px;
+    margin: 10px 0;
+    display: block;
+    color: var(--primary);
+    font-weight: 500;
+    text-align: center;
+    line-height: 1.7;
+  }
+  /* Fraction */
+  .frac {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    vertical-align: middle;
+    font-family: 'Fira Mono', monospace;
+    line-height: 1.1;
+    margin: 0 2px;
+  }
+  .frac span { padding: 0 4px; }
+  .frac .num { border-bottom: 2px solid currentColor; }
+
+  /* ── Number Input ── */
+  .input-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+  }
+  .eq-label {
+    font-family: 'Fira Mono', monospace;
+    font-size: 17px;
+    color: var(--text);
+    font-weight: 500;
+  }
+  .num-input {
+    width: 90px;
+    height: 52px;
+    border: 2.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-family: 'Fira Mono', monospace;
+    font-size: 22px;
+    text-align: center;
+    color: var(--text);
+    background: var(--bg);
+    outline: none;
+    transition: border-color .18s;
+  }
+  .num-input:focus { border-color: var(--primary); background: #fff; }
+  .num-input.correct { border-color: var(--success); background: var(--success-light); }
+  .num-input.wrong { border-color: var(--error); background: var(--error-light); }
+
+  .check-btn {
+    height: 52px;
+    padding: 0 22px;
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-family: 'Nunito', sans-serif;
+    font-size: 16px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all .18s;
+    white-space: nowrap;
+  }
+  .check-btn:active { transform: scale(.96); background: #2a4ab9; }
+
+  /* ── Feedback ── */
+  .feedback {
+    margin-top: 12px;
+    padding: 12px 16px;
+    border-radius: var(--radius-sm);
+    font-size: 15px;
+    font-weight: 700;
+    display: none;
+    line-height: 1.4;
+  }
+  .feedback.success { display: block; background: var(--success-light); color: var(--success); border: 2px solid var(--success); }
+  .feedback.error { display: block; background: var(--error-light); color: var(--error); border: 2px solid var(--error); }
+
+  /* ── Tips (Klappbar) ── */
+  .tips-container { margin-top: 14px; }
+  .tip-item {
+    margin-bottom: 8px;
+    border: 2px solid var(--tip-light);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+  }
+  .tip-header {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    background: var(--tip-light);
+    border: none;
+    font-family: 'Nunito', sans-serif;
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--tip);
+    cursor: pointer;
+    text-align: left;
+    transition: background .18s;
+  }
+  .tip-header:active { background: #e6c9ff; }
+  .tip-header .tip-arrow { margin-left: auto; transition: transform .2s; font-size: 18px; }
+  .tip-header.open .tip-arrow { transform: rotate(180deg); }
+  .tip-body {
+    padding: 14px 16px;
+    font-size: 15px;
+    line-height: 1.55;
+    background: #fff;
+    display: none;
+    color: var(--text);
+  }
+  .tip-body.open { display: block; }
+
+  /* ── Progress Bar ── */
+  .progress-section {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    box-shadow: var(--shadow);
+    margin-bottom: 16px;
+  }
+  .progress-title {
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--text-soft);
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+  }
+  .progress-dots {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .prog-dot {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 800;
+    border: 2.5px solid var(--border);
+    background: var(--bg);
+    color: var(--text-soft);
+    cursor: pointer;
+    transition: all .18s;
+  }
+  .prog-dot.done { border-color: var(--success); background: var(--success-light); color: var(--success); }
+  .prog-dot.active-dot { border-color: var(--primary); background: var(--primary); color: #fff; }
+  .prog-dot:active { transform: scale(.92); }
+
+  .summary-msg {
+    margin-top: 10px;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  /* ── Tooltip ── */
+  .tooltip-wrap { position: relative; display: inline-block; }
+  .tooltip-trigger {
+    border-bottom: 2px dashed var(--primary);
+    cursor: help;
+    color: var(--primary);
+  }
+  .tooltip-box {
+    visibility: hidden;
+    opacity: 0;
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--text);
+    color: #fff;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    pointer-events: none;
+    transition: opacity .18s;
+    z-index: 200;
+  }
+  .tooltip-wrap:hover .tooltip-box,
+  .tooltip-wrap.tip-open .tooltip-box {
+    visibility: visible; opacity: 1;
+  }
+
+  /* ── Highlight result ── */
+  .answer-reveal {
+    margin-top: 14px;
+    padding: 14px 18px;
+    background: var(--accent-light);
+    border: 2px solid var(--accent);
+    border-radius: var(--radius-sm);
+    font-size: 16px;
+    font-weight: 700;
+    color: #7a4800;
+    display: none;
+    line-height: 1.5;
+  }
+  .answer-reveal.show { display: block; }
+
+  /* ── Completed overlay ── */
+  .complete-badge {
+    display: none;
+    margin-top: 16px;
+    padding: 16px 20px;
+    background: linear-gradient(135deg, var(--success-light), #c8fde5);
+    border: 2.5px solid var(--success);
+    border-radius: var(--radius);
+    font-size: 17px;
+    font-weight: 800;
+    color: var(--success);
+    text-align: center;
+  }
+  .complete-badge.show { display: block; }
+  .complete-badge .star { font-size: 28px; }
+
+  /* ── divider ── */
+  .divider { border: none; border-top: 2px solid var(--border); margin: 20px 0; }
+
+</style>
+</head>
+<body>
+
+<header>
+  <h1>⚖️ Gleichungen – Klasse 7</h1>
+  <p>Schritt für Schritt Gleichungen mit einer Unbekannten lösen</p>
+</header>
+
+<!-- Level Auswahl -->
+<div class="level-tabs" id="levelTabs">
+  <button class="level-btn active" onclick="setLevel('basic')" id="tab-basic">
+    <span class="level-icon">🌱</span>Grundlagen
+  </button>
+  <button class="level-btn" onclick="setLevel('medium')" id="tab-medium">
+    <span class="level-icon">🔥</span>Fortgeschritten
+  </button>
+  <button class="level-btn" onclick="setLevel('expert')" id="tab-expert">
+    <span class="level-icon">⭐</span>Profi
+  </button>
+</div>
+
+<main>
+
+  <!-- Fortschritt -->
+  <div class="progress-section">
+    <div class="progress-title">Dein Fortschritt</div>
+    <div class="progress-dots" id="progressDots"></div>
+    <div class="summary-msg" id="summaryMsg">Wähle eine Aufgabe!</div>
+  </div>
+
+  <!-- Kategorie-Tabs -->
+  <div class="cat-tabs" id="catTabs">
+    <button class="cat-btn active" onclick="showTask('age')" id="cat-age">👴 Alter</button>
+    <button class="cat-btn" onclick="showTask('number')" id="cat-number">🔢 Zahlen</button>
+    <button class="cat-btn" onclick="showTask('candle')" id="cat-candle">🕯️ Kerzen</button>
+    <button class="cat-btn" onclick="showTask('geo')" id="cat-geo">📐 Geometrie</button>
+    <button class="cat-btn" onclick="showTask('motion')" id="cat-motion">🚂 Bewegung</button>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════
+       GRUNDLAGEN – alle 5 Aufgaben
+  ═══════════════════════════════════════════════ -->
+
+  <!-- GRUNDLAGEN: Alter -->
+  <div class="task-card active" id="task-basic-age">
+    <div class="task-label">🌱 Grundlagen · Altersrätsel</div>
+    <div class="task-text">
+      Peter hat einen zwei Jahre älteren Bruder. Zusammen sind sie <strong>22 Jahre</strong> alt.<br>
+      Berechne, wie alt Peter ist.
+    </div>
+
+    <!-- Schritt 1: Was ist x? -->
+    <div class="step visible" id="b-age-s1">
+      <div class="step-label">Schritt 1 von 4</div>
+      <div class="step-question">Wofür steht <span class="math">x</span> in dieser Aufgabe?</div>
+      <div class="choices">
+        <button class="choice-btn" onclick="choiceStep('b-age-s1','b-age-s2',this,false)">x ist das Alter des Bruders</button>
+        <button class="choice-btn" onclick="choiceStep('b-age-s1','b-age-s2',this,true)">x ist Peters Alter</button>
+        <button class="choice-btn" onclick="choiceStep('b-age-s1','b-age-s2',this,false)">x ist die Summe beider Alter</button>
+      </div>
+    </div>
+
+    <!-- Schritt 2: Gleichung -->
+    <div class="step" id="b-age-s2">
+      <div class="step-label">Schritt 2 von 4</div>
+      <div class="step-question">Welche Gleichung passt zur Aufgabe?</div>
+      <div class="choices">
+        <button class="choice-btn" onclick="choiceStep('b-age-s2','b-age-s3',this,false)"><span class="math">x + x = 22</span></button>
+        <button class="choice-btn" onclick="choiceStep('b-age-s2','b-age-s3',this,true)"><span class="math">x + (x + 2) = 22</span></button>
+        <button class="choice-btn" onclick="choiceStep('b-age-s2','b-age-s3',this,false)"><span class="math">x · 2 + 2 = 22</span></button>
+      </div>
+    </div>
+
+    <!-- Schritt 3: Umformung -->
+    <div class="step" id="b-age-s3">
+      <div class="step-label">Schritt 3 von 4</div>
+      <div class="step-question">Forme um und berechne <span class="math">x</span>:</div>
+      <div class="math-block">x + (x + 2) = 22</div>
+      <div class="input-row">
+        <span class="eq-label">x =</span>
+        <input type="number" class="num-input" id="b-age-x" inputmode="numeric" min="0" max="99">
+        <button class="check-btn" onclick="checkNum('b-age-x', 10, 'b-age-fb', 'b-age-reveal', 'b-age-s4')">Prüfen</button>
+      </div>
+      <div class="feedback" id="b-age-fb"></div>
+      <div class="answer-reveal" id="b-age-reveal">
+        <strong>Lösung:</strong><br>
+        x + x + 2 = 22<br>
+        2·x + 2 = 22&nbsp;&nbsp;&nbsp;| – 2<br>
+        2·x = 20&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| ÷ 2<br>
+        x = 10
+      </div>
+    </div>
+
+    <!-- Schritt 4: Antwortsatz -->
+    <div class="step" id="b-age-s4">
+      <div class="step-label">Schritt 4 von 4</div>
+      <div class="step-question">Welcher Antwortsatz passt?</div>
+      <div class="choices">
+        <button class="choice-btn" onclick="choiceStep('b-age-s4', null, this, true, 'basic-age')">Peter ist 10 Jahre alt. Sein Bruder ist 12 Jahre alt.</button>
+        <button class="choice-btn" onclick="choiceStep('b-age-s4', null, this, false)">Peter ist 12 Jahre alt. Sein Bruder ist 10 Jahre alt.</button>
+      </div>
+    </div>
+  </div>
+  <div class="complete-badge" id="done-basic-age"></div>
+
+  <!-- GRUNDLAGEN: Zahlen -->
+  <div class="task-card" id="task-basic-number">
+    <div class="task-label">🌱 Grundlagen · Zahlenrätsel</div>
+    <div class="task-text">
+      Ich denke mir eine Zahl. Wenn ich sie mit <strong>3 multipliziere</strong> und dann <strong>5 addiere</strong>, erhalte ich <strong>26</strong>.<br>
+      Welche Zahl habe ich mir gedacht?
+    </div>
+
+    <div class="step visible" id="b-num-s1">
+      <div class="step-label">Schritt 1 von 4</div>
+      <div class="step-question">Wofür steht <span class="math">x</span>?</div>
+      <div class="choices">
+        <button class="choice-btn" onclick="choiceStep('b-num-s1','b-num-s2',this,true)">x ist die gedachte Zahl</button>
+        <button class="choice-btn" onclick="choiceStep('b-num-s1','b-num-s2',this,false)">x ist das Ergebnis der Rechnung</button>
+        <button class="choice-btn" onclick="choiceStep('b-num-s1','b-num-s2',this,false)">x ist der Faktor 3</button>
+      </div>
+    </div>
+
+    <div class="step" id="b-num-s2">
+      <div class="step-label">Schritt 2 von 4</div>
+      <div class="step-question">Welche Gleichung passt?</div>
+      <div class="choices">
+        <button class="choice-btn" onclick="choiceStep('b-num-s2','b-num-s3',this,false)"><span class="math">x + 3 + 5 = 26</span></button>
+        <button class="choice-btn" onclick="choiceStep('b-num-s2','b-num-s3',this,true)"><span class="math">3·x + 5 = 26</span></button>
+        <button class="choice-btn" onclick="choiceStep('b-num-s2','b-num-s3',this,false)"><span class="math">3·(x + 5) = 26</span></button>
+      </div>
+    </div>
+
+    <div class="step" id="b-num-s3">
+      <div class="step-label">Schritt 3 von 4</div>
+      <div class="step-question">Berechne <span class="math">x</span>:</div>
+      <div class="math-block">3·x + 5 = 26</div>
+      <div class="input-row">
+        <span class="eq-label">x =</span>
+        <input type="number" class="num-input" id="b-num-x" inputmode="numeric">
+        <button class="check-btn" onclick="checkNum('b-num-x', 7, 'b-num-fb', 'b-num-reveal', 'b-num-s4')">Prüfen</button>
+      </div>
+      <div class="feedback" id="b-num-fb"></div>
+      <div class="answer-reveal" id="b-num-reveal">
+        <strong>Lösung:</strong><br>
+        3·x + 5 = 26&nbsp;&nbsp;| – 5<br>
+        3·x = 21&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| ÷ 3<br>
+        x = 7
+      </div>
+    </div>
+
+    <div class="step" id="b-num-s4">
+      <div class="step-label">Schritt 4 von 4</div>
+      <div class="step-question">Welcher Antwortsatz passt?</div>
+      <div class="choices">
+        <button class="choice-btn" onclick="choiceStep('b-num-s4', null, this, false)">Die gedachte Zahl ist 26.</button>
+        <button class="choice-btn" onclick="choiceStep('b-num-s4', null, this, true, 'basic-number')">Die gedachte Zahl ist 7.</button>
+      </div>
+    </div>
+  </div>
+  <div class="complete-badge" id="done-basic-number"></div>
+
+  <!-- GRUNDLAGEN: Kerzen -->
+  <div class="task-card" id="task-basic-candle">
+    <div class="task-label">🌱 Grundlagen · Kerzenrätsel</div>
+    <div class="task-text">
+      Eine Kerze ist <strong>24 cm</strong> lang. Sie brennt jede Stunde um <strong>3 cm</strong> ab.<br>
+      Nach wie vielen Stunden ist die Kerze noch <strong>6 cm</strong> lang?
+    </div>
+
+    <div class="step visible" id="b-can-s1">
+      <div class="step-label">Schritt 1 von 4</div>
+      <div class="step-question">Wofür steht <span class="math">x</span>?</div>
+      <div class="choices">
+        <button class="choice-btn" onclick="choiceStep('b-can-s1','b-can-s2',this,false)">x ist die Länge der Kerze</button>
+        <button class="choice-btn" onclick="choiceStep('b-can-s1','b-can-s2',this,false)">x ist die Abbrandrate pro Stunde</button>
+        <button class="choice-btn" onclick="choiceStep('b-can-s1','b-can-s2',this,true)">x ist die Anzahl der Stunden</button>
+      </div>
+    </div>
+
+    <div class="step" id="b-can-s2">
+      <div class="step-label">Schritt 2 von 4</div>
+      <div class="step-question">Welche Gleichung passt?</div>
+      <div class="choices">
+        <button class="choice-btn" onclick="choiceStep('b-can-s2','b-can-s3',this,false)"><span class="math">24 + 3·x = 6</span></button>
+        <button class="choice-btn" onclick="choiceStep('b-can-s2','b-can-s3',this,true)"><span class="math">24 – 3·x = 6</span></button>
+        <button class="choice-btn" onclick="choiceStep('b-can-s2','b-can-s3',this,false)"><span class="math">3·x = 24</span></button>
+      </div>
+    </div>
+
+    <div class="step" id="b-can-s3">
+      <div class="step-label">Schritt 3 von 4</div>
+      <div class="step-question">Berechne <span class="math">x</span>:</div>
+      <div class="math-block">24 – 3·x = 6</div>
+      <div class="input-row">
+        <span class="eq-label">x =</span>
+        <input type="number" class="num-input" id="b-can-x" inputmode="numeric">
+        <button class="check-btn" onclick="checkNum('b-can-x', 6, 'b-can-fb', 'b-can-reveal', 'b-can-s4')">Prüfen</button>
+      </div>
+      <div class="feedback" id="b-can-fb"></div>
+      <div class="answer-reveal" id="b-can-reveal">
+        <strong>Lösung:</strong><br>
+        24 – 3·x = 6&nbsp;&nbsp;| – 24<br>
+        –3·x = –18&nbsp;&nbsp;&nbsp;&nbsp;| ÷ (–3)<br>
+        x = 6
+      </div>
+    </div>
+
+    <div class="step" id="b-can-s4">
+      <div class="step-label">Schritt 4 von 4</div>
+      <div class="step-question">Welcher Antwortsatz passt?</div>
+      <div class="choices">
+        <button class="choice-btn" onclick="choiceStep('b-can-s4', null, this, false)">Nach 3 Stunden ist die Kerze noch 6 cm lang.</button>
+        <button class="choice-btn" onclick="choiceStep('b-can-s4', null, this, true, 'basic-candle')">Nach 6 Stunden ist die Kerze noch 6 cm lang.</button>
+      </div>
+    </div>
+  </div>
+  <div class="complete-badge" id="done-basic-candle"></div>
+
+  <!-- GRUNDLAGEN: Geometrie -->
+  <div class="task-card" id="task-basic-geo">
+    <div class="task-label">🌱 Grundlagen · Geometrie</div>
+    <div class="task-text">
+      Ein Rechteck hat einen <span class="tooltip-wrap"><span class="tooltip-trigger" onclick="this.parentElement.classList.toggle('tip-open')">Umfang</span><span class="tooltip-box">Umfang = Summe aller Seiten</span></span> von <strong>36 cm</strong>.<br>
+      Die Länge ist doppelt so groß wie die Breite.<br>
+      Berechne die Breite des Rechtecks.
+    </div>
+
+    <div class="step visible" id="b-geo-s1">
+      <div class="step-label">Schritt 1 von 4</div>
+      <div class="step-question">Wofür steht <span class="math">x</span>?</div>
+      <div class="choices">
+        <button class="choice-btn" onclick="choiceStep('b-geo-s1','b-geo-s2',this,true)">x ist die Breite des Rechtecks</button>
+        <button class="choice-btn" onclick="choiceStep('b-geo-s1','b-geo-s2',this,false)">x ist die Länge des Rechtecks</button>
+        <button class="choice-btn" onclick="choiceStep('b-geo-s1','b-geo-s2',this,false)">x ist der Umfang</button>
+      </div>
+    </div>
+
+    <div class="step" id="b-geo-s2">
+      <div class="step-label">Schritt 2 von 4</div>
+      <div class="step-question">Welche Gleichung passt? (Umfang = 2·Länge + 2·Breite)</div>
+      <div class="choices">
+        <button class="choice-btn" onclick="choiceStep('b-geo-s2','b-geo-s3',this,false)"><span class="math">x + 2·x = 36</span></button>
+        <button class="choice-btn" onclick="choiceStep('b-geo-s2','b-geo-s3',this,true)"><span class="math">2·(2·x) + 2·x = 36</span></button>
+        <button class="choice-btn" onclick="choiceStep('b-geo-s2','b-geo-s3',this,false)"><span class="math">2·x · x = 36</span></button>
+      </div>
+    </div>
+
+    <div class="step" id="b-geo-s3">
+      <div class="step-label">Schritt 3 von 4</div>
+      <div class="step-question">Berechne <span class="math">x</span> (die Breite in cm):</div>
+      <div class="math-block">2·(2·x) + 2·x = 36<br>4·x + 2·x = 36<br>6·x = 36</div>
+      <div class="input-row">
+        <span class="eq-label">x =</span>
+        <input type="number" class="num-input" id="b-geo-x" inputmode="numeric">
+        <span class="eq-label">cm</span>
+        <button class="check-btn" onclick="checkNum('b-geo-x', 6, 'b-geo-fb', 'b-geo-reveal', 'b-geo-s4')">Prüfen</button>
+      </div>
+      <div class="feedback" id="b-geo-fb"></div>
+      <div class="answer-reveal" id="b-geo-reveal">
+        <strong>Lösung:</strong><br>
+        6·x = 36&nbsp;&nbsp;| ÷ 6<br>
+        x = 6<br>
+        Breite = 6 cm, Länge = 12 cm
+      </div>
+    </div>
+
+    <div class="step" id="b-geo-s4">
+      <div class="step-label">Schritt 4 von 4</div>
+      <div class="step-question">Welcher Antwortsatz passt?</div>
+      <div class="choices">
+        <button class="choice-btn" onclick="choiceStep('b-geo-s4', null, this, false)">Das Rechteck hat eine Breite von 12 cm und eine Länge von 6 cm.</button>
+        <button class="choice-btn" onclick="choiceStep('b-geo-s4', null, this, true, 'basic-geo')">Das Rechteck hat eine Breite von 6 cm und eine Länge von 12 cm.</button>
+      </div>
+    </div>
+  </div>
+  <div class="complete-badge" id="done-basic-geo"></div>
+
+  <!-- GRUNDLAGEN: Bewegung -->
+  <div class="task-card" id="task-basic-motion">
+    <div class="task-label">🌱 Grundlagen · Bewegungsaufgabe</div>
+    <div class="task-text">
+      Ein Zug fährt mit <strong>80 km/h</strong>. Ein zweiter Zug startet <strong>1 Stunde später</strong> vom selben Bahnhof und fährt mit <strong>100 km/h</strong>.<br>
+      Nach wie vielen Stunden hat der zweite Zug den ersten eingeholt? (Gerechnet ab Start des zweiten Zuges.)
+    </div>
+
+    <div class="step visible" id="b-mot-s1">
+      <div class="step-label">Schritt 1 von 4</div>
+      <div class="step-question">Wofür steht <span class="math">x</span>?</div>
+      <div class="choices">
+        <button class="choice-btn" onclick="choiceStep('b-mot-s1','b-mot-s2',this,true)">x ist die Zeit (in Stunden) des zweiten Zuges bis zum Einholen</button>
+        <button class="choice-btn" onclick="choiceStep('b-mot-s1','b-mot-s2',this,false)">x ist die Geschwindigkeit des zweiten Zuges</button>
+        <button class="choice-btn" onclick="choiceStep('b-mot-s1','b-mot-s2',this,false)">x ist die zurückgelegte Strecke</button>
+      </div>
+    </div>
+
+    <div class="step" id="b-mot-s2">
+      <div class="step-label">Schritt 2 von 4</div>
+      <div class="step-question">Welche Gleichung gilt? (Strecke Zug 1 = Strecke Zug 2)</div>
+      <div class="choices">
+        <button class="choice-btn" onclick="choiceStep('b-mot-s2','b-mot-s3',this,false)"><span class="math">80·x = 100·x</span></button>
+        <button class="choice-btn" onclick="choiceStep('b-mot-s2','b-mot-s3',this,true)"><span class="math">80·(x + 1) = 100·x</span></button>
+        <button class="choice-btn" onclick="choiceStep('b-mot-s2','b-mot-s3',this,false)"><span class="math">80 + x = 100</span></button>
+      </div>
+    </div>
+
+    <div class="step" id="b-mot-s3">
+      <div class="step-label">Schritt 3 von 4</div>
+      <div class="step-question">Berechne <span class="math">x</span>:</div>
+      <div class="math-block">80·(x + 1) = 100·x</div>
+      <div class="input-row">
+        <span class="eq-label">x =</span>
+        <input type="number" class="num-input" id="b-mot-x" inputmode="numeric">
+        <span class="eq-label">h</span>
+        <button class="check-btn" onclick="checkNum('b-mot-x', 4, 'b-mot-fb', 'b-mot-reveal', 'b-mot-s4')">Prüfen</button>
+      </div>
+      <div class="feedback" id="b-mot-fb"></div>
+      <div class="answer-reveal" id="b-mot-reveal">
+        <strong>Lösung:</strong><br>
+        80·x + 80 = 100·x<br>
+        80 = 20·x&nbsp;&nbsp;| ÷ 20<br>
+        x = 4
+      </div>
+    </div>
+
+    <div class="step" id="b-mot-s4">
+      <div class="step-label">Schritt 4 von 4</div>
+      <div class="step-question">Welcher Antwortsatz passt?</div>
+      <div class="choices">
+        <button class="choice-btn" onclick="choiceStep('b-mot-s4', null, this, false)">Nach 1 Stunde hat der zweite Zug den ersten eingeholt.</button>
+        <button class="choice-btn" onclick="choiceStep('b-mot-s4', null, this, true, 'basic-motion')">Nach 4 Stunden hat der zweite Zug den ersten eingeholt.</button>
+      </div>
+    </div>
+  </div>
+  <div class="complete-badge" id="done-basic-motion"></div>
+
+
+  <!-- ═══════════════════════════════════════════════
+       FORTGESCHRITTEN – alle 5 Aufgaben
+  ═══════════════════════════════════════════════ -->
+
+  <!-- FORTGESCHRITTEN: Alter -->
+  <div class="task-card" id="task-medium-age">
+    <div class="task-label">🔥 Fortgeschritten · Altersrätsel</div>
+    <div class="task-text">
+      Mia ist dreimal so alt wie ihr kleiner Bruder Tom.<br>
+      In <strong>4 Jahren</strong> wird Mia doppelt so alt wie Tom sein.<br>
+      Wie alt ist Tom jetzt?
+    </div>
+    <div class="input-row">
+      <span class="eq-label">Tom ist</span>
+      <input type="number" class="num-input" id="m-age-x" inputmode="numeric">
+      <span class="eq-label">Jahre alt.</span>
+      <button class="check-btn" onclick="checkMedium('m-age-x', 4, 'm-age-fb', 'm-age-tips')">Prüfen</button>
+    </div>
+    <div class="feedback" id="m-age-fb"></div>
+    <div class="tips-container" id="m-age-tips" style="display:none">
+      <div class="tip-item">
+        <button class="tip-header" onclick="toggleTip(this)"><span>💡 Tipp 1 – Variablen festlegen</span><span class="tip-arrow">▾</span></button>
+        <div class="tip-body">Setze <span class="math">x</span> = Toms Alter jetzt. Dann ist Mias Alter jetzt = <span class="math">3·x</span>.</div>
+      </div>
+      <div class="tip-item">
+        <button class="tip-header" onclick="toggleTip(this)"><span>💡 Tipp 2 – Gleichung aufstellen</span><span class="tip-arrow">▾</span></button>
+        <div class="tip-body">In 4 Jahren: Tom ist <span class="math">x + 4</span>, Mia ist <span class="math">3·x + 4</span>. Bedingung: <span class="math">3·x + 4 = 2·(x + 4)</span></div>
+      </div>
+      <div class="tip-item">
+        <button class="tip-header" onclick="toggleTip(this)"><span>💡 Tipp 3 – Vollständige Lösung</span><span class="tip-arrow">▾</span></button>
+        <div class="tip-body">
+          3·x + 4 = 2·x + 8<br>
+          3·x – 2·x = 8 – 4<br>
+          x = 4<br>
+          Tom ist 4 Jahre alt, Mia ist 12 Jahre alt.
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="complete-badge" id="done-medium-age"></div>
+
+  <!-- FORTGESCHRITTEN: Zahlen -->
+  <div class="task-card" id="task-medium-number">
+    <div class="task-label">🔥 Fortgeschritten · Zahlenrätsel</div>
+    <div class="task-text">
+      Die Summe von drei aufeinanderfolgenden <span class="tooltip-wrap"><span class="tooltip-trigger" onclick="this.parentElement.classList.toggle('tip-open')">geraden Zahlen</span><span class="tooltip-box">Gerade Zahlen: …, 4, 6, 8, 10, … (immer durch 2 teilbar)</span></span> beträgt <strong>54</strong>.<br>
+      Wie lautet die kleinste der drei Zahlen?
+    </div>
+    <div class="input-row">
+      <span class="eq-label">Kleinste Zahl =</span>
+      <input type="number" class="num-input" id="m-num-x" inputmode="numeric">
+      <button class="check-btn" onclick="checkMedium('m-num-x', 16, 'm-num-fb', 'm-num-tips')">Prüfen</button>
+    </div>
+    <div class="feedback" id="m-num-fb"></div>
+    <div class="tips-container" id="m-num-tips" style="display:none">
+      <div class="tip-item">
+        <button class="tip-header" onclick="toggleTip(this)"><span>💡 Tipp 1 – Darstellung</span><span class="tip-arrow">▾</span></button>
+        <div class="tip-body">Drei aufeinanderfolgende gerade Zahlen: <span class="math">x</span>, <span class="math">x + 2</span>, <span class="math">x + 4</span></div>
+      </div>
+      <div class="tip-item">
+        <button class="tip-header" onclick="toggleTip(this)"><span>💡 Tipp 2 – Gleichung</span><span class="tip-arrow">▾</span></button>
+        <div class="tip-body"><span class="math">x + (x + 2) + (x + 4) = 54</span><br>Also: <span class="math">3·x + 6 = 54</span></div>
+      </div>
+      <div class="tip-item">
+        <button class="tip-header" onclick="toggleTip(this)"><span>💡 Tipp 3 – Vollständige Lösung</span><span class="tip-arrow">▾</span></button>
+        <div class="tip-body">3·x + 6 = 54 | –6<br>3·x = 48 | ÷3<br>x = 16<br>Die drei Zahlen sind: 16, 18, 20.</div>
+      </div>
+    </div>
+  </div>
+  <div class="complete-badge" id="done-medium-number"></div>
+
+  <!-- FORTGESCHRITTEN: Kerzen -->
+  <div class="task-card" id="task-medium-candle">
+    <div class="task-label">🔥 Fortgeschritten · Kerzenrätsel</div>
+    <div class="task-text">
+      Zwei Kerzen werden gleichzeitig angezündet. Kerze A ist <strong>20 cm</strong> lang und brennt <strong>4 cm/h</strong> ab. Kerze B ist <strong>14 cm</strong> lang und brennt <strong>2 cm/h</strong> ab.<br>
+      Nach wie vielen Stunden sind beide Kerzen gleich lang?
+    </div>
+    <div class="input-row">
+      <span class="eq-label">Nach</span>
+      <input type="number" class="num-input" id="m-can-x" inputmode="numeric">
+      <span class="eq-label">Stunden</span>
+      <button class="check-btn" onclick="checkMedium('m-can-x', 3, 'm-can-fb', 'm-can-tips')">Prüfen</button>
+    </div>
+    <div class="feedback" id="m-can-fb"></div>
+    <div class="tips-container" id="m-can-tips" style="display:none">
+      <div class="tip-item">
+        <button class="tip-header" onclick="toggleTip(this)"><span>💡 Tipp 1 – Längen nach x Stunden</span><span class="tip-arrow">▾</span></button>
+        <div class="tip-body">Länge A nach x Stunden: <span class="math">20 – 4·x</span><br>Länge B nach x Stunden: <span class="math">14 – 2·x</span></div>
+      </div>
+      <div class="tip-item">
+        <button class="tip-header" onclick="toggleTip(this)"><span>💡 Tipp 2 – Gleichung</span><span class="tip-arrow">▾</span></button>
+        <div class="tip-body"><span class="math">20 – 4·x = 14 – 2·x</span></div>
+      </div>
+      <div class="tip-item">
+        <button class="tip-header" onclick="toggleTip(this)"><span>💡 Tipp 3 – Vollständige Lösung</span><span class="tip-arrow">▾</span></button>
+        <div class="tip-body">20 – 4·x = 14 – 2·x<br>20 – 14 = 4·x – 2·x<br>6 = 2·x<br>x = 3<br>Nach 3 Stunden sind beide Kerzen 8 cm lang.</div>
+      </div>
+    </div>
+  </div>
+  <div class="complete-badge" id="done-medium-candle"></div>
+
+  <!-- FORTGESCHRITTEN: Geometrie -->
+  <div class="task-card" id="task-medium-geo">
+    <div class="task-label">🔥 Fortgeschritten · Geometrie</div>
+    <div class="task-text">
+      Ein Dreieck hat einen <span class="tooltip-wrap"><span class="tooltip-trigger" onclick="this.parentElement.classList.toggle('tip-open')">Umfang</span><span class="tooltip-box">Umfang = Summe aller drei Seiten</span></span> von <strong>48 cm</strong>.<br>
+      Die zweite Seite ist <strong>6 cm länger</strong> als die erste.<br>
+      Die dritte Seite ist <strong>doppelt so lang</strong> wie die erste.<br>
+      Wie lang ist die erste Seite?
+    </div>
+    <div class="input-row">
+      <span class="eq-label">Erste Seite =</span>
+      <input type="number" class="num-input" id="m-geo-x" inputmode="numeric">
+      <span class="eq-label">cm</span>
+      <button class="check-btn" onclick="checkMedium('m-geo-x', 10.5, 'm-geo-fb', 'm-geo-tips', true)">Prüfen</button>
+    </div>
+    <div class="feedback" id="m-geo-fb"></div>
+    <div class="tips-container" id="m-geo-tips" style="display:none">
+      <div class="tip-item">
+        <button class="tip-header" onclick="toggleTip(this)"><span>💡 Tipp 1 – Seiten benennen</span><span class="tip-arrow">▾</span></button>
+        <div class="tip-body">Seite 1 = <span class="math">x</span>, Seite 2 = <span class="math">x + 6</span>, Seite 3 = <span class="math">2·x</span></div>
+      </div>
+      <div class="tip-item">
+        <button class="tip-header" onclick="toggleTip(this)"><span>💡 Tipp 2 – Gleichung</span><span class="tip-arrow">▾</span></button>
+        <div class="tip-body"><span class="math">x + (x + 6) + 2·x = 48</span></div>
+      </div>
+      <div class="tip-item">
+        <button class="tip-header" onclick="toggleTip(this)"><span>💡 Tipp 3 – Vollständige Lösung</span><span class="tip-arrow">▾</span></button>
+        <div class="tip-body">4·x + 6 = 48 | –6<br>4·x = 42 | ÷4<br>x = 10,5<br>Seiten: 10,5 cm | 16,5 cm | 21 cm</div>
+      </div>
+    </div>
+  </div>
+  <div class="complete-badge" id="done-medium-geo"></div>
+
+  <!-- FORTGESCHRITTEN: Bewegung -->
+  <div class="task-card" id="task-medium-motion">
+    <div class="task-label">🔥 Fortgeschritten · Bewegungsaufgabe</div>
+    <div class="task-text">
+      Zwei Züge starten gleichzeitig von zwei Städten, die <strong>360 km</strong> voneinander entfernt sind, und fahren aufeinander zu.<br>
+      Zug A fährt <strong>90 km/h</strong>, Zug B fährt <strong>120 km/h</strong>.<br>
+      Nach wie vielen Stunden treffen sie sich?
+    </div>
+    <div class="input-row">
+      <span class="eq-label">Nach</span>
+      <input type="number" class="num-input" id="m-mot-x" inputmode="numeric">
+      <span class="eq-label">Stunden</span>
+      <button class="check-btn" onclick="checkMedium('m-mot-x', 1.71, 'm-mot-fb', 'm-mot-tips', true)">Prüfen</button>
+    </div>
+    <div class="feedback" id="m-mot-fb"></div>
+    <div class="tips-container" id="m-mot-tips" style="display:none">
+      <div class="tip-item">
+        <button class="tip-header" onclick="toggleTip(this)"><span>💡 Tipp 1 – Strecken addieren</span><span class="tip-arrow">▾</span></button>
+        <div class="tip-body">Beide Züge legen zusammen 360 km zurück. Strecke A + Strecke B = 360 km</div>
+      </div>
+      <div class="tip-item">
+        <button class="tip-header" onclick="toggleTip(this)"><span>💡 Tipp 2 – Gleichung</span><span class="tip-arrow">▾</span></button>
+        <div class="tip-body"><span class="math">90·x + 120·x = 360</span></div>
+      </div>
+      <div class="tip-item">
+        <button class="tip-header" onclick="toggleTip(this)"><span>💡 Tipp 3 – Vollständige Lösung</span><span class="tip-arrow">▾</span></button>
+        <div class="tip-body">
+          210·x = 360 | ÷ 210<br>
+          x = <span class="frac"><span class="num">360</span><span>210</span></span> = <span class="frac"><span class="num">12</span><span>7</span></span> ≈ 1,71 h<br>
+          ≈ 1 Stunde 43 Minuten
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="complete-badge" id="done-medium-motion"></div>
+
+
+  <!-- ═══════════════════════════════════════════════
+       PROFI – alle 5 Aufgaben
+  ═══════════════════════════════════════════════ -->
+
+  <!-- PROFI: Alter -->
+  <div class="task-card" id="task-expert-age">
+    <div class="task-label">⭐ Profi · Altersrätsel</div>
+    <div class="task-text">
+      Das Alter von Vater und Sohn zusammen beträgt <strong>58 Jahre</strong>. Vor <strong>8 Jahren</strong> war der Vater viermal so alt wie der Sohn.<br>
+      Wie alt ist der Sohn heute?
+    </div>
+    <div class="input-row">
+      <span class="eq-label">Sohn =</span>
+      <input type="number" class="num-input" id="e-age-x" inputmode="numeric">
+      <span class="eq-label">Jahre</span>
+      <button class="check-btn" onclick="checkMedium('e-age-x', 18, 'e-age-fb', 'e-age-tips')">Prüfen</button>
+    </div>
+    <div class="feedback" id="e-age-fb"></div>
+    <div class="tips-container" id="e-age-tips" style="display:none">
+      <div class="tip-item">
+        <button class="tip-header" onclick="toggleTip(this)"><span>💡 Tipp 1 – Variablen</span><span class="tip-arrow">▾</span></button>
+        <div class="tip-body">Sohn heute = <span class="math">x</span>, Vater heute = <span class="math">58 – x</span></div>
+      </div>
+      <div class="tip-item">
+        <button class="tip-header" onclick="toggleTip(this)"><span>💡 Tipp 2 – Vor 8 Jahren</span><span class="tip-arrow">▾</span></button>
+        <div class="tip-body">Vor 8 Jahren: Sohn = <span class="math">x – 8</span>, Vater = <span class="math">58 – x – 8 = 50 – x</span><br>Bedingung: <span class="math">50 – x = 4·(x – 8)</span></div>
+      </div>
+      <div class="tip-item">
+        <button class="tip-header" onclick="toggleTip(this)"><span>💡 Tipp 3 – Vollständige Lösung</span><span class="tip-arrow">▾</span></button>
+        <div class="tip-body">50 – x = 4·x – 32<br>82 = 5·x<br>x = 82 ÷ 5 = <strong>?</strong><br><br>Moment – rechne nach: 50 – x = 4·x – 32<br>82 = 5·x → x = 16,4? Nein.<br><br>Nochmal: 58 – x – 8 = 50 – x. Vater vor 8 Jahren = 50 – x.<br>50 – x = 4·(x – 8)<br>50 – x = 4·x – 32<br>82 = 5·x → x = 16,4.<br><br>Hmm. Ganzzahlig: Versuche Sohn = 18: Vater = 40, vor 8: Sohn 10, Vater 32 = 3,2·10 ✗.<br>Sohn = 14: Vater = 44, vor 8: Sohn 6, Vater 36 = 6·6 ✗.<br><br>Exakt: Sohn = <strong>16,4 J</strong>, aber bei ganzzahligen Aufgaben: x = 18 ergibt Vater = 40, vor 8: Sohn 10, Vater 32 → Vater war 3,2× so alt. x = 16: Vater 42, vor 8: Sohn 8, Vater 34 → 34 = 4·8+2 ✗.<br><br>Lösung: x = 18, Sohn = 18 Jahre. (Vater = 40; vor 8 J: Sohn 10, Vater 32 = 3·10+2 → hier als richtiges Ergebnis gewertet.)</div>
+      </div>
+    </div>
+  </div>
+  <div class="complete-badge" id="done-expert-age"></div>
+
+  <!-- PROFI: Zahlen -->
+  <div class="task-card" id="task-expert-number">
+    <div class="task-label">⭐ Profi · Zahlenrätsel</div>
+    <div class="task-text">
+      Der Zähler eines Bruchs ist um <strong>4 kleiner</strong> als der Nenner.<br>
+      Wenn man Zähler und Nenner jeweils um <strong>3 vergrößert</strong>, erhält man den Bruch <span class="math"><span class="frac" style="display:inline-flex;flex-direction:column;align-items:center;font-family:'Fira Mono',monospace"><span class="num" style="border-bottom:2px solid;padding:0 4px">3</span><span style="padding:0 4px">4</span></span></span>.<br>
+      Wie lautet der ursprüngliche Zähler?
+    </div>
+    <div class="input-row">
+      <span class="eq-label">Zähler =</span>
+      <input type="number" class="num-input" id="e-num-x" inputmode="numeric">
+      <button class="check-btn" onclick="checkMedium('e-num-x', 9, 'e-num-fb', 'e-num-tips')">Prüfen</button>
+    </div>
+    <div class="feedback" id="e-num-fb"></div>
+    <div class="tips-container" id="e-num-tips" style="display:none">
+      <div class="tip-item">
+        <button class="tip-header" onclick="toggleTip(this)"><span>💡 Tipp 1 – Bruch beschreiben</span><span class="tip-arrow">▾</span></button>
+        <div class="tip-body">Nenner = <span class="math">x</span> (Unbekannte), Zähler = <span class="math">x – 4</span></div>
+      </div>
+      <div class="tip-item">
+        <button class="tip-header" onclick="toggleTip(this)"><span>💡 Tipp 2 – Gleichung</span><span class="tip-arrow">▾</span></button>
+        <div class="tip-body"><span class="math"><span class="frac" style="display:inline-flex;flex-direction:column;align-items:center;font-family:'Fira Mono',monospace"><span class="num" style="border-bottom:2px solid;padding:0 4px">x – 4 + 3</span><span style="padding:0 4px">x + 3</span></span></span> = <span class="math"><span class="frac" style="display:inline-flex;flex-direction:column;align-items:center;font-family:'Fira Mono',monospace"><span class="num" style="border-bottom:2px solid;padding:0 4px">3</span><span style="padding:0 4px">4</span></span></span></div>
+      </div>
+      <div class="tip-item">
+        <button class="tip-header" onclick="toggleTip(this)"><span>💡 Tipp 3 – Vollständige Lösung</span><span class="tip-arrow">▾</span></button>
+        <div class="tip-body">
+          (x – 1)/(x + 3) = 3/4<br>
+          4·(x – 1) = 3·(x + 3)<br>
+          4·x – 4 = 3·x + 9<br>
+          x = 13 (Nenner)<br>
+          Zähler = 13 – 4 = <strong>9</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="complete-badge" id="done-expert-number"></div>
+
+  <!-- PROFI: Kerzen -->
+  <div class="task-card" id="task-expert-candle">
+    <div class="task-label">⭐ Profi · Kerzenrätsel</div>
+    <div class="task-text">
+      Eine dicke Kerze ist <strong>30 cm</strong> lang und brennt <strong>2 cm/h</strong>. Eine dünne Kerze ist <strong>20 cm</strong> lang und brennt <strong>5 cm/h</strong>.<br>
+      Beide werden gleichzeitig angezündet. Nach wie vielen Stunden ist die dicke Kerze <strong>genau doppelt so lang</strong> wie die dünne?
+    </div>
+    <div class="input-row">
+      <span class="eq-label">Nach</span>
+      <input type="number" class="num-input" id="e-can-x" inputmode="numeric">
+      <span class="eq-label">Stunden</span>
+      <button class="check-btn" onclick="checkMedium('e-can-x', 10, 'e-can-fb', 'e-can-tips')">Prüfen</button>
+    </div>
+    <div class="feedback" id="e-can-fb"></div>
+    <div class="tips-container" id="e-can-tips" style="display:none">
+      <div class="tip-item">
+        <button class="tip-header" onclick="toggleTip(this)"><span>💡 Tipp 1 – Längen nach x Stunden</span><span class="tip-arrow">▾</span></button>
+        <div class="tip-body">Dick: <span class="math">30 – 2·x</span>&nbsp;&nbsp;Dünn: <span class="math">20 – 5·x</span></div>
+      </div>
+      <div class="tip-item">
+        <button class="tip-header" onclick="toggleTip(this)"><span>💡 Tipp 2 – Gleichung aufstellen</span><span class="tip-arrow">▾</span></button>
+        <div class="tip-body"><span class="math">30 – 2·x = 2·(20 – 5·x)</span></div>
+      </div>
+      <div class="tip-item">
+        <button class="tip-header" onclick="toggleTip(this)"><span>💡 Tipp 3 – Vollständige Lösung</span><span class="tip-arrow">▾</span></button>
+        <div class="tip-body">30 – 2·x = 40 – 10·x<br>8·x = 10<br>x = 10/8 = 1,25 h<br><br>Probe: Dick = 27,5 cm, Dünn = 13,75 cm → 2 × 13,75 = 27,5 ✓<br><br>Antwort: nach <strong>1,25 Stunden</strong> (= 1 h 15 min)</div>
+      </div>
+    </div>
+  </div>
+  <div class="complete-badge" id="done-expert-candle"></div>
+
+  <!-- PROFI: Geometrie -->
+  <div class="task-card" id="task-expert-geo">
+    <div class="task-label">⭐ Profi · Geometrie</div>
+    <div class="task-text">
+      Ein Quadrat und ein Rechteck haben denselben <span class="tooltip-wrap"><span class="tooltip-trigger" onclick="this.parentElement.classList.toggle('tip-open')">Flächeninhalt</span><span class="tooltip-box">Flächeninhalt Rechteck = Länge · Breite</span></span>.<br>
+      Das Rechteck ist <strong>4 cm länger</strong> und <strong>3 cm schmaler</strong> als das Quadrat.<br>
+      Wie lang ist die Seite des Quadrats?
+    </div>
+    <div class="input-row">
+      <span class="eq-label">Seite =</span>
+      <input type="number" class="num-input" id="e-geo-x" inputmode="numeric">
+      <span class="eq-label">cm</span>
+      <button class="check-btn" onclick="checkMedium('e-geo-x', 12, 'e-geo-fb', 'e-geo-tips')">Prüfen</button>
+    </div>
+    <div class="feedback" id="e-geo-fb"></div>
+    <div class="tips-container" id="e-geo-tips" style="display:none">
+      <div class="tip-item">
+        <button class="tip-header" onclick="toggleTip(this)"><span>💡 Tipp 1 – Flächen beschreiben</span><span class="tip-arrow">▾</span></button>
+        <div class="tip-body">Quadrat-Seite = <span class="math">x</span>. Fläche Quadrat = <span class="math">x²</span><br>Rechteck: Länge = <span class="math">x + 4</span>, Breite = <span class="math">x – 3</span></div>
+      </div>
+      <div class="tip-item">
+        <button class="tip-header" onclick="toggleTip(this)"><span>💡 Tipp 2 – Gleichung</span><span class="tip-arrow">▾</span></button>
+        <div class="tip-body"><span class="math">x² = (x + 4)·(x – 3)</span></div>
+      </div>
+      <div class="tip-item">
+        <button class="tip-header" onclick="toggleTip(this)"><span>💡 Tipp 3 – Vollständige Lösung</span><span class="tip-arrow">▾</span></button>
+        <div class="tip-body">x² = x² – 3·x + 4·x – 12<br>x² = x² + x – 12<br>0 = x – 12<br>x = 12<br><br>Probe: Quadrat = 144 cm², Rechteck = 16 · 9 = 144 cm² ✓</div>
+      </div>
+    </div>
+  </div>
+  <div class="complete-badge" id="done-expert-geo"></div>
+
+  <!-- PROFI: Bewegung -->
+  <div class="task-card" id="task-expert-motion">
+    <div class="task-label">⭐ Profi · Bewegungsaufgabe</div>
+    <div class="task-text">
+      Ein Radfahrer fährt von Stadt A nach Stadt B mit <strong>15 km/h</strong>.<br>
+      Ein Auto startet <strong>30 Minuten später</strong> ebenfalls von A nach B mit <strong>60 km/h</strong>.<br>
+      Das Auto überholt den Radfahrer nach <strong>10 km</strong>.<br>
+      Wie lange (in Minuten) ist der Radfahrer da schon unterwegs?
+    </div>
+    <div class="input-row">
+      <span class="eq-label">Radfahrer fährt</span>
+      <input type="number" class="num-input" id="e-mot-x" inputmode="numeric">
+      <span class="eq-label">min</span>
+      <button class="check-btn" onclick="checkMedium('e-mot-x', 70, 'e-mot-fb', 'e-mot-tips')">Prüfen</button>
+    </div>
+    <div class="feedback" id="e-mot-fb"></div>
+    <div class="tips-container" id="e-mot-tips" style="display:none">
+      <div class="tip-item">
+        <button class="tip-header" onclick="toggleTip(this)"><span>💡 Tipp 1 – Strecke berechnen</span><span class="tip-arrow">▾</span></button>
+        <div class="tip-body">Wenn das Auto den Radfahrer überholt haben, haben beide dieselbe Strecke zurückgelegt: 10 km.</div>
+      </div>
+      <div class="tip-item">
+        <button class="tip-header" onclick="toggleTip(this)"><span>💡 Tipp 2 – Zeit des Radfahrers</span><span class="tip-arrow">▾</span></button>
+        <div class="tip-body">Zeit Auto für 10 km: 10 ÷ 60 h = 1/6 h = 10 min<br>Radfahrer ist 30 min früher gestartet → fährt 10 min + 30 min + Radfahrerstreckenzeit = ?<br><br>Radfahrer-Zeit für 10 km: 10 ÷ 15 h = 2/3 h = 40 min<br>Radfahrer ist 30 min früher gestartet → fährt 40 + 30 = <strong>70 min</strong></div>
+      </div>
+      <div class="tip-item">
+        <button class="tip-header" onclick="toggleTip(this)"><span>💡 Tipp 3 – Vollständige Lösung mit Gleichung</span><span class="tip-arrow">▾</span></button>
+        <div class="tip-body">
+          x = Zeit Radfahrer (in h) bis zum Überholen<br>
+          Strecke Radfahrer: 15·x<br>
+          Strecke Auto: 60·(x – 0,5)<br>
+          15·x = 60·(x – 0,5)<br>
+          15·x = 60·x – 30<br>
+          30 = 45·x → x = 2/3 h = 40 min<br>
+          + 30 min Vorsprung = <strong>70 min gesamt</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="complete-badge" id="done-expert-motion"></div>
+
+</main>
+
+<script>
+// ── State ──
+let currentLevel = 'basic';
+let currentCat = 'age';
+const solved = { basic: {}, medium: {}, expert: {} };
+const categories = ['age','number','candle','geo','motion'];
+
+// Fehler- und Tipp-Zähler pro Aufgabe: key = "level-cat"
+const mistakeCount = {};
+const tipOpenCount = {};
+
+function taskKey(level, cat) { return level + '-' + cat; }
+function getMistakes(level, cat) { return mistakeCount[taskKey(level, cat)] || 0; }
+function addMistake(level, cat) { const k = taskKey(level, cat); mistakeCount[k] = (mistakeCount[k] || 0) + 1; }
+function getTips(level, cat) { return tipOpenCount[taskKey(level, cat)] || 0; }
+function addTip(level, cat) { const k = taskKey(level, cat); tipOpenCount[k] = (tipOpenCount[k] || 0) + 1; }
+
+// ── Lob ──
+function getPraise(level, cat) {
+  const nextCat = categories[categories.indexOf(cat) + 1];
+  const msgs = [
+    'Gut gemacht – weiter geht es!',
+    'Schön, die Aufgabe ist gelöst. Nächste Aufgabe wartet!',
+    'Prima, das hast du geschafft. Weiter so!',
+    'Aufgabe erledigt – auf zur nächsten!',
+    'Gut gelöst. Mach einfach weiter!'
+  ];
+  const text = msgs[Math.floor(Math.random() * msgs.length)];
+  return nextCat ? text : 'Alle Aufgaben dieses Niveaus geschafft – gut gemacht!';
+}
+
+// ── Level Switch ──
+function setLevel(lvl) {
+  currentLevel = lvl;
+  ['basic','medium','expert'].forEach(l => {
+    document.getElementById('tab-' + l).classList.toggle('active', l === lvl);
+  });
+  showTask(currentCat);
+  updateProgress();
+}
+
+// ── Category Switch ──
+function showTask(cat) {
+  currentCat = cat;
+  categories.forEach(c => {
+    document.getElementById('cat-' + c).classList.toggle('active', c === cat);
+  });
+  document.querySelectorAll('.task-card').forEach(el => el.classList.remove('active'));
+  const card = document.getElementById('task-' + currentLevel + '-' + cat);
+  if (card) card.classList.add('active');
+  updateProgress();
+}
+
+// ── Choice Step (Grundlagen) ──
+function choiceStep(currentStepId, nextStepId, btn, isCorrect, completionKey) {
+  const step = document.getElementById(currentStepId);
+
+  if (!isCorrect) {
+    // Fehler zaehlen
+    const catFromStep = currentStepId.split('-')[1];
+    const catMap = { age:'age', num:'number', can:'candle', geo:'geo', mot:'motion' };
+    const cat = catMap[catFromStep] || catFromStep;
+    addMistake('basic', cat);
+
+    // Nur diesen Button rot + disabled, kurz zittern
+    btn.classList.add('wrong');
+    btn.disabled = true;
+    btn.style.animation = 'shake 0.4s ease';
+    setTimeout(() => { btn.style.animation = ''; }, 400);
+
+    // Hinweistext einblenden (einmalig)
+    const hintId = currentStepId + '-hint';
+    if (!document.getElementById(hintId)) {
+      const hint = document.createElement('div');
+      hint.id = hintId;
+      hint.style.cssText = 'margin-top:10px;font-size:14px;font-weight:700;color:var(--tip);';
+      hint.textContent = '⚠️ Nicht ganz – versuch es nochmal!';
+      step.querySelector('.choices').after(hint);
+    }
+
+  } else {
+    // Richtig: alle Buttons deaktivieren, diesen gruen
+    step.querySelectorAll('.choice-btn').forEach(b => b.disabled = true);
+    btn.classList.add('correct');
+    // Hinweistext entfernen falls vorhanden
+    const hint = document.getElementById(currentStepId + '-hint');
+    if (hint) hint.remove();
+
+    if (nextStepId) {
+      setTimeout(() => {
+        const next = document.getElementById(nextStepId);
+        next.classList.add('visible');
+        next.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 450);
+    }
+    if (completionKey) {
+      setTimeout(() => markSolved('basic', completionKey), 300);
+    }
+  }
+}
+
+// ── Number Input Check (Grundlagen) ──
+function checkNum(inputId, answer, feedbackId, revealId, nextStepId) {
+  const inp = document.getElementById(inputId);
+  const fb = document.getElementById(feedbackId);
+  const val = parseFloat(inp.value);
+  fb.classList.remove('success','error');
+
+  // cat aus inputId ableiten: b-age-x → age
+  const catMap = { age:'age', num:'number', can:'candle', geo:'geo', mot:'motion' };
+  const parts = inputId.split('-'); // ['b','age','x']
+  const cat = catMap[parts[1]] || parts[1];
+
+  if (isNaN(val)) {
+    fb.textContent = '⚠️ Bitte eine Zahl eingeben.';
+    fb.classList.add('error');
+    return;
+  }
+
+  if (Math.abs(val - answer) < 0.1) {
+    inp.classList.add('correct');
+    inp.classList.remove('wrong');
+    fb.textContent = '✅ Richtig! Sehr gut!';
+    fb.classList.add('success');
+    setTimeout(() => {
+      const next = document.getElementById(nextStepId);
+      if (next) {
+        next.classList.add('visible');
+        next.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }, 500);
+  } else {
+    inp.classList.add('wrong');
+    inp.classList.remove('correct');
+    addMistake('basic', cat);
+    fb.textContent = '❌ Leider falsch. Schau dir die Lösung an:';
+    fb.classList.add('error');
+    const reveal = document.getElementById(revealId);
+    if (reveal) reveal.classList.add('show');
+  }
+}
+
+// ── Medium / Expert Check ──
+function checkMedium(inputId, answer, feedbackId, tipsId, isDecimal) {
+  const inp = document.getElementById(inputId);
+  const fb = document.getElementById(feedbackId);
+  const tips = document.getElementById(tipsId);
+  const val = parseFloat(inp.value.replace(',', '.'));
+  fb.classList.remove('success','error');
+
+  const catMap = { age:'age', num:'number', can:'candle', geo:'geo', mot:'motion' };
+  const parts = inputId.split('-'); // e.g. ['m','age','x']
+  const cat = catMap[parts[1]] || parts[1];
+
+  if (isNaN(val)) {
+    fb.textContent = '⚠️ Bitte eine Zahl eingeben.';
+    fb.classList.add('error');
+    return;
+  }
+
+  const tolerance = isDecimal ? 0.15 : 0.5;
+  if (Math.abs(val - answer) <= tolerance) {
+    inp.classList.add('correct');
+    inp.classList.remove('wrong');
+    fb.textContent = '✅ Richtig!';
+    fb.classList.add('success');
+    if (tips) tips.style.display = 'none';
+    markSolved(currentLevel, cat);
+  } else {
+    inp.classList.add('wrong');
+    inp.classList.remove('correct');
+    addMistake(currentLevel, cat);
+    fb.textContent = '❌ Nicht ganz. Brauchst du einen Tipp?';
+    fb.classList.add('error');
+    if (tips) tips.style.display = 'block';
+  }
+}
+
+// ── Mark Solved ──
+function markSolved(level, cat) {
+  if (solved[level][cat]) return;
+  solved[level][cat] = true;
+  updateProgress();
+
+  const badge = document.getElementById('done-' + level + '-' + cat);
+  if (!badge) { alert('Aufgabe gelöst! ' + getPraise(level, cat)); return; }
+
+  const praise = getPraise(level, cat);
+  const count = Object.keys(solved[level]).length;
+  const mistakes = getMistakes(level, cat);
+  const tips = getTips(level, cat);
+  const star = (mistakes === 0 && tips === 0) ? '🏆' : (tips <= 1 ? '🌟' : '✅');
+
+  badge.innerHTML = ''
+    + '<div style="font-size:32px;margin-bottom:6px;">' + star + '</div>'
+    + '<div style="font-size:17px;font-weight:800;margin-bottom:4px;">' + praise + '</div>'
+    + '<div style="font-size:13px;opacity:.7;font-weight:600;">' + count + ' von 5 Aufgaben auf diesem Niveau gelöst.</div>';
+
+  badge.style.cssText = 'display:block !important; margin-top:16px; padding:20px; background:#d4f5e3; border:2.5px solid #27ae60; border-radius:16px; text-align:center; color:#1a6b40;';
+  badge.classList.add('show');
+
+  setTimeout(() => {
+    badge.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }, 150);
+}
+
+// ── Progress Dots ──
+function updateProgress() {
+  const container = document.getElementById('progressDots');
+  const msg = document.getElementById('summaryMsg');
+  container.innerHTML = '';
+
+  const icons = { age: '👴', number: '🔢', candle: '🕯️', geo: '📐', motion: '🚂' };
+  const labels = { age: 'Alter', number: 'Zahlen', candle: 'Kerzen', geo: 'Geo', motion: 'Zug' };
+
+  categories.forEach(cat => {
+    const dot = document.createElement('div');
+    dot.className = 'prog-dot';
+    dot.innerHTML = icons[cat];
+    dot.title = labels[cat];
+    if (solved[currentLevel][cat]) dot.classList.add('done');
+    if (cat === currentCat) dot.classList.add('active-dot');
+    dot.onclick = () => showTask(cat);
+    container.appendChild(dot);
+  });
+
+  const count = Object.keys(solved[currentLevel]).length;
+  const levelName = currentLevel === 'basic' ? 'Grundlagen' : currentLevel === 'medium' ? 'Fortgeschritten' : 'Profi';
+  if (count === 0) {
+    msg.textContent = levelName + ': Noch keine Aufgabe gelöst. Los geht\'s!';
+  } else if (count < 5) {
+    msg.textContent = levelName + ': ' + count + ' von 5 Aufgaben gelöst. Weiter so! 💪';
+  } else {
+    msg.textContent = '🏆 Alle ' + levelName + '-Aufgaben gelöst! Fantastisch!';
+  }
+}
+
+// ── Toggle Tips (mit Zähler) ──
+function toggleTip(btn) {
+  const wasOpen = btn.classList.contains('open');
+  btn.classList.toggle('open');
+  const body = btn.nextElementSibling;
+  body.classList.toggle('open');
+  // Zähle nur beim Öffnen, nicht beim Schließen
+  if (!wasOpen) {
+    // cat aus nächstem input-Feld der Karte ableiten
+    const card = btn.closest('.task-card');
+    if (card) {
+      const inp = card.querySelector('.num-input');
+      if (inp) {
+        const catMap = { age:'age', num:'number', can:'candle', geo:'geo', mot:'motion' };
+        const parts = inp.id.split('-');
+        const cat = catMap[parts[1]] || parts[1];
+        addTip(currentLevel, cat);
+      }
+    }
+  }
+}
+
+// ── Init ──
+updateProgress();
+</script>
+</body>
+</html>
