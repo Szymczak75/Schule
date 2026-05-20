@@ -359,7 +359,7 @@
         <div class="accordion-body">
           <div class="mc-options" id="mc-d2-3">
             <button class="mc-btn" onclick="mcAnswer('d2-3', 0, false, this)">Alle gleich lang → gleichseitig</button>
-            <button class="mc-btn" onclick="mcAnswer('d2-3', 1, true, this)">Zwei gleich lang (\(|PQ|^2=|PR|^2=25\)) → gleichschenklig</button>
+            <button class="mc-btn" onclick="mcAnswer('d2-3', 1, true, this)">Zwei gleich lang (\(|PQ|^2=|QR|^2=25\)) → gleichschenklig</button>
             <button class="mc-btn" onclick="mcAnswer('d2-3', 2, false, this)">Alle unterschiedlich → kein besonderes</button>
           </div>
           <div class="feedback" id="fb-d2-3"></div>
@@ -374,9 +374,9 @@
           <span class="acc-arrow">▼</span>
         </div>
         <div class="accordion-body">
-          <p style="margin-bottom:10px;">Die längste Seite: \(|QR|^2 = 34\) ist Hypotenuse.<br>Prüfe: \(|PQ|^2 + |PR|^2 \stackrel{?}{=} |QR|^2\)</p>
+          <p style="margin-bottom:10px;">Die längste Seite: \(|PR|^2 = 32\) ist die mögliche Hypotenuse.<br>Prüfe: \(|PQ|^2 + |QR|^2 \stackrel{?}{=} |PR|^2\)</p>
           <div class="input-row">
-            <span class="input-label">\(25 + 16 =\)</span>
+            <span class="input-label">\(25 + 25 =\)</span>
             <input class="num-input" id="d2-pyth" type="text" inputmode="numeric" placeholder="?">
           </div>
           <button class="btn btn-secondary" style="margin-top:8px;" onclick="checkD2Step(4)">Prüfen</button>
@@ -1150,10 +1150,10 @@ function checkD2Step(step) {
   }
   if (step===4 && d2done[2]) {
     const p=v('d2-pyth');
-    const ok = p==='41';
+    const ok = p==='50';
     showFb('fb-d2-4', ok,
-      ok ? '\\(25+16=41\\neq25\\) → kein rechter Winkel. Das Dreieck ist gleichschenklig (kein rechter Winkel).' :
-      '\\(|PQ|^2+|PR|^2=25+16=41\\). Vergleich mit \\(|QR|^2=25\\): ungleich – kein rechter Winkel. Prüfe auch \\(|PQ|^2+|QR|^2=50\\neq|PR|^2=32\\).');
+      ok ? '\\(25+25=50\\neq32\\) → kein rechter Winkel. Das Dreieck ist gleichschenklig, aber nicht rechtwinklig.' :
+      '\\(|PQ|^2+|QR|^2=25+25=50\\). Vergleich mit \\(|PR|^2=32\\): \\(50\\neq32\\) – kein rechter Winkel.');
     if (ok) { d2done[3]=true; markAccDone('accnum-d2-4'); answered['d2-pyth']=true; checkWeiter(); }
   }
 }
@@ -1324,15 +1324,32 @@ function mcAnswer(key, idx, correct, btn) {
     group.querySelectorAll('.mc-btn').forEach(b => {
       if (b.getAttribute('onclick') && b.getAttribute('onclick').includes(',true,')) b.classList.add('correct');
     });
-    if (fbEl) { fbEl.className='feedback show err'; fbEl.innerHTML='❌ Leider falsch. Die richtige Antwort ist grün markiert.'; }
+    if (fbEl) {
+      fbEl.className='feedback show err';
+      fbEl.innerHTML='❌ Leider falsch. Die richtige Antwort ist grün markiert. '
+        + '<button onclick="resetMC(\'' + key + '\')" style="margin-left:10px;padding:6px 14px;border-radius:8px;border:none;background:#ff9f43;color:#000;font-weight:600;font-size:.85rem;cursor:pointer;min-height:36px;">Neu versuchen</button>';
+    }
   }
   checkWeiter();
   safeMathJax();
 }
 
 // ══════════════════════════════════════════
-// AUSWERTUNG
+// RESET MC – allows retry after wrong answer
 // ══════════════════════════════════════════
+function resetMC(key) {
+  const group = document.getElementById('mc-' + key);
+  if (!group) return;
+  delete group.dataset.done;
+  delete answered[key];
+  group.querySelectorAll('.mc-btn').forEach(b => {
+    b.classList.remove('correct', 'wrong', 'selected');
+    b.style.pointerEvents = '';
+  });
+  const fbEl = document.getElementById('fb-' + key);
+  if (fbEl) { fbEl.className='feedback'; fbEl.innerHTML=''; }
+  checkWeiter();
+}
 function berechneAuswertung() {
   const keys = getRequiredKeys();
   const labels = {
