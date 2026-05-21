@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Additionsverfahren – Schritt-für-Schritt</title>
+<script>
+  MathJax = {
+    tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+    svg: { fontCache: 'global' }
+  };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f0f4ff;
+    --card: #ffffff;
+    --primary: #3b5bdb;
+    --primary-light: #e8edff;
+    --primary-dark: #2f4ac9;
+    --accent: #f59f00;
+    --accent-light: #fff3cd;
+    --green: #1e7e34;
+    --green-light: #d4edda;
+    --red: #c0392b;
+    --red-light: #fde8e6;
+    --text: #1a1a2e;
+    --text-muted: #5a6070;
+    --border: #dde3f0;
+    --shadow: 0 4px 24px rgba(59,91,219,0.10);
+    --radius: 16px;
+    --radius-sm: 10px;
+    --step-color: #3b5bdb;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 17px;
+    min-height: 100vh;
+    padding-bottom: 80px;
+  }
+
+  /* HEADER */
+  header {
+    background: var(--primary);
+    color: white;
+    padding: 20px 20px 16px;
+    text-align: center;
+  }
+  header h1 {
+    font-size: 1.35rem;
+    font-weight: 900;
+    letter-spacing: -0.3px;
+  }
+  header p {
+    font-size: 0.9rem;
+    opacity: 0.85;
+    margin-top: 4px;
+  }
+
+  /* TABS */
+  .tab-bar {
+    display: flex;
+    background: var(--primary-dark);
+    padding: 0 12px;
+    gap: 4px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .tab-btn {
+    padding: 10px 18px;
+    border: none;
+    background: transparent;
+    color: rgba(255,255,255,0.65);
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    white-space: nowrap;
+    transition: color 0.2s, border-color 0.2s;
+    min-height: 44px;
+  }
+  .tab-btn.active {
+    color: white;
+    border-bottom-color: var(--accent);
+  }
+
+  /* CARD AREA */
+  .card-area {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 20px 14px;
+  }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* TASK INTRO */
+  .task-intro {
+    background: var(--primary-light);
+    border: 2px solid var(--primary);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    margin-bottom: 20px;
+  }
+  .task-intro h2 {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--primary);
+    margin-bottom: 6px;
+  }
+  .task-intro p {
+    font-size: 0.95rem;
+    line-height: 1.55;
+    color: var(--text);
+  }
+
+  /* METHOD BOX */
+  .method-box {
+    background: var(--accent-light);
+    border-left: 5px solid var(--accent);
+    border-radius: var(--radius-sm);
+    padding: 13px 16px;
+    margin-bottom: 22px;
+    font-size: 0.92rem;
+    line-height: 1.6;
+  }
+  .method-box strong { color: #7c5200; }
+
+  /* AUFGABEN GRID */
+  .aufgaben-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  @media (max-width: 600px) {
+    .aufgaben-grid { grid-template-columns: 1fr; }
+  }
+
+  /* AUFGABE CARD */
+  .aufgabe-card {
+    background: var(--card);
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+  .aufgabe-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 13px 16px;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    transition: background 0.15s;
+  }
+  .aufgabe-header:active { background: var(--primary-light); }
+
+  .aufgabe-label {
+    background: var(--primary);
+    color: white;
+    font-weight: 800;
+    font-size: 0.9rem;
+    padding: 4px 11px;
+    border-radius: 20px;
+    flex-shrink: 0;
+  }
+  .aufgabe-equations {
+    flex: 1;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+  .aufgabe-toggle {
+    font-size: 1.2rem;
+    color: var(--primary);
+    flex-shrink: 0;
+    transition: transform 0.3s;
+  }
+  .aufgabe-card.open .aufgabe-toggle { transform: rotate(180deg); }
+
+  /* STEPS */
+  .steps-container {
+    display: none;
+    padding: 0 16px 16px;
+    border-top: 2px solid var(--border);
+  }
+  .aufgabe-card.open .steps-container { display: block; }
+
+  .step {
+    margin-top: 14px;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    border: 1.5px solid var(--border);
+  }
+  .step-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 13px;
+    background: #f7f9ff;
+    cursor: pointer;
+    touch-action: manipulation;
+    transition: background 0.15s;
+  }
+  .step-header:active { background: var(--primary-light); }
+
+  .step-num {
+    background: var(--step-color);
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 800;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .step-title {
+    flex: 1;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.4;
+  }
+  .step-arrow {
+    color: var(--primary);
+    font-size: 1rem;
+    flex-shrink: 0;
+    transition: transform 0.3s;
+    margin-top: 2px;
+  }
+  .step.open .step-arrow { transform: rotate(90deg); }
+
+  .step-body {
+    display: none;
+    padding: 12px 14px 14px 47px;
+    background: white;
+    border-top: 1.5px solid var(--border);
+  }
+  .step.open .step-body { display: block; }
+
+  .step-body p {
+    font-size: 0.9rem;
+    line-height: 1.65;
+    margin-bottom: 8px;
+    color: var(--text);
+  }
+  .step-body p:last-child { margin-bottom: 0; }
+
+  /* Equation display */
+  .eq-block {
+    background: #f7f9ff;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin: 8px 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.88rem;
+    line-height: 1.7;
+  }
+  .eq-line {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .eq-label {
+    color: var(--primary);
+    font-weight: 700;
+    font-size: 0.8rem;
+    min-width: 28px;
+    flex-shrink: 0;
+  }
+  .eq-label.sum { color: var(--green); }
+  .eq-label.probe { color: #7c5200; }
+
+  /* Highlight */
+  .hl-add {
+    background: #fff3cd;
+    border-radius: 4px;
+    padding: 1px 4px;
+    font-weight: 700;
+  }
+  .hl-result {
+    background: var(--green-light);
+    border-left: 4px solid var(--green);
+    border-radius: 6px;
+    padding: 8px 12px;
+    margin: 8px 0;
+    font-weight: 700;
+    color: var(--green);
+    font-size: 0.9rem;
+  }
+  .hl-probe {
+    background: var(--accent-light);
+    border-left: 4px solid var(--accent);
+    border-radius: 6px;
+    padding: 8px 12px;
+    margin: 8px 0;
+    font-size: 0.88rem;
+    color: #7c5200;
+  }
+  .probe-ok {
+    background: var(--green-light);
+    border-left: 4px solid var(--green);
+    border-radius: 6px;
+    padding: 8px 12px;
+    margin: 8px 0;
+    font-weight: 700;
+    color: var(--green);
+    font-size: 0.9rem;
+  }
+  .erklaerung {
+    background: #eef2ff;
+    border-radius: 7px;
+    padding: 8px 12px;
+    font-size: 0.85rem;
+    color: #3b5bdb;
+    margin: 6px 0;
+    line-height: 1.5;
+  }
+  .erklaerung::before { content: "💡 "; }
+
+  /* Divider between steps */
+  .step + .step { margin-top: 8px; }
+
+  /* T-Rex */
+  #trex {
+    position: fixed;
+    bottom: 14px;
+    right: 16px;
+    font-size: 1.6rem;
+    cursor: pointer;
+    z-index: 100;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+  }
+  #trex-tooltip {
+    position: fixed;
+    bottom: 52px;
+    right: 14px;
+    background: #1a1a2e;
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 5px 10px;
+    border-radius: 8px;
+    white-space: nowrap;
+    display: none;
+    z-index: 101;
+  }
+  #trex:hover + #trex-tooltip,
+  #trex-tooltip.visible { display: block; }
+
+  /* Divider line in eq-block */
+  .eq-line.divider {
+    border-top: 1.5px solid var(--border);
+    margin-top: 4px;
+    padding-top: 4px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Additionsverfahren – Lösungen</h1>
+  <p>Klasse 8 · Lineare Gleichungssysteme</p>
+</header>
+
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="switchTab('aufgabe1', this)">Aufgabe 1 – Direkt addieren</button>
+  <button class="tab-btn" onclick="switchTab('aufgabe8', this)">Aufgabe 8 – Mit Faktor multiplizieren</button>
+</div>
+
+<!-- ===== AUFGABE 1 ===== -->
+<div id="aufgabe1" class="tab-panel active">
+  <div class="card-area">
+
+    <div class="task-intro">
+      <h2>Aufgabe 1</h2>
+      <p>Löse mit dem Additionsverfahren und führe eine Probe durch.</p>
+    </div>
+
+    <div class="method-box">
+      <strong>Idee des Additionsverfahrens:</strong> Addiere die beiden Gleichungen so, dass eine Variable wegfällt. Dann hast du eine Gleichung mit nur noch einer Unbekannten.
+    </div>
+
+    <div class="aufgaben-grid">
+
+      <!-- 1a -->
+      <div class="aufgabe-card" id="card-1a">
+        <div class="aufgabe-header" onclick="toggleCard('card-1a')">
+          <span class="aufgabe-label">a)</span>
+          <div class="aufgabe-equations">
+            I: &nbsp;5x + 3y = 14<br>
+            II: −4x − 3y = −16
+          </div>
+          <span class="aufgabe-toggle">▼</span>
+        </div>
+        <div class="steps-container">
+
+          <div class="step" id="s1a-1">
+            <div class="step-header" onclick="toggleStep('s1a-1')">
+              <span class="step-num">1</span>
+              <span class="step-title">Gleichungen aufschreiben und prüfen</span>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <p>Schreib die beiden Gleichungen untereinander:</p>
+              <div class="eq-block">
+                <div class="eq-line"><span class="eq-label">I:</span> \(5x + 3y = 14\)</div>
+                <div class="eq-line"><span class="eq-label">II:</span> \(-4x - 3y = -16\)</div>
+              </div>
+              <div class="erklaerung">Die \(y\)-Terme sind \(+3y\) und \(-3y\). Das sind entgegengesetzt gleiche Terme – sie heben sich beim Addieren auf!</div>
+            </div>
+          </div>
+
+          <div class="step" id="s1a-2">
+            <div class="step-header" onclick="toggleStep('s1a-2')">
+              <span class="step-num">2</span>
+              <span class="step-title">Gleichungen addieren → y fällt weg</span>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <p>Addiere I + II (jeden Term einzeln):</p>
+              <div class="eq-block">
+                <div class="eq-line"><span class="eq-label">I:</span> \(5x + 3y = 14\)</div>
+                <div class="eq-line"><span class="eq-label">II:</span> \(-4x - 3y = -16\)</div>
+                <div class="eq-line divider"><span class="eq-label sum">I+II:</span> <span class="hl-add">\(x + 0 = -2\)</span></div>
+              </div>
+              <p>\(3y + (-3y) = 0\) → \(y\) ist verschwunden ✓</p>
+              <div class="hl-result">\(x = -2\)</div>
+            </div>
+          </div>
+
+          <div class="step" id="s1a-3">
+            <div class="step-header" onclick="toggleStep('s1a-3')">
+              <span class="step-num">3</span>
+              <span class="step-title">x einsetzen → y berechnen</span>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <p>Setze \(x = -2\) in Gleichung I ein:</p>
+              <div class="eq-block">
+                <div class="eq-line"><span class="eq-label">I:</span> \(5 \cdot (-2) + 3y = 14\)</div>
+                <div class="eq-line"><span class="eq-label"></span> \(-10 + 3y = 14\)</div>
+                <div class="eq-line"><span class="eq-label"></span> \(3y = 24\)</div>
+                <div class="eq-line"><span class="eq-label"></span> \(y = 8\)</div>
+              </div>
+              <div class="hl-result">\(y = 8\)</div>
+            </div>
+          </div>
+
+          <div class="step" id="s1a-4">
+            <div class="step-header" onclick="toggleStep('s1a-4')">
+              <span class="step-num">4</span>
+              <span class="step-title">Probe durchführen</span>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <p>Setze \(x = -2\) und \(y = 8\) in <em>beide</em> Gleichungen ein:</p>
+              <div class="hl-probe">
+                <strong>Probe I:</strong> \(5 \cdot (-2) + 3 \cdot 8 = -10 + 24 = 14\) ✓
+              </div>
+              <div class="hl-probe">
+                <strong>Probe II:</strong> \(-4 \cdot (-2) - 3 \cdot 8 = 8 - 24 = -16\) ✓
+              </div>
+              <div class="probe-ok">✅ Lösung: \(x = -2, \; y = 8\)</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- 1b -->
+      <div class="aufgabe-card" id="card-1b">
+        <div class="aufgabe-header" onclick="toggleCard('card-1b')">
+          <span class="aufgabe-label">b)</span>
+          <div class="aufgabe-equations">
+            I: &nbsp;&nbsp;3x − 7y = 8<br>
+            II: −3x + 5y = −4
+          </div>
+          <span class="aufgabe-toggle">▼</span>
+        </div>
+        <div class="steps-container">
+
+          <div class="step" id="s1b-1">
+            <div class="step-header" onclick="toggleStep('s1b-1')">
+              <span class="step-num">1</span>
+              <span class="step-title">Gleichungen aufschreiben und prüfen</span>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <div class="eq-block">
+                <div class="eq-line"><span class="eq-label">I:</span> \(3x - 7y = 8\)</div>
+                <div class="eq-line"><span class="eq-label">II:</span> \(-3x + 5y = -4\)</div>
+              </div>
+              <div class="erklaerung">Die \(x\)-Terme sind \(+3x\) und \(-3x\). Sie heben sich beim Addieren auf!</div>
+            </div>
+          </div>
+
+          <div class="step" id="s1b-2">
+            <div class="step-header" onclick="toggleStep('s1b-2')">
+              <span class="step-num">2</span>
+              <span class="step-title">Gleichungen addieren → x fällt weg</span>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <div class="eq-block">
+                <div class="eq-line"><span class="eq-label">I:</span> \(3x - 7y = 8\)</div>
+                <div class="eq-line"><span class="eq-label">II:</span> \(-3x + 5y = -4\)</div>
+                <div class="eq-line divider"><span class="eq-label sum">I+II:</span> <span class="hl-add">\(0 - 2y = 4\)</span></div>
+              </div>
+              <div class="hl-result">\(-2y = 4 \;\Rightarrow\; y = -2\)</div>
+            </div>
+          </div>
+
+          <div class="step" id="s1b-3">
+            <div class="step-header" onclick="toggleStep('s1b-3')">
+              <span class="step-num">3</span>
+              <span class="step-title">y einsetzen → x berechnen</span>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <p>Setze \(y = -2\) in Gleichung I ein:</p>
+              <div class="eq-block">
+                <div class="eq-line"><span class="eq-label">I:</span> \(3x - 7 \cdot (-2) = 8\)</div>
+                <div class="eq-line"><span class="eq-label"></span> \(3x + 14 = 8\)</div>
+                <div class="eq-line"><span class="eq-label"></span> \(3x = -6\)</div>
+                <div class="eq-line"><span class="eq-label"></span> \(x = -2\)</div>
+              </div>
+              <div class="hl-result">\(x = -2\)</div>
+            </div>
+          </div>
+
+          <div class="step" id="s1b-4">
+            <div class="step-header" onclick="toggleStep('s1b-4')">
+              <span class="step-num">4</span>
+              <span class="step-title">Probe durchführen</span>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <div class="hl-probe">
+                <strong>Probe I:</strong> \(3 \cdot (-2) - 7 \cdot (-2) = -6 + 14 = 8\) ✓
+              </div>
+              <div class="hl-probe">
+                <strong>Probe II:</strong> \(-3 \cdot (-2) + 5 \cdot (-2) = 6 - 10 = -4\) ✓
+              </div>
+              <div class="probe-ok">✅ Lösung: \(x = -2, \; y = -2\)</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- 1c -->
+      <div class="aufgabe-card" id="card-1c">
+        <div class="aufgabe-header" onclick="toggleCard('card-1c')">
+          <span class="aufgabe-label">c)</span>
+          <div class="aufgabe-equations">
+            I: &nbsp;&nbsp;2x + 5y = 14<br>
+            II: −2x + 3y = 18
+          </div>
+          <span class="aufgabe-toggle">▼</span>
+        </div>
+        <div class="steps-container">
+
+          <div class="step" id="s1c-1">
+            <div class="step-header" onclick="toggleStep('s1c-1')">
+              <span class="step-num">1</span>
+              <span class="step-title">Gleichungen aufschreiben und prüfen</span>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <div class="eq-block">
+                <div class="eq-line"><span class="eq-label">I:</span> \(2x + 5y = 14\)</div>
+                <div class="eq-line"><span class="eq-label">II:</span> \(-2x + 3y = 18\)</div>
+              </div>
+              <div class="erklaerung">Die \(x\)-Terme sind \(+2x\) und \(-2x\). Sie heben sich beim Addieren auf!</div>
+            </div>
+          </div>
+
+          <div class="step" id="s1c-2">
+            <div class="step-header" onclick="toggleStep('s1c-2')">
+              <span class="step-num">2</span>
+              <span class="step-title">Gleichungen addieren → x fällt weg</span>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <div class="eq-block">
+                <div class="eq-line"><span class="eq-label">I:</span> \(2x + 5y = 14\)</div>
+                <div class="eq-line"><span class="eq-label">II:</span> \(-2x + 3y = 18\)</div>
+                <div class="eq-line divider"><span class="eq-label sum">I+II:</span> <span class="hl-add">\(0 + 8y = 32\)</span></div>
+              </div>
+              <div class="hl-result">\(8y = 32 \;\Rightarrow\; y = 4\)</div>
+            </div>
+          </div>
+
+          <div class="step" id="s1c-3">
+            <div class="step-header" onclick="toggleStep('s1c-3')">
+              <span class="step-num">3</span>
+              <span class="step-title">y einsetzen → x berechnen</span>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <p>Setze \(y = 4\) in Gleichung I ein:</p>
+              <div class="eq-block">
+                <div class="eq-line"><span class="eq-label">I:</span> \(2x + 5 \cdot 4 = 14\)</div>
+                <div class="eq-line"><span class="eq-label"></span> \(2x + 20 = 14\)</div>
+                <div class="eq-line"><span class="eq-label"></span> \(2x = -6\)</div>
+                <div class="eq-line"><span class="eq-label"></span> \(x = -3\)</div>
+              </div>
+              <div class="hl-result">\(x = -3\)</div>
+            </div>
+          </div>
+
+          <div class="step" id="s1c-4">
+            <div class="step-header" onclick="toggleStep('s1c-4')">
+              <span class="step-num">4</span>
+              <span class="step-title">Probe durchführen</span>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <div class="hl-probe">
+                <strong>Probe I:</strong> \(2 \cdot (-3) + 5 \cdot 4 = -6 + 20 = 14\) ✓
+              </div>
+              <div class="hl-probe">
+                <strong>Probe II:</strong> \(-2 \cdot (-3) + 3 \cdot 4 = 6 + 12 = 18\) ✓
+              </div>
+              <div class="probe-ok">✅ Lösung: \(x = -3, \; y = 4\)</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- 1d -->
+      <div class="aufgabe-card" id="card-1d">
+        <div class="aufgabe-header" onclick="toggleCard('card-1d')">
+          <span class="aufgabe-label">d)</span>
+          <div class="aufgabe-equations">
+            I: &nbsp;6x − 8y = 2<br>
+            II: 4x + 8y = 28
+          </div>
+          <span class="aufgabe-toggle">▼</span>
+        </div>
+        <div class="steps-container">
+
+          <div class="step" id="s1d-1">
+            <div class="step-header" onclick="toggleStep('s1d-1')">
+              <span class="step-num">1</span>
+              <span class="step-title">Gleichungen aufschreiben und prüfen</span>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <div class="eq-block">
+                <div class="eq-line"><span class="eq-label">I:</span> \(6x - 8y = 2\)</div>
+                <div class="eq-line"><span class="eq-label">II:</span> \(4x + 8y = 28\)</div>
+              </div>
+              <div class="erklaerung">Die \(y\)-Terme sind \(-8y\) und \(+8y\). Sie heben sich beim Addieren auf!</div>
+            </div>
+          </div>
+
+          <div class="step" id="s1d-2">
+            <div class="step-header" onclick="toggleStep('s1d-2')">
+              <span class="step-num">2</span>
+              <span class="step-title">Gleichungen addieren → y fällt weg</span>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <div class="eq-block">
+                <div class="eq-line"><span class="eq-label">I:</span> \(6x - 8y = 2\)</div>
+                <div class="eq-line"><span class="eq-label">II:</span> \(4x + 8y = 28\)</div>
+                <div class="eq-line divider"><span class="eq-label sum">I+II:</span> <span class="hl-add">\(10x + 0 = 30\)</span></div>
+              </div>
+              <div class="hl-result">\(10x = 30 \;\Rightarrow\; x = 3\)</div>
+            </div>
+          </div>
+
+          <div class="step" id="s1d-3">
+            <div class="step-header" onclick="toggleStep('s1d-3')">
+              <span class="step-num">3</span>
+              <span class="step-title">x einsetzen → y berechnen</span>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <p>Setze \(x = 3\) in Gleichung II ein:</p>
+              <div class="eq-block">
+                <div class="eq-line"><span class="eq-label">II:</span> \(4 \cdot 3 + 8y = 28\)</div>
+                <div class="eq-line"><span class="eq-label"></span> \(12 + 8y = 28\)</div>
+                <div class="eq-line"><span class="eq-label"></span> \(8y = 16\)</div>
+                <div class="eq-line"><span class="eq-label"></span> \(y = 2\)</div>
+              </div>
+              <div class="hl-result">\(y = 2\)</div>
+            </div>
+          </div>
+
+          <div class="step" id="s1d-4">
+            <div class="step-header" onclick="toggleStep('s1d-4')">
+              <span class="step-num">4</span>
+              <span class="step-title">Probe durchführen</span>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <div class="hl-probe">
+                <strong>Probe I:</strong> \(6 \cdot 3 - 8 \cdot 2 = 18 - 16 = 2\) ✓
+              </div>
+              <div class="hl-probe">
+                <strong>Probe II:</strong> \(4 \cdot 3 + 8 \cdot 2 = 12 + 16 = 28\) ✓
+              </div>
+              <div class="probe-ok">✅ Lösung: \(x = 3, \; y = 2\)</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div><!-- end grid -->
+  </div>
+</div>
+
+<!-- ===== AUFGABE 8 ===== -->
+<div id="aufgabe8" class="tab-panel">
+  <div class="card-area">
+
+    <div class="task-intro">
+      <h2>Aufgabe 8</h2>
+      <p>Löse mit dem Additionsverfahren. Multipliziere vor dem Addieren eine der beiden Gleichungen mit einer geeigneten ganzen Zahl. Überprüfe die Lösung durch eine Probe.</p>
+    </div>
+
+    <div class="method-box">
+      <strong>Neuer Schritt:</strong> Wenn sich die Terme nicht direkt aufheben, multipliziere eine Gleichung mit einer passenden Zahl, sodass ein Koeffizient entgegengesetzt gleich wird. Dann erst addieren.
+    </div>
+
+    <div class="aufgaben-grid">
+
+      <!-- 8a -->
+      <div class="aufgabe-card" id="card-8a">
+        <div class="aufgabe-header" onclick="toggleCard('card-8a')">
+          <span class="aufgabe-label">a)</span>
+          <div class="aufgabe-equations">
+            I: &nbsp;7x + 10y = 3<br>
+            II: 2x + &nbsp;5y = 3
+          </div>
+          <span class="aufgabe-toggle">▼</span>
+        </div>
+        <div class="steps-container">
+
+          <div class="step" id="s8a-1">
+            <div class="step-header" onclick="toggleStep('s8a-1')">
+              <span class="step-num">1</span>
+              <span class="step-title">Gleichungen aufschreiben und planen</span>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <div class="eq-block">
+                <div class="eq-line"><span class="eq-label">I:</span> \(7x + 10y = 3\)</div>
+                <div class="eq-line"><span class="eq-label">II:</span> \(2x + 5y = 3\)</div>
+              </div>
+              <div class="erklaerung">Kein Term hebt sich direkt auf. Aber: \(10y\) in I und \(5y\) in II – wenn ich II mit \((-2)\) multipliziere, ergibt das \(-10y\). Dann heben sich die \(y\)-Terme auf!</div>
+            </div>
+          </div>
+
+          <div class="step" id="s8a-2">
+            <div class="step-header" onclick="toggleStep('s8a-2')">
+              <span class="step-num">2</span>
+              <span class="step-title">Gleichung II mit (−2) multiplizieren</span>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <p>Multipliziere jeden Term in II mit \((-2)\):</p>
+              <div class="eq-block">
+                <div class="eq-line"><span class="eq-label">II:</span> \(2x + 5y = 3\)</div>
+                <div class="eq-line"><span class="eq-label">·(−2):</span> <span class="hl-add">\(-4x - 10y = -6\)</span></div>
+              </div>
+              <div class="erklaerung">Nenne diese neue Gleichung II*. Die ursprüngliche Gleichung II bleibt unverändert erhalten.</div>
+            </div>
+          </div>
+
+          <div class="step" id="s8a-3">
+            <div class="step-header" onclick="toggleStep('s8a-3')">
+              <span class="step-num">3</span>
+              <span class="step-title">I + II* addieren → y fällt weg</span>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <div class="eq-block">
+                <div class="eq-line"><span class="eq-label">I:</span> \(7x + 10y = 3\)</div>
+                <div class="eq-line"><span class="eq-label">II*:</span> \(-4x - 10y = -6\)</div>
+                <div class="eq-line divider"><span class="eq-label sum">Summe:</span> <span class="hl-add">\(3x + 0 = -3\)</span></div>
+              </div>
+              <div class="hl-result">\(3x = -3 \;\Rightarrow\; x = -1\)</div>
+            </div>
+          </div>
+
+          <div class="step" id="s8a-4">
+            <div class="step-header" onclick="toggleStep('s8a-4')">
+              <span class="step-num">4</span>
+              <span class="step-title">x einsetzen → y berechnen</span>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <p>Setze \(x = -1\) in die <em>ursprüngliche</em> Gleichung II ein:</p>
+              <div class="eq-block">
+                <div class="eq-line"><span class="eq-label">II:</span> \(2 \cdot (-1) + 5y = 3\)</div>
+                <div class="eq-line"><span class="eq-label"></span> \(-2 + 5y = 3\)</div>
+                <div class="eq-line"><span class="eq-label"></span> \(5y = 5\)</div>
+                <div class="eq-line"><span class="eq-label"></span> \(y = 1\)</div>
+              </div>
+              <div class="hl-result">\(y = 1\)</div>
+            </div>
+          </div>
+
+          <div class="step" id="s8a-5">
+            <div class="step-header" onclick="toggleStep('s8a-5')">
+              <span class="step-num">5</span>
+              <span class="step-title">Probe durchführen</span>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <div class="hl-probe">
+                <strong>Probe I:</strong> \(7 \cdot (-1) + 10 \cdot 1 = -7 + 10 = 3\) ✓
+              </div>
+              <div class="hl-probe">
+                <strong>Probe II:</strong> \(2 \cdot (-1) + 5 \cdot 1 = -2 + 5 = 3\) ✓
+              </div>
+              <div class="probe-ok">✅ Lösung: \(x = -1, \; y = 1\)</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- 8b -->
+      <div class="aufgabe-card" id="card-8b">
+        <div class="aufgabe-header" onclick="toggleCard('card-8b')">
+          <span class="aufgabe-label">b)</span>
+          <div class="aufgabe-equations">
+            I: 9x − 7y = 10<br>
+            II: 3x + &nbsp;y = &nbsp;2
+          </div>
+          <span class="aufgabe-toggle">▼</span>
+        </div>
+        <div class="steps-container">
+
+          <div class="step" id="s8b-1">
+            <div class="step-header" onclick="toggleStep('s8b-1')">
+              <span class="step-num">1</span>
+              <span class="step-title">Gleichungen aufschreiben und planen</span>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <div class="eq-block">
+                <div class="eq-line"><span class="eq-label">I:</span> \(9x - 7y = 10\)</div>
+                <div class="eq-line"><span class="eq-label">II:</span> \(3x + y = 2\)</div>
+              </div>
+              <div class="erklaerung">In II steht \(+y = +1y\). In I steht \(-7y\). Multipliziere II mit \(7\), dann ergibt das \(+7y\). Dann heben sich die \(y\)-Terme auf!</div>
+            </div>
+          </div>
+
+          <div class="step" id="s8b-2">
+            <div class="step-header" onclick="toggleStep('s8b-2')">
+              <span class="step-num">2</span>
+              <span class="step-title">Gleichung II mit 7 multiplizieren</span>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <div class="eq-block">
+                <div class="eq-line"><span class="eq-label">II:</span> \(3x + y = 2\)</div>
+                <div class="eq-line"><span class="eq-label">·7:</span> <span class="hl-add">\(21x + 7y = 14\)</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="step" id="s8b-3">
+            <div class="step-header" onclick="toggleStep('s8b-3')">
+              <span class="step-num">3</span>
+              <span class="step-title">I + II* addieren → y fällt weg</span>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <div class="eq-block">
+                <div class="eq-line"><span class="eq-label">I:</span> \(9x - 7y = 10\)</div>
+                <div class="eq-line"><span class="eq-label">II*:</span> \(21x + 7y = 14\)</div>
+                <div class="eq-line divider"><span class="eq-label sum">Summe:</span> <span class="hl-add">\(30x + 0 = 24\)</span></div>
+              </div>
+              <div class="hl-result">\(30x = 24 \;\Rightarrow\; x = \dfrac{24}{30} = \dfrac{4}{5}\)</div>
+            </div>
+          </div>
+
+          <div class="step" id="s8b-4">
+            <div class="step-header" onclick="toggleStep('s8b-4')">
+              <span class="step-num">4</span>
+              <span class="step-title">x einsetzen → y berechnen</span>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <p>Setze \(x = \frac{4}{5}\) in Gleichung II ein:</p>
+              <div class="eq-block">
+                <div class="eq-line"><span class="eq-label">II:</span> \(3 \cdot \dfrac{4}{5} + y = 2\)</div>
+                <div class="eq-line"><span class="eq-label"></span> \(\dfrac{12}{5} + y = 2\)</div>
+                <div class="eq-line"><span class="eq-label"></span> \(y = 2 - \dfrac{12}{5} = \dfrac{10}{5} - \dfrac{12}{5} = -\dfrac{2}{5}\)</div>
+              </div>
+              <div class="hl-result">\(y = -\dfrac{2}{5}\)</div>
+            </div>
+          </div>
+
+          <div class="step" id="s8b-5">
+            <div class="step-header" onclick="toggleStep('s8b-5')">
+              <span class="step-num">5</span>
+              <span class="step-title">Probe durchführen</span>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <div class="hl-probe">
+                <strong>Probe I:</strong> \(9 \cdot \frac{4}{5} - 7 \cdot (-\frac{2}{5}) = \frac{36}{5} + \frac{14}{5} = \frac{50}{5} = 10\) ✓
+              </div>
+              <div class="hl-probe">
+                <strong>Probe II:</strong> \(3 \cdot \frac{4}{5} + (-\frac{2}{5}) = \frac{12}{5} - \frac{2}{5} = \frac{10}{5} = 2\) ✓
+              </div>
+              <div class="probe-ok">✅ Lösung: \(x = \dfrac{4}{5}, \; y = -\dfrac{2}{5}\)</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- 8c -->
+      <div class="aufgabe-card" id="card-8c">
+        <div class="aufgabe-header" onclick="toggleCard('card-8c')">
+          <span class="aufgabe-label">c)</span>
+          <div class="aufgabe-equations">
+            I: 5x + 3y = 14<br>
+            II: 8x + 6y = 32
+          </div>
+          <span class="aufgabe-toggle">▼</span>
+        </div>
+        <div class="steps-container">
+
+          <div class="step" id="s8c-1">
+            <div class="step-header" onclick="toggleStep('s8c-1')">
+              <span class="step-num">1</span>
+              <span class="step-title">Gleichungen aufschreiben und planen</span>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <div class="eq-block">
+                <div class="eq-line"><span class="eq-label">I:</span> \(5x + 3y = 14\)</div>
+                <div class="eq-line"><span class="eq-label">II:</span> \(8x + 6y = 32\)</div>
+              </div>
+              <div class="erklaerung">In I steht \(+3y\), in II steht \(+6y\). Multipliziere I mit \((-2)\): dann ergibt das \(-6y\). Die \(y\)-Terme heben sich auf.</div>
+            </div>
+          </div>
+
+          <div class="step" id="s8c-2">
+            <div class="step-header" onclick="toggleStep('s8c-2')">
+              <span class="step-num">2</span>
+              <span class="step-title">Gleichung I mit (−2) multiplizieren</span>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <div class="eq-block">
+                <div class="eq-line"><span class="eq-label">I:</span> \(5x + 3y = 14\)</div>
+                <div class="eq-line"><span class="eq-label">·(−2):</span> <span class="hl-add">\(-10x - 6y = -28\)</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="step" id="s8c-3">
+            <div class="step-header" onclick="toggleStep('s8c-3')">
+              <span class="step-num">3</span>
+              <span class="step-title">II + I* addieren → y fällt weg</span>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <div class="eq-block">
+                <div class="eq-line"><span class="eq-label">II:</span> \(8x + 6y = 32\)</div>
+                <div class="eq-line"><span class="eq-label">I*:</span> \(-10x - 6y = -28\)</div>
+                <div class="eq-line divider"><span class="eq-label sum">Summe:</span> <span class="hl-add">\(-2x + 0 = 4\)</span></div>
+              </div>
+              <div class="hl-result">\(-2x = 4 \;\Rightarrow\; x = -2\)</div>
+            </div>
+          </div>
+
+          <div class="step" id="s8c-4">
+            <div class="step-header" onclick="toggleStep('s8c-4')">
+              <span class="step-num">4</span>
+              <span class="step-title">x einsetzen → y berechnen</span>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <p>Setze \(x = -2\) in Gleichung I ein:</p>
+              <div class="eq-block">
+                <div class="eq-line"><span class="eq-label">I:</span> \(5 \cdot (-2) + 3y = 14\)</div>
+                <div class="eq-line"><span class="eq-label"></span> \(-10 + 3y = 14\)</div>
+                <div class="eq-line"><span class="eq-label"></span> \(3y = 24\)</div>
+                <div class="eq-line"><span class="eq-label"></span> \(y = 8\)</div>
+              </div>
+              <div class="hl-result">\(y = 8\)</div>
+            </div>
+          </div>
+
+          <div class="step" id="s8c-5">
+            <div class="step-header" onclick="toggleStep('s8c-5')">
+              <span class="step-num">5</span>
+              <span class="step-title">Probe durchführen</span>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <div class="hl-probe">
+                <strong>Probe I:</strong> \(5 \cdot (-2) + 3 \cdot 8 = -10 + 24 = 14\) ✓
+              </div>
+              <div class="hl-probe">
+                <strong>Probe II:</strong> \(8 \cdot (-2) + 6 \cdot 8 = -16 + 48 = 32\) ✓
+              </div>
+              <div class="probe-ok">✅ Lösung: \(x = -2, \; y = 8\)</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- 8d -->
+      <div class="aufgabe-card" id="card-8d">
+        <div class="aufgabe-header" onclick="toggleCard('card-8d')">
+          <span class="aufgabe-label">d)</span>
+          <div class="aufgabe-equations">
+            I: &nbsp;2x + &nbsp;5y = 14<br>
+            II: &nbsp;x − 1,5y = −1
+          </div>
+          <span class="aufgabe-toggle">▼</span>
+        </div>
+        <div class="steps-container">
+
+          <div class="step" id="s8d-1">
+            <div class="step-header" onclick="toggleStep('s8d-1')">
+              <span class="step-num">1</span>
+              <span class="step-title">Gleichungen aufschreiben und planen</span>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <div class="eq-block">
+                <div class="eq-line"><span class="eq-label">I:</span> \(2x + 5y = 14\)</div>
+                <div class="eq-line"><span class="eq-label">II:</span> \(x - 1{,}5y = -1\)</div>
+              </div>
+              <div class="erklaerung">In II steht \(+x\), in I steht \(+2x\). Multipliziere II mit \((-2)\): dann ergibt das \(-2x\). Die \(x\)-Terme heben sich auf.</div>
+            </div>
+          </div>
+
+          <div class="step" id="s8d-2">
+            <div class="step-header" onclick="toggleStep('s8d-2')">
+              <span class="step-num">2</span>
+              <span class="step-title">Gleichung II mit (−2) multiplizieren</span>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <div class="eq-block">
+                <div class="eq-line"><span class="eq-label">II:</span> \(x - 1{,}5y = -1\)</div>
+                <div class="eq-line"><span class="eq-label">·(−2):</span> <span class="hl-add">\(-2x + 3y = 2\)</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="step" id="s8d-3">
+            <div class="step-header" onclick="toggleStep('s8d-3')">
+              <span class="step-num">3</span>
+              <span class="step-title">I + II* addieren → x fällt weg</span>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <div class="eq-block">
+                <div class="eq-line"><span class="eq-label">I:</span> \(2x + 5y = 14\)</div>
+                <div class="eq-line"><span class="eq-label">II*:</span> \(-2x + 3y = 2\)</div>
+                <div class="eq-line divider"><span class="eq-label sum">Summe:</span> <span class="hl-add">\(0 + 8y = 16\)</span></div>
+              </div>
+              <div class="hl-result">\(8y = 16 \;\Rightarrow\; y = 2\)</div>
+            </div>
+          </div>
+
+          <div class="step" id="s8d-4">
+            <div class="step-header" onclick="toggleStep('s8d-4')">
+              <span class="step-num">4</span>
+              <span class="step-title">y einsetzen → x berechnen</span>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <p>Setze \(y = 2\) in Gleichung II ein:</p>
+              <div class="eq-block">
+                <div class="eq-line"><span class="eq-label">II:</span> \(x - 1{,}5 \cdot 2 = -1\)</div>
+                <div class="eq-line"><span class="eq-label"></span> \(x - 3 = -1\)</div>
+                <div class="eq-line"><span class="eq-label"></span> \(x = 2\)</div>
+              </div>
+              <div class="hl-result">\(x = 2\)</div>
+            </div>
+          </div>
+
+          <div class="step" id="s8d-5">
+            <div class="step-header" onclick="toggleStep('s8d-5')">
+              <span class="step-num">5</span>
+              <span class="step-title">Probe durchführen</span>
+              <span class="step-arrow">▶</span>
+            </div>
+            <div class="step-body">
+              <div class="hl-probe">
+                <strong>Probe I:</strong> \(2 \cdot 2 + 5 \cdot 2 = 4 + 10 = 14\) ✓
+              </div>
+              <div class="hl-probe">
+                <strong>Probe II:</strong> \(2 - 1{,}5 \cdot 2 = 2 - 3 = -1\) ✓
+              </div>
+              <div class="probe-ok">✅ Lösung: \(x = 2, \; y = 2\)</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div><!-- end grid -->
+  </div>
+</div>
+
+<!-- T-Rex -->
+<div id="trex" onclick="showTrex()" onmouseenter="showTrex()" onmouseleave="hideTrex()">🦖</div>
+<div id="trex-tooltip">Made by Mathedino</div>
+
+<script>
+  function switchTab(panelId, btn) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(panelId).classList.add('active');
+    btn.classList.add('active');
+  }
+
+  function toggleCard(id) {
+    const card = document.getElementById(id);
+    card.classList.toggle('open');
+  }
+
+  function toggleStep(id) {
+    const step = document.getElementById(id);
+    step.classList.toggle('open');
+  }
+
+  let trexTimer;
+  function showTrex() {
+    document.getElementById('trex-tooltip').classList.add('visible');
+    clearTimeout(trexTimer);
+    trexTimer = setTimeout(hideTrex, 2000);
+  }
+  function hideTrex() {
+    document.getElementById('trex-tooltip').classList.remove('visible');
+  }
+</script>
+</body>
+</html>
