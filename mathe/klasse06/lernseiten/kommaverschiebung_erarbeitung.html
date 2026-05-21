@@ -860,45 +860,46 @@
       <!-- a -->
       <div class="zehn-aufg">
         a) &nbsp; \(10^2 = \)
-        <input class="antwort-input" id="z1" inputmode="numeric" placeholder="?">
+        <input class="antwort-input" id="z1" inputmode="numeric" placeholder="?" style="width:110px;">
         <span id="z1fb"></span>
         <button class="clear-btn" id="z1clr" onclick="clearInput('z1')">Leeren</button>
       </div>
       <!-- b -->
       <div class="zehn-aufg">
         b) &nbsp; \(10^5 = 10 \cdot 10 \cdot 10 \cdot 10 \cdot 10 = \)
-        <input class="antwort-input" id="z2" inputmode="numeric" placeholder="?">
+        <input class="antwort-input" id="z2" inputmode="numeric" placeholder="Zahl?" style="width:130px;">
         <span id="z2fb"></span>
         <button class="clear-btn" id="z2clr" onclick="clearInput('z2')">Leeren</button>
       </div>
       <!-- c -->
       <div class="zehn-aufg">
         c) &nbsp; \(10^1 = \)
-        <input class="antwort-input" id="z3" inputmode="numeric" placeholder="?">
+        <input class="antwort-input" id="z3" inputmode="numeric" placeholder="?" style="width:90px;">
         <span id="z3fb"></span>
         <button class="clear-btn" id="z3clr" onclick="clearInput('z3')">Leeren</button>
       </div>
       <!-- d -->
       <div class="zehn-aufg">
         d) &nbsp; \(10^4 = 10 \cdot 10 \cdot 10 \cdot 10 = \)
-        <input class="antwort-input" id="z4" inputmode="numeric" placeholder="?">
+        <input class="antwort-input" id="z4" inputmode="numeric" placeholder="Zahl?" style="width:120px;">
         <span id="z4fb"></span>
         <button class="clear-btn" id="z4clr" onclick="clearInput('z4')">Leeren</button>
       </div>
       <!-- e -->
-      <div class="zehn-aufg">
+      <div class="zehn-aufg" style="flex-wrap:wrap;gap:0.4rem;">
         e) &nbsp; \(10^6 = \)
-        <input class="antwort-input" id="z5" inputmode="numeric" placeholder="?">
+        <input class="antwort-input" id="z5" inputmode="numeric" placeholder="Zahl?" style="width:150px;">
         <span id="z5fb"></span>
         <button class="clear-btn" id="z5clr" onclick="clearInput('z5')">Leeren</button>
-        &nbsp; \( = 1\,000\,000 \)
+        <span style="color:var(--text-light);font-size:0.88rem;">Tipp: 6 Nullen hinter der 1</span>
       </div>
       <!-- f -->
-      <div class="zehn-aufg">
+      <div class="zehn-aufg" style="flex-wrap:wrap;gap:0.4rem;">
         f) &nbsp; \(10^{10} = \)
-        <input class="antwort-input" id="z6" inputmode="numeric" style="width:140px;" placeholder="?">
+        <input class="antwort-input" id="z6" inputmode="numeric" placeholder="Zahl?" style="width:190px;">
         <span id="z6fb"></span>
         <button class="clear-btn" id="z6clr" onclick="clearInput('z6')">Leeren</button>
+        <span style="color:var(--text-light);font-size:0.88rem;">Tipp: 10 Nullen hinter der 1</span>
       </div>
     </div>
     <button class="prüf-btn" id="zehnerBtn" onclick="checkZehner()">Prüfen</button>
@@ -1385,15 +1386,27 @@ function checkZehner() {
     const inp = document.getElementById('z'+i);
     const fb = document.getElementById('z'+i+'fb');
     const clr = document.getElementById('z'+i+'clr');
-    const val = inp.value.trim().replace(/\s/g,'').replace(/\./g,'').replace(/,/g,'');
-    if (val === zehnerAnswers[i-1]) {
+    // Normalize: strip all spaces, dots, commas, asterisks, ·, ×
+    // Then check if it's a plain number matching the answer
+    const raw = inp.value.trim();
+    const normalized = raw
+      .replace(/\s/g, '')        // spaces
+      .replace(/\./g, '')        // dots (thousand separator)
+      .replace(/,/g, '')         // commas
+      .replace(/\*/g, '')        // asterisks
+      .replace(/·/g, '')         // middle dot
+      .replace(/×/g, '');        // times sign
+    const expected = zehnerAnswers[i-1]; // e.g. '100', '100000', ...
+    if (normalized === expected) {
       inp.classList.add('correct'); inp.classList.remove('wrong');
       if (fb) fb.innerHTML = '<span class="feedback-correct">✅</span>';
       clr.classList.remove('visible');
       zehnerCorrect[i-1] = true;
     } else {
       inp.classList.add('wrong'); inp.classList.remove('correct');
-      if (fb) fb.innerHTML = `<span class="feedback-wrong">❌ Richtig: ${zehnerAnswers[i-1]}</span>`;
+      // Format answer nicely with thousand separator for display
+      const dispAnswer = Number(expected).toLocaleString('de-DE');
+      if (fb) fb.innerHTML = `<span class="feedback-wrong">❌ Richtig: ${dispAnswer}</span>`;
       clr.classList.add('visible');
       allRight = false;
     }
