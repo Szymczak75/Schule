@@ -1,0 +1,2176 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lineare Gleichungssysteme – Übung Klasse 8</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fira+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script>
+  MathJax = {
+    tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+    svg: { fontCache: 'global' }
+  };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+:root {
+  --bg: #f0f4ff;
+  --card-bg: #ffffff;
+  --primary: #2563eb;
+  --primary-dark: #1d4ed8;
+  --accent: #f59e0b;
+  --accent2: #10b981;
+  --text: #1e293b;
+  --text-muted: #64748b;
+  --border: #e2e8f0;
+  --correct: #16a34a;
+  --correct-bg: #dcfce7;
+  --wrong: #dc2626;
+  --wrong-bg: #fee2e2;
+  --tab-inactive: #e2e8f0;
+  --shadow: 0 4px 20px rgba(37,99,235,0.10);
+  --radius: 18px;
+  --font: 'Nunito', sans-serif;
+  --mono: 'Fira Mono', monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding: 0 0 80px 0;
+  font-size: 17px;
+}
+
+/* Header */
+.page-header {
+  background: linear-gradient(135deg, #1e40af 0%, #2563eb 60%, #3b82f6 100%);
+  color: white;
+  padding: 22px 20px 18px;
+  text-align: center;
+}
+.page-header h1 { font-size: 1.35rem; font-weight: 900; letter-spacing: -0.3px; }
+.page-header p { font-size: 0.9rem; opacity: 0.85; margin-top: 4px; }
+
+/* Tab bar */
+.tab-bar {
+  display: flex;
+  overflow-x: auto;
+  background: #1e40af;
+  padding: 0 8px;
+  gap: 4px;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.tab-bar::-webkit-scrollbar { display: none; }
+.tab-btn {
+  flex-shrink: 0;
+  padding: 10px 14px;
+  background: transparent;
+  border: none;
+  color: rgba(255,255,255,0.65);
+  font-family: var(--font);
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+.tab-btn.active {
+  color: white;
+  border-bottom-color: var(--accent);
+}
+.tab-btn:active { opacity: 0.8; }
+
+/* Cards */
+.card-wrap { padding: 16px; }
+.card {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 22px 18px;
+  display: none;
+}
+.card.active { display: block; }
+.card-title {
+  font-size: 1.15rem;
+  font-weight: 900;
+  color: var(--primary);
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.card-subtitle {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  margin-bottom: 18px;
+}
+
+/* Level selector */
+.level-bar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.level-btn {
+  padding: 8px 16px;
+  border-radius: 40px;
+  border: 2px solid var(--border);
+  background: white;
+  font-family: var(--font);
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: all 0.2s;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+}
+.level-btn.active-lvl {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: white;
+}
+.level-btn:active { transform: scale(0.96); }
+
+/* Level panels */
+.level-panel { display: none; }
+.level-panel.active { display: block; }
+
+/* Task */
+.task-box {
+  background: #f8faff;
+  border-left: 4px solid var(--primary);
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+}
+.task-box + .task-box { margin-top: 8px; }
+.task-label {
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--primary);
+  margin-bottom: 6px;
+}
+
+/* Collapsible steps (Grundlagen) */
+.step-list { list-style: none; counter-reset: step-c; }
+.step-item { counter-increment: step-c; margin-bottom: 10px; }
+.step-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  background: #eff6ff;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 0.95rem;
+  min-height: 44px;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.step-header::before {
+  content: counter(step-c);
+  background: var(--primary);
+  color: white;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 900;
+  flex-shrink: 0;
+}
+.step-arrow {
+  margin-left: auto;
+  transition: transform 0.25s;
+  font-size: 0.9rem;
+  color: var(--primary);
+}
+.step-item.open .step-arrow { transform: rotate(180deg); }
+.step-body {
+  display: none;
+  padding: 12px 14px 12px 50px;
+  background: #fff;
+  border: 1px solid #dbeafe;
+  border-radius: 0 0 10px 10px;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+.step-item.open .step-body { display: block; }
+.step-body .eq { font-family: var(--mono); background: #f0f9ff; padding: 4px 10px; border-radius: 6px; display: inline-block; margin: 3px 0; }
+
+/* Input fields */
+.input-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 10px 0;
+}
+.answer-input {
+  width: 80px;
+  height: 44px;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  text-align: center;
+  font-family: var(--mono);
+  font-size: 1.05rem;
+  font-weight: 600;
+  padding: 0 8px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.answer-input:focus { border-color: var(--primary); }
+.answer-input.correct { border-color: var(--correct); background: var(--correct-bg); }
+.answer-input.wrong { border-color: var(--wrong); background: var(--wrong-bg); }
+.input-label { font-weight: 700; font-size: 0.95rem; }
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 11px 22px;
+  border-radius: 40px;
+  border: none;
+  font-family: var(--font);
+  font-size: 0.95rem;
+  font-weight: 800;
+  cursor: pointer;
+  min-height: 44px;
+  transition: all 0.18s;
+  text-decoration: none;
+}
+.btn-primary { background: var(--primary); color: white; }
+.btn-primary:active { background: var(--primary-dark); transform: scale(0.97); }
+.btn-secondary { background: #e0e7ff; color: var(--primary); }
+.btn-secondary:active { background: #c7d2fe; transform: scale(0.97); }
+.btn-check { background: var(--accent); color: #7c2d12; }
+.btn-check:active { filter: brightness(0.9); transform: scale(0.97); }
+.btn-clear { background: var(--wrong-bg); color: var(--wrong); border: 2px solid var(--wrong); display: none; }
+.btn-clear.visible { display: inline-flex; }
+.btn-clear:active { filter: brightness(0.9); }
+.btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+
+/* Feedback */
+.feedback {
+  display: none;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-weight: 700;
+  margin-top: 8px;
+  font-size: 0.95rem;
+}
+.feedback.correct { display: block; background: var(--correct-bg); color: var(--correct); border: 2px solid var(--correct); }
+.feedback.wrong { display: block; background: var(--wrong-bg); color: var(--wrong); border: 2px solid var(--wrong); }
+
+/* Hints (gestufter Hilfen) */
+.hint-area { margin-top: 12px; }
+.hint-btn {
+  padding: 9px 16px;
+  background: #fef9c3;
+  border: 2px solid #fde68a;
+  border-radius: 10px;
+  font-family: var(--font);
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #92400e;
+  cursor: pointer;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+  width: 100%;
+}
+.hint-btn:active { filter: brightness(0.95); }
+.hint-content {
+  display: none;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+.hint-content.visible { display: block; }
+.hint-content .eq { font-family: var(--mono); background: #fef3c7; padding: 3px 8px; border-radius: 5px; display: inline-block; margin: 2px 0; }
+
+/* Divider */
+.task-divider {
+  border: none;
+  border-top: 2px dashed var(--border);
+  margin: 20px 0;
+}
+
+/* Frac */
+.frac {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  vertical-align: middle;
+  margin: 0 2px;
+  font-size: 0.9em;
+}
+.frac > span:first-child {
+  border-bottom: 2px solid currentColor;
+  padding: 0 3px;
+  line-height: 1.3;
+}
+.frac > span:last-child { padding: 0 3px; line-height: 1.3; }
+
+/* Section title */
+.section-title {
+  font-size: 0.82rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--accent);
+  margin: 18px 0 8px;
+}
+
+/* Next button */
+.next-btn {
+  display: none;
+  position: fixed;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 32px);
+  max-width: 480px;
+  padding: 16px;
+  background: linear-gradient(135deg, #16a34a, #15803d);
+  color: white;
+  border: none;
+  border-radius: 16px;
+  font-family: var(--font);
+  font-size: 1.05rem;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 6px 24px rgba(22,163,74,0.35);
+  z-index: 100;
+  text-align: center;
+  text-decoration: none;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.next-btn.visible { display: flex; }
+.next-btn:active { filter: brightness(0.92); transform: translateX(-50%) scale(0.98); }
+
+/* Dino */
+.dino {
+  position: fixed;
+  bottom: 14px;
+  right: 16px;
+  font-size: 1.6rem;
+  cursor: pointer;
+  z-index: 200;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.dino-tooltip {
+  display: none;
+  position: absolute;
+  bottom: 38px;
+  right: 0;
+  background: #1e293b;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.dino:hover .dino-tooltip,
+.dino.show-tip .dino-tooltip { display: block; }
+
+/* Evaluation card */
+.eval-section { margin-bottom: 20px; }
+.eval-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  background: #f8faff;
+  border-radius: 10px;
+  margin-bottom: 6px;
+  font-weight: 700;
+}
+.eval-score {
+  font-size: 2.5rem;
+  font-weight: 900;
+  text-align: center;
+  color: var(--primary);
+  margin: 10px 0;
+}
+.eval-star {
+  font-size: 1.8rem;
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+/* Recap */
+.recap-box {
+  background: #fef9c3;
+  border: 2px solid #fde68a;
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 14px;
+}
+.recap-label {
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #92400e;
+  margin-bottom: 6px;
+}
+
+/* Responsive */
+@media (max-width: 420px) {
+  .card { padding: 18px 14px; }
+  .step-body { padding-left: 14px; }
+}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>📐 Lineare Gleichungssysteme</h1>
+  <p>Klasse 8 · Übung mit zwei Unbekannten</p>
+</div>
+
+<div class="tab-bar" id="tabBar">
+  <button class="tab-btn active" onclick="showCard(0)">① Gleichsetzung</button>
+  <button class="tab-btn" onclick="showCard(1)">② Einsetzung</button>
+  <button class="tab-btn" onclick="showCard(2)">③ Addition</button>
+  <button class="tab-btn" onclick="showCard(3)">✏️ Zahlenrätsel</button>
+  <button class="tab-btn" onclick="showCard(4)">🎂 Altersrätsel</button>
+  <button class="tab-btn" onclick="showCard(5)">🧪 Mischung</button>
+  <button class="tab-btn" onclick="showCard(6)">🚗 Bewegung</button>
+  <button class="tab-btn" onclick="showCard(7)">🔁 Wiederholung</button>
+  <button class="tab-btn" onclick="showCard(8)">📊 Auswertung</button>
+</div>
+
+<div class="card-wrap">
+
+<!-- ===== KARTE 1: GLEICHSETZUNGSVERFAHREN ===== -->
+<div class="card active" id="card-0">
+  <div class="card-title">🔄 Gleichsetzungsverfahren</div>
+  <div class="card-subtitle">Beide Gleichungen nach derselben Variable auflösen, dann gleichsetzen.</div>
+
+  <div class="level-bar">
+    <button class="level-btn active-lvl" onclick="setLevel(0,'G')">📖 Grundlagen</button>
+    <button class="level-btn" onclick="setLevel(0,'F')">🎯 Fortgeschritten</button>
+    <button class="level-btn" onclick="setLevel(0,'P')">🏆 Profi</button>
+  </div>
+
+  <!-- GRUNDLAGEN -->
+  <div class="level-panel active" id="c0-G">
+    <div class="task-box">
+      <div class="task-label">Aufgabe</div>
+      <p>Löse das Gleichungssystem mit dem Gleichsetzungsverfahren:<br>
+      <strong>I: \(3x + y = 11\) &nbsp;&nbsp;&nbsp; II: \(x + y = 5\)</strong></p>
+      <p style="margin-top:8px; font-size:0.88rem; color:var(--text-muted)">Mache jeden Schritt zuerst im Heft – klappe dann auf zum Vergleich.</p>
+    </div>
+    <ol class="step-list">
+      <li class="step-item">
+        <div class="step-header" onclick="toggleStep(this)">
+          Beide Gleichungen nach \(y\) auflösen
+          <span class="step-arrow">▼</span>
+        </div>
+        <div class="step-body">
+          Aus I: <span class="eq">y = 11 − 3·x</span><br>
+          Aus II: <span class="eq">y = 5 − x</span>
+        </div>
+      </li>
+      <li class="step-item">
+        <div class="step-header" onclick="toggleStep(this)">
+          Die rechten Seiten gleichsetzen
+          <span class="step-arrow">▼</span>
+        </div>
+        <div class="step-body">
+          <span class="eq">11 − 3·x = 5 − x</span>
+        </div>
+      </li>
+      <li class="step-item">
+        <div class="step-header" onclick="toggleStep(this)">
+          Die Gleichung nach \(x\) auflösen
+          <span class="step-arrow">▼</span>
+        </div>
+        <div class="step-body">
+          <span class="eq">11 − 3·x = 5 − x</span><br>
+          <span class="eq">6 = 2·x</span><br>
+          <span class="eq">x = 3</span>
+        </div>
+      </li>
+      <li class="step-item">
+        <div class="step-header" onclick="toggleStep(this)">
+          \(x\) einsetzen, \(y\) berechnen
+          <span class="step-arrow">▼</span>
+        </div>
+        <div class="step-body">
+          In II: <span class="eq">y = 5 − 3 = 2</span>
+        </div>
+      </li>
+      <li class="step-item">
+        <div class="step-header" onclick="toggleStep(this)">
+          Probe (beide Gleichungen prüfen)
+          <span class="step-arrow">▼</span>
+        </div>
+        <div class="step-body">
+          I: <span class="eq">3·3 + 2 = 11 ✓</span><br>
+          II: <span class="eq">3 + 2 = 5 ✓</span><br>
+          <strong>Lösung: \(x = 3\), \(y = 2\)</strong>
+        </div>
+      </li>
+    </ol>
+  </div>
+
+  <!-- FORTGESCHRITTEN -->
+  <div class="level-panel" id="c0-F">
+    <div class="task-box">
+      <div class="task-label">Aufgabe</div>
+      <p>Löse mit dem Gleichsetzungsverfahren:<br>
+      <strong>I: \(2x + y = 9\) &nbsp;&nbsp;&nbsp; II: \(4x − y = 3\)</strong></p>
+    </div>
+    <div class="input-group">
+      <span class="input-label">\(x =\)</span>
+      <input class="answer-input" id="c0f-x" type="text" inputmode="decimal" placeholder="?">
+      <span class="input-label">\(y =\)</span>
+      <input class="answer-input" id="c0f-y" type="text" inputmode="decimal" placeholder="?">
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-check" onclick="checkC0F()">Prüfen ✔</button>
+      <button class="btn btn-clear" id="c0f-clear" onclick="clearC0F()">Neu versuchen ↺</button>
+    </div>
+    <div class="feedback" id="c0f-fb"></div>
+    <div class="hint-area" id="c0f-hints" style="display:none">
+      <button class="hint-btn" onclick="showHint('c0f-h1',this)">💡 Tipp 1: Wie forme ich um?</button>
+      <div class="hint-content" id="c0f-h1">Löse beide Gleichungen nach \(y\) auf:<br>
+        Aus I: <span class="eq">y = 9 − 2·x</span> &nbsp;&nbsp; Aus II: <span class="eq">y = 4·x − 3</span>
+      </div>
+      <button class="hint-btn" onclick="showHint('c0f-h2',this)">💡 Tipp 2: Welche Gleichung entsteht?</button>
+      <div class="hint-content" id="c0f-h2">Gleichsetzen: <span class="eq">9 − 2·x = 4·x − 3</span><br>
+        Umformen: <span class="eq">12 = 6·x</span></div>
+      <button class="hint-btn" onclick="showHint('c0f-h3',this)">🔓 Komplette Lösung</button>
+      <div class="hint-content" id="c0f-h3">
+        \(x = 2\), einsetzen: \(y = 9 − 4 = 5\)<br>
+        Probe I: \(4 + 5 = 9\) ✓ &nbsp; II: \(8 − 5 = 3\) ✓
+      </div>
+    </div>
+  </div>
+
+  <!-- PROFI -->
+  <div class="level-panel" id="c0-P">
+    <div class="task-box">
+      <div class="task-label">Aufgabe</div>
+      <p>Löse mit dem Gleichsetzungsverfahren (beide Gleichungen müssen erst umgeformt werden):<br>
+      <strong>I: \(3x − 2y = 4\) &nbsp;&nbsp;&nbsp; II: \(x + 3y = 17\)</strong></p>
+    </div>
+    <div class="input-group">
+      <span class="input-label">\(x =\)</span>
+      <input class="answer-input" id="c0p-x" type="text" inputmode="decimal" placeholder="?">
+      <span class="input-label">\(y =\)</span>
+      <input class="answer-input" id="c0p-y" type="text" inputmode="decimal" placeholder="?">
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-check" onclick="checkC0P()">Prüfen ✔</button>
+      <button class="btn btn-clear" id="c0p-clear" onclick="clearC0P()">Neu versuchen ↺</button>
+    </div>
+    <div class="feedback" id="c0p-fb"></div>
+    <div class="hint-area" id="c0p-hints" style="display:none">
+      <button class="hint-btn" onclick="showHint('c0p-h1',this)">💡 Tipp 1: Beide nach x umformen</button>
+      <div class="hint-content" id="c0p-h1">
+        Aus I: <span class="eq">x = <span class="frac"><span>4 + 2·y</span><span>3</span></span></span><br>
+        Aus II: <span class="eq">x = 17 − 3·y</span>
+      </div>
+      <button class="hint-btn" onclick="showHint('c0p-h2',this)">💡 Tipp 2: Gleichsetzen und vereinfachen</button>
+      <div class="hint-content" id="c0p-h2">
+        <span class="eq"><span class="frac"><span>4 + 2·y</span><span>3</span></span> = 17 − 3·y</span><br>
+        Multipliziere mit 3: <span class="eq">4 + 2·y = 51 − 9·y</span><br>
+        <span class="eq">11·y = 47</span> → <span class="eq">y = <span class="frac"><span>47</span><span>11</span></span></span> ... Hmm, prüfe nochmal ob du richtig umgeformt hast!<br>
+        Richtig: <span class="eq">11·y = 47</span> ergibt kein ganzes Ergebnis – kontrolliere die Aufgabenstellung.
+      </div>
+      <button class="hint-btn" onclick="showHint('c0p-h3',this)">🔓 Komplette Lösung</button>
+      <div class="hint-content" id="c0p-h3">
+        Aus I: \(x = \frac{4+2y}{3}\), aus II: \(x = 17-3y\)<br>
+        Gleichsetzen × 3: \(4+2y = 51-9y \Rightarrow 11y = 47\)<br>
+        Tatsächliche Lösung: \(y = \frac{47}{11}\) – keine ganze Zahl. Gib die Lösung als Bruch an!<br>
+        \(x = 17 - 3 \cdot \frac{47}{11} = \frac{187-141}{11} = \frac{46}{11}\)<br>
+        <strong>Lösung: \(x = \frac{46}{11}\), \(y = \frac{47}{11}\)</strong>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== KARTE 2: EINSETZUNGSVERFAHREN ===== -->
+<div class="card" id="card-1">
+  <div class="card-title">🔁 Einsetzungsverfahren</div>
+  <div class="card-subtitle">Eine Gleichung nach einer Variable auflösen und in die andere einsetzen.</div>
+
+  <div class="level-bar">
+    <button class="level-btn active-lvl" onclick="setLevel(1,'G')">📖 Grundlagen</button>
+    <button class="level-btn" onclick="setLevel(1,'F')">🎯 Fortgeschritten</button>
+    <button class="level-btn" onclick="setLevel(1,'P')">🏆 Profi</button>
+  </div>
+
+  <!-- GRUNDLAGEN -->
+  <div class="level-panel active" id="c1-G">
+    <div class="task-box">
+      <div class="task-label">Aufgabe</div>
+      <p>Löse mit dem Einsetzungsverfahren:<br>
+      <strong>I: \(y = 2x − 1\) &nbsp;&nbsp;&nbsp; II: \(3x + 2y = 18\)</strong></p>
+      <p style="margin-top:8px; font-size:0.88rem; color:var(--text-muted)">Mache jeden Schritt zuerst im Heft – klappe dann auf zum Vergleich.</p>
+    </div>
+    <ol class="step-list">
+      <li class="step-item">
+        <div class="step-header" onclick="toggleStep(this)">
+          Welche Gleichung eignet sich zum Einsetzen?
+          <span class="step-arrow">▼</span>
+        </div>
+        <div class="step-body">
+          Gleichung I ist bereits nach \(y\) aufgelöst: <span class="eq">y = 2x − 1</span><br>
+          → Diese können wir direkt einsetzen.
+        </div>
+      </li>
+      <li class="step-item">
+        <div class="step-header" onclick="toggleStep(this)">
+          \(y\) in Gleichung II einsetzen
+          <span class="step-arrow">▼</span>
+        </div>
+        <div class="step-body">
+          <span class="eq">3x + 2·(2x − 1) = 18</span>
+        </div>
+      </li>
+      <li class="step-item">
+        <div class="step-header" onclick="toggleStep(this)">
+          Klammern auflösen und nach \(x\) lösen
+          <span class="step-arrow">▼</span>
+        </div>
+        <div class="step-body">
+          <span class="eq">3x + 4x − 2 = 18</span><br>
+          <span class="eq">7x = 20</span><br>
+          <span class="eq">x = <span class="frac"><span>20</span><span>7</span></span></span> — Moment! Probiere, ob du richtig gerechnet hast.<br>
+          Richtig: <span class="eq">7x = 20 → x = <span class="frac"><span>20</span><span>7</span></span></span>?<br>
+          Nein: <span class="eq">3x + 4x − 2 = 18 → 7x = 20 → x = <span class="frac"><span>20</span><span>7</span></span></span><br>
+          Hm – warte, das geht auf! Prüfe Probe.
+        </div>
+      </li>
+      <li class="step-item">
+        <div class="step-header" onclick="toggleStep(this)">
+          \(x\) einsetzen, \(y\) berechnen
+          <span class="step-arrow">▼</span>
+        </div>
+        <div class="step-body">
+          In I: <span class="eq">y = 2 · <span class="frac"><span>20</span><span>7</span></span> − 1 = <span class="frac"><span>40</span><span>7</span></span> − <span class="frac"><span>7</span><span>7</span></span> = <span class="frac"><span>33</span><span>7</span></span></span><br>
+          <em>Hinweis: Nicht immer entstehen ganze Zahlen!</em>
+        </div>
+      </li>
+      <li class="step-item">
+        <div class="step-header" onclick="toggleStep(this)">
+          Probe durchführen
+          <span class="step-arrow">▼</span>
+        </div>
+        <div class="step-body">
+          II: \(3 \cdot \frac{20}{7} + 2 \cdot \frac{33}{7} = \frac{60+66}{7} = \frac{126}{7} = 18\) ✓<br>
+          <strong>Lösung: \(x = \frac{20}{7}\), \(y = \frac{33}{7}\)</strong>
+        </div>
+      </li>
+    </ol>
+
+    <hr class="task-divider">
+    <div class="task-box">
+      <div class="task-label">2. Aufgabe (mit ganzen Zahlen)</div>
+      <p>Löse mit dem Einsetzungsverfahren:<br>
+      <strong>I: \(x = 3y + 1\) &nbsp;&nbsp;&nbsp; II: \(2x − y = 9\)</strong></p>
+    </div>
+    <ol class="step-list" style="counter-reset:step-c">
+      <li class="step-item">
+        <div class="step-header" onclick="toggleStep(this)">
+          \(x\) in Gleichung II einsetzen
+          <span class="step-arrow">▼</span>
+        </div>
+        <div class="step-body">
+          <span class="eq">2·(3y + 1) − y = 9</span>
+        </div>
+      </li>
+      <li class="step-item">
+        <div class="step-header" onclick="toggleStep(this)">
+          Vereinfachen und \(y\) berechnen
+          <span class="step-arrow">▼</span>
+        </div>
+        <div class="step-body">
+          <span class="eq">6y + 2 − y = 9</span><br>
+          <span class="eq">5y = 7</span><br>
+          <span class="eq">y = <span class="frac"><span>7</span><span>5</span></span></span>
+        </div>
+      </li>
+      <li class="step-item">
+        <div class="step-header" onclick="toggleStep(this)">
+          \(y\) einsetzen, \(x\) berechnen + Probe
+          <span class="step-arrow">▼</span>
+        </div>
+        <div class="step-body">
+          In I: \(x = 3 \cdot \frac{7}{5} + 1 = \frac{21}{5} + \frac{5}{5} = \frac{26}{5}\)<br>
+          Probe II: \(2 \cdot \frac{26}{5} - \frac{7}{5} = \frac{52-7}{5} = \frac{45}{5} = 9\) ✓
+        </div>
+      </li>
+    </ol>
+  </div>
+
+  <!-- FORTGESCHRITTEN -->
+  <div class="level-panel" id="c1-F">
+    <div class="task-box">
+      <div class="task-label">Aufgabe</div>
+      <p>Löse mit dem Einsetzungsverfahren:<br>
+      <strong>I: \(5x − y = 7\) &nbsp;&nbsp;&nbsp; II: \(2x + 3y = 12\)</strong><br>
+      <small style="color:var(--text-muted)">Eine Gleichung muss zuerst umgeformt werden.</small></p>
+    </div>
+    <div class="input-group">
+      <span class="input-label">\(x =\)</span>
+      <input class="answer-input" id="c1f-x" type="text" inputmode="decimal" placeholder="?">
+      <span class="input-label">\(y =\)</span>
+      <input class="answer-input" id="c1f-y" type="text" inputmode="decimal" placeholder="?">
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-check" onclick="checkC1F()">Prüfen ✔</button>
+      <button class="btn btn-clear" id="c1f-clear" onclick="clearC1F()">Neu versuchen ↺</button>
+    </div>
+    <div class="feedback" id="c1f-fb"></div>
+    <div class="hint-area" id="c1f-hints" style="display:none">
+      <button class="hint-btn" onclick="showHint('c1f-h1',this)">💡 Tipp 1: Welche Gleichung umformen?</button>
+      <div class="hint-content" id="c1f-h1">Forme I nach \(y\) auf: <span class="eq">y = 5x − 7</span></div>
+      <button class="hint-btn" onclick="showHint('c1f-h2',this)">💡 Tipp 2: Einsetzen in II</button>
+      <div class="hint-content" id="c1f-h2"><span class="eq">2x + 3·(5x − 7) = 12</span><br><span class="eq">17x − 21 = 12 → 17x = 33</span></div>
+      <button class="hint-btn" onclick="showHint('c1f-h3',this)">🔓 Komplette Lösung</button>
+      <div class="hint-content" id="c1f-h3">
+        \(x = \frac{33}{17}\), \(y = 5 \cdot \frac{33}{17} - 7 = \frac{165-119}{17} = \frac{46}{17}\)
+      </div>
+    </div>
+
+    <hr class="task-divider">
+    <div class="task-box">
+      <div class="task-label">2. Aufgabe</div>
+      <p>Löse mit dem Einsetzungsverfahren:<br>
+      <strong>I: \(4x + y = 10\) &nbsp;&nbsp;&nbsp; II: \(x − 2y = 1\)</strong></p>
+    </div>
+    <div class="input-group">
+      <span class="input-label">\(x =\)</span>
+      <input class="answer-input" id="c1f2-x" type="text" inputmode="decimal" placeholder="?">
+      <span class="input-label">\(y =\)</span>
+      <input class="answer-input" id="c1f2-y" type="text" inputmode="decimal" placeholder="?">
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-check" onclick="checkC1F2()">Prüfen ✔</button>
+      <button class="btn btn-clear" id="c1f2-clear" onclick="clearC1F2()">Neu versuchen ↺</button>
+    </div>
+    <div class="feedback" id="c1f2-fb"></div>
+    <div class="hint-area" id="c1f2-hints" style="display:none">
+      <button class="hint-btn" onclick="showHint('c1f2-h1',this)">💡 Tipp 1</button>
+      <div class="hint-content" id="c1f2-h1">Forme II nach \(x\) um: <span class="eq">x = 2y + 1</span></div>
+      <button class="hint-btn" onclick="showHint('c1f2-h2',this)">💡 Tipp 2</button>
+      <div class="hint-content" id="c1f2-h2">In I: <span class="eq">4·(2y+1) + y = 10 → 9y = 6 → y = <span class="frac"><span>2</span><span>3</span></span></span></div>
+      <button class="hint-btn" onclick="showHint('c1f2-h3',this)">🔓 Komplette Lösung</button>
+      <div class="hint-content" id="c1f2-h3">\(y = \frac{2}{3}\), \(x = 2 \cdot \frac{2}{3} + 1 = \frac{7}{3}\)</div>
+    </div>
+  </div>
+
+  <!-- PROFI -->
+  <div class="level-panel" id="c1-P">
+    <div class="task-box">
+      <div class="task-label">Aufgabe</div>
+      <p>Löse mit dem Einsetzungsverfahren (beide Gleichungen müssen erst umgeformt werden, um effizient vorzugehen):<br>
+      <strong>I: \(3x + 4y = 22\) &nbsp;&nbsp;&nbsp; II: \(2x − 3y = −1\)</strong></p>
+    </div>
+    <div class="input-group">
+      <span class="input-label">\(x =\)</span>
+      <input class="answer-input" id="c1p-x" type="text" inputmode="decimal" placeholder="?">
+      <span class="input-label">\(y =\)</span>
+      <input class="answer-input" id="c1p-y" type="text" inputmode="decimal" placeholder="?">
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-check" onclick="checkC1P()">Prüfen ✔</button>
+      <button class="btn btn-clear" id="c1p-clear" onclick="clearC1P()">Neu versuchen ↺</button>
+    </div>
+    <div class="feedback" id="c1p-fb"></div>
+    <div class="hint-area" id="c1p-hints" style="display:none">
+      <button class="hint-btn" onclick="showHint('c1p-h1',this)">💡 Tipp 1: Umformen</button>
+      <div class="hint-content" id="c1p-h1">Forme II nach \(x\): <span class="eq">x = <span class="frac"><span>3y − 1</span><span>2</span></span></span></div>
+      <button class="hint-btn" onclick="showHint('c1p-h2',this)">💡 Tipp 2: Einsetzen</button>
+      <div class="hint-content" id="c1p-h2">In I: \(3 \cdot \frac{3y-1}{2} + 4y = 22\)<br>Multiplizieren × 2: \(9y-3+8y = 44 → 17y = 47\)</div>
+      <button class="hint-btn" onclick="showHint('c1p-h3',this)">🔓 Komplette Lösung</button>
+      <div class="hint-content" id="c1p-h3">\(y = \frac{47}{17}\), \(x = \frac{3 \cdot \frac{47}{17}-1}{2} = \frac{\frac{141-17}{17}}{2} = \frac{124}{34} = \frac{62}{17}\)<br>Gib als Bruch an: \(x = \frac{62}{17}\), \(y = \frac{47}{17}\)</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== KARTE 3: ADDITIONSVERFAHREN ===== -->
+<div class="card" id="card-2">
+  <div class="card-title">➕ Additionsverfahren</div>
+  <div class="card-subtitle">Gleichungen so multiplizieren, dass eine Variable wegfällt – dann addieren.</div>
+
+  <div class="level-bar">
+    <button class="level-btn active-lvl" onclick="setLevel(2,'G')">📖 Grundlagen</button>
+    <button class="level-btn" onclick="setLevel(2,'F')">🎯 Fortgeschritten</button>
+    <button class="level-btn" onclick="setLevel(2,'P')">🏆 Profi</button>
+  </div>
+
+  <!-- GRUNDLAGEN -->
+  <div class="level-panel active" id="c2-G">
+    <div class="task-box">
+      <div class="task-label">Aufgabe</div>
+      <p>Löse mit dem Additionsverfahren:<br>
+      <strong>I: \(2x + 3y = 16\) &nbsp;&nbsp;&nbsp; II: \(2x − y = 4\)</strong></p>
+      <p style="margin-top:8px; font-size:0.88rem; color:var(--text-muted)">Mache jeden Schritt zuerst im Heft – klappe dann auf zum Vergleich.</p>
+    </div>
+    <ol class="step-list">
+      <li class="step-item">
+        <div class="step-header" onclick="toggleStep(this)">
+          Welche Variable lässt sich eliminieren?
+          <span class="step-arrow">▼</span>
+        </div>
+        <div class="step-body">
+          Die \(x\)-Koeffizienten sind beide \(2\). Multipliziert man II mit \((−1)\), werden die \(x\)-Terme zu Gegenteilen – sie heben sich beim Addieren auf.
+        </div>
+      </li>
+      <li class="step-item">
+        <div class="step-header" onclick="toggleStep(this)">
+          Gleichung II mit \((−1)\) multiplizieren → II'
+          <span class="step-arrow">▼</span>
+        </div>
+        <div class="step-body">
+          II · \((−1)\): <span class="eq">−2x + y = −4</span> &nbsp;&nbsp; (das ist II')
+        </div>
+      </li>
+      <li class="step-item">
+        <div class="step-header" onclick="toggleStep(this)">
+          I und II' addieren
+          <span class="step-arrow">▼</span>
+        </div>
+        <div class="step-body">
+          <span class="eq">&nbsp; 2x + 3y = &nbsp;16 &nbsp;&nbsp;&nbsp; (I)</span><br>
+          <span class="eq">+ (−2x + &nbsp;y = &nbsp;−4) &nbsp;&nbsp; (II')</span><br>
+          <span style="border-top: 2px solid var(--text); display:inline-block; padding-top:4px" class="eq">&nbsp; 0 + 4y = 12</span><br>
+          Die \(x\)-Terme heben sich auf ✓
+        </div>
+      </li>
+      <li class="step-item">
+        <div class="step-header" onclick="toggleStep(this)">
+          \(y\) berechnen
+          <span class="step-arrow">▼</span>
+        </div>
+        <div class="step-body">
+          <span class="eq">4y = 12 &nbsp;|÷4</span><br>
+          <span class="eq">y = 3</span>
+        </div>
+      </li>
+      <li class="step-item">
+        <div class="step-header" onclick="toggleStep(this)">
+          \(y\) in eine der ursprünglichen Gleichungen einsetzen
+          <span class="step-arrow">▼</span>
+        </div>
+        <div class="step-body">
+          In II: <span class="eq">2x − 3 = 4</span><br>
+          <span class="eq">2x = 7 &nbsp;|÷2</span><br>
+          <span class="eq">x = 3,5</span>
+        </div>
+      </li>
+      <li class="step-item">
+        <div class="step-header" onclick="toggleStep(this)">
+          Probe in beiden Originalgleichungen
+          <span class="step-arrow">▼</span>
+        </div>
+        <div class="step-body">
+          I: \(2 \cdot 3{,}5 + 3 \cdot 3 = 7 + 9 = 16\) ✓<br>
+          II: \(2 \cdot 3{,}5 - 3 = 7 - 3 = 4\) ✓<br>
+          <strong>Lösung: \(x = 3{,}5\), \(y = 3\)</strong>
+        </div>
+      </li>
+    </ol>
+  </div>
+
+  <!-- FORTGESCHRITTEN -->
+  <div class="level-panel" id="c2-F">
+    <div class="task-box">
+      <div class="task-label">Aufgabe</div>
+      <p>Löse mit dem Additionsverfahren:<br>
+      <strong>I: \(3x + 2y = 13\) &nbsp;&nbsp;&nbsp; II: \(x − 4y = −3\)</strong><br>
+      <small style="color:var(--text-muted)">Eine Gleichung muss mit einem Faktor multipliziert werden.</small></p>
+    </div>
+    <div class="input-group">
+      <span class="input-label">\(x =\)</span>
+      <input class="answer-input" id="c2f-x" type="text" inputmode="decimal" placeholder="?">
+      <span class="input-label">\(y =\)</span>
+      <input class="answer-input" id="c2f-y" type="text" inputmode="decimal" placeholder="?">
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-check" onclick="checkC2F()">Prüfen ✔</button>
+      <button class="btn btn-clear" id="c2f-clear" onclick="clearC2F()">Neu versuchen ↺</button>
+    </div>
+    <div class="feedback" id="c2f-fb"></div>
+    <div class="hint-area" id="c2f-hints" style="display:none">
+      <button class="hint-btn" onclick="showHint('c2f-h1',this)">💡 Tipp 1: Welchen Faktor wähle ich?</button>
+      <div class="hint-content" id="c2f-h1">
+        Schaue auf die \(x\)-Koeffizienten: I hat \(3x\), II hat \(x\).<br>
+        Multipliziere II mit \((−3)\), dann wird II' zu \(−3x + 12y = 9\).<br>
+        Addiert man I und II', heben sich die \(x\)-Terme auf.
+      </div>
+      <button class="hint-btn" onclick="showHint('c2f-h2',this)">💡 Tipp 2: Addition durchführen</button>
+      <div class="hint-content" id="c2f-h2">
+        <span class="eq">&nbsp; 3x + 2y = 13 &nbsp;&nbsp;&nbsp; (I)</span><br>
+        <span class="eq">+ (−3x + 12y = &nbsp;9) &nbsp;&nbsp; (II')</span><br>
+        <span style="border-top:2px solid var(--text);display:inline-block;padding-top:4px" class="eq">&nbsp; 14y = 22</span><br>
+        → <span class="eq">y = <span class="frac"><span>22</span><span>14</span></span> = <span class="frac"><span>11</span><span>7</span></span></span>
+      </div>
+      <button class="hint-btn" onclick="showHint('c2f-h3',this)">🔓 Komplette Lösung</button>
+      <div class="hint-content" id="c2f-h3">
+        II · \((−3)\) → II': <span class="eq">−3x + 12y = 9</span><br>
+        I + II': <span class="eq">14y = 22 → y = <span class="frac"><span>11</span><span>7</span></span></span><br>
+        In II einsetzen: <span class="eq">x − 4 · <span class="frac"><span>11</span><span>7</span></span> = −3 → x = <span class="frac"><span>44</span><span>7</span></span> − 3 = <span class="frac"><span>23</span><span>7</span></span></span><br>
+        Probe I: \(3 \cdot \frac{23}{7} + 2 \cdot \frac{11}{7} = \frac{69+22}{7} = 13\) ✓<br>
+        <strong>\(x = \frac{23}{7}\), \(y = \frac{11}{7}\)</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROFI -->
+  <div class="level-panel" id="c2-P">
+    <div class="task-box">
+      <div class="task-label">Aufgabe</div>
+      <p>Löse mit dem Additionsverfahren (beide Gleichungen müssen mit Faktoren multipliziert werden):<br>
+      <strong>I: \(4x + 3y = 18\) &nbsp;&nbsp;&nbsp; II: \(3x + 2y = 13\)</strong></p>
+    </div>
+    <div class="input-group">
+      <span class="input-label">\(x =\)</span>
+      <input class="answer-input" id="c2p-x" type="text" inputmode="decimal" placeholder="?">
+      <span class="input-label">\(y =\)</span>
+      <input class="answer-input" id="c2p-y" type="text" inputmode="decimal" placeholder="?">
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-check" onclick="checkC2P()">Prüfen ✔</button>
+      <button class="btn btn-clear" id="c2p-clear" onclick="clearC2P()">Neu versuchen ↺</button>
+    </div>
+    <div class="feedback" id="c2p-fb"></div>
+    <div class="hint-area" id="c2p-hints" style="display:none">
+      <button class="hint-btn" onclick="showHint('c2p-h1',this)">💡 Tipp 1: Faktoren wählen</button>
+      <div class="hint-content" id="c2p-h1">
+        Schaue auf die \(x\)-Koeffizienten: I hat \(4x\), II hat \(3x\).<br>
+        Multipliziere I mit \(3\) → I': <span class="eq">12x + 9y = 54</span><br>
+        Multipliziere II mit \((−4)\) → II': <span class="eq">−12x − 8y = −52</span><br>
+        Addiert man I' und II', heben sich die \(x\)-Terme auf.
+      </div>
+      <button class="hint-btn" onclick="showHint('c2p-h2',this)">💡 Tipp 2: Addition durchführen</button>
+      <div class="hint-content" id="c2p-h2">
+        <span class="eq">&nbsp;12x + 9y = &nbsp;54 &nbsp;&nbsp;&nbsp; (I')</span><br>
+        <span class="eq">+(−12x − 8y = −52) &nbsp;&nbsp; (II')</span><br>
+        <span style="border-top:2px solid var(--text);display:inline-block;padding-top:4px" class="eq">&nbsp; 0 + y = 2</span><br>
+        → <span class="eq">y = 2</span>
+      </div>
+      <button class="hint-btn" onclick="showHint('c2p-h3',this)">🔓 Komplette Lösung</button>
+      <div class="hint-content" id="c2p-h3">
+        I · 3 → I': <span class="eq">12x + 9y = 54</span><br>
+        II · \((−4)\) → II': <span class="eq">−12x − 8y = −52</span><br>
+        I' + II': <span class="eq">y = 2</span><br>
+        In II einsetzen: <span class="eq">3x + 2 · 2 = 13 → 3x = 9 → x = 3</span><br>
+        Probe I: \(4 \cdot 3 + 3 \cdot 2 = 12 + 6 = 18\) ✓ &nbsp; Probe II: \(9 + 4 = 13\) ✓<br>
+        <strong>\(x = 3\), \(y = 2\)</strong>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== KARTE 4: ZAHLENRÄTSEL ===== -->
+<div class="card" id="card-3">
+  <div class="card-title">🔢 Zahlenrätsel</div>
+  <div class="card-subtitle">Stelle ein Gleichungssystem auf und löse das Rätsel.</div>
+
+  <div class="level-bar">
+    <button class="level-btn active-lvl" onclick="setLevel(3,'G')">📖 Grundlagen</button>
+    <button class="level-btn" onclick="setLevel(3,'F')">🎯 Fortgeschritten</button>
+    <button class="level-btn" onclick="setLevel(3,'P')">🏆 Profi</button>
+  </div>
+
+  <div class="level-panel active" id="c3-G">
+
+    <!-- Beispiel aufklappbar -->
+    <div style="background:#f0fdf4;border:2px solid #86efac;border-radius:12px;padding:14px;margin-bottom:18px">
+      <div style="font-size:0.82rem;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;color:#166534;margin-bottom:8px">📖 Beispiel – so geht's</div>
+      <p style="margin-bottom:10px"><em>„Die Summe zweier Zahlen ist 13. Eine Zahl ist um 3 größer als die andere. Welche Zahlen sind es?"</em></p>
+      <ol class="step-list" style="counter-reset:step-c">
+        <li class="step-item">
+          <div class="step-header" onclick="toggleStep(this)" style="background:#dcfce7">
+            Schritt 1: Variablen festlegen
+            <span class="step-arrow">▼</span>
+          </div>
+          <div class="step-body">
+            Nenne die kleinere Zahl \(x\) und die größere Zahl \(y\).
+          </div>
+        </li>
+        <li class="step-item">
+          <div class="step-header" onclick="toggleStep(this)" style="background:#dcfce7">
+            Schritt 2: Gleichungssystem aufstellen
+            <span class="step-arrow">▼</span>
+          </div>
+          <div class="step-body">
+            Was weiß ich? Die Summe ist 13: <span class="eq">x + y = 13</span> &nbsp;→&nbsp; I<br>
+            Eine Zahl ist um 3 größer: <span class="eq">y = x + 3</span> &nbsp;→&nbsp; II
+          </div>
+        </li>
+        <li class="step-item">
+          <div class="step-header" onclick="toggleStep(this)" style="background:#dcfce7">
+            Schritt 3: GLS lösen (hier: Einsetzungsverfahren)
+            <span class="step-arrow">▼</span>
+          </div>
+          <div class="step-body">
+            II in I einsetzen: <span class="eq">x + (x + 3) = 13</span><br>
+            <span class="eq">2x + 3 = 13 → 2x = 10 → x = 5</span><br>
+            In II: <span class="eq">y = 5 + 3 = 8</span>
+          </div>
+        </li>
+        <li class="step-item">
+          <div class="step-header" onclick="toggleStep(this)" style="background:#dcfce7">
+            Schritt 4: Probe und Antwortsatz
+            <span class="step-arrow">▼</span>
+          </div>
+          <div class="step-body">
+            I: \(5 + 8 = 13\) ✓ &nbsp;&nbsp; II: \(8 = 5 + 3\) ✓<br>
+            <strong>Die gesuchten Zahlen sind 5 und 8.</strong>
+          </div>
+        </li>
+      </ol>
+    </div>
+
+    <div class="task-box">
+      <div class="task-label">Jetzt du!</div>
+      <p>Die Summe zweier Zahlen ist 28. Die größere Zahl ist um 6 größer als die kleinere. Welche zwei Zahlen sind gemeint?</p>
+    </div>
+    <p class="section-title">Schritt 1: Variablen festlegen</p>
+    <p style="margin-bottom:10px">Nenne die kleinere Zahl \(x\) und die größere \(y\).</p>
+    <p class="section-title">Schritt 2: Gleichungssystem aufstellen</p>
+    <p style="margin-bottom:10px">I: \(x + y = 28\) &nbsp;&nbsp; II: \(y = x + 6\)</p>
+    <p class="section-title">Schritt 3: GLS lösen und Lösung eingeben</p>
+    <div class="input-group">
+      <span class="input-label">Kleinere Zahl \(x =\)</span>
+      <input class="answer-input" id="c3g-x" type="text" inputmode="decimal" placeholder="?">
+    </div>
+    <div class="input-group">
+      <span class="input-label">Größere Zahl \(y =\)</span>
+      <input class="answer-input" id="c3g-y" type="text" inputmode="decimal" placeholder="?">
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-check" onclick="checkC3G()">Prüfen ✔</button>
+      <button class="btn btn-clear" id="c3g-clear" onclick="clearC3G()">Neu versuchen ↺</button>
+    </div>
+    <div class="feedback" id="c3g-fb"></div>
+  </div>
+
+  <div class="level-panel" id="c3-F">
+    <div class="task-box">
+      <div class="task-label">Rätsel</div>
+      <p>Das Doppelte einer Zahl ist um 10 größer als die andere Zahl. Die Summe beider Zahlen beträgt 35. Ermittle beide Zahlen mithilfe eines Gleichungssystems.</p>
+    </div>
+    <div class="input-group">
+      <span class="input-label">\(x =\)</span>
+      <input class="answer-input" id="c3f-x" type="text" inputmode="decimal" placeholder="?">
+      <span class="input-label">\(y =\)</span>
+      <input class="answer-input" id="c3f-y" type="text" inputmode="decimal" placeholder="?">
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-check" onclick="checkC3F()">Prüfen ✔</button>
+      <button class="btn btn-clear" id="c3f-clear" onclick="clearC3F()">Neu versuchen ↺</button>
+    </div>
+    <div class="feedback" id="c3f-fb"></div>
+    <div class="hint-area" id="c3f-hints" style="display:none">
+      <button class="hint-btn" onclick="showHint('c3f-h1',this)">💡 Tipp 1: Gleichungen aufstellen</button>
+      <div class="hint-content" id="c3f-h1">I: \(2x = y + 10\) (Doppeltes von x ist um 10 größer als y)<br>II: \(x + y = 35\)</div>
+      <button class="hint-btn" onclick="showHint('c3f-h2',this)">💡 Tipp 2</button>
+      <div class="hint-content" id="c3f-h2">Aus I: \(y = 2x-10\), einsetzen in II: \(x + 2x - 10 = 35 → 3x = 45\)</div>
+      <button class="hint-btn" onclick="showHint('c3f-h3',this)">🔓 Komplette Lösung</button>
+      <div class="hint-content" id="c3f-h3">\(x = 15\), \(y = 20\). Probe: \(2·15 = 30 = 20+10\) ✓, \(15+20 = 35\) ✓</div>
+    </div>
+  </div>
+
+  <div class="level-panel" id="c3-P">
+    <div class="task-box">
+      <div class="task-label">Rätsel</div>
+      <p>Wenn man zur dreifachen ersten Zahl die zweite addiert, erhält man 47. Zieht man von der fünffachen zweiten Zahl die erste ab, erhält man 55. Welche zwei Zahlen sind gemeint?</p>
+    </div>
+    <div class="input-group">
+      <span class="input-label">\(x =\)</span>
+      <input class="answer-input" id="c3p-x" type="text" inputmode="decimal" placeholder="?">
+      <span class="input-label">\(y =\)</span>
+      <input class="answer-input" id="c3p-y" type="text" inputmode="decimal" placeholder="?">
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-check" onclick="checkC3P()">Prüfen ✔</button>
+      <button class="btn btn-clear" id="c3p-clear" onclick="clearC3P()">Neu versuchen ↺</button>
+    </div>
+    <div class="feedback" id="c3p-fb"></div>
+    <div class="hint-area" id="c3p-hints" style="display:none">
+      <button class="hint-btn" onclick="showHint('c3p-h1',this)">💡 Tipp 1</button>
+      <div class="hint-content" id="c3p-h1">I: \(3x + y = 47\) &nbsp;&nbsp; II: \(5y - x = 55\)</div>
+      <button class="hint-btn" onclick="showHint('c3p-h2',this)">💡 Tipp 2</button>
+      <div class="hint-content" id="c3p-h2">Aus I: \(y = 47-3x\), einsetzen in II: \(5(47-3x)-x = 55 → 235-16x = 55 → 16x = 180\)</div>
+      <button class="hint-btn" onclick="showHint('c3p-h3',this)">🔓 Lösung</button>
+      <div class="hint-content" id="c3p-h3">\(x = \frac{180}{16} = \frac{45}{4} = 11{,}25\), \(y = 47 - 3·11{,}25 = 47-33{,}75 = 13{,}25\)</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== KARTE 5: ALTERSRÄTSEL ===== -->
+<div class="card" id="card-4">
+  <div class="card-title">🎂 Altersrätsel</div>
+  <div class="card-subtitle">Stelle ein Gleichungssystem auf und löse das Rätsel.</div>
+
+  <div class="level-bar">
+    <button class="level-btn active-lvl" onclick="setLevel(4,'G')">📖 Grundlagen</button>
+    <button class="level-btn" onclick="setLevel(4,'F')">🎯 Fortgeschritten</button>
+    <button class="level-btn" onclick="setLevel(4,'P')">🏆 Profi</button>
+  </div>
+
+  <div class="level-panel active" id="c4-G">
+    <div class="task-box">
+      <div class="task-label">Aufgabe</div>
+      <p>Mia ist 4 Jahre älter als ihr Bruder Leon. Zusammen sind sie 26 Jahre alt. Wie alt sind Mia und Leon?</p>
+    </div>
+    <p class="section-title">Gleichungen aufstellen (Mia = \(m\), Leon = \(l\)):</p>
+    <p>\(m + l = 26\) &nbsp;&nbsp; und &nbsp;&nbsp; \(m = l + 4\)</p>
+    <div class="input-group" style="margin-top:12px">
+      <span class="input-label">Mia ist</span>
+      <input class="answer-input" id="c4g-m" type="text" inputmode="decimal" placeholder="?">
+      <span class="input-label">Jahre alt</span>
+    </div>
+    <div class="input-group">
+      <span class="input-label">Leon ist</span>
+      <input class="answer-input" id="c4g-l" type="text" inputmode="decimal" placeholder="?">
+      <span class="input-label">Jahre alt</span>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-check" onclick="checkC4G()">Prüfen ✔</button>
+      <button class="btn btn-clear" id="c4g-clear" onclick="clearC4G()">Neu versuchen ↺</button>
+    </div>
+    <div class="feedback" id="c4g-fb"></div>
+  </div>
+
+  <div class="level-panel" id="c4-F">
+    <div class="task-box">
+      <div class="task-label">Aufgabe</div>
+      <p>Eine Lehrerin ist dreimal so alt wie ihre Schülerin. In 10 Jahren ist sie nur noch doppelt so alt. Wie alt sind beide heute?</p>
+    </div>
+    <div class="input-group">
+      <span class="input-label">Lehrerin:</span>
+      <input class="answer-input" id="c4f-l" type="text" inputmode="decimal" placeholder="?">
+      <span class="input-label">Schülerin:</span>
+      <input class="answer-input" id="c4f-s" type="text" inputmode="decimal" placeholder="?">
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-check" onclick="checkC4F()">Prüfen ✔</button>
+      <button class="btn btn-clear" id="c4f-clear" onclick="clearC4F()">Neu versuchen ↺</button>
+    </div>
+    <div class="feedback" id="c4f-fb"></div>
+    <div class="hint-area" id="c4f-hints" style="display:none">
+      <button class="hint-btn" onclick="showHint('c4f-h1',this)">💡 Tipp 1</button>
+      <div class="hint-content" id="c4f-h1">Heute: \(l = 3s\). In 10 Jahren: \(l+10 = 2·(s+10)\)</div>
+      <button class="hint-btn" onclick="showHint('c4f-h2',this)">💡 Tipp 2</button>
+      <div class="hint-content" id="c4f-h2">Einsetzen: \(3s+10 = 2s+20 → s = 10\)</div>
+      <button class="hint-btn" onclick="showHint('c4f-h3',this)">🔓 Lösung</button>
+      <div class="hint-content" id="c4f-h3">Schülerin: 10 Jahre, Lehrerin: 30 Jahre<br>In 10 Jahren: 40 = 2·20 ✓</div>
+    </div>
+  </div>
+
+  <div class="level-panel" id="c4-P">
+    <div class="task-box">
+      <div class="task-label">Aufgabe</div>
+      <p>Vor 5 Jahren war Opa viermal so alt wie sein Enkel. In 7 Jahren wird er nur noch doppelt so alt sein. Wie alt sind Opa und Enkel heute?</p>
+    </div>
+    <div class="input-group">
+      <span class="input-label">Opa:</span>
+      <input class="answer-input" id="c4p-o" type="text" inputmode="decimal" placeholder="?">
+      <span class="input-label">Enkel:</span>
+      <input class="answer-input" id="c4p-e" type="text" inputmode="decimal" placeholder="?">
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-check" onclick="checkC4P()">Prüfen ✔</button>
+      <button class="btn btn-clear" id="c4p-clear" onclick="clearC4P()">Neu versuchen ↺</button>
+    </div>
+    <div class="feedback" id="c4p-fb"></div>
+    <div class="hint-area" id="c4p-hints" style="display:none">
+      <button class="hint-btn" onclick="showHint('c4p-h1',this)">💡 Tipp 1</button>
+      <div class="hint-content" id="c4p-h1">Vor 5 Jahren: \(o-5 = 4·(e-5)\). In 7 Jahren: \(o+7 = 2·(e+7)\)</div>
+      <button class="hint-btn" onclick="showHint('c4p-h2',this)">💡 Tipp 2</button>
+      <div class="hint-content" id="c4p-h2">I: \(o = 4e-15\). II: \(o = 2e+7\). Gleichsetzen: \(4e-15 = 2e+7 → e = 11\)</div>
+      <button class="hint-btn" onclick="showHint('c4p-h3',this)">🔓 Lösung</button>
+      <div class="hint-content" id="c4p-h3">Enkel: 11 Jahre, Opa: \(4·11-15 = 29\) Jahre<br>Probe: Vor 5J: 24 = 4·6 ✓. In 7J: 36 = 2·18 ✓</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== KARTE 6: MISCHUNGSAUFGABEN ===== -->
+<div class="card" id="card-5">
+  <div class="card-title">🧪 Mischungsaufgaben</div>
+  <div class="card-subtitle">Mengen und Anteile mit Gleichungssystemen berechnen.</div>
+
+  <div class="level-bar">
+    <button class="level-btn active-lvl" onclick="setLevel(5,'G')">📖 Grundlagen</button>
+    <button class="level-btn" onclick="setLevel(5,'F')">🎯 Fortgeschritten</button>
+    <button class="level-btn" onclick="setLevel(5,'P')">🏆 Profi</button>
+  </div>
+
+  <div class="level-panel active" id="c5-G">
+
+    <!-- Prinzip-Erklärung -->
+    <div style="background:#fff7ed;border:2px solid #fed7aa;border-radius:12px;padding:14px;margin-bottom:18px">
+      <div style="font-size:0.82rem;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;color:#9a3412;margin-bottom:8px">💡 Das Grundprinzip</div>
+      <p style="margin-bottom:8px">Bei Mischaufgaben stellt man <strong>immer zwei Gleichungen</strong> auf:</p>
+      <p style="margin-bottom:6px">📦 <strong>Gleichung I – Gesamtmenge:</strong> Menge A + Menge B = Gesamtmenge</p>
+      <p>🧪 <strong>Gleichung II – Anteil:</strong> Anteil·A + Anteil·B = Anteil·Gesamt</p>
+    </div>
+
+    <div class="task-box">
+      <div class="task-label">Aufgabe</div>
+      <p>Zwei Apfelsäfte werden gemischt. Saft A enthält <strong>20 % Fruchtanteil</strong>, Saft B enthält <strong>80 % Fruchtanteil</strong>. Es sollen <strong>6 Liter</strong> Mischung mit <strong>60 % Fruchtanteil</strong> entstehen.<br>
+      Wie viel Liter von jedem Saft werden benötigt?</p>
+    </div>
+
+    <p class="section-title">Schritt 1: Variablen festlegen</p>
+    <p style="margin-bottom:10px">Sei \(a\) die Menge von Saft A (in Litern) und \(b\) die Menge von Saft B (in Litern).</p>
+
+    <p class="section-title">Schritt 2: Gleichungen aufstellen</p>
+    <p style="margin-bottom:6px">📦 Gesamtmenge: <strong>I: \(a + b = 6\)</strong></p>
+    <p style="margin-bottom:10px">🧪 Fruchtanteil: <strong>II: \(0{,}2 \cdot a + 0{,}8 \cdot b = 0{,}6 \cdot 6 = 3{,}6\)</strong></p>
+
+    <p class="section-title">Schritt 3: Lösung eingeben</p>
+    <div class="input-group">
+      <span class="input-label">Saft A: \(a =\)</span>
+      <input class="answer-input" id="c5g-a" type="text" inputmode="decimal" placeholder="?">
+      <span class="input-label">Liter</span>
+    </div>
+    <div class="input-group">
+      <span class="input-label">Saft B: \(b =\)</span>
+      <input class="answer-input" id="c5g-r" type="text" inputmode="decimal" placeholder="?">
+      <span class="input-label">Liter</span>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-check" onclick="checkC5G()">Prüfen ✔</button>
+      <button class="btn btn-clear" id="c5g-clear" onclick="clearC5G()">Neu versuchen ↺</button>
+    </div>
+    <div class="feedback" id="c5g-fb"></div>
+    <div class="hint-area" id="c5g-hints" style="display:none">
+      <button class="hint-btn" onclick="showHint('c5g-h1',this)">💡 Tipp 1: Gleichung II vereinfachen</button>
+      <div class="hint-content" id="c5g-h1">
+        Multipliziere II mit 10, um Dezimalzahlen zu vermeiden:<br>
+        <span class="eq">2a + 8b = 36</span> &nbsp;&nbsp; (das ist II')
+      </div>
+      <button class="hint-btn" onclick="showHint('c5g-h2',this)">💡 Tipp 2: Variable eliminieren</button>
+      <div class="hint-content" id="c5g-h2">
+        I · \((−2)\) → I': <span class="eq">−2a − 2b = −12</span><br>
+        I' + II' addieren:<br>
+        <span class="eq">&nbsp;−2a − 2b = −12</span><br>
+        <span class="eq">+(&nbsp; 2a + 8b = &nbsp;36)</span><br>
+        <span style="border-top:2px solid var(--text);display:inline-block;padding-top:4px" class="eq">&nbsp; 6b = 24 → b = 4</span>
+      </div>
+      <button class="hint-btn" onclick="showHint('c5g-h3',this)">🔓 Komplette Lösung</button>
+      <div class="hint-content" id="c5g-h3">
+        \(b = 4\) Liter, in I: \(a + 4 = 6 → a = 2\) Liter<br>
+        Probe I: \(2 + 4 = 6\) ✓<br>
+        Probe II: \(0{,}2·2 + 0{,}8·4 = 0{,}4 + 3{,}2 = 3{,}6\) ✓<br>
+        <strong>2 Liter Saft A und 4 Liter Saft B.</strong>
+      </div>
+    </div>
+  </div>
+  </div>
+
+  <div class="level-panel" id="c5-F">
+    <div class="task-box">
+      <div class="task-label">Aufgabe</div>
+      <p>Für eine Schulparty werden 10 Liter Fruchtstempel-Bowle gemischt. Saft A enthält 30 % Fruchtanteil, Saft B enthält 70 % Fruchtanteil. Die Mischung soll 50 % Fruchtanteil haben. Wie viel Liter von jedem Saft werden benötigt?</p>
+    </div>
+    <div class="input-group">
+      <span class="input-label">Saft A:</span>
+      <input class="answer-input" id="c5f-a" type="text" inputmode="decimal" placeholder="?">
+      <span class="input-label">Liter</span>
+    </div>
+    <div class="input-group">
+      <span class="input-label">Saft B:</span>
+      <input class="answer-input" id="c5f-b" type="text" inputmode="decimal" placeholder="?">
+      <span class="input-label">Liter</span>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-check" onclick="checkC5F()">Prüfen ✔</button>
+      <button class="btn btn-clear" id="c5f-clear" onclick="clearC5F()">Neu versuchen ↺</button>
+    </div>
+    <div class="feedback" id="c5f-fb"></div>
+    <div class="hint-area" id="c5f-hints" style="display:none">
+      <button class="hint-btn" onclick="showHint('c5f-h1',this)">💡 Tipp 1</button>
+      <div class="hint-content" id="c5f-h1">I (Menge): \(a + b = 10\)<br>II (Frucht): \(0{,}3·a + 0{,}7·b = 0{,}5·10 = 5\)</div>
+      <button class="hint-btn" onclick="showHint('c5f-h2',this)">💡 Tipp 2</button>
+      <div class="hint-content" id="c5f-h2">Aus I: \(b = 10-a\). In II: \(0{,}3a + 7 - 0{,}7a = 5 → -0{,}4a = -2\)</div>
+      <button class="hint-btn" onclick="showHint('c5f-h3',this)">🔓 Lösung</button>
+      <div class="hint-content" id="c5f-h3">Saft A: 5 Liter, Saft B: 5 Liter (symmetrische Mischung)</div>
+    </div>
+  </div>
+
+  <div class="level-panel" id="c5-P">
+    <div class="task-box">
+      <div class="task-label">Aufgabe</div>
+      <p>Eine Legierung aus Silber und Kupfer hat eine Gesamtmasse von 600 g. Legierung I enthält 40 % Silber, Legierung II enthält 75 % Silber. Wie viel Gramm von jeder Legierung werden benötigt, um 600 g mit 55 % Silberanteil herzustellen?</p>
+    </div>
+    <div class="input-group">
+      <span class="input-label">Leg. I:</span>
+      <input class="answer-input" id="c5p-a" type="text" inputmode="decimal" placeholder="?">
+      <span class="input-label">g</span>
+    </div>
+    <div class="input-group">
+      <span class="input-label">Leg. II:</span>
+      <input class="answer-input" id="c5p-b" type="text" inputmode="decimal" placeholder="?">
+      <span class="input-label">g</span>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-check" onclick="checkC5P()">Prüfen ✔</button>
+      <button class="btn btn-clear" id="c5p-clear" onclick="clearC5P()">Neu versuchen ↺</button>
+    </div>
+    <div class="feedback" id="c5p-fb"></div>
+    <div class="hint-area" id="c5p-hints" style="display:none">
+      <button class="hint-btn" onclick="showHint('c5p-h1',this)">💡 Tipp 1</button>
+      <div class="hint-content" id="c5p-h1">I: \(a + b = 600\)<br>II: \(0{,}4a + 0{,}75b = 0{,}55·600 = 330\)</div>
+      <button class="hint-btn" onclick="showHint('c5p-h2',this)">💡 Tipp 2</button>
+      <div class="hint-content" id="c5p-h2">
+        I · \((−0{,}4)\) → I': <span class="eq">−0{,}4a − 0{,}4b = −240</span><br>
+        I' + II addieren:<br>
+        <span class="eq">&nbsp;−0{,}4a − 0{,}4b = −240</span><br>
+        <span class="eq">+(&nbsp; 0{,}4a + 0{,}75b = &nbsp;330)</span><br>
+        <span style="border-top:2px solid var(--text);display:inline-block;padding-top:4px" class="eq">&nbsp; 0{,}35b = 90</span>
+      </div>
+      <button class="hint-btn" onclick="showHint('c5p-h3',this)">🔓 Lösung</button>
+      <div class="hint-content" id="c5p-h3">\(b = \frac{90}{0{,}35} ≈ 257{,}1\) g, \(a ≈ 342{,}9\) g<br>Probe: \(0{,}4·342{,}9 + 0{,}75·257{,}1 ≈ 137{,}1 + 192{,}9 = 330\) ✓</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== KARTE 7: BEWEGUNGSAUFGABEN ===== -->
+<div class="card" id="card-6">
+  <div class="card-title">🚗 Bewegungsaufgaben</div>
+  <div class="card-subtitle">Geschwindigkeit, Zeit und Weg mit Gleichungssystemen berechnen.</div>
+
+  <div class="level-bar">
+    <button class="level-btn active-lvl" onclick="setLevel(6,'G')">📖 Grundlagen</button>
+    <button class="level-btn" onclick="setLevel(6,'F')">🎯 Fortgeschritten</button>
+    <button class="level-btn" onclick="setLevel(6,'P')">🏆 Profi</button>
+  </div>
+
+  <div class="level-panel active" id="c6-G">
+    <div class="task-box">
+      <div class="task-label">Aufgabe</div>
+      <p>Zwei Freunde, Kai und Mia, radeln aufeinander zu. Sie starten gleichzeitig und sind zu Beginn <strong>36 km</strong> voneinander entfernt. Kai fährt mit \(v_K\) km/h, Mia mit \(v_M\) km/h. Nach <strong>2 Stunden</strong> treffen sie sich. Außerdem ist Kai <strong>3 km/h</strong> schneller als Mia. Wie schnell fährt jeder?</p>
+    </div>
+    <p class="section-title">Variablen: \(v_K\) = Kais Geschwindigkeit, \(v_M\) = Mias Geschwindigkeit (in km/h)</p>
+    <p style="margin-bottom:6px">📦 <strong>I (Treffen):</strong> \(2 \cdot v_K + 2 \cdot v_M = 36\)</p>
+    <p style="margin-bottom:12px">📏 <strong>II (Unterschied):</strong> \(v_K = v_M + 3\)</p>
+    <div class="input-group">
+      <span class="input-label">Kai \(v_K =\)</span>
+      <input class="answer-input" id="c6g-vk" type="text" inputmode="decimal" placeholder="?">
+      <span class="input-label">km/h</span>
+    </div>
+    <div class="input-group">
+      <span class="input-label">Mia \(v_M =\)</span>
+      <input class="answer-input" id="c6g-vm" type="text" inputmode="decimal" placeholder="?">
+      <span class="input-label">km/h</span>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-check" onclick="checkC6G()">Prüfen ✔</button>
+      <button class="btn btn-clear" id="c6g-clear" onclick="clearC6G()">Neu versuchen ↺</button>
+    </div>
+    <div class="feedback" id="c6g-fb"></div>
+    <div class="hint-area" id="c6g-hints" style="display:none">
+      <button class="hint-btn" onclick="showHint('c6g-h1',this)">💡 Tipp 1</button>
+      <div class="hint-content" id="c6g-h1">Setze II in I ein: \(2·(v_M+3) + 2·v_M = 36\)</div>
+      <button class="hint-btn" onclick="showHint('c6g-h2',this)">💡 Tipp 2</button>
+      <div class="hint-content" id="c6g-h2"><span class="eq">4v_M + 6 = 36 → 4v_M = 30 → v_M = 7{,}5</span></div>
+      <button class="hint-btn" onclick="showHint('c6g-h3',this)">🔓 Lösung</button>
+      <div class="hint-content" id="c6g-h3">\(v_M = 7{,}5\) km/h, \(v_K = 10{,}5\) km/h<br>Probe I: \(2·10{,}5 + 2·7{,}5 = 21+15 = 36\) ✓</div>
+    </div>
+  </div>
+
+  <div class="level-panel" id="c6-F">
+    <div class="task-box">
+      <div class="task-label">Aufgabe</div>
+      <p>Ein Boot fährt auf einem Fluss. <strong>Stromabwärts</strong> (mit der Strömung) legt es in 3 Stunden 60 km zurück. <strong>Stromaufwärts</strong> (gegen die Strömung) schafft es dieselbe Strecke in 5 Stunden. Berechne die Eigengeschwindigkeit des Bootes \(b\) und die Strömungsgeschwindigkeit des Flusses \(s\).</p>
+    </div>
+    <div class="input-group">
+      <span class="input-label">Boot \(b =\)</span>
+      <input class="answer-input" id="c6f-b" type="text" inputmode="decimal" placeholder="?">
+      <span class="input-label">km/h</span>
+    </div>
+    <div class="input-group">
+      <span class="input-label">Strömung \(s =\)</span>
+      <input class="answer-input" id="c6f-s" type="text" inputmode="decimal" placeholder="?">
+      <span class="input-label">km/h</span>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-check" onclick="checkC6F()">Prüfen ✔</button>
+      <button class="btn btn-clear" id="c6f-clear" onclick="clearC6F()">Neu versuchen ↺</button>
+    </div>
+    <div class="feedback" id="c6f-fb"></div>
+    <div class="hint-area" id="c6f-hints" style="display:none">
+      <button class="hint-btn" onclick="showHint('c6f-h1',this)">💡 Tipp 1: Gleichungen aufstellen</button>
+      <div class="hint-content" id="c6f-h1">
+        Stromabwärts: Geschwindigkeit = \(b + s\), Weg = 60 km, Zeit = 3 h<br>
+        → I: <span class="eq">3·(b + s) = 60</span> also <span class="eq">b + s = 20</span><br>
+        Stromaufwärts: Geschwindigkeit = \(b − s\), Weg = 60 km, Zeit = 5 h<br>
+        → II: <span class="eq">5·(b − s) = 60</span> also <span class="eq">b − s = 12</span>
+      </div>
+      <button class="hint-btn" onclick="showHint('c6f-h2',this)">💡 Tipp 2: Additionsverfahren</button>
+      <div class="hint-content" id="c6f-h2">
+        I + II addieren: <span class="eq">2b = 32 → b = 16</span>
+      </div>
+      <button class="hint-btn" onclick="showHint('c6f-h3',this)">🔓 Komplette Lösung</button>
+      <div class="hint-content" id="c6f-h3">
+        \(b = 16\) km/h, in I: \(16 + s = 20 → s = 4\) km/h<br>
+        Probe I: \(3·(16+4) = 3·20 = 60\) ✓ &nbsp; Probe II: \(5·(16-4) = 5·12 = 60\) ✓<br>
+        <strong>Eigengeschwindigkeit: 16 km/h, Strömung: 4 km/h</strong>
+      </div>
+    </div>
+  </div>
+
+  <div class="level-panel" id="c6-P">
+    <div class="task-box">
+      <div class="task-label">Aufgabe</div>
+      <p>Zwei Autos starten gleichzeitig von verschiedenen Städten aufeinander zu. Die Städte sind <strong>350 km</strong> voneinander entfernt. Auto A ist <strong>20 km/h</strong> schneller als Auto B. Nach <strong>2,5 Stunden</strong> begegnen sie sich. Außerdem hat Auto A auf seiner bisherigen Strecke noch <strong>10 km mehr</strong> zurückgelegt als Auto B. Berechne die Geschwindigkeiten \(v_A\) und \(v_B\).</p>
+    </div>
+    <div class="input-group">
+      <span class="input-label">Auto A \(v_A =\)</span>
+      <input class="answer-input" id="c6p-va" type="text" inputmode="decimal" placeholder="?">
+      <span class="input-label">km/h</span>
+    </div>
+    <div class="input-group">
+      <span class="input-label">Auto B \(v_B =\)</span>
+      <input class="answer-input" id="c6p-vb" type="text" inputmode="decimal" placeholder="?">
+      <span class="input-label">km/h</span>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-check" onclick="checkC6P()">Prüfen ✔</button>
+      <button class="btn btn-clear" id="c6p-clear" onclick="clearC6P()">Neu versuchen ↺</button>
+    </div>
+    <div class="feedback" id="c6p-fb"></div>
+    <div class="hint-area" id="c6p-hints" style="display:none">
+      <button class="hint-btn" onclick="showHint('c6p-h1',this)">💡 Tipp 1: Gleichungen aufstellen</button>
+      <div class="hint-content" id="c6p-h1">
+        I (Treffen): <span class="eq">2{,}5·v_A + 2{,}5·v_B = 350</span> → <span class="eq">v_A + v_B = 140</span><br>
+        II (Wegunterschied): <span class="eq">2{,}5·v_A − 2{,}5·v_B = 10</span> → <span class="eq">v_A − v_B = 4</span>
+      </div>
+      <button class="hint-btn" onclick="showHint('c6p-h2',this)">💡 Tipp 2</button>
+      <div class="hint-content" id="c6p-h2">
+        I + II: <span class="eq">2v_A = 144 → v_A = 72</span>
+      </div>
+      <button class="hint-btn" onclick="showHint('c6p-h3',this)">🔓 Komplette Lösung</button>
+      <div class="hint-content" id="c6p-h3">
+        \(v_A = 72\) km/h, in I: \(72 + v_B = 140 → v_B = 68\) km/h<br>
+        Probe I: \(2{,}5·72 + 2{,}5·68 = 180+170 = 350\) ✓<br>
+        Probe II: \(180 − 170 = 10\) ✓<br>
+        <strong>Auto A: 72 km/h, Auto B: 68 km/h</strong><br>
+        <em>Hinweis: die Bedingung „20 km/h schneller" ist hier nicht nötig – das GLS ist schon eindeutig lösbar.</em>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== KARTE 8: WIEDERHOLUNG ===== -->
+<div class="card" id="card-7">
+  <div class="card-title">🔁 Wiederholung: Lineare Gleichungen</div>
+  <div class="card-subtitle">Erinnerung: Lineare Gleichungen mit <em>einer</em> Unbekannten – Grundlage der heutigen Methoden.</div>
+
+  <div class="level-bar">
+    <button class="level-btn active-lvl" onclick="setLevel(7,'G')">📖 Grundlagen</button>
+    <button class="level-btn" onclick="setLevel(7,'F')">🎯 Fortgeschritten</button>
+    <button class="level-btn" onclick="setLevel(7,'P')">🏆 Profi</button>
+  </div>
+
+  <div class="level-panel active" id="c7-G">
+    <div class="task-box">
+      <div class="task-label">Aufgabe 1</div>
+      <p>Löse die Gleichung: \(3x + 7 = 22\)</p>
+    </div>
+    <div class="input-group">
+      <span class="input-label">\(x =\)</span>
+      <input class="answer-input" id="c7g-1" type="text" inputmode="decimal" placeholder="?">
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-check" onclick="checkC7G1()">Prüfen ✔</button>
+      <button class="btn btn-clear" id="c7g1-clear" onclick="clearC7G1()">Neu versuchen ↺</button>
+    </div>
+    <div class="feedback" id="c7g1-fb"></div>
+
+    <hr class="task-divider">
+    <div class="task-box">
+      <div class="task-label">Aufgabe 2</div>
+      <p>Löse die Gleichung: \(2·(x − 4) = 10\)</p>
+    </div>
+    <div class="input-group">
+      <span class="input-label">\(x =\)</span>
+      <input class="answer-input" id="c7g-2" type="text" inputmode="decimal" placeholder="?">
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-check" onclick="checkC7G2()">Prüfen ✔</button>
+      <button class="btn btn-clear" id="c7g2-clear" onclick="clearC7G2()">Neu versuchen ↺</button>
+    </div>
+    <div class="feedback" id="c7g2-fb"></div>
+  </div>
+
+  <div class="level-panel" id="c7-F">
+    <div class="task-box">
+      <div class="task-label">Aufgabe 1</div>
+      <p>Löse: \(5x − 3 = 2x + 12\)</p>
+    </div>
+    <div class="input-group">
+      <span class="input-label">\(x =\)</span>
+      <input class="answer-input" id="c7f-1" type="text" inputmode="decimal" placeholder="?">
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-check" onclick="checkC7F1()">Prüfen ✔</button>
+      <button class="btn btn-clear" id="c7f1-clear" onclick="clearC7F1()">Neu versuchen ↺</button>
+    </div>
+    <div class="feedback" id="c7f1-fb"></div>
+
+    <hr class="task-divider">
+    <div class="task-box">
+      <div class="task-label">Aufgabe 2</div>
+      <p>Löse: \(4·(2x + 1) − 3x = 29\)</p>
+    </div>
+    <div class="input-group">
+      <span class="input-label">\(x =\)</span>
+      <input class="answer-input" id="c7f-2" type="text" inputmode="decimal" placeholder="?">
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-check" onclick="checkC7F2()">Prüfen ✔</button>
+      <button class="btn btn-clear" id="c7f2-clear" onclick="clearC7F2()">Neu versuchen ↺</button>
+    </div>
+    <div class="feedback" id="c7f2-fb"></div>
+  </div>
+
+  <div class="level-panel" id="c7-P">
+    <div class="task-box">
+      <div class="task-label">Aufgabe</div>
+      <p>Löse: \(\frac{3x+2}{4} - \frac{x-1}{2} = 3\)</p>
+    </div>
+    <div class="input-group">
+      <span class="input-label">\(x =\)</span>
+      <input class="answer-input" id="c7p-1" type="text" inputmode="decimal" placeholder="?">
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-check" onclick="checkC7P()">Prüfen ✔</button>
+      <button class="btn btn-clear" id="c7p-clear" onclick="clearC7P()">Neu versuchen ↺</button>
+    </div>
+    <div class="feedback" id="c7p-fb"></div>
+    <div class="hint-area" id="c7p-hints" style="display:none">
+      <button class="hint-btn" onclick="showHint('c7p-h1',this)">💡 Tipp 1</button>
+      <div class="hint-content" id="c7p-h1">Multipliziere beide Seiten mit 4: \(3x+2 - 2(x-1) = 12\)</div>
+      <button class="hint-btn" onclick="showHint('c7p-h2',this)">💡 Tipp 2</button>
+      <div class="hint-content" id="c7p-h2">\(3x+2-2x+2 = 12 → x = 8\)</div>
+      <button class="hint-btn" onclick="showHint('c7p-h3',this)">🔓 Lösung</button>
+      <div class="hint-content" id="c7p-h3">\(x = 8\)<br>Probe: \(\frac{26}{4} - \frac{7}{2} = 6{,}5 - 3{,}5 = 3\) ✓</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== KARTE 9: AUSWERTUNG ===== -->
+<div class="card" id="card-8">
+  <div class="card-title">📊 Auswertung</div>
+  <div class="card-subtitle">Dein Ergebnis auf einen Blick.</div>
+  <div id="eval-content">
+    <div class="eval-score" id="eval-score">–</div>
+    <div class="eval-star" id="eval-stars">⭐</div>
+    <div class="eval-section" id="eval-detail"></div>
+    <button class="btn btn-secondary" onclick="buildEval()" style="margin-top:8px">🔄 Auswertung aktualisieren</button>
+  </div>
+</div>
+
+</div><!-- card-wrap -->
+
+<!-- Weiter button (Einzelseite → #) -->
+<a href="#" class="next-btn" id="nextBtn">Weiter →</a>
+
+<!-- Dino -->
+<div class="dino" id="dino" onclick="dinoClick()" ontouchstart="dinoClick()">
+  🦖
+  <div class="dino-tooltip">Made by Mathedino</div>
+</div>
+
+<script>
+// ──────────────────────────────────
+// STATE
+// ──────────────────────────────────
+const cardCount = 9;
+const completed = new Array(cardCount).fill(false);
+// Track which sub-tasks done per card
+const tasksDone = {
+  0: {f:false, p:false},
+  1: {f1:false, f2:false, p:false},
+  2: {f:false, p:false},
+  3: {g:false, f:false, p:false},
+  4: {g:false, f:false, p:false},
+  5: {g:false, f:false, p:false},
+  6: {g:false, f:false, p:false},
+  7: {g1:false, g2:false, f1:false, f2:false, p:false}
+};
+const scores = {}; // key: string, val: true/false
+
+let currentCard = 0;
+const levels = new Array(cardCount).fill('G');
+
+// ──────────────────────────────────
+// NAVIGATION
+// ──────────────────────────────────
+function showCard(idx) {
+  document.querySelectorAll('.card').forEach((c,i)=>{
+    c.classList.toggle('active', i===idx);
+  });
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>{
+    b.classList.toggle('active', i===idx);
+  });
+  currentCard = idx;
+  if (idx === 8) buildEval();
+  checkNextBtn();
+  // scroll tab into view
+  const tabs = document.querySelectorAll('.tab-btn');
+  tabs[idx]?.scrollIntoView({behavior:'smooth', block:'nearest', inline:'center'});
+}
+
+// ──────────────────────────────────
+// LEVEL SWITCHING
+// ──────────────────────────────────
+function setLevel(cardIdx, lvl) {
+  levels[cardIdx] = lvl;
+  const prefixes = ['G','F','P'];
+  prefixes.forEach(p=>{
+    const el = document.getElementById(`c${cardIdx}-${p}`);
+    if(el) el.classList.toggle('active', p===lvl);
+  });
+  const btns = document.querySelectorAll(`#card-${cardIdx} .level-btn`);
+  btns.forEach((b,i)=>{
+    b.classList.toggle('active-lvl', ['G','F','P'][i]===lvl);
+  });
+}
+
+// ──────────────────────────────────
+// STEPS (Grundlagen)
+// ──────────────────────────────────
+function toggleStep(header) {
+  const item = header.closest('.step-item');
+  item.classList.toggle('open');
+}
+
+// ──────────────────────────────────
+// HINTS
+// ──────────────────────────────────
+function showHint(id, btn) {
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.classList.add('visible');
+  btn.style.display = 'none';
+  MathJax && MathJax.typesetPromise && MathJax.typesetPromise([el]);
+}
+
+// ──────────────────────────────────
+// NORMALIZE
+// ──────────────────────────────────
+function norm(s) {
+  return s.replace(/\s/g,'').replace(',','.').toLowerCase();
+}
+function normFrac(num,den) {
+  // Accept decimal or fraction inputs
+  const n = parseFloat(norm(num));
+  return Math.abs(n - num/den) < 0.02;
+}
+function parseVal(s) {
+  const clean = s.replace(/\s/g,'').replace(',','.');
+  // handle fraction input like 2/3
+  if(clean.includes('/')) {
+    const parts = clean.split('/');
+    return parseFloat(parts[0]) / parseFloat(parts[1]);
+  }
+  return parseFloat(clean);
+}
+function approxEq(a,b,tol=0.05) { return Math.abs(a-b) < tol; }
+
+// ──────────────────────────────────
+// FEEDBACK HELPERS
+// ──────────────────────────────────
+function setFb(id, ok, msg) {
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.className = 'feedback ' + (ok ? 'correct' : 'wrong');
+  el.textContent = ok ? '✅ ' + msg : '❌ ' + msg;
+}
+function showClear(id) {
+  const btn = document.getElementById(id);
+  if(btn) btn.classList.add('visible');
+}
+function showHintArea(id) {
+  const el = document.getElementById(id);
+  if(el) el.style.display = 'block';
+}
+function markInput(id, ok) {
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.classList.toggle('correct', ok);
+  el.classList.toggle('wrong', !ok);
+  el.readOnly = ok;
+}
+
+// ──────────────────────────────────
+// CARD 0 CHECKS
+// ──────────────────────────────────
+function checkC0F() {
+  const x = parseVal(document.getElementById('c0f-x').value);
+  const y = parseVal(document.getElementById('c0f-y').value);
+  const ok = approxEq(x,2) && approxEq(y,5);
+  markInput('c0f-x', approxEq(x,2));
+  markInput('c0f-y', approxEq(y,5));
+  setFb('c0f-fb', ok, ok ? 'Richtig! x = 2, y = 5' : 'Noch nicht ganz. Nutze die Tipps!');
+  if(!ok){ showClear('c0f-clear'); showHintArea('c0f-hints'); }
+  else { tasksDone[0].f=true; scores['c0f']=true; checkNextBtn(); }
+}
+function clearC0F() {
+  ['c0f-x','c0f-y'].forEach(id=>{
+    const el=document.getElementById(id); if(el){el.value='';el.className='answer-input';el.readOnly=false;}
+  });
+  document.getElementById('c0f-fb').className='feedback';
+  document.getElementById('c0f-clear').classList.remove('visible');
+}
+function checkC0P() {
+  const x = parseVal(document.getElementById('c0p-x').value);
+  const y = parseVal(document.getElementById('c0p-y').value);
+  const okX = approxEq(x, 46/11);
+  const okY = approxEq(y, 47/11);
+  const ok = okX && okY;
+  markInput('c0p-x', okX); markInput('c0p-y', okY);
+  setFb('c0p-fb', ok, ok ? 'Richtig! Bruchzahlen als Ergebnis – super!' : 'Noch nicht. Schau dir die Tipps an!');
+  if(!ok){ showClear('c0p-clear'); showHintArea('c0p-hints'); }
+  else { tasksDone[0].p=true; scores['c0p']=true; checkNextBtn(); }
+}
+function clearC0P() {
+  ['c0p-x','c0p-y'].forEach(id=>{const el=document.getElementById(id);if(el){el.value='';el.className='answer-input';el.readOnly=false;}});
+  document.getElementById('c0p-fb').className='feedback';
+  document.getElementById('c0p-clear').classList.remove('visible');
+}
+
+// ──────────────────────────────────
+// CARD 1 CHECKS
+// ──────────────────────────────────
+function checkC1F() {
+  const x = parseVal(document.getElementById('c1f-x').value);
+  const y = parseVal(document.getElementById('c1f-y').value);
+  const okX = approxEq(x, 33/17); const okY = approxEq(y, 46/17);
+  const ok = okX && okY;
+  markInput('c1f-x', okX); markInput('c1f-y', okY);
+  setFb('c1f-fb', ok, ok ? 'Richtig! x = 33/17, y = 46/17' : 'Leider falsch. Tipps helfen!');
+  if(!ok){ showClear('c1f-clear'); showHintArea('c1f-hints'); }
+  else { scores['c1f']=true; checkNextBtn(); }
+}
+function clearC1F() {
+  ['c1f-x','c1f-y'].forEach(id=>{const el=document.getElementById(id);if(el){el.value='';el.className='answer-input';el.readOnly=false;}});
+  document.getElementById('c1f-fb').className='feedback';
+  document.getElementById('c1f-clear').classList.remove('visible');
+}
+function checkC1F2() {
+  const x = parseVal(document.getElementById('c1f2-x').value);
+  const y = parseVal(document.getElementById('c1f2-y').value);
+  const okX = approxEq(x, 7/3); const okY = approxEq(y, 2/3);
+  const ok = okX && okY;
+  markInput('c1f2-x', okX); markInput('c1f2-y', okY);
+  setFb('c1f2-fb', ok, ok ? 'Richtig! x = 7/3, y = 2/3' : 'Nicht ganz. Tipps nutzen!');
+  if(!ok){ showClear('c1f2-clear'); showHintArea('c1f2-hints'); }
+  else { tasksDone[1].f2=true; scores['c1f2']=true; checkNextBtn(); }
+}
+function clearC1F2() {
+  ['c1f2-x','c1f2-y'].forEach(id=>{const el=document.getElementById(id);if(el){el.value='';el.className='answer-input';el.readOnly=false;}});
+  document.getElementById('c1f2-fb').className='feedback';
+  document.getElementById('c1f2-clear').classList.remove('visible');
+}
+function checkC1P() {
+  const x = parseVal(document.getElementById('c1p-x').value);
+  const y = parseVal(document.getElementById('c1p-y').value);
+  const okX = approxEq(x, 62/17); const okY = approxEq(y, 47/17);
+  const ok = okX && okY;
+  markInput('c1p-x', okX); markInput('c1p-y', okY);
+  setFb('c1p-fb', ok, ok ? 'Richtig! Brüche gemeistert!' : 'Noch nicht. Tipps nutzen!');
+  if(!ok){ showClear('c1p-clear'); showHintArea('c1p-hints'); }
+  else { scores['c1p']=true; checkNextBtn(); }
+}
+function clearC1P() {
+  ['c1p-x','c1p-y'].forEach(id=>{const el=document.getElementById(id);if(el){el.value='';el.className='answer-input';el.readOnly=false;}});
+  document.getElementById('c1p-fb').className='feedback';
+  document.getElementById('c1p-clear').classList.remove('visible');
+}
+
+// ──────────────────────────────────
+// CARD 2 CHECKS
+// ──────────────────────────────────
+function checkC2F() {
+  const x = parseVal(document.getElementById('c2f-x').value);
+  const y = parseVal(document.getElementById('c2f-y').value);
+  const okX = approxEq(x, 23/7); const okY = approxEq(y, 11/7);
+  const ok = okX && okY;
+  markInput('c2f-x', okX); markInput('c2f-y', okY);
+  setFb('c2f-fb', ok, ok ? 'Richtig! x = 23/7, y = 11/7' : 'Nicht korrekt. Tipps nutzen!');
+  if(!ok){ showClear('c2f-clear'); showHintArea('c2f-hints'); }
+  else { scores['c2f']=true; checkNextBtn(); }
+}
+function clearC2F() {
+  ['c2f-x','c2f-y'].forEach(id=>{const el=document.getElementById(id);if(el){el.value='';el.className='answer-input';el.readOnly=false;}});
+  document.getElementById('c2f-fb').className='feedback';
+  document.getElementById('c2f-clear').classList.remove('visible');
+}
+function checkC2P() {
+  const x = parseVal(document.getElementById('c2p-x').value);
+  const y = parseVal(document.getElementById('c2p-y').value);
+  const ok = approxEq(x,3) && approxEq(y,2);
+  markInput('c2p-x', approxEq(x,3)); markInput('c2p-y', approxEq(y,2));
+  setFb('c2p-fb', ok, ok ? 'Richtig! x = 3, y = 2 – perfekt!' : 'Leider falsch. Tipps helfen!');
+  if(!ok){ showClear('c2p-clear'); showHintArea('c2p-hints'); }
+  else { scores['c2p']=true; checkNextBtn(); }
+}
+function clearC2P() {
+  ['c2p-x','c2p-y'].forEach(id=>{const el=document.getElementById(id);if(el){el.value='';el.className='answer-input';el.readOnly=false;}});
+  document.getElementById('c2p-fb').className='feedback';
+  document.getElementById('c2p-clear').classList.remove('visible');
+}
+
+// ──────────────────────────────────
+// CARD 3 CHECKS (Zahlenrätsel)
+// ──────────────────────────────────
+function checkC3G() {
+  const x = parseVal(document.getElementById('c3g-x').value);
+  const y = parseVal(document.getElementById('c3g-y').value);
+  const ok = approxEq(x,11) && approxEq(y,17);
+  markInput('c3g-x', approxEq(x,11)); markInput('c3g-y', approxEq(y,17));
+  setFb('c3g-fb', ok, ok ? 'Richtig! Die Zahlen sind 11 und 17.' : 'Nicht ganz. Versuche es nochmal!');
+  if(!ok){ showClear('c3g-clear'); }
+  else { scores['c3g']=true; checkNextBtn(); }
+}
+function clearC3G() {
+  ['c3g-x','c3g-y'].forEach(id=>{const el=document.getElementById(id);if(el){el.value='';el.className='answer-input';el.readOnly=false;}});
+  document.getElementById('c3g-fb').className='feedback';
+  document.getElementById('c3g-clear').classList.remove('visible');
+}
+function checkC3F() {
+  const x = parseVal(document.getElementById('c3f-x').value);
+  const y = parseVal(document.getElementById('c3f-y').value);
+  // x=15, y=20 or vice versa
+  const ok = (approxEq(x,15)&&approxEq(y,20)) || (approxEq(x,20)&&approxEq(y,15));
+  markInput('c3f-x', ok); markInput('c3f-y', ok);
+  setFb('c3f-fb', ok, ok ? 'Richtig! Die Zahlen sind 15 und 20.' : 'Nicht korrekt. Tipps nutzen!');
+  if(!ok){ showClear('c3f-clear'); showHintArea('c3f-hints'); }
+  else { scores['c3f']=true; checkNextBtn(); }
+}
+function clearC3F() {
+  ['c3f-x','c3f-y'].forEach(id=>{const el=document.getElementById(id);if(el){el.value='';el.className='answer-input';el.readOnly=false;}});
+  document.getElementById('c3f-fb').className='feedback';
+  document.getElementById('c3f-clear').classList.remove('visible');
+}
+function checkC3P() {
+  const x = parseVal(document.getElementById('c3p-x').value);
+  const y = parseVal(document.getElementById('c3p-y').value);
+  const ok = approxEq(x,11.25) && approxEq(y,13.25);
+  markInput('c3p-x', approxEq(x,11.25)); markInput('c3p-y', approxEq(y,13.25));
+  setFb('c3p-fb', ok, ok ? 'Richtig! x = 11,25, y = 13,25' : 'Nicht korrekt. Tipps ansehen!');
+  if(!ok){ showClear('c3p-clear'); showHintArea('c3p-hints'); }
+  else { scores['c3p']=true; checkNextBtn(); }
+}
+function clearC3P() {
+  ['c3p-x','c3p-y'].forEach(id=>{const el=document.getElementById(id);if(el){el.value='';el.className='answer-input';el.readOnly=false;}});
+  document.getElementById('c3p-fb').className='feedback';
+  document.getElementById('c3p-clear').classList.remove('visible');
+}
+
+// ──────────────────────────────────
+// CARD 4 CHECKS (Altersrätsel)
+// ──────────────────────────────────
+function checkC4G() {
+  const m = parseVal(document.getElementById('c4g-m').value);
+  const l = parseVal(document.getElementById('c4g-l').value);
+  const ok = approxEq(m,15) && approxEq(l,11);
+  markInput('c4g-m', approxEq(m,15)); markInput('c4g-l', approxEq(l,11));
+  setFb('c4g-fb', ok, ok ? 'Richtig! Mia: 15 Jahre, Leon: 11 Jahre.' : 'Leider falsch!');
+  if(!ok){ showClear('c4g-clear'); }
+  else { scores['c4g']=true; checkNextBtn(); }
+}
+function clearC4G() {
+  ['c4g-m','c4g-l'].forEach(id=>{const el=document.getElementById(id);if(el){el.value='';el.className='answer-input';el.readOnly=false;}});
+  document.getElementById('c4g-fb').className='feedback';
+  document.getElementById('c4g-clear').classList.remove('visible');
+}
+function checkC4F() {
+  const l = parseVal(document.getElementById('c4f-l').value);
+  const s = parseVal(document.getElementById('c4f-s').value);
+  const ok = approxEq(l,30) && approxEq(s,10);
+  markInput('c4f-l', approxEq(l,30)); markInput('c4f-s', approxEq(s,10));
+  setFb('c4f-fb', ok, ok ? 'Richtig! Lehrerin: 30, Schülerin: 10 Jahre.' : 'Nicht korrekt. Tipps nutzen!');
+  if(!ok){ showClear('c4f-clear'); showHintArea('c4f-hints'); }
+  else { scores['c4f']=true; checkNextBtn(); }
+}
+function clearC4F() {
+  ['c4f-l','c4f-s'].forEach(id=>{const el=document.getElementById(id);if(el){el.value='';el.className='answer-input';el.readOnly=false;}});
+  document.getElementById('c4f-fb').className='feedback';
+  document.getElementById('c4f-clear').classList.remove('visible');
+}
+function checkC4P() {
+  const o = parseVal(document.getElementById('c4p-o').value);
+  const e = parseVal(document.getElementById('c4p-e').value);
+  const ok = approxEq(o,29) && approxEq(e,11);
+  markInput('c4p-o', approxEq(o,29)); markInput('c4p-e', approxEq(e,11));
+  setFb('c4p-fb', ok, ok ? 'Richtig! Opa: 29 Jahre, Enkel: 11 Jahre.' : 'Noch nicht. Tipps ansehen!');
+  if(!ok){ showClear('c4p-clear'); showHintArea('c4p-hints'); }
+  else { scores['c4p']=true; checkNextBtn(); }
+}
+function clearC4P() {
+  ['c4p-o','c4p-e'].forEach(id=>{const el=document.getElementById(id);if(el){el.value='';el.className='answer-input';el.readOnly=false;}});
+  document.getElementById('c4p-fb').className='feedback';
+  document.getElementById('c4p-clear').classList.remove('visible');
+}
+
+// ──────────────────────────────────
+// CARD 5 CHECKS (Mischung)
+// ──────────────────────────────────
+function checkC5G() {
+  const a = parseVal(document.getElementById('c5g-a').value);
+  const r = parseVal(document.getElementById('c5g-r').value);
+  const ok = approxEq(a,2) && approxEq(r,4);
+  markInput('c5g-a', approxEq(a,2)); markInput('c5g-r', approxEq(r,4));
+  setFb('c5g-fb', ok, ok ? 'Richtig! Saft A: 2 Liter, Saft B: 4 Liter.' : 'Nicht korrekt. Tipps nutzen!');
+  if(!ok){ showClear('c5g-clear'); showHintArea('c5g-hints'); }
+  else { scores['c5g']=true; checkNextBtn(); }
+}
+function clearC5G() {
+  ['c5g-a','c5g-r'].forEach(id=>{const el=document.getElementById(id);if(el){el.value='';el.className='answer-input';el.readOnly=false;}});
+  document.getElementById('c5g-fb').className='feedback';
+  document.getElementById('c5g-clear').classList.remove('visible');
+}
+function checkC5F() {
+  const a = parseVal(document.getElementById('c5f-a').value);
+  const b = parseVal(document.getElementById('c5f-b').value);
+  const ok = approxEq(a,5) && approxEq(b,5);
+  markInput('c5f-a', approxEq(a,5)); markInput('c5f-b', approxEq(b,5));
+  setFb('c5f-fb', ok, ok ? 'Richtig! Beide Säfte je 5 Liter.' : 'Nicht korrekt. Tipps helfen!');
+  if(!ok){ showClear('c5f-clear'); showHintArea('c5f-hints'); }
+  else { scores['c5f']=true; checkNextBtn(); }
+}
+function clearC5F() {
+  ['c5f-a','c5f-b'].forEach(id=>{const el=document.getElementById(id);if(el){el.value='';el.className='answer-input';el.readOnly=false;}});
+  document.getElementById('c5f-fb').className='feedback';
+  document.getElementById('c5f-clear').classList.remove('visible');
+}
+function checkC5P() {
+  const a = parseVal(document.getElementById('c5p-a').value);
+  const b = parseVal(document.getElementById('c5p-b').value);
+  const okA = approxEq(a, 342.86, 1.5); const okB = approxEq(b, 257.14, 1.5);
+  const ok = okA && okB;
+  markInput('c5p-a', okA); markInput('c5p-b', okB);
+  setFb('c5p-fb', ok, ok ? 'Richtig! Leg. I ≈ 342,9 g, Leg. II ≈ 257,1 g' : 'Nicht korrekt. Tipps nutzen!');
+  if(!ok){ showClear('c5p-clear'); showHintArea('c5p-hints'); }
+  else { scores['c5p']=true; checkNextBtn(); }
+}
+function clearC5P() {
+  ['c5p-a','c5p-b'].forEach(id=>{const el=document.getElementById(id);if(el){el.value='';el.className='answer-input';el.readOnly=false;}});
+  document.getElementById('c5p-fb').className='feedback';
+  document.getElementById('c5p-clear').classList.remove('visible');
+}
+
+// ──────────────────────────────────
+// CARD 6 CHECKS (Bewegung)
+// ──────────────────────────────────
+function checkC6G() {
+  const vk = parseVal(document.getElementById('c6g-vk').value);
+  const vm = parseVal(document.getElementById('c6g-vm').value);
+  const okK = approxEq(vk,10.5); const okM = approxEq(vm,7.5);
+  const ok = okK && okM;
+  markInput('c6g-vk', okK); markInput('c6g-vm', okM);
+  setFb('c6g-fb', ok, ok ? 'Richtig! Kai: 10,5 km/h, Mia: 7,5 km/h' : 'Nicht korrekt. Tipps nutzen!');
+  if(!ok){ showClear('c6g-clear'); showHintArea('c6g-hints'); }
+  else { scores['c6g']=true; checkNextBtn(); }
+}
+function clearC6G() {
+  ['c6g-vk','c6g-vm'].forEach(id=>{const el=document.getElementById(id);if(el){el.value='';el.className='answer-input';el.readOnly=false;}});
+  document.getElementById('c6g-fb').className='feedback';
+  document.getElementById('c6g-clear').classList.remove('visible');
+}
+function checkC6F() {
+  const b = parseVal(document.getElementById('c6f-b').value);
+  const s = parseVal(document.getElementById('c6f-s').value);
+  const okB = approxEq(b,16); const okS = approxEq(s,4);
+  const ok = okB && okS;
+  markInput('c6f-b', okB); markInput('c6f-s', okS);
+  setFb('c6f-fb', ok, ok ? 'Richtig! Boot: 16 km/h, Strömung: 4 km/h' : 'Nicht korrekt. Tipps helfen!');
+  if(!ok){ showClear('c6f-clear'); showHintArea('c6f-hints'); }
+  else { scores['c6f']=true; checkNextBtn(); }
+}
+function clearC6F() {
+  ['c6f-b','c6f-s'].forEach(id=>{const el=document.getElementById(id);if(el){el.value='';el.className='answer-input';el.readOnly=false;}});
+  document.getElementById('c6f-fb').className='feedback';
+  document.getElementById('c6f-clear').classList.remove('visible');
+}
+function checkC6P() {
+  const va = parseVal(document.getElementById('c6p-va').value);
+  const vb = parseVal(document.getElementById('c6p-vb').value);
+  const okA = approxEq(va,72); const okB = approxEq(vb,68);
+  const ok = okA && okB;
+  markInput('c6p-va', okA); markInput('c6p-vb', okB);
+  setFb('c6p-fb', ok, ok ? 'Richtig! Auto A: 72 km/h, Auto B: 68 km/h' : 'Nicht korrekt. Tipps nutzen!');
+  if(!ok){ showClear('c6p-clear'); showHintArea('c6p-hints'); }
+  else { scores['c6p']=true; checkNextBtn(); }
+}
+function clearC6P() {
+  ['c6p-va','c6p-vb'].forEach(id=>{const el=document.getElementById(id);if(el){el.value='';el.className='answer-input';el.readOnly=false;}});
+  document.getElementById('c6p-fb').className='feedback';
+  document.getElementById('c6p-clear').classList.remove('visible');
+}
+
+// ──────────────────────────────────
+// CARD 7 CHECKS (Wiederholung)
+// ──────────────────────────────────
+function checkC7G1() {
+  const x = parseVal(document.getElementById('c7g-1').value);
+  const ok = approxEq(x,5);
+  markInput('c7g-1', ok);
+  setFb('c7g1-fb', ok, ok ? 'Richtig! x = 5' : 'Nicht korrekt. 3x = 15 → x = 5');
+  if(!ok) showClear('c7g1-clear');
+  else { scores['c7g1']=true; checkNextBtn(); }
+}
+function clearC7G1() {
+  const el=document.getElementById('c7g-1');if(el){el.value='';el.className='answer-input';el.readOnly=false;}
+  document.getElementById('c7g1-fb').className='feedback';
+  document.getElementById('c7g1-clear').classList.remove('visible');
+}
+function checkC7G2() {
+  const x = parseVal(document.getElementById('c7g-2').value);
+  const ok = approxEq(x,9);
+  markInput('c7g-2', ok);
+  setFb('c7g2-fb', ok, ok ? 'Richtig! x = 9' : 'Nicht korrekt. 2(x−4)=10 → x−4=5 → x=9');
+  if(!ok) showClear('c7g2-clear');
+  else { scores['c7g2']=true; checkNextBtn(); }
+}
+function clearC7G2() {
+  const el=document.getElementById('c7g-2');if(el){el.value='';el.className='answer-input';el.readOnly=false;}
+  document.getElementById('c7g2-fb').className='feedback';
+  document.getElementById('c7g2-clear').classList.remove('visible');
+}
+function checkC7F1() {
+  const x = parseVal(document.getElementById('c7f-1').value);
+  const ok = approxEq(x,5);
+  markInput('c7f-1', ok);
+  setFb('c7f1-fb', ok, ok ? 'Richtig! x = 5' : '3x = 15 → x = 5');
+  if(!ok) showClear('c7f1-clear');
+  else { scores['c7f1']=true; checkNextBtn(); }
+}
+function clearC7F1() {
+  const el=document.getElementById('c7f-1');if(el){el.value='';el.className='answer-input';el.readOnly=false;}
+  document.getElementById('c7f1-fb').className='feedback';
+  document.getElementById('c7f1-clear').classList.remove('visible');
+}
+function checkC7F2() {
+  const x = parseVal(document.getElementById('c7f-2').value);
+  const ok = approxEq(x,5);
+  markInput('c7f-2', ok);
+  setFb('c7f2-fb', ok, ok ? 'Richtig! x = 5' : '8x+4-3x=29 → 5x=25 → x=5');
+  if(!ok) showClear('c7f2-clear');
+  else { scores['c7f2']=true; checkNextBtn(); }
+}
+function clearC7F2() {
+  const el=document.getElementById('c7f-2');if(el){el.value='';el.className='answer-input';el.readOnly=false;}
+  document.getElementById('c7f2-fb').className='feedback';
+  document.getElementById('c7f2-clear').classList.remove('visible');
+}
+function checkC7P() {
+  const x = parseVal(document.getElementById('c7p-1').value);
+  const ok = approxEq(x,8);
+  markInput('c7p-1', ok);
+  setFb('c7p-fb', ok, ok ? 'Richtig! x = 8' : 'Nicht korrekt. Tipps nutzen!');
+  if(!ok){ showClear('c7p-clear'); showHintArea('c7p-hints'); }
+  else { scores['c7p']=true; checkNextBtn(); }
+}
+function clearC7P() {
+  const el=document.getElementById('c7p-1');if(el){el.value='';el.className='answer-input';el.readOnly=false;}
+  document.getElementById('c7p-fb').className='feedback';
+  document.getElementById('c7p-clear').classList.remove('visible');
+}
+
+// ──────────────────────────────────
+// NEXT BUTTON
+// ──────────────────────────────────
+function checkNextBtn() {
+  const anyDone = Object.keys(scores).length > 0;
+  const btn = document.getElementById('nextBtn');
+  if(anyDone) btn.classList.add('visible');
+}
+
+// ──────────────────────────────────
+// EVALUATION
+// ──────────────────────────────────
+function buildEval() {
+  const keys = Object.keys(scores);
+  const total = keys.length;
+  const correct = keys.filter(k=>scores[k]).length;
+  const pct = total > 0 ? Math.round(correct/total*100) : 0;
+
+  document.getElementById('eval-score').textContent = `${correct} / ${total}`;
+  
+  let stars = '⭐';
+  if(pct >= 90) stars = '🌟🌟🌟';
+  else if(pct >= 70) stars = '⭐⭐⭐';
+  else if(pct >= 50) stars = '⭐⭐';
+  document.getElementById('eval-stars').textContent = stars;
+
+  const labels = {
+    'c0f': 'Gleichsetzung (Fortg.)', 'c0p': 'Gleichsetzung (Profi)',
+    'c1f': 'Einsetzung A (Fortg.)', 'c1f2': 'Einsetzung B (Fortg.)', 'c1p': 'Einsetzung (Profi)',
+    'c2f': 'Addition (Fortg.)', 'c2p': 'Addition (Profi)',
+    'c3g': 'Zahlenrätsel (Grundl.)', 'c3f': 'Zahlenrätsel (Fortg.)', 'c3p': 'Zahlenrätsel (Profi)',
+    'c4g': 'Altersrätsel (Grundl.)', 'c4f': 'Altersrätsel (Fortg.)', 'c4p': 'Altersrätsel (Profi)',
+    'c5g': 'Mischung (Grundl.)', 'c5f': 'Mischung (Fortg.)', 'c5p': 'Mischung (Profi)',
+    'c6g': 'Bewegung (Grundl.)', 'c6f': 'Bewegung (Fortg.)', 'c6p': 'Bewegung (Profi)',
+    'c7g1': 'Wdh. Gl. 1', 'c7g2': 'Wdh. Gl. 2',
+    'c7f1': 'Wdh. Fortg. 1', 'c7f2': 'Wdh. Fortg. 2', 'c7p': 'Wdh. Profi'
+  };
+
+  const detail = document.getElementById('eval-detail');
+  if(keys.length === 0) { detail.innerHTML = '<p style="color:var(--text-muted)">Noch keine Aufgaben bearbeitet.</p>'; return; }
+  
+  detail.innerHTML = keys.map(k=>`
+    <div class="eval-row">
+      <span>${labels[k]||k}</span>
+      <span>${scores[k] ? '✅' : '❌'}</span>
+    </div>
+  `).join('');
+}
+
+// ──────────────────────────────────
+// DINO
+// ──────────────────────────────────
+function dinoClick() {
+  const d = document.getElementById('dino');
+  d.classList.add('show-tip');
+  setTimeout(()=>d.classList.remove('show-tip'), 2500);
+}
+
+// Init
+showCard(0);
+</script>
+</body>
+</html>
