@@ -262,45 +262,72 @@ function renderFigure(n, container, mode, interactive) {
 }
 
 let openCell = null;
+
+function setCubeState(cell, sz, chosen) {
+  // Rebuild cell content for a given state (null = qmark, 4/5/6 = dots)
+  cell.innerHTML = '';
+  if (!chosen) {
+    cell.dataset.chosen = '';
+    cell.className = 'cube-cell filled qmark-cube';
+    const lbl = document.createElement('div');
+    lbl.className = 'qmark-label';
+    lbl.style.fontSize = Math.round(sz * 0.55) + 'px';
+    lbl.textContent = '?';
+    cell.appendChild(lbl);
+  } else {
+    cell.dataset.chosen = chosen;
+    cell.className = 'cube-cell filled type' + chosen;
+    cell.innerHTML = makeDots(sz, chosen);
+  }
+}
+
+function openPicker(cell, sz) {
+  closePicker();
+  openCell = cell;
+  const picker = document.createElement('div');
+  picker.className = 'eye-picker';
+
+  // Reset button
+  const resetBtn = document.createElement('button');
+  resetBtn.textContent = '↺';
+  resetBtn.style.cssText = 'background:#eef0f8;border-color:#c0cce8;color:#6b7280;font-size:18px;';
+  resetBtn.addEventListener('click', ev => {
+    ev.stopPropagation();
+    setCubeState(cell, sz, null);
+    closePicker();
+  });
+  picker.appendChild(resetBtn);
+
+  [4, 5, 6].forEach(num => {
+    const btn = document.createElement('button');
+    btn.textContent = num;
+    if (cell.dataset.chosen == num) btn.classList.add('ep' + num);
+    btn.addEventListener('click', ev => {
+      ev.stopPropagation();
+      setCubeState(cell, sz, num);
+      closePicker();
+    });
+    picker.appendChild(btn);
+  });
+
+  cell.style.position = 'relative';
+  cell.appendChild(picker);
+}
+
 function attachPicker(cell, sz) {
   cell.addEventListener('click', e => {
     e.stopPropagation();
-    if (openCell===cell) { closePicker(); return; }
-    closePicker(); openCell=cell;
-    const picker=document.createElement('div'); picker.className='eye-picker';
-    // Reset-Button
-    const resetBtn=document.createElement('button');
-    resetBtn.textContent='↺'; resetBtn.title='Zurücksetzen';
-    resetBtn.style.cssText='background:#eef0f8;border-color:#c0cce8;color:#6b7280;font-size:18px;';
-    resetBtn.addEventListener('click', ev => {
-      ev.stopPropagation();
-      cell.dataset.chosen='';
-      cell.className='cube-cell filled qmark-cube';
-      cell.innerHTML='';
-      const lbl=document.createElement('div');
-      lbl.className='qmark-label'; lbl.style.fontSize=Math.round(sz*0.55)+'px'; lbl.textContent='?';
-      cell.appendChild(lbl);
-      attachPicker(cell,sz); closePicker();
-    });
-    picker.appendChild(resetBtn);
-
-    [4,5,6].forEach(num => {
-      const btn=document.createElement('button'); btn.textContent=num;
-      if (cell.dataset.chosen==num) btn.classList.add('ep'+num);
-      btn.addEventListener('click', ev => {
-        ev.stopPropagation();
-        cell.dataset.chosen=num;
-        cell.className='cube-cell filled type'+num;
-        cell.innerHTML=makeDots(sz,num);
-        attachPicker(cell,sz); closePicker();
-      });
-      picker.appendChild(btn);
-    });
-    cell.style.position='relative'; cell.appendChild(picker);
+    if (openCell === cell) { closePicker(); return; }
+    openPicker(cell, sz);
   });
 }
+
 function closePicker() {
-  if (openCell) { const p=openCell.querySelector('.eye-picker'); if(p)p.remove(); openCell=null; }
+  if (openCell) {
+    const p = openCell.querySelector('.eye-picker');
+    if (p) p.remove();
+    openCell = null;
+  }
 }
 document.addEventListener('click', closePicker);
 
