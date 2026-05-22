@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Würfelmuster – Klasse 7</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #f0f4ff; --card: #ffffff; --primary: #3a5bd9;
+    --primary-light: #e8edff; --accent: #f5a623;
+    --success: #2ecc71; --error: #e74c3c;
+    --text: #1a1a2e; --muted: #6b7280;
+    --shadow: 0 4px 20px rgba(58,91,217,0.12); --radius: 16px;
+  }
+  body { font-family:'Nunito',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; padding:20px 16px 40px; -webkit-tap-highlight-color:transparent; }
+  header { text-align:center; margin-bottom:28px; }
+  header h1 { font-size:26px; font-weight:900; color:var(--primary); letter-spacing:-0.5px; }
+  header p { font-size:16px; color:var(--muted); margin-top:4px; }
+  .badge { display:inline-block; background:var(--primary-light); color:var(--primary); font-size:13px; font-weight:700; padding:3px 10px; border-radius:20px; margin-top:6px; }
+  .figures-row { display:flex; gap:16px; justify-content:center; flex-wrap:wrap; margin-bottom:20px; }
+  .figure-card { background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); padding:16px 20px; text-align:center; min-width:130px; }
+  .figure-card h3 { font-size:15px; font-weight:700; color:var(--primary); margin-bottom:12px; }
+  .cube-grid { display:inline-grid; gap:3px; }
+  .cube-cell { border-radius:6px; }
+  .cube-cell.filled { background:#fff; border:2px solid #c0cce8; box-shadow:0 2px 6px rgba(0,0,0,0.12),inset 0 1px 2px rgba(255,255,255,0.8); position:relative; }
+  .cube-cell.empty { background:transparent; }
+  .eyes { position:absolute; inset:0; }
+  .dot { background:#1a1a2e; border-radius:50%; position:absolute; transform:translate(-50%,-50%); }
+  .cube-cell.qmark-cube { background:#fff8e8; border:2px solid var(--accent); cursor:pointer; }
+  .cube-cell.type4 { background:#e8f0ff; border-color:#3a5bd9; }
+  .cube-cell.type5 { background:#e8faf2; border-color:#2ecc71; }
+  .cube-cell.type6 { background:#fff8e8; border-color:#f5a623; }
+  .qmark-label { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-weight:900; color:var(--accent); pointer-events:none; }
+  .eye-picker { position:absolute; bottom:calc(100% + 8px); left:50%; transform:translateX(-50%); background:#fff; border:2px solid var(--primary); border-radius:12px; padding:6px 8px; display:flex; gap:6px; z-index:100; box-shadow:0 4px 16px rgba(0,0,0,0.18); }
+  .eye-picker button { width:44px; height:44px; border-radius:8px; border:2px solid #c0cce8; font-size:16px; font-weight:800; font-family:'Nunito',sans-serif; cursor:pointer; background:var(--bg); -webkit-tap-highlight-color:transparent; }
+  .eye-picker button:active { transform:scale(0.93); }
+  .ep4 { background:#e8f0ff !important; border-color:#3a5bd9 !important; color:#3a5bd9; }
+  .ep5 { background:#e8faf2 !important; border-color:#2ecc71 !important; color:#1a7a49; }
+  .ep6 { background:#fff8e8 !important; border-color:#f5a623 !important; color:#7a4f0a; }
+  .section { background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); padding:20px; margin-bottom:20px; }
+  .section h2 { font-size:18px; font-weight:800; color:var(--primary); margin-bottom:6px; }
+  .section .hint { font-size:14px; color:var(--muted); margin-bottom:16px; line-height:1.6; }
+  .predict-table { width:100%; border-collapse:collapse; font-size:16px; }
+  .predict-table th { background:var(--primary-light); color:var(--primary); font-weight:700; padding:10px 12px; text-align:center; }
+  .predict-table td { padding:10px 12px; text-align:center; border-bottom:1px solid #eef0f8; }
+  .predict-table tr:last-child td { border-bottom:none; }
+  .predict-table input[type="number"] { width:80px; height:44px; border:2px solid #c0cce8; border-radius:10px; text-align:center; font-size:18px; font-family:'Nunito',sans-serif; font-weight:700; color:var(--text); background:var(--bg); outline:none; -webkit-appearance:none; }
+  .predict-table input[type="number"]:focus { border-color:var(--primary); background:var(--primary-light); }
+  input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;}
+  .term-row { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-top:8px; }
+  .term-label { font-size:17px; font-weight:700; white-space:nowrap; }
+  .term-input { flex:1; min-width:160px; height:48px; border:2px solid #c0cce8; border-radius:12px; padding:0 14px; font-size:18px; font-family:'Nunito',sans-serif; font-weight:700; color:var(--text); background:var(--bg); outline:none; }
+  .term-input:focus { border-color:var(--primary); background:var(--primary-light); }
+  .hint-small { font-size:13px; color:var(--muted); margin-top:6px; }
+  .btn { display:inline-flex; align-items:center; justify-content:center; height:52px; padding:0 28px; border-radius:14px; font-family:'Nunito',sans-serif; font-size:17px; font-weight:800; cursor:pointer; border:none; transition:transform 0.1s; -webkit-tap-highlight-color:transparent; }
+  .btn:active { transform:scale(0.96); }
+  .btn-primary { background:var(--primary); color:#fff; box-shadow:0 4px 14px rgba(58,91,217,0.35); }
+  .btn-reset { background:#eef0f8; color:var(--muted); }
+  .btn-row { display:flex; gap:12px; margin-top:18px; flex-wrap:wrap; }
+  .feedback-box { border-radius:14px; padding:16px 18px; margin-top:16px; font-size:16px; font-weight:600; display:none; animation:popIn 0.3s ease; line-height:1.6; }
+  @keyframes popIn { from{transform:scale(0.95);opacity:0} to{transform:scale(1);opacity:1} }
+  .feedback-box.show { display:block; }
+  .feedback-box.success { background:#e8faf2; border:2px solid var(--success); color:#1a7a49; }
+  .feedback-box.partial { background:#fff8e8; border:2px solid var(--accent); color:#7a4f0a; }
+  .feedback-box.error { background:#fdecea; border:2px solid var(--error); color:#8b1a1a; }
+  .solution-reveal { background:var(--primary-light); border-radius:12px; padding:14px 16px; margin-top:12px; display:none; font-size:16px; line-height:1.6; }
+  .solution-reveal.show { display:block; }
+  .solution-reveal strong { color:var(--primary); }
+  .legend { display:flex; gap:14px; flex-wrap:wrap; margin:10px 0 16px; font-size:14px; font-weight:600; }
+  .legend-item { display:flex; align-items:center; gap:6px; }
+  .legend-dot { width:18px; height:18px; border-radius:4px; border:2px solid; flex-shrink:0; }
+  .l4 { background:#e8f0ff; border-color:#3a5bd9; }
+  .l5 { background:#e8faf2; border-color:#2ecc71; }
+  .l6 { background:#fff8e8; border-color:#f5a623; }
+  .divider { height:2px; background:var(--primary-light); border-radius:2px; margin:22px 0; }
+  .mc-options { display:flex; flex-direction:column; gap:10px; margin-top:8px; }
+  .mc-btn { min-height:52px; padding:12px 16px; border-radius:12px; border:2px solid #c0cce8; background:var(--bg); font-family:'Nunito',sans-serif; font-size:15px; font-weight:600; color:var(--text); cursor:pointer; text-align:left; line-height:1.5; -webkit-tap-highlight-color:transparent; }
+  .mc-btn:active { transform:scale(0.98); }
+  .mc-btn.selected { background:var(--primary-light); border-color:var(--primary); color:var(--primary); }
+  .mc-btn.correct-ans { background:#e8faf2; border-color:var(--success); color:#1a7a49; }
+  .mc-btn.wrong-ans { background:#fdecea; border-color:var(--error); color:#8b1a1a; }
+  @media (max-width:480px) { .figures-row{gap:8px;} .figure-card{padding:10px;min-width:100px;} }
+</style>
+</head>
+<body>
+<header>
+  <h1>Würfelmuster</h1>
+  <p>Figuren aus Würfeln – von oben betrachtet</p>
+  <span class="badge">Klasse 7</span>
+</header>
+
+<div class="figures-row" id="figuresRow"></div>
+
+<div class="section">
+  <h2>Aufgabe 1 – Wie viele Würfel?</h2>
+  <p class="hint">Beobachte das Muster und trage die Anzahl der Würfel für Figur 4 und 5 ein.</p>
+  <table class="predict-table">
+    <thead><tr><th>Figur (n)</th><th>Anzahl Würfel</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>5</td></tr>
+      <tr><td>2</td><td>11</td></tr>
+      <tr><td>3</td><td>17</td></tr>
+      <tr><td>4</td><td><input type="number" id="ans4" inputmode="numeric" placeholder="?"></td></tr>
+      <tr><td>5</td><td><input type="number" id="ans5" inputmode="numeric" placeholder="?"></td></tr>
+    </tbody>
+  </table>
+  <div class="btn-row">
+    <button class="btn btn-primary" onclick="checkCounts()">Überprüfen</button>
+    <button class="btn btn-reset" onclick="resetCounts()">Neu</button>
+  </div>
+  <div class="feedback-box" id="feedbackCounts"></div>
+</div>
+
+<div class="section">
+  <h2>Aufgabe 2 – Finde den Term</h2>
+  <p class="hint">Gib einen Term an, mit dem du die Anzahl der Würfel bei Figur <em>n</em> berechnen kannst.</p>
+  <div class="term-row">
+    <span class="term-label">Anzahl =</span>
+    <input type="text" class="term-input" id="termInput" placeholder="Dein Term …" autocomplete="off" autocorrect="off" spellcheck="false">
+  </div>
+  <p class="hint-small">Tipp: Schau, wie viel mehr Würfel jede neue Figur hat.</p>
+  <div class="btn-row">
+    <button class="btn btn-primary" onclick="checkTerm()">Überprüfen</button>
+    <button class="btn btn-reset" onclick="resetTerm()">Neu</button>
+  </div>
+  <div class="feedback-box" id="feedbackTerm"></div>
+  <div class="solution-reveal" id="solutionReveal">
+    <strong>Mögliche Terme:</strong> 6·n − 1 &nbsp;|&nbsp; 5 + 6·(n−1) &nbsp;|&nbsp; −1 + 6·n<br>
+    <span style="color:#444;font-weight:400;">Jede Figur hat 6 Würfel mehr (+6 pro Schritt). Figur 1 hat 5 → 6·1 − 1 = 5 ✓</span>
+  </div>
+</div>
+
+<div class="section">
+  <h2>Aufgabe 3 – Term nutzen</h2>
+  <p class="hint">Berechne mit deinem Term, wie viele Würfel Figur 10 hat.</p>
+  <div class="term-row">
+    <span class="term-label">Figur 10:</span>
+    <input type="number" id="ans10" inputmode="numeric" placeholder="?" style="width:100px;height:48px;border:2px solid #c0cce8;border-radius:12px;text-align:center;font-size:20px;font-family:'Nunito',sans-serif;font-weight:700;background:var(--bg);outline:none;">
+    <span style="font-size:17px;font-weight:600;">Würfel</span>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-primary" onclick="checkFig10()">Überprüfen</button>
+    <button class="btn btn-reset" onclick="resetFig10()">Neu</button>
+  </div>
+  <div class="feedback-box" id="feedbackFig10"></div>
+</div>
+
+<div class="section">
+  <h2>Aufgabe 4 – Wie viele Augen?</h2>
+  <p class="hint">Alle Würfel zeigen eine <strong>5</strong>. Stelle einen Term auf für die Gesamtzahl der Augen bei Figur <em>n</em>.</p>
+  <div class="figures-row" id="figuresRowEyes" style="margin-bottom:12px;"></div>
+  <div class="term-row">
+    <span class="term-label">Augen =</span>
+    <input type="text" class="term-input" id="termEyes" placeholder="Dein Term …" autocomplete="off" autocorrect="off" spellcheck="false">
+  </div>
+  <p class="hint-small">Tipp: Wie viele Würfel hat Figur n? Jeder zeigt 5 Augen.</p>
+  <div class="btn-row">
+    <button class="btn btn-primary" onclick="checkTermEyes()">Überprüfen</button>
+    <button class="btn btn-reset" onclick="resetTermEyes()">Neu</button>
+  </div>
+  <div class="feedback-box" id="feedbackEyes"></div>
+  <div class="solution-reveal" id="solutionEyes">
+    <strong>Mögliche Terme:</strong> 5·(6·n − 1) &nbsp;|&nbsp; 30·n − 5<br>
+    <span style="color:#444;font-weight:400;">Anzahl Würfel = 6·n − 1, jeder zeigt 5 Augen → 5·(6·n − 1)</span>
+  </div>
+</div>
+
+<div class="section">
+  <h2>Aufgabe 5 – Welche Seite zeigt welcher Würfel?</h2>
+  <p class="hint">
+    Die Würfel zeigen nun <strong>verschiedene Seiten</strong>. Die Gesamtzahl der Augen lässt sich so berechnen:<br><br>
+    <strong style="font-size:17px;color:var(--primary);">A(n) = 4·4·n + 5·n + 6·(n−1)</strong><br><br>
+    Tippe auf jeden Würfel mit <strong>?</strong> und wähle, welche Zahl er zeigt.
+  </p>
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot l4"></div><span>zeigt 4</span></div>
+    <div class="legend-item"><div class="legend-dot l5"></div><span>zeigt 5</span></div>
+    <div class="legend-item"><div class="legend-dot l6"></div><span>zeigt 6</span></div>
+  </div>
+  <div class="figures-row" id="figuresRowQ" style="margin-bottom:12px;"></div>
+  <div class="btn-row">
+    <button class="btn btn-primary" onclick="checkAssignment()">Überprüfen</button>
+    <button class="btn btn-reset" onclick="resetAssignment()">Neu</button>
+  </div>
+  <div class="feedback-box" id="feedbackAssign"></div>
+  <div class="divider"></div>
+  <h2>Term erklären</h2>
+  <p class="hint">Welcher Teil des Terms <strong>A(n) = 4·4·n + 5·n + 6·(n−1)</strong> beschreibt welchen Würfeltyp?</p>
+  <div id="mcQuestions"></div>
+  <div class="btn-row">
+    <button class="btn btn-primary" onclick="checkMC()">Überprüfen</button>
+    <button class="btn btn-reset" onclick="resetMC()">Neu</button>
+  </div>
+  <div class="feedback-box" id="feedbackMC"></div>
+</div>
+
+<script>
+/* Grid: n Säulen (rows 0-3) + Bodenreihe (row 4), cols=2n-1
+   Würfeltypen: rows 0-3 → 4 | row4 gerade col → 5 | row4 ungerade col → 6
+   Zählprobe: 4n + n + (n-1) = 6n-1 ✓
+   Augenzahl: 4*4n + 5*n + 6*(n-1) */
+
+function buildGrid(n) {
+  const cols = Math.max(1, 2*n-1), rows = 5;
+  const g = Array.from({length:rows}, () => Array(cols).fill(null));
+  for (let s=0; s<n; s++) { const c=2*s; for (let r=0; r<4; r++) g[r][c]='top'; }
+  for (let c=0; c<cols; c++) g[4][c] = (c%2===0) ? 'base-col' : 'base-mid';
+  return {g, rows, cols};
+}
+
+function getCubeType(r, c) {
+  if (r < 4) return 4;
+  return (c % 2 === 0) ? 5 : 6;
+}
+
+function makeDots(sz, num) {
+  const d = Math.max(3, Math.round(sz*0.17));
+  const configs = {
+    4:[[22,22],[22,78],[78,22],[78,78]],
+    5:[[22,22],[22,78],[50,50],[78,22],[78,78]],
+    6:[[22,22],[50,22],[78,22],[22,78],[50,78],[78,78]]
+  };
+  const pts = configs[num] || configs[5];
+  return '<div class="eyes">' + pts.map(([t,l]) =>
+    '<div class="dot" style="width:'+d+'px;height:'+d+'px;top:'+t+'%;left:'+l+'%;"></div>'
+  ).join('') + '</div>';
+}
+
+function renderFigure(n, container, mode, interactive) {
+  const {g, rows, cols} = buildGrid(n);
+  const sz = Math.min(32, Math.floor(240/(cols+1)));
+  const grid = document.createElement('div');
+  grid.className = 'cube-grid';
+  grid.style.gridTemplateColumns = 'repeat('+cols+', '+sz+'px)';
+  grid.style.gridTemplateRows    = 'repeat('+rows+', '+sz+'px)';
+  grid.style.gap = '3px';
+  for (let r=0; r<rows; r++) {
+    for (let c=0; c<cols; c++) {
+      const cell = document.createElement('div');
+      cell.style.width = cell.style.height = sz+'px';
+      if (!g[r][c]) { cell.className='cube-cell empty'; }
+      else {
+        const type = getCubeType(r,c);
+        if (mode==='dots5') {
+          cell.className='cube-cell filled';
+          cell.innerHTML = makeDots(sz,5);
+        } else if (mode==='qmark') {
+          cell.className='cube-cell filled qmark-cube';
+          cell.dataset.correct=type; cell.dataset.chosen='';
+          const lbl=document.createElement('div');
+          lbl.className='qmark-label'; lbl.style.fontSize=Math.round(sz*0.55)+'px'; lbl.textContent='?';
+          cell.appendChild(lbl);
+          if (interactive) attachPicker(cell, sz);
+        }
+      }
+      grid.appendChild(cell);
+    }
+  }
+  container.appendChild(grid);
+}
+
+let openCell = null;
+function attachPicker(cell, sz) {
+  cell.addEventListener('click', e => {
+    e.stopPropagation();
+    if (openCell===cell) { closePicker(); return; }
+    closePicker(); openCell=cell;
+    const picker=document.createElement('div'); picker.className='eye-picker';
+    [4,5,6].forEach(num => {
+      const btn=document.createElement('button'); btn.textContent=num;
+      if (cell.dataset.chosen==num) btn.classList.add('ep'+num);
+      btn.addEventListener('click', ev => {
+        ev.stopPropagation();
+        cell.dataset.chosen=num;
+        cell.className='cube-cell filled type'+num;
+        cell.innerHTML=makeDots(sz,num);
+        attachPicker(cell,sz); closePicker();
+      });
+      picker.appendChild(btn);
+    });
+    cell.style.position='relative'; cell.appendChild(picker);
+  });
+}
+function closePicker() {
+  if (openCell) { const p=openCell.querySelector('.eye-picker'); if(p)p.remove(); openCell=null; }
+}
+document.addEventListener('click', closePicker);
+
+function buildSet(id, mode, interactive) {
+  const row=document.getElementById(id); if(!row) return; row.innerHTML='';
+  for (let n=1; n<=3; n++) {
+    const card=document.createElement('div'); card.className='figure-card';
+    card.innerHTML='<h3>Figur '+n+'</h3>';
+    renderFigure(n, card, mode, interactive);
+    if (mode==='dots5') {
+      const lbl=document.createElement('p');
+      lbl.style.cssText='font-size:13px;color:var(--muted);margin-top:8px;font-weight:600;';
+      const {g}=buildGrid(n); lbl.textContent=g.flat().filter(Boolean).length+' Würfel';
+      card.appendChild(lbl);
+    }
+    row.appendChild(card);
+  }
+}
+buildSet('figuresRow','dots5',false);
+buildSet('figuresRowEyes','dots5',false);
+buildSet('figuresRowQ','qmark',true);
+
+const mcData=[
+  { q:'Was beschreibt <strong>4·4·n</strong>?',
+    options:['Die n Säulen haben je 4 Würfel (obere Reihen), jeder zeigt 4 Augen.','Die Bodenreihe hat 4·n Würfel, alle zeigen 4 Augen.','Jede Figur hat 4 Würfel mehr als die vorherige.','Die Zwischenwürfel zeigen 4 Augen.'],
+    correct:0 },
+  { q:'Was beschreibt <strong>5·n</strong>?',
+    options:['Alle Würfel der Figur zeigen 5 Augen.','Die n untersten Würfel der Säulen (in der Bodenreihe) zeigen 5 Augen.','Die Bodenreihe hat n+1 Würfel, die eine 5 zeigen.','Jede Figur hat 5 Würfel mehr als die vorherige.'],
+    correct:1 },
+  { q:'Was beschreibt <strong>6·(n−1)</strong>?',
+    options:['Es gibt n−1 Säulen, die eine 6 zeigen.','Die Figur hat n−1 Würfel mehr als die vorherige.','Die (n−1) Zwischenwürfel in der Bodenreihe zeigen je 6 Augen.','Der Term beschreibt die Lücken zwischen den Säulen.'],
+    correct:2 }
+];
+
+function buildMC() {
+  const cont=document.getElementById('mcQuestions'); cont.innerHTML='';
+  mcData.forEach((q,qi) => {
+    const block=document.createElement('div'); block.style.marginBottom='20px';
+    block.innerHTML='<p style="font-size:16px;font-weight:700;margin-bottom:8px;">'+(qi+1)+'. '+q.q+'</p>';
+    const opts=document.createElement('div'); opts.className='mc-options';
+    q.options.forEach((opt,oi) => {
+      const btn=document.createElement('button'); btn.className='mc-btn';
+      btn.innerHTML=opt; btn.dataset.qi=qi; btn.dataset.oi=oi;
+      btn.addEventListener('click', () => { opts.querySelectorAll('.mc-btn').forEach(b=>b.classList.remove('selected')); btn.classList.add('selected'); });
+      opts.appendChild(btn);
+    });
+    block.appendChild(opts); cont.appendChild(block);
+  });
+}
+buildMC();
+
+function evalTerm(raw, n) {
+  try { const e=raw.replace(/[·×]/g,'*').replace(/−/g,'-').replace(/[^0-9n+\-*/(). ]/g,''); return new Function('n','"use strict";return ('+e+');')(n); }
+  catch(e) { return null; }
+}
+
+function checkTermFor(inputId, fbId, solId, expectedFn) {
+  const raw=document.getElementById(inputId).value.trim();
+  const fb=document.getElementById(fbId);
+  if (!raw) { fb.className='feedback-box error show'; fb.innerHTML='⚠️ Bitte einen Term eingeben.'; return; }
+  let allOk=true, rows=[];
+  for (let n=1; n<=5; n++) { const got=evalTerm(raw,n),exp=expectedFn(n),ok=(got===exp); if(!ok)allOk=false; rows.push({n,got,exp,ok}); }
+  if (allOk) {
+    fb.className='feedback-box success show';
+    fb.innerHTML='✅ Sehr gut! Dein Term <strong>'+raw+'</strong> stimmt für alle Figuren!';
+    if (solId) document.getElementById(solId).className='solution-reveal show';
+  } else {
+    const det=rows.map(r=>'n='+r.n+': erwartet '+r.exp+', erhalten '+(r.got??'?')+' '+(r.ok?'✓':'✗')).join('<br>');
+    fb.className='feedback-box error show';
+    fb.innerHTML='❌ <strong>'+raw+'</strong> passt noch nicht.<br><small style="font-weight:400;line-height:1.8">'+det+'</small>';
+  }
+}
+
+function checkCounts() {
+  const v4=parseInt(document.getElementById('ans4').value),v5=parseInt(document.getElementById('ans5').value);
+  const fb=document.getElementById('feedbackCounts');
+  if (isNaN(v4)&&isNaN(v5)) { fb.className='feedback-box error show'; fb.innerHTML='⚠️ Bitte beide Felder ausfüllen!'; return; }
+  let html='',ok=0,total=0;
+  if (!isNaN(v4)){total++;if(v4===23){html+='<div>✅ Figur 4: 23 – richtig!</div>';ok++;}else{html+='<div>❌ Figur 4: '+v4+' – falsch. Von Figur 3 zu 4 kommen 6 Würfel dazu.</div>';}}
+  if (!isNaN(v5)){total++;if(v5===29){html+='<div>✅ Figur 5: 29 – richtig!</div>';ok++;}else{html+='<div>❌ Figur 5: '+v5+' – falsch. Figur 4 hat 23 Würfel, dann kommen 6 dazu.</div>';}}
+  fb.className='feedback-box '+(ok===total?'success':ok>0?'partial':'error')+' show'; fb.innerHTML=html;
+}
+function resetCounts(){['ans4','ans5'].forEach(i=>document.getElementById(i).value='');const fb=document.getElementById('feedbackCounts');fb.className='feedback-box';fb.innerHTML='';}
+
+function checkTerm(){checkTermFor('termInput','feedbackTerm','solutionReveal',n=>6*n-1);}
+function resetTerm(){document.getElementById('termInput').value='';const fb=document.getElementById('feedbackTerm');fb.className='feedback-box';fb.innerHTML='';document.getElementById('solutionReveal').className='solution-reveal';}
+
+function checkFig10(){const v=parseInt(document.getElementById('ans10').value),fb=document.getElementById('feedbackFig10');if(isNaN(v)){fb.className='feedback-box error show';fb.innerHTML='⚠️ Bitte eine Zahl eingeben.';return;}if(v===59){fb.className='feedback-box success show';fb.innerHTML='✅ Richtig! Figur 10 hat <strong>59 Würfel</strong>.';}else{fb.className='feedback-box error show';fb.innerHTML='❌ Leider falsch. Setze n = 10 in deinen Term ein.';}}
+function resetFig10(){document.getElementById('ans10').value='';const fb=document.getElementById('feedbackFig10');fb.className='feedback-box';fb.innerHTML='';}
+
+function checkTermEyes(){checkTermFor('termEyes','feedbackEyes','solutionEyes',n=>5*(6*n-1));}
+function resetTermEyes(){document.getElementById('termEyes').value='';const fb=document.getElementById('feedbackEyes');fb.className='feedback-box';fb.innerHTML='';document.getElementById('solutionEyes').className='solution-reveal';}
+
+function checkAssignment(){
+  const cells=[...document.querySelectorAll('#figuresRowQ .cube-cell[data-correct]')];
+  let total=0,correct=0,missing=0;
+  cells.forEach(c=>{total++;if(!c.dataset.chosen){missing++;return;}if(parseInt(c.dataset.chosen)===parseInt(c.dataset.correct))correct++;});
+  const fb=document.getElementById('feedbackAssign');
+  if(missing>0){fb.className='feedback-box partial show';fb.innerHTML='⚠️ Noch '+missing+' Würfel ohne Zuordnung. Tippe auf alle Fragezeichen-Würfel.';return;}
+  if(correct===total){fb.className='feedback-box success show';fb.innerHTML='✅ Alle Würfel richtig zugeordnet!<br><span style="font-weight:400">Obere Säulenwürfel → 4 &nbsp;·&nbsp; Unterste Säulenwürfel → 5 &nbsp;·&nbsp; Zwischenwürfel → 6</span>';}
+  else{fb.className='feedback-box error show';fb.innerHTML='❌ '+correct+' von '+total+' richtig. Welche Würfelgruppe gehört zu welchem Teil des Terms?';}
+}
+function resetAssignment(){buildSet('figuresRowQ','qmark',true);const fb=document.getElementById('feedbackAssign');fb.className='feedback-box';fb.innerHTML='';}
+
+function checkMC(){
+  const fb=document.getElementById('feedbackMC');
+  let allAnswered=true,allCorrect=true;
+  mcData.forEach((q,qi)=>{
+    const btns=[...document.querySelectorAll('[data-qi="'+qi+'"]')];
+    const sel=btns.find(b=>b.classList.contains('selected'));
+    if(!sel){allAnswered=false;return;}
+    btns.forEach(b=>{b.classList.remove('selected','correct-ans','wrong-ans');if(parseInt(b.dataset.oi)===q.correct)b.classList.add('correct-ans');else if(b===sel)b.classList.add('wrong-ans');});
+    if(parseInt(sel.dataset.oi)!==q.correct)allCorrect=false;
+  });
+  if(!allAnswered){fb.className='feedback-box partial show';fb.innerHTML='⚠️ Bitte alle drei Fragen beantworten.';return;}
+  if(allCorrect){fb.className='feedback-box success show';fb.innerHTML='✅ Alle drei Fragen richtig! Du hast den Term vollständig verstanden.';}
+  else{fb.className='feedback-box error show';fb.innerHTML='❌ Nicht alle richtig. Die richtigen Antworten sind grün markiert.';}
+}
+function resetMC(){buildMC();const fb=document.getElementById('feedbackMC');fb.className='feedback-box';fb.innerHTML='';}
+</script>
+</body>
+</html>
