@@ -675,26 +675,65 @@ function resetPz(id,sids,bk){
 
 // PROFI EQ CHECK
 function norm(s){
-  return s.toLowerCase()
-    .replace(/\s/g,'')
-    .replace(/,/g,'.');
+  return s.toLowerCase().replace(/\s/g,'').replace(/,/g,'.').replace(/:/g,'/');
+}
+// Split equation into [left, right] at '='
+function splitEq(s){
+  const n=norm(s);
+  const idx=n.indexOf('=');
+  if(idx<0)return[n,''];
+  return[n.slice(0,idx), n.slice(idx+1)];
+}
+// Convert fraction strings like 3/4 to decimals in a string (for coefficient matching)
+function decimalise(s){
+  return s.replace(/(\d+)\/(\d+)/g,(_,a,b)=>{
+    const v=parseFloat(a)/parseFloat(b);
+    return String(Math.round(v*10000)/10000);
+  });
+}
+// Evaluate a simple numeric expression (handles *, /, +, -, decimal)
+function evalSimple(s){
+  try{
+    // Only allow safe numeric expression chars
+    if(!/^[0-9+\-*/.() ]+$/.test(s))return null;
+    return Function('"use strict";return('+s+')')();
+  }catch(e){return null;}
+}
+// Check if string contains variable v adjacent to a number (coefficient)
+function hasCoeff(s, v, coeff){
+  const n=norm(s);
+  const c=String(coeff).replace(',','.');
+  // patterns: 12e, 12*e, e*12
+  const re=new RegExp('('+c+'[*]?'+v+'|'+v+'[*]?'+c+')');
+  return re.test(n);
 }
 function hasVar(s,v){ return norm(s).includes(v.toLowerCase()); }
-function hasNum(s,n){
-  const sn=norm(s);
-  const ns=String(n).replace(',','.');
-  const pct=String(Math.round(parseFloat(ns)*100));
-  return sn.includes(ns)||sn.includes(pct);
-}
 function chkEq1(){
   const r1=document.getElementById('pr1e1').value;
   const r2=document.getElementById('pr1e2').value;
-  const n1=norm(r1), n2=norm(r2);
-  // Accept both fields in either order
-  function isI(s){ return hasVar(s,'x')&&hasVar(s,'y')&&s.includes('500')&&!s.includes('0.7')&&!s.includes('0.4'); }
-  function isII(s){ return (s.includes('0.75')||s.includes('75'))&&(s.includes('0.4')||s.includes('40'))&&(s.includes('300')||s.includes('0.6')); }
-  const o1=isI(n1)||isI(n2);
-  const o2=isII(n1)||isII(n2);
+  // Test both fields in either order
+  function isI(raw){
+    const [l,r]=splitEq(raw);
+    const ld=decimalise(l), rd=decimalise(r);
+    const rv=evalSimple(rd);
+    return hasVar(ld,'x')&&hasVar(ld,'y')&&!hasCoeff(ld,'x',0.75)&&!hasCoeff(ld,'y',0.4)
+           &&(Math.abs(rv-500)<1||(ld.includes('x')&&ld.includes('y')&&rd.includes('500')));
+  }
+  function isII(raw){
+    const [l,r]=splitEq(raw);
+    const ld=decimalise(l), rd=decimalise(r);
+    const rv=evalSimple(rd);
+    // left must have coeff ~0.75 with x AND ~0.4 with y
+    const hasX=(hasCoeff(ld,'x',0.75)||hasCoeff(ld,'x',75)||ld.includes('0.75'));
+    const hasY=(hasCoeff(ld,'y',0.4)||hasCoeff(ld,'y',40)||ld.includes('0.40')||ld.includes('0.4'));
+    // right must evaluate to ~300 OR be 0.6*500 form
+    const rightOk=(rv!==null&&Math.abs(rv-300)<1)
+      ||(rd.includes('300'))
+      ||(rd.includes('0.6')&&rd.includes('500'));
+    return hasX&&hasY&&rightOk;
+  }
+  const o1=isI(r1)||isI(r2);
+  const o2=isII(r1)||isII(r2);
   if(o1&&o2){setFb('pr1eq',true,'&#10003; Beide Gleichungen korrekt! Jetzt l&ouml;sen.');}
   else if(o1){setFb('pr1eq',false,'&#10007; (I) stimmt. Pr&uuml;fe (II):<br>0,75&middot;x + 0,40&middot;y = 300');showClr('pr1eq');}
   else if(o2){setFb('pr1eq',false,'&#10007; (II) stimmt. Pr&uuml;fe (I):<br>x + y = 500');showClr('pr1eq');}
@@ -703,15 +742,32 @@ function chkEq1(){
 function chkEq2(){
   const r1=document.getElementById('pr2e1').value;
   const r2=document.getElementById('pr2e2').value;
-  const n1=norm(r1), n2=norm(r2);
-  function isI(s){ return hasVar(s,'e')&&hasVar(s,'k')&&s.includes('320')&&!s.includes('3290')&&!s.includes('12')&&!s.includes('7'); }
-  function isII(s){ return s.includes('12')&&s.includes('7')&&(s.includes('3290')||s.includes('329')); }
-  const o1=isI(n1)||isI(n2);
-  const o2=isII(n1)||isII(n2);
+  function isI(raw){
+    const [l,r]=splitEq(raw);
+    const rv=evalSimple(r);
+    // simple sum of e and k, right side = 320, no price coefficients
+    return hasVar(l,'e')&&hasVar(l,'k')
+           &&!hasCoeff(l,'e',12)&&!hasCoeff(l,'k',7)
+           &&(Math.abs(rv-320)<1||norm(raw).includes('320'))
+           &&!norm(raw).includes('3290');
+  }
+  function isII(raw){
+    const [l,r]=splitEq(raw);
+    const ld=decimalise(l), rd=decimalise(r);
+    const rv=evalSimple(rd);
+    // left must have 12 with e AND 7 with k
+    const has12e=hasCoeff(ld,'e',12)||ld.includes('12e')||ld.includes('12*e')||ld.includes('e*12');
+    const has7k=hasCoeff(ld,'k',7)||ld.includes('7k')||ld.includes('7*k')||ld.includes('k*7');
+    // right must evaluate strictly to 3290
+    const rightOk=(rv!==null&&Math.abs(rv-3290)<1)||(rd.trim()==='3290');
+    return has12e&&has7k&&rightOk;
+  }
+  const o1=isI(r1)||isI(r2);
+  const o2=isII(r1)||isII(r2);
   if(o1&&o2){setFb('pr2eq',true,'&#10003; Super! Beide Gleichungen korrekt.');}
-  else if(o1){setFb('pr2eq',false,'&#10007; (I) stimmt. Pr&uuml;fe (II):<br>12&middot;e + 7&middot;k = 3290');showClr('pr2eq');}
+  else if(o1){setFb('pr2eq',false,'&#10007; (I) stimmt. Pr&uuml;fe (II):<br>12&middot;e + 7&middot;k = 3290<br><small>Tipp: Die rechte Seite ist eine feste Zahl, kein Produkt.</small>');showClr('pr2eq');}
   else if(o2){setFb('pr2eq',false,'&#10007; (II) stimmt. Pr&uuml;fe (I):<br>e + k = 320');showClr('pr2eq');}
-  else{setFb('pr2eq',false,'&#10007; Tipp: (I)&nbsp; e+k=320 &nbsp; (II)&nbsp; 12&middot;e+7&middot;k=3290');showClr('pr2eq');}
+  else{setFb('pr2eq',false,'&#10007; Tipp: (I)&nbsp; e+k=320 &nbsp; (II)&nbsp; 12&middot;e+7&middot;k=3290<br><small>Pr&uuml;fe: Steht auf der rechten Seite eine einzelne Zahl?</small>');showClr('pr2eq');}
 }
 function chkPr1(){
   const x=pN(document.getElementById('pr1x').value),y=pN(document.getElementById('pr1y').value);
