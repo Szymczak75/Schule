@@ -35,9 +35,9 @@ header h1{font-family:'DM Serif Display',serif;font-size:1.3rem}
 .badge{background:var(--accent);color:#fff;font-size:.72rem;font-weight:700;padding:3px 9px;border-radius:20px;letter-spacing:.06em;text-transform:uppercase}
 
 /* Tabs */
-.tabs{display:flex;background:#120f0a;padding:0 14px;gap:2px;overflow-x:auto;scrollbar-width:none}
+.tabs{display:flex;background:#120f0a;padding:0 14px;gap:2px;overflow-x:auto;scrollbar-width:none;position:relative;z-index:101}
 .tabs::-webkit-scrollbar{display:none}
-.tab{flex-shrink:0;padding:10px 16px;border:none;background:transparent;color:#8a7d6e;font-family:'DM Sans',sans-serif;font-size:.88rem;font-weight:500;cursor:pointer;border-bottom:3px solid transparent;transition:color .2s,border-color .2s;white-space:nowrap;min-height:44px}
+.tab{flex-shrink:0;padding:10px 16px;border:none;background:transparent;color:#8a7d6e;font-family:'DM Sans',sans-serif;font-size:.88rem;font-weight:500;cursor:pointer;border-bottom:3px solid transparent;transition:color .2s,border-color .2s;white-space:nowrap;min-height:44px;-webkit-appearance:none;touch-action:manipulation}
 .tab.active{color:#fffef9;border-bottom-color:var(--accent)}
 .tab.done::after{content:' ✓';color:var(--ok-bd)}
 
@@ -146,9 +146,9 @@ hr.sep{border:none;border-top:1.5px solid #e0d9ce;margin:20px 0}
 </header>
 
 <div class="tabs">
-  <button class="tab active" id="t0" onclick="go(0)">① Die Idee</button>
-  <button class="tab" id="t1" onclick="go(1)">② Geführtes Beispiel</button>
-  <button class="tab" id="t2" onclick="go(2)">③ Selbst lösen</button>
+  <button class="tab active" id="t0" data-tab="0">① Die Idee</button>
+  <button class="tab" id="t1" data-tab="1">② Geführtes Beispiel</button>
+  <button class="tab" id="t2" data-tab="2">③ Selbst lösen</button>
 </div>
 
 <div class="dots">
@@ -199,7 +199,7 @@ hr.sep{border:none;border-top:1.5px solid #e0d9ce;margin:20px 0}
     </div>
 
     <div style="margin-top:20px;text-align:right">
-      <button class="btn" onclick="done0()">Verstanden – weiter →</button>
+      <button class="btn" data-action="done0">Verstanden – weiter →</button>
     </div>
   </div>
 </div>
@@ -559,6 +559,37 @@ function done0(){
   go(1);
 }
 
+// ── Robuste Event-Delegation für Touch + Click ──
+function handleAction(el) {
+  const tab = el.getAttribute('data-tab');
+  const action = el.getAttribute('data-action');
+  if(tab !== null) { go(parseInt(tab)); return; }
+  if(action === 'done0') { done0(); return; }
+  if(action === 'checkProbe') { checkProbe(); return; }
+}
+
+document.addEventListener('click', function(e) {
+  const el = e.target.closest('[data-tab],[data-action]');
+  if(el) { e.preventDefault(); handleAction(el); }
+});
+
+// touchstart only on tab/action elements – scoped so inputs still work
+document.querySelectorAll('[data-tab],[data-action]').forEach(function(el) {
+  el.addEventListener('touchstart', function(e) {
+    e.preventDefault();
+    handleAction(el);
+  }, {passive: false});
+});
+// Re-bind after DOM ready (also handles dynamically shown elements via onclick)
+window.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('[data-tab],[data-action]').forEach(function(el) {
+    el.addEventListener('touchstart', function(e) {
+      e.preventDefault();
+      handleAction(el);
+    }, {passive: false});
+  });
+});
+
 function markDone(n){
   done[n]=true;
   document.getElementById('t'+n).classList.add('done');
@@ -761,10 +792,7 @@ function chkSelf(){
   if(window.MathJax)MathJax.typesetPromise();
 }
 
-// Touch fix
-document.addEventListener('touchend',function(e){
-  if(e.target.tagName==='BUTTON')e.preventDefault();
-},{passive:false});
+// Touch: click-Events funktionieren auf Touch nativ – kein Handler nötig.
 </script>
 </body>
 </html>
