@@ -268,6 +268,22 @@ function attachPicker(cell, sz) {
     if (openCell===cell) { closePicker(); return; }
     closePicker(); openCell=cell;
     const picker=document.createElement('div'); picker.className='eye-picker';
+    // Reset-Button
+    const resetBtn=document.createElement('button');
+    resetBtn.textContent='↺'; resetBtn.title='Zurücksetzen';
+    resetBtn.style.cssText='background:#eef0f8;border-color:#c0cce8;color:#6b7280;font-size:18px;';
+    resetBtn.addEventListener('click', ev => {
+      ev.stopPropagation();
+      cell.dataset.chosen='';
+      cell.className='cube-cell filled qmark-cube';
+      cell.innerHTML='';
+      const lbl=document.createElement('div');
+      lbl.className='qmark-label'; lbl.style.fontSize=Math.round(sz*0.55)+'px'; lbl.textContent='?';
+      cell.appendChild(lbl);
+      attachPicker(cell,sz); closePicker();
+    });
+    picker.appendChild(resetBtn);
+
     [4,5,6].forEach(num => {
       const btn=document.createElement('button'); btn.textContent=num;
       if (cell.dataset.chosen==num) btn.classList.add('ep'+num);
@@ -337,8 +353,17 @@ function buildMC() {
 buildMC();
 
 function evalTerm(raw, n) {
-  try { const e=raw.replace(/[·×]/g,'*').replace(/−/g,'-').replace(/[^0-9n+\-*/(). ]/g,''); return new Function('n','"use strict";return ('+e+');')(n); }
-  catch(e) { return null; }
+  try {
+    let e = raw
+      .replace(/[·×]/g, '*')
+      .replace(/−/g, '-')
+      .replace(/\s+/g, '');
+    e = e.replace(/([0-9])(n)/g, '$1*$2');
+    e = e.replace(/(\))(n|[0-9])/g, '$1*$2');
+    e = e.replace(/(n)(\()/g, '$1*$2');
+    e = e.replace(/[^0-9n+\-*/(). ]/g, '');
+    return new Function('n', '"use strict"; return (' + e + ');')(n);
+  } catch(err) { return null; }
 }
 
 function checkTermFor(inputId, fbId, solId, expectedFn) {
