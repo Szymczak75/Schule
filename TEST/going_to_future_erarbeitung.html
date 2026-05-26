@@ -1,0 +1,1138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Going-to Future – AI in School</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0f14;
+    --surface: #1a1a24;
+    --card-bg: #1e1e2e;
+    --accent: #7c6af7;
+    --accent2: #f7c26a;
+    --accent3: #6af7b8;
+    --text: #f0eeff;
+    --text-dim: #8888aa;
+    --border: rgba(124,106,247,0.18);
+    --correct: #22c55e;
+    --wrong: #ef4444;
+    --radius: 20px;
+    --shadow: 0 8px 40px rgba(0,0,0,0.5);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 17px;
+    -webkit-tap-highlight-color: transparent;
+    overflow: hidden;
+  }
+
+  /* Animated bg */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 40% at 80% 10%, rgba(124,106,247,0.12) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 30% at 10% 90%, rgba(106,247,184,0.08) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── HEADER ── */
+  header {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    background: rgba(15,15,20,0.85);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .header-left {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .header-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1rem;
+    color: var(--accent);
+    letter-spacing: 0.02em;
+  }
+
+  .header-sub {
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .lang-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 0.78rem;
+    padding: 8px 14px;
+    border-radius: 50px;
+    cursor: pointer;
+    letter-spacing: 0.08em;
+    transition: background 0.2s, border-color 0.2s, transform 0.1s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 44px;
+    min-height: 44px;
+    justify-content: center;
+  }
+  .lang-btn:active { transform: scale(0.95); }
+  .lang-btn:hover { background: rgba(124,106,247,0.15); border-color: var(--accent); }
+
+  /* ── PROGRESS ── */
+  .progress-bar-wrap {
+    position: fixed;
+    top: 61px; left: 0; right: 0;
+    z-index: 99;
+    height: 3px;
+    background: rgba(255,255,255,0.06);
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent3));
+    transition: width 0.4s cubic-bezier(.4,0,.2,1);
+    border-radius: 0 2px 2px 0;
+  }
+
+  /* ── CARD DOTS ── */
+  .card-dots {
+    position: fixed;
+    top: 72px; left: 0; right: 0;
+    z-index: 98;
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 0 0;
+  }
+  .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.12);
+    transition: background 0.3s, transform 0.3s;
+  }
+  .dot.active {
+    background: var(--accent);
+    transform: scale(1.3);
+  }
+  .dot.done {
+    background: var(--accent3);
+  }
+
+  /* ── MAIN STAGE ── */
+  main {
+    position: fixed;
+    top: 100px; left: 0; right: 0; bottom: 70px;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    padding: 12px 16px;
+  }
+
+  /* ── CARD ── */
+  .card {
+    position: absolute;
+    width: 100%;
+    max-width: 680px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 28px 24px 24px;
+    overflow-y: auto;
+    max-height: 100%;
+    transition: transform 0.38s cubic-bezier(.4,0,.2,1), opacity 0.38s;
+    will-change: transform, opacity;
+    -webkit-overflow-scrolling: touch;
+  }
+  .card.hidden { opacity: 0; pointer-events: none; transform: translateX(80px); }
+  .card.hidden-left { opacity: 0; pointer-events: none; transform: translateX(-80px); }
+  .card.active { opacity: 1; transform: translateX(0); }
+
+  /* Card tag */
+  .card-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: rgba(124,106,247,0.12);
+    border: 1px solid rgba(124,106,247,0.25);
+    border-radius: 50px;
+    padding: 4px 12px;
+    margin-bottom: 16px;
+  }
+
+  .card-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.65rem;
+    color: var(--text-dim);
+    margin-bottom: 4px;
+    letter-spacing: 0.08em;
+  }
+
+  .card-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1.25;
+    margin-bottom: 14px;
+  }
+
+  .card-body {
+    color: #c8c8e0;
+    line-height: 1.7;
+    font-size: 0.95rem;
+  }
+
+  /* Highlight boxes */
+  .highlight-box {
+    background: rgba(124,106,247,0.1);
+    border: 1px solid rgba(124,106,247,0.3);
+    border-left: 3px solid var(--accent);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin: 14px 0;
+    font-size: 0.93rem;
+    line-height: 1.7;
+  }
+
+  .highlight-box.gold {
+    background: rgba(247,194,106,0.08);
+    border-color: rgba(247,194,106,0.25);
+    border-left-color: var(--accent2);
+  }
+
+  .highlight-box.green {
+    background: rgba(106,247,184,0.08);
+    border-color: rgba(106,247,184,0.25);
+    border-left-color: var(--accent3);
+  }
+
+  /* Formula / structure display */
+  .formula {
+    background: rgba(15,15,20,0.7);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin: 16px 0;
+    font-family: 'Syne', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    text-align: center;
+    color: var(--text);
+    letter-spacing: 0.02em;
+  }
+
+  .formula span.s { color: var(--accent2); }
+  .formula span.v { color: var(--accent); }
+  .formula span.inf { color: var(--accent3); }
+
+  /* Example sentences */
+  .examples { margin: 14px 0; display: flex; flex-direction: column; gap: 8px; }
+
+  .example-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 10px;
+    padding: 10px 12px;
+  }
+  .example-row .icon {
+    font-size: 1.1rem;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .example-row .text { font-size: 0.9rem; line-height: 1.6; color: #d0d0ee; }
+  .example-row .text em {
+    font-style: normal;
+    color: var(--accent2);
+    font-weight: 500;
+  }
+  .example-row .text small { display: block; color: var(--text-dim); font-size: 0.78rem; margin-top: 2px; }
+
+  /* Comparison table */
+  .compare-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 14px 0;
+    font-size: 0.88rem;
+  }
+  .compare-table th {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 8px 12px;
+    background: rgba(255,255,255,0.05);
+    color: var(--text-dim);
+    text-align: left;
+  }
+  .compare-table td {
+    padding: 9px 12px;
+    border-top: 1px solid rgba(255,255,255,0.05);
+    line-height: 1.5;
+    color: #c8c8e0;
+  }
+  .compare-table tr:first-child td { border-top: none; }
+  .compare-table .pill {
+    display: inline-block;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 50px;
+    letter-spacing: 0.06em;
+  }
+  .pill-pos { background: rgba(106,247,184,0.15); color: var(--accent3); border: 1px solid rgba(106,247,184,0.3); }
+  .pill-neg { background: rgba(239,68,68,0.12); color: #f87171; border: 1px solid rgba(239,68,68,0.25); }
+  .pill-q   { background: rgba(247,194,106,0.12); color: var(--accent2); border: 1px solid rgba(247,194,106,0.3); }
+
+  /* Quiz elements */
+  .quiz-q {
+    font-family: 'Syne', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 14px;
+    line-height: 1.4;
+  }
+
+  .quiz-choices {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+  }
+
+  .choice-btn {
+    background: rgba(255,255,255,0.08);
+    border: 1.5px solid rgba(255,255,255,0.22);
+    border-radius: 12px;
+    padding: 13px 16px;
+    color: #f0eeff;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.92rem;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s, transform 0.1s;
+    min-height: 44px;
+    line-height: 1.4;
+  }
+  .choice-btn:active { transform: scale(0.98); }
+  .choice-btn:hover:not(:disabled) {
+    background: rgba(124,106,247,0.1);
+    border-color: rgba(124,106,247,0.4);
+  }
+  .choice-btn.correct {
+    background: rgba(34,197,94,0.15) !important;
+    border-color: var(--correct) !important;
+    color: #86efac;
+  }
+  .choice-btn.wrong {
+    background: rgba(239,68,68,0.12) !important;
+    border-color: var(--wrong) !important;
+    color: #fca5a5;
+  }
+  .choice-btn:disabled { cursor: default; }
+
+  .feedback-msg {
+    margin-top: 12px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    font-size: 0.88rem;
+    line-height: 1.6;
+    display: none;
+  }
+  .feedback-msg.show { display: block; }
+  .feedback-msg.ok {
+    background: rgba(34,197,94,0.1);
+    border: 1px solid rgba(34,197,94,0.3);
+    color: #86efac;
+  }
+  .feedback-msg.bad {
+    background: rgba(239,68,68,0.1);
+    border: 1px solid rgba(239,68,68,0.3);
+    color: #fca5a5;
+  }
+
+  /* Drag / build sentence */
+  .word-tokens {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 10px 0;
+  }
+  .token {
+    background: rgba(124,106,247,0.32);
+    border: 2px solid rgba(124,106,247,0.7);
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #e8e0ff;
+    cursor: pointer;
+    transition: all 0.15s;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    user-select: none;
+  }
+  .token:active { transform: scale(0.95); background: rgba(124,106,247,0.5); }
+  .token:hover:not(.used) { background: rgba(124,106,247,0.45); border-color: var(--accent); }
+  .token.used {
+    opacity: 0.18;
+    pointer-events: none;
+  }
+  .sentence-slots {
+    min-height: 56px;
+    background: rgba(255,255,255,0.06);
+    border: 2px dashed rgba(255,255,255,0.28);
+    border-radius: 12px;
+    padding: 10px 14px;
+    margin: 10px 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+  }
+  .slot-token {
+    background: rgba(247,194,106,0.28);
+    border: 2px solid rgba(247,194,106,0.7);
+    border-radius: 8px;
+    padding: 7px 13px;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    color: #ffe9b0;
+    font-weight: 700;
+    transition: opacity 0.15s;
+  }
+  .slot-token:active { opacity: 0.7; }
+
+  .check-sentence-btn {
+    background: var(--accent);
+    border: none;
+    border-radius: 12px;
+    padding: 12px 22px;
+    color: #fff;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 0.88rem;
+    cursor: pointer;
+    min-height: 44px;
+    margin-top: 8px;
+    transition: opacity 0.2s, transform 0.1s;
+    letter-spacing: 0.04em;
+  }
+  .check-sentence-btn:active { transform: scale(0.97); }
+  .check-sentence-btn:disabled { opacity: 0.4; cursor: default; }
+
+  /* Summary card */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin: 14px 0;
+  }
+  .summary-item {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 12px;
+    text-align: center;
+  }
+  .summary-item .s-icon { font-size: 1.5rem; margin-bottom: 6px; }
+  .summary-item .s-label {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 4px;
+  }
+  .summary-item .s-val {
+    font-size: 0.88rem;
+    color: var(--text);
+    line-height: 1.5;
+  }
+
+  /* ── NAV BUTTONS ── */
+  nav {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    gap: 10px;
+    padding: 12px 16px;
+    background: rgba(15,15,20,0.9);
+    backdrop-filter: blur(16px);
+    border-top: 1px solid var(--border);
+  }
+
+  .nav-btn {
+    flex: 1;
+    border: none;
+    border-radius: 14px;
+    padding: 13px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    min-height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: opacity 0.2s, transform 0.1s;
+    letter-spacing: 0.03em;
+  }
+  .nav-btn:active { transform: scale(0.97); }
+  .nav-btn:disabled { opacity: 0.25; cursor: default; }
+
+  .btn-back {
+    background: rgba(255,255,255,0.06);
+    color: var(--text-dim);
+    max-width: 110px;
+    flex: 0 0 auto;
+  }
+  .btn-next {
+    background: linear-gradient(135deg, var(--accent), #9b8af9);
+    color: #fff;
+    box-shadow: 0 4px 20px rgba(124,106,247,0.35);
+  }
+
+  /* ── T-REX ── */
+  .trex {
+    position: fixed;
+    bottom: 76px;
+    right: 14px;
+    z-index: 200;
+    font-size: 1.4rem;
+    cursor: pointer;
+    user-select: none;
+    filter: drop-shadow(0 2px 6px rgba(0,0,0,0.5));
+    transition: transform 0.2s;
+  }
+  .trex:hover { transform: scale(1.2) rotate(-5deg); }
+  .trex:active { transform: scale(0.9); }
+
+  .trex-tooltip {
+    position: fixed;
+    bottom: 115px;
+    right: 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 6px 12px;
+    font-size: 0.75rem;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    color: var(--accent);
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+    letter-spacing: 0.04em;
+  }
+  .trex:hover + .trex-tooltip,
+  .trex-tooltip.show { opacity: 1; }
+
+  /* Responsive */
+  @media (min-width: 600px) {
+    .card { padding: 36px 32px 30px; }
+    .card-title { font-size: 1.55rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <div class="header-title">Going-to Future</div>
+    <div class="header-sub">AI in School · Class 6</div>
+  </div>
+  <button class="lang-btn" id="langBtn" onclick="toggleLang()">🌐 DE</button>
+</header>
+
+<div class="progress-bar-wrap">
+  <div class="progress-bar-fill" id="progressFill" style="width:16.6%"></div>
+</div>
+
+<div class="card-dots" id="cardDots"></div>
+
+<main>
+
+  <!-- ═══════ CARD 1 ═══════ -->
+  <div class="card active" id="card-0">
+    <div class="card-tag">🚀 <span data-en="Introduction" data-de="Einführung">Introduction</span></div>
+    <div class="card-title" data-en="AI is coming – and it has plans!" data-de="KI kommt – und hat Pläne!">AI is coming – and it has plans!</div>
+    <div class="card-body">
+      <p data-en="Have you ever heard a robot say: <em>&ldquo;I am going to help you with your homework.&rdquo;</em> 🤖" data-de="Hast du schon mal einen Roboter sagen hören: <em>&ldquo;I am going to help you with your homework.&rdquo;</em> 🤖">Have you ever heard a robot say: <em>"I am going to help you with your homework."</em> 🤖</p>
+
+      <div class="highlight-box" style="margin-top:16px">
+        <strong data-en="The going-to future is used when:" data-de="Das going-to future benutzt man, wenn:">The going-to future is used when:</strong>
+        <ul style="margin-top:8px; padding-left:18px; display:flex; flex-direction:column; gap:6px">
+          <li data-en="you have already decided to do something" data-de="du bereits entschieden hast, etwas zu tun">you have already decided to do something</li>
+          <li data-en="you can see from the situation that something is about to happen" data-de="man an der Situation erkennt, dass etwas gleich passieren wird">you can see from the situation that something is about to happen</li>
+        </ul>
+      </div>
+
+      <div class="examples">
+        <div class="example-row">
+          <span class="icon">🤖</span>
+          <div class="text">
+            <em data-en="&ldquo;The AI is going to write your essay.&rdquo;" data-de="&bdquo;Die KI wird deinen Aufsatz schreiben.&ldquo;">"The AI is going to write your essay."</em>
+            <small data-en="→ A plan has already been made." data-de="→ Ein Plan wurde bereits gemacht.">→ A plan has already been made.</small>
+          </div>
+        </div>
+        <div class="example-row">
+          <span class="icon">📱</span>
+          <div class="text">
+            <em data-en="&ldquo;Look! The screen is going to turn off.&rdquo;" data-de="&bdquo;Schau! Der Bildschirm wird gleich ausgehen.&ldquo;">"Look! The screen is going to turn off."</em>
+            <small data-en="→ You can see it happening right now." data-de="→ Du siehst es gerade passieren.">→ You can see it happening right now.</small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ CARD 2 ═══════ -->
+  <div class="card hidden" id="card-1">
+    <div class="card-tag">🔧 <span data-en="Structure" data-de="Aufbau">Structure</span></div>
+    <div class="card-title" data-en="How to build it" data-de="Wie es aufgebaut wird">How to build it</div>
+    <div class="card-body">
+      <p data-en="Three parts – always in this order:" data-de="Drei Teile – immer in dieser Reihenfolge:">Three parts – always in this order:</p>
+
+      <div class="formula">
+        <span class="s">Subject</span> + <span class="v">am / is / are + going to</span> + <span class="inf">Infinitive</span>
+      </div>
+
+      <table class="compare-table">
+        <thead>
+          <tr>
+            <th><span class="pill pill-pos" data-en="✔ Positive" data-de="✔ Positiv">✔ Positive</span></th>
+            <th><span class="pill pill-neg" data-en="✗ Negative" data-de="✗ Negativ">✗ Negative</span></th>
+            <th><span class="pill pill-q" data-en="? Question" data-de="? Frage">? Question</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>I <strong>am going to</strong> learn</td>
+            <td>I <strong>am not going to</strong> learn</td>
+            <td><strong>Am</strong> I <strong>going to</strong> learn?</td>
+          </tr>
+          <tr>
+            <td>She <strong>is going to</strong> use</td>
+            <td>She <strong>isn't going to</strong> use</td>
+            <td><strong>Is</strong> she <strong>going to</strong> use?</td>
+          </tr>
+          <tr>
+            <td>They <strong>are going to</strong> build</td>
+            <td>They <strong>aren't going to</strong> build</td>
+            <td><strong>Are</strong> they <strong>going to</strong> build?</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="highlight-box gold">
+        <strong>💡 <span data-en="Tip:" data-de="Tipp:">Tip:</span></strong>
+        <span data-en=" The verb <em>to be</em> changes (am / is / are) – just like in the Simple Present!" data-de=" Das Verb <em>to be</em> ändert sich (am / is / are) – genau wie im Simple Present!"> The verb <em>to be</em> changes (am / is / are) – just like in the Simple Present!</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ CARD 3 ═══════ -->
+  <div class="card hidden" id="card-2">
+    <div class="card-tag">📚 <span data-en="Examples" data-de="Beispiele">Examples</span></div>
+    <div class="card-title" data-en="AI at school – real sentences" data-de="KI in der Schule – echte Sätze">AI at school – real sentences</div>
+    <div class="card-body">
+      <p data-en="Read these sentences carefully. Can you spot the pattern?" data-de="Lies diese Sätze genau. Erkennst du das Muster?">Read these sentences carefully. Can you spot the pattern?</p>
+
+      <div class="examples" style="margin-top:14px">
+        <div class="example-row">
+          <span class="icon">🗓️</span>
+          <div class="text">
+            Our teacher <em>is going to show</em> us a new AI tool next week.
+            <small data-en="→ Plan: she has already decided this." data-de="→ Plan: sie hat das schon entschieden.">→ Plan: she has already decided this.</small>
+          </div>
+        </div>
+        <div class="example-row">
+          <span class="icon">🎨</span>
+          <div class="text">
+            We <em>are going to use</em> AI to design our class poster.
+            <small data-en="→ The class has already made that plan." data-de="→ Die Klasse hat diesen Plan schon gemacht.">→ The class has already made that plan.</small>
+          </div>
+        </div>
+        <div class="example-row">
+          <span class="icon">😮</span>
+          <div class="text">
+            Watch out! The robot <em>is going to drop</em> the tablet!
+            <small data-en="→ You can see it in the situation right now." data-de="→ Man sieht es gerade in der Situation.">→ You can see it in the situation right now.</small>
+          </div>
+        </div>
+        <div class="example-row">
+          <span class="icon">🤔</span>
+          <div class="text">
+            <em>Is</em> the school <em>going to buy</em> new AI computers?
+            <small data-en="→ A question about a future plan." data-de="→ Eine Frage über einen Zukunftsplan.">→ A question about a future plan.</small>
+          </div>
+        </div>
+        <div class="example-row">
+          <span class="icon">🙅</span>
+          <div class="text">
+            I <em>am not going to</em> let AI write my homework!
+            <small data-en="→ A negative decision already made." data-de="→ Eine schon gefällte negative Entscheidung.">→ A negative decision already made.</small>
+          </div>
+        </div>
+      </div>
+
+      <div class="highlight-box green" style="margin-top:12px">
+        <span data-en="🧩 Notice: <em>going to</em> never changes – only <em>am / is / are</em> does!" data-de="🧩 Beachte: <em>going to</em> ändert sich nie – nur <em>am / is / are</em> ändert sich!">🧩 Notice: <em>going to</em> never changes – only <em>am / is / are</em> does!</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ CARD 4 ═══════ -->
+  <div class="card hidden" id="card-3">
+    <div class="card-tag">🧩 <span data-en="Practice 1" data-de="Übung 1">Practice 1</span></div>
+    <div class="card-title" data-en="Choose the right answer" data-de="Wähle die richtige Antwort">Choose the right answer</div>
+    <div class="card-body">
+
+      <!-- Q1 -->
+      <div class="quiz-q" data-en="1. &ldquo;The AI _____ all our questions.&rdquo; &nbsp;<em style='color:var(--text-dim);font-size:.85em'>(to answer)</em>" data-de='1. „The AI _____ all our questions." &nbsp;<em style="color:var(--text-dim);font-size:.85em">(to answer)</em>'>1. "The AI _____ all our questions." &nbsp;<em style="color:var(--text-dim);font-size:.85em">(to answer)</em></div>
+      <div class="quiz-choices" id="q1">
+        <button class="choice-btn" onclick="checkMC(this,'q1',false)" data-en="is going answer" data-de="is going answer">is going answer</button>
+        <button class="choice-btn" onclick="checkMC(this,'q1',true)" data-en="is going to answer" data-de="is going to answer">is going to answer</button>
+        <button class="choice-btn" onclick="checkMC(this,'q1',false)" data-en="are going to answer" data-de="are going to answer">are going to answer</button>
+      </div>
+      <div class="feedback-msg" id="fb-q1"></div>
+
+      <!-- Q2 -->
+      <div class="quiz-q" style="margin-top:22px" data-en="2. &ldquo;We _____ AI for every test.&rdquo; &nbsp;<em style='color:var(--text-dim);font-size:.85em'>(negative, to use)</em>" data-de='2. „We _____ AI for every test." &nbsp;<em style="color:var(--text-dim);font-size:.85em">(negativ, to use)</em>'>2. "We _____ AI for every test." &nbsp;<em style="color:var(--text-dim);font-size:.85em">(negative, to use)</em></div>
+      <div class="quiz-choices" id="q2">
+        <button class="choice-btn" onclick="checkMC(this,'q2',false)" data-en="is not going to use" data-de="is not going to use">is not going to use</button>
+        <button class="choice-btn" onclick="checkMC(this,'q2',false)" data-en="am not go to use" data-de="am not go to use">am not go to use</button>
+        <button class="choice-btn" onclick="checkMC(this,'q2',true)" data-en="are not going to use" data-de="are not going to use">are not going to use</button>
+      </div>
+      <div class="feedback-msg" id="fb-q2"></div>
+
+      <!-- Q3 -->
+      <div class="quiz-q" style="margin-top:22px" data-en="3. Which sentence is a question?" data-de="3. Welcher Satz ist eine Frage?">3. Which sentence is a question?</div>
+      <div class="quiz-choices" id="q3">
+        <button class="choice-btn" onclick="checkMC(this,'q3',false)" data-en="She is going to present the AI project." data-de="She is going to present the AI project.">She is going to present the AI project.</button>
+        <button class="choice-btn" onclick="checkMC(this,'q3',true)" data-en="Is he going to program the robot?" data-de="Is he going to program the robot?">Is he going to program the robot?</button>
+        <button class="choice-btn" onclick="checkMC(this,'q3',false)" data-en="They aren't going to need a calculator." data-de="They aren't going to need a calculator.">They aren't going to need a calculator.</button>
+      </div>
+      <div class="feedback-msg" id="fb-q3"></div>
+
+    </div>
+  </div>
+
+  <!-- ═══════ CARD 5 ═══════ -->
+  <div class="card hidden" id="card-4">
+    <div class="card-tag">🏗️ <span data-en="Practice 2" data-de="Übung 2">Practice 2</span></div>
+    <div class="card-title" data-en="Build the sentence" data-de="Bau den Satz">Build the sentence</div>
+    <div class="card-body">
+      <div class="highlight-box gold" style="margin-bottom:16px">
+        <span data-en="💡 Tap the word blocks in the right order. Tap a placed word to remove it." data-de="💡 Tippe die Wortblöcke in der richtigen Reihenfolge an. Tippe auf ein platziertes Wort, um es zu entfernen.">💡 Tap the word blocks in the right order. Tap a placed word to remove it.</span>
+      </div>
+
+      <div style="margin-top:4px">
+        <!-- Puzzle 1 -->
+        <div class="quiz-q" data-en="1. A plan about the school's future 🏫" data-de="1. Ein Plan über die Zukunft der Schule 🏫">1. A plan about the school's future 🏫</div>
+        <div class="sentence-slots" id="slots1"></div>
+        <div class="word-tokens" id="tokens1"></div>
+        <button class="check-sentence-btn" id="checkBtn1" onclick="checkSentence(1)" disabled
+          data-en="Check ✓" data-de="Prüfen ✓">Check ✓</button>
+        <div class="feedback-msg" id="fb-s1"></div>
+      </div>
+
+      <div style="margin-top:28px">
+        <!-- Puzzle 2 -->
+        <div class="quiz-q" data-en="2. A question about a coding lesson 💻" data-de="2. Eine Frage über eine Programmierstunde 💻">2. A question about a coding lesson 💻</div>
+        <div class="sentence-slots" id="slots2"></div>
+        <div class="word-tokens" id="tokens2"></div>
+        <button class="check-sentence-btn" id="checkBtn2" onclick="checkSentence(2)" disabled
+          data-en="Check ✓" data-de="Prüfen ✓">Check ✓</button>
+        <div class="feedback-msg" id="fb-s2"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ CARD 6 ═══════ -->
+  <div class="card hidden" id="card-5">
+    <div class="card-tag">🏆 <span data-en="Summary" data-de="Zusammenfassung">Summary</span></div>
+    <div class="card-title" data-en="You've got it!" data-de="Du hast es geschafft!">You've got it!</div>
+    <div class="card-body">
+      <div class="summary-grid">
+        <div class="summary-item">
+          <div class="s-icon">📌</div>
+          <div class="s-label" data-en="Use for" data-de="Verwendung">Use for</div>
+          <div class="s-val" data-en="Plans &amp; decisions already made" data-de="Bereits gefasste Pläne &amp; Entscheidungen">Plans &amp; decisions already made</div>
+        </div>
+        <div class="summary-item">
+          <div class="s-icon">👁️</div>
+          <div class="s-label" data-en="Also for" data-de="Auch für">Also for</div>
+          <div class="s-val" data-en="Things you can see are about to happen" data-de="Dinge, die man gleich passieren sieht">Things you can see are about to happen</div>
+        </div>
+        <div class="summary-item">
+          <div class="s-icon">🔑</div>
+          <div class="s-label" data-en="Key words" data-de="Schlüsselwörter">Key words</div>
+          <div class="s-val">going to + Infinitive</div>
+        </div>
+        <div class="summary-item">
+          <div class="s-icon">⚙️</div>
+          <div class="s-label" data-en="Changes" data-de="Ändert sich">Changes</div>
+          <div class="s-val">am / is / are</div>
+        </div>
+      </div>
+
+      <div class="formula" style="margin-top:6px">
+        <span class="s">S</span> + <span class="v">am/is/are + going to</span> + <span class="inf">Verb</span>
+      </div>
+
+      <div class="highlight-box green">
+        <strong data-en="🎓 Well done! You now know how to talk about the future with AI – and without it!" data-de="🎓 Super! Du weißt jetzt, wie man mit KI – und ohne sie – über die Zukunft spricht!">🎓 Well done! You now know how to talk about the future with AI – and without it!</strong>
+      </div>
+
+      <div class="highlight-box gold" style="margin-top:10px">
+        <strong data-en="Quick test:" data-de="Schnelltest:">Quick test:</strong>
+        <span data-en=' Say one sentence using <em>going to</em> about what AI is going to do in your school. 🤖' data-de=' Sag einen Satz mit <em>going to</em> darüber, was KI in deiner Schule tun wird. 🤖'> Say one sentence using <em>going to</em> about what AI is going to do in your school. 🤖</span>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- NAV -->
+<nav>
+  <button class="nav-btn btn-back" id="btnBack" onclick="goTo(currentCard-1)" disabled>← <span data-en="Back" data-de="Zurück">Back</span></button>
+  <button class="nav-btn btn-next" id="btnNext" onclick="handleNext()">
+    <span id="nextLabel" data-en="Next →" data-de="Weiter →">Next →</span>
+  </button>
+</nav>
+
+<!-- T-Rex -->
+<div class="trex" id="trex" onclick="toggleTrex()" title="Made by Mathedino">🦖</div>
+<div class="trex-tooltip" id="trexTip">Made by Mathedino</div>
+
+<script>
+// ── STATE ──
+let currentCard = 0;
+const TOTAL = 6;
+let lang = 'en';
+
+// Card unlock: each card has its own "done" state
+// Cards 0,1,2,5 are auto-done (info); cards 3,4 need interaction
+const cardDone = [true, true, true, false, false, true];
+
+// MC tracking
+const mcDone = { q1: false, q2: false, q3: false };
+
+// Sentence puzzle state
+const puzzles = {
+  1: {
+    words: ['Our school', 'is going to', 'buy', 'AI robots', '.'],
+    correct: ['Our school', 'is going to', 'buy', 'AI robots', '.'],
+    placed: [],
+    done: false
+  },
+  2: {
+    words: ['Are', 'the students', 'going to', 'learn', 'coding', '?'],
+    correct: ['Are', 'the students', 'going to', 'learn', 'coding', '?'],
+    placed: [],
+    done: false
+  }
+};
+
+// ── INIT ──
+window.addEventListener('DOMContentLoaded', () => {
+  buildDots();
+  renderDots();
+  updateNav();
+  buildPuzzle(1);
+  buildPuzzle(2);
+});
+
+// ── LANGUAGE ──
+function toggleLang() {
+  lang = lang === 'en' ? 'de' : 'en';
+  document.getElementById('langBtn').textContent = lang === 'en' ? '🌐 DE' : '🌐 EN';
+  applyLang();
+}
+
+function applyLang() {
+  document.querySelectorAll('[data-en]').forEach(el => {
+    const val = lang === 'en' ? el.dataset.en : el.dataset.de;
+    if (val !== undefined) el.innerHTML = val;
+  });
+}
+
+// ── DOTS ──
+function buildDots() {
+  const wrap = document.getElementById('cardDots');
+  wrap.innerHTML = '';
+  for (let i = 0; i < TOTAL; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot';
+    d.id = 'dot-' + i;
+    wrap.appendChild(d);
+  }
+}
+
+function renderDots() {
+  for (let i = 0; i < TOTAL; i++) {
+    const d = document.getElementById('dot-' + i);
+    d.className = 'dot' + (i === currentCard ? ' active' : i < currentCard ? ' done' : '');
+  }
+  const fill = ((currentCard + 1) / TOTAL * 100).toFixed(1);
+  document.getElementById('progressFill').style.width = fill + '%';
+}
+
+// ── NAVIGATION ──
+function goTo(idx, direction) {
+  if (idx < 0 || idx >= TOTAL) return;
+  const from = document.getElementById('card-' + currentCard);
+  from.classList.remove('active');
+  from.classList.add(direction === 'back' ? 'hidden' : 'hidden-left');
+
+  currentCard = idx;
+
+  const to = document.getElementById('card-' + currentCard);
+  to.classList.remove('hidden', 'hidden-left');
+  // Force reflow
+  void to.offsetWidth;
+  to.classList.add('active');
+
+  renderDots();
+  updateNav();
+  applyLang();
+}
+
+function handleNext() {
+  if (currentCard < TOTAL - 1) {
+    goTo(currentCard + 1, 'forward');
+  }
+}
+
+function updateNav() {
+  const back = document.getElementById('btnBack');
+  const next = document.getElementById('btnNext');
+  const label = document.getElementById('nextLabel');
+
+  back.disabled = currentCard === 0;
+
+  const isLast = currentCard === TOTAL - 1;
+  if (isLast) {
+    label.dataset.en = 'Finish 🎉';
+    label.dataset.de = 'Fertig 🎉';
+    next.style.background = 'linear-gradient(135deg, #22c55e, #4ade80)';
+    next.disabled = false;
+  } else {
+    label.dataset.en = 'Next →';
+    label.dataset.de = 'Weiter →';
+    next.style.background = '';
+    next.disabled = !cardDone[currentCard];
+  }
+  applyLang();
+}
+
+// Override goTo for back button
+document.getElementById('btnBack').onclick = () => goTo(currentCard - 1, 'back');
+
+// ── MC QUIZ ──
+function checkMC(btn, qid, isCorrect) {
+  const group = document.getElementById(qid);
+  if (group.dataset.answered) return;
+  group.dataset.answered = '1';
+
+  const buttons = group.querySelectorAll('.choice-btn');
+  buttons.forEach(b => {
+    b.disabled = true;
+    if (b === btn) b.classList.add(isCorrect ? 'correct' : 'wrong');
+    // show correct answer if user was wrong
+    if (!isCorrect && b.onclick.toString().includes('true')) b.classList.add('correct');
+  });
+
+  const fb = document.getElementById('fb-' + qid);
+  fb.classList.add('show');
+  if (isCorrect) {
+    fb.classList.add('ok');
+    fb.dataset.en = '✅ Correct! Well done.';
+    fb.dataset.de = '✅ Richtig! Sehr gut.';
+  } else {
+    fb.classList.add('bad');
+    fb.dataset.en = '❌ Not quite – look at the green answer above.';
+    fb.dataset.de = '❌ Nicht ganz – schau auf die grüne Antwort oben.';
+  }
+  fb.innerHTML = lang === 'en' ? fb.dataset.en : fb.dataset.de;
+
+  mcDone[qid] = true;
+  checkCard3Done();
+}
+
+function checkCard3Done() {
+  if (mcDone.q1 && mcDone.q2 && mcDone.q3) {
+    cardDone[3] = true;
+    updateNav();
+  }
+}
+
+// ── SENTENCE PUZZLE ──
+function fisherYates(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function shuffleNotIdentical(arr) {
+  let result;
+  let tries = 0;
+  do {
+    result = fisherYates(arr);
+    tries++;
+  } while (tries < 20 && JSON.stringify(result) === JSON.stringify(arr));
+  return result;
+}
+
+function buildPuzzle(n) {
+  const p = puzzles[n];
+  const shuffled = shuffleNotIdentical(p.words);
+  const tokenWrap = document.getElementById('tokens' + n);
+  tokenWrap.innerHTML = '';
+  p.placed = [];
+
+  shuffled.forEach((word, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'token';
+    btn.textContent = word;
+    btn.dataset.word = word;
+    btn.dataset.idx = i;
+    btn.onclick = () => placeToken(n, btn);
+    tokenWrap.appendChild(btn);
+  });
+
+  renderSlots(n);
+}
+
+function placeToken(n, btn) {
+  const p = puzzles[n];
+  if (p.done) return;
+  p.placed.push(btn.dataset.word);
+  btn.classList.add('used');
+  renderSlots(n);
+  document.getElementById('checkBtn' + n).disabled = p.placed.length !== p.correct.length;
+}
+
+function renderSlots(n) {
+  const p = puzzles[n];
+  const slots = document.getElementById('slots' + n);
+  slots.innerHTML = '';
+  p.placed.forEach((word, i) => {
+    const s = document.createElement('div');
+    s.className = 'slot-token';
+    s.textContent = word;
+    s.onclick = () => removeToken(n, i);
+    slots.appendChild(s);
+  });
+}
+
+function removeToken(n, idx) {
+  const p = puzzles[n];
+  if (p.done) return;
+  const removed = p.placed.splice(idx, 1)[0];
+  // Re-enable matching token button
+  const tokens = document.getElementById('tokens' + n);
+  tokens.querySelectorAll('.token').forEach(btn => {
+    if (btn.dataset.word === removed && btn.classList.contains('used')) {
+      // Only un-use one
+      btn.classList.remove('used');
+    }
+  });
+  renderSlots(n);
+  document.getElementById('checkBtn' + n).disabled = p.placed.length !== p.correct.length;
+}
+
+function checkSentence(n) {
+  const p = puzzles[n];
+  const isCorrect = JSON.stringify(p.placed) === JSON.stringify(p.correct);
+  const fb = document.getElementById('fb-s' + n);
+  fb.classList.add('show');
+
+  if (isCorrect) {
+    fb.classList.remove('bad');
+    fb.classList.add('ok');
+    fb.dataset.en = '✅ Perfect sentence!';
+    fb.dataset.de = '✅ Perfekter Satz!';
+    p.done = true;
+    document.getElementById('checkBtn' + n).disabled = true;
+    // Lock slots
+    document.getElementById('slots' + n).querySelectorAll('.slot-token').forEach(s => s.onclick = null);
+  } else {
+    fb.classList.remove('ok');
+    fb.classList.add('bad');
+    fb.dataset.en = '❌ Not quite right – tap the placed words to remove them and try again.';
+    fb.dataset.de = '❌ Nicht ganz richtig – tippe auf die platzierten Wörter, um sie zu entfernen, und versuche es nochmal.';
+    p.placed = [];
+    document.getElementById('tokens' + n).querySelectorAll('.token').forEach(t => t.classList.remove('used'));
+    renderSlots(n);
+    document.getElementById('checkBtn' + n).disabled = true;
+  }
+  fb.innerHTML = lang === 'en' ? fb.dataset.en : fb.dataset.de;
+
+  if (puzzles[1].done && puzzles[2].done) {
+    cardDone[4] = true;
+    updateNav();
+  }
+}
+
+// ── T-REX ──
+let trexTimer;
+function toggleTrex() {
+  const tip = document.getElementById('trexTip');
+  tip.classList.add('show');
+  clearTimeout(trexTimer);
+  trexTimer = setTimeout(() => tip.classList.remove('show'), 2000);
+}
+</script>
+</body>
+</html>

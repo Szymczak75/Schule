@@ -1,0 +1,1520 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Übung: Teiler, Primzahlen & Primfaktorzerlegung – Klasse 5</title>
+<script>
+  MathJax = {
+    tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+    svg: { fontCache: 'global' }
+  };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f0f4ff;
+  --card: #ffffff;
+  --primary: #3a56d4;
+  --primary-light: #6b82e8;
+  --primary-dark: #2440b0;
+  --secondary: #e05a0e;
+  --accent: #27ae60;
+  --text: #1e2340;
+  --text-light: #5a6080;
+  --border: #dce3f8;
+  --correct: #1e8449;
+  --correct-bg: #d4efdf;
+  --wrong: #c0392b;
+  --wrong-bg: #fadbd8;
+  --shadow: 0 6px 24px rgba(58,86,212,0.1);
+  --radius: 16px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--text); font-size: 17px; min-height: 100vh; padding-bottom: 100px; }
+
+.page-header { background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 60%, var(--primary-light) 100%); color: white; padding: 24px 20px 30px; text-align: center; position: relative; overflow: hidden; }
+.page-header h1 { font-family: 'Fredoka One', cursive; font-size: 1.85rem; margin-bottom: 4px; }
+.page-header .subtitle { font-size: 0.92rem; opacity: 0.82; }
+.chapter-badge { display: inline-block; background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.35); border-radius: 20px; padding: 3px 14px; font-size: 0.8rem; font-weight: 800; margin-bottom: 10px; }
+
+.level-bar { background: white; border-bottom: 2px solid var(--border); padding: 10px 16px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; position: sticky; top: 0; z-index: 100; }
+.level-label { font-size: 0.82rem; font-weight: 800; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
+.level-pills { display: flex; gap: 6px; flex-wrap: wrap; }
+.level-pill { min-height: 36px; padding: 6px 16px; border-radius: 20px; border: 2px solid var(--border); background: white; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.85rem; color: var(--text-light); cursor: pointer; transition: all 0.18s; white-space: nowrap; }
+.level-pill.active-G { background: var(--accent); color: white; border-color: var(--accent); }
+.level-pill.active-F { background: var(--primary); color: white; border-color: var(--primary); }
+.level-pill.active-P { background: var(--secondary); color: white; border-color: var(--secondary); }
+
+.tabs-wrapper { background: white; border-bottom: 2px solid var(--border); padding: 0 12px; display: flex; gap: 4px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.tabs-wrapper::-webkit-scrollbar { display: none; }
+.tab-btn { flex-shrink: 0; padding: 13px 16px 11px; border: none; background: none; font-family: 'Nunito', sans-serif; font-size: 0.88rem; font-weight: 800; color: var(--text-light); cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s; white-space: nowrap; min-height: 44px; }
+.tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
+.tab-check { color: var(--accent); margin-left: 4px; }
+
+.panel { display: none; padding: 20px 16px; max-width: 760px; margin: 0 auto; }
+.panel.active { display: block; }
+
+.card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 22px 20px; margin-bottom: 20px; border: 1.5px solid var(--border); }
+.card-title { font-family: 'Fredoka One', cursive; font-size: 1.2rem; color: var(--primary); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+.card-title .icon { font-size: 1.3rem; }
+
+.level-content { display: none; }
+.level-content.show { display: block; }
+
+.aufgabe { margin-bottom: 22px; padding-bottom: 18px; border-bottom: 1px dashed var(--border); }
+.aufgabe:last-of-type { border-bottom: none; margin-bottom: 0; }
+.aufgabe-num { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 50%; background: var(--primary); color: white; font-size: 0.82rem; font-weight: 900; margin-right: 6px; flex-shrink: 0; }
+.aufgabe-text { font-weight: 700; font-size: 1rem; line-height: 1.55; margin-bottom: 12px; display: flex; align-items: flex-start; gap: 4px; }
+
+.mc-options { display: flex; flex-direction: column; gap: 8px; }
+.mc-option { min-height: 52px; padding: 12px 16px; border-radius: 10px; border: 2px solid var(--border); background: white; font-family: 'Nunito', sans-serif; font-size: 0.95rem; font-weight: 700; cursor: pointer; text-align: left; transition: all 0.18s; display: flex; align-items: center; gap: 10px; }
+.mc-option.correct { border-color: var(--correct); background: var(--correct-bg); color: var(--correct); }
+.mc-option.wrong { border-color: var(--wrong); background: var(--wrong-bg); color: var(--wrong); }
+
+.sort-label { font-weight: 800; font-size: 0.85rem; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+.chip-pool { display: flex; flex-wrap: wrap; gap: 8px; min-height: 52px; padding: 8px; background: #f8f9ff; border: 2px dashed var(--border); border-radius: 10px; }
+.drop-zone { display: flex; flex-wrap: wrap; gap: 8px; min-height: 52px; padding: 8px; border: 2px dashed var(--primary-light); border-radius: 10px; background: #f0f4ff; }
+.drop-zone.primzahl-zone { border-color: var(--secondary); background: #fff5f0; }
+.sort-chip { min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; padding: 0 14px; border-radius: 10px; font-weight: 800; font-size: 1rem; cursor: pointer; border: 2px solid var(--border); background: white; transition: all 0.18s; user-select: none; }
+.sort-chip.selected { background: var(--primary); color: white; border-color: var(--primary); transform: scale(1.05); }
+.sort-chip.in-zone { background: white; border-color: var(--primary); color: var(--primary); }
+.sort-chip.in-zone.primzahl { border-color: var(--secondary); color: var(--secondary); }
+.sort-chip.correct-chip { background: var(--correct-bg); border-color: var(--correct); color: var(--correct); }
+.sort-chip.wrong-chip { background: var(--wrong-bg); border-color: var(--wrong); color: var(--wrong); }
+
+.input-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 10px 0; }
+.math-input { font-family: 'Nunito', sans-serif; font-size: 1.05rem; font-weight: 700; border: 2px solid var(--border); border-radius: 10px; padding: 10px 14px; min-width: 100px; max-width: 220px; outline: none; transition: border-color 0.2s; background: white; }
+.math-input:focus { border-color: var(--primary); }
+.math-input.correct { border-color: var(--correct); background: var(--correct-bg); color: var(--correct); }
+.math-input.wrong { border-color: var(--wrong); background: var(--wrong-bg); color: var(--wrong); }
+
+.btn { min-height: 48px; padding: 12px 22px; border-radius: 12px; border: none; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 1rem; cursor: pointer; transition: all 0.18s; }
+.btn:active { transform: scale(0.97); }
+.btn-primary { background: var(--primary); color: white; }
+.btn-outline { background: white; border: 2px solid var(--border); color: var(--text); }
+.btn-sm { min-height: 40px; padding: 8px 16px; font-size: 0.9rem; }
+.btn-check { background: var(--primary); color: white; min-height: 44px; padding: 10px 20px; font-size: 0.95rem; border: none; border-radius: 10px; font-family: 'Nunito', sans-serif; font-weight: 800; cursor: pointer; }
+
+.feedback { display: none; border-radius: 10px; padding: 12px 16px; margin-top: 10px; font-weight: 700; font-size: 0.95rem; line-height: 1.5; }
+.feedback.show { display: block; }
+.feedback.correct { background: var(--correct-bg); color: #1a6e3a; border: 2px solid var(--correct); }
+.feedback.wrong { background: var(--wrong-bg); color: #922b21; border: 2px solid var(--wrong); }
+
+.hint-toggle { background: none; border: 1.5px dashed #a0b0e0; border-radius: 10px; padding: 10px 16px; font-family: 'Nunito', sans-serif; font-size: 0.9rem; font-weight: 700; color: var(--primary); cursor: pointer; margin: 10px 0; width: 100%; text-align: left; min-height: 44px; display: flex; align-items: center; gap: 8px; }
+.hint-content { display: none; background: #f4f7ff; border: 1.5px solid #c0cff8; border-radius: 10px; padding: 12px 16px; margin-top: 4px; font-size: 0.92rem; line-height: 1.7; }
+.hint-content.open { display: block; }
+.hint-step { border-bottom: 1px dashed #c0cff8; padding-bottom: 8px; margin-bottom: 8px; font-size: 0.88rem; }
+.hint-step:last-child { border: none; margin-bottom: 0; padding-bottom: 0; }
+.hint-step-label { font-weight: 900; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--primary); margin-bottom: 3px; }
+
+.wiederholung-badge { display: inline-flex; align-items: center; gap: 6px; background: linear-gradient(135deg, #fff8e8, #fdebd0); border: 2px solid #e0a050; border-radius: 10px; padding: 6px 14px; font-size: 0.82rem; font-weight: 800; color: #9a5010; margin-bottom: 14px; }
+
+.score-box { text-align: center; padding: 24px 20px; }
+.score-circle { width: 110px; height: 110px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0 auto 16px; font-family: 'Fredoka One', cursive; }
+.score-circle.great { background: var(--correct-bg); border: 4px solid var(--correct); color: var(--correct); }
+.score-circle.ok { background: #fef9c3; border: 4px solid #c9a800; color: #7a6000; }
+.score-circle.retry { background: var(--wrong-bg); border: 4px solid var(--wrong); color: var(--wrong); }
+.score-number { font-size: 2rem; line-height: 1; }
+.score-label { font-size: 0.75rem; font-weight: 700; margin-top: 2px; }
+.score-text { font-size: 1.05rem; font-weight: 700; margin-bottom: 16px; }
+
+.progress-bar-wrap { background: var(--border); border-radius: 20px; height: 8px; margin-bottom: 6px; overflow: hidden; }
+.progress-bar-fill { height: 100%; border-radius: 20px; background: linear-gradient(90deg, var(--primary), var(--primary-light)); transition: width 0.4s ease; }
+.progress-text { font-size: 0.8rem; font-weight: 700; color: var(--text-light); text-align: right; }
+
+.info-box { background: #f0f4ff; border-left: 4px solid var(--primary); border-radius: 8px; padding: 12px 16px; margin: 10px 0; font-size: 0.93rem; line-height: 1.6; }
+.notation { font-family: 'Courier New', monospace; background: #eef1fb; border-radius: 4px; padding: 2px 7px; font-size: 0.9rem; font-weight: 700; }
+
+.teiler-grid { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+.teiler-chip { min-width: 44px; min-height: 44px; display: flex; align-items: center; justify-content: center; padding: 0 12px; border-radius: 10px; font-weight: 800; font-size: 1rem; cursor: pointer; border: 2px solid var(--border); background: white; transition: all 0.18s; }
+.teiler-chip.selected { background: var(--primary); color: white; border-color: var(--primary); transform: scale(1.05); }
+.teiler-chip.correct { background: var(--correct-bg); color: var(--correct); border-color: var(--correct); }
+.teiler-chip.wrong { background: var(--wrong-bg); color: var(--wrong); border-color: var(--wrong); }
+
+#weiter-btn { display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: calc(100% - 40px); max-width: 400px; min-height: 56px; background: linear-gradient(135deg, var(--accent), #1a7a3a); color: white; border: none; border-radius: 16px; font-family: 'Fredoka One', cursive; font-size: 1.2rem; cursor: pointer; box-shadow: 0 4px 20px rgba(39,174,96,0.4); z-index: 200; }
+#weiter-btn:active { transform: translateX(-50%) scale(0.97); }
+
+.trex { position: fixed; bottom: 16px; right: 16px; font-size: 1.6rem; cursor: pointer; z-index: 300; user-select: none; }
+.trex-tooltip { position: fixed; bottom: 60px; right: 16px; background: #222; color: white; padding: 6px 12px; border-radius: 8px; font-size: 0.78rem; font-weight: 700; display: none; z-index: 301; white-space: nowrap; }
+.trex-tooltip.show { display: block; }
+.step-sep { display: flex; align-items: center; gap: 10px; margin: 16px 0 12px; color: var(--text-light); font-size: 0.8rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
+.step-sep::before, .step-sep::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="chapter-badge">✏️ Übung · Kl. 5 · Kapitel 6</div>
+  <h1>Teiler, Primzahlen & Primfaktorzerlegung</h1>
+  <div class="subtitle">Wähle dein Niveau – du kannst jederzeit wechseln</div>
+</div>
+
+<div class="level-bar">
+  <span class="level-label">Niveau:</span>
+  <div class="level-pills">
+    <button class="level-pill active-G" id="pill-G" onclick="setLevel('G')">⭐ Grundlagen</button>
+    <button class="level-pill" id="pill-F" onclick="setLevel('F')">⭐⭐ Fortgeschritten</button>
+    <button class="level-pill" id="pill-P" onclick="setLevel('P')">⭐⭐⭐ Profi</button>
+  </div>
+</div>
+
+<div class="tabs-wrapper">
+  <button class="tab-btn active" id="tabn-1" onclick="showTab('tab1',this)">① Teilermenge</button>
+  <button class="tab-btn" id="tabn-2" onclick="showTab('tab2',this)">② Primzahlen</button>
+  <button class="tab-btn" id="tabn-3" onclick="showTab('tab3',this)">③ Primfaktorzerlegung</button>
+  <button class="tab-btn" id="tabn-4" onclick="showTab('tab4',this)">↩ Wiederholung</button>
+  <button class="tab-btn" id="tabn-5" onclick="showTab('tab5',this)">🏆 Auswertung</button>
+</div>
+
+<!-- TAB 1: TEILERMENGE -->
+<div id="tab1" class="panel active">
+  <div style="margin-bottom:8px;">
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="prog1" style="width:0%"></div></div>
+    <div class="progress-text" id="prog1-text">0 / 3 erledigt</div>
+  </div>
+  <div class="card">
+    <div class="card-title"><span class="icon">📦</span> Teilermenge bestimmen</div>
+
+    <!-- GRUNDLAGEN -->
+    <div class="level-content show" id="lc1-G">
+      <div class="aufgabe">
+        <div class="aufgabe-text"><span class="aufgabe-num">1</span>Welche Zahlen sind Teiler von 24? Tippe alle an!</div>
+        <div class="teiler-grid" id="tg-1-1-G"></div>
+        <button class="btn-check btn-sm" style="margin-top:8px" onclick="checkTeilerChips('1-1-G')">Überprüfen</button>
+        <div class="feedback" id="fb-1-1-G"></div>
+      </div>
+      <div class="aufgabe">
+        <div class="aufgabe-text"><span class="aufgabe-num">2</span>Schreibe die Teilermenge von 16 auf.</div>
+        <div class="input-row">
+          <span style="font-weight:800;">\(T_{16} = \{\)</span>
+          <input class="math-input" id="inp-1-2-G" type="text" placeholder="1;2;…" style="flex:1;max-width:210px;">
+          <span style="font-weight:800;">\(\}\)</span>
+        </div>
+        <button class="btn-check btn-sm" onclick="checkTeilerSet('1-2-G')">Überprüfen</button>
+        <div class="feedback" id="fb-1-2-G"></div>
+      </div>
+      <div class="aufgabe">
+        <div class="aufgabe-text"><span class="aufgabe-num">3</span>Wie viele Teiler hat die Zahl 9?</div>
+        <div class="mc-options" id="mc-1-3-G">
+          <button class="mc-option" onclick="checkMC(this,'mc-1-3-G',false,'Nein. Schreibe T₉ auf – wie viele Einträge hat die Menge?')">2 Teiler</button>
+          <button class="mc-option" onclick="checkMC(this,'mc-1-3-G',true,'T₉ = {1; 3; 9} – das sind genau 3 Teiler.')">3 Teiler</button>
+          <button class="mc-option" onclick="checkMC(this,'mc-1-3-G',false,'Nein. Schreibe T₉ auf – wie viele Einträge hat die Menge?')">4 Teiler</button>
+        </div>
+        <div class="feedback" id="fb-mc-1-3-G"></div>
+      </div>
+    </div>
+
+    <!-- FORTGESCHRITTEN -->
+    <div class="level-content" id="lc1-F">
+      <div class="aufgabe">
+        <div class="aufgabe-text"><span class="aufgabe-num">1</span>Bestimme die Teilermenge von 36 vollständig.</div>
+        <div class="input-row">
+          <span style="font-weight:800;">\(T_{36} = \{\)</span>
+          <input class="math-input" id="inp-1-1-F" type="text" placeholder="1;2;3;…" style="flex:1;max-width:260px;">
+          <span style="font-weight:800;">\(\}\)</span>
+        </div>
+        <button class="btn-check btn-sm" onclick="checkTeilerSet('1-1-F')">Überprüfen</button>
+        <div class="feedback" id="fb-1-1-F"></div>
+      </div>
+      <div class="aufgabe">
+        <div class="aufgabe-text"><span class="aufgabe-num">2</span>Welche Aussage über \(T_{48}\) stimmt?</div>
+        <div class="mc-options" id="mc-1-2-F">
+          <button class="mc-option" onclick="checkMC(this,'mc-1-2-F',false,'48 ÷ 7 = 6 Rest 6 – 7 ist kein Teiler.')">7 ist ein Element von \(T_{48}\).</button>
+          <button class="mc-option" onclick="checkMC(this,'mc-1-2-F',true,'48 ÷ 16 = 3 – kein Rest, also ist 16 ein Teiler von 48.')">16 ist ein Element von \(T_{48}\).</button>
+          <button class="mc-option" onclick="checkMC(this,'mc-1-2-F',false,'T₄₈ hat 10 Teiler, nicht 6.')">Die Teilermenge von 48 hat genau 6 Elemente.</button>
+        </div>
+        <div class="feedback" id="fb-mc-1-2-F"></div>
+      </div>
+      <div class="aufgabe">
+        <div class="aufgabe-text"><span class="aufgabe-num">3</span>Eine Zahl hat genau die Teiler 1, 5 und 25. Welche Zahl ist das?</div>
+        <div class="input-row">
+          <input class="math-input" id="inp-1-3-F" inputmode="numeric" type="text" placeholder="?" style="max-width:120px;">
+          <button class="btn-check btn-sm" onclick="checkExact('1-3-F')">Überprüfen</button>
+        </div>
+        <div class="feedback" id="fb-1-3-F"></div>
+      </div>
+    </div>
+
+    <!-- PROFI -->
+    <div class="level-content" id="lc1-P">
+      <div class="aufgabe">
+        <div class="aufgabe-text"><span class="aufgabe-num">1</span>Bestimme die Teilermenge von 60 vollständig.</div>
+        <div class="input-row">
+          <span style="font-weight:800;">\(T_{60} = \{\)</span>
+          <input class="math-input" id="inp-1-1-P" type="text" placeholder="1;2;3;…" style="flex:1;max-width:280px;">
+          <span style="font-weight:800;">\(\}\)</span>
+        </div>
+        <button class="btn-check btn-sm" onclick="checkTeilerSet('1-1-P')">Überprüfen</button>
+        <div class="feedback" id="fb-1-1-P"></div>
+      </div>
+      <div class="aufgabe">
+        <div class="aufgabe-text"><span class="aufgabe-num">2</span>Zwei Zahlen haben die gemeinsamen Teiler 1, 2 und 4. Eine der Zahlen ist 12 – welche Zahl kleiner als 12 könnte die andere sein?</div>
+        <div class="input-row">
+          <input class="math-input" id="inp-1-2-P" inputmode="numeric" type="text" placeholder="?" style="max-width:120px;">
+          <button class="btn-check btn-sm" onclick="checkExact('1-2-P')">Überprüfen</button>
+        </div>
+        <div class="feedback" id="fb-1-2-P"></div>
+      </div>
+      <div class="aufgabe">
+        <div class="aufgabe-text"><span class="aufgabe-num">3</span>Welche natürlichen Zahlen größer 1 haben genau zwei Teiler und sind gleichzeitig Teiler von 30? Nenne alle (Semikolon-getrennt).</div>
+        <div class="input-row">
+          <input class="math-input" id="inp-1-3-P" type="text" placeholder="z.B. 2;3" style="flex:1;max-width:220px;">
+          <button class="btn-check btn-sm" onclick="checkTeilerSet('1-3-P')">Überprüfen</button>
+        </div>
+        <div class="feedback" id="fb-1-3-P"></div>
+        <div class="hint-toggle" onclick="toggleHint('h-1-3-P')">💡 Tipp</div>
+        <div class="hint-content" id="h-1-3-P">
+          <div class="hint-step"><div class="hint-step-label">Tipp 1</div>Zahlen mit genau 2 Teilern sind Primzahlen.</div>
+          <div class="hint-step"><div class="hint-step-label">Tipp 2</div>Welche Primzahlen teilen 30? Schreibe T₃₀ auf und markiere die Primzahlen.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB 2: PRIMZAHLEN -->
+<div id="tab2" class="panel">
+  <div style="margin-bottom:8px;">
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="prog2" style="width:0%"></div></div>
+    <div class="progress-text" id="prog2-text">0 / 3 erledigt</div>
+  </div>
+  <div class="card">
+    <div class="card-title"><span class="icon">⭐</span> Primzahlen erkennen & anwenden</div>
+
+    <!-- GRUNDLAGEN -->
+    <div class="level-content show" id="lc2-G">
+      <div class="aufgabe">
+        <div class="aufgabe-text"><span class="aufgabe-num">1</span>Sortiere: Primzahl oder keine Primzahl?<br><em style="font-size:0.87rem;color:var(--text-light)">Tippe eine Zahl an – dann tippe das richtige Feld.</em></div>
+        <div id="sort-2-1-G-pool" class="chip-pool" style="margin-bottom:8px;"></div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <div style="flex:1;min-width:130px;">
+            <div class="sort-label">✅ Primzahl</div>
+            <div class="drop-zone primzahl-zone" id="sort-2-1-G-prim" onclick="dropToZone('sort-2-1-G','prim')"></div>
+          </div>
+          <div style="flex:1;min-width:130px;">
+            <div class="sort-label">❌ Keine Primzahl</div>
+            <div class="drop-zone" id="sort-2-1-G-noprim" onclick="dropToZone('sort-2-1-G','noprim')"></div>
+          </div>
+        </div>
+        <button class="btn-check btn-sm" style="margin-top:10px" onclick="checkSort('sort-2-1-G')">Überprüfen</button>
+        <div class="feedback" id="fb-sort-2-1-G"></div>
+      </div>
+      <div class="aufgabe">
+        <div class="aufgabe-text"><span class="aufgabe-num">2</span>Welche der folgenden Zahlen ist eine Primzahl?</div>
+        <div class="mc-options" id="mc-2-2-G">
+          <button class="mc-option" onclick="checkMC(this,'mc-2-2-G',false,'27 = 3 · 9 – hat mehr als 2 Teiler.')">27</button>
+          <button class="mc-option" onclick="checkMC(this,'mc-2-2-G',false,'33 = 3 · 11 – hat mehr als 2 Teiler.')">33</button>
+          <button class="mc-option" onclick="checkMC(this,'mc-2-2-G',true,'29 hat nur die Teiler 1 und 29 – eine Primzahl!')">29</button>
+          <button class="mc-option" onclick="checkMC(this,'mc-2-2-G',false,'21 = 3 · 7 – hat mehr als 2 Teiler.')">21</button>
+        </div>
+        <div class="feedback" id="fb-mc-2-2-G"></div>
+      </div>
+      <div class="aufgabe">
+        <div class="aufgabe-text"><span class="aufgabe-num">3</span>Nenne die kleinste Primzahl, die größer als 10 ist.</div>
+        <div class="input-row">
+          <input class="math-input" id="inp-2-3-G" inputmode="numeric" type="text" placeholder="?" style="max-width:100px;">
+          <button class="btn-check btn-sm" onclick="checkExact('2-3-G')">Überprüfen</button>
+        </div>
+        <div class="feedback" id="fb-2-3-G"></div>
+      </div>
+    </div>
+
+    <!-- FORTGESCHRITTEN -->
+    <div class="level-content" id="lc2-F">
+      <div class="aufgabe">
+        <div class="aufgabe-text"><span class="aufgabe-num">1</span>Sortiere alle Zahlen in die richtige Gruppe:<br><em style="font-size:0.87rem;color:var(--text-light)">Tippe eine Zahl an – dann tippe das Zielfeld.</em></div>
+        <div id="sort-2-1-F-pool" class="chip-pool" style="margin-bottom:8px;"></div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <div style="flex:1;min-width:130px;">
+            <div class="sort-label">✅ Primzahl</div>
+            <div class="drop-zone primzahl-zone" id="sort-2-1-F-prim" onclick="dropToZone('sort-2-1-F','prim')"></div>
+          </div>
+          <div style="flex:1;min-width:130px;">
+            <div class="sort-label">❌ Keine Primzahl</div>
+            <div class="drop-zone" id="sort-2-1-F-noprim" onclick="dropToZone('sort-2-1-F','noprim')"></div>
+          </div>
+        </div>
+        <button class="btn-check btn-sm" style="margin-top:10px" onclick="checkSort('sort-2-1-F')">Überprüfen</button>
+        <div class="feedback" id="fb-sort-2-1-F"></div>
+      </div>
+      <div class="aufgabe">
+        <div class="aufgabe-text"><span class="aufgabe-num">2</span>Welche Aussage ist richtig?</div>
+        <div class="mc-options" id="mc-2-2-F">
+          <button class="mc-option" onclick="checkMC(this,'mc-2-2-F',false,'Nicht jede ungerade Zahl ist prim – z. B. 9 = 3 · 3.')">Jede ungerade Zahl ist eine Primzahl.</button>
+          <button class="mc-option" onclick="checkMC(this,'mc-2-2-F',false,'Die 2 ist eine Primzahl – sie hat genau die Teiler 1 und 2.')">Es gibt keine gerade Primzahl.</button>
+          <button class="mc-option" onclick="checkMC(this,'mc-2-2-F',true,'Es gibt unendlich viele Primzahlen – bewiesen seit der Antike!')">Es gibt unendlich viele Primzahlen.</button>
+          <button class="mc-option" onclick="checkMC(this,'mc-2-2-F',false,'Die 1 hat nur einen Teiler (sich selbst) – keine Primzahl.')">Die 1 ist eine Primzahl.</button>
+        </div>
+        <div class="feedback" id="fb-mc-2-2-F"></div>
+      </div>
+      <div class="aufgabe">
+        <div class="aufgabe-text"><span class="aufgabe-num">3</span>Wie viele Primzahlen gibt es zwischen 20 und 40?</div>
+        <div class="input-row">
+          <input class="math-input" id="inp-2-3-F" inputmode="numeric" type="text" placeholder="?" style="max-width:100px;">
+          <button class="btn-check btn-sm" onclick="checkExact('2-3-F')">Überprüfen</button>
+        </div>
+        <div class="feedback" id="fb-2-3-F"></div>
+        <div class="hint-toggle" onclick="toggleHint('h-2-3-F')">💡 Tipp</div>
+        <div class="hint-content" id="h-2-3-F">
+          <div class="hint-step"><div class="hint-step-label">Tipp 1</div>Streiche alle geraden Zahlen (außer 2) und Vielfache von 3 und 5.</div>
+          <div class="hint-step"><div class="hint-step-label">Tipp 2</div>21=3·7, 25=5·5, 27=3·9, 33=3·11, 35=5·7, 39=3·13 sind keine Primzahlen.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROFI -->
+    <div class="level-content" id="lc2-P">
+      <div class="aufgabe">
+        <div class="aufgabe-text"><span class="aufgabe-num">1</span>Zwei Primzahlen mit Abstand 2 heißen Primzahlzwillinge. Nenne alle Paare bis 50 (Format: 3;5 | 5;7 | …).</div>
+        <div class="input-row">
+          <input class="math-input" id="inp-2-1-P" type="text" placeholder="3;5 | 5;7 | …" style="flex:1;max-width:300px;">
+          <button class="btn-check btn-sm" onclick="checkTwins()">Überprüfen</button>
+        </div>
+        <div class="feedback" id="fb-2-1-P"></div>
+        <div class="hint-toggle" onclick="toggleHint('h-2-1-P')">💡 Tipp</div>
+        <div class="hint-content" id="h-2-1-P">
+          <div class="hint-step"><div class="hint-step-label">Tipp 1</div>Schreibe alle Primzahlen bis 50 auf und suche Paare mit Abstand 2.</div>
+          <div class="hint-step"><div class="hint-step-label">Tipp 2</div>Starte bei 3;5 – dann 5;7 – dann weitersuchen ab 11 …</div>
+        </div>
+      </div>
+      <div class="aufgabe">
+        <div class="aufgabe-text"><span class="aufgabe-num">2</span>Welche Aussage ist wahr?</div>
+        <div class="mc-options" id="mc-2-2-P">
+          <button class="mc-option" onclick="checkMC(this,'mc-2-2-P',false,'2 + 3 = 5 (prim), aber 3 + 5 = 8 (nicht prim). Nicht immer.')">Die Summe zweier Primzahlen ist immer eine Primzahl.</button>
+          <button class="mc-option" onclick="checkMC(this,'mc-2-2-P',true,'Jede Primzahl > 2 ist ungerade. Ungerade + Ungerade = Gerade, und Gerade > 2 ist nie prim.')">Die Summe zweier Primzahlen größer 2 ist nie eine Primzahl.</button>
+          <button class="mc-option" onclick="checkMC(this,'mc-2-2-P',false,'Die 2 ist gerade und eine Primzahl – Gegenbeispiel!')">Alle Primzahlen sind ungerade.</button>
+          <button class="mc-option" onclick="checkMC(this,'mc-2-2-P',false,'2 · 3 = 6 ist keine Primzahl – Gegenbeispiel!')">Das Produkt zweier Primzahlen ist immer eine Primzahl.</button>
+        </div>
+        <div class="feedback" id="fb-mc-2-2-P"></div>
+      </div>
+      <div class="aufgabe">
+        <div class="aufgabe-text"><span class="aufgabe-num">3</span>Welche Primzahlen reichen aus, um zu zeigen, dass 97 eine Primzahl ist? Nenne sie (Semikolon-getrennt).</div>
+        <div class="input-row">
+          <input class="math-input" id="inp-2-3-P" type="text" placeholder="2;3;5;7" style="max-width:180px;">
+          <button class="btn-check btn-sm" onclick="check97()">Überprüfen</button>
+        </div>
+        <div class="feedback" id="fb-2-3-P"></div>
+        <div class="hint-toggle" onclick="toggleHint('h-2-3-P')">💡 Tipp</div>
+        <div class="hint-content" id="h-2-3-P">
+          <div class="hint-step"><div class="hint-step-label">Tipp 1</div>Es reicht, Primzahlen bis zur Wurzel von 97 zu prüfen.</div>
+          <div class="hint-step"><div class="hint-step-label">Tipp 2</div>\(\sqrt{97} \approx 9{,}8\) – also nur Primzahlen bis 9 nötig.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB 3: PRIMFAKTORZERLEGUNG -->
+<div id="tab3" class="panel">
+  <div style="margin-bottom:8px;">
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="prog3" style="width:0%"></div></div>
+    <div class="progress-text" id="prog3-text">0 / 3 erledigt</div>
+  </div>
+  <div class="card">
+    <div class="card-title"><span class="icon">🌳</span> Primfaktorzerlegung</div>
+
+    <!-- GRUNDLAGEN -->
+    <div class="level-content show" id="lc3-G">
+      <div class="aufgabe">
+        <div class="aufgabe-text"><span class="aufgabe-num">1</span>Welche ist die korrekte Primfaktorzerlegung von 18?</div>
+        <div class="mc-options" id="mc-3-1-G">
+          <button class="mc-option" onclick="checkMC(this,'mc-3-1-G',false,'6 ist keine Primzahl – die Zerlegung ist noch nicht fertig.')">18 = 3 · 6</button>
+          <button class="mc-option" onclick="checkMC(this,'mc-3-1-G',true,'2 · 3 · 3 = 18 und alle drei Faktoren sind Primzahlen!')">18 = 2 · 3 · 3</button>
+          <button class="mc-option" onclick="checkMC(this,'mc-3-1-G',false,'9 ist keine Primzahl – weiter zerlegen!')">18 = 2 · 9</button>
+          <button class="mc-option" onclick="checkMC(this,'mc-3-1-G',false,'Prüfe: 2 · 3 · 3 · 2 = 36 – das stimmt nicht.')">18 = 2 · 3 · 3 · 2</button>
+        </div>
+        <div class="feedback" id="fb-mc-3-1-G"></div>
+      </div>
+      <div class="aufgabe">
+        <div class="aufgabe-text"><span class="aufgabe-num">2</span>Gib die Primfaktorzerlegung von 12 an.<br><em style="font-size:0.87rem;color:var(--text-light)">Schreibe z. B. <span class="notation">2·2·3</span></em></div>
+        <div class="input-row">
+          <span style="font-weight:800;">12 = </span>
+          <input class="math-input" id="inp-3-2-G" type="text" placeholder="?">
+          <button class="btn-check btn-sm" onclick="checkPFZ('3-2-G')">Überprüfen</button>
+        </div>
+        <div class="feedback" id="fb-3-2-G"></div>
+        <div class="hint-toggle" onclick="toggleHint('h-3-2-G')">💡 Tipp</div>
+        <div class="hint-content" id="h-3-2-G">
+          <div class="hint-step"><div class="hint-step-label">Tipp 1</div>Starte mit dem kleinsten Primteiler: Ist 12 durch 2 teilbar?</div>
+          <div class="hint-step"><div class="hint-step-label">Tipp 2</div>12 ÷ 2 = 6. Ist 6 selbst durch 2 teilbar?</div>
+        </div>
+      </div>
+      <div class="aufgabe">
+        <div class="aufgabe-text"><span class="aufgabe-num">3</span>Schreibe in Potenzschreibweise: 20 = ?<br><em style="font-size:0.87rem;color:var(--text-light)">Format: <span class="notation">2^2·5</span></em></div>
+        <div class="input-row">
+          <span style="font-weight:800;">20 = </span>
+          <input class="math-input" id="inp-3-3-G" type="text" placeholder="?">
+          <button class="btn-check btn-sm" onclick="checkPFZPow('3-3-G')">Überprüfen</button>
+        </div>
+        <div class="feedback" id="fb-3-3-G"></div>
+      </div>
+    </div>
+
+    <!-- FORTGESCHRITTEN -->
+    <div class="level-content" id="lc3-F">
+      <div class="aufgabe">
+        <div class="aufgabe-text"><span class="aufgabe-num">1</span>Primfaktorzerlegung in Potenzschreibweise – <span class="notation">2^3·3^2</span> als Format:</div>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px;">
+          <div class="input-row" style="flex-wrap:nowrap;">
+            <span style="font-weight:800;min-width:50px;">72 = </span>
+            <input class="math-input" id="inp-3-1-F-a" type="text" placeholder="?" style="max-width:150px;">
+            <button class="btn-check btn-sm" onclick="checkPFZSub('3-1-F-a')">✓</button>
+          </div>
+          <div class="feedback" id="fb-3-1-F-a"></div>
+          <div class="input-row" style="flex-wrap:nowrap;">
+            <span style="font-weight:800;min-width:50px;">45 = </span>
+            <input class="math-input" id="inp-3-1-F-b" type="text" placeholder="?" style="max-width:150px;">
+            <button class="btn-check btn-sm" onclick="checkPFZSub('3-1-F-b')">✓</button>
+          </div>
+          <div class="feedback" id="fb-3-1-F-b"></div>
+        </div>
+      </div>
+      <div class="aufgabe">
+        <div class="aufgabe-text"><span class="aufgabe-num">2</span>Die Primfaktorzerlegung einer Zahl ist \(2^2 \cdot 7\). Welche Zahl ist das?</div>
+        <div class="input-row">
+          <input class="math-input" id="inp-3-2-F" inputmode="numeric" type="text" placeholder="?" style="max-width:120px;">
+          <button class="btn-check btn-sm" onclick="checkExact('3-2-F')">Überprüfen</button>
+        </div>
+        <div class="feedback" id="fb-3-2-F"></div>
+      </div>
+      <div class="aufgabe">
+        <div class="aufgabe-text"><span class="aufgabe-num">3</span>Welche Aussage über \(126 = 2 \cdot 3^2 \cdot 7\) ist richtig?</div>
+        <div class="mc-options" id="mc-3-3-F">
+          <button class="mc-option" onclick="checkMC(this,'mc-3-3-F',false,'4 = 2² – der Faktor 2 kommt nur einmal vor, daher ist 4 kein Teiler.')">4 ist ein Teiler von 126.</button>
+          <button class="mc-option" onclick="checkMC(this,'mc-3-3-F',true,'9 = 3² und 3² steckt in der Zerlegung – also ist 9 ein Teiler.')">9 ist ein Teiler von 126.</button>
+          <button class="mc-option" onclick="checkMC(this,'mc-3-3-F',false,'5 taucht nicht in der Primfaktorzerlegung auf.')">5 ist ein Teiler von 126.</button>
+        </div>
+        <div class="feedback" id="fb-mc-3-3-F"></div>
+      </div>
+    </div>
+
+    <!-- PROFI -->
+    <div class="level-content" id="lc3-P">
+      <div class="aufgabe">
+        <div class="aufgabe-text"><span class="aufgabe-num">1</span>Zerlege in Primfaktoren (Potenzschreibweise):</div>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px;">
+          <div class="input-row" style="flex-wrap:nowrap;">
+            <span style="font-weight:800;min-width:60px;">360 = </span>
+            <input class="math-input" id="inp-3-1-P-a" type="text" placeholder="?" style="max-width:190px;">
+            <button class="btn-check btn-sm" onclick="checkPFZSub('3-1-P-a')">✓</button>
+          </div>
+          <div class="feedback" id="fb-3-1-P-a"></div>
+          <div class="input-row" style="flex-wrap:nowrap;">
+            <span style="font-weight:800;min-width:60px;">1000 = </span>
+            <input class="math-input" id="inp-3-1-P-b" type="text" placeholder="?" style="max-width:190px;">
+            <button class="btn-check btn-sm" onclick="checkPFZSub('3-1-P-b')">✓</button>
+          </div>
+          <div class="feedback" id="fb-3-1-P-b"></div>
+        </div>
+      </div>
+      <div class="aufgabe">
+        <div class="aufgabe-text"><span class="aufgabe-num">2</span>Wie viele Teiler hat \(2^3 \cdot 3 \cdot 5\)?<br><em style="font-size:0.87rem;color:var(--text-light)">Tipp: Teileranzahl = (3+1)·(1+1)·(1+1)</em></div>
+        <div class="input-row">
+          <input class="math-input" id="inp-3-2-P" inputmode="numeric" type="text" placeholder="?" style="max-width:100px;">
+          <button class="btn-check btn-sm" onclick="checkExact('3-2-P')">Überprüfen</button>
+        </div>
+        <div class="feedback" id="fb-3-2-P"></div>
+      </div>
+      <div class="aufgabe">
+        <div class="aufgabe-text"><span class="aufgabe-num">3</span>Welche Zahl hat die Primfaktorzerlegung \(3^2 \cdot 5 \cdot 11\)?</div>
+        <div class="input-row">
+          <input class="math-input" id="inp-3-3-P" inputmode="numeric" type="text" placeholder="?" style="max-width:120px;">
+          <button class="btn-check btn-sm" onclick="checkExact('3-3-P')">Überprüfen</button>
+        </div>
+        <div class="feedback" id="fb-3-3-P"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB 4: WIEDERHOLUNG -->
+<div id="tab4" class="panel">
+  <div style="margin-bottom:8px;">
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="prog4" style="width:0%"></div></div>
+    <div class="progress-text" id="prog4-text">0 / 3 erledigt</div>
+  </div>
+  <div class="card">
+    <div class="card-title"><span class="icon">↩</span> Wiederholung: Teilbarkeitsregeln</div>
+    <div class="wiederholung-badge">📚 Wiederholung · Kap. 5 · S. 100–103</div>
+    <div class="info-box">
+      <strong>Kurzübersicht:</strong><br>
+      ÷ 2: letzte Ziffer gerade &nbsp;·&nbsp; ÷ 3: Quersumme durch 3 &nbsp;·&nbsp; ÷ 5: endet auf 0 oder 5 &nbsp;·&nbsp; ÷ 10: endet auf 0
+    </div>
+
+    <!-- GRUNDLAGEN -->
+    <div class="level-content show" id="lc4-G">
+      <div class="aufgabe">
+        <div class="aufgabe-text"><span class="aufgabe-num">1</span>Ist 234 durch 2 teilbar?</div>
+        <div class="mc-options" id="mc-4-1-G">
+          <button class="mc-option" onclick="checkMC(this,'mc-4-1-G',true,'Die letzte Ziffer (4) ist gerade – 234 ist durch 2 teilbar.')">Ja</button>
+          <button class="mc-option" onclick="checkMC(this,'mc-4-1-G',false,'Die letzte Ziffer ist 4 – eine gerade Zahl, also doch teilbar.')">Nein</button>
+        </div>
+        <div class="feedback" id="fb-mc-4-1-G"></div>
+      </div>
+      <div class="aufgabe">
+        <div class="aufgabe-text"><span class="aufgabe-num">2</span>Ist 135 durch 3 teilbar? Berechne die Quersumme.</div>
+        <div class="input-row">
+          <span style="font-weight:700;">Quersumme = </span>
+          <input class="math-input" id="inp-4-2-G" inputmode="numeric" type="text" placeholder="?" style="max-width:90px;">
+          <button class="btn-check btn-sm" onclick="checkExact('4-2-G')">Überprüfen</button>
+        </div>
+        <div class="feedback" id="fb-4-2-G"></div>
+      </div>
+      <div class="aufgabe">
+        <div class="aufgabe-text"><span class="aufgabe-num">3</span>Welche der folgenden Zahlen ist durch 5 teilbar?</div>
+        <div class="mc-options" id="mc-4-3-G">
+          <button class="mc-option" onclick="checkMC(this,'mc-4-3-G',false,'723 endet auf 3 – nicht durch 5 teilbar.')">723</button>
+          <button class="mc-option" onclick="checkMC(this,'mc-4-3-G',true,'485 endet auf 5 – durch 5 teilbar!')">485</button>
+          <button class="mc-option" onclick="checkMC(this,'mc-4-3-G',false,'832 endet auf 2 – nicht durch 5 teilbar.')">832</button>
+        </div>
+        <div class="feedback" id="fb-mc-4-3-G"></div>
+      </div>
+    </div>
+
+    <!-- FORTGESCHRITTEN -->
+    <div class="level-content" id="lc4-F">
+      <div class="aufgabe">
+        <div class="aufgabe-text"><span class="aufgabe-num">1</span>Durch welche der Zahlen 2, 3, 5, 10 ist 810 teilbar? Wähle alle zutreffenden.</div>
+        <div class="teiler-grid" id="tg-4-1-F"></div>
+        <button class="btn-check btn-sm" style="margin-top:8px" onclick="checkTeilerChips('4-1-F')">Überprüfen</button>
+        <div class="feedback" id="fb-4-1-F"></div>
+      </div>
+      <div class="aufgabe">
+        <div class="aufgabe-text"><span class="aufgabe-num">2</span>Eine Zahl ist durch 2 und durch 3 teilbar. Durch welche weitere Zahl ist sie dann sicher auch teilbar?</div>
+        <div class="mc-options" id="mc-4-2-F">
+          <button class="mc-option" onclick="checkMC(this,'mc-4-2-F',false,'Durch 5 muss man extra prüfen – das folgt nicht aus ÷2 und ÷3.')">5</button>
+          <button class="mc-option" onclick="checkMC(this,'mc-4-2-F',true,'Durch 2 und 3 teilbar → auch durch 6 teilbar.')">6</button>
+          <button class="mc-option" onclick="checkMC(this,'mc-4-2-F',false,'Für ÷9 muss die Quersumme durch 9 teilbar sein – reicht nicht.')">9</button>
+        </div>
+        <div class="feedback" id="fb-mc-4-2-F"></div>
+      </div>
+      <div class="aufgabe">
+        <div class="aufgabe-text"><span class="aufgabe-num">3</span>Ist 4512 durch 3 teilbar? Zeige es mit der Quersumme.</div>
+        <div class="input-row">
+          <span style="font-weight:700;">QS = </span>
+          <input class="math-input" id="inp-4-3-F" inputmode="numeric" type="text" placeholder="?" style="max-width:90px;">
+          <button class="btn-check btn-sm" onclick="checkExact('4-3-F')">Überprüfen</button>
+        </div>
+        <div class="feedback" id="fb-4-3-F"></div>
+      </div>
+    </div>
+
+    <!-- PROFI -->
+    <div class="level-content" id="lc4-P">
+      <div class="aufgabe">
+        <div class="aufgabe-text"><span class="aufgabe-num">1</span>Die Zahl \(45\square\) soll durch 2 und durch 3 teilbar sein. Welche Ziffer kann □ sein? Nenne alle Möglichkeiten.</div>
+        <div class="input-row">
+          <input class="math-input" id="inp-4-1-P" type="text" placeholder="z. B. 0;6" style="max-width:160px;">
+          <button class="btn-check btn-sm" onclick="checkTeilerSet('4-1-P')">Überprüfen</button>
+        </div>
+        <div class="feedback" id="fb-4-1-P"></div>
+        <div class="hint-toggle" onclick="toggleHint('h-4-1-P')">💡 Tipp</div>
+        <div class="hint-content" id="h-4-1-P">
+          <div class="hint-step"><div class="hint-step-label">Tipp 1</div>÷ 2: Die Einerstelle muss gerade sein (0, 2, 4, 6, 8).</div>
+          <div class="hint-step"><div class="hint-step-label">Tipp 2</div>÷ 3: Quersumme 4+5+□ muss durch 3 teilbar sein. Welche geraden Ziffern erfüllen das?</div>
+        </div>
+      </div>
+      <div class="aufgabe">
+        <div class="aufgabe-text"><span class="aufgabe-num">2</span>Welche Ziffer □ macht \(3\,\square\,7\,2\) durch 9 teilbar?</div>
+        <div class="input-row">
+          <input class="math-input" id="inp-4-2-P" inputmode="numeric" type="text" placeholder="?" style="max-width:80px;">
+          <button class="btn-check btn-sm" onclick="checkExact('4-2-P')">Überprüfen</button>
+        </div>
+        <div class="feedback" id="fb-4-2-P"></div>
+      </div>
+      <div class="aufgabe">
+        <div class="aufgabe-text"><span class="aufgabe-num">3</span>Durch welche einstelligen Zahlen ist 2520 teilbar? Wähle alle zutreffenden.</div>
+        <div class="teiler-grid" id="tg-4-3-P"></div>
+        <button class="btn-check btn-sm" style="margin-top:8px" onclick="checkTeilerChips('4-3-P')">Überprüfen</button>
+        <div class="feedback" id="fb-4-3-P"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB 5: AUSWERTUNG -->
+<div id="tab5" class="panel">
+  <div class="card">
+    <div class="card-title"><span class="icon">🏆</span> Deine Auswertung</div>
+    <div id="auswertung-content">
+      <p style="color:var(--text-light);font-size:0.95rem;">Bearbeite alle vier Karten – dann erscheint hier deine Auswertung.</p>
+    </div>
+    <button class="btn btn-outline btn-sm" style="margin-top:16px;" onclick="buildAuswertung()">📊 Jetzt auswerten</button>
+  </div>
+</div>
+
+<button id="weiter-btn" onclick="location.href='#'">Weiter ➜</button>
+<div class="trex" id="trex" onclick="toggleTrex()">🦖</div>
+<div class="trex-tooltip" id="trex-tip">Made by Mathedino</div>
+
+<script>
+// === ANSWERS (not in HTML) ===
+var ANSWERS = {
+  'sort-sort-2-1-F': {prim: [17,23,37], noprim: [25,35,49,51]},
+  'sort-sort-2-1-G': {prim: [2,7,11], noprim: [1,4,9,15]},
+  'exact-1-3-F': {answer: '25', msgOk: 'T₂₅ = {1; 5; 25} – genau drei Teiler.', msgWrong: 'Welche Zahl ist selbst in der Menge und hat 1 und 5 als Teiler?'},
+  'exact-1-2-P': {answer: '8', msgOk: 'T₁₂ = {1;2;3;4;6;12}, T₈ = {1;2;4;8} – gemeinsame Teiler: 1, 2, 4.', msgWrong: 'Schreibe T₁₂ auf und suche eine Zahl kleiner als 12 mit den Teilern 1, 2 und 4.'},
+  'exact-2-3-G': {answer: '11', msgOk: '11 ist die kleinste Primzahl größer als 10.', msgWrong: 'Prüfe: Welche Zahl nach 10 hat genau 2 Teiler?'},
+  'exact-2-3-F': {answer: '4', msgOk: '23, 29, 31, 37 – das sind 4 Primzahlen.', msgWrong: 'Liste auf: 21,22,23,… Welche haben genau 2 Teiler?'},
+  'exact-3-2-F': {answer: '28', msgOk: '2² · 7 = 4 · 7 = 28.', msgWrong: 'Berechne: 2² = 4, dann 4 · 7 = ?'},
+  'exact-3-2-P': {answer: '16', msgOk: '(3+1)·(1+1)·(1+1) = 4·2·2 = 16 Teiler.', msgWrong: 'Für jeden Primfaktor p^n gibt es (n+1) Möglichkeiten.'},
+  'exact-3-3-P': {answer: '495', msgOk: '3² · 5 · 11 = 9 · 5 · 11 = 45 · 11 = 495.', msgWrong: 'Berechne Schritt für Schritt: 3² = 9, dann 9 · 5 = 45, dann 45 · 11 = ?'},
+  'exact-4-2-G': {answer: '9', msgOk: '1+3+5 = 9, und 9 ist durch 3 teilbar – also 135 ÷ 3 = 45.', msgWrong: 'Addiere alle Ziffern: 1 + 3 + 5 = ?'},
+  'exact-4-3-F': {answer: '12', msgOk: '4+5+1+2 = 12, und 12 ÷ 3 = 4 – 4512 ist durch 3 teilbar.', msgWrong: 'Addiere alle Ziffern von 4512.'},
+  'exact-4-2-P': {answer: '6', msgOk: '3+6+7+2 = 18, und 18 ÷ 9 = 2 – die Ziffer 6 funktioniert.', msgWrong: 'Berechne: 3 + □ + 7 + 2 = 12 + □. Welche Ziffer macht die Summe durch 9 teilbar?'},
+  'tset-1-2-G': [1,2,4,8,16],
+  'tset-1-1-F': [1,2,3,4,6,9,12,18,36],
+  'tset-1-1-P': [1,2,3,4,5,6,10,12,15,20,30,60],
+  'tset-1-3-P': [2,3,5],
+  'tset-4-1-P': [0,6],
+  'tchips-1-1-G': {correct: [1,2,3,4,6,8,12,24], options: [1,2,3,4,5,6,7,8,9,10,12,15,24]},
+  'tchips-4-1-F': {correct: [2,3,5,10], options: [2,3,5,10]},
+  'tchips-4-3-P': {correct: [1,2,3,4,5,6,7,8,9], options: [1,2,3,4,5,6,7,8,9]},
+  'pfz-3-2-G': [[2,2],[3,1]],
+  'pfzpow-3-3-G': [[2,2],[5,1]],
+  'pfzsub-3-1-F-a': [[2,3],[3,2]],
+  'pfzsub-3-1-F-b': [[3,2],[5,1]],
+  'pfzsub-3-1-P-a': [[2,3],[3,2],[5,1]],
+  'pfzsub-3-1-P-b': [[2,3],[5,3]],
+};
+
+// STATE
+let currentLevel = 'G';
+const done = {};
+const results = {};
+const TAB_COUNT = {1:3, 2:3, 3:3, 4:3};
+const sortState = {};
+
+// LEVEL
+function setLevel(lvl) {
+  currentLevel = lvl;
+  ['G','F','P'].forEach(function(l) {
+    document.getElementById('pill-'+l).className = 'level-pill' + (l===lvl ? ' active-'+l : '');
+  });
+  document.querySelectorAll('.level-content').forEach(function(el) { el.classList.remove('show'); });
+  document.querySelectorAll('.level-content[id*="-'+lvl+'"]').forEach(function(el) { el.classList.add('show'); });
+  updateAllProgress();
+  if (window.MathJax) MathJax.typesetPromise();
+}
+
+// TABS
+function showTab(id, btn) {
+  document.querySelectorAll('.panel').forEach(function(p) { p.classList.remove('active'); });
+  document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+  if (id === 'tab5') buildAuswertung();
+  checkWeiter();
+}
+
+// PROGRESS
+function markDone(tabIdx, aufgIdx) {
+  var key = tabIdx+'-'+aufgIdx+'-'+currentLevel;
+  if (done[key]) return;
+  done[key] = true;
+  updateProgress(tabIdx);
+  checkWeiter();
+}
+
+function countDone(tabIdx) {
+  var c = 0;
+  for (var i=1; i<=TAB_COUNT[tabIdx]; i++) {
+    if (done[tabIdx+'-'+i+'-'+currentLevel]) c++;
+  }
+  return c;
+}
+
+function updateProgress(tabIdx) {
+  var c = countDone(tabIdx);
+  var total = TAB_COUNT[tabIdx];
+  var pct = Math.round(c/total*100);
+  var bar = document.getElementById('prog'+tabIdx);
+  var txt = document.getElementById('prog'+tabIdx+'-text');
+  if (bar) bar.style.width = pct+'%';
+  if (txt) txt.textContent = c+' / '+total+' erledigt';
+  if (c === total) {
+    var tabBtn = document.getElementById('tabn-'+tabIdx);
+    if (tabBtn && !tabBtn.querySelector('.tab-check')) {
+      var sp = document.createElement('span');
+      sp.className = 'tab-check';
+      sp.textContent = ' ✓';
+      tabBtn.appendChild(sp);
+    }
+  }
+}
+
+function updateAllProgress() {
+  for (var t=1; t<=4; t++) updateProgress(t);
+}
+
+function allDone() {
+  for (var t=1; t<=4; t++) {
+    if (countDone(t) < TAB_COUNT[t]) return false;
+  }
+  return true;
+}
+
+function checkWeiter() {
+  document.getElementById('weiter-btn').style.display = allDone() ? 'block' : 'none';
+}
+
+// HINTS
+function toggleHint(id) {
+  document.getElementById(id).classList.toggle('open');
+}
+
+// RESET HELPERS
+function resetInputById(inputId, fbId) {
+  var inp = document.getElementById(inputId);
+  if (inp) { inp.value=''; inp.className='math-input'; }
+  var fb = document.getElementById(fbId);
+  if (fb) { fb.className='feedback'; fb.innerHTML=''; }
+}
+
+function makeResetBtn(inputId, fbId) {
+  return '<button class="btn btn-outline btn-sm" style="margin-top:10px;display:block;" ' +
+    'data-ri="'+inputId+'||'+fbId+'" onclick="var p=this.dataset.ri.split(\'||\');resetInputById(p[0],p[1])">🔄 Eingabe leeren</button>';
+}
+
+// MULTIPLE CHOICE
+function checkMC(btn, groupId, isCorrect, msg) {
+  var group = document.getElementById(groupId);
+  var btns = group.querySelectorAll('.mc-option');
+  var fb = document.getElementById('fb-'+groupId);
+  if (isCorrect) {
+    btns.forEach(function(b) { b.disabled = true; });
+    btn.classList.add('correct');
+    if (fb) { fb.className='feedback show correct'; fb.innerHTML='✅ '+msg; }
+    var info = parseKey2(groupId);
+    if (info) markDone(info.tab, info.idx);
+  } else {
+    btn.classList.add('wrong');
+    if (fb) {
+      fb.className='feedback show wrong';
+      fb.innerHTML = '❌ '+msg +
+        '<button class="btn btn-outline btn-sm" style="margin-top:10px;display:block;" data-gid="'+groupId+'" onclick="resetMC(this.dataset.gid)">🔄 Antwort leeren</button>';
+    }
+    btns.forEach(function(b) { b.disabled = true; });
+    setTimeout(function() { btns.forEach(function(b) { b.disabled = false; }); }, 700);
+  }
+}
+
+function resetMC(groupId) {
+  var group = document.getElementById(groupId);
+  if (!group) return;
+  group.querySelectorAll('.mc-option').forEach(function(b) {
+    b.classList.remove('correct','wrong'); b.disabled=false;
+  });
+  var fb = document.getElementById('fb-'+groupId);
+  if (fb) { fb.className='feedback'; fb.innerHTML=''; }
+}
+
+function parseKey2(id) {
+  var m = id.match(/mc-(\d+)-(\d+)-([GFP])$/);
+  if (m) return {tab:parseInt(m[1]),idx:parseInt(m[2]),lvl:m[3]};
+  return null;
+}
+
+// TEILER CHIPS
+function buildTeilerChips(gridId, options) {
+  var grid = document.getElementById(gridId);
+  if (!grid || grid.children.length > 0) return;
+  options.forEach(function(n) {
+    var chip = document.createElement('div');
+    chip.className = 'teiler-chip';
+    chip.textContent = n;
+    chip.dataset.n = n;
+    chip.addEventListener('click', function() { chip.classList.toggle('selected'); });
+    grid.appendChild(chip);
+  });
+}
+
+function checkTeilerChips(key, correctArr, optionArr) {
+  var gridId = 'tg-'+key;
+  var fbId = 'fb-'+key;
+  var correctSet = new Set(correctArr);
+  var chips = document.querySelectorAll('#'+gridId+' .teiler-chip');
+  var allOk = true;
+  chips.forEach(function(chip) {
+    var n = parseInt(chip.dataset.n);
+    var sel = chip.classList.contains('selected');
+    var should = correctSet.has(n);
+    chip.classList.remove('selected','correct','wrong');
+    if (should) { chip.classList.add('correct'); if (!sel) allOk=false; }
+    else { if (sel) { chip.classList.add('wrong'); allOk=false; } }
+  });
+  var fb = document.getElementById(fbId);
+  if (!fb) return;
+  if (allOk) {
+    fb.className='feedback show correct';
+    fb.innerHTML='✅ Alle richtigen Teiler gefunden!';
+    var info = parseInputKey(key);
+    if (info) markDone(info.tab, info.idx);
+  } else {
+    fb.className='feedback show wrong';
+    fb.innerHTML='❌ Noch nicht ganz. Falsch markierte oder fehlende Teiler.' +
+      '<button class="btn btn-outline btn-sm" style="margin-top:8px;display:block;" data-kid="'+gridId+'||'+fbId+'" onclick="var p=this.dataset.kid.split(\'||\');resetChips(p[0],p[1])">🔄 Auswahl leeren</button>';
+  }
+}
+
+function resetChips(gridId, fbId) {
+  document.querySelectorAll('#'+gridId+' .teiler-chip').forEach(function(c) { c.classList.remove('selected','correct','wrong'); });
+  var fb = document.getElementById(fbId);
+  if (fb) { fb.className='feedback'; fb.innerHTML=''; }
+}
+
+// TEILERMENGE TEXT
+function checkTeilerSet(key, correctArr) {
+  var inp = document.getElementById('inp-'+key);
+  var fb = document.getElementById('fb-'+key);
+  if (!inp||!fb) return;
+  var val = inp.value.replace(/[\s{}]/g,'');
+  var parts = val.split(';').map(function(s) { return parseInt(s.trim()); }).filter(function(n) { return !isNaN(n); });
+  var inputSet = new Set(parts);
+  var correctSet = new Set(correctArr);
+  var ok = inputSet.size===correctSet.size && Array.from(correctSet).every(function(n) { return inputSet.has(n); });
+  if (ok) {
+    inp.className='math-input correct';
+    fb.className='feedback show correct';
+    fb.innerHTML='✅ Perfekt! Alle Teiler richtig.';
+    var info = parseInputKey(key);
+    if (info) markDone(info.tab, info.idx);
+  } else {
+    var missing = Array.from(correctSet).filter(function(n) { return !inputSet.has(n); });
+    var extra = Array.from(inputSet).filter(function(n) { return !correctSet.has(n); });
+    var hint = '';
+    if (missing.length) hint += ' Fehlend: '+missing.join(', ')+'.';
+    if (extra.length) hint += ' Falsch dabei: '+extra.join(', ')+'.';
+    inp.className='math-input wrong';
+    fb.className='feedback show wrong';
+    fb.innerHTML='❌ Noch nicht ganz.'+hint + makeResetBtn('inp-'+key,'fb-'+key);
+  }
+}
+
+// EXACT INPUT
+function checkExact(key, expected, msgOk, msgWrong) {
+  var inp = document.getElementById('inp-'+key);
+  var fb = document.getElementById('fb-'+key);
+  if (!inp||!fb) return;
+  var ok = inp.value.trim() === expected;
+  inp.className='math-input '+(ok?'correct':'wrong');
+  fb.className='feedback show '+(ok?'correct':'wrong');
+  if (ok) {
+    fb.innerHTML='✅ '+msgOk;
+    var info = parseInputKey(key);
+    if (info) markDone(info.tab, info.idx);
+  } else {
+    fb.innerHTML='❌ '+msgWrong + makeResetBtn('inp-'+key,'fb-'+key);
+  }
+}
+
+// PFZ
+function normalizeMul(s) {
+  return s.replace(/\s/g,'')
+    .replace(/[×✕*xX·•]/g,'·')
+    .replace(/·+/g,'·')
+    .replace(/^·|·$/g,'')
+    .toLowerCase();
+}
+
+function parsePFZExpanded(raw) {
+  var s = normalizeMul(raw);
+  var map = {};
+  s.split('·').forEach(function(part) {
+    var n = parseInt(part);
+    if (!isNaN(n) && n > 1) map[n] = (map[n]||0) + 1;
+  });
+  return map;
+}
+
+function parsePFZPow(raw) {
+  var s = normalizeMul(raw);
+  var map = {};
+  s.split('·').forEach(function(part) {
+    var m = part.match(/^(\d+)\^(\d+)$/);
+    if (m) { map[parseInt(m[1])] = parseInt(m[2]); }
+    else { var n = parseInt(part); if (!isNaN(n) && n > 1) map[n] = (map[n]||0)+1; }
+  });
+  return map;
+}
+
+function mapsEqual(a,b) {
+  var ka = Object.keys(a), kb = Object.keys(b);
+  if (ka.length!==kb.length) return false;
+  return ka.every(function(k) { return a[k]===b[k]; });
+}
+
+function checkPFZ(key, correctFactors) {
+  var inp = document.getElementById('inp-'+key);
+  var fb = document.getElementById('fb-'+key);
+  if (!inp||!fb) return;
+  var correct = {};
+  correctFactors.forEach(function(pair) { correct[pair[0]]=pair[1]; });
+  var got = parsePFZExpanded(inp.value);
+  var ok = mapsEqual(got, correct);
+  inp.className='math-input '+(ok?'correct':'wrong');
+  fb.className='feedback show '+(ok?'correct':'wrong');
+  if (ok) {
+    fb.innerHTML='✅ Richtig! Alle Primfaktoren stimmen.';
+    var info = parseInputKey(key);
+    if (info) markDone(info.tab, info.idx);
+  } else {
+    fb.innerHTML='❌ Nicht ganz. Sind alle Faktoren Primzahlen? Stimmt das Produkt?'+makeResetBtn('inp-'+key,'fb-'+key);
+  }
+}
+
+function checkPFZPow(key, correctFactors) {
+  var inp = document.getElementById('inp-'+key);
+  var fb = document.getElementById('fb-'+key);
+  if (!inp||!fb) return;
+  var correct = {};
+  correctFactors.forEach(function(pair) { correct[pair[0]]=pair[1]; });
+  var got = parsePFZPow(inp.value);
+  var ok = mapsEqual(got, correct);
+  inp.className='math-input '+(ok?'correct':'wrong');
+  fb.className='feedback show '+(ok?'correct':'wrong');
+  if (ok) {
+    fb.innerHTML='✅ Richtig! Perfekte Potenzschreibweise.';
+    var info = parseInputKey(key);
+    if (info) markDone(info.tab, info.idx);
+  } else {
+    fb.innerHTML='❌ Noch nicht. Zähle jeden Primfaktor – wie oft kommt er vor?'+makeResetBtn('inp-'+key,'fb-'+key);
+  }
+}
+
+// Sub-aufgaben (a/b) – both must be correct
+var subDone = {};
+function checkPFZSub(key, correctFactors) {
+  var inp = document.getElementById('inp-'+key);
+  var fb = document.getElementById('fb-'+key);
+  if (!inp||!fb) return;
+  var correct = {};
+  correctFactors.forEach(function(pair) { correct[pair[0]]=pair[1]; });
+  var got = parsePFZPow(inp.value);
+  var ok = mapsEqual(got, correct);
+  inp.className='math-input '+(ok?'correct':'wrong');
+  fb.className='feedback show '+(ok?'correct':'wrong');
+  if (ok) {
+    fb.innerHTML='✅ Richtig!';
+    subDone[key] = true;
+    // Check if parent aufgabe is done
+    var parentKey = key.replace(/-[ab]$/, '');
+    var sibA = parentKey+'-a';
+    var sibB = parentKey+'-b';
+    if (subDone[sibA] && subDone[sibB]) {
+      var info = parseInputKey(parentKey);
+      if (info) markDone(info.tab, info.idx);
+    }
+  } else {
+    fb.innerHTML='❌ Noch nicht. Zähle Primfaktoren sorgfältig.'+makeResetBtn('inp-'+key,'fb-'+key);
+  }
+}
+
+// KEY PARSER
+function parseInputKey(key) {
+  var m = key.match(/^(\d+)-(\d+)-([GFP])$/);
+  if (m) return {tab:parseInt(m[1]),idx:parseInt(m[2]),lvl:m[3]};
+  return null;
+}
+
+// SPECIAL CHECKS
+function checkTwins() {
+  var correct = [[3,5],[5,7],[11,13],[17,19],[29,31],[41,43]];
+  var val = document.getElementById('inp-2-1-P').value;
+  var inp = document.getElementById('inp-2-1-P');
+  var fb = document.getElementById('fb-2-1-P');
+  var nums = (val.match(/\d+/g)||[]).map(Number);
+  var found = correct.filter(function(pair) { return nums.indexOf(pair[0])>-1 && nums.indexOf(pair[1])>-1; });
+  var ok = found.length === correct.length;
+  inp.className='math-input '+(ok?'correct':'wrong');
+  fb.className='feedback show '+(ok?'correct':'wrong');
+  if (ok) {
+    fb.innerHTML='✅ Alle 6 Paare: (3;5), (5;7), (11;13), (17;19), (29;31), (41;43)';
+    markDone(2,1);
+  } else {
+    fb.innerHTML='❌ Noch nicht vollständig. '+found.length+'/'+correct.length+' Paare gefunden.'+makeResetBtn('inp-2-1-P','fb-2-1-P');
+  }
+}
+
+function check97() {
+  var val = document.getElementById('inp-2-3-P').value;
+  var inp = document.getElementById('inp-2-3-P');
+  var fb = document.getElementById('fb-2-3-P');
+  var nums = (val.match(/\d+/g)||[]).map(Number);
+  var required = [2,3,5,7];
+  var ok = required.every(function(n) { return nums.indexOf(n)>-1; });
+  inp.className='math-input '+(ok?'correct':'wrong');
+  fb.className='feedback show '+(ok?'correct':'wrong');
+  if (ok) {
+    fb.innerHTML='✅ Richtig! 2, 3, 5, 7 reichen aus. Keine davon teilt 97 → Primzahl!';
+    markDone(2,3);
+  } else {
+    fb.innerHTML='❌ Noch nicht alle nötigen Primzahlen. Denk an alle Primzahlen bis ca. 10.'+makeResetBtn('inp-2-3-P','fb-2-3-P');
+  }
+}
+
+// SORT
+function initSort(id, nums) {
+  if (sortState[id]) return;
+  sortState[id] = { selected: null, pool: nums.slice(), prim: [], noprim: [] };
+  renderSort(id);
+}
+
+function renderSort(id) {
+  var s = sortState[id];
+  ['pool','prim','noprim'].forEach(function(zone) {
+    var el = document.getElementById(id+'-'+zone);
+    if (!el) return;
+    el.innerHTML = '';
+    s[zone].forEach(function(n) {
+      var chip = document.createElement('div');
+      var cls = 'sort-chip';
+      if (zone !== 'pool') cls += ' in-zone' + (zone==='prim' ? ' primzahl' : '');
+      if (s.selected===n && zone==='pool') cls += ' selected';
+      chip.className = cls;
+      chip.textContent = n;
+      chip.dataset.n = n;
+      chip.dataset.zone = zone;
+      chip.addEventListener('click', function(e) { e.stopPropagation(); selectChip(id, n, zone); });
+      el.appendChild(chip);
+    });
+  });
+}
+
+function selectChip(id, n, zone) {
+  var s = sortState[id];
+  if (zone !== 'pool') {
+    s[zone] = s[zone].filter(function(x) { return x!==n; });
+    s.pool.push(n);
+    s.selected = null;
+  } else {
+    s.selected = s.selected===n ? null : n;
+  }
+  renderSort(id);
+}
+
+function dropToZone(id, target) {
+  var s = sortState[id];
+  if (s.selected===null) return;
+  var n = s.selected;
+  s.pool = s.pool.filter(function(x) { return x!==n; });
+  s[target].push(n);
+  s.selected = null;
+  renderSort(id);
+}
+
+function checkSort(id) {
+  var a = ANSWERS['sort-'+id];
+  if (!a) return;
+  var primArr = a.prim;
+  var noprimArr = a.noprim;
+  var s = sortState[id];
+  var fb = document.getElementById('fb-sort-'+id);
+  var primSet = new Set(primArr);
+  var noprimSet = new Set(noprimArr);
+  if (s.pool.length > 0) {
+    fb.className='feedback show wrong';
+    fb.innerHTML='❌ Ordne erst alle Zahlen zu!';
+    return;
+  }
+  var primOk = primArr.every(function(n) { return s.prim.indexOf(n)>-1; }) && !s.prim.some(function(n) { return noprimSet.has(n); });
+  var noprimOk = noprimArr.every(function(n) { return s.noprim.indexOf(n)>-1; }) && !s.noprim.some(function(n) { return primSet.has(n); });
+  var ok = primOk && noprimOk;
+  fb.className='feedback show '+(ok?'correct':'wrong');
+  if (ok) {
+    fb.innerHTML='✅ Super sortiert!';
+    var info = parseSortKey(id);
+    if (info) markDone(info.tab, info.idx);
+  } else {
+    var wrong = s.prim.filter(function(n) { return noprimSet.has(n); }).concat(s.noprim.filter(function(n) { return primSet.has(n); }));
+    fb.innerHTML='❌ Nicht ganz. Falsch einsortiert: '+wrong.join(', ')+
+      '<button class="btn btn-outline btn-sm" style="margin-top:8px;display:block;" data-sid="'+id+'" onclick="resetSort(this.dataset.sid)">🔄 Neu sortieren</button>';
+  }
+}
+
+function resetSort(id) {
+  var s = sortState[id];
+  var all = s.pool.concat(s.prim).concat(s.noprim);
+  s.pool=all.slice(); s.prim=[]; s.noprim=[]; s.selected=null;
+  renderSort(id);
+  var fb = document.getElementById('fb-sort-'+id);
+  if (fb) { fb.className='feedback'; fb.innerHTML=''; }
+}
+
+function parseSortKey(id) {
+  var m = id.match(/sort-(\d+)-(\d+)-([GFP])$/);
+  if (m) return {tab:parseInt(m[1]),idx:parseInt(m[2]),lvl:m[3]};
+  return null;
+}
+
+// AUSWERTUNG
+function buildAuswertung() {
+  var container = document.getElementById('auswertung-content');
+  var tabNames = ['Teilermenge','Primzahlen','Primfaktorzerlegung','Wiederholung'];
+  var totalDone=0;
+  var html = '';
+  for (var t=1; t<=4; t++) {
+    var c = countDone(t);
+    var total = TAB_COUNT[t];
+    totalDone += c;
+    html += '<div style="margin-bottom:14px;">';
+    html += '<div style="font-weight:800;margin-bottom:6px;">'+tabNames[t-1]+'</div>';
+    html += '<div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:'+Math.round(c/total*100)+'%"></div></div>';
+    html += '<div class="progress-text">'+c+' / '+total+' bearbeitet</div>';
+    html += '</div>';
+  }
+  var total = 12;
+  var pct = Math.round(totalDone/total*100);
+  var cls = pct>=80?'great':pct>=50?'ok':'retry';
+  var msg = pct>=80?'Ausgezeichnet! 🎉':pct>=50?'Gut gemacht! 💪':'Weiter üben! 📚';
+  var scoreHtml = '<div class="score-box">' +
+    '<div class="score-circle '+cls+'"><div class="score-number">'+totalDone+'/'+total+'</div><div class="score-label">Aufgaben</div></div>' +
+    '<div class="score-text">'+msg+'</div></div>';
+  container.innerHTML = scoreHtml + html;
+  if (window.MathJax) MathJax.typesetPromise();
+}
+
+// T-REX
+function toggleTrex() {
+  var tip = document.getElementById('trex-tip');
+  tip.classList.toggle('show');
+  setTimeout(function() { tip.classList.remove('show'); }, 2500);
+}
+
+// INIT
+document.addEventListener('DOMContentLoaded', function() {
+  buildTeilerChips('tg-1-1-G', [1,2,3,4,5,6,7,8,9,10,12,15,24]);
+  buildTeilerChips('tg-4-1-F', [2,3,5,10]);
+  buildTeilerChips('tg-4-3-P', [1,2,3,4,5,6,7,8,9]);
+  initSort('sort-2-1-G', [1,2,4,7,9,11,15]);
+  initSort('sort-2-1-F', [17,23,25,35,37,49,51]);
+  updateAllProgress();
+  if (window.MathJax) MathJax.typesetPromise();
+});
+
+function checkExact(key) {
+  var a = ANSWERS['exact-'+key];
+  if (!a) return;
+  var inp = document.getElementById('inp-'+key);
+  var fb = document.getElementById('fb-'+key);
+  if (!inp||!fb) return;
+  var ok = inp.value.trim() === a.answer;
+  inp.className='math-input '+(ok?'correct':'wrong');
+  fb.className='feedback show '+(ok?'correct':'wrong');
+  if (ok) {
+    fb.innerHTML='✅ '+a.msgOk;
+    var info = parseInputKey(key);
+    if (info) markDone(info.tab, info.idx);
+  } else {
+    fb.innerHTML='❌ '+a.msgWrong + makeResetBtn('inp-'+key,'fb-'+key);
+  }
+}
+
+function checkTeilerSet(key) {
+  var correctArr = ANSWERS['tset-'+key];
+  if (!correctArr) return;
+  var inp = document.getElementById('inp-'+key);
+  var fb = document.getElementById('fb-'+key);
+  if (!inp||!fb) return;
+  var val = inp.value.replace(/[\s{}]/g,'');
+  var parts = val.split(';').map(function(s) { return parseInt(s.trim()); }).filter(function(n) { return !isNaN(n); });
+  var inputSet = new Set(parts);
+  var correctSet = new Set(correctArr);
+  var ok = inputSet.size===correctSet.size && Array.from(correctSet).every(function(n) { return inputSet.has(n); });
+  if (ok) {
+    inp.className='math-input correct';
+    fb.className='feedback show correct';
+    fb.innerHTML='✅ Perfekt! Alle Teiler richtig.';
+    var info = parseInputKey(key);
+    if (info) markDone(info.tab, info.idx);
+  } else {
+    var missing = Array.from(correctSet).filter(function(n) { return !inputSet.has(n); });
+    var extra = Array.from(inputSet).filter(function(n) { return !correctSet.has(n); });
+    var hint = '';
+    if (missing.length) hint += ' Fehlend: '+missing.length+' Zahlen.';
+    if (extra.length) hint += ' Falsch dabei: '+extra.join(', ')+'.';
+    inp.className='math-input wrong';
+    fb.className='feedback show wrong';
+    fb.innerHTML='❌ Noch nicht ganz.'+hint + makeResetBtn('inp-'+key,'fb-'+key);
+  }
+}
+
+function checkTeilerChips(key) {
+  var a = ANSWERS['tchips-'+key];
+  if (!a) return;
+  var gridId = 'tg-'+key;
+  var fbId = 'fb-'+key;
+  var correctSet = new Set(a.correct);
+  var chips = document.querySelectorAll('#'+gridId+' .teiler-chip');
+  var allOk = true;
+  chips.forEach(function(chip) {
+    var n = parseInt(chip.dataset.n);
+    var sel = chip.classList.contains('selected');
+    var should = correctSet.has(n);
+    chip.classList.remove('selected','correct','wrong');
+    if (should) { chip.classList.add('correct'); if (!sel) allOk=false; }
+    else { if (sel) { chip.classList.add('wrong'); allOk=false; } }
+  });
+  var fb = document.getElementById(fbId);
+  if (!fb) return;
+  if (allOk) {
+    fb.className='feedback show correct';
+    fb.innerHTML='✅ Alle richtigen Teiler gefunden!';
+    var info = parseInputKey(key);
+    if (info) markDone(info.tab, info.idx);
+  } else {
+    fb.className='feedback show wrong';
+    fb.innerHTML='❌ Noch nicht ganz. Falsch markierte oder fehlende Teiler.' +
+      '<button class="btn btn-outline btn-sm" style="margin-top:8px;display:block;" data-kid="'+gridId+'||'+fbId+'" onclick="var p=this.dataset.kid.split('||');resetChips(p[0],p[1])">🔄 Auswahl leeren</button>';
+  }
+}
+
+function checkPFZ(key) {
+  var correctFactors = ANSWERS['pfz-'+key];
+  if (!correctFactors) return;
+  var inp = document.getElementById('inp-'+key);
+  var fb = document.getElementById('fb-'+key);
+  if (!inp||!fb) return;
+  var correct = {};
+  correctFactors.forEach(function(pair) { correct[pair[0]]=pair[1]; });
+  var got = parsePFZExpanded(inp.value);
+  var ok = mapsEqual(got, correct);
+  inp.className='math-input '+(ok?'correct':'wrong');
+  fb.className='feedback show '+(ok?'correct':'wrong');
+  if (ok) {
+    fb.innerHTML='✅ Richtig! Alle Primfaktoren stimmen.';
+    var info = parseInputKey(key);
+    if (info) markDone(info.tab, info.idx);
+  } else {
+    fb.innerHTML='❌ Nicht ganz. Sind alle Faktoren Primzahlen? Stimmt das Produkt?'+makeResetBtn('inp-'+key,'fb-'+key);
+  }
+}
+
+function checkPFZPow(key) {
+  var correctFactors = ANSWERS['pfzpow-'+key];
+  if (!correctFactors) return;
+  var inp = document.getElementById('inp-'+key);
+  var fb = document.getElementById('fb-'+key);
+  if (!inp||!fb) return;
+  var correct = {};
+  correctFactors.forEach(function(pair) { correct[pair[0]]=pair[1]; });
+  var got = parsePFZPow(inp.value);
+  var ok = mapsEqual(got, correct);
+  inp.className='math-input '+(ok?'correct':'wrong');
+  fb.className='feedback show '+(ok?'correct':'wrong');
+  if (ok) {
+    fb.innerHTML='✅ Richtig! Perfekte Potenzschreibweise.';
+    var info = parseInputKey(key);
+    if (info) markDone(info.tab, info.idx);
+  } else {
+    fb.innerHTML='❌ Noch nicht. Zähle jeden Primfaktor – wie oft kommt er vor?'+makeResetBtn('inp-'+key,'fb-'+key);
+  }
+}
+
+function checkPFZSub(key) {
+  var correctFactors = ANSWERS['pfzsub-'+key];
+  if (!correctFactors) return;
+  var inp = document.getElementById('inp-'+key);
+  var fb = document.getElementById('fb-'+key);
+  if (!inp||!fb) return;
+  var correct = {};
+  correctFactors.forEach(function(pair) { correct[pair[0]]=pair[1]; });
+  var got = parsePFZPow(inp.value);
+  var ok = mapsEqual(got, correct);
+  inp.className='math-input '+(ok?'correct':'wrong');
+  fb.className='feedback show '+(ok?'correct':'wrong');
+  if (ok) {
+    fb.innerHTML='✅ Richtig!';
+    subDone[key] = true;
+    var parentKey = key.replace(/-[ab]$/, '');
+    var sibA = parentKey+'-a';
+    var sibB = parentKey+'-b';
+    if (subDone[sibA] && subDone[sibB]) {
+      var info = parseInputKey(parentKey);
+      if (info) markDone(info.tab, info.idx);
+    }
+  } else {
+    fb.innerHTML='❌ Noch nicht. Zähle Primfaktoren sorgfältig.'+makeResetBtn('inp-'+key,'fb-'+key);
+  }
+}
+
+
+// SPECIAL CHECKS
+function checkTwins() {
+  var correct = [[3,5],[5,7],[11,13],[17,19],[29,31],[41,43]];
+  var val = document.getElementById('inp-2-1-P').value;
+  var inp = document.getElementById('inp-2-1-P');
+  var fb = document.getElementById('fb-2-1-P');
+  var nums = (val.match(/\d+/g)||[]).map(Number);
+  var found = correct.filter(function(pair) { return nums.indexOf(pair[0])>-1 && nums.indexOf(pair[1])>-1; });
+  var ok = found.length === correct.length;
+  inp.className='math-input '+(ok?'correct':'wrong');
+  fb.className='feedback show '+(ok?'correct':'wrong');
+  if (ok) {
+    fb.innerHTML='✅ Alle 6 Paare: (3;5), (5;7), (11;13), (17;19), (29;31), (41;43)';
+    markDone(2,1);
+  } else {
+    fb.innerHTML='❌ Noch nicht vollständig. '+found.length+'/'+correct.length+' Paare gefunden.'+makeResetBtn('inp-2-1-P','fb-2-1-P');
+  }
+}
+
+function check97() {
+  var val = document.getElementById('inp-2-3-P').value;
+  var inp = document.getElementById('inp-2-3-P');
+  var fb = document.getElementById('fb-2-3-P');
+  var nums = (val.match(/\d+/g)||[]).map(Number);
+  var required = [2,3,5,7];
+  var ok = required.every(function(n) { return nums.indexOf(n)>-1; });
+  inp.className='math-input '+(ok?'correct':'wrong');
+  fb.className='feedback show '+(ok?'correct':'wrong');
+  if (ok) {
+    fb.innerHTML='✅ Richtig! 2, 3, 5, 7 reichen aus. Keine davon teilt 97 → Primzahl!';
+    markDone(2,3);
+  } else {
+    fb.innerHTML='❌ Noch nicht alle nötigen Primzahlen. Denk an alle Primzahlen bis ca. 10.'+makeResetBtn('inp-2-3-P','fb-2-3-P');
+  }
+}
+
+// SORT
+function initSort(id, nums) {
+  if (sortState[id]) return;
+  sortState[id] = { selected: null, pool: nums.slice(), prim: [], noprim: [] };
+  renderSort(id);
+}
+
+function renderSort(id) {
+  var s = sortState[id];
+  ['pool','prim','noprim'].forEach(function(zone) {
+    var el = document.getElementById(id+'-'+zone);
+    if (!el) return;
+    el.innerHTML = '';
+    s[zone].forEach(function(n) {
+      var chip = document.createElement('div');
+      var cls = 'sort-chip';
+      if (zone !== 'pool') cls += ' in-zone' + (zone==='prim' ? ' primzahl' : '');
+      if (s.selected===n && zone==='pool') cls += ' selected';
+      chip.className = cls;
+      chip.textContent = n;
+      chip.dataset.n = n;
+      chip.dataset.zone = zone;
+      chip.addEventListener('click', function(e) { e.stopPropagation(); selectChip(id, n, zone); });
+      el.appendChild(chip);
+    });
+  });
+}
+
+function selectChip(id, n, zone) {
+  var s = sortState[id];
+  if (zone !== 'pool') {
+    s[zone] = s[zone].filter(function(x) { return x!==n; });
+    s.pool.push(n);
+    s.selected = null;
+  } else {
+    s.selected = s.selected===n ? null : n;
+  }
+  renderSort(id);
+}
+
+function dropToZone(id, target) {
+  var s = sortState[id];
+  if (s.selected===null) return;
+  var n = s.selected;
+  s.pool = s.pool.filter(function(x) { return x!==n; });
+  s[target].push(n);
+  s.selected = null;
+  renderSort(id);
+}
+
+function checkSort(id) {
+  var a = ANSWERS['sort-'+id];
+  if (!a) return;
+  var primArr = a.prim;
+  var noprimArr = a.noprim;
+  var s = sortState[id];
+  var fb = document.getElementById('fb-sort-'+id);
+  var primSet = new Set(primArr);
+  var noprimSet = new Set(noprimArr);
+  if (s.pool.length > 0) {
+    fb.className='feedback show wrong';
+    fb.innerHTML='❌ Ordne erst alle Zahlen zu!';
+    return;
+  }
+  var primOk = primArr.every(function(n) { return s.prim.indexOf(n)>-1; }) && !s.prim.some(function(n) { return noprimSet.has(n); });
+  var noprimOk = noprimArr.every(function(n) { return s.noprim.indexOf(n)>-1; }) && !s.noprim.some(function(n) { return primSet.has(n); });
+  var ok = primOk && noprimOk;
+  fb.className='feedback show '+(ok?'correct':'wrong');
+  if (ok) {
+    fb.innerHTML='✅ Super sortiert!';
+    var info = parseSortKey(id);
+    if (info) markDone(info.tab, info.idx);
+  } else {
+    var wrong = s.prim.filter(function(n) { return noprimSet.has(n); }).concat(s.noprim.filter(function(n) { return primSet.has(n); }));
+    fb.innerHTML='❌ Nicht ganz. Falsch einsortiert: '+wrong.join(', ')+
+      '<button class="btn btn-outline btn-sm" style="margin-top:8px;display:block;" data-sid="'+id+'" onclick="resetSort(this.dataset.sid)">🔄 Neu sortieren</button>';
+  }
+}
+
+function resetSort(id) {
+  var s = sortState[id];
+  var all = s.pool.concat(s.prim).concat(s.noprim);
+  s.pool=all.slice(); s.prim=[]; s.noprim=[]; s.selected=null;
+  renderSort(id);
+  var fb = document.getElementById('fb-sort-'+id);
+  if (fb) { fb.className='feedback'; fb.innerHTML=''; }
+}
+
+function parseSortKey(id) {
+  var m = id.match(/sort-(\d+)-(\d+)-([GFP])$/);
+  if (m) return {tab:parseInt(m[1]),idx:parseInt(m[2]),lvl:m[3]};
+  return null;
+}
+
+// AUSWERTUNG
+function buildAuswertung() {
+  var container = document.getElementById('auswertung-content');
+  var tabNames = ['Teilermenge','Primzahlen','Primfaktorzerlegung','Wiederholung'];
+  var totalDone=0;
+  var html = '';
+  for (var t=1; t<=4; t++) {
+    var c = countDone(t);
+    var total = TAB_COUNT[t];
+    totalDone += c;
+    html += '<div style="margin-bottom:14px;">';
+    html += '<div style="font-weight:800;margin-bottom:6px;">'+tabNames[t-1]+'</div>';
+    html += '<div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:'+Math.round(c/total*100)+'%"></div></div>';
+    html += '<div class="progress-text">'+c+' / '+total+' bearbeitet</div>';
+    html += '</div>';
+  }
+  var total = 12;
+  var pct = Math.round(totalDone/total*100);
+  var cls = pct>=80?'great':pct>=50?'ok':'retry';
+  var msg = pct>=80?'Ausgezeichnet! 🎉':pct>=50?'Gut gemacht! 💪':'Weiter üben! 📚';
+  var scoreHtml = '<div class="score-box">' +
+    '<div class="score-circle '+cls+'"><div class="score-number">'+totalDone+'/'+total+'</div><div class="score-label">Aufgaben</div></div>' +
+    '<div class="score-text">'+msg+'</div></div>';
+  container.innerHTML = scoreHtml + html;
+  if (window.MathJax) MathJax.typesetPromise();
+}
+
+// T-REX
+function toggleTrex() {
+  var tip = document.getElementById('trex-tip');
+  tip.classList.toggle('show');
+  setTimeout(function() { tip.classList.remove('show'); }, 2500);
+}
+
+// INIT
+document.addEventListener('DOMContentLoaded', function() {
+  buildTeilerChips('tg-1-1-G', [1,2,3,4,5,6,7,8,9,10,12,15,24]);
+  buildTeilerChips('tg-4-1-F', [2,3,5,10]);
+  buildTeilerChips('tg-4-3-P', [1,2,3,4,5,6,7,8,9]);
+  initSort('sort-2-1-G', [1,2,4,7,9,11,15]);
+  initSort('sort-2-1-F', [17,23,25,35,37,49,51]);
+  updateAllProgress();
+  if (window.MathJax) MathJax.typesetPromise();
+});
+</script>
+</body>
+</html>
