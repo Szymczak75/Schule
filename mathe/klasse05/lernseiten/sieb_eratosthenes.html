@@ -317,7 +317,6 @@
     <div class="legend-item"><div class="legend-dot" style="background:rgba(245,200,66,0.2);border:1px solid rgba(245,200,66,0.6)"></div>aktuelle Primzahl</div>
   </div>
   <div class="sieve-wrapper"><div class="sieve-grid" id="grid-F"></div></div>
-  <div class="q-panel" id="qpanel-F"><div class="q-title">Überprüfung</div><div id="qpanel-body-F"></div></div>
   <div class="questions-section" id="qs-F">
     <div class="q-card">
       <div class="q-title">Primzahlzwillinge bis 350</div>
@@ -351,7 +350,6 @@
     <div class="legend-item"><div class="legend-dot" style="background:rgba(245,200,66,0.2);border:1px solid rgba(245,200,66,0.6)"></div>aktuelle Primzahl</div>
   </div>
   <div class="sieve-wrapper"><div class="sieve-grid" id="grid-P"></div></div>
-  <div class="q-panel" id="qpanel-P"><div class="q-title">Überprüfung</div><div id="qpanel-body-P"></div></div>
   <div class="questions-section" id="qs-P">
     <div class="q-card">
       <div class="q-title">Aufgabe 1 – Primzahl-Drillinge</div>
@@ -585,12 +583,29 @@ function autoCompleteMultiples(lv, p){
 }
 
 // ================================================================
-// AFTER MULTIPLES → CHECK PANEL
+// AFTER MULTIPLES → CHECK PANEL (only G) or auto-advance (F, P)
 // ================================================================
 function afterMultiples(lv, p){
   const limit = LIMITS[lv];
   lvl[lv].phase = 'check';
   syncGrid(lv);
+
+  if(lv !== 'G'){
+    // F and P: no check panel — just advance automatically
+    if(st[p]==='curprime') st[p]='prime';
+    const sq = p*p;
+    if(sq > limit){
+      finishSieve(lv);
+    } else {
+      // find next active prime
+      let nextP = p+1;
+      while(nextP<=limit && st[nextP]!=='active') nextP++;
+      if(nextP>limit){ finishSieve(lv); return; }
+      startMultiples(lv, nextP);
+    }
+    return;
+  }
+
   showCheckPanel(lv, p, limit);
 }
 
