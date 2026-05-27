@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Systole & Diastole – Klasse 6</title>
+<script>
+  MathJax = {
+    tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+    svg: { fontCache: 'global' }
+  };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Nunito+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --rot:    #e63946;
+    --gruen:  #2d9e4f;
+    --blau:   #1a6fb8;
+    --gelb:   #f4a200;
+    --dunkel: #1c2b40;
+    --karte:  #ffffff;
+    --border: #d0dff0;
+    --systole-col: #e63946;
+    --diastole-col: #1a6fb8;
+    --radius: 16px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: 'Nunito Sans', sans-serif;
+    font-size: 17px;
+    background: linear-gradient(135deg, #e8f4ff 0%, #f5f0ff 100%);
+    min-height: 100vh;
+    color: var(--dunkel);
+    padding-bottom: 80px;
+  }
+
+  header {
+    background: linear-gradient(135deg, #1a6fb8 0%, #0f4c8a 100%);
+    color: white; padding: 18px 20px 14px;
+    position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.2);
+  }
+  header h1 { font-family: 'Nunito', sans-serif; font-size: 1.25rem; font-weight: 900; }
+  header p  { font-size: 0.85rem; opacity: 0.85; margin-top: 2px; }
+
+  .tabs {
+    display: flex; overflow-x: auto; background: #0f4c8a;
+    padding: 0 10px 0; gap: 4px; scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab-btn {
+    flex-shrink: 0; background: rgba(255,255,255,0.15);
+    color: rgba(255,255,255,0.75); border: none;
+    border-radius: 10px 10px 0 0; padding: 10px 16px;
+    font-size: 0.82rem; font-family: 'Nunito', sans-serif;
+    font-weight: 700; cursor: pointer; white-space: nowrap;
+    transition: all 0.2s; touch-action: manipulation;
+  }
+  .tab-btn.active { background: white; color: var(--blau); }
+
+  main { padding: 18px 16px; max-width: 820px; margin: 0 auto; }
+
+  .karte {
+    background: var(--karte); border-radius: var(--radius);
+    padding: 22px 20px; margin-bottom: 18px;
+    box-shadow: 0 2px 10px rgba(26,111,184,0.1);
+    border: 1.5px solid var(--border);
+  }
+  .karte h2 {
+    font-family: 'Nunito', sans-serif; font-weight: 900;
+    font-size: 1.15rem; color: var(--blau); margin-bottom: 12px;
+  }
+  .karte h3 {
+    font-family: 'Nunito', sans-serif; font-weight: 800;
+    font-size: 1rem; color: var(--dunkel); margin: 16px 0 8px;
+  }
+  p { line-height: 1.6; margin-bottom: 10px; }
+
+  /* VIDEO */
+  .video-card {
+    display: flex; align-items: center; gap: 16px;
+    background: linear-gradient(135deg, #1c2b40 0%, #1a6fb8 100%);
+    color: white; border-radius: var(--radius);
+    padding: 18px 20px; text-decoration: none;
+    min-height: 80px; cursor: pointer; touch-action: manipulation;
+    transition: transform 0.15s; box-shadow: 0 4px 14px rgba(26,111,184,0.3);
+  }
+  .video-card:active { transform: scale(0.98); }
+  .video-icon {
+    width: 54px; height: 54px; background: rgba(255,255,255,0.15);
+    border-radius: 12px; display: flex; align-items: center;
+    justify-content: center; font-size: 1.8rem; flex-shrink: 0;
+  }
+  .video-info { flex: 1; }
+  .video-info strong { font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 1rem; display: block; }
+  .video-info span { font-size: 0.82rem; opacity: 0.8; }
+  .video-badge {
+    background: rgba(255,255,255,0.2); border-radius: 8px;
+    padding: 4px 10px; font-size: 0.78rem; font-weight: 700; white-space: nowrap;
+  }
+
+  /* HERZ-ANIMATION */
+  .herz-container {
+    display: flex; flex-direction: column; align-items: center;
+    padding: 10px 0 16px; gap: 12px;
+  }
+  /* Bühne größer, damit Herz beim Wachsen nicht abgeschnitten wird */
+  .herz-buehne {
+    position: relative; width: 260px; height: 220px;
+  }
+  .herz-svg { width: 100%; height: 100%; overflow: visible; }
+
+  .phase-label {
+    text-align: center; font-family: 'Nunito', sans-serif;
+    font-weight: 900; font-size: 1.4rem; transition: color 0.4s;
+  }
+  .phase-beschr {
+    text-align: center; font-size: 0.9rem; color: #555;
+    max-width: 300px; min-height: 2.8em; line-height: 1.5;
+  }
+  .herz-btn {
+    background: var(--blau); color: white; border: none;
+    border-radius: 12px; padding: 12px 28px;
+    font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 1rem;
+    cursor: pointer; min-height: 44px; min-width: 44px;
+    touch-action: manipulation; transition: background 0.2s, transform 0.1s;
+  }
+  .herz-btn:active { transform: scale(0.96); background: #0f4c8a; }
+
+  /* PHASEN-CHIPS */
+  .phasen-row {
+    display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin: 14px 0;
+  }
+  .phase-chip {
+    padding: 8px 16px; border-radius: 20px;
+    font-family: 'Nunito', sans-serif; font-weight: 700;
+    font-size: 0.9rem; border: 2px solid transparent;
+    transition: all 0.3s; background: #eef4fb; color: #888;
+  }
+  .phase-chip.aktiv-systole  { background: #fde8ea; color: var(--systole-col);  border-color: var(--systole-col); }
+  .phase-chip.aktiv-diastole { background: #e5eef9; color: var(--diastole-col); border-color: var(--diastole-col); }
+
+  /* MC FRAGEN */
+  .frage-box {
+    background: #f5f9ff; border-left: 4px solid var(--blau);
+    border-radius: 0 12px 12px 0; padding: 14px 16px; margin: 14px 0;
+  }
+  .frage-box p { font-weight: 600; margin-bottom: 10px; }
+  .mc-optionen { display: flex; flex-direction: column; gap: 8px; }
+  .mc-btn {
+    background: white; border: 2px solid var(--border);
+    border-radius: 12px; padding: 12px 16px;
+    font-family: 'Nunito Sans', sans-serif; font-size: 0.95rem;
+    text-align: left; cursor: pointer; min-height: 44px;
+    touch-action: manipulation; transition: all 0.15s;
+  }
+  .mc-btn:active { transform: scale(0.98); }
+  .mc-btn.richtig { background: #d4f5e2; border-color: var(--gruen); color: #1a5c34; font-weight: 700; }
+  .mc-btn.falsch  { background: #fddde0; border-color: var(--rot);   color: #7a1a1a; font-weight: 700; }
+  .mc-btn:disabled { cursor: default; }
+  .feedback-text { font-size: 0.9rem; margin-top: 8px; font-weight: 600; }
+  .feedback-text.ok  { color: var(--gruen); }
+  .feedback-text.nok { color: var(--rot); }
+
+  /* BLUTDRUCK */
+  .bd-anzeige {
+    background: var(--dunkel); color: white;
+    border-radius: var(--radius); padding: 20px;
+    text-align: center; margin: 14px 0;
+  }
+  .bd-wert { font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 3rem; letter-spacing: 2px; }
+  .bd-label { font-size: 0.85rem; opacity: 0.7; margin-top: 4px; }
+  .bd-teile { display: flex; justify-content: center; gap: 30px; margin-top: 12px; }
+  .bd-teil { text-align: center; }
+  .bd-teil .zahl { font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 2rem; }
+  .bd-teil .zahl.sys { color: #ff8fa3; }
+  .bd-teil .zahl.dia { color: #74b9ff; }
+  .bd-teil .name { font-size: 0.8rem; opacity: 0.75; margin-top: 2px; }
+
+  /* EINGABE-BEREICH BLUTDRUCK (zweispaltig) */
+  .bd-eingabe-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 14px 0;
+  }
+  @media (max-width: 480px) { .bd-eingabe-grid { grid-template-columns: 1fr; } }
+  .bd-eingabe-box {
+    border-radius: 12px; padding: 14px 16px;
+  }
+  .bd-eingabe-box.sys-box { background: #fff0f2; border: 2px solid #f5b8c0; }
+  .bd-eingabe-box.dia-box { background: #f0f5ff; border: 2px solid #b0c8f0; }
+  .bd-eingabe-box label { font-weight: 700; font-size: 0.9rem; display: block; margin-bottom: 8px; }
+  .bd-eingabe-box label.sys-label { color: var(--systole-col); }
+  .bd-eingabe-box label.dia-label { color: var(--diastole-col); }
+  .bd-eingabe-row { display: flex; gap: 8px; align-items: center; }
+
+  /* SKALEN */
+  .skala-container { margin: 12px 0; }
+  .skala-title { font-size: 0.8rem; font-weight: 700; color: #666; margin-bottom: 4px; }
+  .skala-label-row {
+    display: flex; justify-content: space-between;
+    font-size: 0.75rem; color: #666; margin-bottom: 3px;
+  }
+  .skala {
+    height: 28px; border-radius: 8px; position: relative;
+    overflow: visible;
+  }
+  .skala.sys-skala { background: linear-gradient(to right, #74b9ff 0%, #2d9e4f 30%, #f4a200 65%, #e63946 100%); }
+  .skala.dia-skala { background: linear-gradient(to right, #74b9ff 0%, #2d9e4f 40%, #f4a200 75%, #e63946 100%); }
+  .skala-marker {
+    position: absolute; top: -5px; width: 6px; height: 38px;
+    background: var(--dunkel); border-radius: 3px;
+    transform: translateX(-50%);
+    transition: left 0.5s cubic-bezier(.4,0,.2,1);
+  }
+  .skala-zonen { display: flex; margin-top: 3px; }
+  .zone {
+    flex: 1; text-align: center; font-size: 0.68rem;
+    font-weight: 700; padding: 2px 0; border-radius: 4px;
+  }
+
+  /* EINGABEFELDER */
+  .eingabe-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin: 10px 0; }
+  .eingabe-label { font-weight: 600; min-width: 80px; }
+  input[type="number"], input[type="text"] {
+    border: 2px solid var(--border); border-radius: 10px;
+    padding: 10px 14px; font-size: 1rem;
+    font-family: 'Nunito Sans', sans-serif;
+    width: 90px; background: #f8fbff; -webkit-appearance: none;
+  }
+  input:focus { outline: none; border-color: var(--blau); background: white; }
+  .einheit { font-size: 0.85rem; color: #666; }
+
+  /* BUTTONS */
+  .auswerten-btn {
+    background: var(--blau); color: white; border: none;
+    border-radius: 12px; padding: 13px 24px;
+    font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 1rem;
+    cursor: pointer; min-height: 44px; touch-action: manipulation;
+    margin-top: 8px; transition: background 0.2s, transform 0.1s;
+  }
+  .auswerten-btn:active { transform: scale(0.96); background: #0f4c8a; }
+
+  /* ERGEBNIS */
+  .ergebnis-box {
+    border-radius: 12px; padding: 14px 16px;
+    margin-top: 10px; display: none; font-weight: 600;
+  }
+  .ergebnis-box.richtig { background: #d4f5e2; border: 2px solid var(--gruen); color: #1a5c34; }
+  .ergebnis-box.falsch  { background: #fddde0; border: 2px solid var(--rot);   color: #7a1a1a; }
+  .ergebnis-box.info    { background: #e5eef9; border: 2px solid var(--blau);  color: var(--blau); }
+
+  /* LÜCKENTEXT */
+  .lueckentext-input {
+    border: 2px solid var(--border); border-radius: 8px;
+    padding: 8px 12px; font-size: 1rem;
+    font-family: 'Nunito Sans', sans-serif;
+    width: 110px; background: #f8fbff; -webkit-appearance: none;
+  }
+  .lueckentext-input.richtig { border-color: var(--gruen); background: #d4f5e2; }
+  .lueckentext-input.falsch  { border-color: var(--rot);   background: #fddde0; }
+
+  /* WEITER */
+  #weiter-btn {
+    display: none; width: 100%; padding: 16px;
+    background: linear-gradient(135deg, #2d9e4f, #1a7a38);
+    color: white; border: none; border-radius: var(--radius);
+    font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 1.15rem;
+    cursor: pointer; min-height: 56px; margin-top: 10px;
+    box-shadow: 0 4px 14px rgba(45,158,79,0.35);
+    touch-action: manipulation; transition: transform 0.1s;
+  }
+  #weiter-btn:active { transform: scale(0.98); }
+
+  /* T-REX */
+  #trex {
+    position: fixed; bottom: 16px; right: 16px;
+    font-size: 1.6rem; cursor: pointer; z-index: 200;
+    user-select: none; touch-action: manipulation;
+  }
+  #trex-tooltip {
+    position: fixed; bottom: 54px; right: 16px;
+    background: var(--dunkel); color: white;
+    border-radius: 10px; padding: 6px 12px;
+    font-size: 0.8rem; font-weight: 700;
+    display: none; white-space: nowrap; z-index: 201;
+  }
+
+  .section { display: none; }
+  .section.aktiv { display: block; }
+
+  .tipp-toggle {
+    background: none; border: 2px solid var(--gelb);
+    border-radius: 10px; padding: 9px 16px;
+    font-family: 'Nunito', sans-serif; font-weight: 700;
+    color: #b07800; cursor: pointer; font-size: 0.9rem;
+    touch-action: manipulation; margin-top: 8px;
+  }
+  .tipp-inhalt {
+    background: #fff8e6; border: 2px solid var(--gelb);
+    border-radius: 0 0 10px 10px; border-top: none;
+    padding: 12px 14px; display: none; font-size: 0.9rem;
+  }
+  .tipp-inhalt.offen { display: block; }
+
+  .divider { height: 1.5px; background: var(--border); margin: 18px 0; }
+  .highlight-sys { color: var(--systole-col); font-weight: 800; }
+  .highlight-dia { color: var(--diastole-col); font-weight: 800; }
+
+  .step-counter {
+    display: inline-block; background: var(--blau); color: white;
+    border-radius: 50%; width: 26px; height: 26px;
+    text-align: center; line-height: 26px;
+    font-size: 0.85rem; font-weight: 800; margin-right: 8px; flex-shrink: 0;
+  }
+  .step-row { display: flex; align-items: flex-start; gap: 6px; margin-bottom: 10px; }
+  .step-row .step-text { flex: 1; line-height: 1.5; }
+
+  .zweispaltig { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 12px 0; }
+  @media (max-width: 480px) { .zweispaltig { grid-template-columns: 1fr; } }
+  .box-sys { background: #fde8ea; border: 2px solid var(--systole-col); border-radius: 12px; padding: 14px; }
+  .box-dia { background: #e5eef9; border: 2px solid var(--diastole-col); border-radius: 12px; padding: 14px; }
+  .box-sys h3, .box-dia h3 { margin-top: 0; margin-bottom: 8px; font-size: 1.05rem; }
+  .box-sys h3 { color: var(--systole-col); }
+  .box-dia h3 { color: var(--diastole-col); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>❤️ Systole, Diastole & Blutdruck</h1>
+  <p>Biologie · Klasse 6</p>
+</header>
+
+<div class="tabs" id="tabs">
+  <button class="tab-btn active" data-tab="0" onclick="zeigeTab(0)">▶ Einstieg</button>
+  <button class="tab-btn" data-tab="1" onclick="zeigeTab(1)">1 Was passiert beim Herzschlag?</button>
+  <button class="tab-btn" data-tab="2" onclick="zeigeTab(2)">2 Blutdruckwerte verstehen</button>
+  <button class="tab-btn" data-tab="3" onclick="zeigeTab(3)">3 Puls & Herzfrequenz</button>
+</div>
+
+<main>
+
+<!-- ===== SECTION 0: EINSTIEG ===== -->
+<div class="section aktiv" id="sec0">
+  <div class="karte">
+    <h2>Einstieg – Was passiert bei jedem Herzschlag?</h2>
+    <p>Dein Herz schlägt in diesem Moment. Was genau passiert dabei? Schau dir das Video an – es erklärt, wie das Blut durch dein Herz fließt und was Systole und Diastole bedeuten.</p>
+
+    <a href="https://www.youtube.com/watch?v=HuLwD-PXt1M" target="_blank" class="video-card">
+      <div class="video-icon">▶</div>
+      <div class="video-info">
+        <strong>Systole und Diastole – der Blutfluss durch das Herz</strong>
+        <span>YouTube · ca. 3 min · animiert, deutsch</span>
+      </div>
+      <div class="video-badge">▶ Öffnen</div>
+    </a>
+
+    <p style="margin-top:14px; font-size:0.9rem; color:#666;">💡 Schreibe während des Videos die zwei Begriffe auf – was bedeuten sie?</p>
+
+    <div class="divider"></div>
+
+    <div class="frage-box">
+      <p>Welche zwei Phasen wechseln sich beim Herzschlag ab?</p>
+      <div class="mc-optionen">
+        <button class="mc-btn" onclick="mcAuswahl(this,'sec0-q1',false)">Systole und Pneumonie</button>
+        <button class="mc-btn" onclick="mcAuswahl(this,'sec0-q1',true)">Systole und Diastole</button>
+        <button class="mc-btn" onclick="mcAuswahl(this,'sec0-q1',false)">Diastolie und Kontraktion</button>
+      </div>
+      <div class="feedback-text" id="sec0-q1-fb"></div>
+    </div>
+
+    <button id="sec0-weiter" class="auswerten-btn" style="display:none; background:var(--gruen);" onclick="zeigeTab(1)">Weiter zu Karte 1 →</button>
+  </div>
+</div>
+
+<!-- ===== SECTION 1: HERZSCHLAG ===== -->
+<div class="section" id="sec1">
+  <div class="karte">
+    <h2>Was passiert beim Herzschlag?</h2>
+    <p>Der Herzschlag besteht immer aus zwei Phasen, die sich ständig abwechseln. Tippe auf „Nächste Phase", um die Herzaktion zu sehen.</p>
+
+    <div class="phasen-row">
+      <div class="phase-chip" id="chip-sys">Systole – Anspannungsphase</div>
+      <div class="phase-chip" id="chip-dia">Diastole – Entspannungsphase</div>
+    </div>
+
+    <div class="herz-container">
+      <!-- Größere Bühne, overflow:visible damit Skalierung sichtbar -->
+      <div class="herz-buehne">
+        <svg class="herz-svg" id="herz-svg" viewBox="0 0 260 220" overflow="visible">
+          <defs>
+            <radialGradient id="hg-grad" cx="50%" cy="45%" r="55%">
+              <stop offset="0%" stop-color="#ff8fa3"/>
+              <stop offset="100%" stop-color="#c0392b"/>
+            </radialGradient>
+            <marker id="arr-rot"  markerWidth="7" markerHeight="7" refX="3" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z" fill="#ff8fa3"/></marker>
+            <marker id="arr-blau" markerWidth="7" markerHeight="7" refX="3" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z" fill="#74b9ff"/></marker>
+            <marker id="arr-rot2"  markerWidth="7" markerHeight="7" refX="3" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z" fill="#ff8fa3"/></marker>
+            <marker id="arr-blau2" markerWidth="7" markerHeight="7" refX="3" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z" fill="#74b9ff"/></marker>
+          </defs>
+
+          <!-- HERZFORM – transform-origin auf Mittelpunkt des Herzens -->
+          <g id="herz-gruppe" style="transform-origin: 130px 110px; transition: transform 0.55s cubic-bezier(.4,0,.2,1);">
+            <path
+              d="M130 175 C70 140 22 105 22 70 C22 42 44 24 72 24 C89 24 106 33 130 54 C154 33 171 24 188 24 C216 24 238 42 238 70 C238 105 190 140 130 175 Z"
+              fill="url(#hg-grad)"
+            />
+            <!-- Scheidewand -->
+            <line x1="130" y1="55" x2="130" y2="162" stroke="rgba(255,255,255,0.4)" stroke-width="2.5" stroke-dasharray="7,5"/>
+            <!-- Beschriftung: weißer Hintergrund-Rect für bessere Lesbarkeit -->
+            <rect x="58" y="92" width="54" height="32" rx="5" fill="rgba(0,0,0,0.35)"/>
+            <text x="85" y="107" text-anchor="middle" fill="white" font-size="13" font-family="Nunito" font-weight="700">linke</text>
+            <text x="85" y="122" text-anchor="middle" fill="white" font-size="13" font-family="Nunito" font-weight="700">Seite</text>
+            <rect x="148" y="92" width="56" height="32" rx="5" fill="rgba(0,0,0,0.35)"/>
+            <text x="176" y="107" text-anchor="middle" fill="white" font-size="13" font-family="Nunito" font-weight="700">rechte</text>
+            <text x="176" y="122" text-anchor="middle" fill="white" font-size="13" font-family="Nunito" font-weight="700">Seite</text>
+          </g>
+
+          <!-- PFEILE RAUS (Systole) – außerhalb der Herzgruppe damit sie nicht mitskalieren -->
+          <g id="pfeil-raus" opacity="0" style="transition: opacity 0.3s;">
+            <line x1="78" y1="28" x2="78" y2="6" stroke="#ff8fa3" stroke-width="2.5" marker-end="url(#arr-rot)"/>
+            <line x1="182" y1="28" x2="182" y2="6" stroke="#74b9ff" stroke-width="2.5" marker-end="url(#arr-blau)"/>
+            <!-- Beschriftung mit weißem Hintergrund -->
+            <rect x="44" y="0" width="62" height="16" rx="4" fill="rgba(230,57,70,0.15)"/>
+            <text x="75" y="12" text-anchor="middle" fill="#e63946" font-size="11" font-family="Nunito" font-weight="800">→ Körper</text>
+            <rect x="154" y="0" width="58" height="16" rx="4" fill="rgba(26,111,184,0.15)"/>
+            <text x="183" y="12" text-anchor="middle" fill="#1a6fb8" font-size="11" font-family="Nunito" font-weight="800">→ Lunge</text>
+          </g>
+
+          <!-- PFEILE REIN (Diastole) -->
+          <g id="pfeil-rein" opacity="0" style="transition: opacity 0.3s;">
+            <line x1="78" y1="6" x2="78" y2="25" stroke="#74b9ff" stroke-width="2.5" marker-end="url(#arr-blau2)"/>
+            <line x1="182" y1="6" x2="182" y2="25" stroke="#ff8fa3" stroke-width="2.5" marker-end="url(#arr-rot2)"/>
+            <rect x="30" y="0" width="78" height="16" rx="4" fill="rgba(26,111,184,0.15)"/>
+            <text x="69" y="12" text-anchor="middle" fill="#1a6fb8" font-size="11" font-family="Nunito" font-weight="800">← vom Körper</text>
+            <rect x="148" y="0" width="68" height="16" rx="4" fill="rgba(230,57,70,0.15)"/>
+            <text x="182" y="12" text-anchor="middle" fill="#e63946" font-size="11" font-family="Nunito" font-weight="800">← aus Lunge</text>
+          </g>
+        </svg>
+      </div>
+      <div class="phase-label" id="phase-label" style="color:#888;">Bereit?</div>
+      <div class="phase-beschr" id="phase-beschr">Tippe auf „Nächste Phase", um die Herzaktion zu sehen.</div>
+      <button class="herz-btn" id="herz-btn" onclick="naechstePhase()">Nächste Phase ▶</button>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="zweispaltig">
+      <div class="box-sys">
+        <h3>Systole</h3>
+        <p style="font-size:0.9rem;">Das Herz <strong>zieht sich zusammen</strong>. Das Blut wird herausgepumpt – in die Lunge und in den Körper.</p>
+        <p style="font-size:0.85rem; color:#888;">griech. <em>systole</em> = Zusammenziehen</p>
+      </div>
+      <div class="box-dia">
+        <h3>Diastole</h3>
+        <p style="font-size:0.9rem;">Das Herz <strong>entspannt sich</strong>. Die Kammern füllen sich wieder mit Blut.</p>
+        <p style="font-size:0.85rem; color:#888;">griech. <em>diastole</em> = Ausdehnen</p>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- MC 1: Satzbau passt zu allen Optionen -->
+    <div class="frage-box">
+      <p>Während der Systole …</p>
+      <div class="mc-optionen">
+        <button class="mc-btn" onclick="mcAuswahl(this,'s1q1',false)">… entspannt sich der Herzmuskel und die Kammern füllen sich mit Blut.</button>
+        <button class="mc-btn" onclick="mcAuswahl(this,'s1q1',true)">… zieht sich der Herzmuskel zusammen und pumpt das Blut heraus.</button>
+        <button class="mc-btn" onclick="mcAuswahl(this,'s1q1',false)">… tut der Herzmuskel nichts – das Blut fließt von ganz allein.</button>
+      </div>
+      <div class="feedback-text" id="s1q1-fb"></div>
+    </div>
+
+    <div class="frage-box" style="margin-top:12px;">
+      <p>In welcher Phase füllen sich die Herzkammern wieder mit Blut?</p>
+      <div class="mc-optionen">
+        <button class="mc-btn" onclick="mcAuswahl(this,'s1q2',false)">In der Systole</button>
+        <button class="mc-btn" onclick="mcAuswahl(this,'s1q2',true)">In der Diastole</button>
+        <button class="mc-btn" onclick="mcAuswahl(this,'s1q2',false)">Zwischen den Schlägen gibt es keine Füllphase</button>
+      </div>
+      <div class="feedback-text" id="s1q2-fb"></div>
+    </div>
+
+    <button id="sec1-weiter" class="auswerten-btn" style="display:none; background:var(--gruen);" onclick="zeigeTab(2)">Weiter zu Karte 2 →</button>
+  </div>
+</div>
+
+<!-- ===== SECTION 2: BLUTDRUCK ===== -->
+<div class="section" id="sec2">
+  <div class="karte">
+    <h2>Was bedeuten die Blutdruckwerte?</h2>
+    <p>Letzte Stunde habt ihr euren Blutdruck gemessen. Aber was sagen diese zwei Zahlen eigentlich aus?</p>
+
+    <div class="bd-anzeige">
+      <div class="bd-label">Normaler Blutdruck eines Erwachsenen</div>
+      <div class="bd-wert">120 / 80</div>
+      <div class="bd-label">mmHg (Millimeter Quecksilbersäule)</div>
+      <div class="bd-teile" style="margin-top:14px;">
+        <div class="bd-teil">
+          <div class="zahl sys">120</div>
+          <div class="name">systolisch<br>(oberer Wert)</div>
+        </div>
+        <div class="bd-teil" style="font-size:2rem; display:flex; align-items:center;">/</div>
+        <div class="bd-teil">
+          <div class="zahl dia">80</div>
+          <div class="name">diastolisch<br>(unterer Wert)</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="step-row"><span class="step-counter">1</span><span class="step-text"><strong class="highlight-sys">Oberer Wert (systolisch):</strong> Gemessen während der Systole – wenn das Herz pumpt. Das ist der <em>höchste</em> Druck in den Blutgefäßen.</span></div>
+    <div class="step-row"><span class="step-counter">2</span><span class="step-text"><strong class="highlight-dia">Unterer Wert (diastolisch):</strong> Gemessen während der Diastole – wenn das Herz entspannt ist. Das ist der <em>niedrigste</em> Druck.</span></div>
+    <div class="step-row"><span class="step-counter">3</span><span class="step-text">Je nach Messwert spricht man von normalem Blutdruck, zu hohem Blutdruck (Hypertonie) oder zu niedrigem Blutdruck (Hypotonie).</span></div>
+
+    <div class="divider"></div>
+
+    <h3>Wo liegen deine Werte?</h3>
+    <p>Gib beide Werte aus deiner Messung ein:</p>
+
+    <div class="bd-eingabe-grid">
+      <!-- Systolisch -->
+      <div class="bd-eingabe-box sys-box">
+        <label class="sys-label">🔴 Oberer Wert (systolisch)</label>
+        <div class="bd-eingabe-row">
+          <input type="number" id="bd-sys-input" inputmode="numeric" placeholder="z.B. 115" min="60" max="200">
+          <span class="einheit">mmHg</span>
+        </div>
+      </div>
+      <!-- Diastolisch -->
+      <div class="bd-eingabe-box dia-box">
+        <label class="dia-label">🔵 Unterer Wert (diastolisch)</label>
+        <div class="bd-eingabe-row">
+          <input type="number" id="bd-dia-input" inputmode="numeric" placeholder="z.B. 75" min="40" max="130">
+          <span class="einheit">mmHg</span>
+        </div>
+      </div>
+    </div>
+
+    <button class="auswerten-btn" onclick="bdAuswerten()">Einordnen ▶</button>
+    <div id="bd-ergebnis" class="ergebnis-box info" style="display:none;"></div>
+
+    <!-- Systolische Skala -->
+    <div class="skala-container" style="margin-top:18px;">
+      <div class="skala-title" style="color:var(--systole-col);">🔴 Systolischer Wert</div>
+      <div class="skala-label-row"><span>80</span><span>100</span><span>120</span><span>140</span><span>160+</span></div>
+      <div class="skala sys-skala" id="bd-skala-sys">
+        <div class="skala-marker" id="bd-marker-sys" style="left:40%;"></div>
+      </div>
+      <div class="skala-zonen">
+        <div class="zone" style="color:#1a6fb8; background:#e5eef9;">Hypotonie</div>
+        <div class="zone" style="color:#2d9e4f; background:#d4f5e2;">Normal</div>
+        <div class="zone" style="color:#b07800; background:#fff3d4;">Hoch-normal</div>
+        <div class="zone" style="color:#e63946; background:#fde8ea;">Hypertonie</div>
+      </div>
+    </div>
+
+    <!-- Diastolische Skala -->
+    <div class="skala-container" style="margin-top:14px;">
+      <div class="skala-title" style="color:var(--diastole-col);">🔵 Diastolischer Wert</div>
+      <div class="skala-label-row"><span>50</span><span>60</span><span>70</span><span>80</span><span>90+</span></div>
+      <div class="skala dia-skala" id="bd-skala-dia">
+        <div class="skala-marker" id="bd-marker-dia" style="left:40%;"></div>
+      </div>
+      <div class="skala-zonen">
+        <div class="zone" style="color:#1a6fb8; background:#e5eef9;">Hypotonie</div>
+        <div class="zone" style="color:#2d9e4f; background:#d4f5e2;">Normal</div>
+        <div class="zone" style="color:#b07800; background:#fff3d4;">Hoch-normal</div>
+        <div class="zone" style="color:#e63946; background:#fde8ea;">Hypertonie</div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="frage-box">
+      <p>Was misst der <em>systolische</em> Blutdruckwert?</p>
+      <div class="mc-optionen">
+        <button class="mc-btn" onclick="mcAuswahl(this,'s2q1',false)">Den Druck, wenn das Herz entspannt ist.</button>
+        <button class="mc-btn" onclick="mcAuswahl(this,'s2q1',true)">Den Druck, wenn das Herz zusammengezogen pumpt.</button>
+        <button class="mc-btn" onclick="mcAuswahl(this,'s2q1',false)">Den Puls pro Minute.</button>
+      </div>
+      <div class="feedback-text" id="s2q1-fb"></div>
+    </div>
+
+    <div class="frage-box" style="margin-top:12px;">
+      <p>Ein Blutdruckwert von 145/95 mmHg wäre …</p>
+      <div class="mc-optionen">
+        <button class="mc-btn" onclick="mcAuswahl(this,'s2q2',false)">… sehr niedrig (Hypotonie).</button>
+        <button class="mc-btn" onclick="mcAuswahl(this,'s2q2',false)">… völlig normal.</button>
+        <button class="mc-btn" onclick="mcAuswahl(this,'s2q2',true)">… zu hoch (Hypertonie).</button>
+      </div>
+      <div class="feedback-text" id="s2q2-fb"></div>
+    </div>
+
+    <button id="sec2-weiter" class="auswerten-btn" style="display:none; background:var(--gruen);" onclick="zeigeTab(3)">Weiter zu Karte 3 →</button>
+  </div>
+</div>
+
+<!-- ===== SECTION 3: PULS ===== -->
+<div class="section" id="sec3">
+  <div class="karte">
+    <h2>Puls & Herzfrequenz</h2>
+    <p>Wenn das Herz pumpt (Systole), stoßen die Gefäße kurz aus – das spürst du als <strong>Puls</strong>. Der Puls zeigt dir also, wie oft das Herz pro Minute schlägt.</p>
+
+    <div class="karte" style="background:#f5f9ff; border-color:#c0d8f5; margin:0 0 14px;">
+      <h3 style="margin-top:0;">Puls = Herzfrequenz</h3>
+      <p>Ein Herzschlag besteht immer aus <strong>einer Systole + einer Diastole</strong>.</p>
+      <p>Der Puls gibt an, wie oft dieses Paar pro Minute stattfindet.</p>
+      <div style="text-align:center; padding:10px 0;">
+        <span style="font-family:'Nunito',sans-serif; font-weight:900; font-size:1.3rem; color:var(--blau);">Normwert: 60–80 Schläge/min</span>
+      </div>
+    </div>
+
+    <h3>Rechne mit deinen Messwerten</h3>
+    <p>Letzte Stunde habt ihr euren Puls gemessen. Gib deinen Wert ein:</p>
+    <div class="eingabe-row">
+      <label class="eingabe-label">Mein Puls:</label>
+      <input type="number" id="puls-input" inputmode="numeric" placeholder="z.B. 72" min="30" max="220">
+      <span class="einheit">Schläge/min</span>
+    </div>
+    <button class="auswerten-btn" onclick="pulsAuswerten()">Berechnen ▶</button>
+    <div id="puls-ergebnis" class="ergebnis-box info" style="display:none;"></div>
+
+    <div class="divider"></div>
+
+    <h3>Lückentext – fülle die Lücken aus</h3>
+    <p>
+      Bei jedem Herzschlag folgt auf die
+      <input class="lueckentext-input" id="lt1" type="text" placeholder="?">
+      die
+      <input class="lueckentext-input" id="lt2" type="text" placeholder="?">
+      . Der Puls zeigt, wie oft das Herz pro
+      <input class="lueckentext-input" id="lt3" type="text" placeholder="?">
+      schlägt.
+    </p>
+    <button class="auswerten-btn" onclick="ltAuswerten()">Überprüfen ✓</button>
+    <div id="lt-feedback" class="ergebnis-box" style="display:none;"></div>
+
+    <button class="tipp-toggle" onclick="this.nextElementSibling.classList.toggle('offen')">💡 Tipp anzeigen</button>
+    <div class="tipp-inhalt">
+      Die zwei Phasen sind die beiden Begriffe, die du heute gelernt hast – einer beginnt mit S, einer mit D. Die Zeiteinheit für den Puls ist eine Zeitangabe.
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="frage-box">
+      <p>Jemand hat einen Puls von 80 Schlägen pro Minute. Wie viele Systolen hat sein Herz in einer Minute?</p>
+      <div class="mc-optionen">
+        <button class="mc-btn" onclick="mcAuswahl(this,'s3q1',false)">40 Systolen</button>
+        <button class="mc-btn" onclick="mcAuswahl(this,'s3q1',true)">80 Systolen</button>
+        <button class="mc-btn" onclick="mcAuswahl(this,'s3q1',false)">160 Systolen</button>
+      </div>
+      <div class="feedback-text" id="s3q1-fb"></div>
+    </div>
+
+    <button id="sec3-weiter" class="auswerten-btn" style="display:none; background:var(--gruen);" onclick="alert('Super – du hast alle Karten bearbeitet! 🎉')">🎉 Alle Karten abgeschlossen!</button>
+  </div>
+</div>
+
+</main>
+
+<div id="trex" onclick="trexTap()" onmouseover="trexTap()" onmouseleave="trexHide()">🦖</div>
+<div id="trex-tooltip">Made by Mathedino</div>
+
+<script>
+const state = {
+  sec1q: {q1: false, q2: false},
+  sec2q: {q1: false, q2: false},
+  sec3q: {q1: false},
+  bdCalcDone: false,
+  ltDone: false,
+};
+
+// ===== TABS =====
+function zeigeTab(n) {
+  document.querySelectorAll('.section').forEach((s, i) => s.classList.toggle('aktiv', i === n));
+  document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', i === n));
+}
+
+// ===== MC =====
+function mcAuswahl(btn, id, richtig) {
+  const gruppe = btn.closest('.mc-optionen');
+  if (gruppe.dataset.beantwortet) return;
+  gruppe.dataset.beantwortet = '1';
+  gruppe.querySelectorAll('.mc-btn').forEach(b => b.disabled = true);
+  const fbEl = document.getElementById(id + '-fb');
+  if (richtig) {
+    btn.classList.add('richtig');
+    fbEl.textContent = '✅ Richtig!';
+    fbEl.className = 'feedback-text ok';
+  } else {
+    btn.classList.add('falsch');
+    fbEl.textContent = '❌ Leider falsch. Die richtige Antwort ist grün markiert.';
+    fbEl.className = 'feedback-text nok';
+    gruppe.querySelectorAll('.mc-btn').forEach(b => {
+      if (b.getAttribute('onclick') && b.getAttribute('onclick').includes('true')) b.classList.add('richtig');
+    });
+  }
+  pruefeSec0(id); pruefeSec1(id); pruefeSec2(id); pruefeSec3(id);
+}
+
+function pruefeSec0(id) {
+  if (id !== 'sec0-q1') return;
+  document.getElementById('sec0-weiter').style.display = 'block';
+}
+function pruefeSec1(id) {
+  if (id === 's1q1') state.sec1q.q1 = true;
+  if (id === 's1q2') state.sec1q.q2 = true;
+  if (state.sec1q.q1 && state.sec1q.q2) document.getElementById('sec1-weiter').style.display = 'block';
+}
+function pruefeSec2(id) {
+  if (id === 's2q1') state.sec2q.q1 = true;
+  if (id === 's2q2') state.sec2q.q2 = true;
+  if (state.sec2q.q1 && state.sec2q.q2 && state.bdCalcDone) document.getElementById('sec2-weiter').style.display = 'block';
+}
+function pruefeSec3(id) {
+  if (id === 's3q1') state.sec3q.q1 = true;
+  if (state.sec3q.q1 && state.ltDone) document.getElementById('sec3-weiter').style.display = 'block';
+}
+
+// ===== HERZ ANIMATION =====
+// Zwei Phasen: Systole (kleiner) und Diastole (größer)
+const herzPhasen = [
+  {
+    label: '🔴 Systole', labelColor: '#e63946',
+    beschr: 'Der Herzmuskel zieht sich zusammen. Das Blut wird in die Arterien gepumpt.',
+    scale: 0.78, pfeilRaus: 1, pfeilRein: 0, chip: 'systole'
+  },
+  {
+    label: '🔵 Diastole', labelColor: '#1a6fb8',
+    beschr: 'Der Herzmuskel entspannt sich. Die Kammern weiten sich aus und füllen sich mit Blut.',
+    scale: 1.12, pfeilRaus: 0, pfeilRein: 1, chip: 'diastole'
+  }
+];
+
+let herzIdx = -1;
+
+function naechstePhase() {
+  herzIdx = (herzIdx + 1) % herzPhasen.length;
+  const p = herzPhasen[herzIdx];
+  const gruppe = document.getElementById('herz-gruppe');
+  const label   = document.getElementById('phase-label');
+  const beschr  = document.getElementById('phase-beschr');
+  const pfRaus  = document.getElementById('pfeil-raus');
+  const pfRein  = document.getElementById('pfeil-rein');
+  const chipSys = document.getElementById('chip-sys');
+  const chipDia = document.getElementById('chip-dia');
+
+  label.textContent  = p.label;
+  label.style.color  = p.labelColor;
+  beschr.textContent = p.beschr;
+
+  // Skalierung bleibt dauerhaft (kein Reset zurück auf 1)
+  gruppe.style.transform = `scale(${p.scale})`;
+
+  pfRaus.style.opacity = p.pfeilRaus;
+  pfRein.style.opacity = p.pfeilRein;
+
+  chipSys.className = 'phase-chip' + (p.chip === 'systole'  ? ' aktiv-systole'  : '');
+  chipDia.className = 'phase-chip' + (p.chip === 'diastole' ? ' aktiv-diastole' : '');
+}
+
+// ===== BLUTDRUCK =====
+function bdKategorieSys(val) {
+  if (val < 100) return { kat: 'Hypotonie', farbe: '#1a6fb8', pct: Math.max(0,(val-80)/20*25) };
+  if (val < 130) return { kat: 'Normal',    farbe: '#2d9e4f', pct: 25 + (val-100)/30*35 };
+  if (val < 140) return { kat: 'Hoch-normal', farbe: '#b07800', pct: 60 + (val-130)/10*15 };
+  return { kat: 'Hypertonie', farbe: '#e63946', pct: Math.min(100, 75 + (val-140)/20*25) };
+}
+function bdKategorieDia(val) {
+  if (val < 60) return { kat: 'Hypotonie',  farbe: '#1a6fb8', pct: Math.max(0,(val-50)/10*25) };
+  if (val < 85) return { kat: 'Normal',     farbe: '#2d9e4f', pct: 25 + (val-60)/25*35 };
+  if (val < 90) return { kat: 'Hoch-normal',farbe: '#b07800', pct: 60 + (val-85)/5*15 };
+  return { kat: 'Hypertonie', farbe: '#e63946', pct: Math.min(100, 75 + (val-90)/10*25) };
+}
+
+function bdAuswerten() {
+  const sys = parseInt(document.getElementById('bd-sys-input').value);
+  const dia = parseInt(document.getElementById('bd-dia-input').value);
+  const el  = document.getElementById('bd-ergebnis');
+
+  if (!sys || sys < 60 || sys > 220) {
+    el.style.display = 'block'; el.className = 'ergebnis-box falsch';
+    el.textContent = '❌ Bitte einen gültigen systolischen Wert (60–220) eingeben.'; return;
+  }
+  if (!dia || dia < 40 || dia > 130) {
+    el.style.display = 'block'; el.className = 'ergebnis-box falsch';
+    el.textContent = '❌ Bitte einen gültigen diastolischen Wert (40–130) eingeben.'; return;
+  }
+
+  const kSys = bdKategorieSys(sys);
+  const kDia = bdKategorieDia(dia);
+
+  document.getElementById('bd-marker-sys').style.left = kSys.pct + '%';
+  document.getElementById('bd-marker-dia').style.left = kDia.pct + '%';
+
+  el.style.display = 'block';
+  // Gesamtbewertung: schlimmste der beiden Kategorien
+  const katOrder = ['Hypotonie','Normal','Hoch-normal','Hypertonie'];
+  const iSys = katOrder.indexOf(kSys.kat);
+  const iDia = katOrder.indexOf(kDia.kat);
+  const worst = katOrder[Math.max(iSys, iDia)];
+
+  let icon = worst === 'Normal' ? '✅' : worst === 'Hypotonie' ? '💙' : worst === 'Hoch-normal' ? '⚠️' : '❗';
+  let klasse = worst === 'Normal' ? 'ergebnis-box richtig' : worst === 'Hypertonie' ? 'ergebnis-box falsch' : 'ergebnis-box info';
+  el.className = klasse;
+  el.innerHTML =
+    `${icon} Dein Blutdruck: <strong>${sys} / ${dia} mmHg</strong><br>` +
+    `🔴 Systolisch: <strong style="color:${kSys.farbe}">${kSys.kat}</strong> &nbsp;|&nbsp; ` +
+    `🔵 Diastolisch: <strong style="color:${kDia.farbe}">${kDia.kat}</strong><br>` +
+    (worst === 'Normal' ? 'Das ist ein guter Wert!' :
+     worst === 'Hypotonie' ? 'Bei Kindern und Jugendlichen können etwas niedrigere Werte normal sein.' :
+     worst === 'Hoch-normal' ? 'Leicht erhöht – bei einmaliger Messung kein Grund zur Sorge.' :
+     'Einmalig erhöhte Werte können durch Aufregung entstehen. Bitte nicht besorgt sein!');
+
+  state.bdCalcDone = true;
+  if (state.sec2q.q1 && state.sec2q.q2) document.getElementById('sec2-weiter').style.display = 'block';
+}
+
+// ===== PULS =====
+function pulsAuswerten() {
+  const val = parseInt(document.getElementById('puls-input').value);
+  const el  = document.getElementById('puls-ergebnis');
+  if (!val || val < 20 || val > 250) {
+    el.style.display = 'block'; el.className = 'ergebnis-box falsch';
+    el.textContent = '❌ Bitte einen gültigen Puls eingeben.'; return;
+  }
+  el.style.display = 'block'; el.className = 'ergebnis-box info';
+  const pro30 = Math.round(val / 2);
+  el.innerHTML =
+    `💙 Dein Puls: <strong>${val} Schläge/min</strong><br>` +
+    `→ In 30 Sekunden schlägt dein Herz ca. <strong>${pro30}</strong>-mal.<br>` +
+    `→ Pro Minute finden <strong>${val} Systolen</strong> und <strong>${val} Diastolen</strong> statt.<br>` +
+    (val < 60 ? '→ Das ist eher niedrig.' : val <= 100 ? '→ Das liegt im normalen Bereich!' : '→ Das ist erhöht – bei Aufregung oder Sport normal.');
+}
+
+// ===== LÜCKENTEXT =====
+function ltAuswerten() {
+  const lt1 = document.getElementById('lt1');
+  const lt2 = document.getElementById('lt2');
+  const lt3 = document.getElementById('lt3');
+  const fb  = document.getElementById('lt-feedback');
+  const v1  = lt1.value.trim().toLowerCase();
+  const v2  = lt2.value.trim().toLowerCase();
+  const v3  = lt3.value.trim().toLowerCase();
+  const ok1 = v1.includes('systole');
+  const ok2 = v2.includes('diastole');
+  const ok3 = v3.includes('minute') || v3 === 'min';
+  lt1.className = 'lueckentext-input ' + (ok1 ? 'richtig' : 'falsch');
+  lt2.className = 'lueckentext-input ' + (ok2 ? 'richtig' : 'falsch');
+  lt3.className = 'lueckentext-input ' + (ok3 ? 'richtig' : 'falsch');
+  fb.style.display = 'block';
+  if (ok1 && ok2 && ok3) {
+    fb.className = 'ergebnis-box richtig';
+    fb.textContent = '✅ Alles richtig! Systole → Diastole, Puls in Schlägen pro Minute.';
+    state.ltDone = true;
+    if (state.sec3q.q1) document.getElementById('sec3-weiter').style.display = 'block';
+  } else {
+    fb.className = 'ergebnis-box falsch';
+    let h = '❌ ';
+    if (!ok1) h += 'Lücke 1: Die Kontraktionsphase beginnt mit S. ';
+    if (!ok2) h += 'Lücke 2: Die Entspannungsphase beginnt mit D. ';
+    if (!ok3) h += 'Lücke 3: Die Zeiteinheit ist „Minute".';
+    fb.textContent = h;
+  }
+}
+
+// ===== T-REX =====
+function trexTap()  { document.getElementById('trex-tooltip').style.display = 'block'; }
+function trexHide() { setTimeout(() => { document.getElementById('trex-tooltip').style.display = 'none'; }, 1500); }
+</script>
+</body>
+</html>

@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Lehrerseite: Systole & Diastole – Klasse 6</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Nunito+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --grün: #2d9e4f; --rot: #e63946; --blau: #1a6fb8;
+    --gelb: #f4a200; --lila: #7c3aed;
+    --bg: #0f1a2e; --karte: #1a2845; --border: #2a3d5f;
+    --text: #e8f0fe; --sub: #8ba8cc;
+    --radius: 14px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: 'Nunito Sans', sans-serif;
+    font-size: 16px; background: var(--bg);
+    color: var(--text); min-height: 100vh; padding-bottom: 80px;
+  }
+
+  /* HEADER */
+  header {
+    background: linear-gradient(135deg, #0f1a2e 0%, #1a2845 100%);
+    padding: 16px 20px 10px;
+    border-bottom: 2px solid var(--border);
+    position: sticky; top: 0; z-index: 100;
+  }
+  .header-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+  header h1 { font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 1.2rem; color: white; }
+  header p  { font-size: 0.8rem; color: var(--sub); margin-top: 2px; }
+  .meta-badges { display: flex; gap: 6px; flex-wrap: wrap; }
+  .badge {
+    padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700;
+    font-family: 'Nunito', sans-serif;
+  }
+  .badge-blau  { background: rgba(26,111,184,0.3); border: 1px solid var(--blau); color: #74b9ff; }
+  .badge-gruen { background: rgba(45,158,79,0.3);  border: 1px solid var(--grün); color: #6bcf8a; }
+  .badge-gelb  { background: rgba(244,162,0,0.25); border: 1px solid var(--gelb); color: #f9c95e; }
+
+  /* PHASEN-LEISTE */
+  .phasen-leiste {
+    display: flex; overflow-x: auto; padding: 10px 14px; gap: 6px;
+    background: #0d1727; border-bottom: 1.5px solid var(--border);
+    scrollbar-width: none;
+  }
+  .phasen-leiste::-webkit-scrollbar { display: none; }
+  .ph-btn {
+    flex-shrink: 0; padding: 9px 14px; border-radius: 10px;
+    font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.78rem;
+    border: 1.5px solid var(--border); background: var(--karte);
+    color: var(--sub); cursor: pointer; white-space: nowrap;
+    touch-action: manipulation; transition: all 0.2s;
+  }
+  .ph-btn.aktiv { background: var(--blau); border-color: var(--blau); color: white; }
+  .ph-btn:active { transform: scale(0.96); }
+
+  /* MAIN */
+  main { padding: 16px; max-width: 880px; margin: 0 auto; }
+
+  /* PHASEN-KARTEN */
+  .phase-karte { display: none; }
+  .phase-karte.aktiv { display: block; }
+
+  .karte {
+    background: var(--karte); border-radius: var(--radius);
+    padding: 20px; margin-bottom: 14px;
+    border: 1.5px solid var(--border);
+  }
+  .karte-header {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    margin-bottom: 14px; flex-wrap: wrap; gap: 8px;
+  }
+  .karte-titel {
+    font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 1.1rem;
+    color: white;
+  }
+  .karte-meta { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+
+  /* TIMER */
+  .timer-container {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    padding: 12px 16px; background: rgba(255,255,255,0.05);
+    border-radius: 10px; margin: 12px 0;
+  }
+  .timer-display {
+    font-family: 'Nunito', sans-serif; font-weight: 900;
+    font-size: 2rem; color: var(--gelb); min-width: 80px;
+  }
+  .timer-display.warnung { color: var(--rot); }
+  .timer-btn {
+    padding: 9px 18px; border-radius: 9px; border: none;
+    font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.9rem;
+    cursor: pointer; min-height: 44px; min-width: 44px;
+    touch-action: manipulation; transition: transform 0.1s;
+  }
+  .timer-btn:active { transform: scale(0.95); }
+  .btn-start  { background: var(--grün); color: white; }
+  .btn-reset  { background: rgba(255,255,255,0.1); color: var(--sub); }
+  .timer-label { font-size: 0.82rem; color: var(--sub); }
+
+  /* INHALT */
+  h3 { font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.95rem; color: #a8c4e8; margin: 14px 0 6px; }
+  p  { line-height: 1.65; margin-bottom: 8px; color: var(--text); }
+  ul, ol { padding-left: 20px; }
+  li { line-height: 1.65; margin-bottom: 4px; color: var(--text); }
+
+  /* FARBIGE BOXEN */
+  .box {
+    border-radius: 10px; padding: 13px 15px; margin: 10px 0;
+    font-size: 0.9rem;
+  }
+  .box-gruen { background: rgba(45,158,79,0.15);  border-left: 3px solid var(--grün); }
+  .box-blau  { background: rgba(26,111,184,0.15); border-left: 3px solid var(--blau); }
+  .box-gelb  { background: rgba(244,162,0,0.12);  border-left: 3px solid var(--gelb); }
+  .box-rot   { background: rgba(230,57,70,0.12);  border-left: 3px solid var(--rot); }
+  .box-lila  { background: rgba(124,58,237,0.12); border-left: 3px solid var(--lila); }
+
+  .box strong { color: white; }
+
+  /* IMPULSFRAGEN */
+  .impuls-liste { list-style: none; padding: 0; }
+  .impuls-liste li {
+    padding: 10px 14px;
+    background: rgba(26,111,184,0.12);
+    border-left: 3px solid var(--blau);
+    border-radius: 0 8px 8px 0;
+    margin-bottom: 7px; font-size: 0.92rem;
+    font-style: italic;
+  }
+
+  /* DIFFERENZIERUNG */
+  .diff-toggle {
+    background: none; border: 1.5px solid var(--lila);
+    border-radius: 9px; padding: 9px 16px;
+    font-family: 'Nunito', sans-serif; font-weight: 700;
+    color: #c4a8ff; cursor: pointer; font-size: 0.85rem;
+    touch-action: manipulation; margin-top: 10px;
+  }
+  .diff-inhalt {
+    background: rgba(124,58,237,0.1); border: 1.5px solid var(--lila);
+    border-radius: 0 0 10px 10px; border-top: none;
+    padding: 12px 14px; display: none; font-size: 0.88rem;
+  }
+  .diff-inhalt.offen { display: block; }
+
+  /* TAFELBILD (Lehrkraft) */
+  .tb-vorlage {
+    background: #1a2e1a; border-radius: var(--radius);
+    padding: 20px; color: #f0ffe8;
+    font-family: 'Nunito', sans-serif; font-size: 0.92rem;
+  }
+  .tb-vorlage h3 { color: #a8ffb0; font-size: 1rem; }
+  .tb-abschnitt { margin-bottom: 12px; }
+  .tb-abschnitt strong { color: #f9d56e; }
+
+  /* ZWEISPALTIG */
+  .zweispaltig {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 10px 0;
+  }
+  @media (max-width: 520px) { .zweispaltig { grid-template-columns: 1fr; } }
+
+  /* ZEITLEISTE */
+  .zeitleiste {
+    display: flex; gap: 0; margin: 14px 0; border-radius: 10px; overflow: hidden;
+  }
+  .ztl-seg {
+    flex: 1; padding: 8px 6px; text-align: center;
+    font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.78rem;
+  }
+
+  /* T-REX */
+  #trex { position: fixed; bottom: 16px; right: 16px; font-size: 1.5rem; cursor: pointer; z-index: 200; user-select: none; }
+  #trex-tt { position: fixed; bottom: 52px; right: 16px; background: white; color: #1c2b40; border-radius: 9px; padding: 5px 11px; font-size: 0.78rem; font-weight: 700; display: none; white-space: nowrap; z-index: 201; }
+
+  .divider { height: 1px; background: var(--border); margin: 14px 0; }
+  code { background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 5px; font-size: 0.85rem; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-row">
+    <div>
+      <h1>🖥 Lehrerseite · Systole, Diastole & Blutdruck</h1>
+      <p>Biologie · Klasse 6 · UV 6.2 · 45 Minuten · Erarbeitung</p>
+    </div>
+    <div class="meta-badges">
+      <span class="badge badge-blau">45 min</span>
+      <span class="badge badge-gruen">Erarbeitung</span>
+      <span class="badge badge-gelb">Klasse 6</span>
+    </div>
+  </div>
+</header>
+
+<div class="phasen-leiste">
+  <button class="ph-btn aktiv" onclick="zeigePhase(0)">🎬 Einstieg (8 min)</button>
+  <button class="ph-btn" onclick="zeigePhase(1)">📖 Erarbeitung I (10 min)</button>
+  <button class="ph-btn" onclick="zeigePhase(2)">💡 Erarbeitung II (10 min)</button>
+  <button class="ph-btn" onclick="zeigePhase(3)">🔢 Erarbeitung III (7 min)</button>
+  <button class="ph-btn" onclick="zeigePhase(4)">📋 Tafelbild (8 min)</button>
+  <button class="ph-btn" onclick="zeigePhase(5)">✅ Sicherung (7 min)</button>
+</div>
+
+<main>
+
+<!-- ============ PHASE 0: EINSTIEG ============ -->
+<div class="phase-karte aktiv" id="ph0">
+  <div class="karte">
+    <div class="karte-header">
+      <div class="karte-titel">🎬 Einstieg – Erinnerung & Aktivierung</div>
+      <div class="karte-meta">
+        <span class="badge badge-gelb">8 min</span>
+        <span class="badge badge-blau">Plenum</span>
+      </div>
+    </div>
+
+    <div class="timer-container">
+      <div class="timer-display" id="t0">08:00</div>
+      <button class="timer-btn btn-start" onclick="startTimer(0, 8*60, 't0')">▶ Start</button>
+      <button class="timer-btn btn-reset" onclick="resetTimer(0, 8*60, 't0')">↺ Reset</button>
+      <span class="timer-label">Einstieg</span>
+    </div>
+
+    <h3>Was tut die Lehrkraft?</h3>
+    <ol>
+      <li>Blutdruckwert an die Tafel schreiben: <strong>120 / 80 mmHg</strong></li>
+      <li>Fragen: „Wer erinnert sich noch an seinen gemessenen Wert aus der letzten Stunde?"</li>
+      <li>Video auf Schüler-Website zeigen (alternativ: Beamer) – kurze Vorankündigung:</li>
+    </ol>
+
+    <div class="box box-blau" style="margin:10px 0;">
+      <strong>Einstiegsvideo:</strong> „Systole und Diastole – der Blutfluss durch das Herz"<br>
+      <code>youtube.com/watch?v=HuLwD-PXt1M</code> · ca. 3 min · animiert, deutsch<br>
+      <small style="color:#8ba8cc;">📌 SuS öffnen die Schüler-Website auf dem iPad – das Video ist dort als Link-Karte eingebunden.</small>
+    </div>
+
+    <h3>Was tun die SuS?</h3>
+    <ul>
+      <li>iPad aufklappen, Schüler-Website öffnen (Link/QR einfügen)</li>
+      <li>Video schauen, zwei Begriffe notieren: <em>Systole</em> und <em>Diastole</em></li>
+      <li>Einstiegsfrage auf der Website beantworten</li>
+    </ul>
+
+    <h3>💬 Impulsfragen</h3>
+    <ul class="impuls-liste">
+      <li>„Was habt ihr letzte Stunde mit dem Blutdruckmessgerät gemacht – was haben die Zahlen bedeutet?"</li>
+      <li>„Wer weiß schon, was beim Herzschlag genau passiert?"</li>
+      <li>„Warum hört man bei einem Herzschlag eigentlich zwei Töne?"</li>
+    </ul>
+
+    <button class="diff-toggle" onclick="this.nextElementSibling.classList.toggle('offen')">🔀 Differenzierung</button>
+    <div class="diff-inhalt">
+      <strong>Schnelle SuS:</strong> Überlegen, was die zwei Töne beim Herzschlag bedeuten könnten.<br>
+      <strong>Förderbedarf:</strong> Vorwissen aktivieren – „Das Herz ist eine Pumpe – wer weiß noch, wie ein Herzschlag klingt?" (lubb-dubb)
+    </div>
+  </div>
+</div>
+
+<!-- ============ PHASE 1: ERARBEITUNG I ============ -->
+<div class="phase-karte" id="ph1">
+  <div class="karte">
+    <div class="karte-header">
+      <div class="karte-titel">📖 Erarbeitung I – Systole & Diastole</div>
+      <div class="karte-meta">
+        <span class="badge badge-gelb">10 min</span>
+        <span class="badge badge-blau">EA + Plenum</span>
+      </div>
+    </div>
+
+    <div class="timer-container">
+      <div class="timer-display" id="t1">10:00</div>
+      <button class="timer-btn btn-start" onclick="startTimer(1, 10*60, 't1')">▶ Start</button>
+      <button class="timer-btn btn-reset" onclick="resetTimer(1, 10*60, 't1')">↺ Reset</button>
+      <span class="timer-label">Erarbeitung I</span>
+    </div>
+
+    <h3>Was tut die Lehrkraft?</h3>
+    <ol>
+      <li>SuS auf <strong>Karte 1</strong> der Schüler-Website hinweisen</li>
+      <li>SuS tippen selbstständig durch die Herzanimation</li>
+      <li>Nach ca. 6 min: Ergebnisse zusammentragen im Plenum</li>
+      <li>Kernaussagen an die Tafel/das Smartboard festhalten (Tafelbild vorbereiten)</li>
+    </ol>
+
+    <div class="box box-gruen">
+      <strong>🎯 Kernaussage dieser Phase:</strong><br>
+      Der Herzschlag besteht aus zwei Phasen: der <em>Systole</em> (Herzmuskel zieht sich zusammen → Blut raus) und der <em>Diastole</em> (Herzmuskel entspannt → Blut rein). Diese Phasen wechseln sich ständig ab.
+    </div>
+
+    <h3>Was tun die SuS?</h3>
+    <ul>
+      <li>Karte 1 auf der Website: Herzanimation Schritt für Schritt durchgehen</li>
+      <li>Infokästen zu Systole und Diastole lesen</li>
+      <li>Zwei Multiple-Choice-Fragen beantworten</li>
+    </ul>
+
+    <h3>💬 Impulsfragen</h3>
+    <ul class="impuls-liste">
+      <li>„Was passiert genau mit dem Herzmuskel während der Systole?"</li>
+      <li>„Wohin fließt das Blut bei der Systole – in welche Richtung?"</li>
+      <li>„Warum muss das Herz nach jeder Systole erschlaffen?"</li>
+    </ul>
+
+    <h3>Alltagsvorstellung aufgreifen</h3>
+    <div class="box box-rot">
+      <strong>⚠️ Häufige Vorstellung:</strong> „Das Herz pumpt immer gleich stark." → Darauf hinweisen, dass sich Systole und Diastole rhythmisch abwechseln – das Herz hat eine aktive UND eine passive Phase.
+    </div>
+
+    <button class="diff-toggle" onclick="this.nextElementSibling.classList.toggle('offen')">🔀 Differenzierung</button>
+    <div class="diff-inhalt">
+      <strong>Schnelle SuS:</strong> Warum hat das Herz zwei Kammern und zwei Vorhöfe? Recherche auf der Website oder im Buch.<br>
+      <strong>Förderbedarf:</strong> Vereinfachung: Herz = Pumpe, Systole = zusammendrücken, Diastole = loslassen – wie eine Wasserpistole.
+    </div>
+  </div>
+</div>
+
+<!-- ============ PHASE 2: ERARBEITUNG II ============ -->
+<div class="phase-karte" id="ph2">
+  <div class="karte">
+    <div class="karte-header">
+      <div class="karte-titel">💡 Erarbeitung II – Blutdruckwerte verstehen</div>
+      <div class="karte-meta">
+        <span class="badge badge-gelb">10 min</span>
+        <span class="badge badge-blau">EA + PA</span>
+      </div>
+    </div>
+
+    <div class="timer-container">
+      <div class="timer-display" id="t2">10:00</div>
+      <button class="timer-btn btn-start" onclick="startTimer(2, 10*60, 't2')">▶ Start</button>
+      <button class="timer-btn btn-reset" onclick="resetTimer(2, 10*60, 't2')">↺ Reset</button>
+      <span class="timer-label">Erarbeitung II</span>
+    </div>
+
+    <h3>Was tut die Lehrkraft?</h3>
+    <ol>
+      <li>Überleitung: „Ihr habt letzte Stunde euren Blutdruck gemessen. Was bedeuten diese zwei Zahlen wirklich?"</li>
+      <li>SuS auf <strong>Karte 2</strong> der Schüler-Website hinweisen</li>
+      <li>SuS geben ihren eigenen systolischen Wert ein und ordnen ihn ein</li>
+      <li>Nach ca. 7 min: Auswertung im Plenum – typische Werte vorstellen</li>
+    </ol>
+
+    <div class="box box-gruen">
+      <strong>🎯 Kernaussage dieser Phase:</strong><br>
+      Der obere Blutdruckwert (systolisch) entsteht beim Pumpen des Herzens (Systole). Der untere Wert (diastolisch) entsteht in der Ruhephase (Diastole). Normalwert Erwachsener: 120/80 mmHg. Bei Kindern etwas niedriger.
+    </div>
+
+    <h3>Blutdruckwerte im Überblick</h3>
+    <div class="karte" style="background:rgba(255,255,255,0.05); padding:14px;">
+      <table style="width:100%; border-collapse:collapse; font-size:0.88rem;">
+        <tr style="color:#8ba8cc; font-size:0.78rem;">
+          <td style="padding:5px 0;">Kategorie</td><td>systolisch</td><td>diastolisch</td>
+        </tr>
+        <tr><td style="padding:5px 0; color:#74b9ff;"><strong>Hypotonie</strong></td><td>&lt; 100</td><td>&lt; 60</td></tr>
+        <tr><td style="padding:5px 0; color:#6bcf8a;"><strong>Normal</strong></td><td>100–129</td><td>60–84</td></tr>
+        <tr><td style="padding:5px 0; color:#f9c95e;"><strong>Hoch-normal</strong></td><td>130–139</td><td>85–89</td></tr>
+        <tr><td style="padding:5px 0; color:#ff8fa3;"><strong>Hypertonie</strong></td><td>≥ 140</td><td>≥ 90</td></tr>
+      </table>
+      <p style="font-size:0.78rem; color:#8ba8cc; margin-top:6px;">Alle Angaben in mmHg. Für Kinder gelten angepasste Normwerte (tendieren etwas niedriger).</p>
+    </div>
+
+    <h3>💬 Impulsfragen</h3>
+    <ul class="impuls-liste">
+      <li>„Warum gibt es beim Blutdruck immer zwei Zahlen – und nicht nur eine?"</li>
+      <li>„Was passiert mit dem Blutdruck, wenn wir Sport machen?"</li>
+      <li>„Warum ist dauerhaft hoher Blutdruck gefährlich?"</li>
+    </ul>
+
+    <div class="box box-gelb">
+      <strong>📌 Hinweis:</strong> Bei der Messung letzte Stunde können die Werte durch Aufregung leicht erhöht gewesen sein. Das ist normal. Einmalig erhöhte Werte sind kein Grund zur Sorge.
+    </div>
+
+    <button class="diff-toggle" onclick="this.nextElementSibling.classList.toggle('offen')">🔀 Differenzierung</button>
+    <div class="diff-inhalt">
+      <strong>Schnelle SuS:</strong> Warum gibt man den Blutdruck in mmHg an? Was bedeutet diese Einheit?<br>
+      <strong>Förderbedarf:</strong> Konkrete Analogie: Blutdruck ist wie der Druck in einem Wasserschlauch – beim Pumpen hoch, in der Pause niedriger.
+    </div>
+  </div>
+</div>
+
+<!-- ============ PHASE 3: ERARBEITUNG III ============ -->
+<div class="phase-karte" id="ph3">
+  <div class="karte">
+    <div class="karte-header">
+      <div class="karte-titel">🔢 Erarbeitung III – Puls & Herzfrequenz</div>
+      <div class="karte-meta">
+        <span class="badge badge-gelb">7 min</span>
+        <span class="badge badge-blau">EA</span>
+      </div>
+    </div>
+
+    <div class="timer-container">
+      <div class="timer-display" id="t3">07:00</div>
+      <button class="timer-btn btn-start" onclick="startTimer(3, 7*60, 't3')">▶ Start</button>
+      <button class="timer-btn btn-reset" onclick="resetTimer(3, 7*60, 't3')">↺ Reset</button>
+      <span class="timer-label">Erarbeitung III</span>
+    </div>
+
+    <h3>Was tut die Lehrkraft?</h3>
+    <ol>
+      <li>Überleitung: „Ihr habt auch euren Puls gemessen. Was hat das mit Systole/Diastole zu tun?"</li>
+      <li>SuS auf <strong>Karte 3</strong> hinweisen</li>
+      <li>SuS berechnen mit eigenem Puls, wie oft das Herz Systolen und Diastolen pro Minute vollzieht</li>
+      <li>Lückentext auf der Website bearbeiten lassen</li>
+    </ol>
+
+    <div class="box box-gruen">
+      <strong>🎯 Kernaussage:</strong><br>
+      Puls = Herzfrequenz = Anzahl vollständiger Herzzyklen (1 Systole + 1 Diastole) pro Minute. Normwert: 60–80/min bei Erwachsenen, bei Kindern etwas höher (ca. 80–100/min).
+    </div>
+
+    <h3>💬 Impulsfragen</h3>
+    <ul class="impuls-liste">
+      <li>„Wenn ihr 70-mal pro Minute Puls habt – wie viele Systolen finden dann pro Minute statt?"</li>
+      <li>„Beim Sport steigt der Puls. Was bedeutet das für Systole und Diastole?"</li>
+      <li>„Warum ist der Puls von Sportlern oft niedriger als bei Menschen, die keinen Sport treiben?"</li>
+    </ul>
+
+    <button class="diff-toggle" onclick="this.nextElementSibling.classList.toggle('offen')">🔀 Differenzierung</button>
+    <div class="diff-inhalt">
+      <strong>Schnelle SuS:</strong> Wie viel Blut pumpt das Herz bei einem Puls von 70 pro Stunde (ca. 70 ml pro Schlag)?<br>
+      <strong>Förderbedarf:</strong> Puls einfach erklären: Jedes Mal, wenn du den Puls spürst, hat das Herz einmal gepumpt (Systole).
+    </div>
+  </div>
+</div>
+
+<!-- ============ PHASE 4: TAFELBILD ============ -->
+<div class="phase-karte" id="ph4">
+  <div class="karte">
+    <div class="karte-header">
+      <div class="karte-titel">📋 Tafelbild erarbeiten</div>
+      <div class="karte-meta">
+        <span class="badge badge-gelb">8 min</span>
+        <span class="badge badge-blau">Plenum</span>
+      </div>
+    </div>
+
+    <div class="timer-container">
+      <div class="timer-display" id="t4">08:00</div>
+      <button class="timer-btn btn-start" onclick="startTimer(4, 8*60, 't4')">▶ Start</button>
+      <button class="timer-btn btn-reset" onclick="resetTimer(4, 8*60, 't4')">↺ Reset</button>
+      <span class="timer-label">Tafelbild</span>
+    </div>
+
+    <h3>Was tut die Lehrkraft?</h3>
+    <ol>
+      <li>SuS auf <strong>Karte 4 (Tafelbild)</strong> der Schüler-Website hinweisen</li>
+      <li>Schritte des Tafelbildes <em>gemeinsam</em> erarbeiten – SuS tippen „Weiter", wenn besprochen</li>
+      <li>Lehrkraft schreibt gleichzeitig an Tafel/Smartboard (s. Vorlage unten)</li>
+      <li>SuS übertragen das Tafelbild ins Heft</li>
+    </ol>
+
+    <div class="box box-blau">
+      <strong>💡 Hinweis:</strong> Das Tafelbild auf der Schüler-Website baut sich schrittweise auf. SuS können beim Abschreiben im gleichen Tempo vorgehen.
+    </div>
+
+    <h3>Tafelbild-Vorlage</h3>
+    <div class="tb-vorlage">
+      <div style="text-align:center; font-weight:900; font-size:1.2rem; color:#a8ffb0; border-bottom:1px solid rgba(255,255,255,0.2); padding-bottom:10px; margin-bottom:14px;">
+        ❤️ Systole, Diastole & Blutdruck
+      </div>
+
+      <div class="tb-abschnitt">
+        <strong>1. Der Herzschlag</strong><br>
+        <span style="color:#ff8fa3;">Systole</span> → Herzmuskel zieht sich zusammen → Blut wird herausgepumpt<br>
+        <span style="color:#74b9ff;">Diastole</span> → Herzmuskel entspannt sich → Kammern füllen sich wieder
+      </div>
+
+      <div class="tb-abschnitt">
+        <strong>2. Der Blutdruck</strong><br>
+        Oberer Wert (systolisch) = Druck beim Pumpen<br>
+        Unterer Wert (diastolisch) = Druck in Ruhe<br>
+        Beispiel: <span style="color:#f9d56e; font-weight:900;">120 / 80 mmHg</span> → Normal
+      </div>
+
+      <div class="tb-abschnitt">
+        <strong>3. Puls = Herzfrequenz</strong><br>
+        1 Herzschlag = 1 Systole + 1 Diastole<br>
+        Normwert: <span style="color:#f9d56e;">60–80 Schläge/min</span>
+      </div>
+
+      <div class="tb-abschnitt">
+        <strong>4. Einordnung Blutdruck</strong><br>
+        <span style="color:#74b9ff;">Hypotonie</span> / <span style="color:#a8ffb0;">Normal</span> / <span style="color:#f9d56e;">Hoch-normal</span> / <span style="color:#ff8fa3;">Hypertonie</span>
+      </div>
+
+      <div class="tb-abschnitt" style="margin-top:14px; text-align:center; font-style:italic; color:#f9d56e;">
+        „Das Herz pumpt (Systole) – das Herz entspannt (Diastole).<br>
+        Der Blutdruck zeigt beide Phasen: oben systolisch, unten diastolisch."
+      </div>
+    </div>
+
+    <button class="diff-toggle" onclick="this.nextElementSibling.classList.toggle('offen')">🔀 Differenzierung</button>
+    <div class="diff-inhalt">
+      <strong>Schnelle SuS:</strong> Skizze des Herzens beschriften mit Systole/Diastole-Pfeilen.<br>
+      <strong>Förderbedarf:</strong> Vereinfachtes Tafelbild – nur die zwei Fachbegriffe mit Erklärung abschreiben.
+    </div>
+  </div>
+</div>
+
+<!-- ============ PHASE 5: SICHERUNG ============ -->
+<div class="phase-karte" id="ph5">
+  <div class="karte">
+    <div class="karte-header">
+      <div class="karte-titel">✅ Sicherung & Abschluss</div>
+      <div class="karte-meta">
+        <span class="badge badge-gelb">7 min</span>
+        <span class="badge badge-blau">Plenum / EA</span>
+      </div>
+    </div>
+
+    <div class="timer-container">
+      <div class="timer-display" id="t5">07:00</div>
+      <button class="timer-btn btn-start" onclick="startTimer(5, 7*60, 't5')">▶ Start</button>
+      <button class="timer-btn btn-reset" onclick="resetTimer(5, 7*60, 't5')">↺ Reset</button>
+      <span class="timer-label">Sicherung</span>
+    </div>
+
+    <h3>Was tut die Lehrkraft?</h3>
+    <ol>
+      <li>Tafelbild gemeinsam durchlesen, Fragen klären</li>
+      <li>Exit-Fragen mündlich stellen (s. unten)</li>
+      <li>Ausblick: „Nächste Stunde schauen wir uns die Zusammensetzung des Blutes genauer an."</li>
+    </ol>
+
+    <h3>💬 Sicherungsfragen (mündlich)</h3>
+    <ul class="impuls-liste">
+      <li>„Erkläre in einem Satz: Was ist die Systole?"</li>
+      <li>„Jemand hat einen Blutdruck von 140/90 – ist das normal?"</li>
+      <li>„Warum zeigt der Puls, wie oft das Herz pro Minute schlägt?"</li>
+    </ul>
+
+    <div class="box box-gruen">
+      <strong>✅ Lernziel der Stunde:</strong><br>
+      Die SuS können erklären, was bei Systole und Diastole im Herzen passiert, die zwei Blutdruckwerte den Phasen zuordnen und einen Blutdruckwert grob einordnen.
+    </div>
+
+    <h3>Lehrplanbezug (UV 6.2 NRW)</h3>
+    <div class="box box-lila">
+      Kompetenzerwartung: „die Funktionsweise des Herzens an einem einfachen Modell erklären und das Konzept des Blutkreislaufs an einem Schema erläutern (E6)"<br>
+      Inhaltsfeld: IF2 – Mensch und Gesundheit · Bau und Funktion des Herzens
+    </div>
+
+    <div class="divider"></div>
+
+    <h3>Zeitübersicht</h3>
+    <div class="zeitleiste">
+      <div class="ztl-seg" style="background:rgba(26,111,184,0.3);">Einstieg<br>8 min</div>
+      <div class="ztl-seg" style="background:rgba(45,158,79,0.3);">Erarb. I<br>10 min</div>
+      <div class="ztl-seg" style="background:rgba(45,158,79,0.25);">Erarb. II<br>10 min</div>
+      <div class="ztl-seg" style="background:rgba(45,158,79,0.2);">Erarb. III<br>7 min</div>
+      <div class="ztl-seg" style="background:rgba(244,162,0,0.3);">Tafelbild<br>8 min</div>
+      <div class="ztl-seg" style="background:rgba(124,58,237,0.3);">Sicherung<br>7 min</div>
+    </div>
+
+    <div class="box box-gelb" style="margin-top:12px;">
+      <strong>📌 Benötigte Materialien:</strong><br>
+      iPad pro SuS mit Schüler-Website · Tafel / Smartboard · ggf. Blutdruckmessgerät (Referenz)
+    </div>
+  </div>
+</div>
+
+</main>
+
+<div id="trex" onclick="ttShow()" onmouseover="ttShow()" onmouseleave="ttHide()">🦖</div>
+<div id="trex-tt">Made by Mathedino</div>
+
+<script>
+// =========== PHASEN ===========
+function zeigePhase(n) {
+  document.querySelectorAll('.phase-karte').forEach((k, i) => k.classList.toggle('aktiv', i === n));
+  document.querySelectorAll('.ph-btn').forEach((b, i) => b.classList.toggle('aktiv', i === n));
+}
+
+// =========== TIMER ===========
+const timers = {};
+function startTimer(id, totalSec, displayId) {
+  if (timers[id] && timers[id].running) return;
+  if (!timers[id]) timers[id] = { remaining: totalSec, running: false };
+  timers[id].running = true;
+  const disp = document.getElementById(displayId);
+  timers[id].interval = setInterval(() => {
+    timers[id].remaining--;
+    const r = timers[id].remaining;
+    if (r <= 0) {
+      clearInterval(timers[id].interval);
+      timers[id].running = false;
+      disp.textContent = '⏰ Zeit!';
+      disp.classList.add('warnung');
+      return;
+    }
+    const m = Math.floor(r / 60);
+    const s = r % 60;
+    disp.textContent = String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+    if (r <= 60) disp.classList.add('warnung');
+    else disp.classList.remove('warnung');
+  }, 1000);
+}
+function resetTimer(id, totalSec, displayId) {
+  if (timers[id]) {
+    clearInterval(timers[id].interval);
+    timers[id] = null;
+  }
+  const disp = document.getElementById(displayId);
+  const m = Math.floor(totalSec / 60);
+  const s = totalSec % 60;
+  disp.textContent = String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+  disp.classList.remove('warnung');
+}
+
+// =========== DIFFERENZIERUNG ===========
+document.querySelectorAll('.diff-toggle').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const next = btn.nextElementSibling;
+    next.classList.toggle('offen');
+    btn.textContent = next.classList.contains('offen') ? '🔀 Differenzierung ausblenden' : '🔀 Differenzierung';
+  });
+});
+
+// =========== T-REX ===========
+let trexTO;
+function ttShow() {
+  document.getElementById('trex-tt').style.display = 'block';
+  clearTimeout(trexTO);
+}
+function ttHide() {
+  trexTO = setTimeout(() => { document.getElementById('trex-tt').style.display = 'none'; }, 1500);
+}
+</script>
+</body>
+</html>
