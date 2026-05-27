@@ -723,7 +723,8 @@ function finishSieve(lv){
     if(st[i]==='active'||st[i]==='curprime') st[i]='prime';
   }
   lvl[lv].phase='done'; lvl[lv].done=true;
-  document.getElementById('qpanel-'+lv).classList.remove('visible');
+  const qp = document.getElementById('qpanel-'+lv);
+  if(qp) qp.classList.remove('visible');
   syncGrid(lv);
   setTask(lv,'🎉 Fertig! Alle grünen Zahlen bis '+limit+' sind Primzahlen.');
   document.getElementById('qs-'+lv).style.display='block';
@@ -750,16 +751,30 @@ function switchNiveau(lv){
 function initExtended(lv){
   lvl[lv].initialized = true;
   const limit = LIMITS[lv];
-  // Mark 1 as removed (inherited)
-  st[1]='removed1';
-  // Find first prime that still has active multiples in the extended range
+  st[1] = 'removed1';
+
+  // Previous level limit — everything up to here was already sieved
+  const prevLimit = lv === 'F' ? LIMITS['G'] : LIMITS['F'];
+
+  // Instantly mark all multiples of already-processed primes in the new range
   for(let p=2; p*p<=limit; p++){
     if(!isPrime(p)) continue;
-    let hasActive=false;
-    for(let m=p*2;m<=limit;m+=p){ if(st[m]==='active'){hasActive=true;break;} }
+    if(p*p <= prevLimit){
+      // This prime was fully processed previously — apply to full new range instantly
+      for(let m=p*2; m<=limit; m+=p){
+        if(st[m]==='active') st[m]='removed';
+      }
+      if(st[p]==='curprime'||st[p]==='active') st[p]='prime';
+    }
+  }
+
+  // Find first prime that still has active multiples left to process
+  for(let p=2; p*p<=limit; p++){
+    if(!isPrime(p)) continue;
+    let hasActive = false;
+    for(let m=p*2; m<=limit; m+=p){ if(st[m]==='active'){ hasActive=true; break; } }
     if(hasActive){
-      // Mark all primes below p as prime (not curprime)
-      for(let j=2;j<p;j++) if(st[j]==='curprime'||st[j]==='active') st[j]='prime';
+      for(let j=2; j<p; j++) if(st[j]==='curprime'||st[j]==='active') st[j]='prime';
       syncGrid(lv);
       startMultiples(lv, p);
       return;
