@@ -513,13 +513,23 @@ function setStatus(id,wert){
   if(id in aufgaben){aufgaben[id]=wert;return;}
   for(const n in niveauStatus){if(id in niveauStatus[n]){niveauStatus[n][id]=wert;return;}}
 }
+/* Wandelt Eingabe in Zahl: akzeptiert Komma (1,25), Punkt (1.25) und Bruch (5/4). NaN bei ungültig. */
+function zahlAus(s){
+  s=(s||'').trim().replace(/\s/g,'').replace(',','.');
+  if(s==='') return NaN;
+  const m=s.match(/^(-?\d+(?:\.\d+)?)\/(-?\d+(?:\.\d+)?)$/);
+  if(m){const n=parseFloat(m[1]),d=parseFloat(m[2]);if(d===0)return NaN;return n/d;}
+  return parseFloat(s);
+}
+function gleich(a,b){return !isNaN(a)&&Math.abs(a-b)<1e-9;}
+
 function pruefeZahl(id,correct,rid){
   const inp=document.getElementById(id);
   const r=document.getElementById(rid);
   const leerBtn=document.getElementById(id+'-leer');
-  const val=inp.value.trim().replace(',','.');
-  if(val===''){return;}
-  if(parseFloat(val)===correct){
+  const roh=inp.value.trim();
+  if(roh===''){return;}
+  if(gleich(zahlAus(roh),correct)){
     r.className='rueck richtig';
     r.innerHTML='✅ Richtig!';
     if(leerBtn) leerBtn.style.display='none';
@@ -534,13 +544,13 @@ function pruefeZahl(id,correct,rid){
 }
 /* Profi: zwei verbotene Werte (Reihenfolge egal, klein vor groß abgefragt) */
 function pruefeZwei(idA,idB,kleiner,groesser,rid){
-  const a=document.getElementById(idA).value.trim().replace(',','.');
-  const b=document.getElementById(idB).value.trim().replace(',','.');
+  const a=document.getElementById(idA).value.trim();
+  const b=document.getElementById(idB).value.trim();
   const r=document.getElementById(rid);
   const leerBtn=document.getElementById(idA+'-leer');
   if(a===''||b==='')return;
-  const va=parseFloat(a),vb=parseFloat(b);
-  const ok=(va===kleiner&&vb===groesser)||(va===groesser&&vb===kleiner);
+  const va=zahlAus(a),vb=zahlAus(b);
+  const ok=(gleich(va,kleiner)&&gleich(vb,groesser))||(gleich(va,groesser)&&gleich(vb,kleiner));
   const key=idA.slice(0,2); // p1 / p2
   if(ok){
     r.className='rueck richtig';r.innerHTML='✅ Richtig! Beide verbotenen Werte stimmen.';
