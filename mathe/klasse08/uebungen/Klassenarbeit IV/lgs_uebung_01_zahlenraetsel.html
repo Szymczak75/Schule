@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LGS Übung – Zahlenrätsel</title>
+<script>
+  MathJax = {
+    tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+    svg: { fontCache: 'global' }
+  };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Fira+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --blue-dark: #1a3a5c;
+    --blue-mid: #2563a8;
+    --blue-light: #dbeafe;
+    --blue-pale: #eff6ff;
+    --accent: #f59e0b;
+    --green: #16a34a;
+    --green-bg: #dcfce7;
+    --red: #dc2626;
+    --red-bg: #fee2e2;
+    --gray: #6b7280;
+    --gray-light: #f3f4f6;
+    --white: #ffffff;
+    --radius: 14px;
+    --shadow: 0 4px 18px rgba(26,58,92,0.10);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 17px; }
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: linear-gradient(135deg, #e8f0fe 0%, #dbeafe 100%);
+    min-height: 100vh;
+    padding-bottom: 6rem;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* HEADER */
+  .page-header {
+    background: linear-gradient(120deg, var(--blue-dark) 0%, var(--blue-mid) 100%);
+    color: white;
+    padding: 1.2rem 1.4rem 1rem;
+    border-bottom: 4px solid var(--accent);
+  }
+  .header-top { display: flex; align-items: center; gap: 0.7rem; flex-wrap: wrap; }
+  .badge {
+    background: var(--accent);
+    color: var(--blue-dark);
+    font-weight: 800;
+    font-size: 0.75rem;
+    padding: 0.2rem 0.7rem;
+    border-radius: 99px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .page-title { font-size: 1.35rem; font-weight: 800; line-height: 1.2; }
+  .page-sub { font-size: 0.9rem; opacity: 0.85; margin-top: 0.25rem; }
+  .verfahren-tag {
+    display: inline-block;
+    background: rgba(255,255,255,0.18);
+    border: 1px solid rgba(255,255,255,0.35);
+    border-radius: 8px;
+    padding: 0.2rem 0.7rem;
+    font-size: 0.82rem;
+    font-weight: 700;
+    margin-top: 0.4rem;
+  }
+
+  /* NIVEAU-TABS */
+  .niveau-bar {
+    background: var(--white);
+    border-bottom: 2px solid var(--blue-light);
+    display: flex;
+    padding: 0.5rem 1rem 0;
+    gap: 0.4rem;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .niveau-btn {
+    flex: 1;
+    min-width: 90px;
+    padding: 0.55rem 0.5rem;
+    border: 2px solid transparent;
+    border-bottom: none;
+    border-radius: 10px 10px 0 0;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    background: var(--gray-light);
+    color: var(--gray);
+    transition: all 0.18s;
+    min-height: 44px;
+  }
+  .niveau-btn.active {
+    background: var(--blue-pale);
+    color: var(--blue-dark);
+    border-color: var(--blue-mid);
+    border-bottom: 2px solid var(--blue-pale);
+    margin-bottom: -2px;
+    z-index: 1;
+  }
+  .niveau-btn:active { opacity: 0.75; }
+
+  /* MAIN CONTENT */
+  .main { padding: 1.2rem 1rem; max-width: 720px; margin: 0 auto; }
+
+  /* AUFGABEN-KARTE */
+  .card {
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 1.4rem 1.2rem;
+    margin-bottom: 1.2rem;
+    border-left: 5px solid var(--blue-mid);
+  }
+  .card-title {
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--blue-dark);
+    margin-bottom: 0.7rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .card-title .step-num {
+    background: var(--blue-mid);
+    color: white;
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 800;
+    flex-shrink: 0;
+  }
+  .aufgabe-text {
+    font-size: 1rem;
+    line-height: 1.65;
+    color: #1e293b;
+    background: var(--blue-pale);
+    border-radius: 10px;
+    padding: 0.9rem 1rem;
+    margin-bottom: 1rem;
+    border-left: 4px solid var(--blue-mid);
+  }
+  .aufgabe-text strong { color: var(--blue-dark); }
+
+  /* INPUT ROWS */
+  .input-row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 0.8rem;
+    flex-wrap: wrap;
+  }
+  .input-label {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--blue-dark);
+    min-width: 80px;
+  }
+  .input-field {
+    flex: 1;
+    min-width: 0;
+    padding: 0.6rem 0.8rem;
+    border: 2px solid #cbd5e1;
+    border-radius: 10px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    background: white;
+    color: #1e293b;
+    transition: border-color 0.15s;
+    min-height: 44px;
+    -webkit-appearance: none;
+  }
+  .input-field:focus { outline: none; border-color: var(--blue-mid); }
+  .input-field.correct { border-color: var(--green); background: var(--green-bg); }
+  .input-field.wrong { border-color: var(--red); background: var(--red-bg); }
+  .input-field[readonly] { background: #f1f5f9; color: #475569; }
+
+  .mono { font-family: 'Fira Mono', monospace; }
+
+  /* CHECK BTN */
+  .check-btn {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: var(--blue-mid);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 1rem;
+    font-weight: 800;
+    cursor: pointer;
+    min-height: 48px;
+    transition: background 0.15s, transform 0.1s;
+    margin-top: 0.5rem;
+  }
+  .check-btn:active { background: var(--blue-dark); transform: scale(0.98); }
+  .check-btn:disabled { background: #93c5fd; cursor: default; }
+
+  .clear-btn {
+    width: 100%;
+    padding: 0.6rem 1rem;
+    background: white;
+    color: var(--red);
+    border: 2px solid var(--red);
+    border-radius: 10px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    min-height: 44px;
+    margin-top: 0.5rem;
+    display: none;
+  }
+  .clear-btn:active { background: var(--red-bg); }
+
+  /* FEEDBACK */
+  .feedback {
+    display: none;
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    margin-top: 0.6rem;
+    line-height: 1.5;
+  }
+  .feedback.ok { background: var(--green-bg); color: var(--green); border: 2px solid var(--green); display: block; }
+  .feedback.err { background: var(--red-bg); color: var(--red); border: 2px solid var(--red); display: block; }
+
+  /* TIPP */
+  .tipp-container { margin-top: 0.7rem; }
+  .tipp-btn {
+    background: none;
+    border: 2px solid var(--accent);
+    color: #92400e;
+    border-radius: 8px;
+    padding: 0.4rem 0.9rem;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 700;
+    cursor: pointer;
+    min-height: 40px;
+    display: none;
+  }
+  .tipp-btn:active { background: #fef3c7; }
+  .tipp-box {
+    display: none;
+    background: #fffbeb;
+    border: 2px solid var(--accent);
+    border-radius: 10px;
+    padding: 0.8rem 1rem;
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: #78350f;
+  }
+  .tipp-box.show { display: block; }
+
+  /* STEPS (Grundlagen) */
+  .step-block {
+    border: 2px solid var(--blue-light);
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    background: var(--blue-pale);
+  }
+  .step-block .step-label {
+    font-size: 0.82rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--blue-mid);
+    margin-bottom: 0.6rem;
+  }
+  .step-block.locked {
+    opacity: 0.45;
+    pointer-events: none;
+    filter: grayscale(0.5);
+  }
+
+  /* FORTGESCHRITTEN / PROFI: nur Lösungseingabe */
+  .result-only-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 1.4rem 1.2rem;
+    margin-bottom: 1.2rem;
+    border-left: 5px solid var(--blue-mid);
+  }
+
+  /* WEITER BTN */
+  .weiter-wrap {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: linear-gradient(to top, white 70%, transparent);
+    padding: 1rem;
+    display: none;
+    z-index: 50;
+  }
+  .weiter-btn {
+    width: 100%;
+    max-width: 720px;
+    margin: 0 auto;
+    display: block;
+    padding: 1rem;
+    background: var(--green);
+    color: white;
+    border: none;
+    border-radius: 14px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 800;
+    cursor: pointer;
+    min-height: 54px;
+    box-shadow: 0 4px 18px rgba(22,163,74,0.25);
+    transition: background 0.15s, transform 0.1s;
+  }
+  .weiter-btn:active { background: #15803d; transform: scale(0.98); }
+
+  /* DINO */
+  .dino {
+    position: fixed;
+    bottom: 1.2rem;
+    right: 1.2rem;
+    font-size: 1.6rem;
+    cursor: pointer;
+    z-index: 100;
+    user-select: none;
+    -webkit-user-select: none;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));
+  }
+  .dino-tooltip {
+    display: none;
+    position: absolute;
+    bottom: 2.4rem;
+    right: 0;
+    background: var(--blue-dark);
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.3rem 0.7rem;
+    border-radius: 8px;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+  .dino:hover .dino-tooltip, .dino.show-tip .dino-tooltip { display: block; }
+
+  /* PROGRESS */
+  .progress-bar-wrap {
+    background: var(--blue-light);
+    border-radius: 99px;
+    height: 8px;
+    margin: 0.8rem 0 0.3rem;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    background: var(--blue-mid);
+    height: 100%;
+    border-radius: 99px;
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+  .progress-label { font-size: 0.8rem; color: var(--gray); text-align: right; margin-bottom: 0.8rem; }
+
+  /* hidden */
+  .hidden { display: none !important; }
+
+  /* Antwortsatz textarea */
+  textarea.input-field {
+    min-height: 64px;
+    resize: vertical;
+    width: 100%;
+  }
+
+  hr.divider { border: none; border-top: 2px dashed var(--blue-light); margin: 1rem 0; }
+</style>
+</head>
+<body>
+
+<header class="page-header">
+  <div class="header-top">
+    <span class="badge">Klasse 9</span>
+    <span class="badge" style="background:rgba(255,255,255,0.2);color:white;">Übung</span>
+  </div>
+  <div class="page-title">Lineare Gleichungssysteme</div>
+  <div class="page-sub">Seite 1 von 6 · Zahlenrätsel</div>
+  <span class="verfahren-tag">📐 Einsetzungsverfahren</span>
+  <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressBar"></div></div>
+  <div class="progress-label" id="progressLabel">0 von 1 Aufgabe erledigt</div>
+</header>
+
+<div class="niveau-bar">
+  <button class="niveau-btn active" onclick="setNiveau('grund')" id="btn-grund">🟢 Grundlagen</button>
+  <button class="niveau-btn" onclick="setNiveau('fort')" id="btn-fort">🔵 Fortgeschritten</button>
+  <button class="niveau-btn" onclick="setNiveau('profi')" id="btn-profi">🔴 Profi</button>
+</div>
+
+<div class="main">
+
+  <!-- ===== GRUNDLAGEN ===== -->
+  <div id="niveau-grund">
+    <div class="card">
+      <div class="card-title">📋 Aufgabe</div>
+      <div class="aufgabe-text">
+        Die Summe zweier Zahlen ist <strong>47</strong>.<br>
+        Die größere Zahl ist um <strong>13</strong> größer als die kleinere.<br>
+        Bestimme beide Zahlen mit dem <strong>Einsetzungsverfahren</strong>.
+      </div>
+    </div>
+
+    <!-- SCHRITT 1: Variablen -->
+    <div class="step-block" id="g-step1">
+      <div class="step-label">Schritt 1 · Variablen benennen</div>
+      <div class="input-row">
+        <span class="input-label">x steht für</span>
+        <input class="input-field" id="g1-x" type="text" placeholder="Wofür steht x?" autocomplete="off">
+      </div>
+      <div class="input-row">
+        <span class="input-label">y steht für</span>
+        <input class="input-field" id="g1-y" type="text" placeholder="Wofür steht y?" autocomplete="off">
+      </div>
+      <button class="check-btn" onclick="checkG1()">Weiter →</button>
+      <div class="feedback" id="g1-fb"></div>
+      <div class="tipp-container">
+        <button class="tipp-btn" id="g1-tipp-btn" onclick="showTipp('g1-tipp')">💡 Tipp anzeigen</button>
+        <div class="tipp-box" id="g1-tipp">
+          <strong>Tipp 1:</strong> Wähle einen Namen für jede unbekannte Zahl.<br>
+          Zum Beispiel: x = kleinere Zahl, y = größere Zahl.<br><br>
+          <strong>Tipp 2 (Lösung):</strong> x = die kleinere Zahl &nbsp;|&nbsp; y = die größere Zahl
+        </div>
+      </div>
+    </div>
+
+    <!-- SCHRITT 2: Gleichungen -->
+    <div class="step-block locked" id="g-step2">
+      <div class="step-label">Schritt 2 · Gleichungen aufstellen</div>
+      <p style="font-size:0.9rem;color:#475569;margin-bottom:0.7rem;">Stelle zwei Gleichungen auf. Nutze \(x\) für die kleinere und \(y\) für die größere Zahl.</p>
+      <div class="input-row">
+        <span class="input-label mono">GI:</span>
+        <input class="input-field mono" id="g2-gl1" type="text" placeholder="z. B. x + y = ..." autocomplete="off">
+      </div>
+      <div class="input-row">
+        <span class="input-label mono">GII:</span>
+        <input class="input-field mono" id="g2-gl2" type="text" placeholder="z. B. y = ..." autocomplete="off">
+      </div>
+      <button class="check-btn" onclick="checkG2()">Weiter →</button>
+      <div class="feedback" id="g2-fb"></div>
+      <div class="tipp-container">
+        <button class="tipp-btn" id="g2-tipp-btn" onclick="showTipp('g2-tipp')">💡 Tipp anzeigen</button>
+        <div class="tipp-box" id="g2-tipp">
+          <strong>Tipp 1:</strong> Die erste Gleichung beschreibt die Summe der beiden Zahlen.<br><br>
+          <strong>Tipp 2:</strong> Die zweite Gleichung beschreibt den Unterschied zwischen den Zahlen.<br><br>
+          <strong>Tipp 3 (Lösung):</strong> GI: \(x + y = 47\) &nbsp;&nbsp; GII: \(y = x + 13\)
+        </div>
+      </div>
+    </div>
+
+    <!-- SCHRITT 3: Einsetzen & lösen -->
+    <div class="step-block locked" id="g-step3">
+      <div class="step-label">Schritt 3 · Einsetzen &amp; lösen</div>
+      <p style="font-size:0.9rem;color:#475569;margin-bottom:0.7rem;">
+        Setze GII in GI ein: \(x + (x + 13) = 47\)<br>
+        Löse nach \(x\) auf, dann berechne \(y\).
+      </p>
+      <div class="input-row">
+        <span class="input-label mono">x =</span>
+        <input class="input-field mono" id="g3-x" type="text" inputmode="numeric" placeholder="?" autocomplete="off">
+      </div>
+      <div class="input-row">
+        <span class="input-label mono">y =</span>
+        <input class="input-field mono" id="g3-y" type="text" inputmode="numeric" placeholder="?" autocomplete="off">
+      </div>
+      <button class="check-btn" onclick="checkG3()">Weiter →</button>
+      <div class="feedback" id="g3-fb"></div>
+      <div class="tipp-container">
+        <button class="tipp-btn" id="g3-tipp-btn" onclick="showTipp('g3-tipp')">💡 Tipp anzeigen</button>
+        <div class="tipp-box" id="g3-tipp">
+          <strong>Tipp 1:</strong> \(x + x + 13 = 47\) → \(2x = 34\)<br><br>
+          <strong>Tipp 2:</strong> \(x = 17\)<br><br>
+          <strong>Tipp 3 (Lösung):</strong> \(x = 17\), dann \(y = 17 + 13 = 30\)
+        </div>
+      </div>
+    </div>
+
+    <!-- SCHRITT 4: Antwortsatz -->
+    <div class="step-block locked" id="g-step4">
+      <div class="step-label">Schritt 4 · Antwortsatz</div>
+      <p style="font-size:0.9rem;color:#475569;margin-bottom:0.7rem;">Formuliere einen vollständigen Antwortsatz.</p>
+      <textarea class="input-field" id="g4-antwort" placeholder="Die beiden Zahlen sind ..."></textarea>
+      <button class="check-btn" onclick="checkG4()">Auswerten ✓</button>
+      <div class="feedback" id="g4-fb"></div>
+      <div class="tipp-container">
+        <button class="tipp-btn" id="g4-tipp-btn" onclick="showTipp('g4-tipp')">💡 Tipp anzeigen</button>
+        <div class="tipp-box" id="g4-tipp">
+          <strong>Musterlösung:</strong> Die beiden Zahlen sind 17 und 30.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== FORTGESCHRITTEN ===== -->
+  <div id="niveau-fort" class="hidden">
+    <div class="result-only-card">
+      <div class="card-title">📋 Aufgabe – Fortgeschritten</div>
+      <div class="aufgabe-text">
+        Zwei Zahlen haben folgende Eigenschaften:<br>
+        Die <strong>Differenz</strong> der beiden Zahlen beträgt <strong>16</strong>.<br>
+        Das <strong>Dreifache der kleineren</strong> Zahl ist um <strong>4 größer</strong> als die größere Zahl.<br>
+        Stelle das LGS auf, löse es mit dem <strong>Einsetzungsverfahren</strong> und formuliere einen Antwortsatz.
+      </div>
+      <hr class="divider">
+      <p style="font-size:0.9rem;color:#475569;margin-bottom:0.6rem;font-weight:700;">Gleichungen aufstellen:</p>
+      <div class="input-row">
+        <span class="input-label mono">GI:</span>
+        <input class="input-field mono" id="f-gl1" type="text" placeholder="..." autocomplete="off">
+      </div>
+      <div class="input-row">
+        <span class="input-label mono">GII:</span>
+        <input class="input-field mono" id="f-gl2" type="text" placeholder="..." autocomplete="off">
+      </div>
+      <hr class="divider">
+      <p style="font-size:0.9rem;color:#475569;margin-bottom:0.6rem;font-weight:700;">Lösung:</p>
+      <div class="input-row">
+        <span class="input-label mono">x =</span>
+        <input class="input-field mono" id="f-x" type="text" inputmode="numeric" placeholder="kleinere Zahl" autocomplete="off">
+      </div>
+      <div class="input-row">
+        <span class="input-label mono">y =</span>
+        <input class="input-field mono" id="f-y" type="text" inputmode="numeric" placeholder="größere Zahl" autocomplete="off">
+      </div>
+      <textarea class="input-field" id="f-antwort" placeholder="Die beiden Zahlen sind ..."></textarea>
+      <button class="check-btn" onclick="checkFort()">Auswerten ✓</button>
+      <button class="clear-btn" id="f-clear" onclick="clearFort()">✕ Antwort löschen &amp; neu versuchen</button>
+      <div class="feedback" id="f-fb"></div>
+      <div class="tipp-container">
+        <button class="tipp-btn" id="f-tipp-btn" onclick="showTipp('f-tipp')">💡 Tipp anzeigen</button>
+        <div class="tipp-box" id="f-tipp">
+          <strong>Tipp 1:</strong> Nenne die kleinere Zahl \(x\), die größere \(y\).<br>
+          Was sagt dir die Differenz von 16? Und die zweite Bedingung?<br><br>
+          <strong>Tipp 2:</strong> GI: \(y - x = 16\) &nbsp;&nbsp; GII: \(3x = y + 4\)<br><br>
+          <strong>Tipp 3 (Lösung):</strong> Aus GI: \(y = x + 16\), einsetzen in GII:<br>
+          \(3x = (x+16) + 4 \Rightarrow 2x = 20 \Rightarrow x = 10\), \(y = 26\)
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== PROFI ===== -->
+  <div id="niveau-profi" class="hidden">
+    <div class="result-only-card">
+      <div class="card-title">📋 Aufgabe – Profi</div>
+      <div class="aufgabe-text">
+        Denke dir zwei Zahlen \(x\) und \(y\).<br>
+        Wenn man die <strong>kleinere Zahl verdoppelt und zur größeren addiert</strong>, erhält man <strong>31</strong>.<br>
+        Wenn man die <strong>größere Zahl verdreifacht und die kleinere subtrahiert</strong>, erhält man <strong>58</strong>.<br>
+        Außerdem gilt: Die <strong>Summe beider Zahlen ist größer als 20</strong> – prüfe deine Lösung auf diese Bedingung.<br><br>
+        Löse mit dem <strong>Einsetzungsverfahren</strong>.
+      </div>
+      <hr class="divider">
+      <div class="input-row">
+        <span class="input-label mono">x =</span>
+        <input class="input-field mono" id="p-x" type="text" inputmode="numeric" placeholder="?" autocomplete="off">
+      </div>
+      <div class="input-row">
+        <span class="input-label mono">y =</span>
+        <input class="input-field mono" id="p-y" type="text" inputmode="numeric" placeholder="?" autocomplete="off">
+      </div>
+      <textarea class="input-field" id="p-antwort" placeholder="Die beiden Zahlen sind ... Überprüfung der Bedingung: ..."></textarea>
+      <button class="check-btn" onclick="checkProfi()">Auswerten ✓</button>
+      <button class="clear-btn" id="p-clear" onclick="clearProfi()">✕ Antwort löschen &amp; neu versuchen</button>
+      <div class="feedback" id="p-fb"></div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<!-- WEITER -->
+<div class="weiter-wrap" id="weiterWrap">
+  <a href="lgs_uebung_02_ziffernraetsel.html">
+    <button class="weiter-btn">Weiter → Seite 2: Ziffernrätsel</button>
+  </a>
+</div>
+
+<!-- DINO -->
+<div class="dino" id="dino" onclick="toggleDinoTip()">
+  🦖
+  <div class="dino-tooltip">Made by Mathedino</div>
+</div>
+
+<script>
+let currentNiveau = 'grund';
+let grundDone = false;
+let fortDone = false;
+let profiDone = false;
+
+// Schritt-Status
+let g1ok = false, g2ok = false, g3ok = false, g4ok = false;
+let g1tries = 0, g2tries = 0, g3tries = 0, g4tries = 0;
+let ftries = 0, ptries = 0;
+
+function setNiveau(n) {
+  currentNiveau = n;
+  ['grund','fort','profi'].forEach(x => {
+    document.getElementById('niveau-' + x).classList.toggle('hidden', x !== n);
+    document.getElementById('btn-' + x).classList.toggle('active', x === n);
+  });
+  checkWeiter();
+}
+
+// ---- GRUNDLAGEN ----
+function normalize(s) {
+  return s.trim().toLowerCase().replace(/\s+/g, ' ');
+}
+
+function checkG1() {
+  const x = normalize(document.getElementById('g1-x').value);
+  const y = normalize(document.getElementById('g1-y').value);
+  g1tries++;
+  const fb = document.getElementById('g1-fb');
+  if (x.length > 3 && y.length > 3) {
+    fb.className = 'feedback ok';
+    fb.textContent = '✅ Gut! Die Variablen sind definiert.';
+    document.getElementById('g-step1').style.borderColor = '#16a34a';
+    unlockStep('g-step2');
+    g1ok = true;
+  } else {
+    fb.className = 'feedback err';
+    fb.textContent = '❌ Bitte beschreibe, wofür x und y stehen (z. B. „die kleinere Zahl").';
+    if (g1tries >= 1) document.getElementById('g1-tipp-btn').style.display = 'inline-block';
+  }
+}
+
+function checkG2() {
+  const gl1 = document.getElementById('g2-gl1').value.replace(/\s/g,'');
+  const gl2 = document.getElementById('g2-gl2').value.replace(/\s/g,'');
+  g2tries++;
+  const fb = document.getElementById('g2-fb');
+  // Akzeptiere x+y=47 oder y+x=47 und y=x+13 oder y=13+x
+  const ok1 = /x\+y=47|y\+x=47/.test(gl1) || /x\+y=47|y\+x=47/.test(gl2);
+  const ok2 = /y=x\+13|y=13\+x/.test(gl1) || /y=x\+13|y=13\+x/.test(gl2);
+  if (ok1 && ok2) {
+    fb.className = 'feedback ok';
+    fb.textContent = '✅ Richtig! Beide Gleichungen sind korrekt.';
+    document.getElementById('g-step2').style.borderColor = '#16a34a';
+    unlockStep('g-step3');
+    g2ok = true;
+    if (typeof MathJax !== 'undefined') MathJax.typesetPromise();
+  } else {
+    fb.className = 'feedback err';
+    fb.textContent = '❌ Eine oder beide Gleichungen stimmen nicht. Schau dir die Aufgabe nochmal an.';
+    if (g2tries >= 1) document.getElementById('g2-tipp-btn').style.display = 'inline-block';
+  }
+}
+
+function checkG3() {
+  const xVal = document.getElementById('g3-x').value.trim();
+  const yVal = document.getElementById('g3-y').value.trim();
+  g3tries++;
+  const fb = document.getElementById('g3-fb');
+  if (xVal === '17' && yVal === '30') {
+    fb.className = 'feedback ok';
+    fb.textContent = '✅ Korrekt! x = 17 und y = 30.';
+    document.getElementById('g3-x').classList.add('correct');
+    document.getElementById('g3-y').classList.add('correct');
+    document.getElementById('g-step3').style.borderColor = '#16a34a';
+    unlockStep('g-step4');
+    g3ok = true;
+  } else {
+    fb.className = 'feedback err';
+    fb.textContent = '❌ Nicht ganz. Überprüfe deinen Rechenweg.';
+    document.getElementById('g3-x').classList.toggle('wrong', xVal !== '17');
+    document.getElementById('g3-y').classList.toggle('wrong', yVal !== '30');
+    document.getElementById('g3-x').classList.toggle('correct', xVal === '17');
+    document.getElementById('g3-y').classList.toggle('correct', yVal === '30');
+    if (g3tries >= 1) document.getElementById('g3-tipp-btn').style.display = 'inline-block';
+  }
+}
+
+function checkG4() {
+  const antwort = normalize(document.getElementById('g4-antwort').value);
+  g4tries++;
+  const fb = document.getElementById('g4-fb');
+  if (antwort.includes('17') && antwort.includes('30') && antwort.length > 12) {
+    fb.className = 'feedback ok';
+    fb.innerHTML = '✅ Super! Vollständiger Antwortsatz mit den richtigen Zahlen.';
+    document.getElementById('g-step4').style.borderColor = '#16a34a';
+    g4ok = true;
+    grundDone = true;
+    checkWeiter();
+    updateProgress();
+  } else {
+    fb.className = 'feedback err';
+    fb.textContent = '❌ Der Antwortsatz muss beide Zahlen (17 und 30) enthalten und als Satz formuliert sein.';
+    if (g4tries >= 1) document.getElementById('g4-tipp-btn').style.display = 'inline-block';
+  }
+}
+
+// ---- FORTGESCHRITTEN ----
+// Aufgabe: y - x = 16 und 3x = y + 4 → y=x+16 → 3x=(x+16)+4 → 2x=20 → x=10, y=26
+function checkFort() {
+  const gl1 = document.getElementById('f-gl1').value.replace(/\s/g,'');
+  const gl2 = document.getElementById('f-gl2').value.replace(/\s/g,'');
+  const xVal = document.getElementById('f-x').value.trim();
+  const yVal = document.getElementById('f-y').value.trim();
+  const antwort = normalize(document.getElementById('f-antwort').value);
+  ftries++;
+  const fb = document.getElementById('f-fb');
+  const both = gl1 + ' ' + gl2;
+  // Accept various forms of y-x=16 and 3x=y+4
+  const glOk = (/y-x=16|x-y=-16/.test(both)) && (/3x=y\+4|3x-y=4|y=3x-4/.test(both));
+  const solOk = xVal === '10' && yVal === '26' && antwort.includes('10') && antwort.includes('26');
+  if (glOk && solOk) {
+    fb.className = 'feedback ok';
+    fb.textContent = '✅ Richtig! Gleichungen und Lösung korrekt. x = 10, y = 26.';
+    document.getElementById('f-x').classList.add('correct');
+    document.getElementById('f-y').classList.add('correct');
+    document.getElementById('f-clear').style.display = 'none';
+    fortDone = true; checkWeiter(); updateProgress();
+  } else if (!glOk && solOk) {
+    fb.className = 'feedback err';
+    fb.textContent = '❌ Lösung stimmt, aber überprüfe deine Gleichungen.';
+    document.getElementById('f-clear').style.display = 'block';
+    if (ftries >= 1) document.getElementById('f-tipp-btn').style.display = 'inline-block';
+  } else {
+    fb.className = 'feedback err';
+    fb.textContent = '❌ Nicht korrekt. Überprüfe Gleichungen und Lösung.';
+    document.getElementById('f-x').classList.toggle('wrong', xVal !== '10');
+    document.getElementById('f-y').classList.toggle('wrong', yVal !== '26');
+    document.getElementById('f-clear').style.display = 'block';
+    if (ftries >= 1) document.getElementById('f-tipp-btn').style.display = 'inline-block';
+  }
+}
+
+function clearFort() {
+  ['f-gl1','f-gl2','f-x','f-y','f-antwort'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.value = ''; el.classList.remove('wrong','correct'); }
+  });
+  const fb = document.getElementById('f-fb');
+  fb.className = 'feedback'; fb.textContent = '';
+  document.getElementById('f-clear').style.display = 'none';
+}
+
+// ---- PROFI ----
+// 2x + y = 31 und 3y - x = 58 → x=(31-y... wait: 2x+y=31 → x=(31-y)/2
+// → 3y - (31-y)/2 = 58 → 6y-31+y=116 → 7y=147 → y=21, x=5
+// Sum = 26 > 20 ✓
+function checkProfi() {
+  const xVal = document.getElementById('p-x').value.trim();
+  const yVal = document.getElementById('p-y').value.trim();
+  const antwort = normalize(document.getElementById('p-antwort').value);
+  ptries++;
+  const fb = document.getElementById('p-fb');
+  if (xVal === '5' && yVal === '21' && antwort.includes('5') && antwort.includes('21')) {
+    fb.className = 'feedback ok';
+    fb.textContent = '✅ Ausgezeichnet! x = 5, y = 21. Summe = 26 > 20 ✓';
+    document.getElementById('p-x').classList.add('correct');
+    document.getElementById('p-y').classList.add('correct');
+    document.getElementById('p-clear').style.display = 'none';
+    profiDone = true; checkWeiter(); updateProgress();
+  } else {
+    fb.className = 'feedback err';
+    fb.textContent = '❌ Nicht korrekt. Überprüfe deine Gleichungen und den Rechenweg.';
+    document.getElementById('p-x').classList.toggle('wrong', xVal !== '5');
+    document.getElementById('p-y').classList.toggle('wrong', yVal !== '21');
+    document.getElementById('p-clear').style.display = 'block';
+  }
+}
+
+function clearProfi() {
+  ['p-x','p-y','p-antwort'].forEach(id => {
+    const el = document.getElementById(id);
+    el.value = ''; el.classList.remove('wrong','correct');
+  });
+  const fb = document.getElementById('p-fb');
+  fb.className = 'feedback'; fb.textContent = '';
+  document.getElementById('p-clear').style.display = 'none';
+}
+
+// ---- HILFSF. ----
+function unlockStep(id) {
+  const el = document.getElementById(id);
+  if (el) el.classList.remove('locked');
+}
+
+function showTipp(id) {
+  const box = document.getElementById(id);
+  box.classList.toggle('show');
+  if (typeof MathJax !== 'undefined') MathJax.typesetPromise();
+}
+
+function checkWeiter() {
+  const done = (currentNiveau === 'grund' && grundDone)
+             || (currentNiveau === 'fort' && fortDone)
+             || (currentNiveau === 'profi' && profiDone);
+  document.getElementById('weiterWrap').style.display = done ? 'block' : 'none';
+}
+
+function updateProgress() {
+  const done = (grundDone ? 1 : 0) + (fortDone ? 1 : 0) + (profiDone ? 1 : 0);
+  const total = 1;
+  const pct = currentNiveau === 'grund' ? (grundDone ? 100 : 0)
+            : currentNiveau === 'fort' ? (fortDone ? 100 : 0)
+            : (profiDone ? 100 : 0);
+  document.getElementById('progressBar').style.width = pct + '%';
+  const label = pct === 100 ? '1 von 1 Aufgabe erledigt ✓' : '0 von 1 Aufgabe erledigt';
+  document.getElementById('progressLabel').textContent = label;
+}
+
+function toggleDinoTip() {
+  document.getElementById('dino').classList.toggle('show-tip');
+}
+
+// Fortgeschritten-Aufgabe: Summe korrigieren auf 60
+document.addEventListener('DOMContentLoaded', () => {
+  const aufgabe = document.querySelector('#niveau-fort .aufgabe-text');
+  if (aufgabe) {
+    aufgabe.innerHTML = 'Die Summe zweier Zahlen ist <strong>60</strong>.<br>Die eine Zahl ist doppelt so groß wie die andere.<br>Bestimme beide Zahlen. Verwende das <strong>Einsetzungsverfahren</strong>.';
+  }
+  // Tipp korrigieren
+  const tipp = document.getElementById('f-tipp');
+  if (tipp) {
+    tipp.innerHTML = '<strong>Tipp 1:</strong> Nenne die kleinere Zahl \\(x\\) und die größere \\(y\\).<br><br><strong>Tipp 2:</strong> GI: \\(x + y = 60\\) &nbsp; GII: \\(y = 2 \\cdot x\\)<br><br><strong>Tipp 3 (Lösung):</strong> Einsetzen: \\(x + 2x = 60 \\Rightarrow 3x = 60 \\Rightarrow x = 20\\), dann \\(y = 40\\)';
+    if (typeof MathJax !== 'undefined') MathJax.typesetPromise();
+  }
+});
+</script>
+</body>
+</html>

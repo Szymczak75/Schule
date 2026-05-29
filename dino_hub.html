@@ -1,0 +1,1034 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🦖 Mathedino Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Source+Sans+3:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f0f2f8;
+    --surface: #ffffff;
+    --border: #d4daf0;
+    --border-light: #e8ecf8;
+    --mathe:     #1d4ed8;
+    --mathe-light: #eff6ff;
+    --bio:       #15803d;
+    --bio-light:   #f0fdf4;
+    --kompass:   #be185d;
+    --kompass-light: #fdf2f8;
+    --sonst:     #475569;
+    --sonst-light: #f8fafc;
+    --col-lernen:  #1d4ed8;
+    --col-uebung:  #0f766e;
+    --col-sonst-c: #7c3aed;
+    --text: #0f172a;
+    --text-mid: #334155;
+    --muted: #64748b;
+    --shadow: 0 4px 12px rgba(15,23,42,.10), 0 12px 40px rgba(15,23,42,.08);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Source Sans 3', sans-serif;
+    font-weight: 400;
+    min-height: 100vh;
+    padding: 0 0 6rem;
+    overflow-x: hidden;
+  }
+
+  /* ── Top bar ── */
+  .topbar {
+    background: #1a0d2e;
+    padding: 1rem 1.5rem .9rem;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    box-shadow: 0 2px 12px rgba(15,23,42,.4);
+    border-bottom: 3px solid #7c3aed;
+  }
+  .topbar-inner { max-width: 900px; margin: 0 auto; }
+  .topbar h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    color: #e2e8f0;
+    margin-bottom: .7rem;
+    letter-spacing: .01em;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+  }
+  .topbar h1 .timestamp { margin-left: auto; font-size: .7rem; opacity: .5; font-family: 'Source Sans 3', sans-serif; font-weight: 400; letter-spacing: .03em; }
+
+  .tabs {
+    display: flex;
+    gap: .5rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+
+  .tab-btn {
+    display: flex;
+    align-items: center;
+    gap: .45rem;
+    padding: .52rem 1rem;
+    border-radius: 10px;
+    border: 1.5px solid rgba(255,255,255,.12);
+    background: rgba(255,255,255,.06);
+    color: #94a3b8;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: .82rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all .18s;
+    -webkit-tap-highlight-color: transparent;
+    min-height: 40px;
+  }
+  .tab-btn:hover { background: rgba(255,255,255,.12); color: #e2e8f0; }
+  .tab-btn.active[data-fach="mathe"]   { background: var(--mathe);   color: #fff; border-color: var(--mathe); }
+  .tab-btn.active[data-fach="bio"]     { background: var(--bio);     color: #fff; border-color: var(--bio); }
+  .tab-btn.active[data-fach="kompass"] { background: var(--kompass); color: #fff; border-color: var(--kompass); }
+  .tab-btn.active[data-fach="sonst"]   { background: var(--sonst);   color: #fff; border-color: var(--sonst); }
+  .tab-btn.active[data-fach="suche"]   { background: #7c3aed; color: #fff; border-color: #7c3aed; }
+
+  /* ── Search bar ── */
+  .search-bar {
+    max-width: 900px;
+    margin: 1.25rem auto 0;
+    padding: 0 1.25rem;
+    display: none;
+  }
+  .search-bar.visible { display: block; }
+
+  .search-row {
+    display: flex;
+    gap: .6rem;
+    flex-wrap: wrap;
+    align-items: center;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: .75rem 1rem;
+    box-shadow: var(--shadow);
+    margin-bottom: .75rem;
+  }
+
+  .search-input {
+    flex: 1;
+    min-width: 180px;
+    border: none;
+    outline: none;
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: .95rem;
+    color: var(--text);
+    background: transparent;
+  }
+  .search-input::placeholder { color: var(--muted); }
+
+  .filter-group { display: flex; gap: .4rem; flex-wrap: wrap; }
+
+  .filter-btn {
+    padding: .3rem .7rem;
+    border-radius: 20px;
+    border: 1.5px solid var(--border);
+    background: #f8fafd;
+    color: var(--muted);
+    font-size: .75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .filter-btn:hover { border-color: #7c3aed; color: #7c3aed; }
+  .filter-btn.active { background: #7c3aed; color: #fff; border-color: #7c3aed; }
+
+  /* Search results */
+  .search-results {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+
+  .search-result-item {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    padding: .65rem 1.2rem;
+    text-decoration: none;
+    color: var(--text);
+    border-bottom: 1px solid var(--border-light);
+    transition: background .12s;
+    -webkit-tap-highlight-color: transparent;
+    min-height: 48px;
+  }
+  .search-result-item:last-child { border-bottom: none; }
+  .search-result-item:hover { background: #f0f4ff; }
+
+  .sri-icon { font-size: .8rem; opacity: .3; flex-shrink: 0; }
+  .sri-info { flex: 1; min-width: 0; }
+  .sri-title { font-size: .9rem; font-weight: 600; color: var(--text); }
+  .sri-desc { font-size: .75rem; color: var(--muted); margin-top: .1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sri-tags { display: flex; gap: .3rem; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; }
+
+  .no-results { padding: 2rem; text-align: center; color: var(--muted); font-size: .9rem; }
+
+  /* loading state */
+  .loading-bar {
+    max-width: 900px;
+    margin: 1rem auto 0;
+    padding: 0 1.25rem;
+    display: none;
+  }
+  .loading-bar.visible { display: block; }
+  .loading-inner {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: .7rem 1rem;
+    font-size: .82rem;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+  }
+  .spinner { animation: spin 1s linear infinite; display: inline-block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── Card area ── */
+  .card-area {
+    padding: 1.5rem 1.25rem;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .card { display: none; background: var(--surface); border: 1px solid var(--border); border-radius: 20px; overflow: hidden; box-shadow: var(--shadow); animation: fadeIn .2s ease; }
+  .card.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+  .card[data-fach="mathe"]   { border-top: 4px solid var(--mathe); }
+  .card[data-fach="bio"]     { border-top: 4px solid var(--bio); }
+  .card[data-fach="kompass"] { border-top: 4px solid var(--kompass); }
+  .card[data-fach="sonst"]   { border-top: 4px solid var(--sonst); }
+
+  .card-header { display: flex; align-items: center; gap: 1rem; padding: 1.1rem 1.5rem; border-bottom: 1px solid var(--border-light); }
+  .card[data-fach="mathe"]   .card-header { background: var(--mathe-light); }
+  .card[data-fach="bio"]     .card-header { background: var(--bio-light); }
+  .card[data-fach="kompass"] .card-header { background: var(--kompass-light); }
+  .card[data-fach="sonst"]   .card-header { background: var(--sonst-light); }
+
+  .card-icon { font-size: 1.5rem; }
+  .card-title { font-family: 'Playfair Display', serif; font-size: 1.3rem; flex: 1; font-weight: 900; }
+  .card[data-fach="mathe"]   .card-title { color: var(--mathe); }
+  .card[data-fach="bio"]     .card-title { color: var(--bio); }
+  .card[data-fach="kompass"] .card-title { color: var(--kompass); }
+  .card[data-fach="sonst"]   .card-title { color: var(--sonst); }
+  .card-meta { font-size: .7rem; color: var(--muted); background: #fff; padding: .2rem .6rem; border-radius: 20px; border: 1px solid var(--border); font-weight: 600; }
+
+  /* ── Accordion ── */
+  .jgst { border-bottom: 1px solid var(--border-light); }
+  .jgst:last-child { border-bottom: none; }
+
+  .jgst-toggle {
+    width: 100%; display: flex; align-items: center; gap: .75rem;
+    padding: .9rem 1.5rem; background: none; border: none; cursor: pointer;
+    text-align: left; color: var(--text);
+    font-family: 'Source Sans 3', sans-serif; font-size: .95rem; font-weight: 700;
+    -webkit-tap-highlight-color: transparent; transition: background .12s; min-height: 52px;
+  }
+  .jgst-toggle:hover { background: #f8fafd; }
+  .card[data-fach="mathe"]   .jgst-toggle:hover { background: var(--mathe-light); }
+  .card[data-fach="bio"]     .jgst-toggle:hover { background: var(--bio-light); }
+  .card[data-fach="kompass"] .jgst-toggle:hover { background: var(--kompass-light); }
+
+  .jgst-label { flex: 1; }
+  .jgst-count { font-size: .7rem; font-weight: 600; color: #fff; padding: .15rem .5rem; border-radius: 12px; }
+  .card[data-fach="mathe"]   .jgst-count { background: var(--mathe); }
+  .card[data-fach="bio"]     .jgst-count { background: var(--bio); }
+  .card[data-fach="kompass"] .jgst-count { background: var(--kompass); }
+  .card[data-fach="sonst"]   .jgst-count { background: var(--sonst); }
+
+  .jgst-arrow { font-size: .65rem; color: var(--muted); transition: transform .22s; margin-left: .3rem; }
+  .jgst-toggle[aria-expanded="true"] .jgst-arrow { transform: rotate(180deg); }
+
+  .jgst-panel { display: none; border-top: 2px solid var(--border-light); background: #f8fafd; }
+  .jgst-panel.open { display: block; }
+
+  /* ── Multi-column grid ── */
+  .col-grid { display: grid; grid-template-columns: repeat(3, 1fr); align-items: start; }
+  .col-grid.single { grid-template-columns: 1fr; }
+  .col-group { border-right: 1px solid var(--border-light); min-width: 0; }
+  .col-group:last-child { border-right: none; }
+
+  .col-head { padding: .5rem 1rem .45rem; font-size: .68rem; text-transform: uppercase; letter-spacing: .13em; font-weight: 700; border-bottom: 2px solid; display: flex; align-items: center; gap: .35rem; }
+  .col-head.lernen  { color: var(--col-lernen);  background: #eff6ff; border-color: var(--col-lernen); }
+  .col-head.uebung  { color: var(--col-uebung);  background: #f0fdfa; border-color: var(--col-uebung); }
+  .col-head.sonstig { color: var(--col-sonst-c); background: #f5f3ff; border-color: var(--col-sonst-c); }
+  .col-head.test    { color: #b91c1c; background: #fff1f2; border-color: #b91c1c; }
+  .col-head.arbeit  { color: #c2410c; background: #fff7ed; border-color: #c2410c; }
+  .col-head.ha      { color: #854d0e; background: #fefce8; border-color: #854d0e; }
+
+  .links { display: flex; flex-direction: column; }
+  .link-row {
+    display: flex; align-items: flex-start; gap: .55rem;
+    padding: .6rem 1rem; text-decoration: none; color: var(--text);
+    border-top: 1px solid var(--border-light); transition: background .1s;
+    -webkit-tap-highlight-color: transparent; min-height: 44px;
+  }
+  .link-row:first-child { border-top: none; }
+  .link-row:hover, .link-row:active { background: #e8f0fe; }
+  .card[data-fach="bio"]     .link-row:hover { background: #dcfce7; }
+  .card[data-fach="kompass"] .link-row:hover { background: #fce7f3; }
+  .card[data-fach="sonst"]   .link-row:hover { background: #f1f5f9; }
+
+  .link-icon { font-size: .72rem; opacity: .3; flex-shrink: 0; margin-top: .18rem; }
+  .link-name { flex: 1; font-size: .88rem; font-weight: 600; color: var(--text); line-height: 1.35; }
+  .link-row:hover .link-name { color: var(--mathe); }
+  .card[data-fach="bio"]     .link-row:hover .link-name { color: var(--bio); }
+  .card[data-fach="kompass"] .link-row:hover .link-name { color: var(--kompass); }
+  .card[data-fach="sonst"]   .link-row:hover .link-name { color: var(--sonst); }
+
+  .empty-col { padding: .7rem 1rem; font-size: .78rem; font-style: italic; color: #94a3b8; }
+
+  .link-tag { font-size: .6rem; padding: .13rem .42rem; border-radius: 20px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; flex-shrink: 0; margin-top: .18rem; }
+  .tag-lernen  { background: #dbeafe; color: #1d4ed8; }
+  .tag-uebung  { background: #ccfbf1; color: #0f766e; }
+  .tag-test    { background: #fee2e2; color: #b91c1c; }
+  .tag-orga    { background: #fef9c3; color: #854d0e; }
+  .tag-arbeit  { background: #ffedd5; color: #c2410c; }
+  .tag-entwurf { background: #f1f5f9; color: #475569; }
+  .tag-bonus   { background: #ede9fe; color: #6d28d9; }
+
+  /* ── Meta-Hinweis Box ── */
+  .meta-hinweis {
+    max-width: 900px;
+    margin: 0 auto 1.5rem;
+    padding: 0 1.25rem;
+    display: none;
+  }
+  .meta-hinweis.visible { display: block; }
+  .meta-box {
+    background: #fffbeb;
+    border: 1.5px solid #f59e0b;
+    border-radius: 14px;
+    padding: 1rem 1.25rem;
+  }
+  .meta-box h3 { font-size: .85rem; font-weight: 700; color: #92400e; margin-bottom: .6rem; display: flex; align-items: center; gap: .4rem; }
+  .meta-box ul { list-style: none; display: flex; flex-direction: column; gap: .35rem; }
+  .meta-box li { display: flex; align-items: center; gap: .6rem; }
+  .meta-box a { font-size: .83rem; font-weight: 600; color: #1d4ed8; text-decoration: none; }
+  .meta-box a:hover { text-decoration: underline; }
+  .meta-box .path { font-size: .7rem; color: var(--muted); }
+
+  @media (max-width: 600px) {
+    .col-grid { grid-template-columns: 1fr; }
+    .col-group { border-right: none; border-bottom: 1px solid var(--border-light); }
+    .col-group:last-child { border-bottom: none; }
+    .filter-group { gap: .3rem; }
+  }
+
+  /* ── Dino ── */
+  #dino { position: fixed; bottom: 1.5rem; right: 1.5rem; font-size: 2.2rem; cursor: pointer; user-select: none; transition: transform .25s cubic-bezier(.34,1.56,.64,1); z-index: 100; line-height: 1; filter: drop-shadow(0 3px 6px rgba(0,0,0,.25)); }
+  #dino:hover { transform: scale(1.25) rotate(-10deg); }
+  #dino:active { transform: scale(.92) rotate(5deg); }
+  #dino-tooltip { position: fixed; bottom: 4.8rem; right: 1.5rem; background: #0f172a; color: #e2e8f0; font-family: 'Source Sans 3', sans-serif; font-size: .78rem; font-weight: 600; padding: .45rem .9rem; border-radius: 10px; white-space: nowrap; pointer-events: none; opacity: 0; transform: translateY(6px); transition: opacity .2s, transform .2s; letter-spacing: .03em; }
+  #dino-tooltip.visible { opacity: 1; transform: translateY(0); }
+  #dino-tooltip::after { content: ''; position: absolute; top: 100%; right: 1.1rem; border: 5px solid transparent; border-top-color: #0f172a; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <h1>🦖 Mathedino <span>· Materialübersicht</span> <span class="timestamp">aktualisiert 29.05.2026 · 11:45</span></h1>
+    <div class="tabs" id="tabBar">
+      <!-- tabs injected by JS based on URL param -->
+    </div>
+  </div>
+</div>
+
+<div class="loading-bar" id="loadingBar">
+  <div class="loading-inner"><span class="spinner">🦖</span> Lade Metadaten…</div>
+</div>
+
+<!-- Search UI -->
+<div class="search-bar" id="searchBar">
+  <div class="search-row">
+    <span style="font-size:1rem;opacity:.5">🔍</span>
+    <input class="search-input" id="searchInput" type="search" placeholder="Schlagwort suchen… z.B. Brüche, Vektoren, HIV" oninput="doSearch()">
+  </div>
+  <div class="search-row" style="gap:.5rem;padding:.5rem .75rem;">
+    <span style="font-size:.75rem;color:var(--muted);font-weight:600;white-space:nowrap;">Klasse:</span>
+    <div class="filter-group" id="filterKlasse">
+      <button class="filter-btn active" data-val="">Alle</button>
+      <button class="filter-btn" data-val="5">5</button>
+      <button class="filter-btn" data-val="6">6</button>
+      <button class="filter-btn" data-val="7">7</button>
+      <button class="filter-btn" data-val="8">8</button>
+      <button class="filter-btn" data-val="9">9</button>
+      <button class="filter-btn" data-val="EF">EF</button>
+    </div>
+    <span style="font-size:.75rem;color:var(--muted);font-weight:600;white-space:nowrap;margin-left:.5rem;">Typ:</span>
+    <div class="filter-group" id="filterTyp">
+      <button class="filter-btn active" data-val="">Alle</button>
+      <button class="filter-btn" data-val="Lernseite">Lernseite</button>
+      <button class="filter-btn" data-val="Übung">Übung</button>
+      <button class="filter-btn" data-val="Test">Test</button>
+      <button class="filter-btn" data-val="Klassenarbeit">Arbeit</button>
+      <button class="filter-btn" data-val="Bonus">Bonus</button>
+    </div>
+  </div>
+  <div class="search-results" id="searchResults"></div>
+</div>
+
+<!-- Meta-Hinweis (2 Seiten ohne Metadaten) -->
+<div class="meta-hinweis" id="metaHinweis">
+  <div class="meta-box">
+    <h3>🛠️ Vorschlag: Metadaten ergänzen</h3>
+    <ul id="metaVorschlagList"></ul>
+  </div>
+</div>
+
+<div class="card-area" id="cardArea">
+
+  <!-- ════ MATHEMATIK ════ -->
+  <div class="card" data-fach="mathe" id="card-mathe">
+    <div class="card-header">
+      <span class="card-icon">📐</span>
+      <span class="card-title">Mathematik</span>
+      <span class="card-meta">5 Stufen · 63 Dateien</span>
+    </div>
+
+    <!-- Klasse 5 -->
+    <div class="jgst">
+      <button class="jgst-toggle" aria-expanded="false" onclick="toggle(this)">
+        <span class="jgst-label">Klasse 5</span><span class="jgst-count">15</span><span class="jgst-arrow">▼</span>
+      </button>
+      <div class="jgst-panel">
+        <div class="col-grid">
+          <div class="col-group">
+            <div class="col-head lernen">📖 Lernseiten</div>
+            <div class="links">
+              <a class="link-row" href="mathe/klasse05/lernseiten/kommutativ_assoziativ_erklaerung.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Kommutativ- &amp; Assoziativgesetz</span></a>
+              <a class="link-row" href="mathe/klasse05/lernseiten/primzahlen_erarbeitung.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Primzahlen – Erarbeitung</span></a>
+              <a class="link-row" href="mathe/klasse05/lernseiten/rechengesetze_erarbeitung.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Rechengesetze – Erarbeitung</span></a>
+              <a class="link-row" href="mathe/klasse05/lernseiten/rechengesetze_textaufgaben.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Rechengesetze – Textaufgaben</span></a>
+              <a class="link-row" href="mathe/klasse05/lernseiten/rechengesetze_uebung.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Rechengesetze – Übung</span></a>
+              <a class="link-row" href="mathe/klasse05/lernseiten/rechenregeln_klasse5.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Rechenregeln Klasse 5</span></a>
+              <a class="link-row" href="mathe/klasse05/lernseiten/sieb_eratosthenes.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Sieb des Eratosthenes</span></a>
+              <a class="link-row" href="mathe/klasse05/lernseiten/teilbarkeitsregeln_erarbeitung.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Teilbarkeitsregeln – Erarbeitung</span></a>
+              <a class="link-row" href="mathe/klasse05/lernseiten/teilbarkeitsregeln_uebung.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Teilbarkeitsregeln – Übung</span></a>
+            </div>
+          </div>
+          <div class="col-group">
+            <div class="col-head uebung">✏️ Übungen</div>
+            <div class="links">
+              <a class="link-row" href="mathe/klasse05/uebungen/distributiv.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Distributivgesetz</span></a>
+              <a class="link-row" href="mathe/klasse05/uebungen/distributivgesetz_uebung.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Distributivgesetz – Übung</span></a>
+              <a class="link-row" href="mathe/klasse05/uebungen/Flaecheninhalt_Aufgaben.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Flächeninhalt – Aufgaben</span></a>
+              <a class="link-row" href="mathe/klasse05/uebungen/potenzrechnung_uebung_klasse5.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Potenzrechnung – Übung</span></a>
+              <a class="link-row" href="mathe/klasse05/uebungen/primzahlen_uebung.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Primzahlen – Übung</span></a>
+              <a class="link-row" href="mathe/klasse05/uebungen/sieb_eratosthenes.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Sieb des Eratosthenes – Übung</span></a>
+            </div>
+          </div>
+          <div class="col-group">
+            <div class="col-head sonstig">📎 Sonstiges</div>
+            <p class="empty-col">keine Einträge</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Klasse 6 -->
+    <div class="jgst">
+      <button class="jgst-toggle" aria-expanded="false" onclick="toggle(this)">
+        <span class="jgst-label">Klasse 6</span><span class="jgst-count">20</span><span class="jgst-arrow">▼</span>
+      </button>
+      <div class="jgst-panel">
+        <div class="col-grid">
+          <div class="col-group">
+            <div class="col-head lernen">📖 Lernseiten</div>
+            <div class="links">
+              <a class="link-row" href="mathe/klasse06/lernseiten/brueche_multiplizieren.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Brüche multiplizieren</span></a>
+              <a class="link-row" href="mathe/klasse06/lernseiten/dezimalzahlen_division.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Dezimalzahlen – Division</span></a>
+              <a class="link-row" href="mathe/klasse06/lernseiten/dezimalzahlen_multiplizieren_erarbeitung.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Dezimalzahlen multiplizieren</span></a>
+              <a class="link-row" href="mathe/klasse06/lernseiten/division_brueche_klasse6.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Division von Brüchen</span></a>
+              <a class="link-row" href="mathe/klasse06/lernseiten/echte_brueche_bilder.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Echte Brüche – Bilder</span></a>
+              <a class="link-row" href="mathe/klasse06/lernseiten/kommaverschiebung_erarbeitung.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Kommaverschiebung</span></a>
+            </div>
+          </div>
+          <div class="col-group">
+            <div class="col-head uebung">✏️ Übungen</div>
+            <div class="links">
+              <a class="link-row" href="mathe/klasse06/uebungen/bruch_multiplikation_uebung.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Bruch-Multiplikation</span></a>
+              <a class="link-row" href="mathe/klasse06/uebungen/brueche_grundrechenarten_uebung.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Brüche Grundrechenarten</span></a>
+              <a class="link-row" href="mathe/klasse06/uebungen/brueche_mal_geteilt_uebung.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Brüche · und ÷</span></a>
+              <a class="link-row" href="mathe/klasse06/uebungen/dezimalzahlen_division_uebung.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Dezimalzahlen Division</span></a>
+              <a class="link-row" href="mathe/klasse06/uebungen/dezimalzahlen_multiplikation_uebung.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Dezimalzahlen Mult. I</span></a>
+              <a class="link-row" href="mathe/klasse06/uebungen/dezimalzahlen_multiplikation_uebung_II.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Dezimalzahlen Mult. II</span></a>
+              <a class="link-row" href="mathe/klasse06/uebungen/grundrechenarten_klasse6.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Grundrechenarten Klasse 6</span></a>
+            </div>
+          </div>
+          <div class="col-group">
+            <div class="col-head arbeit">📝 Tests &amp; Arbeit</div>
+            <div class="links">
+              <a class="link-row" href="mathe/klasse06/Klassenarbeit/Arbeit.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Klassenarbeit</span><span class="link-tag tag-arbeit">Arbeit</span></a>
+              <a class="link-row" href="mathe/klasse06/tests/index.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Übersicht (Index)</span></a>
+              <a class="link-row" href="mathe/klasse06/tests/uebung1_bruch_dezimal.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Bruch → Dezimal</span></a>
+              <a class="link-row" href="mathe/klasse06/tests/uebung2_dezimal_dezimal.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Dezimal ↔ Dezimal</span></a>
+              <a class="link-row" href="mathe/klasse06/tests/uebung3_bruch_bruch.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Bruch ↔ Bruch</span></a>
+              <a class="link-row" href="mathe/klasse06/tests/uebung4_vergleichen.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Vergleichen</span></a>
+              <a class="link-row" href="mathe/klasse06/tests/uebung5_kommaverschiebung.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Kommaverschiebung</span></a>
+              <a class="link-row" href="mathe/klasse06/tests/uebung6_runden.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Runden</span></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Klasse 7 -->
+    <div class="jgst">
+      <button class="jgst-toggle" aria-expanded="false" onclick="toggle(this)">
+        <span class="jgst-label">Klasse 7</span><span class="jgst-count">14</span><span class="jgst-arrow">▼</span>
+      </button>
+      <div class="jgst-panel">
+        <div class="col-grid">
+          <div class="col-group">
+            <div class="col-head lernen">📖 Lernseiten</div>
+            <div class="links">
+              <a class="link-row" href="mathe/klasse07/lernseiten/aequivalenzumformungen_erarbeitung.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Äquivalenzumformungen – Erarbeitung</span></a>
+              <a class="link-row" href="mathe/klasse07/lernseiten/aequivalenzumformungen_ueben.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Äquivalenzumformungen – Üben</span></a>
+              <a class="link-row" href="mathe/klasse07/lernseiten/gleichungen_aequivalenzumformungen_uebung.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Gleichungen – Äquivalenzumformungen</span></a>
+              <a class="link-row" href="mathe/klasse07/lernseiten/terme_mit_einer_variablen.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Terme mit einer Variablen</span></a>
+            </div>
+          </div>
+          <div class="col-group">
+            <div class="col-head uebung">✏️ Übungen</div>
+            <div class="links">
+              <a class="link-row" href="mathe/klasse07/uebungen/gleichungen_textaufgaben_klasse7.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Gleichungen – Textaufgaben</span></a>
+              <a class="link-row" href="mathe/klasse07/uebungen/lineare_gleichungen_sachaufgaben_klasse7.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Lineare Gleichungen – Sachaufgaben</span></a>
+              <a class="link-row" href="mathe/klasse07/uebungen/wuerfelmuster_term.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Würfelmuster – Term</span></a>
+            </div>
+          </div>
+          <div class="col-group">
+            <div class="col-head arbeit">📝 Klassenarbeiten</div>
+            <div class="links">
+              <a class="link-row" href="mathe/klasse07/arbeiten/terme_gleichungen/terme_gleichungen_s1.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Terme &amp; Gleichungen – S1</span><span class="link-tag tag-arbeit">Arbeit</span></a>
+              <a class="link-row" href="mathe/klasse07/arbeiten/terme_gleichungen/terme_gleichungen_s2.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Terme &amp; Gleichungen – S2</span><span class="link-tag tag-arbeit">Arbeit</span></a>
+              <a class="link-row" href="mathe/klasse07/arbeiten/terme_gleichungen/terme_gleichungen_s3.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Terme &amp; Gleichungen – S3</span><span class="link-tag tag-arbeit">Arbeit</span></a>
+              <a class="link-row" href="mathe/klasse07/arbeiten/terme_gleichungen/terme_gleichungen_s4.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Terme &amp; Gleichungen – S4</span><span class="link-tag tag-arbeit">Arbeit</span></a>
+              <a class="link-row" href="mathe/klasse07/arbeiten/terme_gleichungen/terme_gleichungen_s5.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Terme &amp; Gleichungen – S5</span><span class="link-tag tag-arbeit">Arbeit</span></a>
+              <a class="link-row" href="mathe/klasse07/arbeiten/terme_gleichungen/terme_gleichungen_s6.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Terme &amp; Gleichungen – S6</span><span class="link-tag tag-arbeit">Arbeit</span></a>
+              <a class="link-row" href="mathe/klasse07/arbeiten/terme_gleichungen/terme_gleichungen_s7.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Terme &amp; Gleichungen – S7</span><span class="link-tag tag-arbeit">Arbeit</span></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Klasse 8 -->
+    <div class="jgst">
+      <button class="jgst-toggle" aria-expanded="false" onclick="toggle(this)">
+        <span class="jgst-label">Klasse 8</span><span class="jgst-count">18</span><span class="jgst-arrow">▼</span>
+      </button>
+      <div class="jgst-panel">
+        <div class="col-grid" style="grid-template-columns:repeat(4,1fr)">
+          <div class="col-group">
+            <div class="col-head lernen">📖 Lernseiten</div>
+            <div class="links">
+              <a class="link-row" href="mathe/klasse08/lernseiten/additionsverfahren_erarbeitung.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Additionsverfahren – Erarbeitung</span></a>
+              <a class="link-row" href="mathe/klasse08/lernseiten/additionsverfahren_uebung.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Additionsverfahren – Übung</span></a>
+              <a class="link-row" href="mathe/klasse08/lernseiten/gls_mischungsaufgaben.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">GLS – Mischungsaufgaben</span></a>
+              <a class="link-row" href="mathe/klasse08/lernseiten/zahlenraetsel_lgs_erarbeitung.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Zahlenrätsel LGS – Erarbeitung</span></a>
+              <a class="link-row" href="mathe/klasse08/lernseiten/bonus/gls_drei_unbekannte.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">GLS – Drei Unbekannte</span><span class="link-tag tag-bonus">Bonus</span></a>
+            </div>
+          </div>
+          <div class="col-group">
+            <div class="col-head uebung">✏️ Übungen</div>
+            <div class="links">
+              <a class="link-row" href="mathe/klasse08/uebungen/einsetzen_gleichsetzen.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Einsetzen &amp; Gleichsetzen</span></a>
+              <a class="link-row" href="mathe/klasse08/uebungen/gls_uebung_klasse8.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">GLS – Übung Klasse 8</span></a>
+              <a class="link-row" href="mathe/klasse08/uebungen/uebung_lin_gls.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Lineare GLS – Übung</span></a>
+              <a class="link-row" href="mathe/klasse08/uebungen/zahlenraetsel_lgs_uebung.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Zahlenrätsel LGS – Übung</span></a>
+            </div>
+          </div>
+          <div class="col-group">
+            <div class="col-head arbeit">📝 Klassenarbeit IV</div>
+            <div class="links">
+              <a class="link-row" href="mathe/klasse08/uebungen/Klassenarbeit IV/lgs_uebung_01_zahlenraetsel.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">LGS Übung 1 – Zahlenrätsel</span></a>
+              <a class="link-row" href="mathe/klasse08/uebungen/Klassenarbeit IV/lgs_uebung_02_ziffernraetsel.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">LGS Übung 2 – Ziffernrätsel</span></a>
+              <a class="link-row" href="mathe/klasse08/uebungen/Klassenarbeit IV/lgs_uebung_03_altersraetsel.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">LGS Übung 3 – Altersrätsel</span></a>
+              <a class="link-row" href="mathe/klasse08/uebungen/Klassenarbeit IV/lgs_uebung_04_preise.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">LGS Übung 4 – Preise</span></a>
+              <a class="link-row" href="mathe/klasse08/uebungen/Klassenarbeit IV/lgs_uebung_05_bewegung.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">LGS Übung 5 – Bewegung</span></a>
+              <a class="link-row" href="mathe/klasse08/uebungen/Klassenarbeit IV/lgs_uebung_06_situationen.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">LGS Übung 6 – Situationen</span></a>
+              <a class="link-row" href="mathe/klasse08/uebungen/Klassenarbeit IV/lgs_uebung_07_wiederholung.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">LGS Übung 7 – Wiederholung</span></a>
+            </div>
+          </div>
+          <div class="col-group">
+            <div class="col-head ha">📋 Hausaufgaben</div>
+            <div class="links">
+              <a class="link-row" href="mathe/klasse08/HA/additionsverfahren.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Additionsverfahren (HA)</span></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Klasse EF -->
+    <div class="jgst">
+      <button class="jgst-toggle" aria-expanded="false" onclick="toggle(this)">
+        <span class="jgst-label">Klasse EF</span><span class="jgst-count">14</span><span class="jgst-arrow">▼</span>
+      </button>
+      <div class="jgst-panel">
+        <div class="col-grid">
+          <div class="col-group">
+            <div class="col-head lernen">📖 Lernseiten</div>
+            <div class="links">
+              <a class="link-row" href="mathe/klasseEF/lernseiten/extrempunkte_loesung.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Extrempunkte – Lösung</span></a>
+              <a class="link-row" href="mathe/klasseEF/lernseiten/extrempunkte_uebung.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Extrempunkte – Übung</span></a>
+              <a class="link-row" href="mathe/klasseEF/lernseiten/mathe_lerneinheit_ef_v2.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Lerneinheit EF v2</span></a>
+              <a class="link-row" href="mathe/klasseEF/lernseiten/punkt_D_eines_besonderen_Vierecks_ef.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Punkt D – Besonderes Viereck</span></a>
+              <a class="link-row" href="mathe/klasseEF/lernseiten/schueler_figuren_3d_ef.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Schüler-Figuren 3D</span></a>
+              <a class="link-row" href="mathe/klasseEF/lernseiten/vektorrechnung_3d_erarbeitung.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Vektorrechnung 3D – Erarbeitung</span></a>
+              <a class="link-row" href="mathe/klasseEF/lernseiten/wendepunkte_erarbeitung.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Wendepunkte – Erarbeitung</span></a>
+              <a class="link-row" href="mathe/klasseEF/lernseiten/wendepunkte_loesung.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Wendepunkte – Lösung</span></a>
+              <a class="link-row" href="mathe/klasseEF/lernseiten/wendepunkte_uebung.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Wendepunkte – Übung</span></a>
+            </div>
+          </div>
+          <div class="col-group">
+            <div class="col-head uebung">✏️ Übungen</div>
+            <div class="links">
+              <a class="link-row" href="mathe/klasseEF/lernseiten/koordinatensystem_3d_uebung.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Koordinatensystem 3D</span></a>
+              <a class="link-row" href="mathe/klasseEF/uebungen/vektorrechnung_uebung_ef.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Vektorrechnung – Übung</span></a>
+              <a class="link-row" href="mathe/klasseEF/uebungen/besondere_figuren.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Besondere Figuren</span></a>
+              <a class="link-row" href="mathe/klasseEF/lernseiten/zkaufgabe.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">ZK-Aufgabe</span></a>
+            </div>
+          </div>
+          <div class="col-group">
+            <div class="col-head sonstig">📎 Sonstiges</div>
+            <div class="links">
+              <a class="link-row" href="mathe/klasseEF/lernseiten/xxxmathe_lerneinheit_ef_v2.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Lerneinheit EF v2 (xxx)</span><span class="link-tag tag-entwurf">Entwurf</span></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ BIOLOGIE ════ -->
+  <div class="card" data-fach="bio" id="card-bio">
+    <div class="card-header">
+      <span class="card-icon">🧬</span>
+      <span class="card-title">Biologie</span>
+      <span class="card-meta">2 Stufen · 11 Dateien</span>
+    </div>
+    <div class="jgst">
+      <button class="jgst-toggle" aria-expanded="false" onclick="toggle(this)">
+        <span class="jgst-label">Klasse 6</span><span class="jgst-count">4</span><span class="jgst-arrow">▼</span>
+      </button>
+      <div class="jgst-panel">
+        <div class="col-grid">
+          <div class="col-group">
+            <div class="col-head lernen">📖 Lernseiten</div>
+            <div class="links">
+              <a class="link-row" href="bio/klasse06/lernseiten/herz-kreislauf.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Herz-Kreislauf</span></a>
+              <a class="link-row" href="bio/klasse06/lernseiten/lehrer_systole_diastole_kl6.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Systole &amp; Diastole – Lehrerversion</span></a>
+              <a class="link-row" href="bio/klasse06/lernseiten/schueler_systole_diastole_kl6.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Systole &amp; Diastole – Schülerversion</span></a>
+            </div>
+          </div>
+          <div class="col-group">
+            <div class="col-head test">🔍 Tests</div>
+            <div class="links">
+              <a class="link-row" href="bio/klasse06/tests/blut_aufgaben.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Blut – Aufgaben</span></a>
+            </div>
+          </div>
+          <div class="col-group">
+            <div class="col-head sonstig">📎 Sonstiges</div>
+            <p class="empty-col">keine Einträge</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="jgst">
+      <button class="jgst-toggle" aria-expanded="false" onclick="toggle(this)">
+        <span class="jgst-label">Klasse 9</span><span class="jgst-count">7</span><span class="jgst-arrow">▼</span>
+      </button>
+      <div class="jgst-panel">
+        <div class="col-grid">
+          <div class="col-group">
+            <div class="col-head lernen">📖 Lernseiten</div>
+            <div class="links">
+              <a class="link-row" href="bio/klasse09/lernseiten/blutzucker_kl9_erarbeitung.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Blutzucker – Erarbeitung</span></a>
+              <a class="link-row" href="bio/klasse09/lernseiten/blutzucker_kl9_lehrer.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Blutzucker – Lehrerversion</span></a>
+              <a class="link-row" href="bio/klasse09/lernseiten/blutzucker_kl9_tafelbild.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Blutzucker – Tafelbild</span></a>
+              <a class="link-row" href="bio/klasse09/lernseiten/hormone_kl9_lehrer.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Hormone – Lehrerversion</span></a>
+              <a class="link-row" href="bio/klasse09/lernseiten/hormone_kl9_schueler.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Hormone – Schülerversion</span></a>
+              <a class="link-row" href="bio/klasse09/lernseiten/hiv_lerneinheit.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">HIV – Lerneinheit</span></a>
+            </div>
+          </div>
+          <div class="col-group">
+            <div class="col-head test">🔍 Tests</div>
+            <div class="links">
+              <a class="link-row" href="bio/klasse09/tests/Quiz_Antibiotika_HIV.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Quiz – Antibiotika &amp; HIV</span></a>
+            </div>
+          </div>
+          <div class="col-group">
+            <div class="col-head sonstig">📎 Sonstiges</div>
+            <p class="empty-col">keine Einträge</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ KOMPASS ════ -->
+  <div class="card" data-fach="kompass" id="card-kompass">
+    <div class="card-header">
+      <span class="card-icon">🧭</span>
+      <span class="card-title">Kompass</span>
+      <span class="card-meta">2 Dateien</span>
+    </div>
+    <div class="jgst">
+      <button class="jgst-toggle" aria-expanded="false" onclick="toggle(this)">
+        <span class="jgst-label">Cybergrooming</span><span class="jgst-count">2</span><span class="jgst-arrow">▼</span>
+      </button>
+      <div class="jgst-panel">
+        <div class="col-grid">
+          <div class="col-group">
+            <div class="col-head lernen">📖 Lernseiten</div>
+            <div class="links">
+              <a class="link-row" href="kompass/cybergrooming/Lehrer-cybergrooming.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Cybergrooming – Lehrerversion</span></a>
+              <a class="link-row" href="kompass/cybergrooming/schueler-cybergrooming.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Cybergrooming – Schülerversion</span></a>
+            </div>
+          </div>
+          <div class="col-group"><div class="col-head uebung">✏️ Übungen</div><p class="empty-col">keine Einträge</p></div>
+          <div class="col-group"><div class="col-head sonstig">📎 Sonstiges</div><p class="empty-col">keine Einträge</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ SONSTIGES ════ -->
+  <div class="card" data-fach="sonst" id="card-sonst">
+    <div class="card-header">
+      <span class="card-icon">📁</span>
+      <span class="card-title">Sonstiges</span>
+      <span class="card-meta">7 Dateien</span>
+    </div>
+    <div class="jgst">
+      <button class="jgst-toggle" aria-expanded="false" onclick="toggle(this)">
+        <span class="jgst-label">MCG</span><span class="jgst-count">1</span><span class="jgst-arrow">▼</span>
+      </button>
+      <div class="jgst-panel"><div class="col-grid single"><div class="col-group"><div class="links">
+        <a class="link-row" href="MCG/Entlastung.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Entlastung</span><span class="link-tag tag-orga">Orga</span></a>
+      </div></div></div></div>
+    </div>
+    <div class="jgst">
+      <button class="jgst-toggle" aria-expanded="false" onclick="toggle(this)">
+        <span class="jgst-label">BKO – Deutsch</span><span class="jgst-count">1</span><span class="jgst-arrow">▼</span>
+      </button>
+      <div class="jgst-panel"><div class="col-grid single"><div class="col-group"><div class="links">
+        <a class="link-row" href="BKO/Deutsch/test/dramenvergleich_wissenstest.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Dramenvergleich – Wissenstest</span><span class="link-tag tag-test">Test</span></a>
+      </div></div></div></div>
+    </div>
+    <div class="jgst">
+      <button class="jgst-toggle" aria-expanded="false" onclick="toggle(this)">
+        <span class="jgst-label">EF Orga – Salvadore A Haus</span><span class="jgst-count">3</span><span class="jgst-arrow">▼</span>
+      </button>
+      <div class="jgst-panel"><div class="col-grid single"><div class="col-group"><div class="links">
+        <a class="link-row" href="EF Orga/Salvadore A Haus/politische Bildung/demokratie-workshop.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Demokratie-Workshop</span><span class="link-tag tag-orga">Orga</span></a>
+        <a class="link-row" href="EF Orga/Salvadore A Haus/Soziales/skt-druckvorlagen.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">SKT – Druckvorlagen</span><span class="link-tag tag-orga">Orga</span></a>
+        <a class="link-row" href="EF Orga/Salvadore A Haus/Soziales/skt-verlaufsplan.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">SKT – Verlaufsplan</span><span class="link-tag tag-orga">Orga</span></a>
+      </div></div></div></div>
+    </div>
+    <div class="jgst">
+      <button class="jgst-toggle" aria-expanded="false" onclick="toggle(this)">
+        <span class="jgst-label">TEST-Ordner</span><span class="jgst-count">6</span><span class="jgst-arrow">▼</span>
+      </button>
+      <div class="jgst-panel"><div class="col-grid single"><div class="col-group"><div class="links">
+        <a class="link-row" href="TEST/Deutsch.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Deutsch</span><span class="link-tag tag-entwurf">Entwurf</span></a>
+        <a class="link-row" href="TEST/englisch.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Englisch</span><span class="link-tag tag-entwurf">Entwurf</span></a>
+        <a class="link-row" href="TEST/going_to_future_erarbeitung.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Going to Future – Erarbeitung</span><span class="link-tag tag-entwurf">Entwurf</span></a>
+        <a class="link-row" href="TEST/going_to_future_uebung.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Going to Future – Übung</span><span class="link-tag tag-entwurf">Entwurf</span></a>
+        <a class="link-row" href="TEST/questions_erarbeitung.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Questions – Erarbeitung</span><span class="link-tag tag-entwurf">Entwurf</span></a>
+        <a class="link-row" href="TEST/questions_uebung.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Questions – Übung</span><span class="link-tag tag-entwurf">Entwurf</span></a>
+      </div></div></div></div>
+    </div>
+  </div>
+
+</div><!-- card-area -->
+
+<div id="dino" onmouseenter="showTip()" onmouseleave="hideTip()" onclick="toggleTip()">🦖</div>
+<div id="dino-tooltip">Made by Mathedino 🦖</div>
+
+<script>
+// ── Fallback-Metadaten (für Dateien ohne Meta-Tags) ──────────────────────────
+const META_FALLBACK = {
+  'mathe/klasse05/lernseiten/kommutativ_assoziativ_erklaerung.html':   { title:'Kommutativ- & Assoziativgesetz', desc:'Erklärung der Rechengesetze', keywords:'Kommutativgesetz,Assoziativgesetz,Rechengesetze', typ:'Lernseite', klasse:'5', fach:'mathe' },
+  'mathe/klasse05/lernseiten/primzahlen_erarbeitung.html':             { title:'Primzahlen – Erarbeitung', desc:'Einführung in Primzahlen', keywords:'Primzahlen,Teilbarkeit,Zahlentheorie', typ:'Lernseite', klasse:'5', fach:'mathe' },
+  'mathe/klasse05/lernseiten/rechengesetze_erarbeitung.html':          { title:'Rechengesetze – Erarbeitung', desc:'Interaktive Erarbeitung der Rechengesetze', keywords:'Rechengesetze,Distributivgesetz,Kommutativgesetz', typ:'Lernseite', klasse:'5', fach:'mathe' },
+  'mathe/klasse05/lernseiten/rechengesetze_textaufgaben.html':         { title:'Rechengesetze – Textaufgaben', desc:'Textaufgaben zu Rechengesetzen', keywords:'Rechengesetze,Textaufgaben,Sachaufgaben', typ:'Lernseite', klasse:'5', fach:'mathe' },
+  'mathe/klasse05/lernseiten/rechengesetze_uebung.html':               { title:'Rechengesetze – Übung', desc:'Übungsaufgaben zu Rechengesetzen', keywords:'Rechengesetze,Übung,Distributivgesetz', typ:'Lernseite', klasse:'5', fach:'mathe' },
+  'mathe/klasse05/lernseiten/rechenregeln_klasse5.html':               { title:'Rechenregeln Klasse 5', desc:'Übersicht der Rechenregeln', keywords:'Rechenregeln,Punkt vor Strich,Klasse 5', typ:'Lernseite', klasse:'5', fach:'mathe' },
+  'mathe/klasse05/lernseiten/sieb_eratosthenes.html':                  { title:'Sieb des Eratosthenes', desc:'Interaktives Sieb des Eratosthenes zur Primzahlbestimmung', keywords:'Primzahlen,Sieb,Eratosthenes', typ:'Lernseite', klasse:'5', fach:'mathe' },
+  'mathe/klasse05/lernseiten/teilbarkeitsregeln_erarbeitung.html':     { title:'Teilbarkeitsregeln – Erarbeitung', desc:'Erarbeitung der Teilbarkeitsregeln', keywords:'Teilbarkeit,Teilbarkeitsregeln,Primzahlen', typ:'Lernseite', klasse:'5', fach:'mathe' },
+  'mathe/klasse05/lernseiten/teilbarkeitsregeln_uebung.html':          { title:'Teilbarkeitsregeln – Übung', desc:'Übungen zu Teilbarkeitsregeln', keywords:'Teilbarkeit,Teilbarkeitsregeln,Übung', typ:'Lernseite', klasse:'5', fach:'mathe' },
+  'mathe/klasse05/uebungen/distributiv.html':                          { title:'Distributivgesetz', desc:'Übung zum Distributivgesetz', keywords:'Distributivgesetz,Rechengesetze,Ausklammern', typ:'Übung', klasse:'5', fach:'mathe' },
+  'mathe/klasse05/uebungen/distributivgesetz_uebung.html':             { title:'Distributivgesetz – Übung', desc:'Weitere Übungen zum Distributivgesetz', keywords:'Distributivgesetz,Ausklammern,Rechengesetze', typ:'Übung', klasse:'5', fach:'mathe' },
+  'mathe/klasse05/uebungen/Flaecheninhalt_Aufgaben.html':              { title:'Flächeninhalt – Aufgaben', desc:'Aufgaben zum Flächeninhalt', keywords:'Flächeninhalt,Geometrie,Rechteck,Dreieck', typ:'Übung', klasse:'5', fach:'mathe' },
+  'mathe/klasse05/uebungen/potenzrechnung_uebung_klasse5.html':        { title:'Potenzrechnung – Übung', desc:'Übungen zur Potenzrechnung', keywords:'Potenz,Quadratzahl,Kubikzahl,Potenzrechnung', typ:'Übung', klasse:'5', fach:'mathe' },
+  'mathe/klasse05/uebungen/primzahlen_uebung.html':                    { title:'Primzahlen – Übung', desc:'Übungen zu Primzahlen', keywords:'Primzahlen,Teilbarkeit,Übung', typ:'Übung', klasse:'5', fach:'mathe' },
+  'mathe/klasse05/uebungen/sieb_eratosthenes.html':                    { title:'Sieb des Eratosthenes – Übung', desc:'Übung mit dem Sieb des Eratosthenes', keywords:'Primzahlen,Sieb,Eratosthenes,Übung', typ:'Übung', klasse:'5', fach:'mathe' },
+  'mathe/klasse06/lernseiten/brueche_multiplizieren.html':             { title:'Brüche multiplizieren', desc:'Interaktive Lernseite zum Multiplizieren von Brüchen', keywords:'Brüche,Multiplikation,Zähler,Nenner', typ:'Lernseite', klasse:'6', fach:'mathe' },
+  'mathe/klasse06/lernseiten/dezimalzahlen_division.html':             { title:'Dezimalzahlen – Division', desc:'Erarbeitung der Division von Dezimalzahlen', keywords:'Dezimalzahlen,Division,Komma', typ:'Lernseite', klasse:'6', fach:'mathe' },
+  'mathe/klasse06/lernseiten/dezimalzahlen_multiplizieren_erarbeitung.html': { title:'Dezimalzahlen multiplizieren', desc:'Erarbeitung der Multiplikation von Dezimalzahlen', keywords:'Dezimalzahlen,Multiplikation,Kommaverschiebung', typ:'Lernseite', klasse:'6', fach:'mathe' },
+  'mathe/klasse06/lernseiten/division_brueche_klasse6.html':           { title:'Division von Brüchen', desc:'Lernseite zur Division von Brüchen', keywords:'Brüche,Division,Kehrwert', typ:'Lernseite', klasse:'6', fach:'mathe' },
+  'mathe/klasse06/lernseiten/echte_brueche_bilder.html':               { title:'Echte Brüche – Bilder', desc:'Bildliche Darstellung echter Brüche', keywords:'Brüche,echte Brüche,bildliche Darstellung', typ:'Lernseite', klasse:'6', fach:'mathe' },
+  'mathe/klasse06/lernseiten/kommaverschiebung_erarbeitung.html':      { title:'Kommaverschiebung', desc:'Erarbeitung der Kommaverschiebung', keywords:'Kommaverschiebung,Dezimalzahlen,Zehnerpotenzen', typ:'Lernseite', klasse:'6', fach:'mathe' },
+  'mathe/klasse06/uebungen/bruch_multiplikation_uebung.html':          { title:'Bruch-Multiplikation – Übung', desc:'Übungsaufgaben zur Bruchmultiplikation', keywords:'Brüche,Multiplikation,Übung', typ:'Übung', klasse:'6', fach:'mathe' },
+  'mathe/klasse06/uebungen/brueche_grundrechenarten_uebung.html':      { title:'Brüche Grundrechenarten', desc:'Übungen zu allen Grundrechenarten mit Brüchen', keywords:'Brüche,Addition,Subtraktion,Multiplikation,Division', typ:'Übung', klasse:'6', fach:'mathe' },
+  'mathe/klasse06/uebungen/brueche_mal_geteilt_uebung.html':           { title:'Brüche · und ÷', desc:'Übungen zum Multiplizieren und Dividieren von Brüchen', keywords:'Brüche,Multiplikation,Division,Kehrwert', typ:'Übung', klasse:'6', fach:'mathe' },
+  'mathe/klasse06/uebungen/dezimalzahlen_division_uebung.html':        { title:'Dezimalzahlen Division', desc:'Übungen zur Division von Dezimalzahlen', keywords:'Dezimalzahlen,Division,Komma,Übung', typ:'Übung', klasse:'6', fach:'mathe' },
+  'mathe/klasse06/uebungen/dezimalzahlen_multiplikation_uebung.html':  { title:'Dezimalzahlen Mult. I', desc:'Erste Übungen zur Dezimalzahlenmultiplikation', keywords:'Dezimalzahlen,Multiplikation,Komma', typ:'Übung', klasse:'6', fach:'mathe' },
+  'mathe/klasse06/uebungen/dezimalzahlen_multiplikation_uebung_II.html':{ title:'Dezimalzahlen Mult. II', desc:'Weiterführende Übungen zur Dezimalzahlenmultiplikation', keywords:'Dezimalzahlen,Multiplikation,Komma', typ:'Übung', klasse:'6', fach:'mathe' },
+  'mathe/klasse07/lernseiten/aequivalenzumformungen_erarbeitung.html': { title:'Äquivalenzumformungen – Erarbeitung', desc:'Einführung in Äquivalenzumformungen', keywords:'Äquivalenzumformungen,Gleichungen,Umformen', typ:'Lernseite', klasse:'7', fach:'mathe' },
+  'mathe/klasse07/lernseiten/aequivalenzumformungen_ueben.html':       { title:'Äquivalenzumformungen – Üben', desc:'Übungsseite zu Äquivalenzumformungen', keywords:'Äquivalenzumformungen,Gleichungen,Umformen', typ:'Lernseite', klasse:'7', fach:'mathe' },
+  'mathe/klasse07/lernseiten/gleichungen_aequivalenzumformungen_uebung.html': { title:'Gleichungen – Äquivalenzumformungen', desc:'Gleichungen lösen mit Äquivalenzumformungen', keywords:'Gleichungen,Äquivalenzumformungen,lineare Gleichungen', typ:'Übung', klasse:'7', fach:'mathe' },
+  'mathe/klasse07/lernseiten/terme_mit_einer_variablen.html':          { title:'Terme mit einer Variablen', desc:'Einführung in Terme mit Variablen', keywords:'Terme,Variable,Algebra,Ausdruck', typ:'Lernseite', klasse:'7', fach:'mathe' },
+  'mathe/klasse07/uebungen/gleichungen_textaufgaben_klasse7.html':     { title:'Gleichungen – Textaufgaben', desc:'Textaufgaben mit linearen Gleichungen', keywords:'Gleichungen,Textaufgaben,Sachaufgaben,lineare Gleichungen', typ:'Übung', klasse:'7', fach:'mathe' },
+  'mathe/klasse07/uebungen/lineare_gleichungen_sachaufgaben_klasse7.html': { title:'Lineare Gleichungen – Sachaufgaben', desc:'Sachaufgaben zu linearen Gleichungen', keywords:'lineare Gleichungen,Sachaufgaben,Textaufgaben', typ:'Übung', klasse:'7', fach:'mathe' },
+  'mathe/klasse07/uebungen/wuerfelmuster_term.html':                   { title:'Würfelmuster – Term', desc:'Terme aus Würfelmustern ableiten', keywords:'Terme,Würfelmuster,Algebra,Variable', typ:'Übung', klasse:'7', fach:'mathe' },
+  'mathe/klasse08/lernseiten/additionsverfahren_erarbeitung.html':     { title:'Additionsverfahren – Erarbeitung', desc:'Lineares Gleichungssystem mit dem Additionsverfahren', keywords:'Additionsverfahren,LGS,Gleichungssystem', typ:'Lernseite', klasse:'8', fach:'mathe' },
+  'mathe/klasse08/lernseiten/additionsverfahren_uebung.html':          { title:'Additionsverfahren – Übung', desc:'Übungen zum Additionsverfahren', keywords:'Additionsverfahren,LGS,Gleichungssystem,Übung', typ:'Lernseite', klasse:'8', fach:'mathe' },
+  'mathe/klasse08/lernseiten/gls_mischungsaufgaben.html':              { title:'GLS – Mischungsaufgaben', desc:'Mischungsaufgaben mit linearen Gleichungssystemen', keywords:'GLS,Mischungsaufgaben,Gleichungssystem,Sachaufgaben', typ:'Lernseite', klasse:'8', fach:'mathe' },
+  'mathe/klasse08/lernseiten/zahlenraetsel_lgs_erarbeitung.html':      { title:'Zahlenrätsel LGS – Erarbeitung', desc:'Zahlenrätsel mit linearen Gleichungssystemen', keywords:'LGS,Zahlenrätsel,Gleichungssystem', typ:'Lernseite', klasse:'8', fach:'mathe' },
+  'mathe/klasse08/lernseiten/bonus/gls_drei_unbekannte.html':          { title:'GLS – Drei Unbekannte', desc:'Gleichungssystem mit drei Unbekannten', keywords:'GLS,drei Unbekannte,Gleichungssystem,Bonus', typ:'Bonus', klasse:'8', fach:'mathe' },
+  'mathe/klasse08/uebungen/einsetzen_gleichsetzen.html':               { title:'Einsetzen & Gleichsetzen', desc:'Einsetz- und Gleichsetzungsverfahren für LGS', keywords:'Einsetzverfahren,Gleichsetzverfahren,LGS,Gleichungssystem', typ:'Übung', klasse:'8', fach:'mathe' },
+  'mathe/klasse08/uebungen/gls_uebung_klasse8.html':                   { title:'GLS – Übung Klasse 8', desc:'Übungen zu linearen Gleichungssystemen', keywords:'GLS,Gleichungssystem,Übung,lineare Gleichungen', typ:'Übung', klasse:'8', fach:'mathe' },
+  'mathe/klasse08/uebungen/uebung_lin_gls.html':                       { title:'Lineare GLS – Übung', desc:'Übungsaufgaben zu linearen Gleichungssystemen', keywords:'GLS,lineare Gleichungen,Übung', typ:'Übung', klasse:'8', fach:'mathe' },
+  'mathe/klasse06/uebungen/grundrechenarten_klasse6.html':             { title:'Grundrechenarten Klasse 6', desc:'Übungen zu den Grundrechenarten', keywords:'Grundrechenarten,Addition,Subtraktion,Multiplikation,Division,Klasse 6', typ:'Übung', klasse:'6', fach:'mathe' },
+  'mathe/klasse08/uebungen/Klassenarbeit IV/lgs_uebung_01_zahlenraetsel.html': { title:'LGS Übung 1 – Zahlenrätsel', desc:'Zahlenrätsel mit linearen Gleichungssystemen', keywords:'LGS,Zahlenrätsel,Gleichungssystem,Klassenarbeit', typ:'Übung', klasse:'8', fach:'mathe' },
+  'mathe/klasse08/uebungen/Klassenarbeit IV/lgs_uebung_02_ziffernraetsel.html': { title:'LGS Übung 2 – Ziffernrätsel', desc:'Ziffernrätsel mit LGS', keywords:'LGS,Ziffernrätsel,Gleichungssystem,Klassenarbeit', typ:'Übung', klasse:'8', fach:'mathe' },
+  'mathe/klasse08/uebungen/Klassenarbeit IV/lgs_uebung_03_altersraetsel.html': { title:'LGS Übung 3 – Altersrätsel', desc:'Altersrätsel mit LGS', keywords:'LGS,Altersrätsel,Sachaufgaben,Gleichungssystem', typ:'Übung', klasse:'8', fach:'mathe' },
+  'mathe/klasse08/uebungen/Klassenarbeit IV/lgs_uebung_04_preise.html': { title:'LGS Übung 4 – Preise', desc:'Preisaufgaben mit LGS', keywords:'LGS,Preise,Sachaufgaben,Gleichungssystem', typ:'Übung', klasse:'8', fach:'mathe' },
+  'mathe/klasse08/uebungen/Klassenarbeit IV/lgs_uebung_05_bewegung.html': { title:'LGS Übung 5 – Bewegung', desc:'Bewegungsaufgaben mit LGS', keywords:'LGS,Bewegung,Sachaufgaben,Gleichungssystem', typ:'Übung', klasse:'8', fach:'mathe' },
+  'mathe/klasse08/uebungen/Klassenarbeit IV/lgs_uebung_06_situationen.html': { title:'LGS Übung 6 – Situationen', desc:'Situationsaufgaben mit LGS', keywords:'LGS,Situationen,Sachaufgaben,Gleichungssystem', typ:'Übung', klasse:'8', fach:'mathe' },
+  'mathe/klasse08/uebungen/Klassenarbeit IV/lgs_uebung_07_wiederholung.html': { title:'LGS Übung 7 – Wiederholung', desc:'Wiederholungsaufgaben zu LGS', keywords:'LGS,Wiederholung,Gleichungssystem,Klassenarbeit', typ:'Übung', klasse:'8', fach:'mathe' },
+  'mathe/klasse08/HA/additionsverfahren.html':                         { title:'Additionsverfahren (HA)', desc:'Hausaufgabe zum Additionsverfahren', keywords:'Additionsverfahren,LGS,Hausaufgabe', typ:'Übung', klasse:'8', fach:'mathe' },
+  'mathe/klasseEF/lernseiten/extrempunkte_loesung.html':               { title:'Extrempunkte – Lösung', desc:'Lösungen zu Extrempunkten', keywords:'Extrempunkte,Ableitung,Analysis,Maximum,Minimum', typ:'Lernseite', klasse:'EF', fach:'mathe' },
+  'mathe/klasseEF/lernseiten/extrempunkte_uebung.html':                { title:'Extrempunkte – Übung', desc:'Übungen zu Extrempunkten', keywords:'Extrempunkte,Ableitung,Analysis,Kurvendiskussion', typ:'Lernseite', klasse:'EF', fach:'mathe' },
+  'mathe/klasseEF/lernseiten/mathe_lerneinheit_ef_v2.html':            { title:'Lerneinheit EF v2', desc:'Allgemeine Lerneinheit für die EF', keywords:'EF,Lerneinheit,Analysis', typ:'Lernseite', klasse:'EF', fach:'mathe' },
+  'mathe/klasseEF/lernseiten/punkt_D_eines_besonderen_Vierecks_ef.html': { title:'Punkt D – Besonderes Viereck', desc:'Viereck mit Vektoren konstruieren', keywords:'Vektoren,Viereck,Geometrie,3D', typ:'Lernseite', klasse:'EF', fach:'mathe' },
+  'mathe/klasseEF/lernseiten/schueler_figuren_3d_ef.html':             { title:'Schüler-Figuren 3D', desc:'3D-Figuren mit Vektoren', keywords:'3D,Vektoren,Geometrie,Figuren', typ:'Lernseite', klasse:'EF', fach:'mathe' },
+  'mathe/klasseEF/lernseiten/vektorrechnung_3d_erarbeitung.html':      { title:'Vektorrechnung 3D – Erarbeitung', desc:'Einführung in die 3D-Vektorrechnung', keywords:'Vektoren,3D,Vektorrechnung,Koordinaten', typ:'Lernseite', klasse:'EF', fach:'mathe' },
+  'mathe/klasseEF/lernseiten/wendepunkte_erarbeitung.html':            { title:'Wendepunkte – Erarbeitung', desc:'Einführung in Wendepunkte', keywords:'Wendepunkte,zweite Ableitung,Analysis,Kurvendiskussion', typ:'Lernseite', klasse:'EF', fach:'mathe' },
+  'mathe/klasseEF/lernseiten/wendepunkte_loesung.html':                { title:'Wendepunkte – Lösung', desc:'Lösungen zu Wendepunkten', keywords:'Wendepunkte,zweite Ableitung,Analysis', typ:'Lernseite', klasse:'EF', fach:'mathe' },
+  'mathe/klasseEF/lernseiten/wendepunkte_uebung.html':                 { title:'Wendepunkte – Übung', desc:'Übungsaufgaben zu Wendepunkten', keywords:'Wendepunkte,zweite Ableitung,Analysis,Übung', typ:'Lernseite', klasse:'EF', fach:'mathe' },
+  'mathe/klasseEF/lernseiten/koordinatensystem_3d_uebung.html':        { title:'Koordinatensystem 3D – Übung', desc:'Übungen im 3D-Koordinatensystem', keywords:'3D,Koordinatensystem,Vektoren,Übung', typ:'Übung', klasse:'EF', fach:'mathe' },
+  'mathe/klasseEF/uebungen/vektorrechnung_uebung_ef.html':             { title:'Vektorrechnung – Übung', desc:'Übungen zur Vektorrechnung', keywords:'Vektoren,Vektorrechnung,3D,Übung', typ:'Übung', klasse:'EF', fach:'mathe' },
+  'mathe/klasseEF/uebungen/besondere_figuren.html':                    { title:'Besondere Figuren', desc:'Besondere geometrische Figuren mit Vektoren', keywords:'Vektoren,Geometrie,Figuren,besondere Vierecke', typ:'Übung', klasse:'EF', fach:'mathe' },
+  'mathe/klasseEF/lernseiten/zkaufgabe.html':                          { title:'ZK-Aufgabe', desc:'Aufgabe zur Zentralklausur', keywords:'ZK,Zentralklausur,Analysis,EF', typ:'Übung', klasse:'EF', fach:'mathe' },
+  'bio/klasse06/lernseiten/herz-kreislauf.html':                       { title:'Herz-Kreislauf', desc:'Lernseite zum Herz-Kreislauf-System', keywords:'Herz,Kreislauf,Blut,Biologie', typ:'Lernseite', klasse:'6', fach:'bio' },
+  'bio/klasse06/lernseiten/lehrer_systole_diastole_kl6.html':          { title:'Systole & Diastole – Lehrerversion', desc:'Lehrerversion zur Systole und Diastole', keywords:'Herz,Systole,Diastole,Herzschlag', typ:'Lernseite', klasse:'6', fach:'bio' },
+  'bio/klasse06/lernseiten/schueler_systole_diastole_kl6.html':        { title:'Systole & Diastole – Schülerversion', desc:'Schülerversion zur Systole und Diastole', keywords:'Herz,Systole,Diastole,Herzschlag', typ:'Lernseite', klasse:'6', fach:'bio' },
+  'bio/klasse06/tests/blut_aufgaben.html':                             { title:'Blut – Aufgaben', desc:'Aufgaben zum Thema Blut', keywords:'Blut,Blutbestandteile,Erythrozyten,Leukozyten', typ:'Test', klasse:'6', fach:'bio' },
+  'bio/klasse09/lernseiten/blutzucker_kl9_erarbeitung.html':           { title:'Blutzucker – Erarbeitung', desc:'Erarbeitung des Blutzuckerregelkreises', keywords:'Blutzucker,Insulin,Glucagon,Regelkreis', typ:'Lernseite', klasse:'9', fach:'bio' },
+  'bio/klasse09/lernseiten/blutzucker_kl9_lehrer.html':                { title:'Blutzucker – Lehrerversion', desc:'Lehrerversion zum Blutzuckerregelkreis', keywords:'Blutzucker,Insulin,Glucagon,Regelkreis', typ:'Lernseite', klasse:'9', fach:'bio' },
+  'bio/klasse09/lernseiten/blutzucker_kl9_tafelbild.html':             { title:'Blutzucker – Tafelbild', desc:'Tafelbild zum Blutzuckerregelkreis', keywords:'Blutzucker,Tafelbild,Regelkreis,Insulin', typ:'Lernseite', klasse:'9', fach:'bio' },
+  'bio/klasse09/lernseiten/hiv_lerneinheit.html':                      { title:'HIV – Lerneinheit', desc:'Lerneinheit zu HIV und AIDS', keywords:'HIV,AIDS,Virus,Immunsystem', typ:'Lernseite', klasse:'9', fach:'bio' },
+  'bio/klasse09/lernseiten/hormone_kl9_lehrer.html':                   { title:'Hormone – Lehrerversion', desc:'Lehrerversion zu Hormonen', keywords:'Hormone,Hormondrüsen,Regelkreis,endokrines System', typ:'Lernseite', klasse:'9', fach:'bio' },
+  'bio/klasse09/lernseiten/hormone_kl9_schueler.html':                 { title:'Hormone – Schülerversion', desc:'Schülerversion zu Hormonen', keywords:'Hormone,Hormondrüsen,Regelkreis', typ:'Lernseite', klasse:'9', fach:'bio' },
+  'bio/klasse09/tests/Quiz_Antibiotika_HIV.html':                      { title:'Quiz – Antibiotika & HIV', desc:'Quiz zu Antibiotika und HIV', keywords:'Antibiotika,HIV,Resistenz,Virus,Bakterien', typ:'Test', klasse:'9', fach:'bio' },
+  'kompass/cybergrooming/Lehrer-cybergrooming.html':                   { title:'Cybergrooming – Lehrerversion', desc:'Lehrerversion zum Thema Cybergrooming', keywords:'Cybergrooming,Internet,Sicherheit,Prävention', typ:'Lernseite', klasse:'EF', fach:'kompass' },
+  'kompass/cybergrooming/schueler-cybergrooming.html':                 { title:'Cybergrooming – Schülerversion', desc:'Schülerversion zum Thema Cybergrooming', keywords:'Cybergrooming,Internet,Sicherheit,Prävention', typ:'Lernseite', klasse:'EF', fach:'kompass' },
+};
+
+// Alle Dateien für Meta-Check (ohne Klassenarbeiten-Sätze)
+const ALLE_DATEIEN = Object.keys(META_FALLBACK);
+
+// ── URL-Parameter auswerten ──────────────────────────────────────────────────
+const order = ['mathe','bio','kompass','sonst'];
+const params = new URLSearchParams(window.location.search);
+const fachParam = (params.get('fach') || 'alle').toLowerCase();
+
+const erlaubteFaecher = fachParam === 'alle'
+  ? order
+  : fachParam.split(',').map(f => f.trim()).filter(f => order.includes(f));
+
+// Tabs aufbauen
+const tabBar = document.getElementById('tabBar');
+
+if (erlaubteFaecher.length > 1) {
+  // Suche-Tab nur wenn mehrere Fächer
+  const sBtn = document.createElement('button');
+  sBtn.className = 'tab-btn';
+  sBtn.dataset.fach = 'suche';
+  sBtn.textContent = '🔍 Suche';
+  sBtn.onclick = () => showCard('suche', sBtn);
+  tabBar.appendChild(sBtn);
+}
+
+const fachLabels = { mathe:'📐 Mathematik', bio:'🧬 Biologie', kompass:'🧭 Kompass', sonst:'📁 Sonstiges' };
+erlaubteFaecher.forEach((f, i) => {
+  const btn = document.createElement('button');
+  btn.className = 'tab-btn' + (i === 0 ? ' active' : '');
+  btn.dataset.fach = f;
+  btn.textContent = fachLabels[f] || f;
+  btn.onclick = () => showCard(f, btn);
+  tabBar.appendChild(btn);
+});
+
+// Karten ein-/ausblenden je nach erlaubten Fächern
+order.forEach(f => {
+  const card = document.getElementById('card-' + f);
+  if (card) {
+    if (!erlaubteFaecher.includes(f)) {
+      card.remove();
+    }
+  }
+});
+
+// Erste erlaubte Karte zeigen
+if (erlaubteFaecher.length > 0) {
+  const firstCard = document.getElementById('card-' + erlaubteFaecher[0]);
+  if (firstCard) firstCard.classList.add('active');
+}
+
+// ── Navigation ───────────────────────────────────────────────────────────────
+function showCard(fach, btn) {
+  document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  if (fach === 'suche') {
+    document.getElementById('searchBar').classList.add('visible');
+    document.getElementById('cardArea').style.display = 'none';
+    document.getElementById('searchInput').focus();
+    showMetaHinweis();
+  } else {
+    document.getElementById('searchBar').classList.remove('visible');
+    document.getElementById('cardArea').style.display = '';
+    document.getElementById('metaHinweis').classList.remove('visible');
+    const card = document.getElementById('card-' + fach);
+    if (card) card.classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
+
+function toggle(btn) {
+  const panel = btn.nextElementSibling;
+  const open = panel.classList.toggle('open');
+  btn.setAttribute('aria-expanded', open);
+}
+
+// ── Suche ────────────────────────────────────────────────────────────────────
+let filterKlasse = '';
+let filterTyp = '';
+
+document.querySelectorAll('#filterKlasse .filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#filterKlasse .filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    filterKlasse = btn.dataset.val;
+    doSearch();
+  });
+});
+
+document.querySelectorAll('#filterTyp .filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#filterTyp .filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    filterTyp = btn.dataset.val;
+    doSearch();
+  });
+});
+
+function doSearch() {
+  const q = document.getElementById('searchInput').value.trim().toLowerCase();
+  const results = document.getElementById('searchResults');
+
+  const treffer = ALLE_DATEIEN.filter(path => {
+    const m = META_FALLBACK[path];
+    if (filterKlasse && m.klasse !== filterKlasse) return false;
+    if (filterTyp && m.typ !== filterTyp) return false;
+    if (!q) return true;
+    const haystack = (m.title + ' ' + m.desc + ' ' + m.keywords).toLowerCase();
+    return q.split(/\s+/).every(w => haystack.includes(w));
+  });
+
+  if (!q && !filterKlasse && !filterTyp) { results.innerHTML = ''; return; }
+
+  if (treffer.length === 0) {
+    results.innerHTML = '<div class="no-results">🦖 Keine Ergebnisse gefunden</div>';
+    return;
+  }
+
+  results.innerHTML = treffer.map(path => {
+    const m = META_FALLBACK[path];
+    const tagClass = { 'Lernseite':'tag-lernen','Übung':'tag-uebung','Test':'tag-test','Klassenarbeit':'tag-arbeit','Bonus':'tag-bonus' }[m.typ] || 'tag-entwurf';
+    const fachEmoji = { mathe:'📐', bio:'🧬', kompass:'🧭' }[m.fach] || '📄';
+    return `<a class="search-result-item" href="${path}" target="_blank" rel="noopener">
+      <span class="sri-icon">${fachEmoji}</span>
+      <div class="sri-info">
+        <div class="sri-title">${m.title}</div>
+        <div class="sri-desc">${m.desc}</div>
+      </div>
+      <div class="sri-tags">
+        <span class="link-tag ${tagClass}">${m.typ}</span>
+        <span class="link-tag" style="background:#f1f5f9;color:#475569">Kl. ${m.klasse}</span>
+      </div>
+    </a>`;
+  }).join('');
+}
+
+// ── Meta-Hinweis: 2 zufällige Dateien vorschlagen ────────────────────────────
+function showMetaHinweis() {
+  // Alle Dateien ohne echte Meta-Tags (hier simuliert: alle aus Fallback)
+  const ohneEchteMeta = ALLE_DATEIEN.filter(p => META_FALLBACK[p]);
+  // Zufällig 2 auswählen
+  const shuffled = ohneEchteMeta.sort(() => Math.random() - 0.5).slice(0, 2);
+  const list = document.getElementById('metaVorschlagList');
+  list.innerHTML = shuffled.map(path => {
+    const m = META_FALLBACK[path];
+    const vorschlag = `&lt;meta name="description" content="${m.desc}"&gt;\n&lt;meta name="keywords" content="${m.keywords}"&gt;\n&lt;meta name="typ" content="${m.typ}"&gt;\n&lt;meta name="klasse" content="${m.klasse}"&gt;\n&lt;meta name="fach" content="${m.fach}"&gt;`;
+    return `<li>
+      <a href="${path}" target="_blank" rel="noopener">${m.title}</a>
+      <span class="path">${path}</span>
+    </li>`;
+  }).join('');
+  document.getElementById('metaHinweis').classList.add('visible');
+}
+
+// ── Swipe ────────────────────────────────────────────────────────────────────
+let touchStartX = 0;
+document.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
+document.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  if (Math.abs(dx) < 60) return;
+  const cur = document.querySelector('.card.active')?.dataset.fach;
+  if (!cur) return;
+  const idx = erlaubteFaecher.indexOf(cur);
+  if (idx < 0) return;
+  const next = dx < 0 ? Math.min(idx+1, erlaubteFaecher.length-1) : Math.max(idx-1, 0);
+  if (next !== idx) {
+    const btn = document.querySelector(`.tab-btn[data-fach="${erlaubteFaecher[next]}"]`);
+    if (btn) showCard(erlaubteFaecher[next], btn);
+  }
+}, { passive: true });
+
+// ── Dino ─────────────────────────────────────────────────────────────────────
+const tip = document.getElementById('dino-tooltip');
+let hideTimer;
+function showTip() { clearTimeout(hideTimer); tip.classList.add('visible'); }
+function hideTip() { hideTimer = setTimeout(() => tip.classList.remove('visible'), 400); }
+function toggleTip() { tip.classList.toggle('visible'); }
+</script>
+</body>
+</html>
