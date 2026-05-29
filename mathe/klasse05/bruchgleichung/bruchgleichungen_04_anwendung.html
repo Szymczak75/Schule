@@ -292,10 +292,18 @@ function checkFertig(){
   }
 }
 function normalizeMul(s){return s.replace(/\s/g,'').replace(/\D+/g,'·').replace(/·+/g,'·').replace(/^·|·$/g,'').toLowerCase();}
+function zahlAus(s){
+  s=(s||'').trim().replace(/\s/g,'').replace(',','.');
+  if(s==='') return NaN;
+  const m=s.match(/^(-?\d+(?:\.\d+)?)\/(-?\d+(?:\.\d+)?)$/);
+  if(m){const n=parseFloat(m[1]),d=parseFloat(m[2]);if(d===0)return NaN;return n/d;}
+  return parseFloat(s);
+}
+function gleich(a,b){return !isNaN(a)&&Math.abs(a-b)<1e-9;}
 function pruefeZahl(id,correct,rid){
   const inp=document.getElementById(id);const r=document.getElementById(rid);const leerBtn=document.getElementById(id+'-leer');
-  const val=inp.value.trim().replace(',','.');if(val==='')return;
-  if(parseFloat(val)===correct){r.className='rueck richtig';r.innerHTML='✅ Richtig!';if(leerBtn)leerBtn.style.display='none';aufgaben[id]=true;}
+  const roh=inp.value.trim();if(roh==='')return;
+  if(gleich(zahlAus(roh),correct)){r.className='rueck richtig';r.innerHTML='✅ Richtig!';if(leerBtn)leerBtn.style.display='none';aufgaben[id]=true;}
   else{r.className='rueck falsch';r.innerHTML='❌ Noch nicht. Sieh dir den Tipp an und versuche es erneut.<span class="loesung">Lösung: '+String(correct).replace('.',',')+'</span>';if(leerBtn)leerBtn.style.display='inline-block';}
   if(window.MathJax)MathJax.typesetPromise([r]);checkFertig();
 }
