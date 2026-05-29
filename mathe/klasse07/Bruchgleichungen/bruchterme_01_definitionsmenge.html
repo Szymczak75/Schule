@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bruchterme – Definitionsmenge (1/4)</title>
+<meta name="description" content="Erarbeitung zu Bruchtermen: Was ist ein Bruchterm, warum der Nenner nie 0 sein darf und wie man die Definitionsmenge bestimmt.">
+<meta name="keywords" content="Bruchterme, Definitionsmenge, Nenner, rationale Zahlen, Variable, Term definiert, Klasse 7">
+<meta name="typ" content="Lernseite">
+<meta name="klasse" content="7">
+<meta name="fach" content="mathe">
+<script>
+  MathJax = {
+    tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+    svg: { fontCache: 'global' }
+  };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+  :root{
+    --kopf:#f0a04b;            /* orange, nicht knallig – Erarbeitung */
+    --kopf-dunkel:#d6863a;
+    --bg:#fffaf4;
+    --karte:#ffffff;
+    --rahmen:#e8c9a0;
+    --akzent:#e07b2d;
+    --gruen:#1f9d4d;
+    --gruen-bg:#1f9d4d;
+    --rot:#d32020;
+    --text:#2a2a2a;
+    --tipp-bg:#fff3e2;
+    --tipp-rahmen:#e8b56a;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{
+    margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    background:var(--bg);color:var(--text);font-size:1.05rem;line-height:1.5;
+    padding-bottom:6rem;
+  }
+  header{
+    background:linear-gradient(135deg,var(--kopf),var(--kopf-dunkel));
+    color:#fff;padding:1.1rem 1rem;box-shadow:0 2px 8px rgba(0,0,0,.15);
+  }
+  header h1{margin:0;font-size:1.4rem;}
+  header .unter{font-size:.95rem;opacity:.95;margin-top:.2rem;}
+  .progress{font-size:.85rem;background:rgba(255,255,255,.25);display:inline-block;
+    padding:.15rem .6rem;border-radius:1rem;margin-top:.5rem;}
+  main{max-width:60rem;margin:0 auto;padding:1rem;}
+
+  /* Reiter / Registerkarten */
+  .tabs{display:flex;flex-wrap:wrap;gap:.5rem;margin:1rem 0;}
+  .tab{
+    flex:1 1 auto;min-width:7rem;min-height:44px;padding:.6rem .8rem;
+    border:2px solid var(--rahmen);background:var(--karte);border-radius:.7rem;
+    font-size:1rem;font-weight:600;color:var(--text);cursor:pointer;text-align:center;
+    transition:transform .05s;
+  }
+  .tab.aktiv{background:var(--akzent);color:#fff;border-color:var(--akzent);}
+  .tab:active{transform:scale(.97);}
+  .tab .num{display:block;font-size:.75rem;opacity:.8;}
+
+  .karte{
+    background:var(--karte);border:2px solid var(--rahmen);border-radius:1rem;
+    padding:1.2rem;margin-bottom:1rem;box-shadow:0 2px 6px rgba(0,0,0,.05);
+    display:none;
+  }
+  .karte.aktiv{display:block;}
+  .karte h2{margin-top:0;color:var(--akzent);font-size:1.25rem;}
+
+  /* Brüche div-basiert */
+  .frac{display:inline-flex;flex-direction:column;align-items:center;
+    vertical-align:middle;margin:0 .15rem;}
+  .frac>span{display:block;padding:0 .35rem;line-height:1.15;}
+  .frac>span:first-child{border-bottom:2px solid currentColor;}
+
+  .info{background:#fff7ee;border-left:5px solid var(--akzent);
+    padding:.8rem 1rem;border-radius:.5rem;margin:1rem 0;}
+
+  /* Fachbegriff-Tooltip (touch) */
+  .fb{border-bottom:2px dotted var(--akzent);cursor:pointer;position:relative;font-weight:600;}
+  .fb .tt{
+    display:none;position:absolute;left:0;top:120%;z-index:20;
+    background:#333;color:#fff;padding:.6rem .8rem;border-radius:.5rem;
+    width:min(18rem,80vw);font-size:.9rem;font-weight:400;line-height:1.4;
+    box-shadow:0 4px 12px rgba(0,0,0,.3);
+  }
+  .fb.offen .tt{display:block;}
+
+  /* Schritt-Boxen */
+  .schritt{border:2px solid var(--rahmen);border-radius:.7rem;padding:.9rem;margin:.8rem 0;}
+  .schritt .nr{display:inline-block;background:var(--akzent);color:#fff;
+    width:1.8rem;height:1.8rem;line-height:1.8rem;text-align:center;border-radius:50%;
+    font-weight:700;margin-right:.5rem;}
+
+  /* Eingaben */
+  .eingabe-zeile{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem;margin:.7rem 0;}
+  input[type=text]{
+    font-size:1.1rem;padding:.5rem .7rem;border:2px solid var(--rahmen);
+    border-radius:.5rem;min-height:44px;width:8rem;max-width:60vw;
+  }
+  input[type=text]:focus{outline:none;border-color:var(--akzent);}
+  .pruef-btn,.weiter-btn,.tipp-btn,.leer-btn{
+    min-height:44px;min-width:44px;padding:.6rem 1.1rem;border:none;border-radius:.6rem;
+    font-size:1rem;font-weight:700;cursor:pointer;transition:transform .05s;
+  }
+  .pruef-btn{background:var(--akzent);color:#fff;}
+  .pruef-btn:active{transform:scale(.97);}
+  .leer-btn{background:#888;color:#fff;display:none;}
+  .tipp-btn{background:var(--tipp-bg);color:var(--kopf-dunkel);border:2px solid var(--tipp-rahmen);}
+
+  .rueck{margin-top:.5rem;padding:.7rem .9rem;border-radius:.6rem;font-weight:600;display:none;}
+  .rueck.richtig{display:block;background:var(--gruen-bg);color:#fff;}
+  .rueck.falsch{display:block;background:var(--rot);color:#fff;}
+  .rueck .loesung{font-weight:400;margin-top:.3rem;display:block;}
+
+  details.tipp{margin:.6rem 0;background:var(--tipp-bg);border:2px solid var(--tipp-rahmen);
+    border-radius:.6rem;padding:.3rem .7rem;}
+  details.tipp summary{cursor:pointer;font-weight:700;color:var(--kopf-dunkel);
+    min-height:36px;display:flex;align-items:center;}
+  details.tipp[open]{padding-bottom:.7rem;}
+
+  .frage-box{background:#fff7ee;border:2px dashed var(--akzent);border-radius:.7rem;
+    padding:.9rem;margin:1rem 0;}
+
+  .mc-option{display:block;width:100%;text-align:left;margin:.4rem 0;padding:.7rem .9rem;
+    border:2px solid var(--rahmen);border-radius:.6rem;background:var(--karte);
+    font-size:1rem;cursor:pointer;min-height:44px;}
+  .mc-option.gewaehlt{border-color:var(--akzent);}
+  .mc-option.richtig-mc{background:var(--gruen-bg);color:#fff;border-color:var(--gruen);}
+  .mc-option.falsch-mc{background:var(--rot);color:#fff;border-color:var(--rot);}
+
+  /* Weiter-Button */
+  .weiter-wrap{position:fixed;left:0;right:0;bottom:0;padding:.8rem 1rem;
+    background:linear-gradient(to top,var(--bg) 70%,transparent);
+    display:none;justify-content:center;}
+  .weiter-wrap.sichtbar{display:flex;}
+  .weiter-btn{background:var(--gruen);color:#fff;width:100%;max-width:30rem;
+    font-size:1.15rem;text-decoration:none;text-align:center;display:flex;
+    align-items:center;justify-content:center;}
+  .weiter-btn:active{transform:scale(.98);}
+
+  /* T-Rex */
+  .trex{position:fixed;right:.7rem;bottom:.7rem;font-size:1.8rem;cursor:pointer;z-index:50;
+    filter:drop-shadow(0 1px 2px rgba(0,0,0,.3));}
+  .trex .tt{display:none;position:absolute;right:0;bottom:120%;background:#333;color:#fff;
+    padding:.4rem .7rem;border-radius:.5rem;font-size:.8rem;white-space:nowrap;}
+  .trex.offen .tt{display:block;}
+
+  .erledigt-hinweis{font-size:.9rem;color:var(--kopf-dunkel);margin-top:.5rem;font-style:italic;}
+
+  /* Niveaustufen */
+  .niveau-karte{border:2px solid var(--akzent);border-radius:.8rem;padding:.7rem .9rem;margin-bottom:1rem;
+    background:#fff3e2;cursor:pointer;}
+  .niveau-aktuell{display:flex;justify-content:space-between;align-items:center;gap:.5rem;flex-wrap:wrap;
+    font-size:1.05rem;}
+  .niveau-tippsymbol{font-size:.85rem;color:var(--kopf-dunkel);font-weight:600;}
+  .niveau-wahl{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.7rem;}
+  .niveau-wahl.zu{display:none;}
+  .niveau-btn{flex:1 1 8rem;min-height:44px;padding:.6rem;border:2px solid var(--rahmen);border-radius:.6rem;
+    background:var(--karte);font-size:1rem;font-weight:700;color:var(--text);cursor:pointer;}
+  .niveau-btn.aktiv{background:var(--akzent);color:#fff;border-color:var(--akzent);}
+  .niveau-inhalt{display:none;}
+  .niveau-inhalt.aktiv{display:block;}
+  .hochschalt{display:none;margin-top:1rem;padding:.9rem 1rem;border-radius:.8rem;
+    background:linear-gradient(135deg,#6a5acd,#4b3fae);color:#fff;font-weight:600;text-align:center;}
+  .hochschalt.zeigen{display:block;}
+  .hochschalt button{margin-top:.6rem;min-height:44px;padding:.6rem 1.1rem;border:none;border-radius:.6rem;
+    background:#fff;color:#4b3fae;font-weight:700;font-size:1rem;cursor:pointer;}
+</style>
+</head>
+<body>
+<header>
+  <h1>Bruchterme &amp; Bruchgleichungen</h1>
+  <div class="unter">Erarbeitung · Klasse 7 · Seite 1 von 4: Bruchterme &amp; Definitionsmenge</div>
+  <span class="progress" id="prog">Karte 1 von 4</span>
+</header>
+
+<main>
+  <div class="tabs" id="tabs">
+    <button class="tab aktiv" data-k="0"><span class="num">Karte 1</span>Was ist ein Bruchterm?</button>
+    <button class="tab" data-k="1"><span class="num">Karte 2</span>Nenner ≠ 0</button>
+    <button class="tab" data-k="2"><span class="num">Karte 3</span>Definitionsmenge</button>
+    <button class="tab" data-k="3"><span class="num">Karte 4</span>Übe selbst</button>
+  </div>
+
+  <!-- KARTE 1 -->
+  <section class="karte aktiv" data-k="0">
+    <h2>Was ist ein Bruchterm?</h2>
+    <p>Du kennst Brüche wie <span class="frac"><span>3</span><span>4</span></span> schon lange.
+       Ein <span class="fb">Bruchterm<span class="tt">Ein Bruch, in dessen Nenner eine Variable (z.&nbsp;B. $x$) steht.</span></span>
+       ist ein Bruch, in dessen <b>Nenner eine Variable</b> steht.</p>
+
+    <div class="info">
+      Beispiele für Bruchterme:
+      <span class="frac"><span>7</span><span>x</span></span>,
+      <span class="frac"><span>150·x</span><span>3·x</span></span> &nbsp;und&nbsp;
+      <span class="frac"><span>4</span><span>x+2</span></span>.
+    </div>
+
+    <p>Im Nenner steht jetzt also nicht immer eine feste Zahl, sondern manchmal etwas,
+       das sich verändern kann. Genau das macht Bruchterme spannend – und manchmal etwas knifflig.</p>
+
+    <div class="frage-box">
+      <b>Zwischenfrage:</b> Welcher der folgenden Ausdrücke ist ein <i>Bruchterm</i>?
+      <div id="mc1">
+        <button class="mc-option" data-correct="0">$\dfrac{5}{8}$</button>
+        <button class="mc-option" data-correct="0">$3·x + 4$</button>
+        <button class="mc-option" data-correct="1"><span class="frac"><span>9</span><span>x</span></span></button>
+      </div>
+      <div class="rueck" id="mc1-r"></div>
+    </div>
+
+    <p class="erledigt-hinweis">Tippe oben auf <b>„Nenner ≠ 0"</b>, um weiterzumachen.</p>
+  </section>
+
+  <!-- KARTE 2 -->
+  <section class="karte" data-k="1">
+    <h2>Warum darf der Nenner nicht 0 werden?</h2>
+    <p>Eine wichtige Regel aus der Bruchrechnung gilt weiter:
+       <b>Durch 0 darf man nie teilen.</b> Der Nenner eines Bruchs darf also <b>nie 0</b> sein.</p>
+
+    <p>Bei einem Bruchterm wie <span class="frac"><span>4</span><span>x+2</span></span>
+       müssen wir deshalb überlegen: <i>Für welche Zahl wird der Nenner 0?</i></p>
+
+    <div class="schritt">
+      <span class="nr">1</span>Setze den Nenner gleich 0: &nbsp; $x+2 = 0$
+    </div>
+    <div class="schritt">
+      <span class="nr">2</span>Löse die Gleichung: &nbsp; $x+2 = 0 \;\;|-2$ &nbsp;→&nbsp; $x = -2$
+    </div>
+    <div class="schritt">
+      <span class="nr">3</span>Ergebnis: Für $x = -2$ ist der Term <b>nicht definiert</b> (verboten).
+      Alle anderen Zahlen sind erlaubt.
+    </div>
+
+    <div class="frage-box">
+      <b>Zwischenfrage:</b> Für welchen Wert ist der Term
+      <span class="frac"><span>8</span><span>x-3</span></span> <u>nicht</u> definiert?
+      <div class="eingabe-zeile">
+        $x = $
+        <input type="text" inputmode="numeric" id="e2" placeholder="?">
+        <button class="pruef-btn" onclick="pruefeZahl('e2',3,'r2')">Prüfen</button>
+        <button class="leer-btn" id="e2-leer" onclick="leere('e2','r2')">Leeren</button>
+      </div>
+      <div class="rueck" id="r2"></div>
+      <details class="tipp"><summary>💡 Tipp 1 – Wie fange ich an?</summary>
+        Setze den Nenner gleich 0: &nbsp;$x-3 = 0$.</details>
+      <details class="tipp"><summary>💡 Tipp 2 – Lösung</summary>
+        $x-3=0 \;|+3$ &nbsp;→&nbsp; $x = 3$. Für $x=3$ ist der Term nicht definiert.</details>
+    </div>
+
+    <p class="erledigt-hinweis">Weiter geht's mit <b>„Definitionsmenge"</b> oben.</p>
+  </section>
+
+  <!-- KARTE 3 -->
+  <section class="karte" data-k="2">
+    <h2>Die Definitionsmenge $D$</h2>
+    <p>Die <span class="fb">Definitionsmenge<span class="tt">Die Menge aller Zahlen, die man für $x$ einsetzen darf.</span></span>
+       $D$ gibt an, welche Zahlen man einsetzen <b>darf</b>.</p>
+
+    <div class="info">
+      $D = \mathbb{Q} \setminus \{\dots\}$ <br>
+      „$\mathbb{Q}$" ist das Zeichen für die <b>rationalen Zahlen</b> (alle Zahlen, die wir kennen).<br>
+      Hinter „$\setminus$" steht, was <b>nicht</b> eingesetzt werden darf.
+    </div>
+
+    <p>Beispiel: $D = \mathbb{Q} \setminus \{4\}$ bedeutet: Alle Zahlen außer der 4 sind erlaubt.</p>
+
+    <p><b>So liest man es:</b> Bei <span class="frac"><span>4</span><span>x-3</span></span>
+       wird der Nenner für $x=3$ gleich 0. Also: $D = \mathbb{Q} \setminus \{3\}$.</p>
+
+    <div class="frage-box">
+      <b>Zuordnung:</b> Tippe zuerst den Bruchterm an, dann die passende Definitionsmenge.
+      Falsch zugeordnet? Einfach wieder antippen.
+      <div id="zuord"></div>
+      <div class="rueck" id="zuord-r"></div>
+    </div>
+
+    <p class="erledigt-hinweis">Auf <b>„Übe selbst"</b> wartet die letzte Übung dieser Seite.</p>
+  </section>
+
+  <!-- KARTE 4 -->
+  <section class="karte" data-k="3">
+    <h2>Übe selbst: Definitionsmenge bestimmen</h2>
+
+    <!-- Niveau-Umschalter -->
+    <div class="niveau-karte" id="niveauKarte" onclick="toggleNiveauWahl()">
+      <div class="niveau-aktuell">
+        <span>Niveaustufe: <b id="niveauName">Grundlagen</b></span>
+        <span class="niveau-tippsymbol">⇄ Stufe wählen</span>
+      </div>
+      <div class="niveau-wahl" id="niveauWahl">
+        <button class="niveau-btn aktiv" data-niveau="grund" onclick="setNiveau('grund',event)">Grundlagen</button>
+        <button class="niveau-btn" data-niveau="fort" onclick="setNiveau('fort',event)">Fortgeschritten</button>
+        <button class="niveau-btn" data-niveau="profi" onclick="setNiveau('profi',event)">Profi</button>
+      </div>
+    </div>
+
+    <!-- GRUNDLAGEN -->
+    <div class="niveau-inhalt aktiv" data-niveau="grund">
+      <p>Gib jeweils an, für welchen Wert von $x$ der Term <u>nicht</u> definiert ist.
+         Schreibe nur die Zahl.</p>
+
+      <div class="eingabe-zeile">
+        a) &nbsp;<span class="frac"><span>21</span><span>x</span></span> &nbsp;→&nbsp; $x = $
+        <input type="text" inputmode="numeric" id="g1" placeholder="?">
+        <button class="pruef-btn" onclick="pruefeZahl('g1',0,'rg1')">Prüfen</button>
+        <button class="leer-btn" id="g1-leer" onclick="leere('g1','rg1')">Leeren</button>
+      </div>
+      <div class="rueck" id="rg1"></div>
+      <details class="tipp"><summary>💡 Tipp 1</summary>Wann wird der Nenner $x$ gleich 0?</details>
+      <details class="tipp"><summary>💡 Tipp 2 – Lösung</summary>$x = 0$ macht den Nenner 0. Also nicht definiert für $x=0$.</details>
+
+      <div class="eingabe-zeile">
+        b) &nbsp;<span class="frac"><span>4</span><span>x+2</span></span> &nbsp;→&nbsp; $x = $
+        <input type="text" inputmode="numeric" id="g2" placeholder="?">
+        <button class="pruef-btn" onclick="pruefeZahl('g2',-2,'rg2')">Prüfen</button>
+        <button class="leer-btn" id="g2-leer" onclick="leere('g2','rg2')">Leeren</button>
+      </div>
+      <div class="rueck" id="rg2"></div>
+      <details class="tipp"><summary>💡 Tipp 1</summary>Setze $x+2=0$ und löse nach $x$ auf.</details>
+      <details class="tipp"><summary>💡 Tipp 2 – Lösung</summary>$x+2=0\;|-2$ → $x=-2$.</details>
+
+      <div class="eingabe-zeile">
+        c) &nbsp;<span class="frac"><span>8</span><span>x-3</span></span> &nbsp;→&nbsp; $x = $
+        <input type="text" inputmode="numeric" id="g3" placeholder="?">
+        <button class="pruef-btn" onclick="pruefeZahl('g3',3,'rg3')">Prüfen</button>
+        <button class="leer-btn" id="g3-leer" onclick="leere('g3','rg3')">Leeren</button>
+      </div>
+      <div class="rueck" id="rg3"></div>
+      <details class="tipp"><summary>💡 Tipp 1</summary>Setze $x-3=0$ und löse nach $x$ auf.</details>
+      <details class="tipp"><summary>💡 Tipp 2 – Lösung</summary>$x-3=0\;|+3$ → $x=3$.</details>
+    </div>
+
+    <!-- FORTGESCHRITTEN -->
+    <div class="niveau-inhalt" data-niveau="fort">
+      <p>Jetzt steht ein <b>Faktor vor dem $x$</b>. Gib an, für welchen Wert von $x$ der Term
+         <u>nicht</u> definiert ist. Achtung: Es können auch Kommazahlen herauskommen!</p>
+
+      <div class="eingabe-zeile">
+        a) &nbsp;<span class="frac"><span>9</span><span>3·x</span></span> &nbsp;→&nbsp; $x = $
+        <input type="text" inputmode="numeric" id="f1" placeholder="?">
+        <button class="pruef-btn" onclick="pruefeZahl('f1',0,'rf1')">Prüfen</button>
+        <button class="leer-btn" id="f1-leer" onclick="leere('f1','rf1')">Leeren</button>
+      </div>
+      <div class="rueck" id="rf1"></div>
+      <details class="tipp"><summary>💡 Tipp 1</summary>Setze $3·x=0$. Durch welche Zahl muss man teilen?</details>
+      <details class="tipp"><summary>💡 Tipp 2 – Lösung</summary>$3·x=0\;|:3$ → $x=0$.</details>
+
+      <div class="eingabe-zeile">
+        b) &nbsp;<span class="frac"><span>5</span><span>2·x-1</span></span> &nbsp;→&nbsp; $x = $
+        <input type="text" inputmode="numeric" id="f2" placeholder="Zahl, evtl. mit Komma">
+        <button class="pruef-btn" onclick="pruefeZahl('f2',0.5,'rf2')">Prüfen</button>
+        <button class="leer-btn" id="f2-leer" onclick="leere('f2','rf2')">Leeren</button>
+      </div>
+      <div class="rueck" id="rf2"></div>
+      <details class="tipp"><summary>💡 Tipp 1</summary>Setze $2·x-1=0$ und löse nach $x$ auf.</details>
+      <details class="tipp"><summary>💡 Tipp 2</summary>$2·x-1=0\;|+1$ → $2·x=1$.</details>
+      <details class="tipp"><summary>💡 Tipp 3 – Lösung</summary>$2·x=1\;|:2$ → $x=0{,}5$.</details>
+
+      <div class="eingabe-zeile">
+        c) &nbsp;<span class="frac"><span>7</span><span>4·x+10</span></span> &nbsp;→&nbsp; $x = $
+        <input type="text" inputmode="numeric" id="f3" placeholder="Zahl, evtl. mit Komma">
+        <button class="pruef-btn" onclick="pruefeZahl('f3',-2.5,'rf3')">Prüfen</button>
+        <button class="leer-btn" id="f3-leer" onclick="leere('f3','rf3')">Leeren</button>
+      </div>
+      <div class="rueck" id="rf3"></div>
+      <details class="tipp"><summary>💡 Tipp 1</summary>Setze $4·x+10=0$ und löse nach $x$ auf.</details>
+      <details class="tipp"><summary>💡 Tipp 2</summary>$4·x+10=0\;|-10$ → $4·x=-10$.</details>
+      <details class="tipp"><summary>💡 Tipp 3 – Lösung</summary>$4·x=-10\;|:4$ → $x=-2{,}5$.</details>
+    </div>
+
+    <!-- PROFI -->
+    <div class="niveau-inhalt" data-niveau="profi">
+      <p>Jetzt gibt es <b>zwei Brüche</b> – und damit oft <b>zwei verbotene Werte</b>.
+         Untersuche jeden Nenner einzeln. Gib beide verbotenen Werte an (auch Kommazahlen möglich).</p>
+
+      <div class="eingabe-zeile">
+        a) &nbsp;<span class="frac"><span>5</span><span>x-3</span></span> $+$ <span class="frac"><span>17</span><span>4·x+10</span></span>
+      </div>
+      <div class="eingabe-zeile">
+        kleinerer verbotener Wert: $x = $
+        <input type="text" inputmode="numeric" id="p1a" placeholder="?" style="width:5rem">
+        &nbsp;&nbsp;größerer: $x = $
+        <input type="text" inputmode="numeric" id="p1b" placeholder="?" style="width:5rem">
+        <button class="pruef-btn" onclick="pruefeZwei('p1a','p1b',-2.5,3,'rp1')">Prüfen</button>
+        <button class="leer-btn" id="p1a-leer" onclick="leere2('p1a','p1b','rp1')">Leeren</button>
+      </div>
+      <div class="rueck" id="rp1"></div>
+      <details class="tipp"><summary>💡 Tipp 1</summary>Setze jeden Nenner einzeln gleich 0: $x-3=0$ und $4·x+10=0$.</details>
+      <details class="tipp"><summary>💡 Tipp 2</summary>Erster Nenner: $x-3=0$ → $x=3$. Zweiter Nenner: $4·x+10=0$ → $4·x=-10$.</details>
+      <details class="tipp"><summary>💡 Tipp 3 – Lösung</summary>$4·x=-10\;|:4$ → $x=-2{,}5$. Verboten sind also $-2{,}5$ und $3$, d.&nbsp;h. $D=\mathbb{Q}\setminus\{-2{,}5\,;\,3\}$.</details>
+
+      <div class="eingabe-zeile">
+        b) &nbsp;<span class="frac"><span>2</span><span>2·x+1</span></span> $-$ <span class="frac"><span>9</span><span>x+4</span></span>
+      </div>
+      <div class="eingabe-zeile">
+        kleinerer verbotener Wert: $x = $
+        <input type="text" inputmode="numeric" id="p2a" placeholder="?" style="width:5rem">
+        &nbsp;&nbsp;größerer: $x = $
+        <input type="text" inputmode="numeric" id="p2b" placeholder="?" style="width:5rem">
+        <button class="pruef-btn" onclick="pruefeZwei('p2a','p2b',-4,-0.5,'rp2')">Prüfen</button>
+        <button class="leer-btn" id="p2a-leer" onclick="leere2('p2a','p2b','rp2')">Leeren</button>
+      </div>
+      <div class="rueck" id="rp2"></div>
+      <details class="tipp"><summary>💡 Tipp 1</summary>Setze $2·x+1=0$ und $x+4=0$ getrennt.</details>
+      <details class="tipp"><summary>💡 Tipp 2</summary>$2·x+1=0$ → $2·x=-1$ → $x=-0{,}5$. &nbsp; $x+4=0$ → $x=-4$.</details>
+      <details class="tipp"><summary>💡 Tipp 3 – Lösung</summary>Verboten sind $-4$ und $-0{,}5$, also $D=\mathbb{Q}\setminus\{-4\,;\,-0{,}5\}$.</details>
+    </div>
+
+    <div class="hochschalt" id="hochschalt"></div>
+    <p class="erledigt-hinweis" id="fertig-hinweis"></p>
+  </section>
+</main>
+
+<div class="weiter-wrap" id="weiterWrap">
+  <a class="weiter-btn" id="weiterBtn" href="bruchterme_02_kuerzen.html">Weiter zu Seite 2 →</a>
+</div>
+
+<div class="trex" id="trex" onclick="this.classList.toggle('offen')">🦖<span class="tt">Made by Mathedino</span></div>
+
+<script>
+/* ---------- Navigation ---------- */
+const tabs=document.querySelectorAll('.tab');
+const karten=document.querySelectorAll('.karte');
+tabs.forEach(t=>t.addEventListener('click',()=>{
+  const k=t.dataset.k;
+  tabs.forEach(x=>x.classList.remove('aktiv'));
+  karten.forEach(x=>x.classList.remove('aktiv'));
+  t.classList.add('aktiv');
+  document.querySelector('.karte[data-k="'+k+'"]').classList.add('aktiv');
+  document.getElementById('prog').textContent='Karte '+(parseInt(k)+1)+' von 4';
+  window.scrollTo({top:0,behavior:'smooth'});
+}));
+
+/* ---------- Status für Weiter-Button ---------- */
+/* Karte 1-3 Pflicht; Karte 4: eine komplette Niveaustufe genügt */
+const aufgaben={mc1:false, e2:false, zuord:false};
+const niveauStatus={
+  grund:{g1:false,g2:false,g3:false},
+  fort:{f1:false,f2:false,f3:false},
+  profi:{p1:false,p2:false}
+};
+const niveauNamen={grund:'Grundlagen',fort:'Fortgeschritten',profi:'Profi'};
+let aktNiveau='grund';
+
+function niveauKomplett(n){return Object.values(niveauStatus[n]).every(v=>v===true);}
+function einNiveauFertig(){return Object.keys(niveauStatus).some(n=>niveauKomplett(n));}
+
+function checkFertig(){
+  const basis=Object.values(aufgaben).every(v=>v===true);
+  const alle=basis && einNiveauFertig();
+  document.getElementById('weiterWrap').classList.toggle('sichtbar',alle);
+  if(alle){
+    document.getElementById('fertig-hinweis').textContent='Super! Du hast eine ganze Niveaustufe geschafft – der Weiter-Button ist unten sichtbar.';
+  }
+  zeigeHochschalt();
+}
+
+/* ---------- Niveau-Umschalter ---------- */
+function toggleNiveauWahl(){
+  document.getElementById('niveauWahl').classList.toggle('zu');
+}
+function setNiveau(n,ev){
+  if(ev) ev.stopPropagation();
+  aktNiveau=n;
+  document.getElementById('niveauName').textContent=niveauNamen[n];
+  document.querySelectorAll('.niveau-btn').forEach(b=>b.classList.toggle('aktiv',b.dataset.niveau===n));
+  document.querySelectorAll('.niveau-inhalt').forEach(c=>c.classList.toggle('aktiv',c.dataset.niveau===n));
+  zeigeHochschalt();
+  if(window.MathJax) MathJax.typesetPromise();
+}
+function zeigeHochschalt(){
+  const box=document.getElementById('hochschalt');
+  const naechste={grund:'fort',fort:'profi',profi:null};
+  const next=naechste[aktNiveau];
+  if(niveauKomplett(aktNiveau) && next){
+    box.classList.add('zeigen');
+    box.innerHTML='🚀 Stark! Du hast die Stufe „'+niveauNamen[aktNiveau]+'" geschafft. '
+      +'Trau dich an „'+niveauNamen[next]+'" – das schaffst du auch!'
+      +'<br><button onclick="setNiveau(\''+next+'\',event)">Zu '+niveauNamen[next]+' wechseln →</button>';
+  }else if(niveauKomplett(aktNiveau) && !next){
+    box.classList.add('zeigen');
+    box.innerHTML='🏆 Wow – du hast die höchste Stufe „Profi" gemeistert! Riesenrespekt!';
+  }else{
+    box.classList.remove('zeigen');box.innerHTML='';
+  }
+}
+
+/* ---------- Zahl prüfen ---------- */
+function fmtZahl(x){return String(x).replace('.',',');}
+function setStatus(id,wert){
+  if(id in aufgaben){aufgaben[id]=wert;return;}
+  for(const n in niveauStatus){if(id in niveauStatus[n]){niveauStatus[n][id]=wert;return;}}
+}
+function pruefeZahl(id,correct,rid){
+  const inp=document.getElementById(id);
+  const r=document.getElementById(rid);
+  const leerBtn=document.getElementById(id+'-leer');
+  const val=inp.value.trim().replace(',','.');
+  if(val===''){return;}
+  if(parseFloat(val)===correct){
+    r.className='rueck richtig';
+    r.innerHTML='✅ Richtig!';
+    if(leerBtn) leerBtn.style.display='none';
+    setStatus(id,true);
+  }else{
+    r.className='rueck falsch';
+    r.innerHTML='❌ Noch nicht. Schau dir den Tipp an und versuche es erneut.<span class="loesung">Richtig wäre: $x = '+fmtZahl(correct)+'$</span>';
+    if(leerBtn) leerBtn.style.display='inline-block';
+    if(window.MathJax) MathJax.typesetPromise([r]);
+  }
+  checkFertig();
+}
+/* Profi: zwei verbotene Werte (Reihenfolge egal, klein vor groß abgefragt) */
+function pruefeZwei(idA,idB,kleiner,groesser,rid){
+  const a=document.getElementById(idA).value.trim().replace(',','.');
+  const b=document.getElementById(idB).value.trim().replace(',','.');
+  const r=document.getElementById(rid);
+  const leerBtn=document.getElementById(idA+'-leer');
+  if(a===''||b==='')return;
+  const va=parseFloat(a),vb=parseFloat(b);
+  const ok=(va===kleiner&&vb===groesser)||(va===groesser&&vb===kleiner);
+  const key=idA.slice(0,2); // p1 / p2
+  if(ok){
+    r.className='rueck richtig';r.innerHTML='✅ Richtig! Beide verbotenen Werte stimmen.';
+    if(leerBtn) leerBtn.style.display='none';
+    setStatus(key,true);
+  }else{
+    r.className='rueck falsch';
+    r.innerHTML='❌ Noch nicht. Untersuche jeden Nenner einzeln und versuche es erneut.<span class="loesung">Richtig wären: $x='+fmtZahl(kleiner)+'$ und $x='+fmtZahl(groesser)+'$</span>';
+    if(leerBtn) leerBtn.style.display='inline-block';
+    if(window.MathJax) MathJax.typesetPromise([r]);
+  }
+  checkFertig();
+}
+function leere(id,rid){
+  document.getElementById(id).value='';
+  const r=document.getElementById(rid);r.className='rueck';r.innerHTML='';
+  document.getElementById(id+'-leer').style.display='none';
+}
+function leere2(idA,idB,rid){
+  document.getElementById(idA).value='';
+  document.getElementById(idB).value='';
+  const r=document.getElementById(rid);r.className='rueck';r.innerHTML='';
+  document.getElementById(idA+'-leer').style.display='none';
+}
+
+/* ---------- MC Karte 1 ---------- */
+document.querySelectorAll('#mc1 .mc-option').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const r=document.getElementById('mc1-r');
+    document.querySelectorAll('#mc1 .mc-option').forEach(b=>b.classList.remove('falsch-mc','richtig-mc'));
+    if(btn.dataset.correct==='1'){
+      btn.classList.add('richtig-mc');
+      r.className='rueck richtig';r.innerHTML='✅ Richtig! Im Nenner steht die Variable $x$.';
+      aufgaben.mc1=true;
+    }else{
+      btn.classList.add('falsch-mc');
+      r.className='rueck falsch';
+      r.innerHTML='❌ Das ist kein Bruchterm. Achte darauf, ob im <b>Nenner</b> eine Variable steht. Versuche es erneut.';
+    }
+    if(window.MathJax) MathJax.typesetPromise([r]);
+    checkFertig();
+  });
+});
+
+/* ---------- Zuordnung Karte 3 (Antippen-Prinzip) ---------- */
+const terme=[
+  {id:'t1',html:'<span class="frac"><span>4</span><span>x</span></span>',d:'d0'},
+  {id:'t2',html:'<span class="frac"><span>5</span><span>x-1</span></span>',d:'d1'},
+  {id:'t3',html:'<span class="frac"><span>7</span><span>x+5</span></span>',d:'d5'}
+];
+const mengen=[
+  {id:'d0',html:'$D=\\mathbb{Q}\\setminus\\{0\\}$'},
+  {id:'d1',html:'$D=\\mathbb{Q}\\setminus\\{1\\}$'},
+  {id:'d5',html:'$D=\\mathbb{Q}\\setminus\\{-5\\}$'}
+];
+let gewaehlterTerm=null;
+const zuordnungen={};
+function baueZuord(){
+  const box=document.getElementById('zuord');
+  let h='<div style="display:flex;flex-wrap:wrap;gap:.5rem;margin:.6rem 0;">';
+  terme.forEach(t=>{h+='<button class="mc-option" style="width:auto;flex:0 0 auto;" data-term="'+t.id+'">'+t.html+'</button>';});
+  h+='</div><div style="display:flex;flex-wrap:wrap;gap:.5rem;">';
+  mengen.forEach(m=>{h+='<button class="mc-option" style="width:auto;flex:0 0 auto;" data-menge="'+m.id+'"><span class="zlabel"></span> '+m.html+'</button>';});
+  h+='</div>';
+  box.innerHTML=h;
+  box.querySelectorAll('[data-term]').forEach(b=>b.addEventListener('click',()=>{
+    box.querySelectorAll('[data-term]').forEach(x=>x.classList.remove('gewaehlt'));
+    // Term aus evtl. Zuordnung lösen
+    for(const mid in zuordnungen){if(zuordnungen[mid]===b.dataset.term){delete zuordnungen[mid];aktualisiereMengen();}}
+    gewaehlterTerm=b.dataset.term;b.classList.add('gewaehlt');
+  }));
+  box.querySelectorAll('[data-menge]').forEach(b=>b.addEventListener('click',()=>{
+    const mid=b.dataset.menge;
+    if(zuordnungen[mid]){delete zuordnungen[mid];aktualisiereMengen();return;}
+    if(gewaehlterTerm){zuordnungen[mid]=gewaehlterTerm;gewaehlterTerm=null;
+      box.querySelectorAll('[data-term]').forEach(x=>x.classList.remove('gewaehlt'));
+      aktualisiereMengen();pruefeZuord();}
+  }));
+  aktualisiereMengen();
+  if(window.MathJax) MathJax.typesetPromise([box]);
+}
+function aktualisiereMengen(){
+  const box=document.getElementById('zuord');
+  box.querySelectorAll('[data-menge]').forEach(b=>{
+    const mid=b.dataset.menge;const lbl=b.querySelector('.zlabel');
+    if(zuordnungen[mid]){const t=terme.find(x=>x.id===zuordnungen[mid]);lbl.innerHTML='['+t.html+'] →';}
+    else{lbl.innerHTML='[ ? ] →';}
+  });
+  if(window.MathJax) MathJax.typesetPromise([box]);
+}
+function pruefeZuord(){
+  if(Object.keys(zuordnungen).length<3)return;
+  const richtig=terme.every(t=>zuordnungen[t.d]===t.id);
+  const r=document.getElementById('zuord-r');
+  if(richtig){r.className='rueck richtig';r.innerHTML='✅ Alle drei richtig zugeordnet!';aufgaben.zuord=true;}
+  else{r.className='rueck falsch';r.innerHTML='❌ Noch nicht alle passen. Tippe eine Zuordnung an, um sie zu lösen, und versuche es erneut.<span class="loesung">Tipp: Setze den Nenner = 0. Beispiel <span class="frac"><span>5</span><span>x-1</span></span> → $x=1$ verboten.</span>';}
+  if(window.MathJax) MathJax.typesetPromise([r]);
+  checkFertig();
+}
+baueZuord();
+
+/* T-Rex auto-close */
+document.addEventListener('click',e=>{
+  const tr=document.getElementById('trex');
+  if(!tr.contains(e.target))tr.classList.remove('offen');
+  document.querySelectorAll('.fb.offen').forEach(f=>{if(!f.contains(e.target))f.classList.remove('offen');});
+});
+document.querySelectorAll('.fb').forEach(f=>f.addEventListener('click',e=>{e.stopPropagation();f.classList.toggle('offen');}));
+</script>
+</body>
+</html>
