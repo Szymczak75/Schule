@@ -3,6 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Übung zu linearen Gleichungssystemen in Klasse 8: Altersrätsel mit dem Gleichsetzungsverfahren auf drei Niveaustufen.">
+<meta name="keywords" content="Gleichungssystem, Gleichsetzungsverfahren, Altersrätsel, LGS, Klasse 8, zwei Unbekannte, Algebra">
+<meta name="typ" content="Übung">
+<meta name="klasse" content="8">
+<meta name="fach" content="mathe">
 <title>LGS Übung – Altersrätsel</title>
 <script>
   MathJax = {
@@ -298,12 +303,43 @@
     line-height: 1.5;
   }
 </style>
+<style id="nav-style">
+.site-nav{background:#1a3a5c;border-bottom:3px solid #f59e0b;position:sticky;top:0;z-index:200;}
+.nav-inner{display:flex;align-items:center;justify-content:space-between;padding:0.55rem 1rem;}
+.nav-title{color:white;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.9rem;}
+.burger-btn{background:rgba(255,255,255,0.15);border:2px solid rgba(255,255,255,0.35);border-radius:8px;color:white;font-size:1.3rem;cursor:pointer;padding:0.2rem 0.6rem;min-width:44px;min-height:44px;font-family:'Nunito',sans-serif;font-weight:800;line-height:1;}
+.burger-btn:active{background:rgba(255,255,255,0.3);}
+.nav-links{display:flex;flex-direction:column;background:#12284a;border-top:1px solid rgba(255,255,255,0.1);}
+.nav-links.hidden{display:none;}
+.nav-links a{color:rgba(255,255,255,0.85);text-decoration:none;padding:0.75rem 1.2rem;font-family:'Nunito',sans-serif;font-size:0.95rem;font-weight:700;border-bottom:1px solid rgba(255,255,255,0.07);min-height:44px;display:flex;align-items:center;}
+.nav-links a:active{background:rgba(255,255,255,0.12);color:white;}
+.nav-links a.current{color:#f59e0b;background:rgba(245,158,11,0.12);}
+</style>
+<script>function toggleNav(){document.getElementById('navLinks').classList.toggle('hidden');}</script>
+
 </head>
 <body>
+<nav class="site-nav" id="siteNav">
+  <div class="nav-inner">
+    <span class="nav-title">📚 LGS &middot; Klasse 8</span>
+    <button class="burger-btn" onclick="toggleNav()" aria-label="Menü">&#9776;</button>
+  </div>
+  <div class="nav-links hidden" id="navLinks">
+    <a href="lgs_uebung_00_uebersicht.html" style="color:#f59e0b;border-bottom:1px solid rgba(245,158,11,0.2);">📚 Übersicht</a>
+    <a href="lgs_uebung_01_zahlenraetsel.html">1 &middot; Zahlenrätsel</a>
+    <a href="lgs_uebung_02_ziffernraetsel.html">2 &middot; Ziffernrätsel</a>
+    <a href="lgs_uebung_03_altersraetsel.html" class="current">3 &middot; Altersrätsel</a>
+    <a href="lgs_uebung_04_preise.html">4 &middot; Preisaufgaben</a>
+    <a href="lgs_uebung_05_bewegung.html">5 &middot; Bewegung</a>
+    <a href="lgs_uebung_06_situationen.html">6 &middot; Situationen</a>
+    <a href="lgs_uebung_07_wiederholung.html">7 &middot; Wiederholung</a>
+  </div>
+</nav>
+
 
 <header class="page-header">
   <div class="header-top">
-    <span class="badge">Klasse 9</span>
+    <span class="badge">Klasse 8</span>
     <span class="badge" style="background:rgba(255,255,255,0.2);color:white;">Übung</span>
   </div>
   <div class="page-title">Lineare Gleichungssysteme</div>
@@ -525,21 +561,26 @@ function checkG1() {
 }
 
 function checkG2() {
-  const gl1 = document.getElementById('g2-gl1').value.replace(/\s/g,'').toLowerCase();
-  const gl2 = document.getElementById('g2-gl2').value.replace(/\s/g,'').toLowerCase();
+  const gl1 = normGl(document.getElementById('g2-gl1').value);
+  const gl2 = normGl(document.getElementById('g2-gl2').value);
   g2tries++;
   const fb = document.getElementById('g2-fb');
-  const both = gl1+' '+gl2;
-  // Accept: a+v=54 or v+a=54 AND a=v/2 or 2a=v or v=2a or a=0.5v
-  const hasSum = /a\+v=54|v\+a=54/.test(both);
-  const hasRel = /2a=v|v=2a|a=v\/2|v=2\*a|a=0\.5v|2\*a=v/.test(both) || both.includes('a=');
-  if (hasSum && (hasRel || both.includes('=54'))) {
+  if (!gl1 || !gl2) {
+    fb.className='feedback err'; fb.textContent='❌ Bitte beide Gleichungen eintragen.';
+    if(g2tries>=1) document.getElementById('g2-tipp-btn').style.display='inline-block';
+    return;
+  }
+  const sumPatterns = ['a+v=54','v+a=54'];
+  const relPatterns = ['2a=v','v=2a','a=v/2'];
+  const sumOk = sumPatterns.includes(gl1) || sumPatterns.includes(gl2);
+  const relOk = relPatterns.includes(gl1) || relPatterns.includes(gl2);
+  if (sumOk && relOk) {
     fb.className='feedback ok'; fb.textContent='✅ Richtig! Beide Gleichungen stimmen.';
     document.getElementById('g-step2').style.borderColor='#16a34a';
     unlockStep('g-step3'); g2ok=true;
     if(typeof MathJax!=='undefined') MathJax.typesetPromise();
   } else {
-    fb.className='feedback err'; fb.textContent='❌ Überprüfe deine Gleichungen. Tipp: eine Gleichung zeigt die Summe, die andere das Verhältnis.';
+    fb.className='feedback err'; fb.textContent='❌ Überprüfe deine Gleichungen. Eine zeigt die Summe der Alter, die andere das Verhältnis.';
     if(g2tries>=1) document.getElementById('g2-tipp-btn').style.display='inline-block';
   }
 }
@@ -579,24 +620,35 @@ function checkG4() {
 
 // FORT: Leon=20, Mia=12. Gleichungen: l=m+8 und l+4=2m
 function checkFort() {
-  const gl1=document.getElementById('f-gl1').value.replace(/\s/g,'');
-  const gl2=document.getElementById('f-gl2').value.replace(/\s/g,'');
+  const gl1=normGl(document.getElementById('f-gl1').value);
+  const gl2=normGl(document.getElementById('f-gl2').value);
   const lVal=document.getElementById('f-leon').value.trim();
   const mVal=document.getElementById('f-mia').value.trim();
   const antwort=normalize(document.getElementById('f-antwort').value);
   ftries++;
   const fb=document.getElementById('f-fb');
-  const both=gl1+' '+gl2;
-  const glOk=(/l=m\+8|l-m=8/.test(both))&&(/l\+4=2m|l=2m-4/.test(both));
+  if (!gl1 || !gl2) {
+    fb.className='feedback err'; fb.textContent='❌ Bitte beide Gleichungen eintragen.';
+    if(ftries>=1) document.getElementById('f-tipp-btn').style.display='inline-block';
+    return;
+  }
+  const glPatternsA=['l=m+8','l-m=8'];
+  const glPatternsB=['l+4=2m','l=2m-4'];
+  const glOk=(glPatternsA.includes(gl1)||glPatternsA.includes(gl2)) &&
+             (glPatternsB.includes(gl1)||glPatternsB.includes(gl2));
   const solOk=lVal==='20'&&mVal==='12'&&antwort.includes('20')&&antwort.includes('12');
-  if(solOk) {
+  if(glOk && solOk) {
     fb.className='feedback ok'; fb.textContent='✅ Richtig! Leon = 20 Jahre, Mia = 12 Jahre.';
     document.getElementById('f-leon').classList.add('correct');
     document.getElementById('f-mia').classList.add('correct');
     document.getElementById('f-clear').style.display='none';
     fortDone=true; checkWeiter(); updateProgress();
+  } else if (!glOk) {
+    fb.className='feedback err'; fb.textContent='❌ Gleichungen nicht korrekt. Überprüfe beide Bedingungen.';
+    document.getElementById('f-clear').style.display='block';
+    if(ftries>=1) document.getElementById('f-tipp-btn').style.display='inline-block';
   } else {
-    fb.className='feedback err'; fb.textContent='❌ Nicht korrekt. Überprüfe deine Gleichungen und Lösung.';
+    fb.className='feedback err'; fb.textContent='❌ Lösung nicht korrekt. Überprüfe deinen Rechenweg.';
     document.getElementById('f-leon').classList.toggle('wrong',lVal!=='20');
     document.getElementById('f-mia').classList.toggle('wrong',mVal!=='12');
     document.getElementById('f-clear').style.display='block';
@@ -637,6 +689,27 @@ function clearProfi() {
   document.getElementById('p-clear').style.display='none';
 }
 
+
+function normGl(s) {
+  // Normalize an equation string for comparison:
+  // lowercase, remove spaces, replace * with nothing (implicit mult)
+  return s.trim().toLowerCase().replace(/\s/g,'').replace(/\*/g,'');
+}
+function glMatch(input, ...patterns) {
+  const n = normGl(input);
+  return patterns.some(p => n === p);
+}
+function eitherGl(gl1, gl2, patternsA, patternsB) {
+  // Returns true if (gl1 matches patternsA AND gl2 matches patternsB)
+  // OR (gl1 matches patternsB AND gl2 matches patternsA)
+  const n1 = normGl(gl1), n2 = normGl(gl2);
+  const matchA1 = patternsA.some(p => n1 === p);
+  const matchB2 = patternsB.some(p => n2 === p);
+  const matchB1 = patternsB.some(p => n1 === p);
+  const matchA2 = patternsA.some(p => n2 === p);
+  return (matchA1 && matchB2) || (matchB1 && matchA2);
+}
+
 function unlockStep(id) { const el=document.getElementById(id); if(el) el.classList.remove('locked'); }
 function showTipp(id) { document.getElementById(id).classList.toggle('show'); if(typeof MathJax!=='undefined') MathJax.typesetPromise(); }
 function checkWeiter() {
@@ -648,6 +721,14 @@ function updateProgress() {
   document.getElementById('progressBar').style.width=pct+'%';
   document.getElementById('progressLabel').textContent=pct===100?'1 von 1 Aufgabe erledigt ✓':'0 von 1 Aufgabe erledigt';
 }
+
+// Allow re-editing: remove wrong class when user starts typing
+document.querySelectorAll('.input-field').forEach(function(el) {
+  el.addEventListener('input', function() {
+    this.classList.remove('wrong');
+  });
+});
+
 function toggleDinoTip() { document.getElementById('dino').classList.toggle('show-tip'); }
 </script>
 </body>

@@ -3,6 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Übung zu linearen Gleichungssystemen in Klasse 8: Preisaufgaben mit dem Additionsverfahren auf drei Niveaustufen.">
+<meta name="keywords" content="Gleichungssystem, Additionsverfahren, Preisaufgaben, LGS, Klasse 8, zwei Unbekannte, Sachaufgabe">
+<meta name="typ" content="Übung">
+<meta name="klasse" content="8">
+<meta name="fach" content="mathe">
 <title>LGS Übung – Preisaufgaben</title>
 <script>
   MathJax = {
@@ -74,12 +79,43 @@
   .preis-table tr:last-child td{border-bottom:none;}
   .preis-table tr:nth-child(even) td{background:#f8faff;}
 </style>
+<style id="nav-style">
+.site-nav{background:#1a3a5c;border-bottom:3px solid #f59e0b;position:sticky;top:0;z-index:200;}
+.nav-inner{display:flex;align-items:center;justify-content:space-between;padding:0.55rem 1rem;}
+.nav-title{color:white;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.9rem;}
+.burger-btn{background:rgba(255,255,255,0.15);border:2px solid rgba(255,255,255,0.35);border-radius:8px;color:white;font-size:1.3rem;cursor:pointer;padding:0.2rem 0.6rem;min-width:44px;min-height:44px;font-family:'Nunito',sans-serif;font-weight:800;line-height:1;}
+.burger-btn:active{background:rgba(255,255,255,0.3);}
+.nav-links{display:flex;flex-direction:column;background:#12284a;border-top:1px solid rgba(255,255,255,0.1);}
+.nav-links.hidden{display:none;}
+.nav-links a{color:rgba(255,255,255,0.85);text-decoration:none;padding:0.75rem 1.2rem;font-family:'Nunito',sans-serif;font-size:0.95rem;font-weight:700;border-bottom:1px solid rgba(255,255,255,0.07);min-height:44px;display:flex;align-items:center;}
+.nav-links a:active{background:rgba(255,255,255,0.12);color:white;}
+.nav-links a.current{color:#f59e0b;background:rgba(245,158,11,0.12);}
+</style>
+<script>function toggleNav(){document.getElementById('navLinks').classList.toggle('hidden');}</script>
+
 </head>
 <body>
+<nav class="site-nav" id="siteNav">
+  <div class="nav-inner">
+    <span class="nav-title">📚 LGS &middot; Klasse 8</span>
+    <button class="burger-btn" onclick="toggleNav()" aria-label="Menü">&#9776;</button>
+  </div>
+  <div class="nav-links hidden" id="navLinks">
+    <a href="lgs_uebung_00_uebersicht.html" style="color:#f59e0b;border-bottom:1px solid rgba(245,158,11,0.2);">📚 Übersicht</a>
+    <a href="lgs_uebung_01_zahlenraetsel.html">1 &middot; Zahlenrätsel</a>
+    <a href="lgs_uebung_02_ziffernraetsel.html">2 &middot; Ziffernrätsel</a>
+    <a href="lgs_uebung_03_altersraetsel.html">3 &middot; Altersrätsel</a>
+    <a href="lgs_uebung_04_preise.html" class="current">4 &middot; Preisaufgaben</a>
+    <a href="lgs_uebung_05_bewegung.html">5 &middot; Bewegung</a>
+    <a href="lgs_uebung_06_situationen.html">6 &middot; Situationen</a>
+    <a href="lgs_uebung_07_wiederholung.html">7 &middot; Wiederholung</a>
+  </div>
+</nav>
+
 
 <header class="page-header">
   <div class="header-top">
-    <span class="badge">Klasse 9</span>
+    <span class="badge">Klasse 8</span>
     <span class="badge" style="background:rgba(255,255,255,0.2);color:white;">Übung</span>
   </div>
   <div class="page-title">Lineare Gleichungssysteme</div>
@@ -313,9 +349,14 @@ function checkG2(){
   const gl2=document.getElementById('g2-gl2').value.replace(/\s/g,'').replace(',','.');
   g2tries++;
   const fb=document.getElementById('g2-fb');
-  const both=gl1+' '+gl2;
-  const ok1=/2d\+p=14[.,]5|2d\+p=14\.5/.test(both);
-  const ok2=/d\+2p=12[.,]5|d\+2p=12\.5/.test(both);
+  if (!gl1.trim() || !gl2.trim()) {
+    fb.className='feedback err'; fb.textContent='❌ Bitte beide Gleichungen eintragen.';
+    if(g2tries>=1) document.getElementById('g2-tipp-btn').style.display='inline-block';
+    return;
+  }
+  const gl1n=normGl(gl1).replace(',','.'), gl2n=normGl(gl2).replace(',','.');
+  const ok1=['2d+p=14.5','2d+p=14,5'].some(p=>gl1n===p||gl2n===p);
+  const ok2=['d+2p=12.5','d+2p=12,5'].some(p=>gl1n===p||gl2n===p);
   if(ok1&&ok2){
     fb.className='feedback ok';fb.textContent='✅ Richtig! Beide Gleichungen stimmen.';
     document.getElementById('g-step2').style.borderColor='#16a34a';
@@ -369,7 +410,14 @@ function checkFort(){
   const antwort=normalize(document.getElementById('f-antwort').value);
   ftries++;
   const fb=document.getElementById('f-fb');
-  const kOk=parseFloat(kVal)===3.5;
+  const gl1v=document.getElementById('f-gl1');
+  const gl2v=document.getElementById('f-gl2');
+  if(gl1v&&gl2v&&(!gl1v.value.trim()||!gl2v.value.trim())){
+    fb.className='feedback err';fb.textContent='❌ Bitte beide Gleichungen eintragen.';
+    if(ftries>=1) document.getElementById('f-tipp-btn').style.display='inline-block';
+    return;
+  }
+  const kOk=parseFloat(normNum(document.getElementById('f-k').value))===3.5;
   const kuOk=parseFloat(kuVal)===3.0||kuVal==='3'||kuVal==='3.00';
   if(kOk&&kuOk&&(antwort.includes('3,50')||antwort.includes('3.50')||antwort.includes('3.5'))){
     fb.className='feedback ok';fb.textContent='✅ Richtig! Kaffee = 3,50 €, Kuchen = 3,00 €.';
@@ -427,6 +475,27 @@ document.addEventListener('DOMContentLoaded',()=>{
   if(typeof MathJax!=='undefined') MathJax.typesetPromise();
 });
 
+
+function normGl(s) {
+  // Normalize an equation string for comparison:
+  // lowercase, remove spaces, replace * with nothing (implicit mult)
+  return s.trim().toLowerCase().replace(/\s/g,'').replace(/\*/g,'');
+}
+function glMatch(input, ...patterns) {
+  const n = normGl(input);
+  return patterns.some(p => n === p);
+}
+function eitherGl(gl1, gl2, patternsA, patternsB) {
+  // Returns true if (gl1 matches patternsA AND gl2 matches patternsB)
+  // OR (gl1 matches patternsB AND gl2 matches patternsA)
+  const n1 = normGl(gl1), n2 = normGl(gl2);
+  const matchA1 = patternsA.some(p => n1 === p);
+  const matchB2 = patternsB.some(p => n2 === p);
+  const matchB1 = patternsB.some(p => n1 === p);
+  const matchA2 = patternsA.some(p => n2 === p);
+  return (matchA1 && matchB2) || (matchB1 && matchA2);
+}
+
 function unlockStep(id){const el=document.getElementById(id);if(el)el.classList.remove('locked');}
 function showTipp(id){document.getElementById(id).classList.toggle('show');if(typeof MathJax!=='undefined')MathJax.typesetPromise();}
 function checkWeiter(){
@@ -438,6 +507,14 @@ function updateProgress(){
   document.getElementById('progressBar').style.width=pct+'%';
   document.getElementById('progressLabel').textContent=pct===100?'1 von 1 Aufgabe erledigt ✓':'0 von 1 Aufgabe erledigt';
 }
+
+// Allow re-editing: remove wrong class when user starts typing
+document.querySelectorAll('.input-field').forEach(function(el) {
+  el.addEventListener('input', function() {
+    this.classList.remove('wrong');
+  });
+});
+
 function toggleDinoTip(){document.getElementById('dino').classList.toggle('show-tip');}
 </script>
 </body>
