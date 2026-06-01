@@ -1387,35 +1387,48 @@ function updateAuswertung(){
 // ================== LEVEL SWITCH ==================
 function setLevel(lvl, btn){
   if(currentLevel===lvl) return;
-  currentLevel=lvl;
-  document.querySelectorAll('.level-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  // Re-render current visible card
+  // Save current card state before switching level
   let activeCard = document.querySelector('.card.active');
   if(activeCard){
     let idx = parseInt(activeCard.id.replace('card',''));
-    renderedLevel[idx]=null;
-    renderCard(idx);
-    if(window.MathJax) MathJax.typesetPromise();
+    if(idx<10) saveCurrentState(idx);
+  }
+  currentLevel=lvl;
+  document.querySelectorAll('.level-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  // Force re-render of current card at new level
+  if(activeCard){
+    let idx = parseInt(activeCard.id.replace('card',''));
+    if(idx<10){
+      renderedLevel[idx]=null; // mark as needing re-render at new level
+      renderCard(idx);
+      if(window.MathJax) MathJax.typesetPromise();
+    }
   }
 }
 
 // ================== TAB NAV ==================
 let currentTab=0;
 function showTab(idx, btn){
+  // Save state of currently visible card before switching tab
+  let activeCard = document.querySelector('.card.active');
+  if(activeCard){
+    let prevIdx = parseInt(activeCard.id.replace('card',''));
+    if(prevIdx<10) saveCurrentState(prevIdx);
+  }
   document.querySelectorAll('.card').forEach(c=>c.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('card'+idx).classList.add('active');
   if(btn) btn.classList.add('active');
   currentTab=idx;
   if(idx<10){
-    renderedLevel[idx]=null;
+    // Only force re-render if not yet rendered at current level
+    if(renderedLevel[idx] !== currentLevel) renderedLevel[idx]=null;
     renderCard(idx);
   } else {
     updateAuswertung();
   }
   if(window.MathJax) MathJax.typesetPromise();
-  // Scroll tab into view
   btn && btn.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
 }
 
