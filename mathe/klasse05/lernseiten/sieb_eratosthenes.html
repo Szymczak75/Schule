@@ -3,847 +3,769 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<meta name="description" content="Interaktive Erarbeitung des Sieb des Eratosthenes – Primzahlen selbst entdecken">
-<meta name="keywords" content="Primzahlen, Sieb, Eratosthenes, Teilermenge, Primzahlzwillinge, Mathematik">
+<meta name="description" content="Interaktive Übung zum Sieb des Eratosthenes – Primzahlen selbst entdecken">
+<meta name="keywords" content="Primzahlen, Sieb, Eratosthenes, Teilermenge, Primzahlzwillinge, unendlich, Mathematik">
 <meta name="typ" content="Übung">
 <meta name="klasse" content="5">
 <meta name="fach" content="mathe">
 <title>Das Sieb des Eratosthenes</title>
 <style>
-  :root {
-    --bg:       #f4f1ec;
-    --surface:  #ffffff;
-    --surface2: #ede9e1;
-    --border:   #d4ccbc;
-    --head-bg:  #d97b3a;
-    --head-text:#fff;
-    --accent:   #c0621a;
-    --accent2:  #5a7fc1;
-    --prime-bg: #c8f0d0;
-    --prime-bd: #3a9e5a;
-    --prime-tx: #1a5c30;
-    --curp-bg:  #fde9c8;
-    --curp-bd:  #c0621a;
-    --curp-tx:  #7a3800;
-    --rem-bg:   #e8e4db;
-    --rem-tx:   #b0a898;
-    --text:     #2a2520;
-    --muted:    #8a7f72;
-    --red:      #c0392b;
-    --green:    #27ae60;
-    --radius:   10px;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-  body {
-    font-family: 'Georgia', serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-  }
+:root {
+  --bg:#f4f1ec; --surface:#fff; --surface2:#ede9e1; --border:#d4ccbc;
+  --head:#d97b3a; --headtx:#fff;
+  --acc:#c0621a; --acc2:#5a7fc1;
+  --pbg:#c8f0d0; --pbd:#3a9e5a; --ptx:#1a5c30;
+  --cbg:#fde9c8; --cbd:#c0621a; --ctx:#7a3800;
+  --rbg:#e8e4db; --rtx:#b0a898;
+  --text:#2a2520; --muted:#8a7f72;
+  --red:#c0392b; --green:#27ae60; --r:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:Georgia,serif;background:var(--bg);color:var(--text);min-height:100vh}
 
-  /* ── HEADER ── */
-  .page-header {
-    background: var(--head-bg);
-    padding: 0.75rem 1rem 0.6rem;
-    border-bottom: 3px solid rgba(0,0,0,0.15);
-  }
-  .page-header h1 {
-    font-size: 1.25rem;
-    color: var(--head-text);
-    text-align: center;
-    letter-spacing: 0.04em;
-    margin-bottom: 0.15rem;
-  }
-  .page-header .subtitle {
-    text-align: center;
-    color: rgba(255,255,255,0.82);
-    font-size: 0.78rem;
-    margin-bottom: 0.55rem;
-  }
-  .niveau-tabs {
-    display: flex; gap: 0.4rem; justify-content: center;
-  }
-  .niveau-btn {
-    flex: 1; max-width: 150px; min-height: 44px;
-    border: 2px solid rgba(255,255,255,0.4);
-    background: rgba(255,255,255,0.15);
-    color: rgba(255,255,255,0.85);
-    border-radius: var(--radius); font-size: 0.8rem;
-    cursor: pointer; transition: all 0.2s;
-    padding: 0.4rem 0.5rem; font-family: inherit;
-  }
-  .niveau-btn.active {
-    background: #fff; color: var(--accent);
-    border-color: #fff; font-weight: bold;
-  }
-  .niveau-btn.locked { opacity: 0.45; cursor: not-allowed; }
+/* HEADER */
+.hdr{background:var(--head);padding:.75rem 1rem .6rem;border-bottom:3px solid rgba(0,0,0,.15)}
+.hdr h1{font-size:1.25rem;color:var(--headtx);text-align:center;letter-spacing:.04em;margin-bottom:.15rem}
+.hdr .sub{text-align:center;color:rgba(255,255,255,.82);font-size:.78rem;margin-bottom:.55rem}
+.tabs{display:flex;gap:.4rem;justify-content:center}
+.tab{flex:1;max-width:160px;min-height:44px;border:2px solid rgba(255,255,255,.4);
+  background:rgba(255,255,255,.15);color:rgba(255,255,255,.85);border-radius:var(--r);
+  font-size:.8rem;cursor:pointer;transition:all .2s;padding:.4rem .5rem;font-family:inherit}
+.tab.active{background:#fff;color:var(--acc);border-color:#fff;font-weight:bold}
+.tab.locked{opacity:.4;cursor:not-allowed}
 
-  /* ── CONTENT ── */
-  .content { padding: 0.65rem; }
+/* CARDS (top-level tab switching) */
+.card-wrap{padding:.65rem}
+.card{display:none}
+.card.active{display:block}
 
-  /* ── QUESTION PANEL (above sieve) ── */
-  .q-panel {
-    background: var(--surface);
-    border: 2px solid var(--accent);
-    border-radius: var(--radius);
-    padding: 0.8rem 1rem;
-    margin-bottom: 0.6rem;
-    display: none;
-    box-shadow: 0 2px 8px rgba(192,98,26,0.15);
-  }
-  .q-panel.visible { display: block; }
-  .q-panel-title {
-    font-size: 0.8rem; color: var(--accent); font-weight: bold;
-    text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.55rem;
-    display: flex; align-items: center; gap: 0.4rem;
-  }
-  .q-panel-title::before { content:'❓'; font-size:1rem; }
-  .q-row { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.45rem; }
-  .q-label { font-size: 0.95rem; color: var(--text); font-weight: bold; }
-  .q-num-input {
-    width: 80px; background: var(--surface2);
-    border: 2px solid var(--border); border-radius: 7px;
-    color: var(--text); font-size: 1.05rem;
-    padding: 0.3rem 0.4rem; font-family: inherit;
-    min-height: 44px; text-align: center;
-  }
-  .q-num-input:focus { outline: none; border-color: var(--accent); }
-  .q-num-input.correct { border-color: var(--green); background: #eafaf1; }
-  .q-num-input.wrong   { border-color: var(--red);   background: #fdf0ee; }
-  .q-btn {
-    min-height: 44px; padding: 0.35rem 1rem;
-    background: var(--accent); color: #fff; border: none;
-    border-radius: 8px; font-size: 0.9rem; font-weight: bold;
-    cursor: pointer; font-family: inherit;
-  }
-  .q-btn:active { opacity: 0.8; }
-  .q-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-  .mc-row { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.4rem; }
-  .mc-btn {
-    min-height: 44px; padding: 0.4rem 1.3rem;
-    background: var(--surface2); border: 2px solid var(--border);
-    border-radius: 8px; color: var(--text); font-size: 0.92rem;
-    cursor: pointer; font-family: inherit; font-weight: bold;
-    transition: all 0.15s;
-  }
-  .mc-btn:active { opacity: 0.75; }
-  .mc-btn.correct-mc { border-color: var(--green); background: #eafaf1; color: var(--green); }
-  .mc-btn.wrong-mc   { border-color: var(--red);   background: #fdf0ee; color: var(--red); }
-  .fb {
-    padding: 0.45rem 0.75rem; border-radius: 7px;
-    font-size: 0.88rem; margin-top: 0.3rem; line-height: 1.4;
-  }
-  .fb.ok  { background: #eafaf1; color: #1a6b3c; border: 1.5px solid var(--green); }
-  .fb.err { background: #fdf0ee; color: #a02020; border: 1.5px solid var(--red); }
+/* ERARBEITUNG header accent */
+.era-hdr{background:var(--cbg);border-left:4px solid var(--cbd);border-radius:var(--r);
+  padding:.6rem .9rem;margin-bottom:.6rem;color:var(--ctx);font-size:.95rem;line-height:1.5}
+.era-hdr strong{color:var(--acc)}
 
-  /* ── TASK BANNER ── */
-  .task-banner {
-    background: var(--curp-bg);
-    border-left: 4px solid var(--curp-bd);
-    border-radius: var(--radius);
-    padding: 0.5rem 0.8rem;
-    margin-bottom: 0.45rem;
-    font-size: 0.9rem; line-height: 1.4; min-height: 44px;
-    display: flex; align-items: center; gap: 0.5rem;
-    color: var(--curp-tx);
-  }
+/* QUESTION PANEL above sieve */
+.qpanel{background:var(--surface);border:2px solid var(--acc);border-radius:var(--r);
+  padding:.8rem 1rem;margin-bottom:.6rem;display:none;
+  box-shadow:0 2px 8px rgba(192,98,26,.15)}
+.qpanel.on{display:block}
+.qpanel-title{font-size:.8rem;color:var(--acc);font-weight:bold;text-transform:uppercase;
+  letter-spacing:.06em;margin-bottom:.5rem}
 
-  /* ── LEGEND ── */
-  .legend {
-    display: flex; flex-wrap: wrap; gap: 0.4rem;
-    margin-bottom: 0.4rem; font-size: 0.7rem; align-items: center;
-    color: var(--muted);
-  }
-  .legend-item { display: flex; align-items: center; gap: 0.25rem; }
-  .legend-dot { width: 12px; height: 12px; border-radius: 2px; flex-shrink: 0; }
-  .small-reset {
-    min-height: 36px; padding: 0.25rem 0.65rem;
-    background: #fff; color: var(--red); border: 1.5px solid var(--red);
-    border-radius: 7px; font-size: 0.75rem; cursor: pointer; font-family: inherit;
-  }
+/* TASK BANNER */
+.task{background:var(--cbg);border-left:4px solid var(--cbd);border-radius:var(--r);
+  padding:.5rem .8rem;margin-bottom:.4rem;font-size:.9rem;line-height:1.4;min-height:44px;
+  display:flex;align-items:center;color:var(--ctx)}
 
-  /* ── SIEVE ── */
-  .sieve-wrapper { margin-bottom: 0.5rem; }
-  .sieve-grid {
-    display: grid;
-    grid-template-columns: repeat(20, 1fr);
-    gap: 2px;
-  }
-  .sieve-cell {
-    aspect-ratio: 1;
-    border-radius: 3px;
-    display: flex; align-items: center; justify-content: center;
-    font-weight: bold; cursor: default;
-    border: 1px solid var(--border);
-    user-select: none; -webkit-user-select: none;
-    background: var(--surface); color: var(--text);
-    transition: background 0.12s;
-    line-height: 1;
-  }
-  .sieve-cell.removed {
-    background: var(--rem-bg); color: var(--rem-tx);
-    text-decoration: line-through; border-color: #ccc;
-  }
-  .sieve-cell.removed-1 {
-    background: #ece8e0; color: #ccc5b8;
-    text-decoration: line-through; border-color: #ccc;
-  }
-  .sieve-cell.prime-found {
-    background: var(--prime-bg);
-    border-color: var(--prime-bd);
-    color: var(--prime-tx);
-  }
-  .sieve-cell.current-prime {
-    background: var(--curp-bg);
-    border-color: var(--curp-bd);
-    color: var(--curp-tx);
-  }
-  .sieve-cell.clickable { cursor: pointer; }
-  .sieve-cell.clickable:active { transform: scale(0.8); }
-  .sieve-cell.auto-remove { animation: autoRemove 0.38s ease forwards; }
-  @keyframes autoRemove {
-    0%   { background: #fbd5a8; color: #7a3800; }
-    100% { background: var(--rem-bg); color: var(--rem-tx); }
-  }
-  .sieve-cell.wrong-click { animation: wrongshake 0.28s ease; }
-  @keyframes wrongshake {
-    0%,100% { transform: scale(1); }
-    40% { transform: scale(0.72) rotate(-5deg); }
-    70% { transform: scale(0.72) rotate(5deg); }
-  }
+/* LEGEND */
+.legend{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:.4rem;font-size:.7rem;
+  align-items:center;color:var(--muted)}
+.ldot{width:12px;height:12px;border-radius:2px;flex-shrink:0}
+.sreset{min-height:36px;padding:.25rem .65rem;background:#fff;color:var(--red);
+  border:1.5px solid var(--red);border-radius:7px;font-size:.75rem;cursor:pointer;font-family:inherit}
 
-  /* ── POST-SIEVE QUESTIONS ── */
-  .questions-section { margin-top: 0.65rem; display: none; }
-  .q-card {
-    background: var(--surface); border-radius: var(--radius);
-    padding: 0.7rem 0.9rem; margin-bottom: 0.5rem;
-    border-left: 3px solid var(--accent2);
-    box-shadow: 0 1px 4px rgba(0,0,0,0.07);
-  }
-  .q-card-title {
-    font-size: 0.75rem; color: var(--accent2); font-weight: bold;
-    text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.4rem;
-  }
-  .q-text { font-size: 0.9rem; line-height: 1.55; margin-bottom: 0.45rem; color: var(--text); }
-  .q-textarea {
-    width: 100%; background: var(--surface2); border: 2px solid var(--border);
-    border-radius: 8px; color: var(--text); font-size: 0.92rem;
-    padding: 0.45rem 0.65rem; font-family: inherit; min-height: 72px; resize: vertical;
-  }
-  .q-textarea:focus { outline: none; border-color: var(--accent); }
-  .q-textarea.correct { border-color: var(--green); background: #eafaf1; }
-  .q-textarea.wrong   { border-color: var(--red);   background: #fdf0ee; }
-  .btn-row { display: flex; gap: 0.45rem; flex-wrap: wrap; margin-top: 0.35rem; }
-  .check-btn {
-    min-height: 44px; padding: 0.35rem 0.9rem;
-    background: var(--accent2); color: #fff; border: none;
-    border-radius: 8px; font-size: 0.85rem; font-weight: bold;
-    cursor: pointer; font-family: inherit;
-  }
-  .check-btn:active { opacity: 0.8; }
-  .clear-btn {
-    min-height: 44px; padding: 0.35rem 0.8rem;
-    background: #fff; color: var(--red); border: 1.5px solid var(--red);
-    border-radius: 8px; font-size: 0.82rem; cursor: pointer;
-    font-family: inherit; display: none;
-  }
-  .hint-toggle {
-    background: none; border: 1px dashed var(--muted); color: var(--muted);
-    border-radius: 7px; padding: 0.28rem 0.75rem; font-size: 0.78rem;
-    cursor: pointer; min-height: 36px; font-family: inherit;
-    margin-top: 0.35rem; width: 100%; text-align: left;
-  }
-  .hint-content { display: none; }
-  .hint-content.open { display: block; }
-  .hint-step {
-    background: var(--surface2); border-radius: 7px;
-    padding: 0.45rem 0.65rem; margin-top: 0.35rem;
-    font-size: 0.84rem; color: var(--muted); line-height: 1.5;
-    border-left: 2px solid var(--border);
-  }
-  .hint-step .hl { font-size: 0.7rem; color: var(--accent); font-weight: bold; margin-bottom: 0.15rem; }
+/* SIEVE */
+.sieve-grid{display:grid;grid-template-columns:repeat(10,1fr);gap:2px;margin-bottom:.5rem}
+.sc{aspect-ratio:1;border-radius:3px;display:flex;align-items:center;justify-content:center;
+  font-weight:bold;cursor:default;border:1px solid var(--border);
+  user-select:none;-webkit-user-select:none;background:var(--surface);color:var(--text);
+  transition:background .12s;line-height:1;font-size:clamp(11px,3.5vw,18px)}
+.sc.removed{background:var(--rbg);color:var(--rtx);text-decoration:line-through;border-color:#ccc}
+.sc.removed1{background:#ece8e0;color:#ccc5b8;text-decoration:line-through;border-color:#ccc}
+.sc.prime{background:var(--pbg);border-color:var(--pbd);color:var(--ptx)}
+.sc.curprime{background:var(--cbg);border-color:var(--cbd);color:var(--ctx)}
+.sc.clickable{cursor:pointer}
+.sc.clickable:active{transform:scale(.8)}
+.sc.autoremove{animation:ar .38s ease forwards}
+@keyframes ar{0%{background:#fbd5a8;color:#7a3800}100%{background:var(--rbg);color:var(--rtx)}}
+.sc.wrongclick{animation:ws .28s ease}
+@keyframes ws{0%,100%{transform:scale(1)}40%{transform:scale(.72) rotate(-5deg)}70%{transform:scale(.72) rotate(5deg)}}
 
-  .divisor-row { display: flex; align-items: center; gap: 0.45rem; flex-wrap: wrap; margin-bottom: 0.4rem; }
-  .num-tag {
-    background: var(--accent); color: #fff; font-weight: bold;
-    padding: 0.18rem 0.55rem; border-radius: 5px; font-size: 0.85rem; white-space: nowrap;
-  }
-  .divisor-input {
-    flex: 1; min-width: 130px; background: var(--surface2);
-    border: 2px solid var(--border); border-radius: 8px; color: var(--text);
-    font-size: 0.92rem; padding: 0.4rem 0.55rem; font-family: inherit; min-height: 44px;
-  }
-  .divisor-input:focus { outline: none; border-color: var(--accent); }
-  .divisor-input.correct { border-color: var(--green); background: #eafaf1; }
-  .divisor-input.wrong   { border-color: var(--red);   background: #fdf0ee; }
+/* INPUT / BUTTON shared */
+.qrow{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:.45rem}
+.qlabel{font-size:.95rem;color:var(--text);font-weight:bold}
+.numinput{width:80px;background:var(--surface2);border:2px solid var(--border);border-radius:7px;
+  color:var(--text);font-size:1.05rem;padding:.3rem .4rem;font-family:inherit;min-height:44px;text-align:center}
+.numinput:focus{outline:none;border-color:var(--acc)}
+.numinput.ok{border-color:var(--green);background:#eafaf1}
+.numinput.err{border-color:var(--red);background:#fdf0ee}
+.qbtn{min-height:44px;padding:.35rem 1rem;background:var(--acc);color:#fff;border:none;
+  border-radius:8px;font-size:.9rem;font-weight:bold;cursor:pointer;font-family:inherit}
+.qbtn:active{opacity:.8}.qbtn:disabled{opacity:.4;cursor:not-allowed}
+.mcrow{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.4rem}
+.mcbtn{min-height:44px;padding:.4rem 1.3rem;background:var(--surface2);border:2px solid var(--border);
+  border-radius:8px;color:var(--text);font-size:.92rem;cursor:pointer;font-family:inherit;font-weight:bold}
+.mcbtn:active{opacity:.75}
+.mcbtn.ok{border-color:var(--green);background:#eafaf1;color:var(--green)}
+.mcbtn.err{border-color:var(--red);background:#fdf0ee;color:var(--red)}
+.fb{padding:.45rem .75rem;border-radius:7px;font-size:.88rem;margin-top:.3rem;line-height:1.4}
+.fb.ok{background:#eafaf1;color:#1a6b3c;border:1.5px solid var(--green)}
+.fb.err{background:#fdf0ee;color:#a02020;border:1.5px solid var(--red)}
 
-  .pair-table { width: 100%; border-collapse: collapse; margin-top: 0.35rem; font-size: 0.83rem; }
-  .pair-table th { background: var(--surface2); padding: 0.3rem 0.45rem; text-align: left; color: var(--accent2); font-size: 0.74rem; border-bottom: 1px solid var(--border); }
-  .pair-table td { padding: 0.25rem 0.45rem; border-bottom: 1px solid var(--border); }
-  .pair-input {
-    background: var(--surface2); border: 1.5px solid var(--border); border-radius: 5px;
-    color: var(--text); font-size: 0.85rem; padding: 0.22rem 0.38rem;
-    width: 100%; min-height: 36px; font-family: inherit;
-  }
-  .pair-input:focus { outline: none; border-color: var(--accent); }
-  .pair-input.correct { border-color: var(--green); background: #eafaf1; }
-  .pair-input.wrong   { border-color: var(--red);   background: #fdf0ee; }
+/* POST-SIEVE QUESTIONS */
+.qs{margin-top:.65rem;display:none}
+.qcard{background:var(--surface);border-radius:var(--r);padding:.7rem .9rem;margin-bottom:.5rem;
+  border-left:3px solid var(--acc2);box-shadow:0 1px 4px rgba(0,0,0,.07)}
+.qcard-title{font-size:.75rem;color:var(--acc2);font-weight:bold;text-transform:uppercase;
+  letter-spacing:.05em;margin-bottom:.4rem}
+.qtext{font-size:.9rem;line-height:1.55;margin-bottom:.45rem}
+.qtextarea{width:100%;background:var(--surface2);border:2px solid var(--border);border-radius:8px;
+  color:var(--text);font-size:.92rem;padding:.45rem .65rem;font-family:inherit;min-height:72px;resize:vertical}
+.qtextarea:focus{outline:none;border-color:var(--acc)}
+.qtextarea.ok{border-color:var(--green);background:#eafaf1}
+.qtextarea.err{border-color:var(--red);background:#fdf0ee}
+.btnrow{display:flex;gap:.45rem;flex-wrap:wrap;margin-top:.35rem}
+.chkbtn{min-height:44px;padding:.35rem .9rem;background:var(--acc2);color:#fff;border:none;
+  border-radius:8px;font-size:.85rem;font-weight:bold;cursor:pointer;font-family:inherit}
+.chkbtn:active{opacity:.8}
+.clrbtn{min-height:44px;padding:.35rem .8rem;background:#fff;color:var(--red);
+  border:1.5px solid var(--red);border-radius:8px;font-size:.82rem;cursor:pointer;
+  font-family:inherit;display:none}
+.htoggle{background:none;border:1px dashed var(--muted);color:var(--muted);border-radius:7px;
+  padding:.28rem .75rem;font-size:.78rem;cursor:pointer;min-height:36px;font-family:inherit;
+  margin-top:.35rem;width:100%;text-align:left}
+.hcontent{display:none}
+.hcontent.open{display:block}
+.hstep{background:var(--surface2);border-radius:7px;padding:.45rem .65rem;margin-top:.35rem;
+  font-size:.84rem;color:var(--muted);line-height:1.5;border-left:2px solid var(--border)}
+.hstep .hl{font-size:.7rem;color:var(--acc);font-weight:bold;margin-bottom:.15rem}
 
-  .complete-badge {
-    display: inline-flex; align-items: center; gap: 0.35rem;
-    background: #eafaf1; border: 1.5px solid var(--green);
-    color: var(--prime-tx); border-radius: 20px;
-    padding: 0.3rem 0.85rem; font-size: 0.83rem; font-weight: bold; margin-top: 0.4rem;
-  }
+.divrow{display:flex;align-items:center;gap:.45rem;flex-wrap:wrap;margin-bottom:.4rem}
+.ntag{background:var(--acc);color:#fff;font-weight:bold;padding:.18rem .55rem;
+  border-radius:5px;font-size:.85rem;white-space:nowrap}
+.divinput{flex:1;min-width:130px;background:var(--surface2);border:2px solid var(--border);
+  border-radius:8px;color:var(--text);font-size:.92rem;padding:.4rem .55rem;
+  font-family:inherit;min-height:44px}
+.divinput:focus{outline:none;border-color:var(--acc)}
+.divinput.ok{border-color:var(--green);background:#eafaf1}
+.divinput.err{border-color:var(--red);background:#fdf0ee}
 
-  /* ── TREX ── */
-  #trex { position: fixed; bottom: 0.65rem; right: 0.65rem; font-size: 1.2rem; cursor: pointer; z-index: 100; }
-  #trex-tip {
-    position: fixed; bottom: 2.5rem; right: 0.65rem;
-    background: var(--accent); color: #fff;
-    font-size: 0.68rem; font-weight: bold;
-    padding: 0.22rem 0.6rem; border-radius: 6px; display: none; white-space: nowrap;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-  }
+.pair-table{width:100%;border-collapse:collapse;margin-top:.35rem;font-size:.83rem}
+.pair-table th{background:var(--surface2);padding:.3rem .45rem;text-align:left;
+  color:var(--acc2);font-size:.74rem;border-bottom:1px solid var(--border)}
+.pair-table td{padding:.25rem .45rem;border-bottom:1px solid var(--border)}
+.pinput{background:var(--surface2);border:1.5px solid var(--border);border-radius:5px;
+  color:var(--text);font-size:.85rem;padding:.22rem .38rem;width:100%;min-height:36px;font-family:inherit}
+.pinput:focus{outline:none;border-color:var(--acc)}
+.pinput.ok{border-color:var(--green);background:#eafaf1}
+.pinput.err{border-color:var(--red);background:#fdf0ee}
+
+.badge{display:inline-flex;align-items:center;gap:.35rem;background:#eafaf1;
+  border:1.5px solid var(--green);color:var(--ptx);border-radius:20px;
+  padding:.3rem .85rem;font-size:.83rem;font-weight:bold;margin-top:.4rem}
+
+/* ERARBEITUNG card styles */
+.era-step{background:var(--surface);border-radius:var(--r);padding:.75rem .9rem;
+  margin-bottom:.5rem;border-left:4px solid var(--head);
+  box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.era-step-num{display:inline-flex;align-items:center;justify-content:center;
+  width:26px;height:26px;border-radius:50%;background:var(--head);color:#fff;
+  font-weight:bold;font-size:.8rem;flex-shrink:0;margin-right:.4rem}
+.era-q{background:var(--surface2);border-radius:8px;padding:.6rem .8rem;margin-top:.5rem;
+  border:1px solid var(--border)}
+.era-q .qlabel{font-size:.88rem}
+.step-input{background:#fff;border:2px solid var(--border);border-radius:7px;
+  color:var(--text);font-size:.95rem;padding:.35rem .5rem;font-family:inherit;
+  min-height:44px;text-align:center;width:80px}
+.step-input:focus{outline:none;border-color:var(--acc)}
+.step-input.ok{border-color:var(--green);background:#eafaf1}
+.step-input.err{border-color:var(--red);background:#fdf0ee}
+.step-textarea{width:100%;background:#fff;border:2px solid var(--border);border-radius:7px;
+  color:var(--text);font-size:.9rem;padding:.4rem .6rem;font-family:inherit;
+  min-height:64px;resize:vertical}
+.step-textarea:focus{outline:none;border-color:var(--acc)}
+.step-textarea.ok{border-color:var(--green);background:#eafaf1}
+.step-textarea.err{border-color:var(--red);background:#fdf0ee}
+.era-locked{opacity:.45;pointer-events:none}
+
+/* TREX */
+#trex{position:fixed;bottom:.65rem;right:.65rem;font-size:1.2rem;cursor:pointer;z-index:100}
+#trex-tip{position:fixed;bottom:2.5rem;right:.65rem;background:var(--acc);color:#fff;
+  font-size:.68rem;font-weight:bold;padding:.22rem .6rem;border-radius:6px;
+  display:none;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.2)}
 </style>
 </head>
 <body>
 
-<div class="page-header">
+<div class="hdr">
   <h1>Das Sieb des Eratosthenes</h1>
-  <p class="subtitle">Primzahlen selbst entdecken</p>
-  <div class="niveau-tabs">
-    <button class="niveau-btn active" id="btn-G" onclick="switchNiveau('G')">🟡 Grundlagen</button>
-    <button class="niveau-btn locked" id="btn-F" onclick="switchNiveau('F')">🔒 Fortgeschritten</button>
-    <button class="niveau-btn locked" id="btn-P" onclick="switchNiveau('P')">🔒 Profi</button>
+  <p class="sub">Primzahlen selbst entdecken</p>
+  <div class="tabs">
+    <button class="tab active" id="btn-G" onclick="switchTab('G')">🟡 Grundlagen</button>
+    <button class="tab locked"  id="btn-F" onclick="switchTab('F')">🔒 Fortgeschritten</button>
+    <button class="tab locked"  id="btn-P" onclick="switchTab('P')">🔒 Profi</button>
+    <button class="tab locked"  id="btn-E" onclick="switchTab('E')">🔒 ∞ Primzahlen</button>
   </div>
 </div>
 
-<div class="content">
+<div class="card-wrap">
 
-<!-- ===== LEVEL G ===== -->
-<div id="level-G">
-  <!-- Question panel ABOVE sieve -->
-  <div class="q-panel" id="qpanel-G">
-    <div class="q-panel-title">Überprüfung</div>
+<!-- ══════════════════ GRUNDLAGEN ══════════════════ -->
+<div class="card active" id="card-G">
+  <div class="qpanel" id="qpanel-G">
+    <div class="qpanel-title">❓ Überprüfung</div>
     <div id="qpanel-body-G"></div>
   </div>
-  <div class="task-banner"><span id="task-text-G">Klicke auf die <strong>1</strong> – sie ist keine Primzahl.</span></div>
+  <div class="task" id="task-G">Klicke auf die <strong style="margin:0 .2rem">1</strong> – sie ist keine Primzahl.</div>
   <div class="legend">
-    <div class="legend-item"><div class="legend-dot" style="background:var(--surface);border:1px solid var(--border)"></div>offen</div>
-    <div class="legend-item"><div class="legend-dot" style="background:var(--rem-bg)"></div>gestrichen</div>
-    <div class="legend-item"><div class="legend-dot" style="background:var(--prime-bg);border:1px solid var(--prime-bd)"></div>Primzahl</div>
-    <div class="legend-item"><div class="legend-dot" style="background:var(--curp-bg);border:1px solid var(--curp-bd)"></div>aktuelle Primzahl</div>
-    <div style="margin-left:auto"><button class="small-reset" onclick="resetG()">↺ Neu</button></div>
+    <div class="legend" style="gap:.4rem">
+      <span style="display:flex;align-items:center;gap:.25rem"><span class="ldot" style="background:var(--surface);border:1px solid var(--border)"></span>offen</span>
+      <span style="display:flex;align-items:center;gap:.25rem"><span class="ldot" style="background:var(--rbg)"></span>gestrichen</span>
+      <span style="display:flex;align-items:center;gap:.25rem"><span class="ldot" style="background:var(--pbg);border:1px solid var(--pbd)"></span>Primzahl</span>
+      <span style="display:flex;align-items:center;gap:.25rem"><span class="ldot" style="background:var(--cbg);border:1px solid var(--cbd)"></span>aktuelle Primzahl</span>
+      <span style="margin-left:auto"><button class="sreset" onclick="resetG()">↺ Neu</button></span>
+    </div>
   </div>
-  <div class="sieve-wrapper"><div class="sieve-grid" id="grid-G"></div></div>
-  <div class="questions-section" id="qs-G">
-    <div class="q-card">
-      <div class="q-card-title">Aufgabe 1 – Beobachtung</div>
-      <div class="q-text">Was ist das Besondere an den grün markierten Zahlen?</div>
-      <textarea class="q-textarea" id="g-q1" rows="3" placeholder="Schreibe hier …"></textarea>
-      <div class="btn-row">
-        <button class="check-btn" onclick="checkFree('g-q1','g-q1-fb','g-q1-clr',['teiler','primzahl','genau zwei','nur zwei','nicht teilbar','durch sich'])">Prüfen</button>
-        <button class="clear-btn" id="g-q1-clr" onclick="clearTA('g-q1','g-q1-fb','g-q1-clr')">Leeren</button>
+  <div class="sieve-grid" id="grid-G"></div>
+
+  <div class="qs" id="qs-G">
+    <div class="qcard">
+      <div class="qcard-title">Aufgabe 1 – Wie viele Primzahlen?</div>
+      <div class="qtext">Zähle die grün markierten Zahlen. Wie viele Primzahlen gibt es bis 100?</div>
+      <div class="qrow">
+        <span class="qlabel">Anzahl:</span>
+        <input class="numinput" id="g-count" inputmode="numeric" type="text" autocomplete="off">
+        <button class="qbtn" onclick="checkCount()">✓</button>
+      </div>
+      <div id="g-count-fb"></div>
+      <button class="htoggle" onclick="toggleH('h-count')">💡 Tipp</button>
+      <div class="hcontent" id="h-count">
+        <div class="hstep"><div class="hl">Hinweis</div>Zähle systematisch Zeile für Zeile. Oder: Denke daran, dass 2 die einzige gerade Primzahl ist!</div>
+        <div class="hstep"><div class="hl">Lösung</div>Es gibt genau <strong>25</strong> Primzahlen bis 100.</div>
+      </div>
+    </div>
+    <div class="qcard">
+      <div class="qcard-title">Aufgabe 2 – Beobachtung</div>
+      <div class="qtext">Was ist das Besondere an den grün markierten Zahlen?</div>
+      <textarea class="qtextarea" id="g-q1" rows="3" placeholder="Schreibe hier …"></textarea>
+      <div class="btnrow">
+        <button class="chkbtn" onclick="checkFree('g-q1','g-q1-fb','g-q1-clr',['teiler','primzahl','genau zwei','nur zwei','nicht teilbar','durch sich'])">Prüfen</button>
+        <button class="clrbtn" id="g-q1-clr" onclick="clearTA('g-q1','g-q1-fb','g-q1-clr')">Leeren</button>
       </div>
       <div id="g-q1-fb"></div>
-      <button class="hint-toggle" onclick="toggleHint('h-g-q1')">💡 Tipp</button>
-      <div class="hint-content" id="h-g-q1">
-        <div class="hint-step"><div class="hl">Hinweis 1</div>Versuche, eine grüne Zahl durch andere zu teilen – was fällt auf?</div>
-        <div class="hint-step"><div class="hl">Hinweis 2</div>Wie viele Teiler hat z.B. 7 oder 13?</div>
-        <div class="hint-step"><div class="hl">Lösung</div>Die übrigen Zahlen sind <strong>Primzahlen</strong> – sie haben genau zwei Teiler: 1 und sich selbst.</div>
+      <button class="htoggle" onclick="toggleH('h-g-q1')">💡 Tipp</button>
+      <div class="hcontent" id="h-g-q1">
+        <div class="hstep"><div class="hl">Hinweis 1</div>Versuche, eine grüne Zahl durch andere zu teilen – was fällt auf?</div>
+        <div class="hstep"><div class="hl">Hinweis 2</div>Wie viele Teiler hat z.B. 7 oder 13?</div>
+        <div class="hstep"><div class="hl">Lösung</div>Die übrigen Zahlen sind <strong>Primzahlen</strong> – sie haben genau zwei Teiler: 1 und sich selbst.</div>
       </div>
     </div>
-    <div class="q-card">
-      <div class="q-card-title">Aufgabe 2 – Teilermenge</div>
-      <div class="q-text">Notiere die Teilermenge, z.B. <code>T(6) = {1, 2, 3, 6}</code></div>
-      <div class="divisor-row"><span class="num-tag">T(12)</span><input class="divisor-input" id="d12" placeholder="{ … }"><button class="q-btn" onclick="checkDiv('d12','d12-fb','d12-clr',[1,2,3,4,6,12])">✓</button><button class="clear-btn" id="d12-clr" onclick="clearDiv('d12','d12-fb','d12-clr')">✕</button></div>
+    <div class="qcard">
+      <div class="qcard-title">Aufgabe 3 – Teilermenge</div>
+      <div class="qtext">Notiere die Teilermenge, z.B. <code>T(6) = {1, 2, 3, 6}</code></div>
+      <div class="divrow"><span class="ntag">T(12)</span><input class="divinput" id="d12" placeholder="{ … }"><button class="qbtn" onclick="checkDiv('d12','d12-fb','d12-clr',[1,2,3,4,6,12])">✓</button><button class="clrbtn" id="d12-clr" onclick="clearDiv('d12','d12-fb','d12-clr')">✕</button></div>
       <div id="d12-fb"></div>
-      <div class="divisor-row"><span class="num-tag">T(17)</span><input class="divisor-input" id="d17" placeholder="{ … }"><button class="q-btn" onclick="checkDiv('d17','d17-fb','d17-clr',[1,17])">✓</button><button class="clear-btn" id="d17-clr" onclick="clearDiv('d17','d17-fb','d17-clr')">✕</button></div>
+      <div class="divrow"><span class="ntag">T(17)</span><input class="divinput" id="d17" placeholder="{ … }"><button class="qbtn" onclick="checkDiv('d17','d17-fb','d17-clr',[1,17])">✓</button><button class="clrbtn" id="d17-clr" onclick="clearDiv('d17','d17-fb','d17-clr')">✕</button></div>
       <div id="d17-fb"></div>
-      <div class="divisor-row"><span class="num-tag">T(36)</span><input class="divisor-input" id="d36" placeholder="{ … }"><button class="q-btn" onclick="checkDiv('d36','d36-fb','d36-clr',[1,2,3,4,6,9,12,18,36])">✓</button><button class="clear-btn" id="d36-clr" onclick="clearDiv('d36','d36-fb','d36-clr')">✕</button></div>
+      <div class="divrow"><span class="ntag">T(36)</span><input class="divinput" id="d36" placeholder="{ … }"><button class="qbtn" onclick="checkDiv('d36','d36-fb','d36-clr',[1,2,3,4,6,9,12,18,36])">✓</button><button class="clrbtn" id="d36-clr" onclick="clearDiv('d36','d36-fb','d36-clr')">✕</button></div>
       <div id="d36-fb"></div>
-      <div class="divisor-row"><span class="num-tag">T(97)</span><input class="divisor-input" id="d97" placeholder="{ … }"><button class="q-btn" onclick="checkDiv('d97','d97-fb','d97-clr',[1,97])">✓</button><button class="clear-btn" id="d97-clr" onclick="clearDiv('d97','d97-fb','d97-clr')">✕</button></div>
+      <div class="divrow"><span class="ntag">T(97)</span><input class="divinput" id="d97" placeholder="{ … }"><button class="qbtn" onclick="checkDiv('d97','d97-fb','d97-clr',[1,97])">✓</button><button class="clrbtn" id="d97-clr" onclick="clearDiv('d97','d97-fb','d97-clr')">✕</button></div>
       <div id="d97-fb"></div>
-      <button class="hint-toggle" onclick="toggleHint('h-div')">💡 Was ist eine Teilermenge?</button>
-      <div class="hint-content" id="h-div">
-        <div class="hint-step"><div class="hl">Erklärung</div>T(n) enthält alle Zahlen, durch die n ohne Rest teilbar ist.</div>
-        <div class="hint-step"><div class="hl">Tipp</div>Teiler kommen paarweise – du musst nur bis zur Hälfte prüfen!</div>
+      <button class="htoggle" onclick="toggleH('h-div')">💡 Was ist eine Teilermenge?</button>
+      <div class="hcontent" id="h-div">
+        <div class="hstep"><div class="hl">Erklärung</div>T(n) enthält alle Zahlen, durch die n ohne Rest teilbar ist.</div>
+        <div class="hstep"><div class="hl">Tipp</div>Teiler kommen paarweise – du musst nur bis zur Hälfte prüfen!</div>
       </div>
     </div>
-    <div id="g-done-badge" style="display:none"><div class="complete-badge">✅ Grundlagen fertig! Fortgeschritten freigeschaltet.</div></div>
+    <div id="g-done-badge" style="display:none"><div class="badge">✅ Grundlagen fertig! Fortgeschritten &amp; ∞ freigeschaltet.</div></div>
   </div>
 </div>
 
-<!-- ===== LEVEL F ===== -->
-<div id="level-F" style="display:none">
-  <div class="task-banner"><span id="task-text-F">Sieb wird auf 150 erweitert – klicke weiter!</span></div>
+<!-- ══════════════════ FORTGESCHRITTEN ══════════════════ -->
+<div class="card" id="card-F">
+  <div class="task" id="task-F">Sieb bis 100 – alle Vielfachen bereits gestrichen. Suche die Primzahlzwillinge!</div>
   <div class="legend">
-    <div class="legend-item"><div class="legend-dot" style="background:var(--surface);border:1px solid var(--border)"></div>offen</div>
-    <div class="legend-item"><div class="legend-dot" style="background:var(--rem-bg)"></div>gestrichen</div>
-    <div class="legend-item"><div class="legend-dot" style="background:var(--prime-bg);border:1px solid var(--prime-bd)"></div>Primzahl</div>
-    <div class="legend-item"><div class="legend-dot" style="background:var(--curp-bg);border:1px solid var(--curp-bd)"></div>aktuelle Primzahl</div>
+    <span style="display:flex;align-items:center;gap:.25rem"><span class="ldot" style="background:var(--pbg);border:1px solid var(--pbd)"></span>Primzahl</span>
+    <span style="display:flex;align-items:center;gap:.25rem"><span class="ldot" style="background:var(--rbg)"></span>gestrichen</span>
   </div>
-  <div class="sieve-wrapper"><div class="sieve-grid" id="grid-F"></div></div>
-  <div class="questions-section" id="qs-F">
-    <div class="q-card">
-      <div class="q-card-title">Primzahlzwillinge bis 150</div>
-      <div class="q-text"><strong>Primzahlzwillinge</strong> sind zwei Primzahlen mit Abstand 2 – z.B. (11 | 13). Finde alle bis 150!</div>
+  <div class="sieve-grid" id="grid-F"></div>
+  <div class="qs" id="qs-F">
+    <div class="qcard">
+      <div class="qcard-title">Primzahlzwillinge bis 100</div>
+      <div class="qtext"><strong>Primzahlzwillinge</strong> sind zwei Primzahlen mit Abstand 2 – z.B. (11 | 13). Finde alle bis 100!</div>
       <table class="pair-table">
         <thead><tr><th>#</th><th>Kleinere Primzahl</th><th>Größere Primzahl</th></tr></thead>
         <tbody id="twins-tbody"></tbody>
       </table>
-      <div class="btn-row" style="margin-top:0.45rem">
-        <button class="check-btn" onclick="checkTwins()">Alle prüfen</button>
-        <button class="q-btn" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);font-weight:normal" onclick="addTwinRow()">+ Zeile</button>
+      <div class="btnrow" style="margin-top:.45rem">
+        <button class="chkbtn" onclick="checkTwins()">Alle prüfen</button>
+        <button class="qbtn" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);font-weight:normal" onclick="addTwinRow()">+ Zeile</button>
       </div>
       <div id="twins-fb"></div>
-      <button class="hint-toggle" onclick="toggleHint('h-twins')">💡 Tipp</button>
-      <div class="hint-content" id="h-twins">
-        <div class="hint-step"><div class="hl">Hinweis</div>Welche zwei grünen Zahlen haben genau Abstand 2?</div>
-        <div class="hint-step"><div class="hl">Lösung</div>(3|5),(5|7),(11|13),(17|19),(29|31),(41|43),(59|61),(71|73),(101|103),(107|109),(137|139),(149|151) – aber 151 liegt außerhalb des Siebs, also bis 150: (3|5),(5|7),(11|13),(17|19),(29|31),(41|43),(59|61),(71|73),(101|103),(107|109),(137|139)</div>
+      <button class="htoggle" onclick="toggleH('h-twins')">💡 Tipp</button>
+      <div class="hcontent" id="h-twins">
+        <div class="hstep"><div class="hl">Hinweis</div>Welche zwei grünen Zahlen haben genau Abstand 2?</div>
+        <div class="hstep"><div class="hl">Lösung</div>(3|5), (5|7), (11|13), (17|19), (29|31), (41|43), (59|61), (71|73)</div>
       </div>
     </div>
-    <div id="f-done-badge" style="display:none"><div class="complete-badge">✅ Fortgeschritten fertig! Profi freigeschaltet.</div></div>
+    <div id="f-done-badge" style="display:none"><div class="badge">✅ Fortgeschritten fertig! Profi freigeschaltet.</div></div>
   </div>
 </div>
 
-<!-- ===== LEVEL P ===== -->
-<div id="level-P" style="display:none">
-  <div class="task-banner"><span id="task-text-P">Sieb wird auf 150 erweitert – klicke weiter!</span></div>
+<!-- ══════════════════ PROFI ══════════════════ -->
+<div class="card" id="card-P">
+  <div class="task" id="task-P">Sieb bis 100 – alle Primzahlen markiert. Untersuche Primzahl-Drillinge!</div>
   <div class="legend">
-    <div class="legend-item"><div class="legend-dot" style="background:var(--surface);border:1px solid var(--border)"></div>offen</div>
-    <div class="legend-item"><div class="legend-dot" style="background:var(--rem-bg)"></div>gestrichen</div>
-    <div class="legend-item"><div class="legend-dot" style="background:var(--prime-bg);border:1px solid var(--prime-bd)"></div>Primzahl</div>
-    <div class="legend-item"><div class="legend-dot" style="background:var(--curp-bg);border:1px solid var(--curp-bd)"></div>aktuelle Primzahl</div>
+    <span style="display:flex;align-items:center;gap:.25rem"><span class="ldot" style="background:var(--pbg);border:1px solid var(--pbd)"></span>Primzahl</span>
+    <span style="display:flex;align-items:center;gap:.25rem"><span class="ldot" style="background:var(--rbg)"></span>gestrichen</span>
   </div>
-  <div class="sieve-wrapper"><div class="sieve-grid" id="grid-P"></div></div>
-  <div class="questions-section" id="qs-P">
-    <div class="q-card">
-      <div class="q-card-title">Aufgabe 1 – Primzahl-Drillinge</div>
-      <div class="q-text"><strong>Primzahl-Drillinge</strong> wären (p | p+2 | p+4). Gibt es solche für p &gt; 5? Was beobachtest du?</div>
-      <textarea class="q-textarea" id="p-q1" rows="3" placeholder="Schreibe hier …"></textarea>
-      <div class="btn-row">
-        <button class="check-btn" onclick="checkFree('p-q1','p-q1-fb','p-q1-clr',['nein','keine','nicht','gibt es nicht','durch 3','unmöglich'])">Prüfen</button>
-        <button class="clear-btn" id="p-q1-clr" onclick="clearTA('p-q1','p-q1-fb','p-q1-clr')">Leeren</button>
+  <div class="sieve-grid" id="grid-P"></div>
+  <div class="qs" id="qs-P">
+    <div class="qcard">
+      <div class="qcard-title">Aufgabe 1 – Primzahl-Drillinge</div>
+      <div class="qtext"><strong>Primzahl-Drillinge</strong> wären (p | p+2 | p+4). Gibt es solche für p &gt; 5? Was beobachtest du?</div>
+      <textarea class="qtextarea" id="p-q1" rows="3" placeholder="Schreibe hier …"></textarea>
+      <div class="btnrow">
+        <button class="chkbtn" onclick="checkFree('p-q1','p-q1-fb','p-q1-clr',['nein','keine','nicht','gibt es nicht','durch 3','unmöglich'])">Prüfen</button>
+        <button class="clrbtn" id="p-q1-clr" onclick="clearTA('p-q1','p-q1-fb','p-q1-clr')">Leeren</button>
       </div>
       <div id="p-q1-fb"></div>
-      <button class="hint-toggle" onclick="toggleHint('h-p1')">💡 Tipp</button>
-      <div class="hint-content" id="h-p1">
-        <div class="hint-step"><div class="hl">Hinweis</div>Prüfe z.B. 5, 7, 9 – ist 9 grün? Oder 11, 13, 15?</div>
-        <div class="hint-step"><div class="hl">Lösung</div>Für p &gt; 5 gibt es keine Drillinge: von drei aufeinanderfolgenden ungeraden Zahlen ist immer genau eine durch 3 teilbar.</div>
+      <button class="htoggle" onclick="toggleH('h-p1')">💡 Tipp</button>
+      <div class="hcontent" id="h-p1">
+        <div class="hstep"><div class="hl">Hinweis</div>Prüfe z.B. 5, 7, 9 – ist 9 grün? Oder 11, 13, 15?</div>
+        <div class="hstep"><div class="hl">Lösung</div>Für p &gt; 5 gibt es keine Drillinge: von drei aufeinanderfolgenden ungeraden Zahlen ist immer genau eine durch 3 teilbar.</div>
       </div>
     </div>
-    <div class="q-card">
-      <div class="q-card-title">Aufgabe 2 – Warum klappt es nicht?</div>
-      <div class="q-text">Erkläre mathematisch: Warum können (p | p+2 | p+4) nicht alle Primzahlen sein (außer 3, 5, 7)?</div>
-      <textarea class="q-textarea" id="p-q2" rows="3" placeholder="Begründe …"></textarea>
-      <div class="btn-row">
-        <button class="check-btn" onclick="checkFree('p-q2','p-q2-fb','p-q2-clr',['durch 3','quersumme','vielfaches','rest','immer eine','genau eine'])">Prüfen</button>
-        <button class="clear-btn" id="p-q2-clr" onclick="clearTA('p-q2','p-q2-fb','p-q2-clr')">Leeren</button>
+    <div class="qcard">
+      <div class="qcard-title">Aufgabe 2 – Warum klappt es nicht?</div>
+      <div class="qtext">Erkläre mathematisch: Warum können (p | p+2 | p+4) nicht alle Primzahlen sein (außer 3, 5, 7)?</div>
+      <textarea class="qtextarea" id="p-q2" rows="3" placeholder="Begründe …"></textarea>
+      <div class="btnrow">
+        <button class="chkbtn" onclick="checkFree('p-q2','p-q2-fb','p-q2-clr',['durch 3','quersumme','vielfaches','rest','immer eine','genau eine'])">Prüfen</button>
+        <button class="clrbtn" id="p-q2-clr" onclick="clearTA('p-q2','p-q2-fb','p-q2-clr')">Leeren</button>
       </div>
       <div id="p-q2-fb"></div>
-      <button class="hint-toggle" onclick="toggleSingleHint('h-p2-1')" id="btn-h-p2-1">💡 Tipp 1 – Ausprobieren</button>
-      <div class="hint-content" id="h-p2-1">
-        <div class="hint-step"><div class="hl">Schritt 1</div>Notiere drei aufeinanderfolgende ungerade Zahlen, z.B. 9, 11, 13 oder 15, 17, 19. Berechne die Quersumme jeder der drei Zahlen.</div>
+      <button class="htoggle" id="btn-h-p2-1" onclick="toggleSingleH('h-p2-1')">💡 Tipp 1 – Ausprobieren</button>
+      <div class="hcontent" id="h-p2-1">
+        <div class="hstep"><div class="hl">Schritt 1</div>Notiere drei aufeinanderfolgende ungerade Zahlen, z.B. 9, 11, 13. Berechne die Quersumme jeder der drei Zahlen.</div>
       </div>
-      <button class="hint-toggle" id="btn-h-p2-2" style="display:none" onclick="toggleSingleHint('h-p2-2')">💡 Tipp 2 – Muster erkennen</button>
-      <div class="hint-content" id="h-p2-2">
-        <div class="hint-step"><div class="hl">Schritt 2</div>Fällt dir auf, dass bei jeder Dreierkette immer genau eine Quersumme durch 3 teilbar ist? Das ist kein Zufall!</div>
+      <button class="htoggle" id="btn-h-p2-2" style="display:none" onclick="toggleSingleH('h-p2-2')">💡 Tipp 2 – Muster erkennen</button>
+      <div class="hcontent" id="h-p2-2">
+        <div class="hstep"><div class="hl">Schritt 2</div>Fällt dir auf, dass bei jeder Dreierkette immer genau eine Quersumme durch 3 teilbar ist? Das ist kein Zufall!</div>
       </div>
-      <button class="hint-toggle" id="btn-h-p2-3" style="display:none" onclick="toggleSingleHint('h-p2-3')">💡 Tipp 3 – Vollständige Begründung</button>
-      <div class="hint-content" id="h-p2-3">
-        <div class="hint-step"><div class="hl">Vollständige Begründung</div>Drei aufeinanderfolgende ungerade Zahlen lassen sich schreiben als n, n+2, n+4. Ihre Reste bei Division durch 3 sind stets {0, 1, 2} – also ist genau eine davon durch 3 teilbar. Ein Vielfaches von 3, das größer als 3 ist, kann keine Primzahl sein.</div>
+      <button class="htoggle" id="btn-h-p2-3" style="display:none" onclick="toggleSingleH('h-p2-3')">💡 Tipp 3 – Vollständige Begründung</button>
+      <div class="hcontent" id="h-p2-3">
+        <div class="hstep"><div class="hl">Vollständige Begründung</div>Drei aufeinanderfolgende ungerade Zahlen lassen sich schreiben als n, n+2, n+4. Ihre Reste bei Division durch 3 sind stets {0, 1, 2} – also ist genau eine davon durch 3 teilbar. Ein Vielfaches von 3, das größer als 3 ist, kann keine Primzahl sein.</div>
       </div>
     </div>
-    <div id="p-done-badge" style="display:none"><div class="complete-badge">✅ Profi abgeschlossen! 🏆</div></div>
+    <div id="p-done-badge" style="display:none"><div class="badge">✅ Profi abgeschlossen! 🏆</div></div>
   </div>
 </div>
 
-</div><!-- /content -->
+<!-- ══════════════════ ERARBEITUNG: UNENDLICH VIELE PRIMZAHLEN ══════════════════ -->
+<div class="card" id="card-E">
+  <div class="era-hdr">
+    <strong>Gibt es unendlich viele Primzahlen?</strong><br>
+    Eine Frage, die Menschen seit über 2000 Jahren beschäftigt – und die du jetzt selbst erkunden kannst.
+  </div>
+
+  <!-- Schritt 1 -->
+  <div class="era-step" id="era-s1">
+    <div style="font-size:.9rem;line-height:1.6;margin-bottom:.5rem">
+      <span class="era-step-num">1</span>
+      <strong>Schaue dir die Primzahlen bis 100 an.</strong> Werden sie mit zunehmender Größe häufiger oder seltener?
+    </div>
+    <div class="era-q">
+      <div class="qrow">
+        <span class="qlabel" style="font-size:.88rem">Wie viele Primzahlen gibt es zwischen 1 und 50?</span>
+        <input class="step-input" id="e-s1a" inputmode="numeric" type="text">
+        <button class="qbtn" onclick="checkEraStep('e-s1a',15,'e-s1a-fb')">✓</button>
+      </div>
+      <div id="e-s1a-fb"></div>
+      <div class="qrow" style="margin-top:.4rem">
+        <span class="qlabel" style="font-size:.88rem">Wie viele Primzahlen gibt es zwischen 51 und 100?</span>
+        <input class="step-input" id="e-s1b" inputmode="numeric" type="text">
+        <button class="qbtn" onclick="checkEraStep('e-s1b',10,'e-s1b-fb')">✓</button>
+      </div>
+      <div id="e-s1b-fb"></div>
+    </div>
+    <div id="era-s1-next" style="display:none">
+      <div class="fb ok" style="margin-top:.5rem">✅ Genau! In der zweiten Hälfte gibt es weniger Primzahlen – sie werden mit zunehmender Größe <strong>seltener</strong>. Aber hören sie irgendwann ganz auf?</div>
+      <button class="qbtn" style="margin-top:.5rem" onclick="eraUnlock(2)">Weiter →</button>
+    </div>
+  </div>
+
+  <!-- Schritt 2 -->
+  <div class="era-step era-locked" id="era-s2">
+    <div style="font-size:.9rem;line-height:1.6;margin-bottom:.5rem">
+      <span class="era-step-num">2</span>
+      <strong>Euklids Idee (ca. 300 v. Chr.):</strong> Angenommen, es gäbe nur endlich viele Primzahlen. Nenn sie p₁, p₂, …, pₙ. Dann bilde die Zahl:<br>
+      <div style="text-align:center;font-size:1.05rem;margin:.5rem 0;padding:.4rem;background:var(--surface2);border-radius:6px">
+        M = p₁ · p₂ · … · pₙ + 1
+      </div>
+      M ist entweder selbst eine Primzahl – oder hat einen Primteiler. Was gilt für diesen Primteiler?
+    </div>
+    <div class="era-q">
+      <textarea class="step-textarea" id="e-s2" rows="2" placeholder="Was fällt dir auf? Kann dieser Primteiler in der Liste p₁ … pₙ stehen?"></textarea>
+      <div class="btnrow">
+        <button class="qbtn" onclick="checkEraFree('e-s2','e-s2-fb',['nicht','nein','rest 1','teilt nicht','neu','außerhalb','fehlt'])">Prüfen</button>
+        <button class="clrbtn" id="e-s2-clr" style="display:none" onclick="clearEra('e-s2','e-s2-fb','e-s2-clr')">Leeren</button>
+      </div>
+      <div id="e-s2-fb"></div>
+    </div>
+    <div id="era-s2-next" style="display:none">
+      <div class="fb ok" style="margin-top:.5rem">✅ Richtig! Jede Primzahl aus der Liste teilt M−1, also lässt M bei Division durch sie den Rest 1 – kein Primteiler aus der Liste teilt M. Also muss es eine neue Primzahl geben, die nicht in der Liste stand. Widerspruch!</div>
+      <button class="htoggle" onclick="toggleH('h-euklid')" style="margin-top:.4rem">💡 Beispiel nachrechnen</button>
+      <div class="hcontent" id="h-euklid">
+        <div class="hstep"><div class="hl">Beispiel</div>Angenommen, die einzigen Primzahlen wären 2, 3, 5. Dann: M = 2·3·5 + 1 = 31. Ist 31 durch 2, 3 oder 5 teilbar? Nein! 31 ist selbst eine Primzahl – und stand nicht in der Liste. Die Liste war also unvollständig.</div>
+      </div>
+      <button class="qbtn" style="margin-top:.5rem" onclick="eraUnlock(3)">Weiter →</button>
+    </div>
+  </div>
+
+  <!-- Schritt 3 -->
+  <div class="era-step era-locked" id="era-s3">
+    <div style="font-size:.9rem;line-height:1.6;margin-bottom:.5rem">
+      <span class="era-step-num">3</span>
+      <strong>Der Widerspruch:</strong> Egal welche endliche Liste von Primzahlen wir aufstellen – Euklids Konstruktion liefert immer eine Zahl, die einen <em>neuen</em> Primteiler haben muss. Die Liste kann also nie vollständig sein.
+    </div>
+    <div class="era-q">
+      <div style="font-size:.88rem;margin-bottom:.4rem">Was folgt daraus?</div>
+      <div class="mcrow" id="mc-era-s3">
+        <button class="mcbtn" onclick="checkEraMC(0)">Es gibt endlich viele Primzahlen.</button>
+        <button class="mcbtn" onclick="checkEraMC(1)">Es gibt unendlich viele Primzahlen.</button>
+        <button class="mcbtn" onclick="checkEraMC(2)">Man kann keine Aussage treffen.</button>
+      </div>
+      <div id="mc-era-s3-fb"></div>
+    </div>
+    <div id="era-s3-next" style="display:none">
+      <div class="fb ok" style="margin-top:.5rem">🎉 Genau! Euklid hat damit bewiesen: Es gibt <strong>unendlich viele Primzahlen</strong>. Dieser Beweis ist über 2300 Jahre alt – und gilt heute noch.</div>
+      <div class="era-q" style="margin-top:.5rem;font-size:.88rem;line-height:1.6">
+        <strong>Übrigens:</strong> Primzahlen werden zwar immer seltener, aber sie hören nie auf. Mathematiker suchen bis heute nach immer größeren Primzahlen – die derzeit größte bekannte Primzahl hat über 41 Millionen Stellen!
+      </div>
+    </div>
+  </div>
+
+</div><!-- /card-E -->
+
+</div><!-- /card-wrap -->
 
 <div id="trex" onclick="trexClick()">🦖</div>
 <div id="trex-tip">Made by Mathedino</div>
 
 <script>
-// ================================================================
-const LIMITS = { G:200, F:150, P:150 };
-const MANUAL_CLICKS = 5;
+// ════════════════════════════════════════════════
+// SIEVE ENGINE  (G: interactive 1-100, F/P: pre-built)
+// ════════════════════════════════════════════════
+const LIMIT = 100;
+const MANUAL = 5;
 
-const st = {}; // num -> 'active'|'removed'|'removed1'|'prime'|'curprime'
-const lvl = {
-  G: { phase:'remove1', curP:2, clickCount:0, done:false, initialized:true  },
-  F: { phase:'wait',    curP:null, clickCount:0, done:false, initialized:false },
-  P: { phase:'wait',    curP:null, clickCount:0, done:false, initialized:false }
-};
-let currentNiveau = 'G';
+const st = {}; // 1..100 -> 'active'|'removed'|'removed1'|'prime'|'curprime'
+const Gs = { phase:'remove1', curP:2, clicks:0 };
 let autoRunning = false;
+let currentTab = 'G';
 
 function isPrime(n){ if(n<2)return false; for(let i=2;i*i<=n;i++)if(n%i===0)return false; return true; }
 
-// ================================================================
-// INIT
-// ================================================================
+// ── INIT ──
 function initAll(){
-  for(let i=1;i<=400;i++) st[i]='active';
-  buildGrid('G');
-  buildGrid('F');
-  buildGrid('P');
-  for(let i=0;i<8;i++) addTwinRow();
+  for(let i=1;i<=LIMIT;i++) st[i]='active';
+  buildGrid('G', true);   // interactive
+  buildGrid('F', false);  // display only
+  buildGrid('P', false);  // display only
+  preFill('F'); preFill('P');
+  // show F/P questions immediately (sieve already done)
+  document.getElementById('qs-F').style.display='block';
+  document.getElementById('qs-P').style.display='block';
+  for(let i=0;i<5;i++) addTwinRow();
 }
 
-function buildGrid(lv){
-  const limit = LIMITS[lv];
-  const grid  = document.getElementById('grid-'+lv);
-  grid.innerHTML = '';
-  // G=200 cells (20 cols, 10 rows) → cells are narrower → use slightly smaller font
-  // F/P=150 cells (20 cols, 7.5 rows) → cells can be bigger
-  const fs = lv==='G' ? 'clamp(9px,2.6vw,14px)' : 'clamp(10px,3.0vw,16px)';
-  for(let i=1;i<=limit;i++){
-    const c = document.createElement('div');
-    c.className = 'sieve-cell';
-    c.id = 'c'+lv+i;
-    c.textContent = i;
-    c.style.fontSize = fs;
-    const num=i, l=lv;
-    c.addEventListener('touchend', e=>{ e.preventDefault(); handleClick(l,num); });
-    c.addEventListener('click', ()=>handleClick(l,num));
-    grid.appendChild(c);
+function buildGrid(lv, interactive){
+  const g = document.getElementById('grid-'+lv);
+  g.innerHTML='';
+  for(let i=1;i<=LIMIT;i++){
+    const c=document.createElement('div');
+    c.className='sc'; c.id='c'+lv+i; c.textContent=i;
+    if(interactive){
+      c.addEventListener('touchend',e=>{e.preventDefault();handleClick(i);});
+      c.addEventListener('click',()=>handleClick(i));
+    }
+    g.appendChild(c);
   }
   syncGrid(lv);
+}
+
+function preFill(lv){
+  // Instantly sieve everything
+  for(let i=1;i<=LIMIT;i++) {
+    const c=document.getElementById('c'+lv+i);
+    if(!c)continue;
+    if(i===1){ c.className='sc removed1'; continue; }
+    c.className = isPrime(i) ? 'sc prime' : 'sc removed';
+  }
 }
 
 function syncGrid(lv){
-  const limit = LIMITS[lv];
-  const phase = lvl[lv].phase;
-  const curP  = lvl[lv].curP;
-  const fs    = lv==='G' ? 'clamp(9px,2.6vw,14px)' : 'clamp(10px,3.0vw,16px)';
-  for(let i=1;i<=limit;i++){
-    const c = document.getElementById('c'+lv+i);
-    if(!c) continue;
-    c.className = 'sieve-cell';
-    c.style.fontSize = fs;
-    const s = st[i];
-    if(s==='removed')      c.classList.add('removed');
-    else if(s==='removed1') c.classList.add('removed-1');
-    else if(s==='prime')   c.classList.add('prime-found');
-    else if(s==='curprime') c.classList.add('current-prime');
+  for(let i=1;i<=LIMIT;i++){
+    const c=document.getElementById('c'+lv+i); if(!c)continue;
+    c.className='sc';
+    const s=st[i];
+    if(s==='removed')  c.classList.add('removed');
+    else if(s==='removed1') c.classList.add('removed1');
+    else if(s==='prime')    c.classList.add('prime');
+    else if(s==='curprime') c.classList.add('curprime');
+    // clickable?
     if(s==='active'){
-      if(phase==='remove1' && i===1) c.classList.add('clickable');
-      if(phase==='multiples' && i!==curP && i%curP===0) c.classList.add('clickable');
+      if(Gs.phase==='remove1' && i===1) c.classList.add('clickable');
+      if(Gs.phase==='multiples' && i!==Gs.curP && i%Gs.curP===0) c.classList.add('clickable');
     }
   }
 }
 
-// ================================================================
-// CLICK
-// ================================================================
-function handleClick(lv, n){
-  if(lv !== currentNiveau) return;
-  if(autoRunning) return;
-  const L = lvl[lv];
-  if(L.phase === 'remove1'){
-    if(n===1){ st[1]='removed1'; syncGrid(lv); startMultiples(lv,2); }
-    else shakeCell(lv,n);
+// ── CLICK ──
+function handleClick(n){
+  if(currentTab!=='G'||autoRunning) return;
+  if(Gs.phase==='remove1'){
+    if(n===1){ st[1]='removed1'; syncGrid('G'); startMultiples(2); }
+    else shakeCell('G',n);
     return;
   }
-  if(L.phase === 'multiples'){
-    const p = L.curP;
-    if(st[n]==='active' && n!==p && n%p===0){
+  if(Gs.phase==='multiples'){
+    const p=Gs.curP;
+    if(st[n]==='active'&&n!==p&&n%p===0){
       st[n]='removed';
-      const c=cell(lv,n); c.classList.remove('clickable'); c.classList.add('removed');
-      L.clickCount++;
-      if(L.clickCount >= MANUAL_CLICKS) autoCompleteMultiples(lv,p);
-      else { syncGrid(lv); updateTask(lv,p,L.clickCount); }
-    } else if(st[n]==='active') shakeCell(lv,n);
+      const c=document.getElementById('cG'+n);
+      c.className='sc removed';
+      Gs.clicks++;
+      if(Gs.clicks>=MANUAL) autoComplete(p);
+      else{ syncGrid('G'); setTask('G',`Noch <strong>${MANUAL-Gs.clicks}</strong> Vielfache von <strong>${p}</strong> anklicken …`); }
+    } else if(st[n]==='active') shakeCell('G',n);
   }
 }
 
-function cell(lv,n){ return document.getElementById('c'+lv+n); }
 function shakeCell(lv,n){
-  const c=cell(lv,n); if(!c)return;
-  c.classList.add('wrong-click');
-  setTimeout(()=>c.classList.remove('wrong-click'),300);
-}
-function updateTask(lv, p, clicked){
-  const rem = MANUAL_CLICKS - clicked;
-  setTask(lv, `Noch <strong>${rem}</strong> Vielfache von <strong>${p}</strong> anklicken …`);
+  const c=document.getElementById('c'+lv+n); if(!c)return;
+  c.classList.add('wrongclick');
+  setTimeout(()=>c.classList.remove('wrongclick'),300);
 }
 
-// ================================================================
-// MULTIPLES
-// ================================================================
-function startMultiples(lv, p){
-  const L = lvl[lv];
-  const limit = LIMITS[lv];
+function startMultiples(p){
   if(st[p]==='active') st[p]='curprime';
-  L.curP=p; L.phase='multiples'; L.clickCount=0;
-  syncGrid(lv);
-  setTask(lv, `Klicke die ersten <strong>5 Vielfachen von ${p}</strong> weg: ${p*2}, ${p*3}, ${p*4}, ${p*5}, ${p*6}`);
+  Gs.curP=p; Gs.phase='multiples'; Gs.clicks=0;
+  syncGrid('G');
+  setTask('G',`Klicke die ersten <strong>5 Vielfachen von ${p}</strong> weg: ${p*2}, ${p*3}, ${p*4}, ${p*5}, ${p*6}`);
   let active=0;
-  for(let m=p*2;m<=limit;m+=p) if(st[m]==='active') active++;
-  if(active===0) afterMultiples(lv,p);
-  else if(active<MANUAL_CLICKS) autoCompleteMultiples(lv,p);
+  for(let m=p*2;m<=LIMIT;m+=p) if(st[m]==='active') active++;
+  if(active===0) afterMultiples(p);
+  else if(active<MANUAL) autoComplete(p);
 }
 
-function autoCompleteMultiples(lv, p){
+function autoComplete(p){
   autoRunning=true;
-  const limit=LIMITS[lv];
   const toRemove=[];
-  for(let m=p*2;m<=limit;m+=p) if(st[m]==='active') toRemove.push(m);
+  for(let m=p*2;m<=LIMIT;m+=p) if(st[m]==='active') toRemove.push(m);
+  setTask('G',`Die restlichen Vielfachen von <strong>${p}</strong> werden automatisch gestrichen …`);
   let i=0;
-  setTask(lv,`Die restlichen Vielfachen von <strong>${p}</strong> werden automatisch gestrichen …`);
   function next(){
-    if(i>=toRemove.length){ autoRunning=false; afterMultiples(lv,p); return; }
+    if(i>=toRemove.length){ autoRunning=false; afterMultiples(p); return; }
     const n=toRemove[i++];
     st[n]='removed';
-    const c=cell(lv,n);
-    if(c){
-      const fs=lv==='G'?'clamp(9px,2.6vw,14px)':'clamp(10px,3.0vw,16px)';
-      c.classList.add('auto-remove');
-      setTimeout(()=>{ c.className='sieve-cell removed'; c.style.fontSize=fs; },400);
-    }
-    setTimeout(next, Math.max(18, 55-toRemove.length));
+    const c=document.getElementById('cG'+n);
+    if(c){ c.classList.add('autoremove'); setTimeout(()=>c.className='sc removed',400); }
+    setTimeout(next, Math.max(18,55-toRemove.length));
   }
   next();
 }
 
-// ================================================================
-// AFTER MULTIPLES
-// ================================================================
-function afterMultiples(lv, p){
-  lvl[lv].phase='check';
-  syncGrid(lv);
-  if(lv==='G'){
-    showCheckPanel(p);
-  } else {
-    // No check panel for F/P – auto-advance
-    if(st[p]==='curprime') st[p]='prime';
-    const limit=LIMITS[lv];
-    if(p*p>limit){ finishSieve(lv); return; }
-    let next=p+1;
-    while(next<=limit && st[next]!=='active') next++;
-    if(next>limit) finishSieve(lv);
-    else startMultiples(lv, next);
-  }
+function afterMultiples(p){
+  Gs.phase='check'; syncGrid('G');
+  showCheckPanel(p);
 }
 
-// ================================================================
-// CHECK PANEL (G only)
-// ================================================================
+// ── CHECK PANEL ──
 function showCheckPanel(p){
-  const lv='G';
-  const limit=LIMITS[lv];
+  const sq=p*p;
   const panel=document.getElementById('qpanel-G');
   const body=document.getElementById('qpanel-body-G');
-  const sq=p*p;
-  panel.classList.add('visible');
-  // Scroll panel into view
-  panel.scrollIntoView({behavior:'smooth', block:'nearest'});
+  panel.classList.add('on');
+  panel.scrollIntoView({behavior:'smooth',block:'nearest'});
   body.innerHTML=`
-    <div class="q-row">
-      <span class="q-label">Berechne: ${p}² =</span>
-      <input class="q-num-input" id="sq-G" inputmode="numeric" type="text" autocomplete="off">
-      <button class="q-btn" id="sqbtn-G" onclick="checkSq(${p},${sq},${limit})">✓</button>
-    </div>
-    <div id="sq-fb-G"></div>
-  `;
-  setTask(lv,`Alle Vielfachen von ${p} gestrichen ✓ — beantworte die Frage oben.`);
-  setTimeout(()=>{ const el=document.getElementById('sq-G'); if(el)el.focus(); },150);
+    <div class="qrow">
+      <span class="qlabel">Berechne: ${p}² =</span>
+      <input class="numinput" id="sq-G" inputmode="numeric" type="text" autocomplete="off">
+      <button class="qbtn" id="sqbtn" onclick="checkSq(${p},${sq})">✓</button>
+    </div><div id="sq-fb"></div>`;
+  setTask('G',`Alle Vielfachen von ${p} gestrichen ✓ — beantworte die Frage oben.`);
+  setTimeout(()=>{ const e=document.getElementById('sq-G'); if(e)e.focus(); },150);
 }
 
-function checkSq(p, sq, limit){
+function checkSq(p,sq){
   const inp=document.getElementById('sq-G');
   const val=parseInt(inp.value);
-  const fb=document.getElementById('sq-fb-G');
-  const btn=document.getElementById('sqbtn-G');
+  const fb=document.getElementById('sq-fb');
   if(val===sq){
-    inp.classList.add('correct'); inp.readOnly=true; btn.disabled=true;
+    inp.classList.add('ok'); inp.readOnly=true;
+    document.getElementById('sqbtn').disabled=true;
     fb.innerHTML=`<div class="fb ok">✅ Richtig! ${p}² = ${sq}</div>`;
-    const body=document.getElementById('qpanel-body-G');
-    body.innerHTML+=`
-      <div class="q-row" style="margin-top:0.55rem">
-        <span class="q-label">Ist ${p}² = ${sq} größer als ${limit}?</span>
+    document.getElementById('qpanel-body-G').innerHTML+=`
+      <div class="qrow" style="margin-top:.5rem">
+        <span class="qlabel">Ist ${p}² = ${sq} größer als ${LIMIT}?</span>
       </div>
-      <div class="mc-row" id="mc-G">
-        <button class="mc-btn" onclick="checkGt(${sq},${limit},${p},true)">Ja → fertig!</button>
-        <button class="mc-btn" onclick="checkGt(${sq},${limit},${p},false)">Nein → weiter</button>
-      </div>
-      <div id="gt-fb-G"></div>
-    `;
+      <div class="mcrow" id="mc-sq">
+        <button class="mcbtn" onclick="checkGt(${sq},${p},true)">Ja → fertig!</button>
+        <button class="mcbtn" onclick="checkGt(${sq},${p},false)">Nein → weiter</button>
+      </div><div id="gt-fb"></div>`;
   } else {
-    inp.classList.add('wrong');
+    inp.classList.add('err');
     fb.innerHTML=`<div class="fb err">❌ Noch einmal versuchen.</div>`;
-    setTimeout(()=>{ inp.value=''; inp.classList.remove('wrong'); fb.innerHTML=''; inp.focus(); },1200);
+    setTimeout(()=>{ inp.value=''; inp.classList.remove('err'); fb.innerHTML=''; inp.focus(); },1200);
   }
 }
 
-function checkGt(sq, limit, p, userYes){
-  const isGt=sq>limit;
-  const ok=userYes===isGt;
-  const fb=document.getElementById('gt-fb-G');
-  const mc=document.getElementById('mc-G');
+function checkGt(sq,p,userYes){
+  const isGt=sq>LIMIT, ok=userYes===isGt;
+  const mc=document.getElementById('mc-sq');
   mc.querySelectorAll('button').forEach(b=>{
     b.disabled=true;
     const bYes=b.textContent.startsWith('Ja');
-    b.classList.add(bYes===isGt?'correct-mc':'wrong-mc');
+    b.classList.add(bYes===isGt?'ok':'err');
   });
-  if(ok && isGt){
-    fb.innerHTML=`<div class="fb ok">✅ Richtig! ${sq} > ${limit} — alle übrigen Zahlen sind Primzahlen!</div>`;
-    setTimeout(()=>finishSieve('G'), 800);
-  } else if(ok && !isGt){
-    fb.innerHTML=`<div class="fb ok">✅ Richtig! ${sq} ≤ ${limit} — weiter sieben.</div>`;
-    const body=document.getElementById('qpanel-body-G');
+  const fb=document.getElementById('gt-fb');
+  if(ok&&isGt){
+    fb.innerHTML=`<div class="fb ok">✅ Richtig! ${sq} > ${LIMIT} — alle übrigen Zahlen sind Primzahlen!</div>`;
+    setTimeout(()=>finishSieve(),800);
+  } else if(ok&&!isGt){
+    fb.innerHTML=`<div class="fb ok">✅ Richtig! ${sq} ≤ ${LIMIT} — weiter sieben.</div>`;
     let nextP=p+1;
-    while(nextP<=limit && st[nextP]!=='active') nextP++;
-    if(nextP>limit){ finishSieve('G'); return; }
-    body.innerHTML+=`
-      <div class="q-row" style="margin-top:0.55rem">
-        <span class="q-label">Welche Zahl kommt als nächste Primzahl?</span>
-        <input class="q-num-input" id="np-G" inputmode="numeric" type="text" autocomplete="off">
-        <button class="q-btn" id="npbtn-G" onclick="checkNextPrime(${nextP},${p})">✓</button>
-      </div>
-      <div id="np-fb-G"></div>
-    `;
-    setTimeout(()=>{ const el=document.getElementById('np-G'); if(el)el.focus(); },100);
+    while(nextP<=LIMIT&&st[nextP]!=='active') nextP++;
+    if(nextP>LIMIT){ finishSieve(); return; }
+    document.getElementById('qpanel-body-G').innerHTML+=`
+      <div class="qrow" style="margin-top:.5rem">
+        <span class="qlabel">Welche Zahl kommt als nächste Primzahl?</span>
+        <input class="numinput" id="np-G" inputmode="numeric" type="text" autocomplete="off">
+        <button class="qbtn" id="npbtn" onclick="checkNextP(${nextP},${p})">✓</button>
+      </div><div id="np-fb"></div>`;
+    setTimeout(()=>{ const e=document.getElementById('np-G'); if(e)e.focus(); },100);
   } else {
-    fb.innerHTML=`<div class="fb err">❌ Schau nochmal: ${sq} ${isGt?'>':'≤'} ${limit}.</div>`;
-    setTimeout(()=>{
-      fb.innerHTML='';
-      mc.querySelectorAll('button').forEach(b=>{ b.disabled=false; b.className='mc-btn'; });
-    },1500);
+    fb.innerHTML=`<div class="fb err">❌ Schau nochmal: ${sq} ${isGt?'>':'≤'} ${LIMIT}.</div>`;
+    setTimeout(()=>{ fb.innerHTML=''; mc.querySelectorAll('button').forEach(b=>{b.disabled=false;b.className='mcbtn';}); },1500);
   }
 }
 
-function checkNextPrime(nextP, oldP){
+function checkNextP(nextP,oldP){
   const inp=document.getElementById('np-G');
   const val=parseInt(inp.value);
-  const fb=document.getElementById('np-fb-G');
-  const btn=document.getElementById('npbtn-G');
+  const fb=document.getElementById('np-fb');
   if(val===nextP){
-    inp.classList.add('correct'); inp.readOnly=true; btn.disabled=true;
+    inp.classList.add('ok'); inp.readOnly=true;
+    document.getElementById('npbtn').disabled=true;
     fb.innerHTML=`<div class="fb ok">✅ Genau! ${nextP} ist die nächste Primzahl.</div>`;
     if(st[oldP]==='curprime') st[oldP]='prime';
-    setTimeout(()=>{
-      document.getElementById('qpanel-G').classList.remove('visible');
-      startMultiples('G', nextP);
-    }, 700);
+    setTimeout(()=>{ document.getElementById('qpanel-G').classList.remove('on'); startMultiples(nextP); },700);
   } else {
-    inp.classList.add('wrong');
+    inp.classList.add('err');
     fb.innerHTML=`<div class="fb err">❌ Schau ins Sieb – welche Zahl ist noch nicht gestrichen?</div>`;
-    setTimeout(()=>{ inp.value=''; inp.classList.remove('wrong'); fb.innerHTML=''; inp.focus(); },1500);
+    setTimeout(()=>{ inp.value=''; inp.classList.remove('err'); fb.innerHTML=''; inp.focus(); },1500);
   }
 }
 
-// ================================================================
-// FINISH
-// ================================================================
-function finishSieve(lv){
-  const limit=LIMITS[lv];
-  for(let i=2;i<=limit;i++) if(st[i]==='active'||st[i]==='curprime') st[i]='prime';
-  lvl[lv].phase='done'; lvl[lv].done=true;
-  const qp=document.getElementById('qpanel-'+lv);
-  if(qp) qp.classList.remove('visible');
-  syncGrid(lv);
-  setTask(lv,'🎉 Fertig! Alle grünen Zahlen bis '+limit+' sind Primzahlen.');
-  document.getElementById('qs-'+lv).style.display='block';
+function finishSieve(){
+  for(let i=2;i<=LIMIT;i++) if(st[i]==='active'||st[i]==='curprime') st[i]='prime';
+  Gs.phase='done';
+  document.getElementById('qpanel-G').classList.remove('on');
+  syncGrid('G');
+  setTask('G','🎉 Fertig! Alle grünen Zahlen bis 100 sind Primzahlen.');
+  document.getElementById('qs-G').style.display='block';
 }
 
-// ================================================================
-// NIVEAU SWITCHING
-// ================================================================
-function switchNiveau(lv){
-  const btn=document.getElementById('btn-'+lv);
-  if(btn.classList.contains('locked')) return;
-  currentNiveau=lv;
-  ['G','F','P'].forEach(l=>{
-    document.getElementById('level-'+l).style.display= l===lv?'block':'none';
-    document.getElementById('btn-'+l).classList.toggle('active', l===lv);
-  });
-  if(lv==='F' && !lvl.F.initialized) initExtended('F');
-  if(lv==='P' && !lvl.P.initialized) initExtended('P');
-}
-
-function initExtended(lv){
-  lvl[lv].initialized=true;
-  const limit=LIMITS[lv]; // 150
-  const prevLimit=LIMITS['G']; // 200 – but for 150 this means ALL primes up to sqrt(150)≈12.2 were done in G
-
-  st[1]='removed1';
-
-  // Instantly pre-remove all multiples for primes already fully processed
-  // A prime p was "fully processed" in G if p*p <= 200 (G's limit) AND p <= sqrt(150)
-  // Actually we want: all primes p where p*p <= 150 (these need processing for sieve of 150)
-  // But since G went to 200, all such primes were already sieded — just apply instantly
-  for(let p=2; p*p<=limit; p++){
-    if(!isPrime(p)) continue;
-    // p*p <= 150 → p<=12 → primes: 2,3,5,7,11
-    // All were handled in G → instantly remove their multiples in 1..150
-    for(let m=p*2; m<=limit; m+=p){
-      if(st[m]==='active') st[m]='removed';
-    }
-    if(st[p]==='curprime'||st[p]==='active') st[p]='prime';
-  }
-  // Also mark all primes up to limit
-  for(let i=2;i<=limit;i++) if(st[i]==='active') st[i]='prime';
-
-  syncGrid(lv);
-  // All done instantly — just finish
-  finishSieve(lv);
-}
-
-// ================================================================
-// RESET
-// ================================================================
+// ── RESET ──
 function resetG(){
-  for(let i=1;i<=400;i++) st[i]='active';
-  lvl.G={phase:'remove1',curP:2,clickCount:0,done:false,initialized:true};
-  lvl.F={phase:'wait',curP:null,clickCount:0,done:false,initialized:false};
-  lvl.P={phase:'wait',curP:null,clickCount:0,done:false,initialized:false};
-  ['F','P'].forEach(l=>{
-    document.getElementById('btn-'+l).className='niveau-btn locked';
-    document.getElementById('btn-'+l).textContent= l==='F'?'🔒 Fortgeschritten':'🔒 Profi';
+  for(let i=1;i<=LIMIT;i++) st[i]='active';
+  Gs.phase='remove1'; Gs.curP=2; Gs.clicks=0;
+  document.getElementById('qpanel-G').classList.remove('on');
+  document.getElementById('qs-G').style.display='none';
+  // reset G questions
+  ['g-count','g-q1','d12','d17','d36','d97'].forEach(id=>{
+    const e=document.getElementById(id); if(!e)return;
+    e.value=''; e.readOnly=false;
+    e.className=e.tagName==='TEXTAREA'?'qtextarea':'numinput';
+    if(e.classList.contains('divinput'))e.className='divinput';
   });
-  ['g-q1','d12','d17','d36','d97'].forEach(id=>{
-    const el=document.getElementById(id); if(!el)return;
-    el.value=''; el.readOnly=false;
-    el.className=el.tagName==='TEXTAREA'?'q-textarea':'divisor-input';
-  });
-  ['g-q1-fb','d12-fb','d17-fb','d36-fb','d97-fb'].forEach(id=>{ const e=document.getElementById(id);if(e)e.innerHTML=''; });
+  ['g-count-fb','g-q1-fb','d12-fb','d17-fb','d36-fb','d97-fb'].forEach(id=>{ const e=document.getElementById(id);if(e)e.innerHTML=''; });
   ['g-q1-clr','d12-clr','d17-clr','d36-clr','d97-clr'].forEach(id=>{ const e=document.getElementById(id);if(e)e.style.display='none'; });
   document.getElementById('g-done-badge').style.display='none';
-  document.getElementById('qs-G').style.display='none';
-  const qp=document.getElementById('qpanel-G');
-  if(qp) qp.classList.remove('visible');
-  buildGrid('G'); buildGrid('F'); buildGrid('P');
-  setTask('G','Klicke auf die <strong>1</strong> – sie ist keine Primzahl.');
+  buildGrid('G',true);
+  setTask('G','Klicke auf die <strong style="margin:0 .2rem">1</strong> – sie ist keine Primzahl.');
 }
 
-// ================================================================
-// HELPERS
-// ================================================================
-function setTask(lv,html){ document.getElementById('task-text-'+lv).innerHTML=html; }
+// ── TAB SWITCHING ──
+function switchTab(t){
+  const btn=document.getElementById('btn-'+t);
+  if(btn.classList.contains('locked')) return;
+  currentTab=t;
+  ['G','F','P','E'].forEach(l=>{
+    document.getElementById('card-'+l).classList.toggle('active',l===t);
+    document.getElementById('btn-'+l).classList.toggle('active',l===t);
+  });
+}
 
+function unlockTab(t, label){
+  const btn=document.getElementById('btn-'+t);
+  btn.classList.remove('locked');
+  btn.textContent=label;
+}
+
+// ── LEVEL COMPLETE ──
+function checkGDone(){
+  const countOk = document.getElementById('g-count').classList.contains('ok');
+  const q1ok    = document.getElementById('g-q1').classList.contains('ok');
+  const divOk   = ['d12','d17','d36','d97'].every(id=>document.getElementById(id).classList.contains('ok'));
+  if(countOk&&q1ok&&divOk){
+    document.getElementById('g-done-badge').style.display='block';
+    unlockTab('F','🟠 Fortgeschritten');
+    unlockTab('E','∞ Primzahlen');
+  }
+}
+function checkFDone(){
+  document.getElementById('f-done-badge').style.display='block';
+  unlockTab('P','🔴 Profi');
+}
+function checkPDone(){
+  const q1=document.getElementById('p-q1').classList.contains('ok');
+  const q2=document.getElementById('p-q2').classList.contains('ok');
+  if(q1&&q2) document.getElementById('p-done-badge').style.display='block';
+}
+
+// ── COUNT CHECK ──
+function checkCount(){
+  const val=parseInt(document.getElementById('g-count').value);
+  const inp=document.getElementById('g-count');
+  const fb=document.getElementById('g-count-fb');
+  if(val===25){
+    inp.classList.add('ok'); inp.readOnly=true;
+    fb.innerHTML='<div class="fb ok">✅ Genau! Es gibt 25 Primzahlen bis 100.</div>';
+    checkGDone();
+  } else {
+    inp.classList.add('err');
+    fb.innerHTML='<div class="fb err">❌ Nicht ganz – zähle nochmal, oder schau dir den Tipp an.</div>';
+    setTimeout(()=>{ inp.value=''; inp.classList.remove('err'); fb.innerHTML=''; },1500);
+  }
+}
+
+// ── FREE TEXT ──
 function checkFree(id,fbId,clrId,kw){
   const val=document.getElementById(id).value.toLowerCase().trim();
   if(!val)return;
   const ok=kw.some(k=>val.includes(k));
   const el=document.getElementById(id);
   if(ok){
-    el.classList.add('correct'); el.readOnly=true;
+    el.classList.add('ok'); el.readOnly=true;
     document.getElementById(fbId).innerHTML='<div class="fb ok">✅ Sehr gut!</div>';
     document.getElementById(clrId).style.display='none';
-    checkLevelComplete(currentNiveau);
+    if(id.startsWith('g-')) checkGDone();
+    if(id.startsWith('p-')) checkPDone();
   } else {
-    el.classList.add('wrong');
+    el.classList.add('err');
     document.getElementById(fbId).innerHTML='<div class="fb err">❌ Schau dir den Tipp an.</div>';
     document.getElementById(clrId).style.display='inline-block';
   }
 }
 function clearTA(id,fbId,clrId){
-  const el=document.getElementById(id); el.value=''; el.className='q-textarea'; el.readOnly=false;
+  const el=document.getElementById(id); el.value=''; el.className='qtextarea'; el.readOnly=false;
   document.getElementById(fbId).innerHTML=''; document.getElementById(clrId).style.display='none';
 }
+
+// ── DIV CHECK ──
 function checkDiv(id,fbId,clrId,correct){
   const raw=document.getElementById(id).value;
   const nums=raw.replace(/[^0-9]/g,' ').trim().split(/\s+/).map(Number).filter(n=>n>0);
@@ -851,77 +773,129 @@ function checkDiv(id,fbId,clrId,correct){
   const ok=JSON.stringify(nums)===JSON.stringify(correct);
   const el=document.getElementById(id);
   if(ok){
-    el.classList.add('correct'); el.readOnly=true;
+    el.classList.add('ok'); el.readOnly=true;
     document.getElementById(fbId).innerHTML=`<div class="fb ok">✅ Richtig! T = {${correct.join(', ')}}</div>`;
     document.getElementById(clrId).style.display='none';
-    checkLevelComplete(currentNiveau);
+    checkGDone();
   } else {
-    el.classList.add('wrong');
+    el.classList.add('err');
     document.getElementById(fbId).innerHTML=`<div class="fb err">❌ Richtig wäre: {${correct.join(', ')}}</div>`;
     document.getElementById(clrId).style.display='inline-block';
   }
 }
 function clearDiv(id,fbId,clrId){
-  const el=document.getElementById(id); el.value=''; el.className='divisor-input'; el.readOnly=false;
+  const el=document.getElementById(id); el.value=''; el.className='divinput'; el.readOnly=false;
   document.getElementById(fbId).innerHTML=''; document.getElementById(clrId).style.display='none';
 }
 
-const TWINS_150=[[3,5],[5,7],[11,13],[17,19],[29,31],[41,43],[59,61],[71,73],[101,103],[107,109],[137,139]];
+// ── TWINS ──
+const TWINS100=[[3,5],[5,7],[11,13],[17,19],[29,31],[41,43],[59,61],[71,73]];
 function addTwinRow(){
   const tb=document.getElementById('twins-tbody');
-  const tr=document.createElement('tr');
-  const idx=tb.rows.length+1;
-  tr.innerHTML=`<td>${idx}</td><td><input class="pair-input" inputmode="numeric"></td><td><input class="pair-input" inputmode="numeric"></td>`;
+  const tr=document.createElement('tr'); const idx=tb.rows.length+1;
+  tr.innerHTML=`<td>${idx}</td><td><input class="pinput" inputmode="numeric"></td><td><input class="pinput" inputmode="numeric"></td>`;
   tb.appendChild(tr);
 }
 function checkTwins(){
   const rows=document.getElementById('twins-tbody').querySelectorAll('tr');
   const entered=[];
   rows.forEach(r=>{ const ins=r.querySelectorAll('input'); const a=parseInt(ins[0].value),b=parseInt(ins[1].value); if(a&&b)entered.push([a,b]); });
-  rows.forEach(r=>{ const ins=r.querySelectorAll('input'); const a=parseInt(ins[0].value),b=parseInt(ins[1].value); if(!a||!b)return; const v=TWINS_150.some(([x,y])=>x===a&&y===b); ins[0].className='pair-input '+(v?'correct':'wrong'); ins[1].className='pair-input '+(v?'correct':'wrong'); });
-  const missing=TWINS_150.filter(([x,y])=>!entered.some(([a,b])=>a===x&&b===y));
+  rows.forEach(r=>{ const ins=r.querySelectorAll('input'); const a=parseInt(ins[0].value),b=parseInt(ins[1].value); if(!a||!b)return; const v=TWINS100.some(([x,y])=>x===a&&y===b); ins[0].className='pinput '+(v?'ok':'err'); ins[1].className='pinput '+(v?'ok':'err'); });
+  const missing=TWINS100.filter(([x,y])=>!entered.some(([a,b])=>a===x&&b===y));
   const fb=document.getElementById('twins-fb');
-  if(missing.length===0&&entered.length>=TWINS_150.length){ fb.innerHTML=`<div class="fb ok">✅ Alle ${TWINS_150.length} Zwillinge bis 150 gefunden!</div>`; checkLevelComplete('F'); }
-  else fb.innerHTML=`<div class="fb err">❌ ${missing.length} Zwilling(e) fehlen noch.</div>`;
-}
-
-function checkLevelComplete(lv){
-  if(lv==='G'){
-    const ok=document.getElementById('g-q1').classList.contains('correct')&&
-             ['d12','d17','d36','d97'].every(id=>document.getElementById(id).classList.contains('correct'));
-    if(ok){ document.getElementById('g-done-badge').style.display='block'; document.getElementById('btn-F').className='niveau-btn'; document.getElementById('btn-F').textContent='🟠 Fortgeschritten'; }
-  } else if(lv==='F'){
-    document.getElementById('f-done-badge').style.display='block';
-    document.getElementById('btn-P').className='niveau-btn'; document.getElementById('btn-P').textContent='🔴 Profi';
-  } else if(lv==='P'){
-    if(document.getElementById('p-q1').classList.contains('correct')&&document.getElementById('p-q2').classList.contains('correct'))
-      document.getElementById('p-done-badge').style.display='block';
+  if(missing.length===0&&entered.length>=TWINS100.length){
+    fb.innerHTML=`<div class="fb ok">✅ Alle ${TWINS100.length} Zwillinge bis 100 gefunden!</div>`;
+    checkFDone();
+  } else {
+    fb.innerHTML=`<div class="fb err">❌ ${missing.length} Zwilling(e) fehlen noch.</div>`;
   }
 }
 
-function toggleSingleHint(id){
+// ── ERARBEITUNG UNENDLICH ──
+let eraStepDone=[false,false,false];
+
+function checkEraStep(id,correct,fbId){
+  const val=parseInt(document.getElementById(id).value);
+  const inp=document.getElementById(id);
+  const fb=document.getElementById(fbId);
+  if(val===correct){
+    inp.classList.add('ok'); inp.readOnly=true;
+    fb.innerHTML=`<div class="fb ok">✅ Richtig! ${correct} Primzahlen.</div>`;
+    // check if both s1 inputs done
+    const a=document.getElementById('e-s1a').classList.contains('ok');
+    const b=document.getElementById('e-s1b').classList.contains('ok');
+    if(a&&b) document.getElementById('era-s1-next').style.display='block';
+  } else {
+    inp.classList.add('err');
+    fb.innerHTML=`<div class="fb err">❌ Nicht ganz – probiere es erneut.</div>`;
+    setTimeout(()=>{ inp.value=''; inp.classList.remove('err'); fb.innerHTML=''; },1400);
+  }
+}
+
+function checkEraFree(id,fbId,kw){
+  const val=document.getElementById(id).value.toLowerCase().trim();
+  if(!val)return;
+  const ok=kw.some(k=>val.includes(k));
   const el=document.getElementById(id);
-  el.classList.toggle('open');
-  const btn=document.getElementById('btn-'+id);
-  btn.textContent=el.classList.contains('open')?'🔼 Tipp ausblenden':'💡 '+btn.textContent.replace(/^💡 /,'').replace(/^🔼 Tipp ausblenden/,'💡 ');
-  // Reveal next hint button when this one is opened
-  if(el.classList.contains('open')){
-    const nextMap={'h-p2-1':'btn-h-p2-2','h-p2-2':'btn-h-p2-3'};
-    if(nextMap[id]){
-      const nextBtn=document.getElementById(nextMap[id]);
-      if(nextBtn) nextBtn.style.display='block';
-    }
+  if(ok){
+    el.classList.add('ok'); el.readOnly=true;
+    document.getElementById(fbId).innerHTML='<div class="fb ok">✅ Gut erkannt!</div>';
+    document.getElementById('e-s2-clr').style.display='none';
+    document.getElementById('era-s2-next').style.display='block';
+  } else {
+    el.classList.add('err');
+    document.getElementById(fbId).innerHTML='<div class="fb err">❌ Denk nochmal nach – kann der Primteiler von M in der Liste stehen?</div>';
+    document.getElementById('e-s2-clr').style.display='inline-block';
+  }
+}
+function clearEra(id,fbId,clrId){
+  const el=document.getElementById(id); el.value=''; el.className='step-textarea'; el.readOnly=false;
+  document.getElementById(fbId).innerHTML=''; document.getElementById(clrId).style.display='none';
+}
+
+function eraUnlock(step){
+  const el=document.getElementById('era-s'+step);
+  el.classList.remove('era-locked');
+  el.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function checkEraMC(idx){
+  const mc=document.getElementById('mc-era-s3');
+  const btns=mc.querySelectorAll('button');
+  btns.forEach((b,i)=>{ b.disabled=true; b.classList.add(i===1?'ok':'err'); });
+  // correct is idx 1
+  const fb=document.getElementById('mc-era-s3-fb');
+  if(idx===1){
+    fb.innerHTML='<div class="fb ok">✅ Richtig!</div>';
+    setTimeout(()=>document.getElementById('era-s3-next').style.display='block',500);
+  } else {
+    btns[idx].classList.remove('ok'); btns[idx].classList.add('err');
+    fb.innerHTML='<div class="fb err">❌ Schau nochmal – was zeigt Euklids Konstruktion?</div>';
+    setTimeout(()=>{ fb.innerHTML=''; btns.forEach(b=>{b.disabled=false;b.className='mcbtn';}); },1600);
   }
 }
 
-
-function toggleHint(id){
+// ── HINTS ──
+function toggleH(id){
   const el=document.getElementById(id); el.classList.toggle('open');
-  el.previousElementSibling.textContent=el.classList.contains('open')?'🔼 Tipp ausblenden':'💡 Tipp';
+  const btn=el.previousElementSibling;
+  if(btn&&btn.classList.contains('htoggle'))
+    btn.textContent=el.classList.contains('open')?'🔼 Tipp ausblenden':'💡 '+btn.textContent.replace(/^(💡 |🔼 Tipp ausblenden)/,'');
 }
+function toggleSingleH(id){
+  const el=document.getElementById(id); el.classList.toggle('open');
+  const btn=document.getElementById('btn-'+id);
+  const open=el.classList.contains('open');
+  btn.textContent=open?'🔼 Tipp ausblenden':btn.textContent.replace(/^🔼 Tipp ausblenden/,'💡 '+({
+    'h-p2-1':'Tipp 1 – Ausprobieren','h-p2-2':'Tipp 2 – Muster erkennen','h-p2-3':'Tipp 3 – Vollständige Begründung'
+  }[id]||''));
+  if(open){ const nm={'h-p2-1':'btn-h-p2-2','h-p2-2':'btn-h-p2-3'}; const nb=nm[id]&&document.getElementById(nm[id]); if(nb)nb.style.display='block'; }
+}
+
+function setTask(lv,html){ document.getElementById('task-'+lv).innerHTML=html; }
 function trexClick(){ const t=document.getElementById('trex-tip'); t.style.display='block'; setTimeout(()=>t.style.display='none',2500); }
 
-document.addEventListener('DOMContentLoaded', initAll);
+document.addEventListener('DOMContentLoaded',initAll);
 </script>
 </body>
 </html>

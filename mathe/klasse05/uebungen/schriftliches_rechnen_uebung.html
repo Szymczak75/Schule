@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Interaktive Übung zum schriftlichen Rechnen: Addition, Subtraktion, Multiplikation und Division natürlicher Zahlen sowie Wiederholung der Potenzschreibweise.">
+<meta name="keywords" content="Schriftliches Rechnen, Addition, Subtraktion, Multiplikation, Division, Potenzen, Klasse 5, Notation">
+<meta name="typ" content="Übung">
+<meta name="klasse" content="5">
+<meta name="fach" content="mathe">
+<title>Schriftliches Rechnen – Übung</title>
+<script>
+  MathJax = {
+    tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+    svg: { fontCache: 'global' }
+  };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+  :root{
+    --blau:#1565c0;
+    --hellblau:#e3f0fb;
+    --hellblau2:#d0e6f9;
+    --rand:#1976d2;
+    --gruen:#1b8a3a;
+    --rot:#cc2222;
+    --grau:#f4f7fb;
+    --text:#143055;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{
+    margin:0;
+    font-family:'Segoe UI',system-ui,sans-serif;
+    background:var(--grau);
+    color:var(--text);
+    font-size:18px;
+    line-height:1.5;
+    padding-bottom:120px;
+  }
+  header{
+    background:linear-gradient(135deg,#1976d2,#2196f3);
+    color:#fff;
+    padding:1.2rem 1rem 1rem;
+    text-align:center;
+  }
+  header h1{margin:0;font-size:1.5rem;}
+  header p{margin:.4rem 0 0;font-size:1rem;opacity:.95;}
+
+  .tabs{
+    display:flex;
+    flex-wrap:wrap;
+    gap:.4rem;
+    justify-content:center;
+    padding:.8rem .6rem;
+    background:var(--hellblau);
+    position:sticky;
+    top:0;
+    z-index:50;
+    border-bottom:2px solid var(--hellblau2);
+  }
+  .tab{
+    min-height:44px;
+    padding:.5rem .9rem;
+    border:2px solid var(--rand);
+    background:#fff;
+    color:var(--blau);
+    border-radius:12px;
+    font-size:1rem;
+    font-weight:600;
+    cursor:pointer;
+    transition:transform .08s, background .15s;
+  }
+  .tab.active{background:var(--blau);color:#fff;}
+  .tab:active{transform:scale(.96);}
+  .tab .done{color:var(--gruen);font-weight:800;}
+  .tab.active .done{color:#bff5cf;}
+
+  .wrap{max-width:900px;margin:0 auto;padding:1rem;}
+  .card{display:none;}
+  .card.active{display:block;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+
+  .panel{
+    background:#fff;
+    border:2px solid var(--hellblau2);
+    border-radius:16px;
+    padding:1.1rem;
+    margin-bottom:1.1rem;
+    box-shadow:0 2px 8px rgba(20,60,120,.06);
+  }
+  h2.cardtitle{
+    margin:.2rem 0 1rem;
+    font-size:1.35rem;
+    color:var(--blau);
+    border-bottom:3px solid var(--hellblau2);
+    padding-bottom:.5rem;
+  }
+  .beispiel{
+    background:var(--hellblau);
+    border-left:6px solid var(--blau);
+    border-radius:10px;
+    padding:.9rem 1rem;
+    margin-bottom:1rem;
+  }
+  .beispiel h3{margin:.1rem 0 .5rem;font-size:1.05rem;color:var(--blau);}
+
+  /* Niveau-Auswahl */
+  .levelcard{
+    background:var(--hellblau);
+    border:2px dashed var(--rand);
+    border-radius:12px;
+    padding:.7rem 1rem;
+    margin-bottom:1rem;
+    cursor:pointer;
+    user-select:none;
+  }
+  .levelcard .lvlhead{display:flex;justify-content:space-between;align-items:center;font-weight:700;color:var(--blau);}
+  .levelopts{display:none;gap:.5rem;flex-wrap:wrap;margin-top:.7rem;}
+  .levelopts.open{display:flex;}
+  .lvlbtn{
+    min-height:44px;flex:1 1 30%;
+    border:2px solid var(--rand);background:#fff;color:var(--blau);
+    border-radius:10px;font-size:.95rem;font-weight:600;cursor:pointer;padding:.4rem;
+  }
+  .lvlbtn.active{background:var(--blau);color:#fff;}
+  .lvlbtn:active{transform:scale(.97);}
+
+  /* ===== Schriftliche Rechnung: stellengerechtes Grid ===== */
+  .calc{
+    display:inline-block;
+    background:#fff;
+    border:1px solid #cfe0f2;
+    border-radius:10px;
+    padding:.8rem 1rem;
+    font-family:'Courier New',monospace;
+    font-size:1.55rem;
+    line-height:1;
+    color:var(--text);
+  }
+  /* Zeile: Operator + feste Anzahl gleich breiter Ziffernzellen, rechtsbündig */
+  .calc .row{
+    display:flex;
+    justify-content:flex-end;
+    align-items:flex-end;
+    position:relative;
+  }
+  .calc .cell{
+    width:1.4ch;
+    text-align:center;
+    padding:.12rem 0;
+    flex:0 0 auto;
+  }
+  .calc .op{
+    width:1.7ch;
+    text-align:left;
+    color:var(--blau);
+    font-weight:700;
+    flex:0 0 auto;
+  }
+  .calc .carry .cell{
+    font-size:.85rem;
+    color:var(--rot);
+    height:1rem;
+    padding:0;
+  }
+  /* durchgehender Rechenstrich über die volle Breite */
+  .calc .line{
+    border-top:3px solid var(--text);
+    height:0;
+    margin:.2rem 0;
+  }
+  /* Erklärung rechts neben einer Zeile (außerhalb der Ziffernausrichtung) */
+  .calc .res{
+    position:absolute;left:100%;bottom:.12rem;margin-left:.5rem;
+    color:var(--blau);font-weight:700;white-space:nowrap;font-size:1.4rem;
+  }
+  .calc .label{
+    position:absolute;left:100%;bottom:.2rem;margin-left:.6rem;
+    font-size:.8rem;color:#6b86a8;white-space:nowrap;font-family:'Segoe UI',sans-serif;
+  }
+  /* etwas rechter Innenabstand, damit Labels Platz haben */
+  .calc.wide{padding-right:8.5rem;}
+  /* Division: linksbündig ausrichten */
+  .calc.divi .row{justify-content:flex-start;padding-left:1.7ch;}
+  .calc.divi .op{position:absolute;left:0;width:1.7ch;}
+  .calc.divi .line{width:4.2ch;margin-left:1.7ch;}
+
+  @media(max-width:520px){
+    .calc{font-size:1.25rem;padding:.6rem .7rem;}
+    .calc .cell{width:1.3ch;}
+    .calc .label{font-size:.7rem;}
+    .calc.wide{padding-right:6rem;}
+  }
+
+  .aufg{margin:1rem 0;padding-top:1rem;border-top:1px dashed #cdd9e8;}
+  .aufg:first-of-type{border-top:none;}
+  .aufg .frage{font-size:1.15rem;margin-bottom:.6rem;}
+  .nr{
+    display:inline-block;background:var(--blau);color:#fff;
+    width:30px;height:30px;line-height:30px;text-align:center;
+    border-radius:50%;font-weight:700;font-size:1rem;margin-right:.4rem;
+  }
+  input.answer{
+    font-size:1.25rem;
+    padding:.5rem .7rem;
+    border:2px solid var(--rand);
+    border-radius:10px;
+    width:9rem;
+    text-align:center;
+    min-height:44px;
+  }
+  input.answer:focus{outline:none;border-color:var(--blau);background:#f0f7ff;}
+  input.answer.ok{background:var(--gruen);color:#fff;border-color:var(--gruen);}
+  input.answer.bad{background:var(--rot);color:#fff;border-color:var(--rot);}
+
+  .btn{
+    min-height:44px;min-width:44px;
+    border:none;border-radius:10px;
+    font-size:1rem;font-weight:700;cursor:pointer;
+    padding:.55rem 1.1rem;margin:.3rem .3rem 0 0;
+  }
+  .btn-check{background:var(--blau);color:#fff;}
+  .btn-clear{background:#fff;color:var(--rot);border:2px solid var(--rot);display:none;}
+  .btn:active{transform:scale(.97);}
+
+  .fb{margin-top:.6rem;font-weight:700;border-radius:10px;padding:.6rem .8rem;display:none;font-size:1.05rem;}
+  .fb.ok{display:block;background:var(--gruen);color:#fff;}
+  .fb.bad{display:block;background:var(--rot);color:#fff;}
+
+  details.tipp{margin-top:.6rem;background:#fff8e6;border:2px solid #f1c40f;border-radius:10px;padding:.5rem .8rem;}
+  details.tipp summary{cursor:pointer;font-weight:700;color:#a07400;min-height:44px;display:flex;align-items:center;}
+  details.tipp .inner{padding-top:.5rem;}
+  details.tipp .inner details{margin-top:.5rem;}
+
+  /* Brüche */
+  .frac{display:inline-flex;flex-direction:column;text-align:center;vertical-align:middle;margin:0 .15rem;}
+  .frac > span{display:block;padding:0 .3rem;}
+  .frac > span:first-child{border-bottom:2px solid currentColor;}
+
+  /* Auswertung */
+  #scorebox{font-size:1.3rem;text-align:center;}
+  .scoreval{font-size:2.6rem;font-weight:800;color:var(--blau);display:block;margin:.4rem 0;}
+
+  .weiter-wrap{
+    position:fixed;bottom:0;left:0;right:0;
+    padding:.8rem 1rem;
+    background:linear-gradient(to top,var(--grau) 70%,transparent);
+    text-align:center;
+    display:none;
+  }
+  .weiter-wrap.show{display:block;}
+  .weiter{
+    display:inline-block;width:100%;max-width:600px;min-height:54px;
+    background:var(--gruen);color:#fff;text-decoration:none;
+    font-size:1.25rem;font-weight:800;border-radius:14px;
+    line-height:54px;
+  }
+  .weiter:active{transform:scale(.98);}
+
+  .dino{
+    position:fixed;bottom:.5rem;right:.7rem;font-size:1.8rem;cursor:pointer;z-index:100;
+    filter:drop-shadow(0 1px 2px rgba(0,0,0,.2));
+  }
+  .dino .bubble{
+    position:absolute;bottom:115%;right:0;white-space:nowrap;
+    background:var(--text);color:#fff;font-size:.8rem;padding:.3rem .6rem;
+    border-radius:8px;opacity:0;pointer-events:none;transition:opacity .2s;
+  }
+  .dino:hover .bubble,.dino.show .bubble{opacity:1;}
+
+  .tooltipw{border-bottom:2px dotted var(--blau);cursor:help;position:relative;color:var(--blau);font-weight:600;}
+  .tooltipw .tt{
+    visibility:hidden;opacity:0;position:absolute;bottom:130%;left:50%;transform:translateX(-50%);
+    background:var(--text);color:#fff;padding:.4rem .6rem;border-radius:8px;font-size:.85rem;
+    width:200px;font-weight:400;z-index:60;transition:opacity .2s;
+  }
+  .tooltipw.show .tt,.tooltipw:hover .tt{visibility:visible;opacity:1;}
+
+  @media(max-width:520px){
+    input.answer{width:7.5rem;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Schriftliches Rechnen</h1>
+  <p>Übung · Klasse 5 · Achte genau auf die Schreibweise!</p>
+</header>
+
+<nav class="tabs" id="tabs"></nav>
+
+<div class="wrap">
+
+  <!-- ADDITION -->
+  <section class="card" data-card="0">
+    <div class="panel">
+      <h2 class="cardtitle">➕ Addition</h2>
+      <div class="beispiel">
+        <h3>So schreibst du es auf</h3>
+        <p>Bei der Addition heißen die Zahlen <span class="tooltipw">Summanden<span class="tt">Die Zahlen, die addiert werden.</span></span>, das Ergebnis heißt <span class="tooltipw">Summe<span class="tt">Das Ergebnis einer Addition.</span></span>. Stellen genau untereinander schreiben – Einer unter Einer!</p>
+        <div class="calc">
+          <div class="row"><span class="op"></span><span class="cell">3</span><span class="cell">4</span><span class="cell">5</span><span class="cell">7</span><span class="cell">2</span></div>
+          <div class="row"><span class="op">+</span><span class="cell">5</span><span class="cell">9</span><span class="cell">3</span><span class="cell">4</span><span class="cell">9</span></div>
+          <div class="row carry"><span class="op"></span><span class="cell"></span><span class="cell">1</span><span class="cell"></span><span class="cell">1</span><span class="cell"></span></div>
+          <div class="line"></div>
+          <div class="row"><span class="op"></span><span class="cell">9</span><span class="cell">3</span><span class="cell">9</span><span class="cell">2</span><span class="cell">1</span></div>
+        </div>
+        <p style="margin-top:.6rem">Die kleinen <span style="color:var(--rot);font-weight:700">roten</span> Überträge schreibst du <b>unter</b> die Aufgabe (über den Strich). Rechne von rechts nach links.</p>
+      </div>
+
+      <div class="aufg" data-q>
+        <div class="frage"><span class="nr">1</span>$4\,572 + 3\,849 = $ ?</div>
+        <input class="answer" inputmode="numeric" data-sol="8421" aria-label="Antwort Aufgabe 1">
+        <button class="btn btn-check">Prüfen</button>
+        <button class="btn btn-clear">Leeren</button>
+        <div class="fb"></div>
+        <details class="tipp"><summary>💡 Tipp</summary><div class="inner">
+          <p>Schreibe die Zahlen stellengerecht untereinander und addiere von rechts: Einer, Zehner, Hunderter …</p>
+          <details><summary>Noch ein Tipp</summary><p>$2+9=11$ → 1 hinschreiben, 1 als Übertrag merken.</p></details>
+          <details><summary>Lösung</summary><p>Das Ergebnis ist $8\,421$.</p></details>
+        </div></details>
+      </div>
+
+      <div class="aufg" data-q>
+        <div class="frage"><span class="nr">2</span>$6\,308 + 1\,896 = $ ?</div>
+        <input class="answer" inputmode="numeric" data-sol="8204" aria-label="Antwort Aufgabe 2">
+        <button class="btn btn-check">Prüfen</button>
+        <button class="btn btn-clear">Leeren</button>
+        <div class="fb"></div>
+        <details class="tipp"><summary>💡 Tipp</summary><div class="inner">
+          <p>Vorsicht bei den Überträgen – hier entstehen mehrere.</p>
+          <details><summary>Noch ein Tipp</summary><p>$8+6=14$, $0+9+1=10$ …</p></details>
+          <details><summary>Lösung</summary><p>Das Ergebnis ist $8\,204$.</p></details>
+        </div></details>
+      </div>
+    </div>
+  </section>
+
+  <!-- SUBTRAKTION -->
+  <section class="card" data-card="1">
+    <div class="panel">
+      <h2 class="cardtitle">➖ Subtraktion</h2>
+      <div class="beispiel">
+        <h3>So schreibst du es auf</h3>
+        <p>Die obere Zahl heißt <span class="tooltipw">Minuend<span class="tt">Die Zahl, von der abgezogen wird.</span></span>, die untere <span class="tooltipw">Subtrahend<span class="tt">Die Zahl, die abgezogen wird.</span></span>, das Ergebnis <span class="tooltipw">Differenz<span class="tt">Das Ergebnis einer Subtraktion.</span></span>.</p>
+        <div class="calc">
+          <div class="row"><span class="op"></span><span class="cell">9</span><span class="cell">5</span><span class="cell">7</span><span class="cell">4</span><span class="cell">8</span></div>
+          <div class="row"><span class="op">−</span><span class="cell"></span><span class="cell">8</span><span class="cell">6</span><span class="cell">8</span><span class="cell">6</span></div>
+          <div class="row carry"><span class="op"></span><span class="cell"></span><span class="cell">1</span><span class="cell"></span><span class="cell">1</span><span class="cell"></span></div>
+          <div class="line"></div>
+          <div class="row"><span class="op"></span><span class="cell">8</span><span class="cell">7</span><span class="cell">0</span><span class="cell">6</span><span class="cell">2</span></div>
+        </div>
+        <p style="margin-top:.6rem">Reicht eine Stelle nicht, borgst du dir 10 von der nächsten Stelle. Die <span style="color:var(--rot);font-weight:700">roten</span> Überträge schreibst du <b>unter</b> die Aufgabe. Der Subtrahend steht <b>rechtsbündig</b> – Einer unter Einer.</p>
+      </div>
+
+      <div class="aufg" data-q>
+        <div class="frage"><span class="nr">1</span>$7\,402 - 3\,856 = $ ?</div>
+        <input class="answer" inputmode="numeric" data-sol="3546" aria-label="Antwort">
+        <button class="btn btn-check">Prüfen</button>
+        <button class="btn btn-clear">Leeren</button>
+        <div class="fb"></div>
+        <details class="tipp"><summary>💡 Tipp</summary><div class="inner">
+          <p>An der Einerstelle: $2-6$ geht nicht → eine 10 von der Zehnerstelle borgen.</p>
+          <details><summary>Noch ein Tipp</summary><p>Mache die Probe: Differenz $+$ Subtrahend muss den Minuenden ergeben.</p></details>
+          <details><summary>Lösung</summary><p>Das Ergebnis ist $3\,546$.</p></details>
+        </div></details>
+      </div>
+
+      <div class="aufg" data-q>
+        <div class="frage"><span class="nr">2</span>$5\,003 - 1\,748 = $ ?</div>
+        <input class="answer" inputmode="numeric" data-sol="3255" aria-label="Antwort">
+        <button class="btn btn-check">Prüfen</button>
+        <button class="btn btn-clear">Leeren</button>
+        <div class="fb"></div>
+        <details class="tipp"><summary>💡 Tipp</summary><div class="inner">
+          <p>Hier musst du über mehrere Nullen hinweg borgen – arbeite sorgfältig.</p>
+          <details><summary>Noch ein Tipp</summary><p>Probe: $3\,255 + 1\,748$ muss $5\,003$ ergeben.</p></details>
+          <details><summary>Lösung</summary><p>Das Ergebnis ist $3\,255$.</p></details>
+        </div></details>
+      </div>
+    </div>
+  </section>
+
+  <!-- MULTIPLIKATION -->
+  <section class="card" data-card="2">
+    <div class="panel">
+      <h2 class="cardtitle">✖️ Multiplikation</h2>
+      <div class="beispiel">
+        <h3>So schreibst du es auf</h3>
+        <p>Die Zahlen heißen <span class="tooltipw">Faktoren<span class="tt">Die Zahlen, die multipliziert werden.</span></span>, das Ergebnis heißt <span class="tooltipw">Produkt<span class="tt">Das Ergebnis einer Multiplikation.</span></span>. Wir schreiben das Malzeichen immer als $\cdot$.</p>
+        <div class="calc wide">
+          <div class="row"><span class="op"></span><span class="cell">3</span><span class="cell">9</span><span class="cell">5</span><span class="cell" style="color:var(--blau);font-weight:700">·</span><span class="cell" style="color:var(--blau);font-weight:700">2</span><span class="cell" style="color:var(--blau);font-weight:700">7</span></div>
+          <div class="line"></div>
+          <div class="row"><span class="op"></span><span class="cell">2</span><span class="cell">7</span><span class="cell">6</span><span class="cell">5</span><span class="label">395 · 7</span></div>
+          <div class="row"><span class="op">+</span><span class="cell">7</span><span class="cell">9</span><span class="cell">0</span><span class="cell"></span><span class="label">395 · 2 (eine Stelle nach links)</span></div>
+          <div class="line"></div>
+          <div class="row"><span class="op"></span><span class="cell">1</span><span class="cell">0</span><span class="cell">6</span><span class="cell">6</span><span class="cell">5</span></div>
+        </div>
+        <p style="margin-top:.6rem">So geht's: erst $395 \cdot 7$ – die <b>5</b> steht unter der <b>7</b>. Dann $395 \cdot 2$ – die <b>0</b> steht unter der <b>2</b> (eine Stelle nach links, weil die 2 für 20 steht). Zum Schluss beide Teilprodukte addieren.</p>
+      </div>
+
+      <div class="aufg" data-q>
+        <div class="frage"><span class="nr">1</span>$236 \cdot 4 = $ ?</div>
+        <input class="answer" inputmode="numeric" data-sol="944" aria-label="Antwort">
+        <button class="btn btn-check">Prüfen</button>
+        <button class="btn btn-clear">Leeren</button>
+        <div class="fb"></div>
+        <details class="tipp"><summary>💡 Tipp</summary><div class="inner">
+          <p>Multipliziere jede Stelle einzeln mit 4 und beachte die Überträge.</p>
+          <details><summary>Noch ein Tipp</summary><p>$6\cdot 4 = 24$ → 4 hinschreiben, 2 merken.</p></details>
+          <details><summary>Lösung</summary><p>Das Ergebnis ist $944$.</p></details>
+        </div></details>
+      </div>
+
+      <div class="aufg" data-q>
+        <div class="frage"><span class="nr">2</span>$53 \cdot 18 = $ ?</div>
+        <input class="answer" inputmode="numeric" data-sol="954" aria-label="Antwort">
+        <button class="btn btn-check">Prüfen</button>
+        <button class="btn btn-clear">Leeren</button>
+        <div class="fb"></div>
+        <details class="tipp"><summary>💡 Tipp</summary><div class="inner">
+          <p>Rechne $53\cdot 8$ und $53\cdot 10$ getrennt, dann addiere die Teilergebnisse.</p>
+          <details><summary>Noch ein Tipp</summary><p>$53\cdot 8 = 424$ und $53\cdot 10 = 530$.</p></details>
+          <details><summary>Lösung</summary><p>$424 + 530 = 954$.</p></details>
+        </div></details>
+      </div>
+    </div>
+  </section>
+
+  <!-- DIVISION -->
+  <section class="card" data-card="3">
+    <div class="panel">
+      <h2 class="cardtitle">➗ Division</h2>
+      <div class="beispiel">
+        <h3>So schreibst du es auf</h3>
+        <p>Die erste Zahl heißt <span class="tooltipw">Dividend<span class="tt">Die Zahl, die geteilt wird.</span></span>, die zweite <span class="tooltipw">Divisor<span class="tt">Die Zahl, durch die geteilt wird.</span></span>, das Ergebnis <span class="tooltipw">Quotient<span class="tt">Das Ergebnis einer Division.</span></span>. Bleibt etwas übrig, schreiben wir den <b>Rest</b> dazu.</p>
+        <div class="calc divi wide">
+          <div class="row"><span class="cell">2</span><span class="cell">5</span><span class="cell">6</span><span class="res">: 19 = 13</span></div>
+          <div class="row"><span class="op">−</span><span class="cell">1</span><span class="cell">9</span><span class="label">1 · 19</span></div>
+          <div class="line" style="margin-left:1.7ch;width:3.4ch"></div>
+          <div class="row"><span class="cell"></span><span class="cell">6</span><span class="cell">6</span><span class="label">6 herunterholen</span></div>
+          <div class="row"><span class="op">−</span><span class="cell"></span><span class="cell">5</span><span class="cell">7</span><span class="label">3 · 19</span></div>
+          <div class="line" style="margin-left:3.1ch;width:3.4ch"></div>
+          <div class="row"><span class="cell"></span><span class="cell"></span><span class="cell">9</span><span class="res" style="font-size:1rem">→ Rest 9</span></div>
+        </div>
+        <p style="margin-top:.6rem">Schritt für Schritt: <b>teilen</b> ($25 : 19 = 1$), <b>malnehmen</b> ($1 \cdot 19 = 19$), <b>abziehen</b> ($25 - 19 = 6$), nächste Ziffer <b>herunterholen</b> – dann von vorn. Am Ende bleibt der Rest.</p>
+      </div>
+
+      <div class="aufg" data-q>
+        <div class="frage"><span class="nr">1</span>$96 : 6 = $ ?</div>
+        <input class="answer" inputmode="numeric" data-sol="16" aria-label="Antwort">
+        <button class="btn btn-check">Prüfen</button>
+        <button class="btn btn-clear">Leeren</button>
+        <div class="fb"></div>
+        <details class="tipp"><summary>💡 Tipp</summary><div class="inner">
+          <p>Wie oft passt 6 in 9? Dann den Rest mit der nächsten Ziffer weiterteilen.</p>
+          <details><summary>Noch ein Tipp</summary><p>$9 : 6 = 1$ Rest $3$ → die 6 herunterholen ergibt $36$.</p></details>
+          <details><summary>Lösung</summary><p>Das Ergebnis ist $16$ (ohne Rest).</p></details>
+        </div></details>
+      </div>
+
+      <div class="aufg" data-q>
+        <div class="frage"><span class="nr">2</span>$148 : 7 = $ ? &nbsp;<span style="font-size:.95rem;color:#557">(nur den Quotienten ohne Rest eintragen)</span></div>
+        <input class="answer" inputmode="numeric" data-sol="21" aria-label="Antwort">
+        <button class="btn btn-check">Prüfen</button>
+        <button class="btn btn-clear">Leeren</button>
+        <div class="fb"></div>
+        <details class="tipp"><summary>💡 Tipp</summary><div class="inner">
+          <p>$14 : 7 = 2$, dann die 8 herunterholen.</p>
+          <details><summary>Noch ein Tipp</summary><p>$8 : 7 = 1$ Rest $1$.</p></details>
+          <details><summary>Lösung</summary><p>Der Quotient ist $21$, es bleibt Rest $1$.</p></details>
+        </div></details>
+      </div>
+    </div>
+  </section>
+
+  <!-- POTENZEN (Wiederholung) -->
+  <section class="card" data-card="4">
+    <div class="panel">
+      <h2 class="cardtitle">🔁 Potenzen – Wiederholung</h2>
+
+      <div class="levelcard" data-level>
+        <div class="lvlhead"><span>🎚️ Niveaustufe wählen</span><span class="arrow">▾</span></div>
+        <div class="levelopts">
+          <button class="lvlbtn active" data-lvl="0">Grundlagen</button>
+          <button class="lvlbtn" data-lvl="1">Fortgeschritten</button>
+          <button class="lvlbtn" data-lvl="2">Profi</button>
+        </div>
+      </div>
+
+      <div class="beispiel">
+        <h3>Was bedeutet eine Potenz?</h3>
+        <p>Ein Produkt aus <b>gleichen Faktoren</b> schreibt man kurz als <span class="tooltipw">Potenz<span class="tt">Kurzschreibweise für ein Produkt gleicher Faktoren.</span></span>. Die <b>Hochzahl</b> (Exponent) gibt an, wie oft die <b>Grundzahl</b> (Basis) als Faktor vorkommt.</p>
+        <p style="font-size:1.3rem">$4 \cdot 4 \cdot 4 = 4^3 = 64$ &nbsp;&nbsp;<span style="color:#557;font-size:1rem">(3-mal die 4)</span></p>
+      </div>
+
+      <!-- Grundlagen -->
+      <div class="lvlbox" data-box="0">
+        <div class="aufg" data-q>
+          <div class="frage"><span class="nr">1</span>Schreibe als Potenz: $3 \cdot 3 \cdot 3 \cdot 3$ &nbsp;<span style="font-size:.95rem;color:#557">(Form: Basis^Exponent, z.&nbsp;B. 2^5)</span></div>
+          <input class="answer" inputmode="text" data-sol="3^4" aria-label="Antwort">
+          <button class="btn btn-check">Prüfen</button>
+          <button class="btn btn-clear">Leeren</button>
+          <div class="fb"></div>
+          <details class="tipp"><summary>💡 Tipp</summary><div class="inner">
+            <p>Wie oft kommt die 3 als Faktor vor? Das ist der Exponent.</p>
+            <details><summary>Noch ein Tipp</summary><p>Die Basis ist 3, gezählt werden vier Faktoren.</p></details>
+            <details><summary>Lösung</summary><p>$3^4$</p></details>
+          </div></details>
+        </div>
+        <div class="aufg" data-q>
+          <div class="frage"><span class="nr">2</span>Berechne den Wert: $2^3 = $ ?</div>
+          <input class="answer" inputmode="numeric" data-sol="8" aria-label="Antwort">
+          <button class="btn btn-check">Prüfen</button>
+          <button class="btn btn-clear">Leeren</button>
+          <div class="fb"></div>
+          <details class="tipp"><summary>💡 Tipp</summary><div class="inner">
+            <p>$2^3$ bedeutet $2\cdot 2\cdot 2$.</p>
+            <details><summary>Noch ein Tipp</summary><p>$2\cdot 2 = 4$, dann $\cdot 2$.</p></details>
+            <details><summary>Lösung</summary><p>$2^3 = 8$.</p></details>
+          </div></details>
+        </div>
+      </div>
+
+      <!-- Fortgeschritten -->
+      <div class="lvlbox" data-box="1" style="display:none">
+        <div class="aufg" data-q>
+          <div class="frage"><span class="nr">1</span>Berechne: $5^2 \cdot 2 = $ ?</div>
+          <input class="answer" inputmode="numeric" data-sol="50" aria-label="Antwort">
+          <button class="btn btn-check">Prüfen</button>
+          <button class="btn btn-clear">Leeren</button>
+          <div class="fb"></div>
+          <details class="tipp"><summary>💡 Tipp</summary><div class="inner">
+            <p>Erst die Potenz ausrechnen, dann multiplizieren (Potenz vor Punkt).</p>
+            <details><summary>Noch ein Tipp</summary><p>$5^2 = 25$.</p></details>
+            <details><summary>Lösung</summary><p>$25 \cdot 2 = 50$.</p></details>
+          </div></details>
+        </div>
+        <div class="aufg" data-q>
+          <div class="frage"><span class="nr">2</span>Berechne: $2^2 \cdot 10^2 = $ ?</div>
+          <input class="answer" inputmode="numeric" data-sol="400" aria-label="Antwort">
+          <button class="btn btn-check">Prüfen</button>
+          <button class="btn btn-clear">Leeren</button>
+          <div class="fb"></div>
+          <details class="tipp"><summary>💡 Tipp</summary><div class="inner">
+            <p>Berechne beide Potenzen einzeln und multipliziere dann.</p>
+            <details><summary>Noch ein Tipp</summary><p>$2^2 = 4$ und $10^2 = 100$.</p></details>
+            <details><summary>Lösung</summary><p>$4 \cdot 100 = 400$.</p></details>
+          </div></details>
+        </div>
+      </div>
+
+      <!-- Profi -->
+      <div class="lvlbox" data-box="2" style="display:none">
+        <div class="aufg" data-q>
+          <div class="frage"><span class="nr">1</span>Berechne: $4^3 - 7^2 = $ ?</div>
+          <input class="answer" inputmode="numeric" data-sol="15" aria-label="Antwort">
+          <button class="btn btn-check">Prüfen</button>
+          <button class="btn btn-clear">Leeren</button>
+          <div class="fb"></div>
+          <details class="tipp"><summary>💡 Tipp</summary><div class="inner">
+            <p>Beide Potenzen einzeln berechnen, dann subtrahieren.</p>
+            <details><summary>Noch ein Tipp</summary><p>$4^3 = 64$ und $7^2 = 49$.</p></details>
+            <details><summary>Lösung</summary><p>$64 - 49 = 15$.</p></details>
+          </div></details>
+        </div>
+        <div class="aufg" data-q>
+          <div class="frage"><span class="nr">2</span>Berechne: $5^2 \cdot 10^3 = $ ?</div>
+          <input class="answer" inputmode="numeric" data-sol="25000" aria-label="Antwort">
+          <button class="btn btn-check">Prüfen</button>
+          <button class="btn btn-clear">Leeren</button>
+          <div class="fb"></div>
+          <details class="tipp"><summary>💡 Tipp</summary><div class="inner">
+            <p>$10^3$ bedeutet $10\cdot 10\cdot 10$.</p>
+            <details><summary>Noch ein Tipp</summary><p>$5^2 = 25$ und $10^3 = 1000$.</p></details>
+            <details><summary>Lösung</summary><p>$25 \cdot 1000 = 25\,000$.</p></details>
+          </div></details>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- AUSWERTUNG -->
+  <section class="card" data-card="5">
+    <div class="panel" id="scorebox">
+      <h2 class="cardtitle">🏁 Auswertung</h2>
+      <p>Du hast richtig gelöst:</p>
+      <span class="scoreval" id="scoreval">0 / 0</span>
+      <p id="scoremsg">Bearbeite zuerst alle Aufgaben auf den anderen Karten.</p>
+    </div>
+  </section>
+
+</div>
+
+<div class="weiter-wrap" id="weiterWrap">
+  <a class="weiter" href="#">Weiter ➜</a>
+</div>
+
+<div class="dino" id="dino" onclick="this.classList.toggle('show')">🦖<span class="bubble">Made by Mathedino</span></div>
+
+<script>
+(function(){
+  const titles = ["➕ Addition","➖ Subtraktion","✖️ Multiplikation","➗ Division","🔁 Potenzen","🏁 Auswertung"];
+  const cards = Array.from(document.querySelectorAll('.card'));
+  const tabsNav = document.getElementById('tabs');
+  const weiterWrap = document.getElementById('weiterWrap');
+
+  // Tabs bauen
+  titles.forEach((t,i)=>{
+    const b=document.createElement('button');
+    b.className='tab'+(i===0?' active':'');
+    b.dataset.tab=i;
+    b.innerHTML='<span class="done" style="display:none">✓ </span>'+t;
+    b.onclick=()=>showCard(i);
+    tabsNav.appendChild(b);
+  });
+  function showCard(i){
+    cards.forEach(c=>c.classList.toggle('active',+c.dataset.card===i));
+    document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',+t.dataset.tab===i));
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+  showCard(0);
+
+  // Niveau-Umschaltung (Potenzkarte)
+  document.querySelectorAll('[data-level]').forEach(card=>{
+    const opts=card.querySelector('.levelopts');
+    card.querySelector('.lvlhead').onclick=()=>opts.classList.toggle('open');
+    card.querySelectorAll('.lvlbtn').forEach(btn=>{
+      btn.onclick=(e)=>{
+        e.stopPropagation();
+        const lvl=btn.dataset.lvl;
+        card.querySelectorAll('.lvlbtn').forEach(b=>b.classList.toggle('active',b===btn));
+        const panel=card.closest('.panel');
+        panel.querySelectorAll('.lvlbox').forEach(box=>{
+          box.style.display = (box.dataset.box===lvl)?'block':'none';
+        });
+        updateState();
+        if(window.MathJax&&MathJax.typesetPromise)MathJax.typesetPromise();
+      };
+    });
+  });
+
+  function normalizeMul(s){
+    return s.replace(/\s/g,'').replace(/\D+/g,'·').replace(/·+/g,'·').replace(/^·|·$/g,'').toLowerCase();
+  }
+  // Vergleich: reine Zahlen exakt, Potenzschreibweise (a^b) tolerant
+  function isCorrect(input,sol){
+    const inp=input.trim();
+    if(/^\d+$/.test(sol)){
+      return inp.replace(/\s/g,'')===sol;
+    }
+    if(sol.includes('^')){
+      const norm=x=>x.replace(/\s/g,'').replace(/\*\*/g,'^').toLowerCase();
+      return norm(inp)===norm(sol);
+    }
+    return normalizeMul(inp)===normalizeMul(sol);
+  }
+
+  // jede sichtbare Aufgabe verdrahten
+  function wireAufg(aufg){
+    if(aufg.dataset.wired) return;
+    aufg.dataset.wired='1';
+    const inp=aufg.querySelector('input.answer');
+    const check=aufg.querySelector('.btn-check');
+    const clear=aufg.querySelector('.btn-clear');
+    const fb=aufg.querySelector('.fb');
+    check.onclick=()=>{
+      if(inp.value.trim()===''){return;}
+      const ok=isCorrect(inp.value,inp.dataset.sol);
+      aufg.dataset.answered='1';
+      aufg.dataset.correct=ok?'1':'0';
+      inp.classList.remove('ok','bad');fb.classList.remove('ok','bad');
+      if(ok){
+        inp.classList.add('ok');inp.readOnly=true;
+        fb.classList.add('ok');fb.textContent='✓ Richtig!';
+        clear.style.display='none';
+      }else{
+        inp.classList.add('bad');
+        fb.classList.add('bad');fb.innerHTML='✕ Noch nicht richtig. Korrigiere deine Eingabe – ein Tipp hilft dir.';
+        clear.style.display='inline-block';
+      }
+      updateState();
+    };
+    clear.onclick=()=>{
+      inp.value='';inp.readOnly=false;inp.classList.remove('ok','bad');
+      fb.classList.remove('ok','bad');fb.textContent='';clear.style.display='none';
+      delete aufg.dataset.answered;delete aufg.dataset.correct;
+      updateState();
+    };
+  }
+
+  function visibleAufgaben(){
+    return Array.from(document.querySelectorAll('.aufg[data-q]')).filter(a=>a.offsetParent!==null);
+  }
+
+  function updateState(){
+    // neue sichtbare Aufgaben verdrahten
+    document.querySelectorAll('.aufg[data-q]').forEach(wireAufg);
+
+    // pro Karte prüfen ob alle sichtbaren Aufgaben richtig
+    cards.forEach(card=>{
+      const idx=+card.dataset.card;
+      if(idx>=5) return;
+      const qs=Array.from(card.querySelectorAll('.aufg[data-q]')).filter(a=>a.offsetParent!==null);
+      const allCorrect = qs.length>0 && qs.every(a=>a.dataset.correct==='1');
+      const tab=document.querySelector('.tab[data-tab="'+idx+'"]');
+      tab.querySelector('.done').style.display=allCorrect?'inline':'none';
+    });
+
+    // Score
+    const vis=visibleAufgaben();
+    const total=vis.length;
+    const correct=vis.filter(a=>a.dataset.correct==='1').length;
+    const answered=vis.filter(a=>a.dataset.answered==='1').length;
+    document.getElementById('scoreval').textContent=correct+' / '+total;
+    const msg=document.getElementById('scoremsg');
+    if(answered<total){
+      msg.textContent='Bearbeite zuerst alle Aufgaben auf den anderen Karten.';
+    }else if(correct===total){
+      msg.textContent='🎉 Super! Alles richtig gelöst.';
+    }else{
+      msg.textContent='Schau dir die rot markierten Aufgaben noch einmal an und korrigiere sie.';
+    }
+
+    // Weiter-Button: erst wenn ALLES sichtbare richtig
+    const done = total>0 && correct===total;
+    weiterWrap.classList.toggle('show',done);
+  }
+
+  updateState();
+})();
+</script>
+</body>
+</html>
