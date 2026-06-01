@@ -1049,12 +1049,66 @@ function buildTasks(){
   // answers verified above in task definitions
 }
 
-// ================== RENDER TASKS ==================
-let cardTaskStates = {}; // {cardIdx: [{done:bool,correct:bool,tipLevel:0},...]}
-let renderedLevel = {};
+// ================== PERSISTENT STATE ==================
+// savedState[cardIdx][level][taskIdx] = { value, valueZ, valueN, correct, wrong, tipOpen, tipLevel, fbHtml, fbClass, itemClass }
+let savedState = {};
+let cardTaskStates = {}; // active states for current level: [{correct,tipLevel}]
+let renderedLevel = {}; // which level is currently rendered per card
 
+function getState(ci, lvl){
+  if(!savedState[ci]) savedState[ci]={};
+  if(!savedState[ci][lvl]) savedState[ci][lvl]=null;
+  return savedState[ci][lvl];
+}
+
+function saveCurrentState(ci){
+  let lvl = renderedLevel[ci];
+  if(lvl===undefined||lvl===null) return;
+  let arr = tasks[ci]&&tasks[ci][lvl];
+  if(!arr) return;
+  let snapshot = arr.map((t,i)=>{
+    let s = (cardTaskStates[ci]||[])[i]||{};
+    let entry = { correct: s.correct||false, tipLevel: s.tipLevel||0 };
+    if(t.type==='frac'){
+      let z=document.getElementById('inp-z-'+ci+'-'+i);
+      let n=document.getElementById('inp-n-'+ci+'-'+i);
+      entry.valueZ = z?z.value:'';
+      entry.valueN = n?n.value:'';
+    } else {
+      let el=document.getElementById('inp-'+ci+'-'+i);
+      entry.value = el?el.value:'';
+    }
+    // save visual state
+    let item=document.getElementById('ti-'+ci+'-'+i);
+    entry.itemClass = item ? (item.classList.contains('correct')?'correct': item.classList.contains('wrong')?'wrong':'') : '';
+    let fb=document.getElementById('fb-'+ci+'-'+i);
+    entry.fbClass = fb ? fb.className : '';
+    entry.fbHtml  = fb ? fb.innerHTML : '';
+    let tipBox=document.getElementById('tip-'+ci+'-'+i);
+    entry.tipOpen = tipBox ? tipBox.classList.contains('show') : false;
+    return entry;
+  });
+  savedState[ci][lvl] = snapshot;
+  // save weiter/clear button state
+  let wb=document.getElementById('weiter-'+ci);
+  let cb=document.getElementById('clear-'+ci);
+  if(!savedState[ci]['_btns']) savedState[ci]['_btns']={};
+  savedState[ci]['_btns'][lvl]={
+    weiter: wb?wb.classList.contains('show'):false,
+    clear:  cb?cb.classList.contains('visible'):false
+  };
+}
+
+// ================== RENDER TASKS ==================
 function renderCard(cardIdx){
   let lvl = currentLevel;
+
+  // Save state of whatever is currently rendered before switching
+  if(renderedLevel[cardIdx]!==undefined && renderedLevel[cardIdx]!==null && renderedLevel[cardIdx]!==lvl){
+    saveCurrentState(cardIdx);
+  }
+
+  // If already rendered at this level, just restore
   if(renderedLevel[cardIdx] === lvl) return;
   renderedLevel[cardIdx] = lvl;
 
@@ -1063,7 +1117,11 @@ function renderCard(cardIdx){
   if(!container) return;
   container.innerHTML='';
 
-  cardTaskStates[cardIdx] = arr.map(()=>({done:false,correct:false,tipLevel:0}));
+  let existing = getState(cardIdx, lvl);
+  cardTaskStates[cardIdx] = arr.map((_,i)=>({
+    correct: existing?.[i]?.correct||false,
+    tipLevel: existing?.[i]?.tipLevel||0
+  }));
 
   arr.forEach((t,i)=>{
     let div = document.createElement('div');
@@ -1107,9 +1165,50 @@ function renderCard(cardIdx){
     container.appendChild(div);
   });
 
-  // reset done state
-  document.getElementById('weiter-'+cardIdx) && (document.getElementById('weiter-'+cardIdx).classList.remove('show'));
-  document.getElementById('clear-'+cardIdx) && (document.getElementById('clear-'+cardIdx).classList.remove('visible'));
+  // Restore saved state if available
+  if(existing){
+    arr.forEach((t,i)=>{
+      let s=existing[i];
+      if(!s) return;
+      // restore input values
+      if(t.type==='frac'){
+        let z=document.getElementById('inp-z-'+cardIdx+'-'+i);
+        let n=document.getElementById('inp-n-'+cardIdx+'-'+i);
+        if(z) z.value=s.valueZ||'';
+        if(n) n.value=s.valueN||'';
+      } else {
+        let el=document.getElementById('inp-'+cardIdx+'-'+i);
+        if(el) el.value=s.value||'';
+      }
+      // restore item class
+      let item=document.getElementById('ti-'+cardIdx+'-'+i);
+      if(item && s.itemClass){ item.classList.add(s.itemClass); }
+      // restore feedback
+      let fb=document.getElementById('fb-'+cardIdx+'-'+i);
+      if(fb && s.fbClass){ fb.className=s.fbClass; fb.innerHTML=s.fbHtml||''; }
+      // restore tip visibility and steps
+      let tipBox=document.getElementById('tip-'+cardIdx+'-'+i);
+      if(tipBox && s.tipOpen) tipBox.classList.add('show');
+      if(s.tipLevel>0){
+        for(let j=1;j<=s.tipLevel;j++){
+          let el=document.getElementById('tip-step-'+cardIdx+'-'+i+'-'+j);
+          if(el) el.style.display='';
+        }
+        let moreBtn=document.getElementById('tip-more-'+cardIdx+'-'+i);
+        if(moreBtn && s.tipLevel>=(t.tips.length-1)) moreBtn.style.display='none';
+      }
+    });
+    // restore button states
+    let btns=savedState[cardIdx]?.['_btns']?.[lvl];
+    let wb=document.getElementById('weiter-'+cardIdx);
+    let cb=document.getElementById('clear-'+cardIdx);
+    if(wb) wb.classList.toggle('show', btns?.weiter||false);
+    if(cb) cb.classList.toggle('visible', btns?.clear||false);
+  } else {
+    // fresh card
+    document.getElementById('weiter-'+cardIdx)?.classList.remove('show');
+    document.getElementById('clear-'+cardIdx)?.classList.remove('visible');
+  }
 }
 
 function buildTipHtml(tips, ci, ti){
