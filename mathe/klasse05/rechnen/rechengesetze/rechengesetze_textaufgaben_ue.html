@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Textaufgaben – Geschickt rechnen · Klasse 5</title>
+<style>
+  :root {
+    --teal: #0f6b6b;
+    --teal-hell: #e0f4f4;
+    --teal-mid: #1e9090;
+    --lila: #5e35b1;
+    --lila-hell: #ede7f6;
+    --gelb: #f57f17;
+    --gelb-hell: #fff8e1;
+    --gruen: #1a7a3a;
+    --gruen-hell: #e6f5eb;
+    --rot: #c0392b;
+    --rot-hell: #fdecea;
+    --grau: #f2f4f8;
+    --text: #1e2a35;
+    --weiss: #ffffff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    font-size: 18px;
+    background: var(--grau);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  .header {
+    background: linear-gradient(140deg, var(--teal) 0%, var(--teal-mid) 100%);
+    color: white;
+    padding: 20px 20px 16px;
+  }
+  .header-top { display: flex; align-items: center; gap: 14px; }
+  .header-icon { font-size: 2.2rem; }
+  .header h1 { font-size: 1.25rem; font-weight: 700; line-height: 1.2; }
+  .header p { font-size: 0.85rem; color: #b2dfdb; margin-top: 3px; }
+  .header-sub {
+    background: rgba(0,0,0,0.25);
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin-top: 12px;
+    font-size: 0.88rem;
+    line-height: 1.4;
+    color: #ffffff;
+  }
+
+  /* PROGRESS */
+  .progress-wrap { background: rgba(0,0,0,0.2); height: 6px; }
+  .progress-bar { background: var(--gelb); height: 6px; transition: width 0.4s; }
+
+  /* AUFGABEN-ÜBERSICHT */
+  .aufgaben-nav {
+    display: flex;
+    overflow-x: auto;
+    padding: 12px 16px 6px;
+    gap: 10px;
+    scrollbar-width: none;
+  }
+  .aufgaben-nav::-webkit-scrollbar { display: none; }
+  .nav-chip {
+    flex-shrink: 0;
+    padding: 10px 16px;
+    border-radius: 20px;
+    border: 2px solid #b0bec5;
+    background: white;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--teal);
+    cursor: pointer;
+    min-height: 44px;
+    -webkit-tap-highlight-color: transparent;
+    transition: all 0.2s;
+  }
+  .nav-chip.aktiv { background: var(--teal); color: white; border-color: var(--teal); }
+  .nav-chip.gelöst { background: var(--gruen); color: white; border-color: var(--gruen); }
+
+  /* AUFGABEN-KARTE */
+  .aufgabe-karte {
+    background: white;
+    border-radius: 18px;
+    box-shadow: 0 4px 18px rgba(15,107,107,0.11);
+    margin: 10px 16px;
+    overflow: hidden;
+    display: none;
+  }
+  .aufgabe-karte.aktiv { display: block; }
+
+  /* KONTEXTBILD */
+  .kontext-header {
+    padding: 18px 18px 14px;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+  }
+  .kontext-emoji { font-size: 3rem; flex-shrink: 0; }
+  .kontext-info { flex: 1; }
+  .kontext-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 6px;
+  }
+  .kontext-badge.alltag { background: var(--gelb-hell); color: var(--gelb); }
+  .kontext-badge.sport { background: var(--teal-hell); color: var(--teal); }
+  .kontext-badge.schule { background: var(--lila-hell); color: var(--lila); }
+
+  .kontext-titel { font-size: 1.1rem; font-weight: 700; color: var(--teal); }
+  .kontext-desc { font-size: 0.9rem; color: #555; margin-top: 4px; line-height: 1.4; }
+
+  .aufgabe-inhalt { padding: 0 18px 18px; }
+
+  /* TEXT-AUFGABE */
+  .text-block {
+    background: var(--grau);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin: 12px 0;
+    line-height: 1.6;
+    font-size: 0.97rem;
+  }
+  .text-block .fett { font-weight: 700; }
+  .text-block .zahl { color: var(--teal); font-weight: 700; }
+
+  /* SCHRITTE */
+  .schritt {
+    border-left: 4px solid var(--teal);
+    padding: 12px 14px;
+    margin: 10px 0;
+    background: var(--teal-hell);
+    border-radius: 0 10px 10px 0;
+  }
+  .schritt-nr { font-size: 0.78rem; font-weight: 700; color: var(--teal-mid); text-transform: uppercase; letter-spacing: 0.05em; }
+  .schritt-text { font-size: 0.95rem; margin-top: 4px; line-height: 1.4; }
+
+  /* EINGABE */
+  .eingabe-gruppe {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin: 10px 0;
+  }
+  .eingabe-gruppe .label { flex: 1; min-width: 160px; font-weight: 600; }
+  input[type="number"] {
+    font-size: 1.1rem;
+    padding: 11px 14px;
+    border: 2px solid #b0bec5;
+    border-radius: 11px;
+    width: 110px;
+    min-width: 110px;
+    text-align: center;
+    -webkit-appearance: none;
+    transition: border-color 0.2s;
+  }
+  input:focus { border-color: var(--teal); outline: none; }
+  input.richtig { border-color: var(--gruen); background: var(--gruen-hell); }
+  input.falsch { border-color: var(--rot); background: var(--rot-hell); }
+
+  /* BUTTONS */
+  .btn {
+    font-size: 1rem; font-weight: 700;
+    padding: 13px 22px;
+    border-radius: 12px; border: none;
+    cursor: pointer; min-height: 48px;
+    transition: transform 0.1s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn-teal { background: var(--teal); color: white; box-shadow: 0 3px 10px rgba(15,107,107,0.25); }
+  .btn-voll { width: 100%; margin-top: 10px; }
+  .btn-hinweis { background: var(--gelb-hell); color: var(--gelb); border: 2px solid var(--gelb); padding: 10px 18px; font-size: 0.9rem; width:100%; margin-top:8px; }
+
+  /* FEEDBACK */
+  .feedback {
+    display: none;
+    border-radius: 11px;
+    padding: 13px 16px;
+    margin: 10px 0;
+    font-weight: 600;
+    font-size: 0.92rem;
+    line-height: 1.5;
+  }
+  .feedback.richtig { display: block; background: var(--gruen); color: white; }
+  .feedback.falsch { display: block; background: var(--rot); color: white; }
+
+  /* HINWEIS */
+  .hinweis {
+    background: var(--gelb-hell);
+    border: 2px solid var(--gelb);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 0.9rem;
+    margin: 10px 0;
+    display: none;
+    line-height: 1.4;
+  }
+  .hinweis.sichtbar { display: block; }
+
+  /* RECHENWEG */
+  .rechenweg {
+    background: #f9f9f9;
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.95rem;
+    margin: 10px 0;
+    display: none;
+  }
+  .rechenweg.sichtbar { display: block; }
+  .rechenweg .schritt-rw { margin: 4px 0; }
+  .rechenweg .highlight { color: var(--teal); font-weight: 700; }
+  .rechenweg .ergebnis { color: var(--gruen); font-weight: 700; }
+
+  /* GESETZ CHIP */
+  .gesetz-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 12px;
+    border-radius: 16px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    margin: 4px 4px 4px 0;
+  }
+  .gesetz-chip.komm { background: var(--teal-hell); color: var(--teal); }
+  .gesetz-chip.assoz { background: var(--lila-hell); color: var(--lila); }
+
+  /* AUSWERTUNG */
+  .auswertung-box {
+    background: linear-gradient(135deg, var(--teal), var(--teal-mid));
+    color: white;
+    border-radius: 16px;
+    padding: 20px;
+    margin: 14px 0;
+    text-align: center;
+  }
+  .auswertung-box .stern { font-size: 2.5rem; }
+  .auswertung-box h2 { margin: 8px 0 6px; font-size: 1.3rem; }
+  .auswertung-box p { color: #e0f4f4; }
+
+  /* WEITER */
+  .weiter-bereich {
+    padding: 14px 16px 20px;
+    position: sticky; bottom: 0;
+    background: linear-gradient(to top, var(--grau) 70%, transparent);
+  }
+  .btn-weiter {
+    width: 100%; font-size: 1.1rem; font-weight: 700; padding: 16px;
+    border-radius: 14px; border: none; cursor: pointer;
+    background: var(--teal); color: white;
+    box-shadow: 0 4px 14px rgba(15,107,107,0.3);
+    min-height: 56px; display: flex; align-items: center; justify-content: center; gap: 8px;
+    -webkit-tap-highlight-color: transparent; transition: transform 0.1s;
+  }
+  .btn-weiter:active { transform: scale(0.98); }
+
+  .trex { position: fixed; bottom: 78px; right: 14px; font-size: 1.5rem; opacity: 0.28; pointer-events: none; z-index: 999; }
+  .divider { height: 1px; background: #dde4ec; margin: 14px 0; }
+
+  /* MEHRFACH EINGABE IN EINER REIHE */
+  .rechen-input-reihe {
+    display: flex; align-items: center; flex-wrap: wrap; gap: 6px;
+    font-family: 'Courier New', monospace; font-size: 1rem;
+    margin: 8px 0;
+  }
+  .rechen-input-reihe input { width: 75px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div class="header-icon">📖</div>
+    <div>
+      <h1>Textaufgaben – Geschickt rechnen</h1>
+      <p>Klasse 5 · Kommutativ- &amp; Assoziativgesetz anwenden</p>
+    </div>
+  </div>
+  <div class="header-sub">
+    💡 Bei jeder Aufgabe: Überlege zuerst, <strong>welches Gesetz</strong> dir hilft – dann rechne!
+  </div>
+</div>
+<div class="progress-wrap">
+  <div class="progress-bar" id="progressBar" style="width:14%"></div>
+</div>
+
+<div class="aufgaben-nav" id="aufgabenNav"></div>
+
+<!-- AUFGABE 1: Flohmarkt -->
+<div class="aufgabe-karte aktiv" id="aufgabe-1">
+  <div class="kontext-header">
+    <div class="kontext-emoji">🏪</div>
+    <div class="kontext-info">
+      <div class="kontext-badge alltag">Alltag</div>
+      <div class="kontext-titel">Der Schulflohmarkt</div>
+      <div class="kontext-desc">Addition · Aufgabe 1 von 7</div>
+    </div>
+  </div>
+  <div class="aufgabe-inhalt">
+    <div class="text-block">
+      Die Klassen des Albert-Einstein-Gymnasiums veranstalteten einen Flohmarkt für ihre Partnerschule in Sierra Leone. Sie nahmen ein: <span class="zahl">57 €</span>, <span class="zahl">43 €</span>, <span class="zahl">65 €</span>, <span class="zahl">35 €</span>, <span class="zahl">49 €</span> und <span class="zahl">51 €</span>. Mathilda sagt: „Das kann ich im Kopf rechnen!" Wie geht das?
+    </div>
+
+    <div class="schritt">
+      <div class="schritt-nr">Schritt 1 – Strategie wählen</div>
+      <div class="schritt-text">Suche Paare, die zusammen <strong>100</strong> ergeben!</div>
+    </div>
+
+    <div class="eingabe-gruppe">
+      <span class="label">57 + 43 =</span>
+      <input type="number" id="a1-z1" inputmode="numeric" placeholder="?">
+    </div>
+    <div class="eingabe-gruppe">
+      <span class="label">65 + 35 =</span>
+      <input type="number" id="a1-z2" inputmode="numeric" placeholder="?">
+    </div>
+    <div class="eingabe-gruppe">
+      <span class="label">49 + 51 =</span>
+      <input type="number" id="a1-z3" inputmode="numeric" placeholder="?">
+    </div>
+    <div class="eingabe-gruppe">
+      <span class="label">Gesamteinnahmen:</span>
+      <input type="number" id="a1-e" inputmode="numeric" placeholder="? €">
+    </div>
+
+    <button class="btn btn-teal btn-voll" onclick="pruefeA1()">Prüfen ✓</button>
+    <div class="feedback" id="fb-a1"></div>
+
+    <div class="gesetz-chip komm">🔀 Kommutativgesetz</div>
+    <div class="gesetz-chip assoz">🔗 Assoziativgesetz</div>
+  </div>
+</div>
+
+<!-- AUFGABE 2: Fahrradtour -->
+<div class="aufgabe-karte" id="aufgabe-2">
+  <div class="kontext-header">
+    <div class="kontext-emoji">🚴</div>
+    <div class="kontext-info">
+      <div class="kontext-badge sport">Sport &amp; Freizeit</div>
+      <div class="kontext-titel">Die Fahrradtour</div>
+      <div class="kontext-desc">Addition · Aufgabe 2 von 7</div>
+    </div>
+  </div>
+  <div class="aufgabe-inhalt">
+    <div class="text-block">
+      Hanna und ihre Freundin machen eine Fahrradtour. Am ersten Tag fahren sie <span class="zahl">42 km</span>, am zweiten Tag <span class="zahl">57 km</span>, am dritten Tag <span class="zahl">48 km</span>. Am vierten Tag legen sie eine Pause ein. Am fünften Tag fahren sie nochmal <span class="zahl">43 km</span>. Berechne die <strong>gesamte Strecke der Fahrradtour</strong> geschickt im Kopf.
+    </div>
+
+    <button class="btn btn-hinweis" id="btn-hint-a2" onclick="zeigeHinweis('hint-a2','btn-hint-a2')">💡 Tipp anzeigen</button>
+    <div class="hinweis" id="hint-a2">Welche zwei Zahlen ergeben zusammen eine runde Zahl? Denke an 42 und 48!</div>
+
+    <div class="schritt">
+      <div class="schritt-nr">Dein Rechenweg</div>
+      <div class="schritt-text">Schreibe: Welche Zahlen fasst du zuerst zusammen?</div>
+    </div>
+
+    <div class="eingabe-gruppe">
+      <span class="label">Cleveres Paar (Summe):</span>
+      <input type="number" id="a2-z1" inputmode="numeric" placeholder="?">
+    </div>
+    <div class="eingabe-gruppe">
+      <span class="label">Alle 4 Tage zusammen (km):</span>
+      <input type="number" id="a2-e" inputmode="numeric" placeholder="?">
+    </div>
+    <button class="btn btn-teal btn-voll" onclick="pruefeA2()">Prüfen ✓</button>
+    <div class="feedback" id="fb-a2"></div>
+    <div class="gesetz-chip komm">🔀 Kommutativgesetz</div>
+  </div>
+</div>
+
+<!-- AUFGABE 3: Schulmaterial -->
+<div class="aufgabe-karte" id="aufgabe-3">
+  <div class="kontext-header">
+    <div class="kontext-emoji">🎒</div>
+    <div class="kontext-info">
+      <div class="kontext-badge schule">Schule</div>
+      <div class="kontext-titel">Schulmaterial kaufen</div>
+      <div class="kontext-desc">Multiplikation · Aufgabe 3 von 7</div>
+    </div>
+  </div>
+  <div class="aufgabe-inhalt">
+    <div class="text-block">
+      Die Lehrerin kauft Schulmaterial: <span class="zahl">4 Packungen</span> mit je <span class="zahl">25 Blatt</span> Tonpapier für <span class="zahl">3 Klassen</span>. Außerdem noch <span class="zahl">8 Schachteln</span> mit je <span class="zahl">125 Stifte</span>. Wie viele Blätter und Stifte kauft sie insgesamt?
+    </div>
+
+    <div class="schritt">
+      <div class="schritt-nr">Aufgabe a) – Tonpapier</div>
+      <div class="schritt-text">4 · 25 · 3 = ? Tipp: Rechne erst 4 · 25!</div>
+    </div>
+    <div class="eingabe-gruppe">
+      <span class="label">4 · 25 =</span>
+      <input type="number" id="a3-z1" inputmode="numeric" placeholder="?">
+    </div>
+    <div class="eingabe-gruppe">
+      <span class="label">… · 3 = Anzahl Blätter:</span>
+      <input type="number" id="a3-e1" inputmode="numeric" placeholder="?">
+    </div>
+    <button class="btn btn-teal btn-voll" onclick="pruefeA3a()">Prüfen ✓</button>
+    <div class="feedback" id="fb-a3a"></div>
+
+    <div class="divider"></div>
+
+    <div class="schritt">
+      <div class="schritt-nr">Aufgabe b) – Stifte</div>
+      <div class="schritt-text">8 · 125 = ? Das ist ein bekannter Trick!</div>
+    </div>
+    <div class="eingabe-gruppe">
+      <span class="label">8 · 125 = Anzahl Stifte:</span>
+      <input type="number" id="a3-e2" inputmode="numeric" placeholder="?">
+    </div>
+    <button class="btn btn-teal btn-voll" onclick="pruefeA3b()">Prüfen ✓</button>
+    <div class="feedback" id="fb-a3b"></div>
+    <div class="gesetz-chip assoz">🔗 Assoziativgesetz</div>
+  </div>
+</div>
+
+<!-- AUFGABE 4: Kassenwart -->
+<div class="aufgabe-karte" id="aufgabe-4">
+  <div class="kontext-header">
+    <div class="kontext-emoji">💰</div>
+    <div class="kontext-info">
+      <div class="kontext-badge schule">Schule</div>
+      <div class="kontext-titel">Die Klassenkasse</div>
+      <div class="kontext-desc">Addition &amp; Subtraktion · Aufgabe 4 von 7</div>
+    </div>
+  </div>
+  <div class="aufgabe-inhalt">
+    <div class="text-block">
+      Der Klassenkassenwart Jonas notiert die Einnahmen und Ausgaben der Klasse 5a:
+      Einnahmen: <span class="zahl">88 €</span> + <span class="zahl">46 €</span> + <span class="zahl">12 €</span> + <span class="zahl">54 €</span>.
+      Ausgaben: <span class="zahl">75 €</span>.
+      Berechne zuerst die Einnahmen <strong>geschickt</strong>, dann den Kassenstand.
+    </div>
+
+    <div class="schritt">
+      <div class="schritt-nr">Schritt 1 – Einnahmen</div>
+      <div class="schritt-text">88 + 46 + 12 + 54 = ? Suche clevere Paare!</div>
+    </div>
+    <div class="eingabe-gruppe">
+      <span class="label">Paar 1 – Summe der beiden Zahlen:</span>
+      <input type="number" id="a4-p1" inputmode="numeric" placeholder="?">
+    </div>
+    <div class="eingabe-gruppe">
+      <span class="label">Paar 2 – Summe der beiden Zahlen:</span>
+      <input type="number" id="a4-p2" inputmode="numeric" placeholder="?">
+    </div>
+    <div class="eingabe-gruppe">
+      <span class="label">Einnahmen gesamt:</span>
+      <input type="number" id="a4-e" inputmode="numeric" placeholder="? €">
+    </div>
+    <div class="eingabe-gruppe">
+      <span class="label">Kassenstand (− 75 €):</span>
+      <input type="number" id="a4-k" inputmode="numeric" placeholder="? €">
+    </div>
+    <button class="btn btn-teal btn-voll" onclick="pruefeA4()">Prüfen ✓</button>
+    <div class="feedback" id="fb-a4"></div>
+    <div class="gesetz-chip komm">🔀 Kommutativgesetz</div>
+    <div class="gesetz-chip assoz">🔗 Assoziativgesetz</div>
+  </div>
+</div>
+
+<!-- AUFGABE 5: Kino -->
+<div class="aufgabe-karte" id="aufgabe-5">
+  <div class="kontext-header">
+    <div class="kontext-emoji">🎬</div>
+    <div class="kontext-info">
+      <div class="kontext-badge alltag">Alltag</div>
+      <div class="kontext-titel">Kinobesuch</div>
+      <div class="kontext-desc">Multiplikation · Aufgabe 5 von 7</div>
+    </div>
+  </div>
+  <div class="aufgabe-inhalt">
+    <div class="text-block">
+      Eine Schulklasse geht ins Kino. <span class="zahl">5 Reihen</span> mit je <span class="zahl">8 Sitzen</span> sind belegt. Die Lehrerin kauft außerdem für jedes der <span class="zahl">40 Kinder</span> ein Popcorn für je <span class="zahl">4 €</span>. Berechne beide Ergebnisse <strong>geschickt</strong>.
+    </div>
+
+    <div class="schritt">
+      <div class="schritt-nr">a) Wie viele Kinder sitzen im Kino?</div>
+      <div class="schritt-text">5 · 8 = ? (Einfach – kein Trick nötig)</div>
+    </div>
+    <div class="eingabe-gruppe">
+      <span class="label">Kinder im Kino:</span>
+      <input type="number" id="a5-z1" inputmode="numeric" placeholder="?">
+    </div>
+
+    <div class="schritt">
+      <div class="schritt-nr">b) Was kosten alle Popcorns?</div>
+      <div class="schritt-text">40 · 4 = (4 · 10) · 4 = 4 · (10 · 4) = ?</div>
+    </div>
+    <div class="eingabe-gruppe">
+      <span class="label">10 · 4 =</span>
+      <input type="number" id="a5-z2" inputmode="numeric" placeholder="?">
+    </div>
+    <div class="eingabe-gruppe">
+      <span class="label">4 · 40 = Popcorn gesamt:</span>
+      <input type="number" id="a5-e" inputmode="numeric" placeholder="? €">
+    </div>
+    <button class="btn btn-teal btn-voll" onclick="pruefeA5()">Prüfen ✓</button>
+    <div class="feedback" id="fb-a5"></div>
+    <div class="gesetz-chip assoz">🔗 Assoziativgesetz</div>
+  </div>
+</div>
+
+<!-- AUFGABE 6: Bücherregal -->
+<div class="aufgabe-karte" id="aufgabe-6">
+  <div class="kontext-header">
+    <div class="kontext-emoji">📚</div>
+    <div class="kontext-info">
+      <div class="kontext-badge alltag">Alltag</div>
+      <div class="kontext-titel">Bücher in der Bibliothek</div>
+      <div class="kontext-desc">Gemischt · Aufgabe 6 von 7</div>
+    </div>
+  </div>
+  <div class="aufgabe-inhalt">
+    <div class="text-block">
+      In der Schulbibliothek stehen Bücher in Regalen. In Regal A: <span class="zahl">17</span> Bücher, in Regal B: <span class="zahl">83</span> Bücher, in Regal C: <span class="zahl">29</span> Bücher, in Regal D: <span class="zahl">71</span> Bücher. Jedes Buch ist durchschnittlich <span class="zahl">4</span> Mal ausgeliehen worden. Berechne: a) Wie viele Bücher gibt es insgesamt? b) Wie oft wurden alle Bücher insgesamt ausgeliehen?
+    </div>
+
+    <button class="btn btn-hinweis" id="btn-hint-a6" onclick="zeigeHinweis('hint-a6','btn-hint-a6')">💡 Tipp anzeigen</button>
+    <div class="hinweis" id="hint-a6">
+      Für a): Suche Paare, die 100 ergeben! (17+83=? und 29+71=?)<br>
+      Für b): Rechne zuerst die Summe in der Klammer: (17+83+29+71) · 4.<br>
+      <strong>⚠️ Wichtig:</strong> Die Klammer muss hier stehen bleiben! (17+83+29+71) · 4 ist etwas anderes als 17+83+29+71 · 4 – bei letzterem würde nach Punkt-vor-Strich nur 71 · 4 berechnet.
+    </div>
+    <p style="font-size:0.85rem;color:#666;margin-top:10px">💡 Fällt euch auf, dass ihr hier ähnlich wie beim Bäcker zwei Zahlen „zusammenzieht"? Das Prinzip dahinter heißt <strong>Distributivgesetz</strong> – das kommt im nächsten Kapitel!</p>
+
+    <div class="eingabe-gruppe">
+      <span class="label">a) Bücher gesamt:</span>
+      <input type="number" id="a6-e1" inputmode="numeric" placeholder="?">
+    </div>
+    <div class="eingabe-gruppe">
+      <span class="label">b) Ausleihen gesamt:</span>
+      <input type="number" id="a6-e2" inputmode="numeric" placeholder="?">
+    </div>
+    <button class="btn btn-teal btn-voll" onclick="pruefeA6()">Prüfen ✓</button>
+    <div class="feedback" id="fb-a6"></div>
+    <div class="gesetz-chip komm">🔀 Kommutativgesetz</div>
+    <div class="gesetz-chip assoz">🔗 Assoziativgesetz</div>
+  </div>
+</div>
+
+<!-- AUFGABE 7: Brötchen -->
+<div class="aufgabe-karte" id="aufgabe-7">
+  <div class="kontext-header">
+    <div class="kontext-emoji">🥐</div>
+    <div class="kontext-info">
+      <div class="kontext-badge alltag">Alltag</div>
+      <div class="kontext-titel">Beim Bäcker – zwei Wege</div>
+      <div class="kontext-desc">Methodenvergleich · Aufgabe 7 von 7</div>
+    </div>
+  </div>
+  <div class="aufgabe-inhalt">
+    <div class="text-block">
+      Für das Schulfest kauft die Schule <span class="zahl">4 Körbe</span> à <span class="zahl">25 Brötchen</span> und <span class="zahl">8 Pakete</span> à <span class="zahl">25 Brötchen</span>. Wie viele Brötchen sind das insgesamt?
+    </div>
+
+    <p style="font-weight:700;margin:14px 0 8px">Hier sind zwei Rechenwege. Berechne beide:</p>
+
+    <!-- WEG 1 -->
+    <div class="schritt">
+      <div class="schritt-nr">Weg 1 – Nacheinander</div>
+      <div class="schritt-text">4 · 25 + 8 · 25 → erst jedes Produkt einzeln, dann addieren</div>
+    </div>
+    <div class="eingabe-gruppe">
+      <span class="label">4 · 25 =</span>
+      <input type="number" id="a7-w1a" inputmode="numeric" placeholder="?">
+    </div>
+    <div class="eingabe-gruppe">
+      <span class="label">8 · 25 =</span>
+      <input type="number" id="a7-w1b" inputmode="numeric" placeholder="?">
+    </div>
+    <div class="eingabe-gruppe">
+      <span class="label">Summe (Brötchen gesamt):</span>
+      <input type="number" id="a7-w1e" inputmode="numeric" placeholder="?">
+    </div>
+    <button class="btn btn-teal btn-voll" onclick="pruefeA7weg1()">Weg 1 prüfen ✓</button>
+    <div class="feedback" id="fb-a7w1"></div>
+
+    <div class="divider"></div>
+
+    <!-- WEG 2 -->
+    <div class="schritt">
+      <div class="schritt-nr">Weg 2 – Zusammenfassen zuerst</div>
+      <div class="schritt-text">4 · 25 + 8 · 25 = (4 + 8) · 25 → erst die Anzahlen addieren, dann multiplizieren</div>
+    </div>
+    <div class="eingabe-gruppe">
+      <span class="label">4 + 8 =</span>
+      <input type="number" id="a7-w2a" inputmode="numeric" placeholder="?">
+    </div>
+    <div class="eingabe-gruppe">
+      <span class="label">… · 25 = Brötchen gesamt:</span>
+      <input type="number" id="a7-w2e" inputmode="numeric" placeholder="?">
+    </div>
+    <button class="btn btn-teal btn-voll" onclick="pruefeA7weg2()">Weg 2 prüfen ✓</button>
+    <div class="feedback" id="fb-a7w2"></div>
+
+    <div id="a7-vergleich" style="display:none">
+      <div class="divider"></div>
+      <div class="schritt" style="border-left-color:#6a1b9a;background:#f3e5f5">
+        <div class="schritt-nr" style="color:#6a1b9a">🤔 Welcher Weg gefällt euch besser?</div>
+        <div class="schritt-text">Besprecht mit eurem Partner: Was sind die Vor- und Nachteile?</div>
+      </div>
+      <div style="background:white;border:2px solid #e0e0e0;border-radius:12px;padding:14px;margin:10px 0;font-size:0.95rem">
+        <p style="font-weight:700;margin-bottom:8px">Weg 1 – Nacheinander:</p>
+        <p>✅ Einfach zu verstehen, kein besonderer Trick nötig</p>
+        <p>❌ Zwei Multiplikationen nötig: 4·25 und 8·25</p>
+        <div style="height:10px"></div>
+        <p style="font-weight:700;margin-bottom:8px">Weg 2 – Zusammenfassen:</p>
+        <p>✅ Nur eine Multiplikation: 12·25 – schneller im Kopf!</p>
+        <p>✅ Besonders praktisch wenn die Multiplikation „schön" ist (hier: ·25)</p>
+        <p>❌ Man muss erst erkennen, dass man zusammenfassen kann</p>
+      </div>
+      <p style="font-size:0.88rem;color:#666;margin-top:6px">💡 Dieser Trick heißt <strong>Distributivgesetz</strong> – das lernt ihr bald im nächsten Kapitel!</p>
+    </div>
+
+    <div class="gesetz-chip komm">🔀 Kommutativgesetz</div>
+    <div class="gesetz-chip assoz">🔗 Assoziativgesetz</div>
+  </div>
+</div>
+
+<!-- AUSWERTUNG -->
+<div class="aufgabe-karte" id="aufgabe-auswertung">
+  <div id="auswertung-ta-inhalt" style="padding:4px"></div>
+</div>
+
+<!-- WEITER BUTTON -->
+<div class="weiter-bereich">
+  <button class="btn-weiter" id="weiterBtn" onclick="naechsteAufgabe()">
+    Nächste Aufgabe →
+  </button>
+</div>
+
+<div class="trex">🦖</div>
+
+<script>
+  let aktuelle = 1;
+  const gesamt = 7;
+  const tabNamen = ['Flohmarkt','Radtour','Material','Kasse','Kino','Bücher','Bäcker'];
+  const geloest = new Set();
+
+  function buildNav() {
+    const nav = document.getElementById('aufgabenNav');
+    nav.innerHTML = '';
+    for (let i = 1; i <= gesamt; i++) {
+      const chip = document.createElement('button');
+      chip.className = 'nav-chip' + (i === aktuelle ? ' aktiv' : '') + (geloest.has(i) ? ' gelöst' : '');
+      chip.textContent = i + '. ' + tabNamen[i-1];
+      chip.onclick = () => { aktuelle = i; zeigeAufgabe(i); };
+      nav.appendChild(chip);
+    }
+    const aChip = document.createElement('button');
+    aChip.className = 'nav-chip' + (aktuelle === 8 ? ' aktiv' : '') + (geloest.size === gesamt ? ' gelöst' : '');
+    aChip.textContent = '🏆 Auswertung';
+    aChip.onclick = () => { aktuelle = 8; zeigeAufgabe(8); };
+    nav.appendChild(aChip);
+  }
+
+  function zeigeAufgabe(nr) {
+    document.querySelectorAll('.aufgabe-karte').forEach(k => k.classList.remove('aktiv'));
+    if (nr === 8) {
+      document.getElementById('aufgabe-auswertung').classList.add('aktiv');
+      zeigeAuswertungTA();
+      document.getElementById('progressBar').style.width = '100%';
+      document.getElementById('weiterBtn').textContent = '🎉 Fertig!';
+    } else {
+      document.getElementById('aufgabe-' + nr).classList.add('aktiv');
+      document.getElementById('progressBar').style.width = (nr / gesamt * 100) + '%';
+      document.getElementById('weiterBtn').textContent =
+        nr < gesamt ? 'Nächste Aufgabe →' : '🏆 Zur Auswertung';
+    }
+    window.scrollTo(0, 0);
+    buildNav();
+  }
+
+  function naechsteAufgabe() {
+    if (aktuelle <= gesamt) { aktuelle++; zeigeAufgabe(aktuelle); }
+  }
+
+  function zeigeAuswertungTA() {
+    const anzahl = geloest.size;
+    const sterne = anzahl >= 6 ? '⭐⭐⭐' : anzahl >= 4 ? '⭐⭐' : anzahl >= 2 ? '⭐' : '🔁';
+    const farbe  = anzahl >= 6 ? '#1a7a3a' : anzahl >= 4 ? '#1565c0' : anzahl >= 2 ? '#e07b00' : '#c0392b';
+    const texte  = [
+      'Nochmal üben! Schaut euch die Tipps bei den Aufgaben an.',
+      'Weiter so! Probiert die schwierigeren Aufgaben nochmal.',
+      'Gut gemacht! Ihr habt die Rechengesetze gut angewendet.',
+      'Ausgezeichnet! Ihr rechnet schon sehr geschickt! 🎉'
+    ];
+    const textIdx = anzahl >= 6 ? 3 : anzahl >= 4 ? 2 : anzahl >= 2 ? 1 : 0;
+    const aufgabenListe = tabNamen.map((name, i) => {
+      const ok = geloest.has(i + 1);
+      return `<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #e0e0e0">
+        <span style="font-size:1.2rem">${ok ? '✅' : '⬜'}</span>
+        <span style="flex:1">${i+1}. ${name}</span>
+        ${!ok ? '<span style="font-size:0.82rem;color:#c0392b;font-weight:600">Nochmal ansehen</span>' : ''}
+      </div>`;
+    }).join('');
+    document.getElementById('auswertung-ta-inhalt').innerHTML = `
+      <div style="text-align:center;padding:10px 0 16px">
+        <div style="font-size:3rem;margin-bottom:6px">${sterne}</div>
+        <div style="font-size:1.5rem;font-weight:700;color:${farbe};margin-bottom:14px">${anzahl} von ${gesamt} Aufgaben gelöst</div>
+        <div style="background:${farbe};color:white;border-radius:14px;padding:15px 18px;font-size:1rem;font-weight:600">${texte[textIdx]}</div>
+      </div>
+      <div style="background:#f4f5f7;border-radius:12px;padding:14px 16px;margin:14px 0">
+        <div style="font-weight:700;margin-bottom:8px;color:#0f6b6b">Deine Aufgaben im Überblick:</div>
+        ${aufgabenListe}
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:4px">
+        <button onclick="aktuelle=1;zeigeAufgabe(1)" style="flex:1;padding:13px;border-radius:12px;border:2px solid #0f6b6b;background:#e0f4f4;color:#0f6b6b;font-weight:700;font-size:0.95rem;min-height:48px;cursor:pointer">
+          🔄 Von vorne
+        </button>
+        <a href="rechengesetze_uebung.html" style="flex:1;padding:13px;border-radius:12px;background:#0f6b6b;color:white;font-weight:700;font-size:0.95rem;min-height:48px;text-decoration:none;display:flex;align-items:center;justify-content:center;text-align:center">
+          🏋️ Zur Übungsseite
+        </a>
+      </div>
+    `;
+  }
+
+  function zeigeHinweis(id, btnId) {
+    document.getElementById(id).classList.add('sichtbar');
+    document.getElementById(btnId).style.display = 'none';
+  }
+
+  function markiereGeloest(nr) { geloest.add(nr); buildNav(); }
+
+  // PRÜF-FUNKTIONEN
+  function pruefeA1() {
+    const z1 = +document.getElementById('a1-z1').value;
+    const z2 = +document.getElementById('a1-z2').value;
+    const z3 = +document.getElementById('a1-z3').value;
+    const e  = +document.getElementById('a1-e').value;
+    const fb = document.getElementById('fb-a1');
+    if (z1===100 && z2===100 && z3===100 && e===300) {
+      fb.className='feedback richtig';
+      fb.textContent='✅ Super! 57+43=100, 65+35=100, 49+51=100 → 3·100=300 €. Perfekt geschickt gerechnet!';
+      markiereGeloest(1);
+    } else {
+      fb.className='feedback falsch';
+      fb.textContent='❌ Schau nochmal. Jedes Paar ergibt 100. Gesamteinnahmen = 300 €.';
+    }
+  }
+
+  function pruefeA2() {
+    const z1 = +document.getElementById('a2-z1').value;
+    const e  = +document.getElementById('a2-e').value;
+    const fb = document.getElementById('fb-a2');
+    if ((z1===90 || z1===100) && e===190) {
+      fb.className='feedback richtig';
+      fb.textContent='✅ Richtig! 42+48=90 (oder 57+43=100), dann alles zusammen = 190 km.';
+      markiereGeloest(2);
+    } else if (e===190) {
+      fb.className='feedback richtig';
+      fb.textContent='✅ Das Ergebnis stimmt: 190 km! Tipp: 42+48=90 war das clevere Paar!';
+      markiereGeloest(2);
+    } else {
+      fb.className='feedback falsch';
+      fb.textContent='❌ Gesamtstrecke: 42+57+48+43=190 km. Tipp: 42+48=90 und 57+43=100!';
+    }
+  }
+
+  function pruefeA3a() {
+    const z1 = +document.getElementById('a3-z1').value;
+    const e1 = +document.getElementById('a3-e1').value;
+    const fb = document.getElementById('fb-a3a');
+    if (z1===100 && e1===300) {
+      fb.className='feedback richtig';
+      fb.textContent='✅ Klasse! 4·25=100 (Assoziativgesetz!), dann 100·3=300 Blätter!';
+      markiereGeloest(3);
+    } else {
+      fb.className='feedback falsch';
+      fb.textContent='❌ 4·25=100, dann ·3=300 Blätter.';
+    }
+  }
+
+  function pruefeA3b() {
+    const e2 = +document.getElementById('a3-e2').value;
+    const fb = document.getElementById('fb-a3b');
+    if (e2===1000) {
+      fb.className='feedback richtig';
+      fb.textContent='✅ Perfekt! 8·125=1000 – das ist ein wichtiger Trick! (8·125=8·(5·25)=40·25=1000)';
+    } else {
+      fb.className='feedback falsch';
+      fb.textContent='❌ 8·125=1000. Tipp: 8·125=8·5·25=40·25=1000!';
+    }
+  }
+
+  function pruefeA4() {
+    const e  = +document.getElementById('a4-e').value;
+    const k  = +document.getElementById('a4-k').value;
+    const fb = document.getElementById('fb-a4');
+    if (e===200 && k===125) {
+      fb.className='feedback richtig';
+      fb.textContent='✅ Super! 88+12=100 und 46+54=100 → 200 €. Dann 200-75=125 €. Jonas hat einen vollen Kassenstand!';
+      markiereGeloest(4);
+    } else if (e===200) {
+      fb.className='feedback richtig';
+      fb.textContent='✅ Einnahmen richtig: 200 €! Kassenstand: 200-75=125 €.';
+    } else {
+      fb.className='feedback falsch';
+      fb.textContent='❌ 88+12=100 und 46+54=100 → Einnahmen=200 €. Kassenstand: 200-75=125 €.';
+    }
+  }
+
+  function pruefeA5() {
+    const z1 = +document.getElementById('a5-z1').value;
+    const z2 = +document.getElementById('a5-z2').value;
+    const e  = +document.getElementById('a5-e').value;
+    const fb = document.getElementById('fb-a5');
+    if (z1===40 && z2===40 && e===160) {
+      fb.className='feedback richtig';
+      fb.textContent='✅ Richtig! 5·8=40 Kinder. Popcorn: 40·4=4·(10·4)=4·40=160 €. ';
+      markiereGeloest(5);
+    } else if (e===160) {
+      fb.className='feedback richtig';
+      fb.textContent='✅ Ergebnis stimmt: 160 €! Und es sitzen 5·8=40 Kinder drin.';
+      markiereGeloest(5);
+    } else {
+      fb.className='feedback falsch';
+      fb.textContent='❌ 5·8=40 Kinder. 40·4=160 €. Tipp: 40·4 = 4·(10·4) = 4·40 = 160!';
+    }
+  }
+
+  function pruefeA6() {
+    const e1 = +document.getElementById('a6-e1').value;
+    const e2 = +document.getElementById('a6-e2').value;
+    const fb = document.getElementById('fb-a6');
+    if (e1===200 && e2===800) {
+      fb.className='feedback richtig';
+      fb.textContent='✅ Perfekt! 17+83=100 und 29+71=100 → 200 Bücher. 200·4=800 Ausleihen!';
+      markiereGeloest(6);
+    } else if (e1===200) {
+      fb.className='feedback richtig';
+      fb.textContent='✅ Bücher richtig: 200! Ausleihen: 200·4=800.';
+    } else {
+      fb.className='feedback falsch';
+      fb.textContent='❌ 17+83=100 und 29+71=100 → 200 Bücher. Ausleihen: 200·4=800.';
+    }
+  }
+
+  function pruefeA7weg1() {
+    const w1a = +document.getElementById('a7-w1a').value;
+    const w1b = +document.getElementById('a7-w1b').value;
+    const w1e = +document.getElementById('a7-w1e').value;
+    const fb = document.getElementById('fb-a7w1');
+    if (w1a===100 && w1b===200 && w1e===300) {
+      fb.className='feedback richtig';
+      fb.textContent='✅ Richtig! 4·25=100, 8·25=200, zusammen 300 Brötchen.';
+      pruefeObVergleichZeigen();
+    } else {
+      fb.className='feedback falsch';
+      let msg='❌ ';
+      if(w1a!==100) msg+='4·25=100. ';
+      if(w1b!==200) msg+='8·25=200. ';
+      if(w1e!==300) msg+='Summe=300. ';
+      fb.textContent=msg;
+    }
+  }
+
+  function pruefeA7weg2() {
+    const w2a = +document.getElementById('a7-w2a').value;
+    const w2e = +document.getElementById('a7-w2e').value;
+    const fb = document.getElementById('fb-a7w2');
+    if (w2a===12 && w2e===300) {
+      fb.className='feedback richtig';
+      fb.textContent='✅ Richtig! (4+8)=12, dann 12·25=300 Brötchen. Nur eine Multiplikation!';
+      markiereGeloest(7);
+      pruefeObVergleichZeigen();
+    } else {
+      fb.className='feedback falsch';
+      let msg='❌ ';
+      if(w2a!==12) msg+='4+8=12. ';
+      if(w2e!==300) msg+='12·25=300. ';
+      fb.textContent=msg;
+    }
+  }
+
+  function pruefeObVergleichZeigen() {
+    const w1ok = document.getElementById('fb-a7w1').classList.contains('richtig');
+    const w2ok = document.getElementById('fb-a7w2').classList.contains('richtig');
+    if (w1ok && w2ok) {
+      document.getElementById('a7-vergleich').style.display = 'block';
+    }
+  }
+
+  // Init
+  buildNav();
+  zeigeAufgabe(1);
+</script>
+</body>
+</html>

@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Rechengesetze entdecken – Klasse 5</title>
+<style>
+  :root {
+    --blau: #1a56a0;
+    --blau-hell: #e8f0fb;
+    --blau-mid: #3a7bd5;
+    --orange: #e07b00;
+    --orange-hell: #fff3e0;
+    --gruen: #1a7a3a;
+    --gruen-hell: #e6f5eb;
+    --rot: #c0392b;
+    --rot-hell: #fdecea;
+    --grau: #f4f5f7;
+    --dunkel: #1a1f2e;
+    --text: #2c3345;
+    --karte-schatten: 0 4px 18px rgba(26,86,160,0.13);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    font-size: 18px;
+    background: linear-gradient(160deg, #e8f0fb 0%, #f7f9fc 60%, #fff3e0 100%);
+    min-height: 100vh;
+    color: var(--text);
+  }
+
+  /* HEADER */
+  .header {
+    background: var(--blau);
+    color: white;
+    padding: 18px 22px 14px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.18);
+  }
+  .header-icon { font-size: 2rem; }
+  .header h1 { font-size: 1.25rem; font-weight: 700; line-height: 1.2; }
+  .header p { font-size: 0.85rem; color: #c8d8f5; margin-top: 2px; }
+
+  /* PROGRESS */
+  .progress-bar-wrap {
+    background: #d0dff5;
+    height: 8px;
+    width: 100%;
+  }
+  .progress-bar {
+    background: var(--orange);
+    height: 8px;
+    transition: width 0.5s ease;
+    border-radius: 0 4px 4px 0;
+  }
+
+  /* PARTNERINFO */
+  .partner-box {
+    background: var(--orange-hell);
+    border-left: 5px solid var(--orange);
+    border-radius: 10px;
+    padding: 13px 16px;
+    margin: 16px 16px 0;
+    font-size: 0.95rem;
+    display: flex; gap: 10px; align-items: flex-start;
+  }
+  .partner-icon { font-size: 1.5rem; flex-shrink: 0; }
+
+  /* KARTEN */
+  .karte {
+    background: white;
+    border-radius: 16px;
+    box-shadow: var(--karte-schatten);
+    margin: 14px 16px;
+    padding: 20px 18px;
+    display: none;
+  }
+  .karte.aktiv { display: block; }
+
+  /* ABSCHNITT BADGES */
+  .badge {
+    display: inline-block;
+    background: var(--blau);
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 10px;
+  }
+  .badge.orange { background: var(--orange); }
+  .badge.gruen { background: var(--gruen); }
+
+  .karte h2 { font-size: 1.2rem; color: var(--blau); margin-bottom: 8px; }
+  .karte p, .karte li { line-height: 1.55; margin-bottom: 8px; }
+  .karte ul { padding-left: 20px; }
+
+  /* TEXTHERVORHEBUNG */
+  .highlight { background: #fffacd; border-radius: 4px; padding: 1px 4px; font-weight: 600; }
+  .fachbegriff {
+    border-bottom: 2px dashed var(--blau-mid);
+    cursor: pointer;
+    position: relative;
+    font-weight: 700;
+    color: var(--blau);
+  }
+  /* Fachbegriff auf dunklem/blauem Hintergrund: weiß mit gelbem Unterstrich */
+  .merksatz .fachbegriff,
+  .gesetz-kasten .fachbegriff {
+    color: #ffe082;
+    border-bottom-color: #ffe082;
+  }
+  .fachbegriff .tooltip {
+    display: none;
+    position: absolute;
+    bottom: 130%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1a1f2e;
+    color: #ffffff;
+    font-size: 0.9rem;
+    padding: 9px 14px;
+    border-radius: 8px;
+    white-space: nowrap;
+    z-index: 100;
+    pointer-events: none;
+    font-weight: 600;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+    border: 1px solid rgba(255,255,255,0.15);
+  }
+  .fachbegriff .tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%; left: 50%; transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: #1a1f2e;
+  }
+  .fachbegriff.aktiv-tip .tooltip { display: block; }
+
+  /* RECHENBEISPIEL-BOX */
+  .rechen-box {
+    background: var(--blau-hell);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin: 12px 0;
+    font-family: 'Courier New', monospace;
+    font-size: 1.05rem;
+  }
+  .rechen-box .zeile { margin: 4px 0; }
+  .rechen-box .zeile-flex {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 4px 0;
+    font-family: 'Courier New', monospace;
+    font-size: 1.05rem;
+  }
+  .rechen-box .ergebnis { color: var(--blau); font-weight: 700; }
+  .rechen-box .hervor { color: var(--orange); font-weight: 700; }
+
+  /* ENTDECKUNGSBOX */
+  .entdeckbox {
+    background: var(--gruen-hell);
+    border: 2px solid var(--gruen);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin: 14px 0;
+  }
+  .entdeckbox h3 { color: var(--gruen); font-size: 1rem; margin-bottom: 6px; }
+
+  /* GESETZ-KASTEN */
+  .gesetz-kasten {
+    background: var(--blau);
+    color: white;
+    border-radius: 14px;
+    padding: 18px;
+    margin: 14px 0;
+    text-align: center;
+  }
+  .gesetz-kasten h3 { font-size: 1.1rem; margin-bottom: 8px; font-weight: 700; }
+  .gesetz-kasten .formel {
+    font-family: 'Courier New', monospace;
+    font-size: 1.05rem;
+    background: rgba(0,0,0,0.25);
+    border-radius: 8px;
+    padding: 8px 14px;
+    margin: 6px 0;
+    color: #ffffff;
+  }
+  .gesetz-kasten p { font-size: 0.9rem; color: #ffffff; margin-top: 8px; }
+
+  /* EINGABEFELDER */
+  .eingabe-gruppe {
+    display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+    margin: 10px 0;
+  }
+  .eingabe-label { font-weight: 600; min-width: 200px; flex: 1; }
+  input[type="text"], input[type="number"] {
+    font-size: 1.1rem;
+    padding: 10px 14px;
+    border: 2px solid #c5d3e8;
+    border-radius: 10px;
+    width: 110px;
+    min-width: 110px;
+    text-align: center;
+    -webkit-appearance: none;
+    transition: border-color 0.2s;
+  }
+  input[type="text"]:focus, input[type="number"]:focus {
+    border-color: var(--blau);
+    outline: none;
+  }
+  input.richtig { border-color: var(--gruen); background: var(--gruen-hell); }
+  input.falsch { border-color: var(--rot); background: var(--rot-hell); }
+
+  /* BUTTONS */
+  .btn {
+    display: inline-block;
+    font-size: 1rem;
+    font-weight: 700;
+    padding: 13px 22px;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    min-height: 48px;
+    min-width: 48px;
+    transition: transform 0.1s, box-shadow 0.1s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn-blau { background: var(--blau); color: white; box-shadow: 0 3px 10px rgba(26,86,160,0.25); }
+  .btn-orange { background: var(--orange); color: white; box-shadow: 0 3px 10px rgba(224,123,0,0.25); }
+  .btn-gruen { background: var(--gruen); color: white; box-shadow: 0 3px 10px rgba(26,122,58,0.25); }
+  .btn-grau { background: #e0e4ef; color: var(--text); }
+
+  /* FEEDBACK */
+  .feedback {
+    display: none;
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin: 10px 0;
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+  .feedback.richtig { display: block; background: var(--gruen); color: white; }
+  .feedback.falsch { display: block; background: var(--rot); color: white; }
+
+  /* ZEITANZEIGE */
+  .zeit-box {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--grau);
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin: 12px 0;
+    font-size: 0.9rem;
+  }
+  .zeit-icon { font-size: 1.2rem; }
+
+  /* LINK-KARTE */
+  .link-karte {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: var(--blau-hell);
+    border: 2px solid var(--blau-mid);
+    border-radius: 14px;
+    padding: 16px;
+    margin: 14px 0;
+    text-decoration: none;
+    color: var(--text);
+    min-height: 64px;
+  }
+  .link-karte:active { background: #d0dff5; }
+  .link-icon { font-size: 2rem; flex-shrink: 0; }
+  .link-info { flex: 1; }
+  .link-info strong { display: block; color: var(--blau); font-size: 1rem; margin-bottom: 2px; }
+  .link-info span { font-size: 0.85rem; color: #555; }
+  .link-pfeil { font-size: 1.5rem; color: var(--blau-mid); }
+
+  /* FORTSCHRITT SCHRITTE */
+  .schritt-nav {
+    display: flex; gap: 8px; flex-wrap: wrap;
+    padding: 0 16px 4px;
+    margin-top: 14px;
+  }
+  .schritt-punkt {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: #d0dff5;
+    border: none;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--blau);
+    cursor: pointer;
+    transition: background 0.2s;
+    min-height: 32px;
+  }
+  .schritt-punkt.aktiv { background: var(--blau); color: white; }
+  .schritt-punkt.fertig { background: var(--gruen); color: white; }
+
+  /* WEITER-BUTTON BEREICH */
+  .weiter-bereich {
+    padding: 16px;
+    position: sticky;
+    bottom: 0;
+    background: linear-gradient(to top, rgba(247,249,252,1) 70%, transparent);
+  }
+  .btn-weiter {
+    width: 100%;
+    font-size: 1.1rem;
+    font-weight: 700;
+    padding: 16px;
+    border-radius: 14px;
+    border: none;
+    cursor: pointer;
+    background: var(--blau);
+    color: white;
+    box-shadow: 0 4px 14px rgba(26,86,160,0.3);
+    min-height: 56px;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    transition: transform 0.1s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .btn-weiter:active { transform: scale(0.98); }
+
+  /* T-REX */
+  .trex {
+    position: fixed;
+    bottom: 80px; right: 14px;
+    font-size: 1.6rem;
+    opacity: 0.35;
+    pointer-events: none;
+    z-index: 999;
+    user-select: none;
+  }
+
+  /* AUFGABEN KARTE */
+  .aufgabe-box {
+    background: var(--grau);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin: 12px 0;
+  }
+  .aufgabe-box p { font-weight: 700; margin-bottom: 8px; }
+
+  /* MERKSATZ */
+  .merksatz {
+    background: linear-gradient(135deg, var(--blau) 0%, var(--blau-mid) 100%);
+    color: white;
+    border-radius: 16px;
+    padding: 18px;
+    margin: 16px 0;
+    text-align: center;
+  }
+  .merksatz h3 { font-size: 1.1rem; margin-bottom: 10px; }
+  .merksatz .formel-text {
+    font-size: 1rem;
+    background: rgba(0,0,0,0.28);
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin: 6px 0;
+    font-family: 'Courier New', monospace;
+    color: #ffffff;
+  }
+
+  /* SCHÜLER AUFGABE */
+  .partner-aufgabe {
+    border: 2px dashed var(--orange);
+    border-radius: 12px;
+    padding: 14px;
+    margin: 12px 0;
+    background: var(--orange-hell);
+  }
+  .partner-aufgabe h3 { color: var(--orange); font-size: 1rem; margin-bottom: 8px; }
+
+  .divider { height: 1px; background: #d0dff5; margin: 14px 0; }
+
+  /* BUCHSEITE REF */
+  .buch-ref {
+    display: flex; align-items: center; gap: 8px;
+    background: #f0f0f0;
+    border-radius: 8px;
+    padding: 9px 13px;
+    font-size: 0.85rem;
+    margin: 10px 0;
+    color: #555;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-icon">🧮</div>
+  <div>
+    <h1>Rechengesetze entdecken</h1>
+    <p>Klasse 5 · Partnerarbeit · ca. 60 Minuten</p>
+  </div>
+</div>
+<div class="progress-bar-wrap">
+  <div class="progress-bar" id="progressBar" style="width: 12%"></div>
+</div>
+
+<div class="schritt-nav" id="schrittNav"></div>
+
+<!-- KARTE 1: Einstieg -->
+<div class="karte aktiv" id="karte-1">
+  <span class="badge">Start · 5 min</span>
+  <h2>🏪 Der Schulflohmarkt</h2>
+  <div class="buch-ref">📖 Schau in dein Buch: Seite 91 oben (das Bild mit den Klassen)</div>
+  <p>Die Klassen des Albert-Einstein-Gymnasiums haben einen Flohmarkt veranstaltet. Die Einnahmen gehen an eine Partnerschule in Sierra Leone.</p>
+  <div class="rechen-box">
+    <div class="zeile">Klasse 5a: <span class="hervor">57 €</span> &nbsp; Klasse 5b: <span class="hervor">49 €</span></div>
+    <div class="zeile">Klasse 5c: <span class="hervor">34 €</span> &nbsp; Klasse 5d: <span class="hervor">65 €</span></div>
+    <div class="zeile">Klasse 6a: <span class="hervor">45 €</span> &nbsp; Klasse 6b: <span class="hervor">16 €</span></div>
+    <div class="zeile">Klasse 6c: <span class="hervor">21 €</span> &nbsp; Klasse 6d: <span class="hervor">33 €</span></div>
+  </div>
+  <div class="partner-aufgabe">
+    <h3>🤝 Partneraufgabe – Berechne im Kopf!</h3>
+    <p>Berechne mit deinem Partner die Gesamteinnahmen. Versucht es im Kopf – wie geht das möglichst geschickt?</p>
+    <p>Notiert euren Rechenweg auf einem Blatt. Wie habt ihr die Zahlen zusammengefasst?</p>
+  </div>
+  <div class="entdeckbox">
+    <h3>💡 Frage euch:</h3>
+    <p>Habt ihr passende Zahlen zuerst addiert? Zum Beispiel 57 + 33 oder 49 + 21? Die Einer-Stellen ergeben runde Zahlen – warum ist das praktisch?</p>
+  </div>
+</div>
+
+<!-- KARTE 2: Kommutativgesetz entdecken -->
+<div class="karte" id="karte-2">
+  <span class="badge">Entdecken · 10 min</span>
+  <h2>🔀 Summanden vertauschen</h2>
+  <p>Probiert folgendes aus – rechnet beide Terme aus und vergleicht:</p>
+  <div class="rechen-box">
+    <div class="zeile-flex">24 + 76 =&nbsp;<input type="number" id="k2a" inputmode="numeric" placeholder="?"></div>
+    <div class="zeile-flex" style="margin-top:8px">76 + 24 =&nbsp;<input type="number" id="k2b" inputmode="numeric" placeholder="?"></div>
+  </div>
+  <div class="rechen-box">
+    <div class="zeile-flex">8 · 25 =&nbsp;<input type="number" id="k2c" inputmode="numeric" placeholder="?"></div>
+    <div class="zeile-flex" style="margin-top:8px">25 · 8 =&nbsp;<input type="number" id="k2d" inputmode="numeric" placeholder="?"></div>
+  </div>
+  <button class="btn btn-blau" onclick="pruefeKommutativ()" style="margin-top:10px">Prüfen ✓</button>
+  <div class="feedback" id="fbK2"></div>
+
+  <div id="kommutativ-erklaerung" style="display:none">
+    <div class="divider"></div>
+    <div class="entdeckbox">
+      <h3>✅ Was habt ihr entdeckt?</h3>
+      <p>Die Ergebnisse sind <strong>gleich</strong> – egal in welcher Reihenfolge man addiert oder multipliziert!</p>
+    </div>
+    <div class="merksatz">
+      <h3>Kommutativgesetz</h3>
+      <div class="formel-text">a + b = b + a</div>
+      <div class="formel-text">a · b = b · a</div>
+      <p>Die <span class="fachbegriff" onclick="zeigeTooltip(this)">Summanden<span class="tooltip">Zahlen die addiert werden</span></span> einer Summe oder die <span class="fachbegriff" onclick="zeigeTooltip(this)">Faktoren<span class="tooltip">Zahlen die multipliziert werden</span></span> eines Produkts darf man beliebig vertauschen.</p>
+    </div>
+    <a class="link-karte" href="https://szymczak75.github.io/Schule/mathe/klasse05/lernseiten/kommutativ_assoziativ_erklaerung.html" target="_blank">
+      <div class="link-icon">🖥️</div>
+      <div class="link-info">
+        <strong>Kommutativgesetz und Assoziativgesetz anschaulich erklärt</strong>
+        <span>Interaktive Erklärung – öffnet im Browser</span>
+      </div>
+      <div class="link-pfeil">›</div>
+    </a>
+    <p style="font-size:0.85rem;color:#666;text-align:center">👆 Öffne den Link und schau dir das Kommutativgesetz dort an (ca. 3 Min)</p>
+  </div>
+</div>
+
+<!-- KARTE 3: Kommutativgesetz verstehen -->
+<div class="karte" id="karte-3">
+  <span class="badge">Verstehen · 8 min</span>
+  <h2>🧠 Wozu ist das nützlich?</h2>
+  <p>Das Vertauschen hilft beim <strong>geschickten Rechnen</strong>. Schau dir dieses Beispiel aus deinem Buch (S. 91) an:</p>
+  <div class="rechen-box">
+    <div class="zeile">24 + <span class="hervor">388</span> + <span class="hervor">76</span></div>
+    <div class="zeile">= 24 + <span class="hervor">76</span> + <span class="hervor">388</span> &nbsp; ← Summanden vertauscht</div>
+    <div class="zeile ergebnis">= 100 + 388 = <strong>488</strong></div>
+  </div>
+  <div class="partner-aufgabe">
+    <h3>🤝 Besprecht gemeinsam:</h3>
+    <p>Warum ist es bei dieser Aufgabe <strong>geschickter</strong>, die 24 und die 76 zuerst zu addieren?</p>
+    <p>Erklärt es mit eigenen Worten! Notiert euren Gedanken.</p>
+  </div>
+  <div class="aufgabe-box">
+    <p>📝 Probiert selbst: Rechnet geschickt mit dem Kommutativgesetz</p>
+    <div class="eingabe-gruppe">
+      <span class="eingabe-label">22 + 17 + 13 =</span>
+      <input type="number" id="k3a" inputmode="numeric" placeholder="?">
+    </div>
+    <div class="eingabe-gruppe">
+      <span class="eingabe-label">46 + 14 + 27 =</span>
+      <input type="number" id="k3b" inputmode="numeric" placeholder="?">
+    </div>
+    <div class="eingabe-gruppe">
+      <span class="eingabe-label">28 + 35 + 55 =</span>
+      <input type="number" id="k3c" inputmode="numeric" placeholder="?">
+    </div>
+    <button class="btn btn-blau" onclick="pruefeK3()" style="margin-top:10px">Prüfen ✓</button>
+    <div class="feedback" id="fbK3"></div>
+  </div>
+  <div class="buch-ref">📖 Aufgabe 1a–c auf Seite 92</div>
+</div>
+
+<!-- KARTE 4: Assoziativgesetz entdecken -->
+<div class="karte" id="karte-4">
+  <span class="badge">Entdecken · 10 min</span>
+  <h2>🔗 Klammern setzen oder weglassen</h2>
+  <p>Jetzt kommt ein weiteres Gesetz! Rechnet beide Terme aus – tragt die Zwischenergebnisse in die Felder ein:</p>
+  <div class="rechen-box">
+    <div class="zeile-flex">2 + (3 + 4) =&nbsp;<input type="number" id="k4a1" inputmode="numeric" placeholder="?">&nbsp;+ 4 =&nbsp;<input type="number" id="k4a2" inputmode="numeric" placeholder="?"></div>
+    <div class="zeile-flex" style="margin-top:8px">(2 + 3) + 4 =&nbsp;<input type="number" id="k4b1" inputmode="numeric" placeholder="?">&nbsp;+ 4 =&nbsp;<input type="number" id="k4b2" inputmode="numeric" placeholder="?"></div>
+  </div>
+  <div class="rechen-box">
+    <div class="zeile-flex">2 · (3 · 4) =&nbsp;<input type="number" id="k4c1" inputmode="numeric" placeholder="?">&nbsp;· 4 =&nbsp;<input type="number" id="k4c2" inputmode="numeric" placeholder="?"></div>
+    <div class="zeile-flex" style="margin-top:8px">(2 · 3) · 4 =&nbsp;<input type="number" id="k4d1" inputmode="numeric" placeholder="?">&nbsp;· 4 =&nbsp;<input type="number" id="k4d2" inputmode="numeric" placeholder="?"></div>
+  </div>
+  <button class="btn btn-blau" onclick="pruefeAssoz()" style="margin-top:10px">Prüfen ✓</button>
+  <div class="feedback" id="fbK4"></div>
+
+  <div id="assoz-erklaerung" style="display:none">
+    <div class="divider"></div>
+    <div class="entdeckbox">
+      <h3>✅ Was habt ihr entdeckt?</h3>
+      <p>Die <strong>Klammern verändern das Ergebnis nicht!</strong> Man kann sie beliebig setzen oder weglassen.</p>
+    </div>
+    <div class="merksatz">
+      <h3>Assoziativgesetz</h3>
+      <div class="formel-text">(a + b) + c = a + (b + c)</div>
+      <div class="formel-text">(a · b) · c = a · (b · c)</div>
+      <p>Bei Summen oder Produkten dürfen Klammern beliebig gesetzt oder weggelassen werden.</p>
+    </div>
+  </div>
+</div>
+
+<!-- KARTE 5: Assoziativgesetz anwenden -->
+<div class="karte" id="karte-5">
+  <span class="badge">Anwenden · 10 min</span>
+  <h2>⚡ Geschickt rechnen mit beiden Gesetzen</h2>
+  <p>Jetzt kombinieren wir beide Gesetze! Schau dir das Beispiel aus dem Buch an (S. 91):</p>
+  <div class="rechen-box">
+    <div class="zeile">13 · 25 · 8</div>
+    <div class="zeile">= 13 · <span class="hervor">(25 · 8)</span> &nbsp; ← Assoziativgesetz: Klammern gesetzt</div>
+    <div class="zeile">= 13 · <span class="hervor">200</span></div>
+    <div class="zeile ergebnis">= <strong>2600</strong></div>
+  </div>
+  <div class="partner-aufgabe">
+    <h3>🤝 Besprecht gemeinsam:</h3>
+    <p>Warum ist es hier geschickt, erst 25 · 8 zu rechnen? Was ergibt das?</p>
+    <p>Notiert: Welche Zahl ist hier "günstig" als Zwischenergebnis?</p>
+  </div>
+
+  <div class="aufgabe-box">
+    <p>📝 Rechnet geschickt – welches Zwischenergebnis hilft?</p>
+    <div class="eingabe-gruppe">
+      <span class="eingabe-label">2 · 5 · 17 = ?</span>
+      <input type="number" id="k5a" inputmode="numeric" placeholder="?">
+    </div>
+    <div class="eingabe-gruppe">
+      <span class="eingabe-label">4 · 250 · 3 = ?</span>
+      <input type="number" id="k5b" inputmode="numeric" placeholder="?">
+    </div>
+    <div class="eingabe-gruppe">
+      <span class="eingabe-label">8 · 3 · 25 · 3 = ?</span>
+      <input type="number" id="k5c" inputmode="numeric" placeholder="?">
+    </div>
+    <button class="btn btn-blau" onclick="pruefeK5()" style="margin-top:10px">Prüfen ✓</button>
+    <div class="feedback" id="fbK5"></div>
+  </div>
+  <div class="buch-ref">📖 Aufgabe 3 auf Seite 92</div>
+</div>
+
+<!-- KARTE 6: Gesetze sichern -->
+<div class="karte" id="karte-6">
+  <span class="badge">Sichern · 8 min</span>
+  <h2>📝 Gesetze in eigenen Worten</h2>
+  <p>Jetzt ist Partnerarbeit gefragt! Erklärt euch gegenseitig:</p>
+  <div class="partner-aufgabe">
+    <h3>🤝 Person A erklärt – Person B hört zu und korrigiert:</h3>
+    <p><strong>Person A:</strong> Erkläre das <span class="fachbegriff" onclick="zeigeTooltip(this)">Kommutativgesetz<span class="tooltip">commutare (lat.) = vertauschen</span></span> in eigenen Worten. Nenne ein Beispiel!</p>
+    <p style="margin-top:10px"><strong>Person B:</strong> Erkläre das <span class="fachbegriff" onclick="zeigeTooltip(this)">Assoziativgesetz<span class="tooltip">associare (lat.) = verbinden</span></span> in eigenen Worten. Nenne ein Beispiel!</p>
+  </div>
+  <div class="divider"></div>
+  <p><strong>Schreibt jetzt die Gesetze als Merksatz in euer Heft:</strong></p>
+  <div class="gesetz-kasten">
+    <h3>📓 Mein Merksatz</h3>
+    <div class="formel">Kommutativgesetz: a + b = b + a &nbsp;|&nbsp; a · b = b · a</div>
+    <div class="formel">Assoziativgesetz: (a+b)+c = a+(b+c) &nbsp;|&nbsp; (a·b)·c = a·(b·c)</div>
+    <p>Diese Gesetze gelten für Addition und Multiplikation,<br>NICHT für Subtraktion und Division!</p>
+  </div>
+  <div class="entdeckbox">
+    <h3>❗ Wichtig zu wissen:</h3>
+    <p>Testet: Gilt 10 − 3 = 3 − 10? Gilt 12 ÷ 4 = 4 ÷ 12?</p>
+    <p><strong>Nein!</strong> Subtraction und Division sind nicht kommutativ.</p>
+  </div>
+</div>
+
+<!-- KARTE 7: Flohmarkt-Aufgabe lösen -->
+<div class="karte" id="karte-7">
+  <span class="badge">Anwenden · 10 min</span>
+  <h2>🏪 Zurück zum Flohmarkt!</h2>
+  <p>Erinnert ihr euch an den Anfang? Jetzt könnt ihr Mathilda helfen, die Gesamteinnahmen <strong>geschickt im Kopf</strong> zu berechnen!</p>
+  <div class="rechen-box">
+    <div class="zeile">57 + 49 + 34 + 65 + 45 + 16 + 21 + 33</div>
+  </div>
+  <div class="partner-aufgabe">
+    <h3>🤝 Strategie besprechen:</h3>
+    <p>Welche Zahlen könnt ihr clever zusammenfassen, damit ihr einfacher rechnen könnt? Schaut euch die Zahlen genau an!</p>
+    <p style="margin-top:6px;font-size:0.9rem;color:#555">Kein Paar ergibt hier genau 100 – aber geschickte Paare machen das Rechnen trotzdem viel einfacher!</p>
+  </div>
+  <div class="aufgabe-box">
+    <p>📝 Schreibt euren Rechenweg auf – welche Paare habt ihr gewählt?</p>
+
+    <button class="btn btn-grau" id="btn-tipp-k7" onclick="zeigeTippK7()"
+      style="width:100%;margin:10px 0;font-size:0.95rem;padding:12px;border-radius:10px;border:2px dashed var(--orange);background:var(--orange-hell);color:var(--orange);font-weight:700">
+      💡 Tipp anzeigen
+    </button>
+    <div id="tipp-k7" style="display:none;background:white;border-radius:8px;padding:12px;margin-bottom:10px;font-family:monospace;font-size:0.95rem;line-height:1.9;border:2px solid var(--orange)">
+      Schau dir die <strong>Einer-Stellen</strong> an:<br>
+      57 + 33 → Einer: 7 + 3 = 10 ✓<br>
+      49 + 21 → Einer: 9 + 1 = 10 ✓<br>
+      34 + 16 → Einer: 4 + 6 = 10 ✓<br>
+      65 + 45 → Einer: 5 + 5 = 10 ✓
+    </div>
+
+    <div class="eingabe-gruppe">
+      <span class="eingabe-label">Gesamteinnahmen =</span>
+      <input type="number" id="k7a" inputmode="numeric" placeholder="? €"> €
+    </div>
+    <button class="btn btn-blau" onclick="pruefeFlohmarkt()" style="margin-top:10px">Prüfen ✓</button>
+    <div class="feedback" id="fbK7"></div>
+  </div>
+</div>
+
+<!-- KARTE 8: Abschluss -->
+<div class="karte" id="karte-8">
+  <span class="badge gruen">Abschluss · 5 min</span>
+  <h2>🎉 Super gemacht!</h2>
+  <p>Ihr habt heute zwei wichtige Rechengesetze entdeckt und angewendet:</p>
+  <div class="gesetz-kasten">
+    <h3>✅ Das habt ihr gelernt:</h3>
+    <div class="formel">🔀 Kommutativgesetz: Summanden und Faktoren darf man vertauschen</div>
+    <div class="formel">🔗 Assoziativgesetz: Klammern darf man beliebig setzen</div>
+    <p>Beide Gesetze gelten für + und · – nicht für − und ÷</p>
+  </div>
+  <div class="divider"></div>
+  <p><strong>Nächste Schritte:</strong></p>
+  <div class="buch-ref">📖 Übungsaufgaben: Seite 92–93 in eurem Buch</div>
+  <a class="link-karte" href="rechengesetze_uebung.html">
+    <div class="link-icon">🏋️</div>
+    <div class="link-info">
+      <strong>Weiter zur Übungsseite</strong>
+      <span>Aufgaben in drei Niveaustufen</span>
+    </div>
+    <div class="link-pfeil">›</div>
+  </a>
+  <a class="link-karte" href="rechengesetze_textaufgaben.html">
+    <div class="link-icon">📖</div>
+    <div class="link-info">
+      <strong>Textaufgaben mit Rechengesetzen</strong>
+      <span>Anwenden im Alltag</span>
+    </div>
+    <div class="link-pfeil">›</div>
+  </a>
+  <div style="text-align:center;margin-top:16px;font-size:0.9rem;color:#888">
+    🦖 Bis zum nächsten Mal!
+  </div>
+</div>
+
+<!-- WEITER BUTTON -->
+<div class="weiter-bereich">
+  <button class="btn-weiter" id="weiterBtn" onclick="naechsteKarte()">
+    <span id="weiterText">Weiter →</span>
+  </button>
+</div>
+
+<!-- T-Rex -->
+<div class="trex">🦖</div>
+
+<script>
+  let aktuelleKarte = 1;
+  const gesamtKarten = 8;
+
+  function karteZeigen(n) {
+    document.querySelectorAll('.karte').forEach(k => k.classList.remove('aktiv'));
+    const karte = document.getElementById('karte-' + n);
+    if (karte) karte.classList.add('aktiv');
+    document.getElementById('progressBar').style.width = (n / gesamtKarten * 100) + '%';
+    updateNav();
+    window.scrollTo(0, 0);
+    // Weiter-Button-Text
+    const weiterText = document.getElementById('weiterText');
+    if (n === gesamtKarten) {
+      document.getElementById('weiterBtn').style.display = 'none';
+    } else {
+      document.getElementById('weiterBtn').style.display = 'flex';
+      weiterText.textContent = n === gesamtKarten - 1 ? 'Abschluss →' : 'Weiter →';
+    }
+  }
+
+  function naechsteKarte() {
+    if (aktuelleKarte < gesamtKarten) {
+      aktuelleKarte++;
+      karteZeigen(aktuelleKarte);
+    }
+  }
+
+  function updateNav() {
+    const nav = document.getElementById('schrittNav');
+    nav.innerHTML = '';
+    for (let i = 1; i <= gesamtKarten; i++) {
+      const btn = document.createElement('button');
+      btn.className = 'schritt-punkt' + (i === aktuelleKarte ? ' aktiv' : (i < aktuelleKarte ? ' fertig' : ''));
+      btn.textContent = i;
+      btn.onclick = () => { aktuelleKarte = i; karteZeigen(i); };
+      nav.appendChild(btn);
+    }
+  }
+
+  function zeigeTooltip(el) {
+    document.querySelectorAll('.fachbegriff').forEach(f => f.classList.remove('aktiv-tip'));
+    el.classList.add('aktiv-tip');
+    setTimeout(() => el.classList.remove('aktiv-tip'), 2500);
+  }
+
+  // Prüf-Funktionen
+  function pruefeKommutativ() {
+    const k2a = parseInt(document.getElementById('k2a').value);
+    const k2b = parseInt(document.getElementById('k2b').value);
+    const k2c = parseInt(document.getElementById('k2c').value);
+    const k2d = parseInt(document.getElementById('k2d').value);
+    const fb = document.getElementById('fbK2');
+    if (k2a === 100 && k2b === 100 && k2c === 200 && k2d === 200) {
+      fb.className = 'feedback richtig';
+      fb.textContent = '✅ Richtig! 24+76 = 76+24 = 100 und 8·25 = 25·8 = 200. Die Ergebnisse sind gleich!';
+      document.getElementById('kommutativ-erklaerung').style.display = 'block';
+    } else {
+      fb.className = 'feedback falsch';
+      fb.textContent = '❌ Noch nicht ganz. Rechne nochmal nach: 24+76 = ? und 8·25 = ?';
+    }
+  }
+
+  function pruefeAssoz() {
+    const k4a1 = parseInt(document.getElementById('k4a1').value);
+    const k4a2 = parseInt(document.getElementById('k4a2').value);
+    const k4b1 = parseInt(document.getElementById('k4b1').value);
+    const k4b2 = parseInt(document.getElementById('k4b2').value);
+    const k4c1 = parseInt(document.getElementById('k4c1').value);
+    const k4c2 = parseInt(document.getElementById('k4c2').value);
+    const k4d1 = parseInt(document.getElementById('k4d1').value);
+    const k4d2 = parseInt(document.getElementById('k4d2').value);
+    const fb = document.getElementById('fbK4');
+    if (k4a1===7 && k4a2===9 && k4b1===5 && k4b2===9 && k4c1===12 && k4c2===24 && k4d1===6 && k4d2===24) {
+      fb.className = 'feedback richtig';
+      fb.textContent = '✅ Super! Alle Ergebnisse sind 9 bzw. 24 – egal wie die Klammern gesetzt sind!';
+      document.getElementById('assoz-erklaerung').style.display = 'block';
+    } else {
+      fb.className = 'feedback falsch';
+      let hints = [];
+      if (k4a1!==7) hints.push('(3+4) = 7');
+      if (k4b1!==5) hints.push('(2+3) = 5');
+      if (k4c1!==12) hints.push('(3·4) = 12');
+      if (k4d1!==6) hints.push('(2·3) = 6');
+      fb.textContent = '❌ Schau nochmal in die orangenen Felder: ' + hints.join(' · ');
+    }
+  }
+
+  function pruefeK3() {
+    const a = parseInt(document.getElementById('k3a').value);
+    const b = parseInt(document.getElementById('k3b').value);
+    const c = parseInt(document.getElementById('k3c').value);
+    const fb = document.getElementById('fbK3');
+    if (a === 52 && b === 87 && c === 118) {
+      fb.className = 'feedback richtig';
+      fb.textContent = '✅ Perfekt! 22+17+13=52, 46+14+27=87, 28+35+55=118. Habt ihr geschickte Paare gefunden?';
+    } else {
+      let msg = '❌ Nicht ganz. ';
+      if (a !== 52) msg += '22+17+13 = 52. ';
+      if (b !== 87) msg += '46+14+27 = 87. ';
+      if (c !== 118) msg += '28+35+55 = 118. ';
+      fb.className = 'feedback falsch';
+      fb.textContent = msg;
+    }
+  }
+
+  function pruefeK5() {
+    const a = parseInt(document.getElementById('k5a').value);
+    const b = parseInt(document.getElementById('k5b').value);
+    const c = parseInt(document.getElementById('k5c').value);
+    const fb = document.getElementById('fbK5');
+    if (a === 170 && b === 3000 && c === 1800) {
+      fb.className = 'feedback richtig';
+      fb.textContent = '✅ Klasse! 2·5·17=170, 4·250·3=3000, 8·3·25·3=1800. Habt ihr die 10er und 100er ausgenutzt?';
+    } else {
+      let msg = '❌ Schau nochmal: ';
+      if (a !== 170) msg += '2·5=10, dann 10·17=170. ';
+      if (b !== 3000) msg += '4·250=1000, dann 1000·3=3000. ';
+      if (c !== 1800) msg += '8·25=200, dann 200·3·3=1800. ';
+      fb.className = 'feedback falsch';
+      fb.textContent = msg;
+    }
+  }
+
+  function pruefeFlohmarkt() {
+    const val = parseInt(document.getElementById('k7a').value);
+    const fb = document.getElementById('fbK7');
+    if (val === 320) {
+      fb.className = 'feedback richtig';
+      fb.textContent = '✅ Genau! 320 € – super! Habt ihr die cleveren Paare genutzt? 57+33=90, 49+21=70, 34+16=50, 65+45=110 → 90+70+50+110=320!';
+    } else {
+      fb.className = 'feedback falsch';
+      fb.textContent = '❌ Noch nicht ganz. Die Summe ist 320 €. Tipp: Rechnet erst die Paare: 57+33, 49+21, 34+16, 65+45.';
+    }
+  }
+
+  function zeigeTippK7() {
+    document.getElementById('tipp-k7').style.display = 'block';
+    document.getElementById('btn-tipp-k7').style.display = 'none';
+  }
+
+  // Init
+  updateNav();
+  karteZeigen(1);
+
+  // Touch-Events für Tooltips außerhalb
+  document.addEventListener('touchstart', function(e) {
+    if (!e.target.closest('.fachbegriff')) {
+      document.querySelectorAll('.fachbegriff').forEach(f => f.classList.remove('aktiv-tip'));
+    }
+  });
+</script>
+</body>
+</html>

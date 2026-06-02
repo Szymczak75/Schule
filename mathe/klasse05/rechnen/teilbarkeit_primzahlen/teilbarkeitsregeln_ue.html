@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Teilbarkeitsregeln – Übung – Klasse 5</title>
+<style>
+:root {
+  --bg: #f0f4ff;
+  --card: #ffffff;
+  --pri: #3b5bdb;
+  --pri-l: #edf2ff;
+  --grn: #2f9e44;
+  --grn-l: #d3f9d8;
+  --red: #c92a2a;
+  --red-l: #ffe3e3;
+  --ylw: #f59f00;
+  --ylw-l: #fff3bf;
+  --ora: #e67700;
+  --ora-l: #fff3e0;
+  --pur: #7048e8;
+  --pur-l: #f3f0ff;
+  --txt: #1a1a2e;
+  --mut: #6c757d;
+  --bdr: #dee2e6;
+  --shd: 0 4px 20px rgba(59,91,219,0.10);
+  --rad: 16px;
+}
+* { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif; background:var(--bg); color:var(--txt); font-size:17px; min-height:100vh; padding-bottom:100px; }
+
+/* HEADER */
+.hdr { background:linear-gradient(135deg,#3b5bdb,#5c7cfa); color:white; padding:16px 18px 12px; box-shadow:0 2px 14px rgba(59,91,219,.28); }
+.hdr h1 { font-size:1.3rem; font-weight:900; }
+.hdr .sub { font-size:.8rem; opacity:.85; font-weight:600; margin-top:2px; }
+
+/* LEVEL BAR */
+.lvlbar { display:flex; gap:6px; padding:10px 14px 0; }
+.lvlbtn {
+  flex:1; padding:9px 4px; border:2.5px solid var(--bdr); border-radius:10px;
+  background:white; font-weight:700; font-size:.8rem; cursor:pointer;
+  color:var(--mut); transition:all .18s; text-align:center;
+}
+.lvlbtn:active { transform:scale(.96); }
+.lvlbtn.on { border-color:var(--pri); background:var(--pri); color:white; }
+
+/* TABS */
+.tabs { display:flex; padding:10px 14px 0; gap:4px; overflow-x:auto; scrollbar-width:none; -webkit-overflow-scrolling:touch; }
+.tabs::-webkit-scrollbar { display:none; }
+.tab {
+  flex-shrink:0; padding:8px 13px; border:2px solid var(--bdr); border-bottom:none;
+  border-radius:10px 10px 0 0; background:white; font-weight:700; font-size:.78rem;
+  cursor:pointer; color:var(--mut); white-space:nowrap; transition:all .18s; opacity:.8;
+}
+.tab:active { transform:scale(.96); }
+.tab.on { background:white; color:var(--pri); border-color:var(--pri); opacity:1; }
+.tab.done { color:var(--grn); border-color:var(--grn); opacity:1; }
+
+/* CARD */
+.cards { padding:0 14px 14px; min-height:300px; }
+.card { background:var(--card); border-radius:0 var(--rad) var(--rad) var(--rad); border:2px solid var(--pri); padding:20px; display:none; box-shadow:var(--shd); }
+.card h2 { font-size:1.1rem; color:var(--pri); margin-bottom:14px; font-weight:900; }
+
+/* TASK BLOCK */
+.tb { margin-bottom:20px; padding-bottom:18px; border-bottom:1.5px dashed var(--bdr); }
+.tb:last-of-type { border-bottom:none; margin-bottom:0; }
+.tlbl { font-weight:800; font-size:.82rem; color:var(--mut); text-transform:uppercase; letter-spacing:.05em; margin-bottom:5px; }
+.tq { font-weight:700; font-size:.97rem; line-height:1.5; margin-bottom:11px; }
+.tq em { color:var(--pri); font-style:normal; font-weight:800; }
+
+/* CHIPS */
+.pool { display:flex; flex-wrap:wrap; gap:7px; margin:10px 0; }
+.chip {
+  padding:10px 14px; border-radius:9px; border:2.5px solid var(--bdr);
+  background:white; font-weight:800; font-size:.95rem;
+  cursor:pointer; min-width:44px; min-height:44px;
+  display:flex; align-items:center; justify-content:center;
+  user-select:none; transition:all .15s;
+}
+.chip:active { transform:scale(.93); }
+.chip.sel { background:var(--pri); border-color:var(--pri); color:white; }
+.chip.ok  { background:var(--grn-l); border-color:var(--grn); color:var(--grn); }
+.chip.err { background:var(--red-l); border-color:var(--red); color:var(--red); }
+.chip.mis { background:var(--ylw-l); border-color:var(--ylw); color:#7c5700; }
+.chip.locked { cursor:default; }
+
+/* MC */
+.mc { display:flex; flex-direction:column; gap:7px; margin:10px 0; }
+.mco { padding:12px 15px; border-radius:11px; border:2.5px solid var(--bdr); background:white; font-weight:700; font-size:.95rem; cursor:pointer; text-align:left; min-height:44px; transition:all .15s; }
+.mco:active { transform:scale(.98); }
+.mco.sel { border-color:var(--pri); background:var(--pri-l); }
+.mco.ok  { background:var(--grn-l); border-color:var(--grn); color:var(--grn); }
+.mco.err { background:var(--red-l); border-color:var(--red); color:var(--red); text-decoration:line-through; }
+.mco.rev { background:var(--grn-l); border-color:var(--grn); color:var(--grn); }
+
+/* INPUT */
+.irow { display:flex; align-items:center; gap:7px; flex-wrap:wrap; margin:8px 0; }
+.inp { border:2.5px solid var(--bdr); border-radius:9px; padding:9px 12px; font-weight:700; font-size:1rem; min-height:44px; background:white; -webkit-appearance:none; width:110px; }
+.inp:focus { outline:none; border-color:var(--pri); }
+.inp.ok { border-color:var(--grn); background:var(--grn-l); color:var(--grn); }
+.inp.err { border-color:var(--red); background:var(--red-l); color:var(--red); }
+
+/* BUTTONS */
+.bchk { padding:10px 20px; border-radius:9px; border:none; background:var(--pri); color:white; font-weight:800; font-size:.92rem; cursor:pointer; min-height:44px; transition:background .18s; }
+.bchk:active { background:#2f4ac7; }
+.bclr { padding:9px 14px; border-radius:9px; border:2px solid var(--red); background:white; color:var(--red); font-weight:800; font-size:.85rem; cursor:pointer; min-height:44px; display:none; }
+.bclr:active { background:var(--red-l); }
+.bdone { width:100%; padding:13px; border-radius:11px; border:none; background:var(--ora); color:white; font-weight:800; font-size:.97rem; cursor:pointer; min-height:44px; margin-top:14px; display:none; }
+.bdone:active { background:#c96b00; }
+
+/* FEEDBACK */
+.fb { margin-top:9px; padding:9px 13px; border-radius:9px; font-weight:700; font-size:.92rem; display:none; line-height:1.45; }
+.fb.on { display:block; }
+.fb.ok { background:var(--grn-l); color:var(--grn); border:2px solid var(--grn); }
+.fb.er { background:var(--red-l); color:var(--red); border:2px solid var(--red); }
+
+/* TEXTAUFGABE BOX */
+.textbox { background:var(--pri-l); border:2px solid var(--pri); border-radius:12px; padding:14px 16px; margin-bottom:12px; font-size:.95rem; font-weight:600; line-height:1.6; }
+.textbox strong { color:var(--pri); }
+
+/* AUSWERTUNG */
+.result-banner { background:linear-gradient(135deg,#3b5bdb,#5c7cfa); border-radius:14px; padding:20px; color:white; text-align:center; margin-bottom:16px; }
+.result-banner .score { font-size:3rem; font-weight:900; }
+.result-banner .slbl { font-size:.9rem; opacity:.9; font-weight:700; }
+.result-banner .sdet { font-size:.88rem; opacity:.8; margin-top:5px; font-weight:600; }
+.restart { width:100%; padding:14px; background:var(--ora); color:white; border:none; border-radius:11px; font-weight:800; font-size:1rem; cursor:pointer; min-height:44px; margin-top:8px; }
+.restart:active { background:#c96b00; }
+
+/* WEITER */
+.weiter { padding:12px 14px 0; display:none; }
+.weiter.on { display:block; }
+.weiter-btn { display:block; width:100%; padding:16px; background:var(--grn); color:white; border:none; border-radius:13px; text-align:center; font-weight:900; font-size:1.12rem; min-height:54px; box-shadow:0 4px 14px rgba(47,158,68,.22); cursor:pointer; }
+.weiter-btn:active { background:#237032; }
+
+/* TREX */
+.trex { position:fixed; bottom:16px; right:16px; font-size:1.6rem; cursor:pointer; z-index:200; user-select:none; }
+.trex-tip { position:fixed; bottom:58px; right:16px; background:var(--txt); color:white; font-size:.76rem; font-weight:700; padding:5px 10px; border-radius:8px; white-space:nowrap; opacity:0; pointer-events:none; transition:opacity .2s; z-index:201; }
+.trex-tip.on { opacity:1; }
+
+/* CHECKBOX TABLE */
+.cbtbl { width:100%; border-collapse:collapse; margin:10px 0; font-size:.88rem; }
+.cbtbl th { background:var(--pri-l); color:var(--pri); font-weight:800; padding:9px 6px; text-align:center; border:1.5px solid var(--bdr); font-size:.82rem; }
+.cbtbl th:first-child { text-align:left; padding-left:12px; }
+.cbtbl td { padding:7px 4px; text-align:center; border:1.5px solid var(--bdr); font-weight:700; vertical-align:middle; }
+.cbtbl td:first-child { text-align:left; padding-left:12px; font-weight:800; font-size:.95rem; }
+.cbtbl tr:nth-child(even) td { background:#fafafa; }
+.cbtbl tr.row-ok td { background:var(--grn-l); }
+.cbtbl tr.row-er td { background:var(--red-l); }
+.cbc { width:36px; height:36px; border-radius:7px; border:2.5px solid var(--bdr); background:white; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; font-size:1rem; transition:all .15s; user-select:none; }
+.cbc:active { transform:scale(.88); }
+.cbc.chk { background:var(--pri); border-color:var(--pri); color:white; }
+.cbc.ok  { background:var(--grn); border-color:var(--grn); color:white; cursor:default; }
+.cbc.er  { background:var(--red); border-color:var(--red); color:white; cursor:default; }
+.cbc.rev { background:var(--grn); border-color:var(--grn); color:white; cursor:default; }
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <h1>🔢 Teilbarkeitsregeln – Übung</h1>
+  <div class="sub">Mathematik · Klasse 5 · Übung</div>
+</div>
+
+<!-- LEVEL BAR -->
+<div class="lvlbar">
+  <button class="lvlbtn on" id="lbG" onclick="setLevel('g')">🟢 Grundlagen</button>
+  <button class="lvlbtn" id="lbF" onclick="setLevel('f')">🟠 Fortgeschritten</button>
+  <button class="lvlbtn" id="lbP" onclick="setLevel('p')">🟣 Profi</button>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab on" id="tab1" onclick="goTab(1)">1 · Wahr/Falsch <span class="dm"></span></button>
+  <button class="tab" id="tab2" onclick="goTab(2)">2 · Schnellcheck <span class="dm"></span></button>
+  <button class="tab" id="tab3" onclick="goTab(3)">3 · Tabelle <span class="dm"></span></button>
+  <button class="tab" id="tab4" onclick="goTab(4)">4 · Textaufgaben <span class="dm"></span></button>
+  <button class="tab" id="tab5" onclick="goTab(5)">5 · Wiederholung <span class="dm"></span></button>
+  <button class="tab" id="tab6" onclick="goTab(6)">6 · Auswertung</button>
+</div>
+
+<div class="cards">
+
+<!-- ════════════════════════════
+     KARTE 1: WAHR ODER FALSCH
+════════════════════════════ -->
+<div class="card" id="card1">
+  <h2>Wahr oder falsch?</h2>
+
+  <!-- GRUNDLAGEN -->
+  <div id="c1g">
+    <div class="tb" id="g1">
+      <div class="tlbl">1a</div>
+      <div class="tq">„<strong>3 846</strong> ist durch 2 teilbar, weil ihre letzte Ziffer eine gerade Zahl ist."</div>
+      <div style="display:flex;gap:8px">
+        <button class="mco" style="flex:1" data-c="true"  onclick="tfPick(this,'g1','fbg1')">✅ Wahr</button>
+        <button class="mco" style="flex:1" data-c="false" onclick="tfPick(this,'g1','fbg1')">❌ Falsch</button>
+      </div>
+      <div class="fb" id="fbg1"></div>
+    </div>
+    <div class="tb" id="g2">
+      <div class="tlbl">1b</div>
+      <div class="tq">„<strong>7 215</strong> ist durch 10 teilbar."</div>
+      <div style="display:flex;gap:8px">
+        <button class="mco" style="flex:1" data-c="false" onclick="tfPick(this,'g2','fbg2')">✅ Wahr</button>
+        <button class="mco" style="flex:1" data-c="true"  onclick="tfPick(this,'g2','fbg2')">❌ Falsch</button>
+      </div>
+      <div class="fb" id="fbg2"></div>
+    </div>
+    <div class="tb" id="g3">
+      <div class="tlbl">1c</div>
+      <div class="tq">„Die Quersumme von <strong>4 521</strong> ist 12 – also ist 4 521 durch 3 teilbar."</div>
+      <div style="display:flex;gap:8px">
+        <button class="mco" style="flex:1" data-c="true"  onclick="tfPick(this,'g3','fbg3')">✅ Wahr</button>
+        <button class="mco" style="flex:1" data-c="false" onclick="tfPick(this,'g3','fbg3')">❌ Falsch</button>
+      </div>
+      <div class="fb" id="fbg3"></div>
+    </div>
+    <div class="tb" id="g4">
+      <div class="tlbl">1d</div>
+      <div class="tq">„Jede Zahl, die durch 10 teilbar ist, ist auch durch 5 teilbar."</div>
+      <div style="display:flex;gap:8px">
+        <button class="mco" style="flex:1" data-c="true"  onclick="tfPick(this,'g4','fbg4')">✅ Wahr</button>
+        <button class="mco" style="flex:1" data-c="false" onclick="tfPick(this,'g4','fbg4')">❌ Falsch</button>
+      </div>
+      <div class="fb" id="fbg4"></div>
+    </div>
+  </div>
+
+  <!-- FORTGESCHRITTEN -->
+  <div id="c1f" style="display:none">
+    <div class="tb" id="f1">
+      <div class="tlbl">1a</div>
+      <div class="tq">„<strong>5 832</strong> ist durch 6 teilbar, weil sie durch 2 und durch 3 teilbar ist."</div>
+      <div style="display:flex;gap:8px">
+        <button class="mco" style="flex:1" data-c="true"  onclick="tfPick(this,'f1','fbf1')">✅ Wahr</button>
+        <button class="mco" style="flex:1" data-c="false" onclick="tfPick(this,'f1','fbf1')">❌ Falsch</button>
+      </div>
+      <div class="fb" id="fbf1"></div>
+    </div>
+    <div class="tb" id="f2">
+      <div class="tlbl">1b</div>
+      <div class="tq">„Die Quersumme von <strong>8 073</strong> ist 18 – also ist 8 073 durch 9 teilbar."</div>
+      <div style="display:flex;gap:8px">
+        <button class="mco" style="flex:1" data-c="true"  onclick="tfPick(this,'f2','fbf2')">✅ Wahr</button>
+        <button class="mco" style="flex:1" data-c="false" onclick="tfPick(this,'f2','fbf2')">❌ Falsch</button>
+      </div>
+      <div class="fb" id="fbf2"></div>
+    </div>
+    <div class="tb" id="f3">
+      <div class="tlbl">1c</div>
+      <div class="tq">„<strong>3 916</strong> ist durch 8 teilbar, weil die letzte Ziffer 6 gerade ist."</div>
+      <div style="display:flex;gap:8px">
+        <button class="mco" style="flex:1" data-c="false" onclick="tfPick(this,'f3','fbf3')">✅ Wahr</button>
+        <button class="mco" style="flex:1" data-c="true"  onclick="tfPick(this,'f3','fbf3')">❌ Falsch</button>
+      </div>
+      <div class="fb" id="fbf3"></div>
+    </div>
+    <div class="tb" id="f4">
+      <div class="tlbl">1d</div>
+      <div class="tq">„Jede Zahl, die durch 9 teilbar ist, ist auch durch 3 teilbar."</div>
+      <div style="display:flex;gap:8px">
+        <button class="mco" style="flex:1" data-c="true"  onclick="tfPick(this,'f4','fbf4')">✅ Wahr</button>
+        <button class="mco" style="flex:1" data-c="false" onclick="tfPick(this,'f4','fbf4')">❌ Falsch</button>
+      </div>
+      <div class="fb" id="fbf4"></div>
+    </div>
+  </div>
+
+  <!-- PROFI -->
+  <div id="c1p" style="display:none">
+    <div class="tb" id="p1">
+      <div class="tlbl">1a</div>
+      <div class="tq">„<strong>52 943</strong> ist durch 11 teilbar." — Berechne: 5 − 2 + 9 − 4 + 3 = ?</div>
+      <div style="display:flex;gap:8px">
+        <button class="mco" style="flex:1" data-c="true"  onclick="tfPick(this,'p1','fbp1')">✅ Wahr</button>
+        <button class="mco" style="flex:1" data-c="false" onclick="tfPick(this,'p1','fbp1')">❌ Falsch</button>
+      </div>
+      <div class="fb" id="fbp1"></div>
+    </div>
+    <div class="tb" id="p2">
+      <div class="tlbl">1b</div>
+      <div class="tq">„<strong>2 790</strong> ist durch 18 teilbar, weil sie durch 2 und durch 9 teilbar ist."</div>
+      <div style="display:flex;gap:8px">
+        <button class="mco" style="flex:1" data-c="true"  onclick="tfPick(this,'p2','fbp2')">✅ Wahr</button>
+        <button class="mco" style="flex:1" data-c="false" onclick="tfPick(this,'p2','fbp2')">❌ Falsch</button>
+      </div>
+      <div class="fb" id="fbp2"></div>
+    </div>
+    <div class="tb" id="p3">
+      <div class="tlbl">1c</div>
+      <div class="tq">„Eine Zahl, die durch 15 teilbar ist, muss auch durch 45 teilbar sein."</div>
+      <div style="display:flex;gap:8px">
+        <button class="mco" style="flex:1" data-c="false" onclick="tfPick(this,'p3','fbp3')">✅ Wahr</button>
+        <button class="mco" style="flex:1" data-c="true"  onclick="tfPick(this,'p3','fbp3')">❌ Falsch</button>
+      </div>
+      <div class="fb" id="fbp3"></div>
+    </div>
+  </div>
+
+  <button class="bdone" id="d1" onclick="doneCard(1)">Karte abschließen ✓</button>
+</div>
+
+
+<!-- ════════════════════════════
+     KARTE 2: SCHNELLCHECK
+════════════════════════════ -->
+<div class="card" id="card2">
+  <h2>Schnellcheck</h2>
+
+  <div id="c2g">
+    <div class="tb">
+      <div class="tlbl">2a – durch 4</div>
+      <div class="tq">Welche Zahlen sind durch <strong>4</strong> teilbar? Tippe alle richtigen an!</div>
+      <div class="pool" id="p2ga">
+        <span class="chip" data-c="true"  onclick="chipTap(this,'p2ga')">2 316</span>
+        <span class="chip" data-c="false" onclick="chipTap(this,'p2ga')">5 730</span>
+        <span class="chip" data-c="true"  onclick="chipTap(this,'p2ga')">8 912</span>
+        <span class="chip" data-c="false" onclick="chipTap(this,'p2ga')">6 453</span>
+        <span class="chip" data-c="true"  onclick="chipTap(this,'p2ga')">4 700</span>
+        <span class="chip" data-c="false" onclick="chipTap(this,'p2ga')">3 618</span>
+      </div>
+      <div style="display:flex;gap:7px;flex-wrap:wrap">
+        <button class="bchk" onclick="checkPool('p2ga','fb2ga','cl2ga')">Prüfen</button>
+        <button class="bclr" id="cl2ga" onclick="clearPool('p2ga','fb2ga','cl2ga')">Erneut</button>
+      </div>
+      <div class="fb" id="fb2ga"></div>
+    </div>
+
+    <div class="tb">
+      <div class="tlbl">2b – Lückentext</div>
+      <div class="tq">Vervollständige: Die Zahl <strong>6 930</strong> ist durch 3 teilbar, weil ihre Quersumme <input class="inp" id="lt1" inputmode="numeric" placeholder="?" style="width:70px;display:inline-block"> beträgt und diese durch 3 teilbar ist. Sie ist außerdem durch <input class="inp" id="lt2" inputmode="numeric" placeholder="?" style="width:65px;display:inline-block"> teilbar, weil ihre letzte Ziffer 0 ist.</div>
+      <div style="display:flex;gap:7px;flex-wrap:wrap">
+        <button class="bchk" onclick="checkLuecke()">Prüfen</button>
+        <button class="bclr" id="clL" onclick="clearLuecke()">Erneut</button>
+      </div>
+      <div class="fb" id="fbL"></div>
+    </div>
+  </div>
+
+  <div id="c2f" style="display:none">
+    <div class="tb">
+      <div class="tlbl">2a – durch 6</div>
+      <div class="tq">Welche Zahlen sind durch <strong>6</strong> teilbar?</div>
+      <div class="pool" id="p2fa">
+        <span class="chip" data-c="true"  onclick="chipTap(this,'p2fa')">3 714</span>
+        <span class="chip" data-c="false" onclick="chipTap(this,'p2fa')">5 130</span>
+        <span class="chip" data-c="true"  onclick="chipTap(this,'p2fa')">8 532</span>
+        <span class="chip" data-c="false" onclick="chipTap(this,'p2fa')">7 215</span>
+        <span class="chip" data-c="true"  onclick="chipTap(this,'p2fa')">2 058</span>
+        <span class="chip" data-c="false" onclick="chipTap(this,'p2fa')">4 915</span>
+      </div>
+      <div style="display:flex;gap:7px;flex-wrap:wrap">
+        <button class="bchk" onclick="checkPool('p2fa','fb2fa','cl2fa')">Prüfen</button>
+        <button class="bclr" id="cl2fa" onclick="clearPool('p2fa','fb2fa','cl2fa')">Erneut</button>
+      </div>
+      <div class="fb" id="fb2fa"></div>
+    </div>
+    <div class="tb">
+      <div class="tlbl">2b – durch 9</div>
+      <div class="tq">Welche Zahlen sind durch <strong>9</strong> teilbar?</div>
+      <div class="pool" id="p2fb">
+        <span class="chip" data-c="true"  onclick="chipTap(this,'p2fb')">6 237</span>
+        <span class="chip" data-c="false" onclick="chipTap(this,'p2fb')">4 812</span>
+        <span class="chip" data-c="true"  onclick="chipTap(this,'p2fb')">7 209</span>
+        <span class="chip" data-c="false" onclick="chipTap(this,'p2fb')">3 541</span>
+        <span class="chip" data-c="true"  onclick="chipTap(this,'p2fb')">9 801</span>
+      </div>
+      <div style="display:flex;gap:7px;flex-wrap:wrap">
+        <button class="bchk" onclick="checkPool('p2fb','fb2fb','cl2fb')">Prüfen</button>
+        <button class="bclr" id="cl2fb" onclick="clearPool('p2fb','fb2fb','cl2fb')">Erneut</button>
+      </div>
+      <div class="fb" id="fb2fb"></div>
+    </div>
+    <div class="tb">
+      <div class="tlbl">2c – Begründung ÷ 8</div>
+      <div class="tq">Ist <strong>5 624</strong> durch 8 teilbar? Wähle die richtige Begründung.</div>
+      <div class="mc" id="mc2fc">
+        <button class="mco" data-c="false" onclick="mcPick(this,'mc2fc','fb2fc')">Nein, weil die Quersumme 17 nicht durch 8 teilbar ist.</button>
+        <button class="mco" data-c="false" onclick="mcPick(this,'mc2fc','fb2fc')">Ja, weil die letzte Ziffer 4 durch 8 teilbar ist.</button>
+        <button class="mco" data-c="true"  onclick="mcPick(this,'mc2fc','fb2fc')">Ja – die letzten drei Ziffern: 624 : 8 = 78 ✓</button>
+        <button class="mco" data-c="false" onclick="mcPick(this,'mc2fc','fb2fc')">Nein, weil 5 624 keine runde Zahl ist.</button>
+      </div>
+      <div class="fb" id="fb2fc"></div>
+    </div>
+  </div>
+
+  <div id="c2p" style="display:none">
+    <div class="tb">
+      <div class="tlbl">2a – Elferwechsel</div>
+      <div class="tq">Berechne für <strong>63 481</strong>: 6 − 3 + 4 − 8 + 1 =</div>
+      <div class="irow">
+        <input class="inp" id="i11" inputmode="numeric" placeholder="?">
+        <button class="bchk" onclick="chkSingle('i11','0','fb2pa','cl2pa','✅ Richtig! Ergebnis = 0 → durch 11 teilbar ✓','❌ Schritt für Schritt: 6−3=3, 3+4=7, 7−8=−1, −1+1=0')">Prüfen</button>
+        <button class="bclr" id="cl2pa" onclick="clrIn('i11','fb2pa','cl2pa')">Erneut</button>
+      </div>
+      <div class="fb" id="fb2pa"></div>
+    </div>
+    <div class="tb">
+      <div class="tlbl">2b – durch 15</div>
+      <div class="tq">Welche Zahlen sind durch <strong>15</strong> teilbar?</div>
+      <div class="pool" id="p2pb">
+        <span class="chip" data-c="true"  onclick="chipTap(this,'p2pb')">4 725</span>
+        <span class="chip" data-c="false" onclick="chipTap(this,'p2pb')">6 310</span>
+        <span class="chip" data-c="true"  onclick="chipTap(this,'p2pb')">8 055</span>
+        <span class="chip" data-c="false" onclick="chipTap(this,'p2pb')">7 218</span>
+        <span class="chip" data-c="true"  onclick="chipTap(this,'p2pb')">3 600</span>
+      </div>
+      <div style="display:flex;gap:7px;flex-wrap:wrap">
+        <button class="bchk" onclick="checkPool('p2pb','fb2pb','cl2pb')">Prüfen</button>
+        <button class="bclr" id="cl2pb" onclick="clearPool('p2pb','fb2pb','cl2pb')">Erneut</button>
+      </div>
+      <div class="fb" id="fb2pb"></div>
+    </div>
+  </div>
+
+  <button class="bdone" id="d2" onclick="doneCard(2)">Karte abschließen ✓</button>
+</div>
+
+
+<!-- ════════════════════════════
+     KARTE 3: TABELLE
+════════════════════════════ -->
+<div class="card" id="card3">
+  <h2>Teilbarkeitstabelle</h2>
+  <p style="font-size:.9rem;color:var(--mut);font-weight:600;margin-bottom:12px">Setze ein Häkchen, wenn die Zahl durch die Spalte teilbar ist. Eine Zahl kann mehrere Häkchen haben!</p>
+
+  <div id="c3g">
+    <div class="tlbl" style="margin-bottom:8px">÷ 2, ÷ 3, ÷ 5, ÷ 10</div>
+    <div style="overflow-x:auto">
+      <table class="cbtbl" id="tbl3g">
+        <thead><tr><th>Zahl</th><th>÷ 2</th><th>÷ 3</th><th>÷ 5</th><th>÷ 10</th></tr></thead>
+        <tbody>
+          <tr data-row="[true,false,false,false]"><td>6 874</td><td><span class="cbc" onclick="cbTog(this)"></span></td><td><span class="cbc" onclick="cbTog(this)"></span></td><td><span class="cbc" onclick="cbTog(this)"></span></td><td><span class="cbc" onclick="cbTog(this)"></span></td></tr>
+          <tr data-row="[false,true,true,false]"><td>4 815</td><td><span class="cbc" onclick="cbTog(this)"></span></td><td><span class="cbc" onclick="cbTog(this)"></span></td><td><span class="cbc" onclick="cbTog(this)"></span></td><td><span class="cbc" onclick="cbTog(this)"></span></td></tr>
+          <tr data-row="[true,true,true,true]"><td>9 360</td><td><span class="cbc" onclick="cbTog(this)"></span></td><td><span class="cbc" onclick="cbTog(this)"></span></td><td><span class="cbc" onclick="cbTog(this)"></span></td><td><span class="cbc" onclick="cbTog(this)"></span></td></tr>
+          <tr data-row="[false,true,false,false]"><td>7 623</td><td><span class="cbc" onclick="cbTog(this)"></span></td><td><span class="cbc" onclick="cbTog(this)"></span></td><td><span class="cbc" onclick="cbTog(this)"></span></td><td><span class="cbc" onclick="cbTog(this)"></span></td></tr>
+          <tr data-row="[false,false,true,false]"><td>2 935</td><td><span class="cbc" onclick="cbTog(this)"></span></td><td><span class="cbc" onclick="cbTog(this)"></span></td><td><span class="cbc" onclick="cbTog(this)"></span></td><td><span class="cbc" onclick="cbTog(this)"></span></td></tr>
+          <tr data-row="[true,true,false,false]"><td>5 184</td><td><span class="cbc" onclick="cbTog(this)"></span></td><td><span class="cbc" onclick="cbTog(this)"></span></td><td><span class="cbc" onclick="cbTog(this)"></span></td><td><span class="cbc" onclick="cbTog(this)"></span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:10px">
+      <button class="bchk" onclick="checkTable('tbl3g','fb3g','cl3g')">Prüfen</button>
+      <button class="bclr" id="cl3g" onclick="clearTable('tbl3g','fb3g','cl3g')">Erneut</button>
+    </div>
+    <div class="fb" id="fb3g"></div>
+  </div>
+
+  <div id="c3f" style="display:none">
+    <div class="tlbl" style="margin-bottom:8px">÷ 2, ÷ 3, ÷ 4, ÷ 6, ÷ 9</div>
+    <div style="overflow-x:auto">
+      <table class="cbtbl" id="tbl3f">
+        <thead><tr><th>Zahl</th><th>÷ 2</th><th>÷ 3</th><th>÷ 4</th><th>÷ 6</th><th>÷ 9</th></tr></thead>
+        <tbody>
+          <!-- 7236: QS=18→÷3✓÷9✓, even→÷2✓, 36:4=9→÷4✓, ÷6✓ -->
+          <tr data-row="[true,true,true,true,true]"><td>7 236</td><td><span class="cbc" onclick="cbTog(this)"></span></td><td><span class="cbc" onclick="cbTog(this)"></span></td><td><span class="cbc" onclick="cbTog(this)"></span></td><td><span class="cbc" onclick="cbTog(this)"></span></td><td><span class="cbc" onclick="cbTog(this)"></span></td></tr>
+          <!-- 3645: QS=18→÷3✓÷9✓, odd→not÷2,÷4,÷6 -->
+          <tr data-row="[false,true,false,false,true]"><td>3 645</td><td><span class="cbc" onclick="cbTog(this)"></span></td><td><span class="cbc" onclick="cbTog(this)"></span></td><td><span class="cbc" onclick="cbTog(this)"></span></td><td><span class="cbc" onclick="cbTog(this)"></span></td><td><span class="cbc" onclick="cbTog(this)"></span></td></tr>
+          <!-- 4028: QS=14→not÷3, even→÷2✓, 28:4=7→÷4✓ -->
+          <tr data-row="[true,false,true,false,false]"><td>4 028</td><td><span class="cbc" onclick="cbTog(this)"></span></td><td><span class="cbc" onclick="cbTog(this)"></span></td><td><span class="cbc" onclick="cbTog(this)"></span></td><td><span class="cbc" onclick="cbTog(this)"></span></td><td><span class="cbc" onclick="cbTog(this)"></span></td></tr>
+          <!-- 9504: QS=18→÷3✓÷9✓, even→÷2✓, 04:4=1→÷4✓, ÷6✓ -->
+          <tr data-row="[true,true,true,true,true]"><td>9 504</td><td><span class="cbc" onclick="cbTog(this)"></span></td><td><span class="cbc" onclick="cbTog(this)"></span></td><td><span class="cbc" onclick="cbTog(this)"></span></td><td><span class="cbc" onclick="cbTog(this)"></span></td><td><span class="cbc" onclick="cbTog(this)"></span></td></tr>
+          <!-- 6813: QS=18→÷3✓÷9✓, odd→not÷2,÷4,÷6 -->
+          <tr data-row="[false,true,false,false,true]"><td>6 813</td><td><span class="cbc" onclick="cbTog(this)"></span></td><td><span class="cbc" onclick="cbTog(this)"></span></td><td><span class="cbc" onclick="cbTog(this)"></span></td><td><span class="cbc" onclick="cbTog(this)"></span></td><td><span class="cbc" onclick="cbTog(this)"></span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:10px">
+      <button class="bchk" onclick="checkTable('tbl3f','fb3f','cl3f')">Prüfen</button>
+      <button class="bclr" id="cl3f" onclick="clearTable('tbl3f','fb3f','cl3f')">Erneut</button>
+    </div>
+    <div class="fb" id="fb3f"></div>
+  </div>
+
+  <div id="c3p" style="display:none">
+    <div class="tlbl" style="margin-bottom:8px">÷ 3, ÷ 4, ÷ 6, ÷ 9, ÷ 12, ÷ 18</div>
+    <div style="overflow-x:auto">
+      <table class="cbtbl" id="tbl3p">
+        <thead><tr><th>Zahl</th><th>÷ 3</th><th>÷ 4</th><th>÷ 6</th><th>÷ 9</th><th>÷ 12</th><th>÷ 18</th></tr></thead>
+        <tbody>
+          <!-- 5616: QS=18→÷3✓÷9✓, 16:4→÷4✓, even→÷2, ÷6✓, ÷12✓, ÷18✓ -->
+          <tr data-row="[true,true,true,true,true,true]"><td>5 616</td><td><span class="cbc" onclick="cbTog(this)"></span></td><td><span class="cbc" onclick="cbTog(this)"></span></td><td><span class="cbc" onclick="cbTog(this)"></span></td><td><span class="cbc" onclick="cbTog(this)"></span></td><td><span class="cbc" onclick="cbTog(this)"></span></td><td><span class="cbc" onclick="cbTog(this)"></span></td></tr>
+          <!-- 7340: QS=14→not÷3, 40:4→÷4✓, even→÷2, not÷3→not÷6,÷9,÷12,÷18 -->
+          <tr data-row="[false,true,false,false,false,false]"><td>7 340</td><td><span class="cbc" onclick="cbTog(this)"></span></td><td><span class="cbc" onclick="cbTog(this)"></span></td><td><span class="cbc" onclick="cbTog(this)"></span></td><td><span class="cbc" onclick="cbTog(this)"></span></td><td><span class="cbc" onclick="cbTog(this)"></span></td><td><span class="cbc" onclick="cbTog(this)"></span></td></tr>
+          <!-- 4158: QS=18→÷3✓÷9✓, 58:4→not÷4, even→÷2, ÷6✓, not÷12, ÷18✓ -->
+          <tr data-row="[true,false,true,true,false,true]"><td>4 158</td><td><span class="cbc" onclick="cbTog(this)"></span></td><td><span class="cbc" onclick="cbTog(this)"></span></td><td><span class="cbc" onclick="cbTog(this)"></span></td><td><span class="cbc" onclick="cbTog(this)"></span></td><td><span class="cbc" onclick="cbTog(this)"></span></td><td><span class="cbc" onclick="cbTog(this)"></span></td></tr>
+          <!-- 2916: QS=18→÷3✓÷9✓, 16:4→÷4✓, even→÷2, ÷6✓, ÷12✓, ÷18✓ -->
+          <tr data-row="[true,true,true,true,true,true]"><td>2 916</td><td><span class="cbc" onclick="cbTog(this)"></span></td><td><span class="cbc" onclick="cbTog(this)"></span></td><td><span class="cbc" onclick="cbTog(this)"></span></td><td><span class="cbc" onclick="cbTog(this)"></span></td><td><span class="cbc" onclick="cbTog(this)"></span></td><td><span class="cbc" onclick="cbTog(this)"></span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="display:flex;gap:7px;flex-wrap:wrap;margin-top:10px">
+      <button class="bchk" onclick="checkTable('tbl3p','fb3p','cl3p')">Prüfen</button>
+      <button class="bclr" id="cl3p" onclick="clearTable('tbl3p','fb3p','cl3p')">Erneut</button>
+    </div>
+    <div class="fb" id="fb3p"></div>
+  </div>
+
+  <button class="bdone" id="d3" onclick="doneCard(3)">Karte abschließen ✓</button>
+</div>
+
+
+<!-- ════════════════════════════
+     KARTE 4: TEXTAUFGABEN
+════════════════════════════ -->
+<div class="card" id="card4">
+  <h2>Textaufgaben</h2>
+
+  <div id="c4g">
+    <div class="tb">
+      <div class="tlbl">4a – Gruppenaufteilung</div>
+      <div class="textbox">Eine Schulklasse hat <strong>32 Schülerinnen und Schüler</strong>. Die Lehrkraft möchte gleich große Gruppen bilden, ohne dass jemand übrig bleibt.</div>
+      <div class="tq">Welche Gruppengrößen sind möglich?</div>
+      <div class="pool" id="p4ga">
+        <span class="chip" data-c="true"  onclick="chipTap(this,'p4ga')">2er-Gruppen</span>
+        <span class="chip" data-c="false" onclick="chipTap(this,'p4ga')">3er-Gruppen</span>
+        <span class="chip" data-c="true"  onclick="chipTap(this,'p4ga')">4er-Gruppen</span>
+        <span class="chip" data-c="false" onclick="chipTap(this,'p4ga')">5er-Gruppen</span>
+        <span class="chip" data-c="false" onclick="chipTap(this,'p4ga')">6er-Gruppen</span>
+        <span class="chip" data-c="true"  onclick="chipTap(this,'p4ga')">8er-Gruppen</span>
+      </div>
+      <div style="display:flex;gap:7px;flex-wrap:wrap">
+        <button class="bchk" onclick="checkPool('p4ga','fb4ga','cl4ga')">Prüfen</button>
+        <button class="bclr" id="cl4ga" onclick="clearPool('p4ga','fb4ga','cl4ga')">Erneut</button>
+      </div>
+      <div class="fb" id="fb4ga"></div>
+    </div>
+    <div class="tb">
+      <div class="tlbl">4b – Bonbons</div>
+      <div class="textbox">Oliver hat <strong>558 Bonbons</strong> gesammelt. Er möchte sie gleichmäßig auf seine Freunde verteilen.</div>
+      <div class="tq">Kann Oliver die Bonbons gleichmäßig auf 3 Freunde verteilen? Begründe mit der Quersummenregel.</div>
+      <div class="mc" id="mc4gb">
+        <button class="mco" data-c="true"  onclick="mcPick(this,'mc4gb','fb4gb')">Ja – QS von 558 = 5+5+8 = 18, und 18 : 3 = 6 → durch 3 teilbar ✓</button>
+        <button class="mco" data-c="false" onclick="mcPick(this,'mc4gb','fb4gb')">Nein – 558 endet auf 8, also nicht durch 3 teilbar</button>
+        <button class="mco" data-c="false" onclick="mcPick(this,'mc4gb','fb4gb')">Nein – 558 ist eine gerade Zahl, also nicht durch 3 teilbar</button>
+      </div>
+      <div class="fb" id="fb4gb"></div>
+    </div>
+  </div>
+
+  <div id="c4f" style="display:none">
+    <div class="tb">
+      <div class="tlbl">4a – Eintrittskarten</div>
+      <div class="textbox">Ein Schülertheater nimmt <strong>1 107 €</strong> ein. Die Eintrittskarten kosten je 3 €.</div>
+      <div class="tq">Prüfe mit der Quersummenregel: Ist 1 107 durch 3 teilbar? Was bedeutet das für die Abrechnung?</div>
+      <div class="mc" id="mc4fa">
+        <button class="mco" data-c="true"  onclick="mcPick(this,'mc4fa','fb4fa')">Ja – QS = 1+1+0+7 = 9, und 9 : 3 = 3 → die Einnahme stimmt genau ✓</button>
+        <button class="mco" data-c="false" onclick="mcPick(this,'mc4fa','fb4fa')">Nein – 1 107 endet auf 7, also nicht durch 3 teilbar</button>
+        <button class="mco" data-c="false" onclick="mcPick(this,'mc4fa','fb4fa')">Man kann das ohne schriftliche Division nicht prüfen</button>
+      </div>
+      <div class="fb" id="fb4fa"></div>
+    </div>
+    <div class="tb">
+      <div class="tlbl">4b – Zaun</div>
+      <div class="textbox">Ein Zaun soll <strong>114 m</strong> lang werden. Die Zaunpfosten sollen im gleichen Abstand stehen. Möglich sind Abstände von 2 m, 3 m, 4 m oder 6 m.</div>
+      <div class="tq">Welche Abstände gehen auf (also ohne Rest)?</div>
+      <div class="pool" id="p4fb">
+        <span class="chip" data-c="true"  onclick="chipTap(this,'p4fb')">2 m</span>
+        <span class="chip" data-c="true"  onclick="chipTap(this,'p4fb')">3 m</span>
+        <span class="chip" data-c="false" onclick="chipTap(this,'p4fb')">4 m</span>
+        <span class="chip" data-c="true"  onclick="chipTap(this,'p4fb')">6 m</span>
+      </div>
+      <div style="display:flex;gap:7px;flex-wrap:wrap">
+        <button class="bchk" onclick="checkPool('p4fb','fb4fb','cl4fb')">Prüfen</button>
+        <button class="bclr" id="cl4fb" onclick="clearPool('p4fb','fb4fb','cl4fb')">Erneut</button>
+      </div>
+      <div class="fb" id="fb4fb"></div>
+    </div>
+  </div>
+
+  <div id="c4p" style="display:none">
+    <div class="tb">
+      <div class="tlbl">4a – Jahreszahl</div>
+      <div class="textbox">Ein Jahr ist ein <strong>Schaltjahr</strong>, wenn es durch 4 teilbar ist. Ausnahme: durch 100 teilbare Jahre sind nur dann Schaltjahr, wenn sie auch durch 400 teilbar sind.</div>
+      <div class="tq">War <strong>2 024</strong> ein Schaltjahr? Begründe mit der Teilbarkeitsregel für ÷ 4.</div>
+      <div class="mc" id="mc4pa">
+        <button class="mco" data-c="true"  onclick="mcPick(this,'mc4pa','fb4pa')">Ja – die letzten zwei Ziffern 24 : 4 = 6 → durch 4 teilbar → Schaltjahr ✓</button>
+        <button class="mco" data-c="false" onclick="mcPick(this,'mc4pa','fb4pa')">Nein – 2 024 ist nicht durch 4 teilbar</button>
+        <button class="mco" data-c="false" onclick="mcPick(this,'mc4pa','fb4pa')">Ja – weil 2 024 eine gerade Zahl ist</button>
+      </div>
+      <div class="fb" id="fb4pa"></div>
+    </div>
+    <div class="tb">
+      <div class="tlbl">4b – Kombination</div>
+      <div class="textbox">In einem Lager liegen <strong>4 320 Schrauben</strong>. Sie sollen in gleich große Pakete abgepackt werden.</div>
+      <div class="tq">Für welche Paketgrößen geht die Aufteilung ohne Rest auf? Tippe alle richtigen an!</div>
+      <div class="pool" id="p4pb">
+        <span class="chip" data-c="true"  onclick="chipTap(this,'p4pb')">6er-Pakete</span>
+        <span class="chip" data-c="true"  onclick="chipTap(this,'p4pb')">9er-Pakete</span>
+        <span class="chip" data-c="true"  onclick="chipTap(this,'p4pb')">12er-Pakete</span>
+        <span class="chip" data-c="false" onclick="chipTap(this,'p4pb')">11er-Pakete</span>
+        <span class="chip" data-c="true"  onclick="chipTap(this,'p4pb')">15er-Pakete</span>
+        <span class="chip" data-c="false" onclick="chipTap(this,'p4pb')">7er-Pakete</span>
+      </div>
+      <div style="display:flex;gap:7px;flex-wrap:wrap">
+        <button class="bchk" onclick="checkPool('p4pb','fb4pb','cl4pb')">Prüfen</button>
+        <button class="bclr" id="cl4pb" onclick="clearPool('p4pb','fb4pb','cl4pb')">Erneut</button>
+      </div>
+      <div class="fb" id="fb4pb"></div>
+    </div>
+  </div>
+
+  <button class="bdone" id="d4" onclick="doneCard(4)">Karte abschließen ✓</button>
+</div>
+
+
+<!-- ════════════════════════════
+     KARTE 5: WIEDERHOLUNG
+════════════════════════════ -->
+<div class="card" id="card5">
+  <h2>🔁 Wiederholung: Teiler und Vielfache</h2>
+
+  <div id="c5g">
+    <div class="tb">
+      <div class="tlbl">W1 – Teiler von 36</div>
+      <div class="tq">Welche Zahlen sind <strong>Teiler von 36</strong>?</div>
+      <div class="pool" id="pW1">
+        <span class="chip" data-c="true"  onclick="chipTap(this,'pW1')">1</span>
+        <span class="chip" data-c="true"  onclick="chipTap(this,'pW1')">2</span>
+        <span class="chip" data-c="true"  onclick="chipTap(this,'pW1')">3</span>
+        <span class="chip" data-c="true"  onclick="chipTap(this,'pW1')">4</span>
+        <span class="chip" data-c="false" onclick="chipTap(this,'pW1')">5</span>
+        <span class="chip" data-c="true"  onclick="chipTap(this,'pW1')">6</span>
+        <span class="chip" data-c="false" onclick="chipTap(this,'pW1')">8</span>
+        <span class="chip" data-c="true"  onclick="chipTap(this,'pW1')">9</span>
+        <span class="chip" data-c="false" onclick="chipTap(this,'pW1')">10</span>
+        <span class="chip" data-c="true"  onclick="chipTap(this,'pW1')">12</span>
+        <span class="chip" data-c="true"  onclick="chipTap(this,'pW1')">18</span>
+        <span class="chip" data-c="true"  onclick="chipTap(this,'pW1')">36</span>
+      </div>
+      <div style="display:flex;gap:7px;flex-wrap:wrap">
+        <button class="bchk" onclick="checkPool('pW1','fbW1','clW1')">Prüfen</button>
+        <button class="bclr" id="clW1" onclick="clearPool('pW1','fbW1','clW1')">Erneut</button>
+      </div>
+      <div class="fb" id="fbW1"></div>
+    </div>
+    <div class="tb">
+      <div class="tlbl">W2 – Vielfache von 7</div>
+      <div class="tq">Welche Zahlen sind <strong>Vielfache von 7</strong> (kleiner als 60)?</div>
+      <div class="pool" id="pW2">
+        <span class="chip" data-c="true"  onclick="chipTap(this,'pW2')">7</span>
+        <span class="chip" data-c="false" onclick="chipTap(this,'pW2')">10</span>
+        <span class="chip" data-c="true"  onclick="chipTap(this,'pW2')">14</span>
+        <span class="chip" data-c="false" onclick="chipTap(this,'pW2')">20</span>
+        <span class="chip" data-c="true"  onclick="chipTap(this,'pW2')">21</span>
+        <span class="chip" data-c="false" onclick="chipTap(this,'pW2')">25</span>
+        <span class="chip" data-c="true"  onclick="chipTap(this,'pW2')">28</span>
+        <span class="chip" data-c="false" onclick="chipTap(this,'pW2')">30</span>
+        <span class="chip" data-c="true"  onclick="chipTap(this,'pW2')">35</span>
+        <span class="chip" data-c="true"  onclick="chipTap(this,'pW2')">42</span>
+        <span class="chip" data-c="false" onclick="chipTap(this,'pW2')">50</span>
+        <span class="chip" data-c="true"  onclick="chipTap(this,'pW2')">56</span>
+      </div>
+      <div style="display:flex;gap:7px;flex-wrap:wrap">
+        <button class="bchk" onclick="checkPool('pW2','fbW2','clW2')">Prüfen</button>
+        <button class="bclr" id="clW2" onclick="clearPool('pW2','fbW2','clW2')">Erneut</button>
+      </div>
+      <div class="fb" id="fbW2"></div>
+    </div>
+  </div>
+
+  <div id="c5f" style="display:none">
+    <div class="tb">
+      <div class="tlbl">W1 – Teiler von 72</div>
+      <div class="tq">Gib alle <strong>Teiler von 72</strong> an.</div>
+      <div class="pool" id="pWf1">
+        <span class="chip" data-c="true"  onclick="chipTap(this,'pWf1')">1</span>
+        <span class="chip" data-c="true"  onclick="chipTap(this,'pWf1')">2</span>
+        <span class="chip" data-c="true"  onclick="chipTap(this,'pWf1')">3</span>
+        <span class="chip" data-c="true"  onclick="chipTap(this,'pWf1')">4</span>
+        <span class="chip" data-c="false" onclick="chipTap(this,'pWf1')">5</span>
+        <span class="chip" data-c="true"  onclick="chipTap(this,'pWf1')">6</span>
+        <span class="chip" data-c="false" onclick="chipTap(this,'pWf1')">7</span>
+        <span class="chip" data-c="true"  onclick="chipTap(this,'pWf1')">8</span>
+        <span class="chip" data-c="true"  onclick="chipTap(this,'pWf1')">9</span>
+        <span class="chip" data-c="false" onclick="chipTap(this,'pWf1')">10</span>
+        <span class="chip" data-c="true"  onclick="chipTap(this,'pWf1')">12</span>
+        <span class="chip" data-c="true"  onclick="chipTap(this,'pWf1')">18</span>
+        <span class="chip" data-c="true"  onclick="chipTap(this,'pWf1')">24</span>
+        <span class="chip" data-c="true"  onclick="chipTap(this,'pWf1')">36</span>
+        <span class="chip" data-c="true"  onclick="chipTap(this,'pWf1')">72</span>
+      </div>
+      <div style="display:flex;gap:7px;flex-wrap:wrap">
+        <button class="bchk" onclick="checkPool('pWf1','fbWf1','clWf1')">Prüfen</button>
+        <button class="bclr" id="clWf1" onclick="clearPool('pWf1','fbWf1','clWf1')">Erneut</button>
+      </div>
+      <div class="fb" id="fbWf1"></div>
+    </div>
+  </div>
+
+  <div id="c5p" style="display:none">
+    <div class="tb">
+      <div class="tlbl">W1 – Vollkommene Zahl</div>
+      <div class="tq">Die Zahl <strong>28</strong> heißt <em>vollkommen</em>: 1+2+4+7+14 = 28.<br>Teiler von 496 (ohne 496): 1, 2, 4, 8, 16, 31, 62, 124, 248.<br>Ist 496 auch vollkommen?</div>
+      <div class="irow">
+        <span style="font-weight:700">Summe =</span>
+        <input class="inp" id="inWp" inputmode="numeric" placeholder="?">
+        <button class="bchk" onclick="chkSingle('inWp','496','fbWp','clWp','✅ Richtig! Die Summe ist 496 – also vollkommen!','❌ Addiere alle Teiler sorgfältig.')">Prüfen</button>
+        <button class="bclr" id="clWp" onclick="clrIn('inWp','fbWp','clWp')">Erneut</button>
+      </div>
+      <div class="fb" id="fbWp"></div>
+    </div>
+    <div class="tb">
+      <div class="tlbl">W2 – Aussage</div>
+      <div class="tq">Welche Aussage ist <em>immer</em> wahr?</div>
+      <div class="mc" id="mcWp2">
+        <button class="mco" data-c="false" onclick="mcPick(this,'mcWp2','fbWp2')">Jeder Teiler einer Zahl ist auch ein Vielfaches dieser Zahl.</button>
+        <button class="mco" data-c="true"  onclick="mcPick(this,'mcWp2','fbWp2')">Jede Zahl ist ein Vielfaches von 1 und Teiler von sich selbst.</button>
+        <button class="mco" data-c="false" onclick="mcPick(this,'mcWp2','fbWp2')">Eine Zahl hat immer gleich viele Teiler wie Vielfache unter 100.</button>
+        <button class="mco" data-c="false" onclick="mcPick(this,'mcWp2','fbWp2')">Primzahlen haben genau drei Teiler.</button>
+      </div>
+      <div class="fb" id="fbWp2"></div>
+    </div>
+  </div>
+
+  <button class="bdone" id="d5" onclick="doneCard(5)">Karte abschließen ✓</button>
+</div>
+
+
+<!-- ════════════════════════════
+     KARTE 6: AUSWERTUNG
+════════════════════════════ -->
+<div class="card" id="card6">
+  <h2>📊 Auswertung</h2>
+  <div id="resArea">
+    <p style="color:var(--mut);font-weight:600">Schließe zuerst alle Karten (1–5) ab!</p>
+  </div>
+</div>
+
+</div><!-- cards -->
+
+<div class="weiter" id="weiterWrap">
+  <button class="weiter-btn" onclick="alert('Super gemacht!')">✅ Übung abgeschlossen!</button>
+</div>
+
+<span class="trex" id="trex" onclick="trexTip()" onmouseover="document.getElementById('trexT').classList.add('on')" onmouseout="document.getElementById('trexT').classList.remove('on')">🦖</span>
+<div class="trex-tip" id="trexT">Made by Mathedino</div>
+
+<script>
+var curTab = 1;
+var TOTAL = 5; // cards 1-5, card 6 is result
+var curLevel = 'g';
+var scored = {c:0, t:0};
+var cardsDone = {};
+
+// ── TABS ─────────────────────────────────
+function goTab(n) {
+  for(var i=1; i<=6; i++) {
+    var c = document.getElementById('card'+i);
+    if(c) c.style.display = 'none';
+  }
+  document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('on'); });
+  var card = document.getElementById('card'+n);
+  var tab  = document.getElementById('tab'+n);
+  if(card) card.style.display = 'block';
+  if(tab)  tab.classList.add('on');
+  curTab = n;
+  if(n===6) buildResults();
+  window.scrollTo(0,0);
+}
+
+// ── LEVEL ────────────────────────────────
+function setLevel(l) {
+  curLevel = l;
+  // Update buttons
+  document.getElementById('lbG').classList.toggle('on', l==='g');
+  document.getElementById('lbF').classList.toggle('on', l==='f');
+  document.getElementById('lbP').classList.toggle('on', l==='p');
+
+  // For each card, show/hide level divs
+  for(var i=1; i<=5; i++) {
+    var g = document.getElementById('c'+i+'g');
+    var f = document.getElementById('c'+i+'f');
+    var p = document.getElementById('c'+i+'p');
+    if(g) g.style.display = (l==='g') ? 'block' : 'none';
+    if(f) f.style.display = (l==='f') ? 'block' : 'none';
+    if(p) p.style.display = (l==='p') ? 'block' : 'none';
+  }
+}
+
+// ── DONE CARD ────────────────────────────
+function doneCard(n) {
+  cardsDone[n] = true;
+  var btn = document.getElementById('d'+n);
+  if(btn) btn.style.display = 'none';
+  var tab = document.getElementById('tab'+n);
+  if(tab) tab.classList.add('done');
+  // Check if all done
+  if(cardsDone[1]&&cardsDone[2]&&cardsDone[3]&&cardsDone[4]&&cardsDone[5]) {
+    document.getElementById('weiterWrap').classList.add('on');
+    buildResults();
+  }
+}
+
+function buildResults() {
+  var pct = scored.t>0 ? Math.round(scored.c/scored.t*100) : 0;
+  var e = pct>=85?'🏆':pct>=60?'💪':'📚';
+  var m = pct>=85?'Ausgezeichnet!':pct>=60?'Gut gemacht!':'Nochmal üben!';
+  document.getElementById('resArea').innerHTML =
+    '<div class="result-banner"><div class="score">'+e+' '+pct+'%</div>'+
+    '<div class="slbl">'+m+'</div>'+
+    '<div class="sdet">'+scored.c+' von '+scored.t+' Aufgaben richtig</div></div>'+
+    '<button class="restart" onclick="location.reload()">🔄 Nochmal von vorne</button>';
+}
+
+// ── SHOW DONE BTN ────────────────────────
+function tryShowDone(triggerId) {
+  var el = document.getElementById(triggerId);
+  if(!el) return;
+  var card = el.closest ? el.closest('.card') : null;
+  if(!card) return;
+  var n = card.id.replace('card','');
+  var btn = document.getElementById('d'+n);
+  if(btn) btn.style.display = 'block';
+}
+
+// ── TF PICK ──────────────────────────────
+var tfFb = {
+  g1:{ok:'✅ Richtig! 3 846 endet auf 6 – gerade → durch 2 teilbar.',er:''},
+  g2:{ok:'✅ Richtig! Für ÷10 muss die letzte Ziffer 0 sein – 7 215 endet auf 5.',er:'❌ Falsch. Letzte Ziffer muss 0 sein, nicht 5.'},
+  g3:{ok:'✅ Richtig! 4+5+2+1 = 12, 12 : 3 = 4 → durch 3 teilbar.',er:''},
+  g4:{ok:'✅ Richtig! Endet eine Zahl auf 0, ist sie durch 10 und durch 5 teilbar.',er:'❌ Falsch. Jede ÷10-Zahl endet auf 0 und ist damit auch durch 5 teilbar.'},
+  f1:{ok:'✅ Richtig! 5 832 ist gerade (÷2 ✓) und QS=18 (÷3 ✓) → ÷6 ✓',er:''},
+  f2:{ok:'✅ Richtig! QS = 8+0+7+3 = 18, 18:9=2 → durch 9 teilbar.',er:''},
+  f3:{ok:'✅ Richtig! Für ÷8 zählen die letzten drei Ziffern: 916:8 geht nicht auf.',er:'❌ Falsch. Die letzte Ziffer allein reicht nicht – man prüft die letzten drei Ziffern.'},
+  f4:{ok:'✅ Richtig! 9 = 3·3 → jede durch 9 teilbare Zahl ist auch durch 3 teilbar.',er:'❌ Falsch. Da 9 = 3·3: Ja, jede durch 9 teilbare Zahl ist auch durch 3 teilbar.'},
+  p1:{ok:'✅ Richtig! 5−2+9−4+3 = 11, und 11 : 11 = 1 → durch 11 teilbar.',er:'❌ Falsch. 5−2+9−4+3 = 11 → durch 11 teilbar.'},
+  p2:{ok:'✅ Richtig! QS=18 (÷9 ✓), letzte Ziffer 0 (÷2 ✓) → ÷18 ✓',er:''},
+  p3:{ok:'✅ Richtig! Gegenbeispiel: 30 ÷ 15 = 2 ✓, aber 30 ÷ 45 geht nicht auf.',er:'❌ Falsch. Gegenbeispiel: 30 ist durch 15 teilbar, aber nicht durch 45.'},
+};
+
+function tfPick(btn, blockId, fbId) {
+  var block = document.getElementById(blockId);
+  if(!block || block.querySelector('.ok,.err')) return;
+  var btns = block.querySelectorAll('.mco');
+  var isOk = btn.dataset.c === 'true';
+  var data = tfFb[blockId] || {ok:'✅ Richtig!',er:'❌ Falsch.'};
+  scored.t++;
+  if(isOk) {
+    btn.classList.add('ok');
+    scored.c++;
+    showFb(fbId,'ok',data.ok||'✅ Richtig!');
+  } else {
+    btn.classList.add('err');
+    btns.forEach(function(b){ if(b.dataset.c==='true') b.classList.add('rev'); });
+    showFb(fbId,'er',data.er||'❌ Leider falsch.');
+  }
+  tryShowDone(fbId);
+}
+
+// ── MC ───────────────────────────────────
+function mcPick(btn, gId, fbId) {
+  var g = document.getElementById(gId);
+  if(!g || g.querySelector('.ok,.err')) return;
+  g.querySelectorAll('.mco').forEach(function(b){ b.classList.remove('sel'); });
+  btn.classList.add('sel');
+  scored.t++;
+  if(btn.dataset.c==='true') {
+    btn.classList.replace('sel','ok');
+    scored.c++;
+    showFb(fbId,'ok','✅ Richtig!');
+  } else {
+    btn.classList.replace('sel','err');
+    g.querySelectorAll('[data-c="true"]').forEach(function(b){ b.classList.add('rev'); });
+    showFb(fbId,'er','❌ Leider falsch. Die grüne Antwort ist richtig.');
+  }
+  tryShowDone(fbId);
+}
+
+// ── CHIPS ────────────────────────────────
+function chipTap(chip, poolId) {
+  if(chip.classList.contains('ok')||chip.classList.contains('err')||
+     chip.classList.contains('mis')||chip.classList.contains('locked')) return;
+  chip.classList.toggle('sel');
+}
+
+function checkPool(poolId, fbId, clId) {
+  var chips = document.getElementById(poolId).querySelectorAll('.chip');
+  var cor=0, wrong=false;
+  chips.forEach(function(c){
+    var isC=c.dataset.c==='true', isSel=c.classList.contains('sel');
+    if(isC&&isSel)  { c.classList.replace('sel','ok');  c.classList.add('locked'); cor++; }
+    else if(isC)    { c.classList.add('mis'); }
+    else if(isSel)  { c.classList.replace('sel','err'); c.classList.add('locked'); wrong=true; }
+  });
+  var need=Array.from(chips).filter(function(c){return c.dataset.c==='true';}).length;
+  scored.t++;
+  if(cor===need&&!wrong) { scored.c++; showFb(fbId,'ok','✅ Richtig!'); tryShowDone(fbId); }
+  else { showFb(fbId,'er','❌ Noch nicht ganz. Gelb = vergessen · Rot = falsch.'); document.getElementById(clId).style.display='inline-flex'; }
+}
+
+function clearPool(poolId, fbId, clId) {
+  document.getElementById(poolId).querySelectorAll('.chip').forEach(function(c){
+    c.className='chip'; c.onclick=function(){ chipTap(c,poolId); };
+  });
+  hideFb(fbId);
+  document.getElementById(clId).style.display='none';
+}
+
+// ── LÜCKENTEXT ───────────────────────────
+function checkLuecke() {
+  var v1=document.getElementById('lt1').value.trim();
+  var v2=document.getElementById('lt2').value.trim();
+  var ok = (v1==='18') && (v2==='10'||v2==='5');
+  scored.t++;
+  if(ok) {
+    document.getElementById('lt1').className='inp ok';
+    document.getElementById('lt2').className='inp ok';
+    scored.c++;
+    showFb('fbL','ok','✅ Richtig! QS = 18, durch 10 (oder 5) teilbar.');
+    tryShowDone('fbL');
+  } else {
+    document.getElementById('lt1').className = v1==='18'?'inp ok':'inp err';
+    document.getElementById('lt2').className = (v2==='10'||v2==='5')?'inp ok':'inp err';
+    showFb('fbL','er','❌ Quersumme von 6 930 = 6+9+3+0 = 18. Letzte Ziffer 0 → durch 10 teilbar.');
+    document.getElementById('clL').style.display='inline-flex';
+  }
+}
+function clearLuecke() {
+  ['lt1','lt2'].forEach(function(id){ var e=document.getElementById(id); e.value=''; e.className='inp'; });
+  hideFb('fbL'); document.getElementById('clL').style.display='none';
+}
+
+// ── TABLE ────────────────────────────────
+function cbTog(cell) {
+  if(cell.classList.contains('ok')||cell.classList.contains('er')||cell.classList.contains('rev')) return;
+  cell.classList.toggle('chk');
+  cell.textContent = cell.classList.contains('chk') ? '✓' : '';
+}
+
+function checkTable(tblId, fbId, clId) {
+  var rows = document.getElementById(tblId).querySelectorAll('tbody tr');
+  var allOk = true;
+  rows.forEach(function(row){
+    var cor = JSON.parse(row.dataset.row);
+    var cells = row.querySelectorAll('.cbc');
+    var rowOk = true;
+    cells.forEach(function(cell,i){
+      var chk = cell.classList.contains('chk');
+      if(cor[i]&&chk)       { cell.classList.add('ok'); cell.textContent='✓'; }
+      else if(!cor[i]&&!chk){ cell.classList.add('ok'); }
+      else if(cor[i]&&!chk) { cell.classList.add('rev'); cell.textContent='✓'; rowOk=false; allOk=false; }
+      else                   { cell.classList.add('er'); cell.textContent='✗'; rowOk=false; allOk=false; }
+    });
+    row.classList.add(rowOk?'row-ok':'row-er');
+  });
+  scored.t++;
+  if(allOk) { scored.c++; showFb(fbId,'ok','✅ Alle Teilbarkeiten korrekt!'); tryShowDone(fbId); }
+  else { showFb(fbId,'er','❌ Noch Fehler. Grün = vergessen · Rot = falsch.'); document.getElementById(clId).style.display='inline-flex'; }
+}
+
+function clearTable(tblId, fbId, clId) {
+  document.getElementById(tblId).querySelectorAll('.cbc').forEach(function(c){
+    c.className='cbc'; c.textContent=''; c.onclick=function(){ cbTog(c); };
+  });
+  document.getElementById(tblId).querySelectorAll('tbody tr').forEach(function(r){
+    r.classList.remove('row-ok','row-er');
+  });
+  hideFb(fbId); document.getElementById(clId).style.display='none';
+}
+
+// ── SINGLE INPUT ─────────────────────────
+function chkSingle(inId,exp,fbId,clId,okMsg,erMsg) {
+  var inp=document.getElementById(inId);
+  scored.t++;
+  if(inp.value.trim()===exp) {
+    inp.className='inp ok'; inp.readOnly=true;
+    scored.c++; showFb(fbId,'ok',okMsg); tryShowDone(fbId);
+  } else {
+    inp.className='inp err'; showFb(fbId,'er',erMsg);
+    document.getElementById(clId).style.display='inline-flex';
+  }
+}
+function clrIn(inId,fbId,clId) {
+  var inp=document.getElementById(inId);
+  if(inp){inp.value='';inp.className='inp';inp.readOnly=false;}
+  hideFb(fbId); document.getElementById(clId).style.display='none';
+}
+
+// ── HELPERS ──────────────────────────────
+function showFb(id,type,msg){ var e=document.getElementById(id); if(e){e.textContent=msg; e.className='fb on '+type;} }
+function hideFb(id){ var e=document.getElementById(id); if(e) e.className='fb'; }
+function trexTip(){ var t=document.getElementById('trexT'); t.classList.add('on'); setTimeout(function(){t.classList.remove('on');},2000); }
+
+// ── INIT ─────────────────────────────────
+document.addEventListener('DOMContentLoaded', function() {
+  // Hide all cards
+  for(var i=1; i<=6; i++) {
+    var c=document.getElementById('card'+i);
+    if(c) c.style.display='none';
+  }
+  // Init level to Grundlagen
+  setLevel('g');
+  // Show card 1
+  goTab(1);
+});
+</script>
+</body>
+</html>
