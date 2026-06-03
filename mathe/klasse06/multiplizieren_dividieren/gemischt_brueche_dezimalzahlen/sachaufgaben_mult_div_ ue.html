@@ -738,7 +738,7 @@
 
       <div class="aufgabe" data-aid="3-g-2">
         <p class="anr">Aufgabe 2</p>
-        <p class="text">Schreibe 0,75 als gekürzten Bruch (Form Zähler/Nenner, z.B. 9/17).</p>
+        <p class="text">Schreibe 0,75 als gekürzten Bruch (Form Zähler/Nenner, z.B. 3/4).</p>
         <div class="eingabe-zeile">
           <input type="text" data-feld="3-g-2" placeholder="Bruch, z.B. a/b">
         </div>
@@ -777,7 +777,7 @@
 
       <div class="aufgabe" data-aid="3-f-2">
         <p class="anr">Aufgabe 2</p>
-        <p class="text">Schreibe 1,25 als gekürzten Bruch (z.B. 17/31).</p>
+        <p class="text">Schreibe 1,25 als gekürzten Bruch (z.B. 5/4).</p>
         <div class="eingabe-zeile">
           <input type="text" data-feld="3-f-2" placeholder="Bruch, z.B. a/b">
         </div>
@@ -924,48 +924,58 @@ function zeigeFeedback(aid, ok, korrektText){
   pruefeAllesFertig();
 }
 
-/* =================== PRÜFEN: ZAHL =================== */
-function pruefeZahl(aid, soll){
-  const inp=document.querySelector('[data-feld="'+aid+'"]');
-  const s=getS(aid);
-  s.value=inp.value;
-  const wert=parseFloat((inp.value||'').replace(',','.').trim());
-  const ok = !isNaN(wert) && Math.abs(wert-soll)<1e-9;
-  s.status=ok?'ok':'no';
-  zeigeFeedback(aid, ok, formatZahl(soll));
-}
-
-/* =================== PRÜFEN: DEZIMAL =================== */
-function pruefeDez(aid, soll){
-  const inp=document.querySelector('[data-feld="'+aid+'"]');
-  const s=getS(aid);
-  s.value=inp.value;
-  const wert=parseFloat((inp.value||'').replace(',','.').replace(/[^0-9.\-]/g,'').trim());
-  const ok = !isNaN(wert) && Math.abs(wert-soll)<0.005;
-  s.status=ok?'ok':'no';
-  zeigeFeedback(aid, ok, formatZahl(soll));
-}
-
-/* =================== PRÜFEN: BRUCH =================== */
-/* akzeptiert beliebige äquivalente Schreibweise z/n, ggf. ganze Zahl */
-function pruefeFrac(aid, zSoll, nSoll){
-  const inp=document.querySelector('[data-feld="'+aid+'"]');
-  const s=getS(aid);
-  s.value=inp.value;
-  let raw=(inp.value||'').replace(',','.').trim();
-  let ok=false;
-  if(raw.indexOf('/')>=0){
-    const t=raw.split('/');
+/* =================== ANTWORT PARSEN =================== */
+/* Entfernt Einheiten (m², m^2, m³, m^3, kg, l, €, EUR, Liter, Stück …)
+   und liefert einen Zahlenwert. Akzeptiert Bruch (a/b) UND Dezimalzahl. */
+function parseAntwort(raw){
+  if(raw===null||raw===undefined) return NaN;
+  let s=(''+raw).trim().replace(',', '.');
+  // Einheiten-Hochzahlen wie m^2, m^3, cm^2 entfernen (^ + Ziffer),
+  // damit die Exponent-Ziffer nicht als Teil der Zahl gelesen wird.
+  s=s.replace(/\^\s*\d+/g,'');
+  // Alles entfernen außer Ziffern, Punkt und Bruchstrich.
+  // Dadurch werden Einheiten (m², m^2, m³, m^3, kg, l, €, EUR, Stück …)
+  // automatisch ignoriert, ohne Nachkommastellen zu zerstören.
+  s=s.replace(/[^0-9.\/]/g,'');
+  // mehrfache Punkte/Striche säubern
+  if(s==='' || s==='/' || s==='.') return NaN;
+  if(s.indexOf('/')>=0){
+    const t=s.split('/');
     const z=parseFloat(t[0]), n=parseFloat(t[1]);
-    if(!isNaN(z)&&!isNaN(n)&&n!==0){
-      ok = Math.abs(z/n - zSoll/nSoll) < 1e-9;
-    }
-  }else{
-    const w=parseFloat(raw);
-    if(!isNaN(w)) ok = Math.abs(w - zSoll/nSoll) < 1e-9;
+    if(!isNaN(z)&&!isNaN(n)&&n!==0) return z/n;
+    return NaN;
   }
+  const w=parseFloat(s);
+  return isNaN(w)? NaN : w;
+}
+
+/* Gemeinsame Prüfung: Sollwert als Zahl; akzeptiert Bruch und Dezimal.
+   tol = erlaubte Abweichung (für endliche Werte klein, deckt Rundung ab). */
+function pruefeWert(aid, soll, korrektText){
+  const inp=document.querySelector('[data-feld="'+aid+'"]');
+  const s=getS(aid);
+  s.value=inp.value;
+  const wert=parseAntwort(inp.value);
+  const ok = !isNaN(wert) && Math.abs(wert-soll) < 0.0005;
   s.status=ok?'ok':'no';
-  zeigeFeedback(aid, ok, zSoll+'/'+nSoll);
+  zeigeFeedback(aid, ok, korrektText);
+}
+
+/* =================== PRÜFEN: ganze Zahl / Anzahl =================== */
+function pruefeZahl(aid, soll){
+  pruefeWert(aid, soll, formatZahl(soll));
+}
+
+/* =================== PRÜFEN: Dezimalwert =================== */
+/* akzeptiert Dezimalzahl ODER äquivalenten Bruch (z.B. 1/8 für 0,125) */
+function pruefeDez(aid, soll){
+  pruefeWert(aid, soll, formatZahl(soll));
+}
+
+/* =================== PRÜFEN: Bruchwert =================== */
+/* akzeptiert Bruch (jede äquivalente Form) ODER passende Dezimalzahl */
+function pruefeFrac(aid, zSoll, nSoll){
+  pruefeWert(aid, zSoll/nSoll, zSoll+'/'+nSoll+' (= '+formatZahl(Math.round(zSoll/nSoll*1000)/1000)+')');
 }
 
 /* =================== PRÜFEN: MC =================== */
