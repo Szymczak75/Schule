@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sachaufgaben systematisch lösen – Lernseite</title>
+<meta name="description" content="Lernseite für Klasse 5: Schritt für Schritt lernen, wie man Sachaufgaben systematisch und eigenständig löst.">
+<meta name="keywords" content="Sachaufgaben, Textaufgaben, systematisch lösen, vier Schritte, Antwortsatz, genau lesen, Klasse 5, Rechenplan">
+<meta name="typ" content="Lernseite">
+<meta name="klasse" content="5">
+<meta name="fach" content="mathe">
+<meta name="oberthema" content="Rechnen">
+<meta name="thema" content="Sachaufgaben systematisch lösen">
+<script>
+  MathJax = {
+    tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+    svg: { fontCache: 'global' }
+  };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+  :root{
+    --kopf:#E8902E;          /* Orange, nicht knallig */
+    --kopf-dunkel:#C9761A;
+    --bg:#FFF9F2;
+    --karte:#FFFFFF;
+    --rand:#E4D8C8;
+    --text:#2A2A2A;
+    --blau:#1B6FB3;
+    --gruen:#1E8E3E;
+    --gruen-bg:#1E8E3E;
+    --rot:#D32020;
+    --tipp:#FFF3E0;
+    --tipp-rand:#E8902E;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0; padding:0;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    font-size:17px;
+    line-height:1.5;
+    padding-bottom:120px;
+  }
+  header{
+    background:var(--kopf);
+    color:#fff;
+    padding:18px 20px;
+    box-shadow:0 2px 8px rgba(0,0,0,.15);
+  }
+  header h1{margin:0; font-size:1.45rem;}
+  header .sub{margin-top:4px; font-size:.95rem; opacity:.95;}
+  .wrap{max-width:1000px; margin:0 auto; padding:16px;}
+
+  /* Registerkarten */
+  .tabs{
+    display:flex; flex-wrap:wrap; gap:8px;
+    margin:16px 0;
+  }
+  .tab{
+    flex:1 1 auto; min-width:120px; min-height:48px;
+    border:2px solid var(--rand); background:#fff; color:var(--text);
+    border-radius:12px; font-size:1rem; font-weight:600;
+    padding:10px 12px; cursor:pointer;
+    transition:background .12s, border-color .12s, transform .05s;
+  }
+  .tab.aktiv{background:var(--kopf); color:#fff; border-color:var(--kopf-dunkel);}
+  .tab:active{transform:scale(.97);}
+  .tab .done{color:var(--gruen); font-weight:800;}
+  .tab.aktiv .done{color:#fff;}
+
+  .karte{
+    display:none;
+    background:var(--karte); border:1px solid var(--rand);
+    border-radius:16px; padding:20px; margin-bottom:18px;
+    box-shadow:0 1px 4px rgba(0,0,0,.05);
+  }
+  .karte.aktiv{display:block;}
+  .karte h2{margin-top:0; color:var(--kopf-dunkel); font-size:1.3rem;}
+  .karte h3{color:var(--blau); font-size:1.1rem; margin-bottom:6px;}
+
+  .schritt-nr{
+    display:inline-flex; align-items:center; justify-content:center;
+    width:34px; height:34px; border-radius:50%;
+    background:var(--kopf); color:#fff; font-weight:800; font-size:1.1rem;
+    margin-right:8px; flex-shrink:0;
+  }
+  .schritt-kopf{display:flex; align-items:center; margin-bottom:8px;}
+  .schritt-kopf h3{margin:0;}
+
+  .box{
+    background:#FFF3E0; border-left:5px solid var(--kopf);
+    border-radius:8px; padding:12px 14px; margin:12px 0;
+  }
+  .box.blau{background:#E8F1FA; border-left-color:var(--blau);}
+  .markiert{background:#FFE08A; padding:0 3px; border-radius:3px; font-weight:600;}
+  .such{background:#BFE3FF; padding:0 3px; border-radius:3px; font-weight:600;}
+
+  /* Buttons */
+  button{font-family:inherit;}
+  .btn{
+    min-height:48px; min-width:48px;
+    border:none; border-radius:12px; cursor:pointer;
+    font-size:1rem; font-weight:700; padding:12px 18px;
+    transition:transform .05s, filter .12s;
+  }
+  .btn:active{transform:scale(.97);}
+  .btn-pruef{background:var(--blau); color:#fff;}
+  .btn-leer{background:#fff; color:var(--rot); border:2px solid var(--rot); margin-left:8px;}
+  .btn-tipp{background:#fff; color:var(--kopf-dunkel); border:2px solid var(--kopf); margin-top:8px;}
+  .btn-aufdeck{background:var(--kopf); color:#fff; margin-top:8px;}
+
+  input[type=text],input[type=number]{
+    font-size:1.05rem; padding:10px 12px; min-height:46px;
+    border:2px solid var(--rand); border-radius:10px; width:100%;
+    max-width:340px; background:#fff;
+  }
+  input:focus{outline:none; border-color:var(--blau);}
+
+  .feedback{margin-top:10px; padding:12px 14px; border-radius:10px; font-weight:700; display:none;}
+  .feedback.richtig{display:block; background:var(--gruen-bg); color:#fff;}
+  .feedback.falsch{display:block; background:var(--rot); color:#fff;}
+  .feedback .loesung{font-weight:600; margin-top:6px; font-size:.97rem;}
+
+  /* MC */
+  .mc-opt{
+    display:block; width:100%; text-align:left;
+    border:2px solid var(--rand); background:#fff;
+    border-radius:12px; padding:14px; margin:8px 0; font-size:1rem; cursor:pointer;
+    min-height:48px;
+  }
+  .mc-opt:active{transform:scale(.99);}
+  .mc-opt.gewaehlt{border-color:var(--blau); background:#E8F1FA;}
+  .mc-opt.richtig{border-color:var(--gruen); background:var(--gruen-bg); color:#fff;}
+  .mc-opt.falsch{border-color:var(--rot); background:var(--rot); color:#fff;}
+  .mc-opt.loesung-mark{border-color:var(--gruen); background:#E6F4EA;}
+
+  /* Sortieren */
+  .sort-pool, .sort-ziel{margin:10px 0;}
+  .sort-item{
+    border:2px solid var(--rand); background:#fff;
+    border-radius:10px; padding:12px; margin:6px 0; cursor:pointer; min-height:48px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .sort-item.gewaehlt{border-color:var(--kopf); background:#FFF3E0;}
+  .sort-ziel{border:2px dashed var(--blau); border-radius:12px; padding:8px; min-height:60px; background:#F4F9FE;}
+  .sort-ziel .platz-nr{background:var(--blau); color:#fff; border-radius:6px; padding:2px 8px; font-weight:800; margin-right:6px;}
+
+  /* Flip-Cards */
+  .flip-row{display:flex; flex-wrap:wrap; gap:12px;}
+  .flip{
+    flex:1 1 200px; min-height:120px; perspective:800px; cursor:pointer;
+  }
+  .flip-inner{position:relative; width:100%; height:120px; transition:transform .5s; transform-style:preserve-3d;}
+  .flip.gedreht .flip-inner{transform:rotateY(180deg);}
+  .flip-face{
+    position:absolute; width:100%; height:100%; -webkit-backface-visibility:hidden; backface-visibility:hidden;
+    border-radius:14px; padding:14px; display:flex; align-items:center; justify-content:center; text-align:center;
+    font-weight:600;
+  }
+  .flip-front{background:#E8F1FA; border:2px solid var(--blau); color:var(--blau);}
+  .flip-back{background:var(--kopf); color:#fff; transform:rotateY(180deg);}
+
+  /* Bruch */
+  .frac{display:inline-flex; flex-direction:column; vertical-align:middle; text-align:center; margin:0 2px;}
+  .frac>span{display:block; padding:0 4px;}
+  .frac>span:first-child{border-bottom:2px solid currentColor;}
+
+  /* Tooltip */
+  .fb{border-bottom:2px dotted var(--blau); color:var(--blau); cursor:pointer; position:relative;}
+  .fb .tip{
+    display:none; position:absolute; left:0; bottom:130%;
+    background:#222; color:#fff; padding:8px 10px; border-radius:8px;
+    font-size:.85rem; width:220px; z-index:10; font-weight:400;
+  }
+  .fb.offen .tip{display:block;}
+
+  details{margin:8px 0; border:1px solid var(--rand); border-radius:10px; padding:4px 10px; background:#FFFBF5;}
+  summary{cursor:pointer; font-weight:700; color:var(--kopf-dunkel); min-height:40px; display:flex; align-items:center;}
+
+  /* Weiter-Button */
+  #weiterWrap{position:fixed; left:0; right:0; bottom:0; padding:12px 16px;
+    background:linear-gradient(transparent, var(--bg) 30%); display:none; text-align:center;}
+  #weiterWrap.zeig{display:block;}
+  #weiterBtn{width:100%; max-width:600px; background:var(--gruen-bg); color:#fff; font-size:1.15rem;}
+
+  .hint-klein{font-size:.9rem; color:#666;}
+  ul{margin:8px 0;}
+  li{margin:5px 0;}
+
+  /* T-Rex */
+  #trex{position:fixed; right:14px; bottom:80px; font-size:1.8rem; cursor:pointer; z-index:50; user-select:none;}
+  #trexTip{position:fixed; right:14px; bottom:120px; background:#222; color:#fff; padding:6px 10px;
+    border-radius:8px; font-size:.85rem; display:none; z-index:50;}
+</style>
+</head>
+<body>
+<header>
+  <h1>🧩 Sachaufgaben systematisch lösen</h1>
+  <div class="sub">Mathematik · Klasse 5 · Lernseite (Erarbeitung)</div>
+</header>
+
+<div class="wrap">
+  <div class="tabs" id="tabs">
+    <button class="tab aktiv" data-k="0">① Warum so schwer?</button>
+    <button class="tab" data-k="1">② Die 4 Schritte</button>
+    <button class="tab" data-k="2">③ Genau lesen</button>
+    <button class="tab" data-k="3">④ Beispiel mit</button>
+    <button class="tab" data-k="4">⑤ Schritte ordnen</button>
+    <button class="tab" data-k="5">⑥ Übung</button>
+  </div>
+
+  <!-- KARTE 0 -->
+  <section class="karte aktiv" data-k="0">
+    <h2>Warum sind Sachaufgaben oft so knifflig?</h2>
+    <p>Bei einer Sachaufgabe steht die Mathematik nicht direkt da – sie versteckt sich in einem Text. Du musst selbst herausfinden, <b>was gesucht ist</b> und <b>welche Zahlen du brauchst</b>.</p>
+    <div class="box">
+      <b>Das Geheimnis:</b> Nicht sofort losrechnen! Wer zuerst <span class="markiert">genau liest</span> und einen <span class="markiert">Plan</span> macht, rechnet am Ende schneller und richtiger.
+    </div>
+    <h3>Tippe die Karten an – was passt zusammen?</h3>
+    <p class="hint-klein">Antippen dreht die Karte um.</p>
+    <div class="flip-row" id="flipRow"></div>
+    <p style="margin-top:14px">Hast du dir alle Karten angeschaut? Dann weiter zu den <b>4 Schritten</b> über die Registerkarte oben. ✅</p>
+  </section>
+
+  <!-- KARTE 1 -->
+  <section class="karte" data-k="1">
+    <h2>Die 4 Schritte beim Lösen</h2>
+    <p>Profis lösen jede Sachaufgabe in vier Schritten. Tippe jeden Schritt an, um ihn aufzudecken.</p>
+    <div id="schritteBox"></div>
+    <div class="box blau" style="margin-top:14px">
+      Merksatz: <b>Erst verstehen, dann zerlegen, dann rechnen, dann prüfen.</b>
+    </div>
+    <p class="hint-klein">Decke alle vier Schritte auf, um weiterzukommen.</p>
+  </section>
+
+  <!-- KARTE 2 -->
+  <section class="karte" data-k="2">
+    <h2>Schritt 1 üben: Genau lesen &amp; markieren</h2>
+    <p>Beim Lesen markierst du zwei Dinge: <span class="markiert">wichtige Zahlen/Angaben</span> (gelb) und <span class="such">die Frage – was ist gesucht?</span> (blau).</p>
+    <div class="box">
+      <p style="margin:.2em 0">In einer Schulbücherei stehen <span class="markiert">4 Regale</span>. In jedem Regal sind <span class="markiert">6 Fächer</span>, in jedem Fach stehen <span class="markiert">25 Bücher</span>. <span class="such">Wie viele Bücher hat die Bücherei insgesamt?</span></p>
+    </div>
+    <p>In manchen Aufgaben stehen auch Angaben, die man <b>gar nicht braucht</b>. Solche „Fallen" muss man erkennen.</p>
+
+    <h3>Aufgabe: Welche Angabe wird für die Frage <u>nicht</u> gebraucht?</h3>
+    <div class="box">
+      Ein Kino hat 12 Reihen mit je 20 Plätzen. Eine Eintrittskarte kostet 8 €. Das Kino ist 15 Jahre alt.
+      <b>Frage: Wie viele Plätze hat das Kino insgesamt?</b>
+    </div>
+    <div id="mcLesen"></div>
+    <div class="feedback" id="fbLesen"></div>
+    <div>
+      <button class="btn btn-pruef" onclick="pruefLesen()">Prüfen</button>
+      <button class="btn btn-leer" id="leerLesen" style="display:none" onclick="leerLesen()">Leeren</button>
+    </div>
+  </section>
+
+  <!-- KARTE 3 -->
+  <section class="karte" data-k="3">
+    <h2>Beispiel: Schritt für Schritt mitdenken</h2>
+    <p>Wir lösen diese Aufgabe gemeinsam – aber <b>du</b> denkst bei jedem Schritt mit. Decke immer erst auf, wenn du selbst überlegt hast.</p>
+    <div class="box">
+      In der Klasse 5b sind <b>25 Kinder</b>. Für einen Ausflug ins Schwimmbad kostet der Eintritt pro Kind <b>5 €</b>. Die Klassenkasse zahlt <b>50 €</b> dazu. Den Rest teilen sich die Kinder gleichmäßig.
+      <b>Wie viel muss jedes Kind bezahlen?</b>
+    </div>
+
+    <div class="schritt-kopf"><span class="schritt-nr">1</span><h3>Verstehen – was ist gesucht?</h3></div>
+    <p>Überlege zuerst selbst. Was sollen wir am Ende herausfinden?</p>
+    <details><summary>Lösung von Schritt 1 aufdecken</summary>
+      <p>Gesucht ist der <b>Betrag pro Kind</b>. Gegeben sind: 25 Kinder, 5 € Eintritt je Kind, 50 € aus der Kasse.</p>
+    </details>
+
+    <div class="schritt-kopf" style="margin-top:14px"><span class="schritt-nr">2</span><h3>Zerlegen – einen Plan machen</h3></div>
+    <p>In welchen Teilschritten kommst du ans Ziel? (Tipp: zuerst die Gesamtkosten, dann …)</p>
+    <details><summary>Plan aufdecken</summary>
+      <ul>
+        <li>Gesamtkosten ausrechnen.</li>
+        <li>Die 50 € aus der Kasse abziehen.</li>
+        <li>Den Rest durch die Anzahl der Kinder teilen.</li>
+      </ul>
+      <p class="hint-klein">Das ist nur der Weg – die Zahlen rechnest du gleich selbst aus.</p>
+    </details>
+
+    <div class="schritt-kopf" style="margin-top:14px"><span class="schritt-nr">3</span><h3>Rechnen – jetzt bist du dran</h3></div>
+    <p>Rechne den <b>Betrag pro Kind</b> aus und trage ihn ein (nur die Zahl in Euro).</p>
+    <input type="number" id="bspEingabe" inputmode="numeric" placeholder="… €">
+    <div class="feedback" id="fbBsp"></div>
+    <div style="margin-top:8px">
+      <button class="btn btn-pruef" onclick="pruefBsp()">Prüfen</button>
+      <button class="btn btn-leer" id="leerBsp" style="display:none" onclick="leerBsp()">Leeren</button>
+    </div>
+    <div id="tippBsp" style="display:none; margin-top:10px">
+      <details><summary>Tipp 1</summary><p>Wie viel kosten <b>alle</b> Eintritte zusammen? Rechne $25 \cdot 5$.</p></details>
+      <details><summary>Tipp 2</summary><p>Ziehe jetzt die 50 € der Klassenkasse von den Gesamtkosten ab. Den Rest teilst du dann durch die Anzahl der Kinder.</p></details>
+      <details><summary>Tipp 3 – Lösungsweg</summary><p>$25 \cdot 5 = 125$ €. Dann $125 - 50 = 75$ €. Zum Schluss $75 : 25 = 3$. Jedes Kind zahlt also 3 €.</p></details>
+    </div>
+
+    <div class="schritt-kopf" style="margin-top:14px"><span class="schritt-nr">4</span><h3>Rückschau – Antwortsatz</h3></div>
+    <p>Zum Schluss prüfst du, ob das Ergebnis sinnvoll ist, und schreibst einen Antwortsatz.</p>
+    <details><summary>Beispiel-Antwortsatz aufdecken</summary>
+      <p>„Jedes Kind muss etwa … € bezahlen." – Der Antwortsatz sagt klar, was herauskam. Ist die Zahl realistisch? Ein kleiner Betrag pro Kind klingt passend.</p>
+    </details>
+  </section>
+
+  <!-- KARTE 4 -->
+  <section class="karte" data-k="4">
+    <h2>Bring die 4 Schritte in die richtige Reihenfolge</h2>
+    <p>Tippe links einen Schritt an und dann den nächsten freien Platz rechts. Erneut antippen holt ihn zurück.</p>
+    <div style="display:flex; flex-wrap:wrap; gap:16px">
+      <div style="flex:1 1 280px">
+        <h3>Schritte</h3>
+        <div class="sort-pool" id="sortPool"></div>
+      </div>
+      <div style="flex:1 1 280px">
+        <h3>Richtige Reihenfolge</h3>
+        <div id="sortZiele"></div>
+      </div>
+    </div>
+    <div class="feedback" id="fbSort"></div>
+    <div style="margin-top:10px">
+      <button class="btn btn-pruef" onclick="pruefSort()">Prüfen</button>
+      <button class="btn btn-leer" id="leerSort" style="display:none" onclick="leerSort()">Leeren</button>
+    </div>
+  </section>
+
+  <!-- KARTE 5 -->
+  <section class="karte" data-k="5">
+    <h2>Übung: Eine Sachaufgabe selbst lösen</h2>
+    <p>Jetzt wendest du alles an. Lies genau, mach einen Plan, rechne – und prüfe.</p>
+    <div class="box">
+      Frau Berg kauft für ihre Klasse <b>6 Päckchen Buntstifte</b>. In jedem Päckchen sind <b>12 Stifte</b>. Sie verteilt die Stifte gleichmäßig an <b>9 Gruppen</b>.
+      <b>Wie viele Stifte bekommt jede Gruppe?</b>
+    </div>
+
+    <h3>a) Was ist gesucht?</h3>
+    <div id="mcUe"></div>
+    <div class="feedback" id="fbUeA"></div>
+    <div>
+      <button class="btn btn-pruef" onclick="pruefUeA()">Prüfen</button>
+      <button class="btn btn-leer" id="leerUeA" style="display:none" onclick="leerUeA()">Leeren</button>
+    </div>
+
+    <h3 style="margin-top:18px">b) Wie viele Stifte bekommt jede Gruppe?</h3>
+    <input type="number" id="ueEingabe" inputmode="numeric" placeholder="Anzahl Stifte">
+    <div class="feedback" id="fbUeB"></div>
+    <div style="margin-top:8px">
+      <button class="btn btn-pruef" onclick="pruefUeB()">Prüfen</button>
+      <button class="btn btn-leer" id="leerUeB" style="display:none" onclick="leerUeB()">Leeren</button>
+    </div>
+    <div id="tippUe" style="display:none; margin-top:10px">
+      <details><summary>Tipp 1</summary><p>Wie viele Stifte sind es <b>insgesamt</b>? Denke an „6 Päckchen mit je 12 Stiften".</p></details>
+      <details><summary>Tipp 2</summary><p>Teile die Gesamtzahl gleichmäßig auf die 9 Gruppen auf.</p></details>
+      <details><summary>Tipp 3 – Lösungsweg</summary><p>Zuerst $6 \cdot 12$ rechnen, dann das Ergebnis $: 9$ teilen.</p></details>
+    </div>
+  </section>
+</div>
+
+<div id="weiterWrap">
+  <button class="btn" id="weiterBtn" onclick="window.location.href='#'">Weiter zur nächsten Seite →</button>
+</div>
+
+<div id="trexTip">Made by Mathedino</div>
+<div id="trex">🦖</div>
+
+<script>
+// ============ Zustand (nur im JS-Speicher) ============
+const S = {
+  flipsGedreht:new Set(),
+  schritteAuf:new Set(),
+  lesenWahl:null, lesenGeprueft:false, lesenRichtig:false,
+  bspGeprueft:false, bspRichtig:false,
+  sortPlatz:[null,null,null,null], sortGewaehlt:null, sortGeprueft:false, sortRichtig:false,
+  ueAWahl:null, ueAGeprueft:false, ueARichtig:false,
+  ueBGeprueft:false, ueBRichtig:false
+};
+
+// ============ Tabs ============
+const tabs=[...document.querySelectorAll('.tab')];
+const karten=[...document.querySelectorAll('.karte')];
+tabs.forEach(t=>t.addEventListener('click',()=>{
+  const k=t.dataset.k;
+  tabs.forEach(x=>x.classList.remove('aktiv'));
+  karten.forEach(x=>x.classList.remove('aktiv'));
+  t.classList.add('aktiv');
+  document.querySelector('.karte[data-k="'+k+'"]').classList.add('aktiv');
+  if(window.MathJax&&MathJax.typesetPromise)MathJax.typesetPromise();
+}));
+
+// ============ KARTE 0: Flip-Cards ============
+const flips=[
+  {f:'Was muss man ZUERST tun?', b:'Genau lesen!'},
+  {f:'Worauf achtet man beim Lesen?', b:'Was ist gesucht?'},
+  {f:'Was hilft beim Verstehen?', b:'Wichtiges markieren'},
+  {f:'Was kommt ganz zum Schluss?', b:'Antwortsatz + Prüfen'}
+];
+const flipRow=document.getElementById('flipRow');
+flips.forEach((c,i)=>{
+  const d=document.createElement('div');
+  d.className='flip'; d.dataset.i=i;
+  d.innerHTML='<div class="flip-inner"><div class="flip-face flip-front">'+c.f+'</div><div class="flip-face flip-back">'+c.b+'</div></div>';
+  d.addEventListener('click',()=>{
+    d.classList.toggle('gedreht');
+    if(d.classList.contains('gedreht'))S.flipsGedreht.add(i); else S.flipsGedreht.delete(i);
+    pruefWeiter();
+  });
+  flipRow.appendChild(d);
+});
+
+// ============ KARTE 1: Schritte aufdecken ============
+const schritte=[
+  {n:1,t:'Verstehen',d:'Aufgabe genau lesen. Fragen: Was ist gesucht? Welche Angaben sind wichtig?'},
+  {n:2,t:'Zerlegen',d:'Den Rechenweg in kleine Teilschritte planen. Was rechne ich zuerst, was danach?'},
+  {n:3,t:'Rechnen',d:'Die Teilschritte ausrechnen und Zwischenergebnisse aufschreiben.'},
+  {n:4,t:'Rückschau',d:'Ergebnis prüfen: Ist es sinnvoll? Dann einen Antwortsatz schreiben.'}
+];
+const schritteBox=document.getElementById('schritteBox');
+schritte.forEach(s=>{
+  const div=document.createElement('div');
+  div.className='box'; div.style.cursor='pointer';
+  div.innerHTML='<div class="schritt-kopf"><span class="schritt-nr">'+s.n+'</span><h3>'+s.t+'</h3></div><div class="s-text" style="display:none">'+s.d+'</div><div class="s-hint hint-klein">Tippen zum Aufdecken</div>';
+  div.addEventListener('click',()=>{
+    div.querySelector('.s-text').style.display='block';
+    div.querySelector('.s-hint').style.display='none';
+    S.schritteAuf.add(s.n);
+    pruefWeiter();
+  });
+  schritteBox.appendChild(div);
+});
+
+// ============ KARTE 2: MC genau lesen ============
+const lesenOpt=['Die Zahl der Reihen (12)','Die Plätze pro Reihe (20)','Das Alter des Kinos (15 Jahre)','Reihen und Plätze zusammen'];
+const lesenRichtigIdx=2;
+const mcLesen=document.getElementById('mcLesen');
+lesenOpt.forEach((o,i)=>{
+  const b=document.createElement('button');
+  b.className='mc-opt'; b.textContent=o; b.dataset.i=i;
+  b.addEventListener('click',()=>{
+    if(S.lesenGeprueft)return;
+    S.lesenWahl=i;
+    [...mcLesen.children].forEach(c=>c.classList.remove('gewaehlt'));
+    b.classList.add('gewaehlt');
+  });
+  mcLesen.appendChild(b);
+});
+function pruefLesen(){
+  if(S.lesenWahl===null){alert('Bitte zuerst eine Antwort antippen.');return;}
+  S.lesenGeprueft=true;
+  S.lesenRichtig=(S.lesenWahl===lesenRichtigIdx);
+  const fb=document.getElementById('fbLesen');
+  [...mcLesen.children].forEach((c,i)=>{
+    if(i===lesenRichtigIdx)c.classList.add('richtig');
+    else if(i===S.lesenWahl)c.classList.add('falsch');
+  });
+  if(S.lesenRichtig){fb.className='feedback richtig'; fb.innerHTML='✅ Richtig! Das Alter des Kinos hat nichts mit der Anzahl der Plätze zu tun.';}
+  else{fb.className='feedback falsch'; fb.innerHTML='❌ Nicht ganz.<div class="loesung">Richtig ist: Das Alter des Kinos (15 Jahre) wird für die Frage nicht gebraucht.</div>';
+    document.getElementById('leerLesen').style.display='inline-block';}
+  pruefWeiter();
+}
+function leerLesen(){
+  S.lesenWahl=null; S.lesenGeprueft=false; S.lesenRichtig=false;
+  [...mcLesen.children].forEach(c=>c.classList.remove('gewaehlt','richtig','falsch'));
+  document.getElementById('fbLesen').className='feedback';
+  document.getElementById('leerLesen').style.display='none';
+  pruefWeiter();
+}
+
+// ============ KARTE 3: Beispiel-Eingabe ============
+// 28*4=112; 112-50=62; 62:28 ist nicht glatt -> wir nutzen runde Werte: korrektur unten
+function pruefBsp(){
+  const v=document.getElementById('bspEingabe').value.trim().replace(',','.');
+  if(v===''){alert('Bitte einen Betrag eintragen.');return;}
+  S.bspGeprueft=true;
+  const zahl=parseFloat(v);
+  // Lösung: 25*5=125, -50=75, :25 = 3
+  const richtig=(Math.abs(zahl-3)<0.001);
+  S.bspRichtig=richtig;
+  const fb=document.getElementById('fbBsp');
+  if(richtig){fb.className='feedback richtig'; fb.innerHTML='✅ Sehr gut! $125-50=75$, dann $75:25 = 3$ € pro Kind.';}
+  else{fb.className='feedback falsch'; fb.innerHTML='❌ Das passt noch nicht.<div class="loesung">Schau dir die gestuften Tipps unten an und rechne nochmal.</div>';
+    document.getElementById('leerBsp').style.display='inline-block';
+    document.getElementById('tippBsp').style.display='block';}
+  if(window.MathJax&&MathJax.typesetPromise)MathJax.typesetPromise([fb]);
+  pruefWeiter();
+}
+function leerBsp(){
+  document.getElementById('bspEingabe').value='';
+  S.bspGeprueft=false; S.bspRichtig=false;
+  document.getElementById('fbBsp').className='feedback';
+  document.getElementById('leerBsp').style.display='none';
+  document.getElementById('tippBsp').style.display='none';
+  pruefWeiter();
+}
+
+// ============ KARTE 4: Sortieren ============
+const sortText=['Verstehen – genau lesen','Zerlegen – Plan machen','Rechnen','Rückschau – Antwortsatz'];
+// Startreihenfolge bewusst durcheinander
+const sortStart=[2,0,3,1];
+const sortPool=document.getElementById('sortPool');
+const sortZiele=document.getElementById('sortZiele');
+function baueSort(){
+  sortPool.innerHTML=''; sortZiele.innerHTML='';
+  // Pool: alle, die nicht platziert sind
+  sortStart.forEach(idx=>{
+    if(S.sortPlatz.includes(idx))return;
+    const it=document.createElement('div');
+    it.className='sort-item'+(S.sortGewaehlt===idx?' gewaehlt':'');
+    it.textContent=sortText[idx]; it.dataset.idx=idx;
+    it.addEventListener('click',()=>{
+      if(S.sortGeprueft)return;
+      S.sortGewaehlt=(S.sortGewaehlt===idx)?null:idx;
+      baueSort();
+    });
+    sortPool.appendChild(it);
+  });
+  // Ziele
+  for(let p=0;p<4;p++){
+    const z=document.createElement('div');
+    z.className='sort-ziel';
+    const inhalt=S.sortPlatz[p];
+    if(inhalt!==null){
+      z.innerHTML='<span class="platz-nr">'+(p+1)+'</span>'+sortText[inhalt];
+      z.style.cursor='pointer';
+      z.addEventListener('click',()=>{
+        if(S.sortGeprueft)return;
+        S.sortPlatz[p]=null; // zurück in Pool
+        baueSort();
+      });
+    } else {
+      z.innerHTML='<span class="platz-nr">'+(p+1)+'</span><span class="hint-klein">hier einsetzen</span>';
+      z.addEventListener('click',()=>{
+        if(S.sortGeprueft)return;
+        if(S.sortGewaehlt!==null){
+          S.sortPlatz[p]=S.sortGewaehlt; S.sortGewaehlt=null; baueSort();
+        }
+      });
+    }
+    sortZiele.appendChild(z);
+  }
+}
+baueSort();
+function pruefSort(){
+  if(S.sortPlatz.includes(null)){alert('Bitte alle vier Plätze füllen.');return;}
+  S.sortGeprueft=true;
+  S.sortRichtig=(S.sortPlatz[0]===0&&S.sortPlatz[1]===1&&S.sortPlatz[2]===2&&S.sortPlatz[3]===3);
+  const fb=document.getElementById('fbSort');
+  if(S.sortRichtig){fb.className='feedback richtig'; fb.innerHTML='✅ Perfekt! Genau diese Reihenfolge brauchst du.';}
+  else{fb.className='feedback falsch'; fb.innerHTML='❌ Noch nicht richtig.<div class="loesung">Richtig: 1. Verstehen → 2. Zerlegen → 3. Rechnen → 4. Rückschau.</div>';
+    document.getElementById('leerSort').style.display='inline-block';}
+  pruefWeiter();
+}
+function leerSort(){
+  S.sortPlatz=[null,null,null,null]; S.sortGewaehlt=null; S.sortGeprueft=false; S.sortRichtig=false;
+  document.getElementById('fbSort').className='feedback';
+  document.getElementById('leerSort').style.display='none';
+  baueSort();
+  pruefWeiter();
+}
+
+// ============ KARTE 5: Übung ============
+const ueOpt=['Wie viele Päckchen gekauft wurden','Wie viele Stifte jede Gruppe bekommt','Wie viel die Stifte kosten','Wie viele Gruppen es gibt'];
+const ueRichtigIdx=1;
+const mcUe=document.getElementById('mcUe');
+ueOpt.forEach((o,i)=>{
+  const b=document.createElement('button');
+  b.className='mc-opt'; b.textContent=o; b.dataset.i=i;
+  b.addEventListener('click',()=>{
+    if(S.ueAGeprueft)return;
+    S.ueAWahl=i;
+    [...mcUe.children].forEach(c=>c.classList.remove('gewaehlt'));
+    b.classList.add('gewaehlt');
+  });
+  mcUe.appendChild(b);
+});
+function pruefUeA(){
+  if(S.ueAWahl===null){alert('Bitte zuerst eine Antwort antippen.');return;}
+  S.ueAGeprueft=true; S.ueARichtig=(S.ueAWahl===ueRichtigIdx);
+  const fb=document.getElementById('fbUeA');
+  [...mcUe.children].forEach((c,i)=>{
+    if(i===ueRichtigIdx)c.classList.add('richtig');
+    else if(i===S.ueAWahl)c.classList.add('falsch');
+  });
+  if(S.ueARichtig){fb.className='feedback richtig'; fb.innerHTML='✅ Richtig! Gesucht ist die Stiftezahl pro Gruppe.';}
+  else{fb.className='feedback falsch'; fb.innerHTML='❌ Lies die Frage nochmal.<div class="loesung">Gesucht ist, wie viele Stifte jede Gruppe bekommt.</div>';
+    document.getElementById('leerUeA').style.display='inline-block';}
+  pruefWeiter();
+}
+function leerUeA(){
+  S.ueAWahl=null; S.ueAGeprueft=false; S.ueARichtig=false;
+  [...mcUe.children].forEach(c=>c.classList.remove('gewaehlt','richtig','falsch'));
+  document.getElementById('fbUeA').className='feedback';
+  document.getElementById('leerUeA').style.display='none';
+  pruefWeiter();
+}
+function pruefUeB(){
+  const v=document.getElementById('ueEingabe').value.trim();
+  if(v===''){alert('Bitte eine Anzahl eintragen.');return;}
+  S.ueBGeprueft=true;
+  S.ueBRichtig=(parseInt(v,10)===8); // 6*12=72; 72:9=8
+  const fb=document.getElementById('fbUeB');
+  if(S.ueBRichtig){fb.className='feedback richtig'; fb.innerHTML='✅ Genau! $6 \\cdot 12 = 72$, dann $72 : 9 = 8$ Stifte pro Gruppe.';}
+  else{fb.className='feedback falsch'; fb.innerHTML='❌ Das stimmt noch nicht.<div class="loesung">Nutze die gestuften Tipps unten.</div>';
+    document.getElementById('leerUeB').style.display='inline-block';
+    document.getElementById('tippUe').style.display='block';}
+  if(window.MathJax&&MathJax.typesetPromise)MathJax.typesetPromise([fb]);
+  pruefWeiter();
+}
+function leerUeB(){
+  document.getElementById('ueEingabe').value='';
+  S.ueBGeprueft=false; S.ueBRichtig=false;
+  document.getElementById('fbUeB').className='feedback';
+  document.getElementById('leerUeB').style.display='none';
+  document.getElementById('tippUe').style.display='none';
+  pruefWeiter();
+}
+
+// ============ Weiter-Button ============
+function pruefWeiter(){
+  // Tab-Häkchen aktualisieren
+  setHaken(0, S.flipsGedreht.size>=4);
+  setHaken(1, S.schritteAuf.size>=4);
+  setHaken(2, S.lesenRichtig);
+  setHaken(3, S.bspRichtig);
+  setHaken(4, S.sortRichtig);
+  setHaken(5, S.ueARichtig&&S.ueBRichtig);
+
+  const fertig = S.flipsGedreht.size>=4 && S.schritteAuf.size>=4 &&
+    S.lesenRichtig && S.bspRichtig && S.sortRichtig && S.ueARichtig && S.ueBRichtig;
+  document.getElementById('weiterWrap').classList.toggle('zeig', fertig);
+}
+function setHaken(k, ok){
+  const t=document.querySelector('.tab[data-k="'+k+'"]');
+  let h=t.querySelector('.done');
+  if(ok && !h){const s=document.createElement('span'); s.className='done'; s.textContent=' ✓'; t.appendChild(s);}
+  if(!ok && h)h.remove();
+}
+
+// ============ T-Rex ============
+const trex=document.getElementById('trex'), trexTip=document.getElementById('trexTip');
+function zeigTrex(){trexTip.style.display='block'; setTimeout(()=>trexTip.style.display='none',2000);}
+trex.addEventListener('click',zeigTrex);
+trex.addEventListener('mouseover',()=>trexTip.style.display='block');
+trex.addEventListener('mouseout',()=>trexTip.style.display='none');
+
+pruefWeiter();
+</script>
+</body>
+</html>
