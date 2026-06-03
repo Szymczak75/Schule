@@ -337,15 +337,49 @@ function normalizeMul(s){
 function normNum(s){
   return (s||'').toString().trim().replace(/\s/g,'').replace(',', '.');
 }
-function numEq(a, b){
-  const x = parseFloat(normNum(a));
-  if(isNaN(x)) return false;
-  return Math.abs(x - b) < 1e-9;
+// Wert einlesen: akzeptiert Dezimalzahl, Bruch "3/8" und gemischte Zahl "1 1/2" bzw. "1_1/2"
+function parseValue(s){
+  if(s===null||s===undefined) return NaN;
+  let str = s.toString().trim().toLowerCase().replace(',', '.');
+  if(str==='') return NaN;
+  // gemischte Zahl: "1 1/2", "1_1/2", "1-1/2"
+  let mMix = str.match(/^(-?\d+)[\s_\-]+(\d+)\/(\d+)$/);
+  if(mMix){
+    const g=parseInt(mMix[1],10), z=parseInt(mMix[2],10), n=parseInt(mMix[3],10);
+    if(n===0) return NaN;
+    const sign = g<0?-1:1;
+    return g + sign*(z/n);
+  }
+  // reiner Bruch: "3/8"
+  let mFr = str.match(/^(-?\d+)\/(\d+)$/);
+  if(mFr){
+    const z=parseInt(mFr[1],10), n=parseInt(mFr[2],10);
+    if(n===0) return NaN;
+    return z/n;
+  }
+  // normale Dezimal-/Ganzzahl
+  let str2 = str.replace(/\s/g,'');
+  const v = parseFloat(str2);
+  return isNaN(v) ? NaN : v;
 }
-// Einheit: Klein, Leerzeichen weg, einfache Synonyme
+function numEq(a, b, tol){
+  const x = parseValue(a);
+  if(isNaN(x)) return false;
+  return Math.abs(x - b) < (tol||1e-9);
+}
+// Einheit: Klein, Leerzeichen/Punkte weg; ^ und hochgestellte Ziffern normalisieren (m^2, m², qm -> m2)
 function unitEq(input, accepted){
-  const u = (input||'').toLowerCase().replace(/\s|\./g,'');
-  return accepted.some(a => a.toLowerCase().replace(/\s|\./g,'') === u);
+  return accepted.some(a => normUnit(a) === normUnit(input));
+}
+function normUnit(s){
+  return (s||'')
+    .toLowerCase()
+    .replace(/\s|\./g,'')
+    .replace(/\^/g,'')          // m^2 -> m2
+    .replace(/²/g,'2')          // m²  -> m2
+    .replace(/³/g,'3')          // m³  -> m3
+    .replace(/^qm$/,'m2')       // qm  -> m2
+    .replace(/^quadratmeter$/,'m2');
 }
 function frac(z,n){return `<span class="frac"><span>${z}</span><span>${n}</span></span>`;}
 function mixed(g,z,n){return `<span class="mixed">${g}&thinsp;${frac(z,n)}</span>`;}
@@ -819,13 +853,15 @@ function readInputs(t){
 function evalTask(t, vals){
   if(t.kind==='num+unit'){
     const tol = t.tol||1e-9;
-    const numOk = !isNaN(parseFloat(normNum(vals.vVal))) && Math.abs(parseFloat(normNum(vals.vVal)) - t.val) < tol;
+    const v = parseValue(vals.vVal);
+    const numOk = !isNaN(v) && Math.abs(v - t.val) < tol;
     const unitOk = unitEq(vals.vUnit, t.unit);
     return {correct: numOk && unitOk, numOk, unitOk};
   }
   if(t.kind==='num'){
     const tol = t.tol||1e-9;
-    const numOk = !isNaN(parseFloat(normNum(vals.vVal))) && Math.abs(parseFloat(normNum(vals.vVal)) - t.val) < tol;
+    const v = parseValue(vals.vVal);
+    const numOk = !isNaN(v) && Math.abs(v - t.val) < tol;
     return {correct:numOk, numOk};
   }
   if(t.kind==='frac'){
