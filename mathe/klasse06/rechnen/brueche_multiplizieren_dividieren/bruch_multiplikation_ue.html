@@ -1,0 +1,1191 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Brüche multiplizieren – Klasse 6</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fdf6ec;
+    --card: #ffffff;
+    --primary: #e07b39;
+    --primary-dark: #c4612a;
+    --accent: #4a90d9;
+    --accent-dark: #2c6fad;
+    --green: #1a8a3c;
+    --green-bg: #d4f0dc;
+    --red: #c0171c;
+    --red-bg: #fcd8d9;
+    --text: #1e1e2e;
+    --muted: #6b7280;
+    --border: #e5d9cc;
+    --shadow: 0 4px 16px rgba(0,0,0,0.10);
+    --radius: 16px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 17px;
+    line-height: 1.6;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: linear-gradient(135deg, var(--primary) 0%, #e8973a 100%);
+    color: white;
+    padding: 18px 20px 14px;
+    text-align: center;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+    position: sticky; top: 0; z-index: 100;
+  }
+  header h1 {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.6rem;
+    letter-spacing: 0.5px;
+  }
+  header p { font-size: 0.88rem; opacity: 0.9; margin-top: 2px; }
+
+  /* ── PROGRESS ── */
+  .progress-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 20px 6px;
+    background: var(--bg);
+  }
+  .progress-bar {
+    flex: 1;
+    height: 8px;
+    background: var(--border);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary), #e8b04a);
+    border-radius: 99px;
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+  .progress-label { font-size: 0.82rem; color: var(--muted); font-weight: 700; min-width: 48px; text-align: right; }
+
+  /* ── TAB NAV ── */
+  .tab-nav {
+    display: flex;
+    overflow-x: auto;
+    gap: 8px;
+    padding: 10px 16px 0;
+    background: var(--bg);
+    scrollbar-width: none;
+  }
+  .tab-nav::-webkit-scrollbar { display: none; }
+  .tab-btn {
+    flex-shrink: 0;
+    padding: 8px 14px;
+    border-radius: 99px;
+    border: 2px solid var(--border);
+    background: white;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s;
+    min-height: 44px;
+    display: flex; align-items: center; gap: 5px;
+  }
+  .tab-btn.active {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: white;
+  }
+  .tab-btn.done { border-color: var(--green); color: var(--green); }
+  .tab-btn.done.active { background: var(--green); color: white; }
+
+  /* ── MAIN CONTENT ── */
+  main { padding: 16px 16px 100px; max-width: 780px; margin: 0 auto; }
+
+  .screen { display: none; }
+  .screen.active { display: block; animation: fadeIn 0.25s ease; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+
+  /* ── CARD ── */
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    border: 1.5px solid var(--border);
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  .card-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.15rem;
+    color: var(--primary);
+    margin-bottom: 10px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .tag {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 800;
+    padding: 3px 9px;
+    border-radius: 99px;
+    background: #fff3e0;
+    color: var(--primary);
+    border: 1.5px solid #f5c08a;
+    letter-spacing: 0.3px;
+    font-family: 'Nunito', sans-serif;
+  }
+  .tag.blue { background: #e3f0fb; color: var(--accent-dark); border-color: #a8cfef; }
+  .tag.green { background: var(--green-bg); color: var(--green); border-color: #7fcf9a; }
+  .tag.wdh { background: #f3e8ff; color: #7c3aed; border-color: #c4a0f0; }
+
+  /* ── FRACTION ── */
+  .frac {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    vertical-align: middle;
+    margin: 0 3px;
+    line-height: 1.1;
+  }
+  .frac span:first-child { border-bottom: 2px solid currentColor; padding: 0 3px 1px; }
+  .frac span:last-child { padding: 1px 3px 0; }
+
+  /* ── THEORIE ── */
+  .rule-box {
+    background: linear-gradient(135deg, #fff8f0, #fff3e0);
+    border-left: 5px solid var(--primary);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: 14px 16px;
+    margin: 12px 0;
+    font-size: 0.97rem;
+  }
+  .rule-box strong { color: var(--primary-dark); }
+  .formula-big {
+    font-size: 1.3rem;
+    font-weight: 800;
+    text-align: center;
+    padding: 16px;
+    background: white;
+    border-radius: 12px;
+    border: 2px dashed var(--primary);
+    margin: 12px 0;
+    letter-spacing: 0.5px;
+    color: var(--primary-dark);
+  }
+  .example-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    font-size: 1.05rem;
+    font-weight: 700;
+    padding: 8px 0;
+  }
+  .arrow { color: var(--muted); font-size: 1.3rem; }
+
+  /* ── MC BUTTONS ── */
+  .mc-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 14px;
+  }
+  .mc-btn {
+    padding: 14px 10px;
+    border-radius: 12px;
+    border: 2.5px solid var(--border);
+    background: white;
+    font-family: 'Nunito', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.18s;
+    min-height: 54px;
+    text-align: center;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .mc-btn:active { transform: scale(0.97); }
+  .mc-btn.correct { background: var(--green-bg) !important; border-color: var(--green) !important; color: var(--green) !important; }
+  .mc-btn.wrong   { background: var(--red-bg) !important; border-color: var(--red) !important; color: var(--red) !important; }
+  .mc-btn.disabled { pointer-events: none; opacity: 0.65; }
+
+  /* ── INPUT ── */
+  .input-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+  }
+  .frac-input {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+  }
+  .frac-input input {
+    width: 52px;
+    height: 40px;
+    text-align: center;
+    border: 2.5px solid var(--border);
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    background: white;
+    color: var(--text);
+    -webkit-appearance: none;
+    outline: none;
+    transition: border-color 0.18s;
+  }
+  .frac-input input:focus { border-color: var(--accent); }
+  .frac-input .frac-line { width: 52px; height: 2px; background: var(--text); }
+  .check-btn {
+    padding: 12px 22px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 1rem;
+    font-weight: 800;
+    cursor: pointer;
+    min-height: 44px;
+    transition: background 0.18s, transform 0.1s;
+  }
+  .check-btn:active { transform: scale(0.97); background: var(--accent-dark); }
+
+  /* ── FEEDBACK ── */
+  .feedback {
+    display: none;
+    margin-top: 12px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 0.97rem;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .feedback.show { display: flex; }
+  .feedback.correct { background: var(--green-bg); color: var(--green); border: 2px solid var(--green); }
+  .feedback.wrong   { background: var(--red-bg);   color: var(--red);   border: 2px solid var(--red); }
+  .feedback-icon { font-size: 1.4rem; line-height: 1; flex-shrink: 0; }
+
+  /* ── HINT ── */
+  .hint-toggle {
+    margin-top: 12px;
+    padding: 10px 16px;
+    border-radius: 10px;
+    border: 2px solid var(--accent);
+    background: white;
+    color: var(--accent-dark);
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.92rem;
+    font-weight: 700;
+    cursor: pointer;
+    width: 100%;
+    text-align: left;
+    transition: background 0.18s;
+    min-height: 44px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .hint-toggle:active { background: #e8f3fb; }
+  .hint-box {
+    display: none;
+    background: #e8f3fb;
+    border-radius: 0 0 10px 10px;
+    padding: 12px 16px;
+    font-size: 0.93rem;
+    border: 2px solid var(--accent);
+    border-top: none;
+    color: var(--accent-dark);
+    line-height: 1.6;
+  }
+  .hint-box.open { display: block; }
+
+  /* ── TASK TEXT ── */
+  .task-text {
+    font-size: 1.02rem;
+    font-weight: 600;
+    line-height: 1.7;
+    margin-bottom: 6px;
+  }
+  .task-text em { font-style: normal; font-weight: 800; color: var(--primary-dark); }
+
+  /* ── NEXT BUTTON ── */
+  .next-btn-wrap {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    padding: 12px 16px 16px;
+    background: linear-gradient(to top, var(--bg) 80%, transparent);
+    z-index: 50;
+  }
+  .next-btn {
+    width: 100%;
+    max-width: 780px;
+    margin: 0 auto;
+    display: block;
+    padding: 16px;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: white;
+    border: none;
+    border-radius: 14px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 1.05rem;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(224,123,57,0.4);
+    transition: transform 0.15s, box-shadow 0.15s;
+    min-height: 54px;
+    letter-spacing: 0.3px;
+  }
+  .next-btn:active { transform: scale(0.98); box-shadow: 0 2px 8px rgba(224,123,57,0.3); }
+
+  /* ── STEP HIGHLIGHT ── */
+  .step-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: white;
+    font-size: 0.85rem;
+    font-weight: 900;
+    flex-shrink: 0;
+    margin-right: 6px;
+  }
+  .step-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin: 10px 0;
+    font-size: 0.97rem;
+  }
+
+  /* ── AUSWERTUNG ── */
+  .score-circle {
+    width: 110px; height: 110px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary), #e8b04a);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    color: white;
+    margin: 16px auto;
+    box-shadow: 0 6px 20px rgba(224,123,57,0.35);
+  }
+  .score-circle .score-num { font-family: 'Fredoka One', cursive; font-size: 2.6rem; line-height:1; }
+  .score-circle .score-of  { font-size: 0.85rem; opacity: 0.9; font-weight: 700; }
+  .result-row {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    margin-bottom: 8px;
+    font-size: 0.93rem;
+    font-weight: 600;
+  }
+  .result-row.ok  { background: var(--green-bg); color: var(--green); }
+  .result-row.bad { background: var(--red-bg);   color: var(--red); }
+
+  /* ── DINO ── */
+  .dino {
+    position: fixed;
+    bottom: 80px; right: 14px;
+    font-size: 1.5rem;
+    opacity: 0.55;
+    pointer-events: none;
+    z-index: 200;
+    filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.15));
+  }
+
+  /* ── LEVEL SWITCH ── */
+  .level-row {
+    display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px;
+  }
+  .level-btn {
+    padding: 7px 15px;
+    border-radius: 99px;
+    border: 2px solid var(--border);
+    background: white;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.85rem; font-weight: 800;
+    color: var(--muted);
+    cursor: pointer;
+    min-height: 44px;
+    transition: all 0.18s;
+  }
+  .level-btn.active { background: var(--accent); border-color: var(--accent); color: white; }
+
+  @media (max-width: 420px) {
+    .mc-options { grid-template-columns: 1fr; }
+    header h1 { font-size: 1.3rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>✖️ Brüche multiplizieren</h1>
+  <p>Klasse 6 · Übung</p>
+</header>
+
+<div class="progress-wrap">
+  <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+  <div class="progress-label" id="progressLabel">0 / 6</div>
+</div>
+
+<div class="tab-nav" id="tabNav">
+  <button class="tab-btn active" onclick="goTo(0)" id="tab0">📖 Grundlagen</button>
+  <button class="tab-btn" onclick="goTo(1)" id="tab1">⚡ Aufgabe 1</button>
+  <button class="tab-btn" onclick="goTo(2)" id="tab2">🏠 Aufgabe 2</button>
+  <button class="tab-btn" onclick="goTo(3)" id="tab3">🌿 Aufgabe 3</button>
+  <button class="tab-btn" onclick="goTo(4)" id="tab4">🧮 Aufgabe 4</button>
+  <button class="tab-btn" onclick="goTo(5)" id="tab5">🔁 Wiederholung</button>
+  <button class="tab-btn" onclick="goTo(6)" id="tab6">📊 Auswertung</button>
+</div>
+
+<main>
+
+<!-- ════════════════════ SCREEN 0: GRUNDLAGEN ════════════════════ -->
+<div class="screen active" id="screen0">
+  <div class="card">
+    <div class="card-title"><span class="tag">Theorie</span> Brüche multiplizieren – so geht's</div>
+
+    <div class="rule-box">
+      <strong>Regel:</strong> Beim Multiplizieren von Brüchen werden Zähler mit Zähler und Nenner mit Nenner multipliziert. Dann so weit kürzen wie möglich.
+    </div>
+
+    <div class="formula-big">
+      <span class="frac"><span>a</span><span>b</span></span>
+      &nbsp;·&nbsp;
+      <span class="frac"><span>c</span><span>d</span></span>
+      &nbsp;=&nbsp;
+      <span class="frac"><span>a · c</span><span>b · d</span></span>
+    </div>
+
+    <div class="step-row"><span class="step-num">1</span><span><strong>Zähler · Zähler</strong> rechnen</span></div>
+    <div class="step-row"><span class="step-num">2</span><span><strong>Nenner · Nenner</strong> rechnen</span></div>
+    <div class="step-row"><span class="step-num">3</span><span><strong>Kürzen</strong> – wenn möglich</span></div>
+
+    <hr style="border:none;border-top:1.5px solid var(--border);margin:16px 0;">
+    <div class="card-title"><span class="tag blue">Beispiele</span></div>
+
+    <div class="example-row">
+      <span class="frac"><span>2</span><span>3</span></span>
+      <span>·</span>
+      <span class="frac"><span>3</span><span>4</span></span>
+      <span class="arrow">→</span>
+      <span class="frac"><span>2 · 3</span><span>3 · 4</span></span>
+      <span>=</span>
+      <span class="frac"><span>6</span><span>12</span></span>
+      <span>=</span>
+      <span class="frac"><span>1</span><span>2</span></span>
+    </div>
+
+    <div class="example-row">
+      <span class="frac"><span>4</span><span>5</span></span>
+      <span>·</span>
+      <span class="frac"><span>1</span><span>2</span></span>
+      <span class="arrow">→</span>
+      <span class="frac"><span>4 · 1</span><span>5 · 2</span></span>
+      <span>=</span>
+      <span class="frac"><span>4</span><span>10</span></span>
+      <span>=</span>
+      <span class="frac"><span>2</span><span>5</span></span>
+    </div>
+
+    <div class="example-row">
+      <span>1<span class="frac"><span>1</span><span>3</span></span></span>
+      <span>·</span>
+      <span class="frac"><span>3</span><span>4</span></span>
+      <span class="arrow">→</span>
+      <span class="frac"><span>4</span><span>3</span></span>
+      <span>·</span>
+      <span class="frac"><span>3</span><span>4</span></span>
+      <span>=</span>
+      <span class="frac"><span>12</span><span>12</span></span>
+      <span>=</span>
+      <strong>1</strong>
+    </div>
+    <p style="font-size:0.88rem;color:var(--muted);margin-top:6px;">💡 Gemischte Zahlen zuerst in unechte Brüche umwandeln: 1<span class="frac" style="font-size:0.88rem"><span>1</span><span>3</span></span> = <span class="frac" style="font-size:0.88rem"><span>4</span><span>3</span></span></p>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="tag">Tipp</span> Kürzen <em>vor</em> dem Rechnen</div>
+    <div class="rule-box">
+      Manchmal kann man schon <strong>vor</strong> dem Multiplizieren kürzen – das macht die Rechnung einfacher!
+    </div>
+    <div class="example-row">
+      <span class="frac"><span style="text-decoration:line-through;color:var(--muted)">3</span><span>5</span></span>
+      <span>·</span>
+      <span class="frac"><span>2</span><span style="text-decoration:line-through;color:var(--muted)">3</span></span>
+      <span class="arrow">→</span>
+      <span class="frac"><span>1</span><span>5</span></span>
+      <span>·</span>
+      <span class="frac"><span>2</span><span>1</span></span>
+      <span>=</span>
+      <span class="frac"><span>2</span><span>5</span></span>
+    </div>
+  </div>
+</div><!-- /screen0 -->
+
+<!-- ════════════════════ SCREEN 1: AUFGABE 1 ════════════════════ -->
+<div class="screen" id="screen1">
+
+  <!-- Level-Wahl -->
+  <div class="level-row">
+    <button class="level-btn active" id="lvl1_basis" onclick="setLevel(1,'basis')">⭐ Basis</button>
+    <button class="level-btn" id="lvl1_standard" onclick="setLevel(1,'standard')">⭐⭐ Standard</button>
+    <button class="level-btn" id="lvl1_erweitert" onclick="setLevel(1,'erweitert')">⭐⭐⭐ Erweitert</button>
+  </div>
+
+  <!-- BASIS -->
+  <div class="card level-card-1" data-level="basis">
+    <div class="card-title"><span class="tag">Aufgabe 1 – Basis</span> Schulranzen-Gewicht</div>
+    <div class="task-text">
+      Lena hat einen Schulranzen, der <em><span class="frac"><span>3</span><span>4</span></span> kg</em> wiegt.<br>
+      Ihr Bruder hat einen Ranzen, der nur <em>halb so schwer</em> ist.<br>
+      <br>
+      Wie schwer ist der Ranzen des Bruders?
+    </div>
+    <p style="font-size:0.9rem;color:var(--muted);margin-top:6px;">Rechne: <span class="frac"><span>1</span><span>2</span></span> · <span class="frac"><span>3</span><span>4</span></span> = ?</p>
+    <div class="mc-options" id="mc1_basis">
+      <button class="mc-btn" onclick="checkMC(this,'mc1_basis','wrong','<span class=frac><span>1</span><span>2</span></span> · <span class=frac><span>3</span><span>4</span></span> = <span class=frac><span>3</span><span>8</span></span>')">
+        <span class="frac"><span>1</span><span>3</span></span>
+      </button>
+      <button class="mc-btn correct-answer" onclick="checkMC(this,'mc1_basis','correct','')">
+        <span class="frac"><span>3</span><span>8</span></span>
+      </button>
+      <button class="mc-btn" onclick="checkMC(this,'mc1_basis','wrong','<span class=frac><span>1</span><span>2</span></span> · <span class=frac><span>3</span><span>4</span></span> = <span class=frac><span>3</span><span>8</span></span>')">
+        <span class="frac"><span>3</span><span>4</span></span>
+      </button>
+      <button class="mc-btn" onclick="checkMC(this,'mc1_basis','wrong','<span class=frac><span>1</span><span>2</span></span> · <span class=frac><span>3</span><span>4</span></span> = <span class=frac><span>3</span><span>8</span></span>')">
+        <span class="frac"><span>4</span><span>8</span></span>
+      </button>
+    </div>
+    <div class="feedback" id="fb_mc1_basis"></div>
+    <button class="hint-toggle" onclick="toggleHint('hint1_basis')">💡 Tipp anzeigen</button>
+    <div class="hint-box" id="hint1_basis">
+      Zähler mal Zähler: 1 · 3 = 3<br>
+      Nenner mal Nenner: 2 · 4 = 8<br>
+      Ergebnis: <span class="frac"><span>3</span><span>8</span></span> – lässt sich nicht kürzen.
+    </div>
+  </div>
+
+  <!-- STANDARD -->
+  <div class="card level-card-1" data-level="standard" style="display:none">
+    <div class="card-title"><span class="tag">Aufgabe 1 – Standard</span> Schulranzen-Gewicht</div>
+    <div class="task-text">
+      Lenas Schulranzen wiegt <em><span class="frac"><span>2</span><span>5</span></span> kg</em>. Ihr Bruder hat einen Ranzen, der <em><span class="frac"><span>3</span><span>4</span></span> so schwer</em> ist.<br>
+      <br>
+      Wie schwer ist der Ranzen des Bruders? Gib den Anteil als gekürzten Bruch an.
+    </div>
+    <div class="input-row" id="inp1_std_wrap">
+      <span>Ergebnis:</span>
+      <div class="frac-input">
+        <input type="number" inputmode="numeric" id="in1s_z" placeholder="?">
+        <div class="frac-line"></div>
+        <input type="number" inputmode="numeric" id="in1s_n" placeholder="?">
+      </div>
+      <button class="check-btn" onclick="checkFrac('in1s_z','in1s_n',6,20,'fb1std','inp1_std_wrap',true)">Prüfen</button>
+    </div>
+    <div class="feedback" id="fb1std"></div>
+    <button class="hint-toggle" onclick="toggleHint('hint1_std')">💡 Tipp anzeigen</button>
+    <div class="hint-box" id="hint1_std">
+      <strong>Schritt 1:</strong> <span class="frac"><span>3</span><span>4</span></span> · <span class="frac"><span>2</span><span>5</span></span><br>
+      <strong>Schritt 2:</strong> Zähler: 3·2 = 6, Nenner: 4·5 = 20<br>
+      <strong>Schritt 3:</strong> Kürzen: <span class="frac"><span>6</span><span>20</span></span> = <span class="frac"><span>3</span><span>10</span></span>
+    </div>
+  </div>
+
+  <!-- ERWEITERT -->
+  <div class="card level-card-1" data-level="erweitert" style="display:none">
+    <div class="card-title"><span class="tag">Aufgabe 1 – Erweitert</span> Schulranzen-Gewicht</div>
+    <div class="task-text">
+      Lenas Ranzen wiegt <em>1<span class="frac"><span>3</span><span>5</span></span> kg</em>. Der Ranzen ihres Bruders ist <em><span class="frac"><span>3</span><span>4</span></span> so schwer</em>.<br>
+      <br>
+      Berechne das Gewicht des Bruder-Ranzens. Wandle zuerst in einen unechten Bruch um und gib das Ergebnis als gemischte Zahl an.
+    </div>
+    <div class="input-row" id="inp1_ext_wrap">
+      <span>Ergebnis:</span>
+      <div class="frac-input">
+        <input type="number" inputmode="numeric" id="in1e_z" placeholder="?">
+        <div class="frac-line"></div>
+        <input type="number" inputmode="numeric" id="in1e_n" placeholder="?">
+      </div>
+      <button class="check-btn" onclick="checkFrac('in1e_z','in1e_n',6,5,'fb1ext','inp1_ext_wrap',false)">Prüfen</button>
+    </div>
+    <p style="font-size:0.82rem;color:var(--muted);margin-top:6px;">Tipp: <span class="frac"><span>6</span><span>5</span></span> = 1<span class="frac" style="font-size:0.82rem"><span>1</span><span>5</span></span> kg</p>
+    <div class="feedback" id="fb1ext"></div>
+    <button class="hint-toggle" onclick="toggleHint('hint1_ext')">💡 Tipp anzeigen</button>
+    <div class="hint-box" id="hint1_ext">
+      1<span class="frac"><span>3</span><span>5</span></span> = <span class="frac"><span>8</span><span>5</span></span><br>
+      <span class="frac"><span>8</span><span>5</span></span> · <span class="frac"><span>3</span><span>4</span></span> = <span class="frac"><span>24</span><span>20</span></span> = <span class="frac"><span>6</span><span>5</span></span> = 1<span class="frac"><span>1</span><span>5</span></span> kg
+    </div>
+  </div>
+
+</div><!-- /screen1 -->
+
+<!-- ════════════════════ SCREEN 2: AUFGABE 2 ════════════════════ -->
+<div class="screen" id="screen2">
+
+  <div class="level-row">
+    <button class="level-btn active" id="lvl2_basis" onclick="setLevel(2,'basis')">⭐ Basis</button>
+    <button class="level-btn" id="lvl2_standard" onclick="setLevel(2,'standard')">⭐⭐ Standard</button>
+    <button class="level-btn" id="lvl2_erweitert" onclick="setLevel(2,'erweitert')">⭐⭐⭐ Erweitert</button>
+  </div>
+
+  <!-- BASIS -->
+  <div class="card level-card-2" data-level="basis">
+    <div class="card-title"><span class="tag">Aufgabe 2 – Basis</span> Wohnzimmer 🏠</div>
+    <div class="task-text">
+      Ein Haus hat insgesamt <em>200 m²</em> Wohnfläche.<br>
+      Das Wohnzimmer nimmt <em><span class="frac"><span>1</span><span>4</span></span></em> der Fläche ein.<br>
+      <br>
+      Wie groß ist das Wohnzimmer?
+    </div>
+    <p style="font-size:0.9rem;color:var(--muted);margin-top:4px;">Tipp: <span class="frac"><span>1</span><span>4</span></span> von 200 = <span class="frac"><span>1</span><span>4</span></span> · 200</p>
+    <div class="mc-options" id="mc2_basis">
+      <button class="mc-btn" onclick="checkMC(this,'mc2_basis','wrong','<span class=frac><span>1</span><span>4</span></span> · 200 = 50 m²')">40 m²</button>
+      <button class="mc-btn" onclick="checkMC(this,'mc2_basis','wrong','<span class=frac><span>1</span><span>4</span></span> · 200 = 50 m²')">25 m²</button>
+      <button class="mc-btn correct-answer" onclick="checkMC(this,'mc2_basis','correct','')">50 m²</button>
+      <button class="mc-btn" onclick="checkMC(this,'mc2_basis','wrong','<span class=frac><span>1</span><span>4</span></span> · 200 = 50 m²')">80 m²</button>
+    </div>
+    <div class="feedback" id="fb_mc2_basis"></div>
+    <button class="hint-toggle" onclick="toggleHint('hint2_basis')">💡 Tipp anzeigen</button>
+    <div class="hint-box" id="hint2_basis">
+      <span class="frac"><span>1</span><span>4</span></span> · 200 = <span class="frac"><span>200</span><span>4</span></span> = 50 m²
+    </div>
+  </div>
+
+  <!-- STANDARD -->
+  <div class="card level-card-2" data-level="standard" style="display:none">
+    <div class="card-title"><span class="tag">Aufgabe 2 – Standard</span> Wohnzimmer 🏠</div>
+    <div class="task-text">
+      Familie Müller hat ein Haus mit <em>240 m²</em> Gesamtfläche.<br>
+      Das Erdgeschoss nimmt <em><span class="frac"><span>3</span><span>5</span></span></em> der Fläche ein.<br>
+      Das Wohnzimmer macht <em><span class="frac"><span>1</span><span>4</span></span></em> des Erdgeschosses aus.<br>
+      <br>
+      Welchen Anteil der Gesamtfläche hat das Wohnzimmer? Wie viele m² sind das?
+    </div>
+    <div class="input-row" id="inp2_std_wrap">
+      <span>Anteil (Bruch):</span>
+      <div class="frac-input">
+        <input type="number" inputmode="numeric" id="in2s_z" placeholder="?">
+        <div class="frac-line"></div>
+        <input type="number" inputmode="numeric" id="in2s_n" placeholder="?">
+      </div>
+      <button class="check-btn" onclick="checkFrac('in2s_z','in2s_n',3,20,'fb2std','inp2_std_wrap',true)">Prüfen</button>
+    </div>
+    <div class="feedback" id="fb2std"></div>
+    <button class="hint-toggle" onclick="toggleHint('hint2_std')">💡 Tipp anzeigen</button>
+    <div class="hint-box" id="hint2_std">
+      Anteil Wohnzimmer = <span class="frac"><span>1</span><span>4</span></span> · <span class="frac"><span>3</span><span>5</span></span> = <span class="frac"><span>3</span><span>20</span></span><br>
+      Fläche: <span class="frac"><span>3</span><span>20</span></span> · 240 = 36 m²
+    </div>
+  </div>
+
+  <!-- ERWEITERT -->
+  <div class="card level-card-2" data-level="erweitert" style="display:none">
+    <div class="card-title"><span class="tag">Aufgabe 2 – Erweitert</span> Bungalow 🏠</div>
+    <div class="task-text">
+      Familie Lustig hat einen Bungalow, der <em><span class="frac"><span>1</span><span>4</span></span></em> des Grundstücks einnimmt. Das Grundstück ist <em>400 m²</em> groß.<br>
+      Das Wohnzimmer nimmt <em><span class="frac"><span>1</span><span>5</span></span></em> der Bungalofläche ein.<br>
+      Das Bad hat einen Anteil von <em><span class="frac"><span>8</span><span>100</span></span></em> der Bungalofläche.<br>
+      <br>
+      a) Wie groß ist der Bungalow?<br>
+      b) Welchen Anteil am <strong>Grundstück</strong> hat das Wohnzimmer?<br>
+      c) Wie viel Prozent der Grundstücksfläche nimmt das Bad ein?
+    </div>
+    <div class="feedback" id="fb2ext" style="display:block;background:#fff3e0;border:2px solid var(--primary);color:var(--primary-dark);padding:12px 16px;border-radius:10px;margin-top:12px;">
+      <strong>a)</strong> <span class="frac"><span>1</span><span>4</span></span> · 400 = 100 m² Bungalow<br>
+      <strong>b)</strong> Wohnzimmer-Anteil am Grundstück: <span class="frac"><span>1</span><span>5</span></span> · <span class="frac"><span>1</span><span>4</span></span> = <span class="frac"><span>1</span><span>20</span></span> = 5%<br>
+      <strong>c)</strong> Bad: <span class="frac"><span>8</span><span>100</span></span> · <span class="frac"><span>1</span><span>4</span></span> = <span class="frac"><span>8</span><span>400</span></span> = <span class="frac"><span>1</span><span>50</span></span> = 2%
+    </div>
+    <p style="font-size:0.85rem;color:var(--muted);margin-top:8px;">Löse die Aufgabe schriftlich in deinem Heft und vergleiche dann mit der Lösung.</p>
+    <button class="hint-toggle" onclick="toggleHint('hint2_ext')">💡 Tipp anzeigen</button>
+    <div class="hint-box" id="hint2_ext">
+      Denke daran: „Anteil vom Anteil" = <strong>Multiplikation der Brüche</strong>!<br>
+      Wohnzimmer-Anteil am Grundstück = <span class="frac"><span>1</span><span>5</span></span> · <span class="frac"><span>1</span><span>4</span></span>
+    </div>
+  </div>
+
+</div><!-- /screen2 -->
+
+<!-- ════════════════════ SCREEN 3: AUFGABE 3 ════════════════════ -->
+<div class="screen" id="screen3">
+
+  <div class="level-row">
+    <button class="level-btn active" id="lvl3_basis" onclick="setLevel(3,'basis')">⭐ Basis</button>
+    <button class="level-btn" id="lvl3_standard" onclick="setLevel(3,'standard')">⭐⭐ Standard</button>
+    <button class="level-btn" id="lvl3_erweitert" onclick="setLevel(3,'erweitert')">⭐⭐⭐ Erweitert</button>
+  </div>
+
+  <!-- BASIS -->
+  <div class="card level-card-3" data-level="basis">
+    <div class="card-title"><span class="tag">Aufgabe 3 – Basis</span> Garten 🌿</div>
+    <div class="task-text">
+      Ein Garten ist <em>60 m²</em> groß.<br>
+      Ein Gemüsebeet nimmt <em><span class="frac"><span>1</span><span>6</span></span></em> des Gartens ein.<br>
+      <br>
+      Wie groß ist das Gemüsebeet?
+    </div>
+    <div class="mc-options" id="mc3_basis">
+      <button class="mc-btn" onclick="checkMC(this,'mc3_basis','wrong','<span class=frac><span>1</span><span>6</span></span> · 60 = 10 m²')">6 m²</button>
+      <button class="mc-btn correct-answer" onclick="checkMC(this,'mc3_basis','correct','')">10 m²</button>
+      <button class="mc-btn" onclick="checkMC(this,'mc3_basis','wrong','<span class=frac><span>1</span><span>6</span></span> · 60 = 10 m²')">12 m²</button>
+      <button class="mc-btn" onclick="checkMC(this,'mc3_basis','wrong','<span class=frac><span>1</span><span>6</span></span> · 60 = 10 m²')">15 m²</button>
+    </div>
+    <div class="feedback" id="fb_mc3_basis"></div>
+    <button class="hint-toggle" onclick="toggleHint('hint3_basis')">💡 Tipp anzeigen</button>
+    <div class="hint-box" id="hint3_basis">
+      <span class="frac"><span>1</span><span>6</span></span> · 60 = <span class="frac"><span>60</span><span>6</span></span> = 10 m²
+    </div>
+  </div>
+
+  <!-- STANDARD -->
+  <div class="card level-card-3" data-level="standard" style="display:none">
+    <div class="card-title"><span class="tag">Aufgabe 3 – Standard</span> Gartenteich 🌿</div>
+    <div class="task-text">
+      Familie Meier hat einen Garten mit <em>300 m²</em>.<br>
+      Der Gartenteich nimmt <em><span class="frac"><span>1</span><span>60</span></span></em> der Gartenfläche ein.<br>
+      Die Terrasse ist <em>3 m lang und 5 m breit</em>.<br>
+      <br>
+      a) Wie groß ist der Gartenteich?<br>
+      b) Welchen Anteil des Gartens nimmt die Terrasse ein?
+    </div>
+    <div class="input-row" id="inp3_std_wrap">
+      <span>Gartenteich (m²):</span>
+      <input type="number" inputmode="numeric" id="in3s_val" placeholder="?" style="width:65px;height:42px;text-align:center;border:2.5px solid var(--border);border-radius:8px;font-size:1.1rem;font-family:'Nunito',sans-serif;font-weight:700;outline:none;">
+      <button class="check-btn" onclick="checkNum('in3s_val',5,'fb3std','inp3_std_wrap')">Prüfen</button>
+    </div>
+    <div class="feedback" id="fb3std"></div>
+    <button class="hint-toggle" onclick="toggleHint('hint3_std')">💡 Tipp anzeigen</button>
+    <div class="hint-box" id="hint3_std">
+      <strong>a)</strong> <span class="frac"><span>1</span><span>60</span></span> · 300 = 5 m²<br>
+      <strong>b)</strong> Terrasse: 3 · 5 = 15 m²<br>
+      Anteil: <span class="frac"><span>15</span><span>300</span></span> = <span class="frac"><span>1</span><span>20</span></span>
+    </div>
+  </div>
+
+  <!-- ERWEITERT -->
+  <div class="card level-card-3" data-level="erweitert" style="display:none">
+    <div class="card-title"><span class="tag">Aufgabe 3 – Erweitert</span> Gartenanlage 🌿</div>
+    <div class="task-text">
+      Das Grundstück von Familie Koch ist <em>400 m²</em> groß.<br>
+      Der Garten nimmt <em><span class="frac"><span>3</span><span>4</span></span></em> des Grundstücks ein. Die Terrasse ist <em>3 m × 5 m</em> groß.<br>
+      <br>
+      a) Welchen Anteil am <strong>Garten</strong> hat die Terrasse?<br>
+      b) Welchen Anteil am <strong>gesamten Grundstück</strong> hat die Terrasse?<br>
+      c) Gib beide Anteile als Prozentzahl an.
+    </div>
+    <div class="feedback" id="fb3ext" style="display:block;background:#fff3e0;border:2px solid var(--primary);color:var(--primary-dark);padding:12px 16px;border-radius:10px;margin-top:12px;">
+      <strong>a)</strong> Garten: <span class="frac"><span>3</span><span>4</span></span> · 400 = 300 m² | Terrasse: 15 m² | Anteil: <span class="frac"><span>15</span><span>300</span></span> = <span class="frac"><span>1</span><span>20</span></span> = 5%<br>
+      <strong>b)</strong> Anteil am Grundstück: <span class="frac"><span>15</span><span>400</span></span> = <span class="frac"><span>3</span><span>80</span></span> ≈ 3,75%
+    </div>
+    <p style="font-size:0.85rem;color:var(--muted);margin-top:8px;">Löse die Aufgabe schriftlich und vergleiche.</p>
+    <button class="hint-toggle" onclick="toggleHint('hint3_ext')">💡 Tipp anzeigen</button>
+    <div class="hint-box" id="hint3_ext">
+      Anteil = <span class="frac"><span>Terrasse</span><span>Gartenfläche</span></span><br>
+      Für b) musst du durch die Grundstücksfläche (400 m²) teilen.
+    </div>
+  </div>
+
+</div><!-- /screen3 -->
+
+<!-- ════════════════════ SCREEN 4: AUFGABE 4 ════════════════════ -->
+<div class="screen" id="screen4">
+
+  <div class="level-row">
+    <button class="level-btn active" id="lvl4_basis" onclick="setLevel(4,'basis')">⭐ Basis</button>
+    <button class="level-btn" id="lvl4_standard" onclick="setLevel(4,'standard')">⭐⭐ Standard</button>
+    <button class="level-btn" id="lvl4_erweitert" onclick="setLevel(4,'erweitert')">⭐⭐⭐ Erweitert</button>
+  </div>
+
+  <!-- BASIS -->
+  <div class="card level-card-4" data-level="basis">
+    <div class="card-title"><span class="tag">Aufgabe 4 – Basis</span> Rechenmauer 🧮</div>
+    <div class="task-text">
+      In einer Rechenmauer steht oben das <em>Produkt</em> der darunter stehenden Zahlen.<br>
+      Berechne den fehlenden Wert.
+    </div>
+    <!-- Visual Rechenmauer -->
+    <div style="margin:16px 0;font-size:1.1rem;display:flex;flex-direction:column;align-items:center;gap:8px;">
+      <div style="background:#fff3e0;border:2.5px solid var(--primary);border-radius:10px;padding:10px 22px;font-weight:800;color:var(--primary-dark);">
+        <span class="frac"><span>6</span><span>35</span></span>
+      </div>
+      <div style="display:flex;gap:10px;">
+        <div style="background:#e8f3fb;border:2.5px solid var(--accent);border-radius:10px;padding:9px 18px;font-weight:700;">
+          <span class="frac"><span>2</span><span>5</span></span>
+        </div>
+        <div style="background:#e8f3fb;border:2.5px solid var(--accent);border-radius:10px;padding:9px 18px;font-weight:700;">
+          ?
+        </div>
+      </div>
+    </div>
+    <div class="mc-options" id="mc4_basis">
+      <button class="mc-btn" onclick="checkMC(this,'mc4_basis','wrong','<span class=frac><span>6</span><span>35</span></span> ÷ <span class=frac><span>2</span><span>5</span></span> = <span class=frac><span>3</span><span>7</span></span>')">
+        <span class="frac"><span>2</span><span>7</span></span>
+      </button>
+      <button class="mc-btn correct-answer" onclick="checkMC(this,'mc4_basis','correct','')">
+        <span class="frac"><span>3</span><span>7</span></span>
+      </button>
+      <button class="mc-btn" onclick="checkMC(this,'mc4_basis','wrong','<span class=frac><span>6</span><span>35</span></span> ÷ <span class=frac><span>2</span><span>5</span></span> = <span class=frac><span>3</span><span>7</span></span>')">
+        <span class="frac"><span>4</span><span>7</span></span>
+      </button>
+      <button class="mc-btn" onclick="checkMC(this,'mc4_basis','wrong','<span class=frac><span>6</span><span>35</span></span> ÷ <span class=frac><span>2</span><span>5</span></span> = <span class=frac><span>3</span><span>7</span></span>')">
+        <span class="frac"><span>1</span><span>5</span></span>
+      </button>
+    </div>
+    <div class="feedback" id="fb_mc4_basis"></div>
+    <button class="hint-toggle" onclick="toggleHint('hint4_basis')">💡 Tipp anzeigen</button>
+    <div class="hint-box" id="hint4_basis">
+      <span class="frac"><span>2</span><span>5</span></span> · ? = <span class="frac"><span>6</span><span>35</span></span><br>
+      Prüfe: <span class="frac"><span>2</span><span>5</span></span> · <span class="frac"><span>3</span><span>7</span></span> = <span class="frac"><span>6</span><span>35</span></span> ✓
+    </div>
+  </div>
+
+  <!-- STANDARD -->
+  <div class="card level-card-4" data-level="standard" style="display:none">
+    <div class="card-title"><span class="tag">Aufgabe 4 – Standard</span> Kinderzimmer 🧮</div>
+    <div class="task-text">
+      Familie Lustig hat zwei Kinderzimmer. Zusammen nehmen sie <em><span class="frac"><span>11</span><span>50</span></span></em> der Bungalofläche ein.<br>
+      Miriams Zimmer ist <em><span class="frac"><span>6</span><span>11</span></span></em> davon.<br>
+      <br>
+      Welchen Anteil an der Bungalofläche hat Miriams Zimmer?<br>
+      Gib das Ergebnis als gekürzten Bruch und als Prozent an.
+    </div>
+    <div class="input-row" id="inp4_std_wrap">
+      <span>Anteil (Bruch):</span>
+      <div class="frac-input">
+        <input type="number" inputmode="numeric" id="in4s_z" placeholder="?">
+        <div class="frac-line"></div>
+        <input type="number" inputmode="numeric" id="in4s_n" placeholder="?">
+      </div>
+      <button class="check-btn" onclick="checkFrac('in4s_z','in4s_n',6,50,'fb4std','inp4_std_wrap',true)">Prüfen</button>
+    </div>
+    <div class="feedback" id="fb4std"></div>
+    <button class="hint-toggle" onclick="toggleHint('hint4_std')">💡 Tipp anzeigen</button>
+    <div class="hint-box" id="hint4_std">
+      <span class="frac"><span>6</span><span>11</span></span> · <span class="frac"><span>11</span><span>50</span></span> = <span class="frac"><span>66</span><span>550</span></span> = <span class="frac"><span>6</span><span>50</span></span> = <span class="frac"><span>3</span><span>25</span></span> = 12%<br>
+      (Die 11 kürzt sich heraus!)
+    </div>
+  </div>
+
+  <!-- ERWEITERT -->
+  <div class="card level-card-4" data-level="erweitert" style="display:none">
+    <div class="card-title"><span class="tag">Aufgabe 4 – Erweitert</span> Zimmer-Anteile 🧮</div>
+    <div class="task-text">
+      Familie Lustig hat einen <em>100 m²</em> großen Bungalow auf einem <em>400 m²</em> Grundstück.<br>
+      Die Kinderzimmer nehmen <em><span class="frac"><span>11</span><span>50</span></span></em> der Bungalofläche ein.<br>
+      Miriams Zimmer ist <em><span class="frac"><span>6</span><span>11</span></span></em> der Kinderzimmerfläche.<br>
+      <br>
+      a) Welchen Anteil am <strong>Grundstück</strong> hat Miriams Zimmer?<br>
+      b) Wie viele <strong>m²</strong> hat Miriams Zimmer?<br>
+      c) Wie viel Prozent des Grundstücks sind das?
+    </div>
+    <div class="feedback" id="fb4ext" style="display:block;background:#fff3e0;border:2px solid var(--primary);color:var(--primary-dark);padding:12px 16px;border-radius:10px;margin-top:12px;">
+      <strong>a)</strong> Miriams Zimmer am Bungalow: <span class="frac"><span>6</span><span>11</span></span> · <span class="frac"><span>11</span><span>50</span></span> = <span class="frac"><span>6</span><span>50</span></span> = <span class="frac"><span>3</span><span>25</span></span><br>
+      Anteil am Grundstück: <span class="frac"><span>3</span><span>25</span></span> · <span class="frac"><span>1</span><span>4</span></span> = <span class="frac"><span>3</span><span>100</span></span><br>
+      <strong>b)</strong> <span class="frac"><span>6</span><span>50</span></span> · 100 = 12 m²<br>
+      <strong>c)</strong> <span class="frac"><span>3</span><span>100</span></span> = 3%
+    </div>
+    <p style="font-size:0.85rem;color:var(--muted);margin-top:8px;">Löse die Aufgabe schriftlich und vergleiche.</p>
+    <button class="hint-toggle" onclick="toggleHint('hint4_ext')">💡 Tipp anzeigen</button>
+    <div class="hint-box" id="hint4_ext">
+      Kette: Bungalow-Anteil am Grundstück = <span class="frac"><span>1</span><span>4</span></span><br>
+      Miriams Zimmer · Bungalow-Anteil am Grundstück = Anteil am Grundstück
+    </div>
+  </div>
+
+</div><!-- /screen4 -->
+
+<!-- ════════════════════ SCREEN 5: WIEDERHOLUNG ════════════════════ -->
+<div class="screen" id="screen5">
+  <div class="card">
+    <div class="card-title"><span class="tag wdh">🔁 Wiederholung</span> Brüche kürzen und erweitern</div>
+    <div class="task-text">
+      Vor der Multiplikation hilft oft <em>Kürzen</em>. Kürze die folgenden Brüche so weit wie möglich.
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title" style="font-size:1rem;">a) Kürze: <span class="frac"><span>6</span><span>8</span></span></div>
+    <div class="input-row" id="wdh_a_wrap">
+      <div class="frac-input">
+        <input type="number" inputmode="numeric" id="wdh_az" placeholder="?">
+        <div class="frac-line"></div>
+        <input type="number" inputmode="numeric" id="wdh_an" placeholder="?">
+      </div>
+      <button class="check-btn" onclick="checkFrac('wdh_az','wdh_an',3,4,'fb_wdha','wdh_a_wrap',true)">Prüfen</button>
+    </div>
+    <div class="feedback" id="fb_wdha"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title" style="font-size:1rem;">b) Kürze: <span class="frac"><span>15</span><span>20</span></span></div>
+    <div class="input-row" id="wdh_b_wrap">
+      <div class="frac-input">
+        <input type="number" inputmode="numeric" id="wdh_bz" placeholder="?">
+        <div class="frac-line"></div>
+        <input type="number" inputmode="numeric" id="wdh_bn" placeholder="?">
+      </div>
+      <button class="check-btn" onclick="checkFrac('wdh_bz','wdh_bn',3,4,'fb_wdhb','wdh_b_wrap',true)">Prüfen</button>
+    </div>
+    <div class="feedback" id="fb_wdhb"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title" style="font-size:1rem;">c) Welche Rechnung ist geschickt <em>vor</em> dem Multiplizieren zu kürzen?</div>
+    <div class="mc-options" id="mc_wdh_c">
+      <button class="mc-btn" onclick="checkMC(this,'mc_wdh_c','wrong','Bei <span class=frac><span>4</span><span>7</span></span> · <span class=frac><span>7</span><span>8</span></span> kann die 7 gekürzt werden → <span class=frac><span>1</span><span>2</span></span>')">
+        <span class="frac"><span>2</span><span>3</span></span>·<span class="frac"><span>1</span><span>5</span></span>
+      </button>
+      <button class="mc-btn correct-answer" onclick="checkMC(this,'mc_wdh_c','correct','')">
+        <span class="frac"><span>4</span><span>7</span></span>·<span class="frac"><span>7</span><span>8</span></span>
+      </button>
+      <button class="mc-btn" onclick="checkMC(this,'mc_wdh_c','wrong','Bei <span class=frac><span>4</span><span>7</span></span> · <span class=frac><span>7</span><span>8</span></span> kann die 7 gekürzt werden → <span class=frac><span>1</span><span>2</span></span>')">
+        <span class="frac"><span>3</span><span>4</span></span>·<span class="frac"><span>2</span><span>5</span></span>
+      </button>
+      <button class="mc-btn" onclick="checkMC(this,'mc_wdh_c','wrong','Bei <span class=frac><span>4</span><span>7</span></span> · <span class=frac><span>7</span><span>8</span></span> kann die 7 gekürzt werden → <span class=frac><span>1</span><span>2</span></span>')">
+        <span class="frac"><span>5</span><span>6</span></span>·<span class="frac"><span>1</span><span>3</span></span>
+      </button>
+    </div>
+    <div class="feedback" id="fb_mc_wdh_c"></div>
+  </div>
+</div><!-- /screen5 -->
+
+<!-- ════════════════════ SCREEN 6: AUSWERTUNG ════════════════════ -->
+<div class="screen" id="screen6">
+  <div class="card" style="text-align:center;">
+    <div class="card-title" style="justify-content:center;font-size:1.3rem;">🎉 Auswertung</div>
+    <div class="score-circle">
+      <span class="score-num" id="scoreNum">0</span>
+      <span class="score-of" id="scoreOf">von 0</span>
+    </div>
+    <p style="font-size:1rem;font-weight:700;color:var(--muted);" id="scoreMsg">Prima gemacht!</p>
+  </div>
+
+  <div class="card" id="resultsCard">
+    <div class="card-title">Deine Ergebnisse im Überblick</div>
+    <div id="resultsList"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="tag blue">Tipp</span> Was ich heute gelernt habe:</div>
+    <ul style="padding-left:20px;line-height:2;font-size:0.97rem;">
+      <li>Zähler · Zähler und Nenner · Nenner</li>
+      <li>Immer kürzen – vor oder nach dem Rechnen</li>
+      <li>Gemischte Zahlen zuerst umwandeln</li>
+      <li>„Anteil vom Anteil" = Multiplikation</li>
+    </ul>
+  </div>
+
+  <button class="next-btn" onclick="restart()" style="background:linear-gradient(135deg,var(--accent),var(--accent-dark));">🔁 Nochmal versuchen</button>
+</div>
+
+</main>
+
+<!-- Weiter-Button (sticky) -->
+<div class="next-btn-wrap">
+  <button class="next-btn" id="mainNextBtn" onclick="nextScreen()">Weiter →</button>
+</div>
+
+<!-- T-Rex -->
+<div class="dino">🦖</div>
+
+<script>
+  // ── STATE ──
+  let currentScreen = 0;
+  const totalScreens = 7;
+  const scores = {}; // key: questionId, value: correct bool
+
+  // ── NAVIGATION ──
+  function goTo(n) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('screen' + n).classList.add('active');
+    document.querySelectorAll('.tab-btn').forEach((b,i) => {
+      b.classList.toggle('active', i === n);
+    });
+    currentScreen = n;
+    updateProgress();
+    updateNextBtn();
+    window.scrollTo(0,0);
+  }
+
+  function nextScreen() {
+    if (currentScreen < totalScreens - 1) {
+      if (currentScreen === totalScreens - 2) buildAuswertung();
+      goTo(currentScreen + 1);
+    }
+  }
+
+  function updateNextBtn() {
+    const btn = document.getElementById('mainNextBtn');
+    if (currentScreen === 0) btn.textContent = 'Zu den Aufgaben →';
+    else if (currentScreen === totalScreens - 2) btn.textContent = 'Zur Auswertung →';
+    else if (currentScreen === totalScreens - 1) btn.style.display = 'none';
+    else btn.textContent = 'Nächste Aufgabe →';
+  }
+
+  function updateProgress() {
+    const done = Object.keys(scores).length;
+    const total = 8; // approx questions
+    const pct = Math.min(100, Math.round((currentScreen / (totalScreens-1)) * 100));
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressLabel').textContent = currentScreen + ' / ' + (totalScreens-1);
+    // mark tab done
+    if (currentScreen > 0) {
+      document.getElementById('tab' + (currentScreen-1)).classList.add('done');
+    }
+  }
+
+  // ── HINT TOGGLE ──
+  function toggleHint(id) {
+    const box = document.getElementById(id);
+    const btn = box.previousElementSibling;
+    if (box.classList.toggle('open')) {
+      btn.textContent = '🔼 Tipp ausblenden';
+    } else {
+      btn.innerHTML = '💡 Tipp anzeigen';
+    }
+  }
+
+  // ── MC CHECK ──
+  function checkMC(btn, groupId, result, correction) {
+    const group = document.getElementById(groupId);
+    const btns = group.querySelectorAll('.mc-btn');
+    btns.forEach(b => b.classList.add('disabled'));
+
+    const fbId = 'fb_' + groupId;
+    const fb = document.getElementById(fbId);
+
+    if (result === 'correct') {
+      btn.classList.add('correct');
+      showFeedback(fb, true, '✅ Richtig! Super gemacht!');
+      scores[groupId] = true;
+    } else {
+      btn.classList.add('wrong');
+      // highlight correct answer
+      btns.forEach(b => { if (b.classList.contains('correct-answer')) b.classList.add('correct'); });
+      showFeedback(fb, false, '❌ Leider falsch. Richtig wäre: ' + correction);
+      scores[groupId] = false;
+    }
+    updateProgress();
+  }
+
+  // ── FRACTION INPUT CHECK ──
+  function gcd(a, b) { return b === 0 ? a : gcd(b, a % b); }
+
+  function checkFrac(zId, nId, correctZ, correctN, fbId, wrapId, autoKuerzen) {
+    const z = parseInt(document.getElementById(zId).value);
+    const n = parseInt(document.getElementById(nId).value);
+    const fb = document.getElementById(fbId);
+
+    if (isNaN(z) || isNaN(n) || n === 0) {
+      showFeedback(fb, false, '❌ Bitte beide Felder ausfüllen!');
+      return;
+    }
+
+    // compare as fractions (cross-multiply)
+    const correct = (z * correctN === n * correctZ) && z > 0 && n > 0;
+    if (correct) {
+      showFeedback(fb, true, '✅ Richtig! Sehr gut!');
+      scores[fbId] = true;
+      document.getElementById(zId).disabled = true;
+      document.getElementById(nId).disabled = true;
+    } else {
+      const g = gcd(correctZ, correctN);
+      const kz = correctZ/g, kn = correctN/g;
+      showFeedback(fb, false, `❌ Nicht ganz. Richtig wäre: <span class="frac"><span>${kz}</span><span>${kn}</span></span>`);
+      scores[fbId] = false;
+    }
+    updateProgress();
+  }
+
+  // ── NUMBER CHECK ──
+  function checkNum(inputId, correct, fbId, wrapId) {
+    const val = parseFloat(document.getElementById(inputId).value);
+    const fb = document.getElementById(fbId);
+    if (isNaN(val)) { showFeedback(fb, false, '❌ Bitte eine Zahl eingeben!'); return; }
+    if (Math.abs(val - correct) < 0.01) {
+      showFeedback(fb, true, '✅ Richtig! ' + correct + ' m²');
+      scores[fbId] = true;
+      document.getElementById(inputId).disabled = true;
+    } else {
+      showFeedback(fb, false, '❌ Leider falsch. Richtig: ' + correct + ' m²');
+      scores[fbId] = false;
+    }
+    updateProgress();
+  }
+
+  // ── SHOW FEEDBACK ──
+  function showFeedback(el, ok, msg) {
+    el.className = 'feedback show ' + (ok ? 'correct' : 'wrong');
+    el.innerHTML = '<span class="feedback-icon">' + (ok ? '✅' : '❌') + '</span><span>' + msg + '</span>';
+  }
+
+  // ── LEVEL SWITCH ──
+  function setLevel(taskNum, level) {
+    // Update buttons
+    ['basis','standard','erweitert'].forEach(l => {
+      const b = document.getElementById('lvl'+taskNum+'_'+l);
+      if(b) b.classList.toggle('active', l === level);
+    });
+    // Show/hide cards
+    document.querySelectorAll('.level-card-'+taskNum).forEach(c => {
+      c.style.display = (c.dataset.level === level) ? 'block' : 'none';
+    });
+  }
+
+  // ── AUSWERTUNG ──
+  function buildAuswertung() {
+    const total = Object.keys(scores).length;
+    const correct = Object.values(scores).filter(Boolean).length;
+    document.getElementById('scoreNum').textContent = correct;
+    document.getElementById('scoreOf').textContent = 'von ' + total;
+
+    const pct = total > 0 ? correct/total : 0;
+    let msg = '';
+    if (pct >= 0.8) msg = '🌟 Hervorragend – du hast das drauf!';
+    else if (pct >= 0.6) msg = '👍 Gut gemacht – noch etwas üben!';
+    else msg = '💪 Weiter üben – du schaffst das!';
+    document.getElementById('scoreMsg').textContent = msg;
+
+    const list = document.getElementById('resultsList');
+    list.innerHTML = '';
+    const labels = {
+      'mc1_basis':'A1 Basis (MC)','fb1std':'A1 Standard','fb1ext':'A1 Erweitert',
+      'mc2_basis':'A2 Basis (MC)','fb2std':'A2 Standard',
+      'mc3_basis':'A3 Basis (MC)','fb3std':'A3 Standard',
+      'mc4_basis':'A4 Basis (MC)','fb4std':'A4 Standard',
+      'fb_mc_wdh_c':'Wiederholung c)','fb_wdha':'Wdh a)','fb_wdhb':'Wdh b)'
+    };
+    Object.entries(scores).forEach(([k,v]) => {
+      const row = document.createElement('div');
+      row.className = 'result-row ' + (v ? 'ok' : 'bad');
+      row.innerHTML = (v ? '✅ ' : '❌ ') + (labels[k] || k);
+      list.appendChild(row);
+    });
+  }
+
+  function restart() {
+    Object.keys(scores).forEach(k => delete scores[k]);
+    goTo(0);
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('done'));
+    document.getElementById('mainNextBtn').style.display = '';
+  }
+
+  // ── INIT ──
+  updateNextBtn();
+</script>
+</body>
+</html>

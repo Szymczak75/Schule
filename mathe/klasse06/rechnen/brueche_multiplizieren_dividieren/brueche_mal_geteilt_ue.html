@@ -1,0 +1,1734 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Brüche – Multiplizieren & Dividieren | Klasse 6</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fira+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script>
+  MathJax = {
+    tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+    svg: { fontCache: 'global' }
+  };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+  :root {
+    --bg: #f7f3ee;
+    --card: #ffffff;
+    --primary: #2d6a4f;
+    --primary-light: #52b788;
+    --accent: #f4a261;
+    --accent2: #e76f51;
+    --text: #1b2a22;
+    --text-muted: #6b7c72;
+    --border: #d8e8df;
+    --correct: #1b7a3e;
+    --correct-bg: #d4f0de;
+    --wrong: #c0392b;
+    --wrong-bg: #fde8e6;
+    --tab-inactive: #e8f4ee;
+    --shadow: 0 4px 20px rgba(45,106,79,0.10);
+    --radius: 18px;
+    --font: 'Nunito', sans-serif;
+    --mono: 'Fira Mono', monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 17px;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: linear-gradient(135deg, var(--primary) 0%, #1b4332 100%);
+    color: white;
+    padding: 1.2rem 1.5rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  header .icon { font-size: 2rem; }
+  header h1 { font-size: 1.25rem; font-weight: 900; line-height: 1.2; }
+  header .subtitle { font-size: 0.85rem; opacity: 0.8; margin-top: 0.1rem; }
+
+  /* ── TAB BAR ── */
+  .tab-bar {
+    display: flex;
+    overflow-x: auto;
+    background: #1b4332;
+    padding: 0 0.5rem;
+    gap: 0.25rem;
+    scrollbar-width: none;
+  }
+  .tab-bar::-webkit-scrollbar { display: none; }
+  .tab-btn {
+    flex-shrink: 0;
+    padding: 0.6rem 1.1rem;
+    border: none;
+    border-radius: 10px 10px 0 0;
+    background: transparent;
+    color: rgba(255,255,255,0.65);
+    font-family: var(--font);
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+  .tab-btn:active { opacity: 0.7; }
+  .tab-btn.active {
+    background: var(--bg);
+    color: var(--primary);
+  }
+
+  /* ── CARDS ── */
+  .page { display: none; padding: 1rem; max-width: 900px; margin: 0 auto; }
+  .page.active { display: block; }
+
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 1.4rem;
+    margin-bottom: 1.2rem;
+    box-shadow: var(--shadow);
+    border: 1.5px solid var(--border);
+  }
+  .card-title {
+    font-size: 1.05rem;
+    font-weight: 900;
+    color: var(--primary);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .card-title .num {
+    background: var(--primary);
+    color: white;
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.9rem; font-weight: 800; flex-shrink: 0;
+  }
+
+  /* ── LEVEL SWITCHER ── */
+  .level-switcher {
+    display: flex;
+    gap: 0.4rem;
+    margin-bottom: 1.2rem;
+    flex-wrap: wrap;
+  }
+  .level-btn {
+    padding: 0.45rem 1rem;
+    border-radius: 50px;
+    border: 2px solid var(--border);
+    background: var(--tab-inactive);
+    color: var(--text-muted);
+    font-family: var(--font);
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.18s;
+    min-height: 44px;
+    display: flex; align-items: center; gap: 0.3rem;
+  }
+  .level-btn.active {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+  }
+  .level-btn:active { transform: scale(0.96); }
+
+  /* ── AUFGABEN ── */
+  .aufgabe {
+    background: #f7faf8;
+    border-radius: 12px;
+    padding: 1rem 1.1rem;
+    margin-bottom: 0.9rem;
+    border: 1.5px solid var(--border);
+  }
+  .aufgabe-text {
+    font-size: 1.05rem;
+    line-height: 1.7;
+    margin-bottom: 0.8rem;
+  }
+  .eingabe-row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+  }
+  .eingabe-label { font-size: 1rem; color: var(--text-muted); }
+
+  /* Brucheingabe */
+  .bruch-eingabe {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+  .bruch-eingabe input {
+    width: 60px;
+    height: 40px;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    text-align: center;
+    font-family: var(--mono);
+    font-size: 1.1rem;
+    font-weight: 600;
+    background: white;
+    color: var(--text);
+    outline: none;
+    transition: border 0.15s;
+    -webkit-appearance: none;
+  }
+  .bruch-eingabe input:focus { border-color: var(--primary); }
+  .bruch-linie {
+    width: 60px; height: 2px;
+    background: var(--text);
+    margin: 2px 0;
+  }
+  .bruch-eingabe.wide input { width: 72px; }
+  .bruch-eingabe.wide .bruch-linie { width: 72px; }
+
+  /* Ganzzahl-Eingabe */
+  input.ganzzahl {
+    width: 72px; height: 44px;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    text-align: center;
+    font-family: var(--mono);
+    font-size: 1.1rem;
+    font-weight: 600;
+    background: white;
+    color: var(--text);
+    outline: none;
+    transition: border 0.15s;
+    -webkit-appearance: none;
+  }
+  input.ganzzahl:focus { border-color: var(--primary); }
+
+  .check-btn {
+    padding: 0.55rem 1.3rem;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-family: var(--font);
+    font-size: 0.95rem;
+    font-weight: 800;
+    cursor: pointer;
+    min-height: 44px;
+    transition: background 0.15s;
+  }
+  .check-btn:active { background: #1b4332; transform: scale(0.97); }
+
+  .clear-btn {
+    padding: 0.45rem 1rem;
+    background: #fff3f2;
+    color: var(--wrong);
+    border: 2px solid #f5c6c2;
+    border-radius: 10px;
+    font-family: var(--font);
+    font-size: 0.88rem;
+    font-weight: 700;
+    cursor: pointer;
+    min-height: 44px;
+    display: none;
+    transition: all 0.15s;
+  }
+  .clear-btn.show { display: flex; align-items: center; gap: 0.3rem; }
+  .clear-btn:active { background: #fde8e6; }
+
+  /* Feedback */
+  .feedback {
+    display: none;
+    margin-top: 0.7rem;
+    padding: 0.7rem 1rem;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+  .feedback.correct {
+    display: block;
+    background: var(--correct-bg);
+    color: var(--correct);
+    border: 2px solid #6fcf97;
+  }
+  .feedback.wrong {
+    display: block;
+    background: var(--wrong-bg);
+    color: var(--wrong);
+    border: 2px solid #eb9999;
+  }
+
+  /* Multiple Choice */
+  .mc-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.6rem;
+    margin-top: 0.5rem;
+  }
+  .mc-btn {
+    padding: 0.8rem 0.8rem;
+    background: white;
+    border: 2.5px solid var(--border);
+    border-radius: 12px;
+    font-family: var(--font);
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    min-height: 56px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+    text-align: center;
+  }
+  .mc-btn:active { transform: scale(0.97); }
+  .mc-btn.selected { border-color: var(--primary); background: #edf7f2; }
+  .mc-btn.correct-answer { background: var(--correct-bg); border-color: var(--correct); color: var(--correct); }
+  .mc-btn.wrong-answer { background: var(--wrong-bg); border-color: var(--wrong); color: var(--wrong); }
+  .mc-btn:disabled { cursor: default; }
+
+  /* Bruch-Darstellung (nicht editierbar) */
+  .frac {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    vertical-align: middle;
+    margin: 0 2px;
+    font-family: var(--mono);
+    font-weight: 600;
+    line-height: 1;
+  }
+  .frac > span:first-child { border-bottom: 2px solid currentColor; padding-bottom: 1px; }
+  .frac > span { display: block; text-align: center; padding: 1px 3px; }
+
+  /* Tipp-Box */
+  .tipp-toggle {
+    background: none;
+    border: 2px solid var(--accent);
+    color: var(--accent2);
+    border-radius: 10px;
+    font-family: var(--font);
+    font-size: 0.85rem;
+    font-weight: 800;
+    padding: 0.4rem 0.9rem;
+    cursor: pointer;
+    min-height: 44px;
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    margin-top: 0.5rem;
+    transition: all 0.15s;
+  }
+  .tipp-toggle:active { background: #fff5ee; }
+  .tipp-box {
+    display: none;
+    background: #fff8f0;
+    border: 2px solid var(--accent);
+    border-radius: 12px;
+    padding: 0.9rem 1rem;
+    margin-top: 0.6rem;
+    font-size: 0.93rem;
+    line-height: 1.6;
+    color: #7c4a0a;
+  }
+  .tipp-box.open { display: block; }
+
+  /* Textaufgabe */
+  .textaufgabe-box {
+    background: linear-gradient(135deg, #f0faf5 0%, #e8f7f0 100%);
+    border: 2px solid #b7dfc9;
+    border-radius: 14px;
+    padding: 1.1rem 1.2rem;
+    margin-bottom: 1rem;
+    font-size: 1rem;
+    line-height: 1.7;
+  }
+  .textaufgabe-box .kontext {
+    font-size: 0.92rem;
+    color: var(--text-muted);
+    margin-bottom: 0.6rem;
+    font-weight: 700;
+  }
+  .textaufgabe-box .frage {
+    font-weight: 800;
+    color: var(--primary);
+    margin-top: 0.5rem;
+  }
+
+  /* Wiederholung */
+  .wiederholung-badge {
+    background: #fff3e0;
+    color: #d66a00;
+    border: 2px solid #ffc87a;
+    border-radius: 10px;
+    padding: 0.3rem 0.8rem;
+    font-size: 0.8rem;
+    font-weight: 800;
+    display: inline-block;
+    margin-bottom: 0.8rem;
+  }
+
+  /* Auswertung */
+  .auswertung-box {
+    text-align: center;
+    padding: 2rem 1rem;
+  }
+  .auswertung-kreis {
+    width: 110px; height: 110px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-light), var(--primary));
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 1.2rem;
+    font-size: 2rem;
+    font-weight: 900;
+    color: white;
+    box-shadow: 0 6px 20px rgba(45,106,79,0.30);
+  }
+  .auswertung-text { font-size: 1.1rem; font-weight: 700; color: var(--text); }
+  .auswertung-detail { font-size: 0.9rem; color: var(--text-muted); margin-top: 0.4rem; }
+  .stern { font-size: 2rem; }
+
+  /* WEITER-Button */
+  .weiter-btn {
+    display: none;
+    width: 100%;
+    padding: 1rem;
+    background: linear-gradient(135deg, var(--primary-light), var(--primary));
+    color: white;
+    border: none;
+    border-radius: 14px;
+    font-family: var(--font);
+    font-size: 1.1rem;
+    font-weight: 900;
+    cursor: pointer;
+    min-height: 56px;
+    margin-top: 1.5rem;
+    box-shadow: 0 4px 16px rgba(45,106,79,0.25);
+    transition: all 0.2s;
+    letter-spacing: 0.02em;
+  }
+  .weiter-btn.show { display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
+  .weiter-btn:active { transform: scale(0.98); }
+
+  /* T-Rex */
+  .trex {
+    position: fixed;
+    bottom: 16px; right: 16px;
+    font-size: 1.8rem;
+    cursor: pointer;
+    z-index: 100;
+    user-select: none;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+    transition: transform 0.2s;
+  }
+  .trex:hover, .trex:active { transform: scale(1.15); }
+  .trex-tooltip {
+    position: fixed;
+    bottom: 60px; right: 14px;
+    background: #1b2a22;
+    color: white;
+    font-family: var(--font);
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 0.35rem 0.75rem;
+    border-radius: 8px;
+    white-space: nowrap;
+    display: none;
+    z-index: 101;
+  }
+  .trex-tooltip.show { display: block; }
+
+  /* Gemischte Zahl: z.B. 1½ */
+  .gemischt {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    vertical-align: middle;
+  }
+  .gemischt .ganz {
+    font-weight: 800;
+    font-size: 1.1rem;
+  }
+
+  /* Separating line in formula */
+  .op-symbol {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin: 0 4px;
+    vertical-align: middle;
+  }
+
+  @media (max-width: 500px) {
+    .mc-options { grid-template-columns: 1fr; }
+    header h1 { font-size: 1.1rem; }
+    .card { padding: 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="icon">✖️➗</div>
+  <div>
+    <h1>Brüche multiplizieren &amp; dividieren</h1>
+    <div class="subtitle">Klasse 6 · Übung</div>
+  </div>
+</header>
+
+<!-- TAB BAR -->
+<div class="tab-bar" id="tabBar">
+  <button class="tab-btn active" onclick="showPage(0)" id="tab0">🟢 Multiplizieren</button>
+  <button class="tab-btn" onclick="showPage(1)" id="tab1">📝 Text: Malnehmen</button>
+  <button class="tab-btn" onclick="showPage(2)" id="tab2">🔵 Dividieren</button>
+  <button class="tab-btn" onclick="showPage(3)" id="tab3">📝 Text: Dividieren</button>
+  <button class="tab-btn" onclick="showPage(4)" id="tab4">🔁 Wiederholung</button>
+  <button class="tab-btn" onclick="showPage(5)" id="tab5">📊 Auswertung</button>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     SEITE 0: MULTIPLIZIEREN
+═══════════════════════════════════════════════════════ -->
+<div class="page active" id="page0">
+
+  <!-- Level switcher -->
+  <div style="margin-top:1rem;" class="level-switcher" id="mul-levels">
+    <button class="level-btn active" onclick="setLevel('mul',0,this)">⭐ Grundlagen</button>
+    <button class="level-btn" onclick="setLevel('mul',1,this)">⭐⭐ Fortgeschritten</button>
+    <button class="level-btn" onclick="setLevel('mul',2,this)">⭐⭐⭐ Profi</button>
+  </div>
+
+  <!-- GRUNDLAGEN -->
+  <div id="mul-level-0">
+
+    <div class="card">
+      <div class="card-title"><div class="num">1</div>Zähler mal Zähler, Nenner mal Nenner</div>
+      <div class="aufgabe">
+        <div class="aufgabe-text">Berechne:
+          <span class="frac"><span>2</span><span>3</span></span>
+          <span class="op-symbol">·</span>
+          <span class="frac"><span>1</span><span>4</span></span>
+          = ?
+        </div>
+        <div class="eingabe-row">
+          <div class="bruch-eingabe" id="mul-a1">
+            <input type="number" inputmode="numeric" placeholder="Z" id="mul-a1-z" min="0">
+            <div class="bruch-linie"></div>
+            <input type="number" inputmode="numeric" placeholder="N" id="mul-a1-n" min="1">
+          </div>
+          <button class="check-btn" onclick="checkBruch('mul-a1',2,12,'mul',0)">Prüfen</button>
+          <button class="clear-btn" id="clear-mul-a1" onclick="clearAufgabe('mul-a1')">✖ Leeren</button>
+        </div>
+        <div class="feedback" id="fb-mul-a1"></div>
+        <button class="tipp-toggle" onclick="toggleTipp('tipp-mul-a1')">💡 Tipp</button>
+        <div class="tipp-box" id="tipp-mul-a1">
+          Zähler · Zähler: 2 · 1 = 2<br>
+          Nenner · Nenner: 3 · 4 = 12<br>
+          Ergebnis: <span class="frac"><span>2</span><span>12</span></span> – kürzen ergibt <span class="frac"><span>1</span><span>6</span></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><div class="num">2</div>Einfaches Multiplizieren</div>
+      <div class="aufgabe">
+        <div class="aufgabe-text">Berechne und kürze:
+          <span class="frac"><span>3</span><span>5</span></span>
+          <span class="op-symbol">·</span>
+          <span class="frac"><span>2</span><span>3</span></span>
+          = ?
+        </div>
+        <div class="eingabe-row">
+          <div class="bruch-eingabe" id="mul-a2">
+            <input type="number" inputmode="numeric" placeholder="Z" id="mul-a2-z" min="0">
+            <div class="bruch-linie"></div>
+            <input type="number" inputmode="numeric" placeholder="N" id="mul-a2-n" min="1">
+          </div>
+          <button class="check-btn" onclick="checkBruch('mul-a2',2,5,'mul',0)">Prüfen</button>
+          <button class="clear-btn" id="clear-mul-a2" onclick="clearAufgabe('mul-a2')">✖ Leeren</button>
+        </div>
+        <div class="feedback" id="fb-mul-a2"></div>
+        <button class="tipp-toggle" onclick="toggleTipp('tipp-mul-a2')">💡 Tipp</button>
+        <div class="tipp-box" id="tipp-mul-a2">
+          3 · 2 = 6 im Zähler, 5 · 3 = 15 im Nenner → <span class="frac"><span>6</span><span>15</span></span> kürzen durch 3.
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><div class="num">3</div>Bruch mal ganze Zahl</div>
+      <div class="aufgabe">
+        <div class="aufgabe-text">Berechne:
+          <span class="frac"><span>3</span><span>4</span></span>
+          <span class="op-symbol">·</span>
+          8 = ?
+        </div>
+        <div class="eingabe-row">
+          <input type="number" inputmode="numeric" class="ganzzahl" id="mul-a3-z" placeholder="?">
+          <button class="check-btn" onclick="checkGanz('mul-a3',6,'mul',0)">Prüfen</button>
+          <button class="clear-btn" id="clear-mul-a3" onclick="clearGanz('mul-a3')">✖ Leeren</button>
+        </div>
+        <div class="feedback" id="fb-mul-a3"></div>
+        <button class="tipp-toggle" onclick="toggleTipp('tipp-mul-a3')">💡 Tipp</button>
+        <div class="tipp-box" id="tipp-mul-a3">
+          Schreibe 8 als <span class="frac"><span>8</span><span>1</span></span> → dann Zähler · Zähler = 24, Nenner · Nenner = 4 → <span class="frac"><span>24</span><span>4</span></span> = 6
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end grundlagen -->
+
+  <!-- FORTGESCHRITTEN -->
+  <div id="mul-level-1" style="display:none">
+
+    <div class="card">
+      <div class="card-title"><div class="num">1</div>Gemischte Zahl mal Bruch</div>
+      <div class="aufgabe">
+        <div class="aufgabe-text">Berechne und kürze vollständig:
+          <span class="gemischt"><span class="ganz">1</span><span class="frac"><span>1</span><span>2</span></span></span>
+          <span class="op-symbol">·</span>
+          <span class="frac"><span>2</span><span>3</span></span>
+          = ?
+        </div>
+        <div style="font-size:0.88rem;color:var(--text-muted);margin-bottom:0.6rem">
+          Tipp: Schreibe die gemischte Zahl zuerst als unechten Bruch.
+        </div>
+        <div class="eingabe-row">
+          <div class="bruch-eingabe" id="mul-b1">
+            <input type="number" inputmode="numeric" placeholder="Z" id="mul-b1-z" min="0">
+            <div class="bruch-linie"></div>
+            <input type="number" inputmode="numeric" placeholder="N" id="mul-b1-n" min="1">
+          </div>
+          <button class="check-btn" onclick="checkBruch('mul-b1',1,1,'mul',1)">Prüfen</button>
+          <button class="clear-btn" id="clear-mul-b1" onclick="clearAufgabe('mul-b1')">✖ Leeren</button>
+        </div>
+        <div class="feedback" id="fb-mul-b1"></div>
+        <button class="tipp-toggle" onclick="toggleTipp('tipp-mul-b1')">💡 Tipp</button>
+        <div class="tipp-box" id="tipp-mul-b1">
+          1<span class="frac"><span>1</span><span>2</span></span> = <span class="frac"><span>3</span><span>2</span></span> (1 ganzes = <span class="frac"><span>2</span><span>2</span></span>, plus <span class="frac"><span>1</span><span>2</span></span>)<br>
+          Dann: <span class="frac"><span>3</span><span>2</span></span> · <span class="frac"><span>2</span><span>3</span></span> = … kürzen!
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><div class="num">2</div>Gemischte Zahl mal gemischte Zahl</div>
+      <div class="aufgabe">
+        <div class="aufgabe-text">Berechne:
+          <span class="gemischt"><span class="ganz">1</span><span class="frac"><span>1</span><span>3</span></span></span>
+          <span class="op-symbol">·</span>
+          <span class="gemischt"><span class="ganz">2</span><span class="frac"><span>1</span><span>4</span></span></span>
+          = ?
+        </div>
+        <div class="aufgabe-text" style="font-size:0.88rem;color:var(--text-muted)">Gib das Ergebnis als unechten Bruch an.</div>
+        <div class="eingabe-row">
+          <div class="bruch-eingabe" id="mul-b2">
+            <input type="number" inputmode="numeric" placeholder="Z" id="mul-b2-z" min="0">
+            <div class="bruch-linie"></div>
+            <input type="number" inputmode="numeric" placeholder="N" id="mul-b2-n" min="1">
+          </div>
+          <button class="check-btn" onclick="checkBruch('mul-b2',3,1,'mul',1)">Prüfen</button>
+          <button class="clear-btn" id="clear-mul-b2" onclick="clearAufgabe('mul-b2')">✖ Leeren</button>
+        </div>
+        <div class="feedback" id="fb-mul-b2"></div>
+        <button class="tipp-toggle" onclick="toggleTipp('tipp-mul-b2')">💡 Tipp</button>
+        <div class="tipp-box" id="tipp-mul-b2">
+          1<span class="frac"><span>1</span><span>3</span></span> = <span class="frac"><span>4</span><span>3</span></span> &nbsp;|&nbsp; 2<span class="frac"><span>1</span><span>4</span></span> = <span class="frac"><span>9</span><span>4</span></span><br>
+          Dann: <span class="frac"><span>4</span><span>3</span></span> · <span class="frac"><span>9</span><span>4</span></span> = ? → kürzen!
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><div class="num">3</div>Gemischte Zahl mal Bruch – Multiple Choice</div>
+      <div class="aufgabe">
+        <div class="aufgabe-text">
+          <span class="gemischt"><span class="ganz">2</span><span class="frac"><span>2</span><span>5</span></span></span>
+          <span class="op-symbol">·</span>
+          <span class="frac"><span>5</span><span>6</span></span>
+          = ?
+        </div>
+        <div class="mc-options" id="mc-mul-b3">
+          <button class="mc-btn" onclick="checkMC('mc-mul-b3', this, false, 'mul', 1)"><span class="gemischt"><span class="ganz">1</span><span class="frac"><span>1</span><span>2</span></span></span></button>
+          <button class="mc-btn" onclick="checkMC('mc-mul-b3', this, true, 'mul', 1)">2</button>
+          <button class="mc-btn" onclick="checkMC('mc-mul-b3', this, false, 'mul', 1)"><span class="frac"><span>7</span><span>6</span></span></button>
+          <button class="mc-btn" onclick="checkMC('mc-mul-b3', this, false, 'mul', 1)"><span class="gemischt"><span class="ganz">1</span><span class="frac"><span>2</span><span>3</span></span></span></button>
+        </div>
+        <div class="feedback" id="fb-mc-mul-b3"></div>
+      </div>
+    </div>
+
+  </div><!-- end fortgeschritten -->
+
+  <!-- PROFI -->
+  <div id="mul-level-2" style="display:none">
+
+    <div class="card">
+      <div class="card-title"><div class="num">1</div>Gemischte Zahl – Kürzen vor dem Rechnen</div>
+      <div class="aufgabe">
+        <div class="aufgabe-text">Wandle zuerst um, kürze dann geschickt:
+          <span class="gemischt"><span class="ganz">2</span><span class="frac"><span>1</span><span>3</span></span></span>
+          <span class="op-symbol">·</span>
+          <span class="frac"><span>9</span><span>28</span></span>
+          = ?
+        </div>
+        <div class="eingabe-row">
+          <div class="bruch-eingabe" id="mul-c1">
+            <input type="number" inputmode="numeric" placeholder="Z" id="mul-c1-z" min="0">
+            <div class="bruch-linie"></div>
+            <input type="number" inputmode="numeric" placeholder="N" id="mul-c1-n" min="1">
+          </div>
+          <button class="check-btn" onclick="checkBruch('mul-c1',3,4,'mul',2)">Prüfen</button>
+          <button class="clear-btn" id="clear-mul-c1" onclick="clearAufgabe('mul-c1')">✖ Leeren</button>
+        </div>
+        <div class="feedback" id="fb-mul-c1"></div>
+        <button class="tipp-toggle" onclick="toggleTipp('tipp-mul-c1')">💡 Tipp</button>
+        <div class="tipp-box" id="tipp-mul-c1">
+          2<span class="frac"><span>1</span><span>3</span></span> = <span class="frac"><span>7</span><span>3</span></span><br>
+          Dann: <span class="frac"><span>7</span><span>3</span></span> · <span class="frac"><span>9</span><span>28</span></span> – kürze 7 mit 28 und 9 mit 3.
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><div class="num">2</div>Zwei gemischte Zahlen – Profi-Niveau</div>
+      <div class="aufgabe">
+        <div class="aufgabe-text">Berechne vollständig gekürzt:
+          <span class="gemischt"><span class="ganz">1</span><span class="frac"><span>4</span><span>5</span></span></span>
+          <span class="op-symbol">·</span>
+          <span class="gemischt"><span class="ganz">1</span><span class="frac"><span>2</span><span>3</span></span></span>
+          = ?
+        </div>
+        <div class="aufgabe-text" style="font-size:0.88rem;color:var(--text-muted)">Gib das Ergebnis als unechten Bruch an.</div>
+        <div class="eingabe-row">
+          <div class="bruch-eingabe" id="mul-c2">
+            <input type="number" inputmode="numeric" placeholder="Z" id="mul-c2-z" min="0">
+            <div class="bruch-linie"></div>
+            <input type="number" inputmode="numeric" placeholder="N" id="mul-c2-n" min="1">
+          </div>
+          <button class="check-btn" onclick="checkBruch('mul-c2',3,1,'mul',2)">Prüfen</button>
+          <button class="clear-btn" id="clear-mul-c2" onclick="clearAufgabe('mul-c2')">✖ Leeren</button>
+        </div>
+        <div class="feedback" id="fb-mul-c2"></div>
+        <button class="tipp-toggle" onclick="toggleTipp('tipp-mul-c2')">💡 Tipp</button>
+        <div class="tipp-box" id="tipp-mul-c2">
+          1<span class="frac"><span>4</span><span>5</span></span> = <span class="frac"><span>9</span><span>5</span></span> &nbsp;|&nbsp; 1<span class="frac"><span>2</span><span>3</span></span> = <span class="frac"><span>5</span><span>3</span></span><br>
+          Dann multiplizieren und kürzen.
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><div class="num">3</div>Multiple Choice: Welches Ergebnis stimmt?</div>
+      <div class="aufgabe">
+        <div class="aufgabe-text">
+          <span class="gemischt"><span class="ganz">1</span><span class="frac"><span>1</span><span>4</span></span></span>
+          <span class="op-symbol">·</span>
+          <span class="frac"><span>8</span><span>15</span></span>
+          = ?
+        </div>
+        <div class="mc-options" id="mc-mul-c3">
+          <button class="mc-btn" onclick="checkMC('mc-mul-c3', this, false, 'mul', 2)"><span class="frac"><span>8</span><span>60</span></span></button>
+          <button class="mc-btn" onclick="checkMC('mc-mul-c3', this, false, 'mul', 2)"><span class="frac"><span>5</span><span>12</span></span></button>
+          <button class="mc-btn" onclick="checkMC('mc-mul-c3', this, true, 'mul', 2)"><span class="frac"><span>2</span><span>3</span></span></button>
+          <button class="mc-btn" onclick="checkMC('mc-mul-c3', this, false, 'mul', 2)"><span class="frac"><span>3</span><span>4</span></span></button>
+        </div>
+        <div class="feedback" id="fb-mc-mul-c3"></div>
+      </div>
+    </div>
+
+  </div><!-- end profi -->
+
+  <button class="weiter-btn" id="weiter-mul" onclick="showPage(1)">Weiter zur Textaufgabe ➜</button>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     SEITE 1: TEXTAUFGABE MULTIPLIZIEREN
+═══════════════════════════════════════════════════════ -->
+<div class="page" id="page1">
+  <div style="margin-top:1rem;" class="level-switcher" id="tmul-levels">
+    <button class="level-btn active" onclick="setLevel('tmul',0,this)">⭐ Grundlagen</button>
+    <button class="level-btn" onclick="setLevel('tmul',1,this)">⭐⭐ Fortgeschritten</button>
+    <button class="level-btn" onclick="setLevel('tmul',2,this)">⭐⭐⭐ Profi</button>
+  </div>
+
+  <!-- GRUNDLAGEN -->
+  <div id="tmul-level-0">
+    <div class="card">
+      <div class="card-title"><div class="num">📝</div>Textaufgabe: Backen</div>
+      <div class="textaufgabe-box">
+        <div class="kontext">📖 Situation</div>
+        Lena backt einen Kuchen. Das Rezept braucht
+        <span class="frac"><span>3</span><span>4</span></span> kg Mehl.
+        Sie möchte nur <span class="frac"><span>1</span><span>2</span></span> des Rezepts backen.
+        <div class="frage">Wie viel Mehl braucht Lena?</div>
+      </div>
+      <div class="aufgabe">
+        <div class="aufgabe-text">Gib das Ergebnis als vollständig gekürzten Bruch ein (in kg):</div>
+        <div class="eingabe-row">
+          <div class="bruch-eingabe" id="tmul-a1">
+            <input type="number" inputmode="numeric" placeholder="Z" id="tmul-a1-z" min="0">
+            <div class="bruch-linie"></div>
+            <input type="number" inputmode="numeric" placeholder="N" id="tmul-a1-n" min="1">
+          </div>
+          <button class="check-btn" onclick="checkBruch('tmul-a1',3,8,'tmul',0)">Prüfen</button>
+          <button class="clear-btn" id="clear-tmul-a1" onclick="clearAufgabe('tmul-a1')">✖ Leeren</button>
+        </div>
+        <div class="feedback" id="fb-tmul-a1"></div>
+        <button class="tipp-toggle" onclick="toggleTipp('tipp-tmul-a1')">💡 Tipp</button>
+        <div class="tipp-box" id="tipp-tmul-a1">
+          „Die Hälfte von" bedeutet: ·
+          <span class="frac"><span>1</span><span>2</span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FORTGESCHRITTEN -->
+  <div id="tmul-level-1" style="display:none">
+    <div class="card">
+      <div class="card-title"><div class="num">📝</div>Textaufgabe: Wanderweg</div>
+      <div class="textaufgabe-box">
+        <div class="kontext">📖 Situation</div>
+        Ein Wanderweg ist
+        <span class="frac"><span>5</span><span>6</span></span> km lang.
+        Elias hat bereits <span class="frac"><span>2</span><span>3</span></span> des Weges zurückgelegt.
+        <div class="frage">Wie viele Kilometer hat Elias schon gewandert?</div>
+      </div>
+      <div class="aufgabe">
+        <div class="aufgabe-text">Ergebnis in km (vollständig gekürzt):</div>
+        <div class="eingabe-row">
+          <div class="bruch-eingabe" id="tmul-b1">
+            <input type="number" inputmode="numeric" placeholder="Z" id="tmul-b1-z" min="0">
+            <div class="bruch-linie"></div>
+            <input type="number" inputmode="numeric" placeholder="N" id="tmul-b1-n" min="1">
+          </div>
+          <button class="check-btn" onclick="checkBruch('tmul-b1',5,9,'tmul',1)">Prüfen</button>
+          <button class="clear-btn" id="clear-tmul-b1" onclick="clearAufgabe('tmul-b1')">✖ Leeren</button>
+        </div>
+        <div class="feedback" id="fb-tmul-b1"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROFI -->
+  <div id="tmul-level-2" style="display:none">
+    <div class="card">
+      <div class="card-title"><div class="num">📝</div>Textaufgabe: Schneiderin</div>
+      <div class="textaufgabe-box">
+        <div class="kontext">📖 Situation</div>
+        Eine Schneiderin hat
+        <span class="gemischt"><span class="ganz">2</span><span class="frac"><span>1</span><span>4</span></span></span> m Stoff.
+        Für ein Kleid braucht sie jeweils <span class="frac"><span>3</span><span>4</span></span> des vorhandenen Stoffes.
+        <div class="frage">Wie viele Meter Stoff verarbeitet sie für das Kleid?</div>
+      </div>
+      <div class="aufgabe">
+        <div class="aufgabe-text">Vollständig gekürztes Ergebnis (als unechten Bruch oder ganze Zahl) in m:</div>
+        <div class="eingabe-row">
+          <div class="bruch-eingabe" id="tmul-c1">
+            <input type="number" inputmode="numeric" placeholder="Z" id="tmul-c1-z" min="0">
+            <div class="bruch-linie"></div>
+            <input type="number" inputmode="numeric" placeholder="N" id="tmul-c1-n" min="1">
+          </div>
+          <button class="check-btn" onclick="checkBruch('tmul-c1',27,16,'tmul',2)">Prüfen</button>
+          <button class="clear-btn" id="clear-tmul-c1" onclick="clearAufgabe('tmul-c1')">✖ Leeren</button>
+        </div>
+        <div class="feedback" id="fb-tmul-c1"></div>
+        <button class="tipp-toggle" onclick="toggleTipp('tipp-tmul-c1')">💡 Tipp</button>
+        <div class="tipp-box" id="tipp-tmul-c1">
+          Wandle 2<span class="frac"><span>1</span><span>4</span></span> in einen unechten Bruch um: = <span class="frac"><span>9</span><span>4</span></span><br>
+          Dann: <span class="frac"><span>9</span><span>4</span></span> · <span class="frac"><span>3</span><span>4</span></span> = ?
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <button class="weiter-btn" id="weiter-tmul" onclick="showPage(2)">Weiter zur Division ➜</button>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     SEITE 2: DIVIDIEREN
+═══════════════════════════════════════════════════════ -->
+<div class="page" id="page2">
+
+  <div style="margin-top:1rem;" class="level-switcher" id="div-levels">
+    <button class="level-btn active" onclick="setLevel('div',0,this)">⭐ Grundlagen</button>
+    <button class="level-btn" onclick="setLevel('div',1,this)">⭐⭐ Fortgeschritten</button>
+    <button class="level-btn" onclick="setLevel('div',2,this)">⭐⭐⭐ Profi</button>
+  </div>
+
+  <!-- GRUNDLAGEN -->
+  <div id="div-level-0">
+
+    <div class="card">
+      <div class="card-title"><div class="num">1</div>Division = Mal Kehrwert</div>
+      <div class="aufgabe">
+        <div class="aufgabe-text">Berechne:
+          <span class="frac"><span>3</span><span>4</span></span>
+          ÷
+          <span class="frac"><span>1</span><span>2</span></span>
+          = ?
+        </div>
+        <div class="eingabe-row">
+          <div class="bruch-eingabe" id="div-a1">
+            <input type="number" inputmode="numeric" placeholder="Z" id="div-a1-z" min="0">
+            <div class="bruch-linie"></div>
+            <input type="number" inputmode="numeric" placeholder="N" id="div-a1-n" min="1">
+          </div>
+          <button class="check-btn" onclick="checkBruch('div-a1',3,2,'div',0)">Prüfen</button>
+          <button class="clear-btn" id="clear-div-a1" onclick="clearAufgabe('div-a1')">✖ Leeren</button>
+        </div>
+        <div class="feedback" id="fb-div-a1"></div>
+        <button class="tipp-toggle" onclick="toggleTipp('tipp-div-a1')">💡 Tipp</button>
+        <div class="tipp-box" id="tipp-div-a1">
+          Drehe den zweiten Bruch um (Kehrwert): <span class="frac"><span>1</span><span>2</span></span> → <span class="frac"><span>2</span><span>1</span></span><br>
+          Dann multiplizieren: <span class="frac"><span>3</span><span>4</span></span> · <span class="frac"><span>2</span><span>1</span></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><div class="num">2</div>Einfache Division</div>
+      <div class="aufgabe">
+        <div class="aufgabe-text">Berechne und kürze:
+          <span class="frac"><span>5</span><span>6</span></span>
+          ÷
+          <span class="frac"><span>5</span><span>3</span></span>
+          = ?
+        </div>
+        <div class="eingabe-row">
+          <div class="bruch-eingabe" id="div-a2">
+            <input type="number" inputmode="numeric" placeholder="Z" id="div-a2-z" min="0">
+            <div class="bruch-linie"></div>
+            <input type="number" inputmode="numeric" placeholder="N" id="div-a2-n" min="1">
+          </div>
+          <button class="check-btn" onclick="checkBruch('div-a2',1,2,'div',0)">Prüfen</button>
+          <button class="clear-btn" id="clear-div-a2" onclick="clearAufgabe('div-a2')">✖ Leeren</button>
+        </div>
+        <div class="feedback" id="fb-div-a2"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><div class="num">3</div>Bruch durch ganze Zahl</div>
+      <div class="aufgabe">
+        <div class="aufgabe-text">Berechne:
+          <span class="frac"><span>4</span><span>5</span></span>
+          ÷ 4 = ?
+        </div>
+        <div class="eingabe-row">
+          <div class="bruch-eingabe" id="div-a3">
+            <input type="number" inputmode="numeric" placeholder="Z" id="div-a3-z" min="0">
+            <div class="bruch-linie"></div>
+            <input type="number" inputmode="numeric" placeholder="N" id="div-a3-n" min="1">
+          </div>
+          <button class="check-btn" onclick="checkBruch('div-a3',1,5,'div',0)">Prüfen</button>
+          <button class="clear-btn" id="clear-div-a3" onclick="clearAufgabe('div-a3')">✖ Leeren</button>
+        </div>
+        <div class="feedback" id="fb-div-a3"></div>
+        <button class="tipp-toggle" onclick="toggleTipp('tipp-div-a3')">💡 Tipp</button>
+        <div class="tipp-box" id="tipp-div-a3">
+          Schreibe 4 als <span class="frac"><span>4</span><span>1</span></span> → Kehrwert ist <span class="frac"><span>1</span><span>4</span></span>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end grundlagen -->
+
+  <!-- FORTGESCHRITTEN -->
+  <div id="div-level-1" style="display:none">
+
+    <div class="card">
+      <div class="card-title"><div class="num">1</div>Gemischte Zahl dividieren</div>
+      <div class="aufgabe">
+        <div class="aufgabe-text">Berechne und kürze vollständig:
+          <span class="gemischt"><span class="ganz">1</span><span class="frac"><span>1</span><span>2</span></span></span>
+          ÷
+          <span class="frac"><span>3</span><span>4</span></span>
+          = ?
+        </div>
+        <div style="font-size:0.88rem;color:var(--text-muted);margin-bottom:0.6rem">
+          Tipp: Zuerst in unechten Bruch umwandeln, dann dividieren.
+        </div>
+        <div class="eingabe-row">
+          <div class="bruch-eingabe" id="div-b1">
+            <input type="number" inputmode="numeric" placeholder="Z" id="div-b1-z" min="0">
+            <div class="bruch-linie"></div>
+            <input type="number" inputmode="numeric" placeholder="N" id="div-b1-n" min="1">
+          </div>
+          <button class="check-btn" onclick="checkBruch('div-b1',2,1,'div',1)">Prüfen</button>
+          <button class="clear-btn" id="clear-div-b1" onclick="clearAufgabe('div-b1')">✖ Leeren</button>
+        </div>
+        <div class="feedback" id="fb-div-b1"></div>
+        <button class="tipp-toggle" onclick="toggleTipp('tipp-div-b1')">💡 Tipp</button>
+        <div class="tipp-box" id="tipp-div-b1">
+          1<span class="frac"><span>1</span><span>2</span></span> = <span class="frac"><span>3</span><span>2</span></span><br>
+          Dann: <span class="frac"><span>3</span><span>2</span></span> ÷ <span class="frac"><span>3</span><span>4</span></span> = <span class="frac"><span>3</span><span>2</span></span> · <span class="frac"><span>4</span><span>3</span></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><div class="num">2</div>Gemischte Zahl durch gemischte Zahl</div>
+      <div class="aufgabe">
+        <div class="aufgabe-text">Berechne:
+          <span class="gemischt"><span class="ganz">2</span><span class="frac"><span>2</span><span>3</span></span></span>
+          ÷
+          <span class="gemischt"><span class="ganz">1</span><span class="frac"><span>1</span><span>3</span></span></span>
+          = ?
+        </div>
+        <div class="aufgabe-text" style="font-size:0.88rem;color:var(--text-muted)">Gib das Ergebnis als vollständig gekürzten Bruch oder ganze Zahl an.</div>
+        <div class="eingabe-row">
+          <div class="bruch-eingabe" id="div-b2">
+            <input type="number" inputmode="numeric" placeholder="Z" id="div-b2-z" min="0">
+            <div class="bruch-linie"></div>
+            <input type="number" inputmode="numeric" placeholder="N" id="div-b2-n" min="1">
+          </div>
+          <button class="check-btn" onclick="checkBruch('div-b2',2,1,'div',1)">Prüfen</button>
+          <button class="clear-btn" id="clear-div-b2" onclick="clearAufgabe('div-b2')">✖ Leeren</button>
+        </div>
+        <div class="feedback" id="fb-div-b2"></div>
+        <button class="tipp-toggle" onclick="toggleTipp('tipp-div-b2')">💡 Tipp</button>
+        <div class="tipp-box" id="tipp-div-b2">
+          2<span class="frac"><span>2</span><span>3</span></span> = <span class="frac"><span>8</span><span>3</span></span> &nbsp;|&nbsp; 1<span class="frac"><span>1</span><span>3</span></span> = <span class="frac"><span>4</span><span>3</span></span><br>
+          Dann: <span class="frac"><span>8</span><span>3</span></span> · <span class="frac"><span>3</span><span>4</span></span> = ?
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><div class="num">3</div>Multiple Choice</div>
+      <div class="aufgabe">
+        <div class="aufgabe-text">
+          <span class="gemischt"><span class="ganz">1</span><span class="frac"><span>1</span><span>5</span></span></span>
+          ÷
+          <span class="frac"><span>3</span><span>5</span></span>
+          = ?
+        </div>
+        <div class="mc-options" id="mc-div-b3">
+          <button class="mc-btn" onclick="checkMC('mc-div-b3', this, false, 'div', 1)"><span class="frac"><span>18</span><span>25</span></span></button>
+          <button class="mc-btn" onclick="checkMC('mc-div-b3', this, true, 'div', 1)">2</button>
+          <button class="mc-btn" onclick="checkMC('mc-div-b3', this, false, 'div', 1)"><span class="gemischt"><span class="ganz">1</span><span class="frac"><span>4</span><span>5</span></span></span></button>
+          <button class="mc-btn" onclick="checkMC('mc-div-b3', this, false, 'div', 1)"><span class="frac"><span>3</span><span>5</span></span></button>
+        </div>
+        <div class="feedback" id="fb-mc-div-b3"></div>
+      </div>
+    </div>
+
+  </div><!-- end fortgeschritten -->
+
+  <!-- PROFI -->
+  <div id="div-level-2" style="display:none">
+
+    <div class="card">
+      <div class="card-title"><div class="num">1</div>Gemischte Zahlen – Kürzen vor dem Rechnen</div>
+      <div class="aufgabe">
+        <div class="aufgabe-text">Berechne vollständig gekürzt:
+          <span class="gemischt"><span class="ganz">3</span><span class="frac"><span>1</span><span>2</span></span></span>
+          ÷
+          <span class="gemischt"><span class="ganz">1</span><span class="frac"><span>1</span><span>6</span></span></span>
+          = ?
+        </div>
+        <div class="eingabe-row">
+          <div class="bruch-eingabe" id="div-c1">
+            <input type="number" inputmode="numeric" placeholder="Z" id="div-c1-z" min="0">
+            <div class="bruch-linie"></div>
+            <input type="number" inputmode="numeric" placeholder="N" id="div-c1-n" min="1">
+          </div>
+          <button class="check-btn" onclick="checkBruch('div-c1',3,1,'div',2)">Prüfen</button>
+          <button class="clear-btn" id="clear-div-c1" onclick="clearAufgabe('div-c1')">✖ Leeren</button>
+        </div>
+        <div class="feedback" id="fb-div-c1"></div>
+        <button class="tipp-toggle" onclick="toggleTipp('tipp-div-c1')">💡 Tipp</button>
+        <div class="tipp-box" id="tipp-div-c1">
+          3<span class="frac"><span>1</span><span>2</span></span> = <span class="frac"><span>7</span><span>2</span></span> &nbsp;|&nbsp; 1<span class="frac"><span>1</span><span>6</span></span> = <span class="frac"><span>7</span><span>6</span></span><br>
+          Dann: <span class="frac"><span>7</span><span>2</span></span> · <span class="frac"><span>6</span><span>7</span></span> = ? → kürze 7 mit 7 und 6 mit 2.
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><div class="num">2</div>Kettenaufgabe mit gemischten Zahlen</div>
+      <div class="aufgabe">
+        <div class="aufgabe-text">Berechne:
+          <span class="gemischt"><span class="ganz">2</span><span class="frac"><span>1</span><span>2</span></span></span>
+          ÷
+          <span class="frac"><span>5</span><span>6</span></span>
+          ÷
+          <span class="gemischt"><span class="ganz">1</span><span class="frac"><span>1</span><span>2</span></span></span>
+          = ?
+        </div>
+        <div class="aufgabe-text" style="font-size:0.88rem;color:var(--text-muted)">(Teile von links nach rechts)</div>
+        <div class="eingabe-row">
+          <div class="bruch-eingabe" id="div-c2">
+            <input type="number" inputmode="numeric" placeholder="Z" id="div-c2-z" min="0">
+            <div class="bruch-linie"></div>
+            <input type="number" inputmode="numeric" placeholder="N" id="div-c2-n" min="1">
+          </div>
+          <button class="check-btn" onclick="checkBruch('div-c2',2,1,'div',2)">Prüfen</button>
+          <button class="clear-btn" id="clear-div-c2" onclick="clearAufgabe('div-c2')">✖ Leeren</button>
+        </div>
+        <div class="feedback" id="fb-div-c2"></div>
+        <button class="tipp-toggle" onclick="toggleTipp('tipp-div-c2')">💡 Tipp</button>
+        <div class="tipp-box" id="tipp-div-c2">
+          Zuerst: <span class="gemischt"><span class="ganz">2</span><span class="frac"><span>1</span><span>2</span></span></span> ÷ <span class="frac"><span>5</span><span>6</span></span> = <span class="frac"><span>5</span><span>2</span></span> · <span class="frac"><span>6</span><span>5</span></span> = 3<br>
+          Dann: 3 ÷ <span class="gemischt"><span class="ganz">1</span><span class="frac"><span>1</span><span>2</span></span></span> = ?
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><div class="num">3</div>Fehlersuche</div>
+      <div class="aufgabe">
+        <div class="aufgabe-text">
+          Tom rechnet:<br>
+          <span class="gemischt"><span class="ganz">1</span><span class="frac"><span>1</span><span>2</span></span></span> ÷ <span class="frac"><span>3</span><span>4</span></span> = <span class="frac"><span>3</span><span>2</span></span> · <span class="frac"><span>3</span><span>4</span></span> = <span class="frac"><span>9</span><span>8</span></span><br>
+          Was hat Tom falsch gemacht?
+        </div>
+        <div class="mc-options" id="mc-div-c3">
+          <button class="mc-btn" onclick="checkMC('mc-div-c3', this, false, 'div', 2)">Tom hat die gemischte Zahl falsch umgewandelt.</button>
+          <button class="mc-btn" onclick="checkMC('mc-div-c3', this, true, 'div', 2)">Tom hat den Kehrwert vergessen – er muss mit <span class="frac"><span>4</span><span>3</span></span> multiplizieren.</button>
+          <button class="mc-btn" onclick="checkMC('mc-div-c3', this, false, 'div', 2)">Tom hätte den ersten Bruch umdrehen müssen.</button>
+          <button class="mc-btn" onclick="checkMC('mc-div-c3', this, false, 'div', 2)">Tom hat nichts falsch gemacht.</button>
+        </div>
+        <div class="feedback" id="fb-mc-div-c3"></div>
+      </div>
+    </div>
+
+  </div><!-- end profi -->
+
+  <button class="weiter-btn" id="weiter-div" onclick="showPage(3)">Weiter zur Textaufgabe ➜</button>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     SEITE 3: TEXTAUFGABE DIVIDIEREN
+═══════════════════════════════════════════════════════ -->
+<div class="page" id="page3">
+  <div style="margin-top:1rem;" class="level-switcher" id="tdiv-levels">
+    <button class="level-btn active" onclick="setLevel('tdiv',0,this)">⭐ Grundlagen</button>
+    <button class="level-btn" onclick="setLevel('tdiv',1,this)">⭐⭐ Fortgeschritten</button>
+    <button class="level-btn" onclick="setLevel('tdiv',2,this)">⭐⭐⭐ Profi</button>
+  </div>
+
+  <!-- GRUNDLAGEN -->
+  <div id="tdiv-level-0">
+    <div class="card">
+      <div class="card-title"><div class="num">📝</div>Textaufgabe: Schnüre</div>
+      <div class="textaufgabe-box">
+        <div class="kontext">📖 Situation</div>
+        Ein Seil ist
+        <span class="frac"><span>3</span><span>4</span></span> m lang.
+        Es wird in 3 gleich lange Stücke geschnitten.
+        <div class="frage">Wie lang ist ein Stück?</div>
+      </div>
+      <div class="aufgabe">
+        <div class="aufgabe-text">Ergebnis in m (vollständig gekürzt):</div>
+        <div class="eingabe-row">
+          <div class="bruch-eingabe" id="tdiv-a1">
+            <input type="number" inputmode="numeric" placeholder="Z" id="tdiv-a1-z" min="0">
+            <div class="bruch-linie"></div>
+            <input type="number" inputmode="numeric" placeholder="N" id="tdiv-a1-n" min="1">
+          </div>
+          <button class="check-btn" onclick="checkBruch('tdiv-a1',1,4,'tdiv',0)">Prüfen</button>
+          <button class="clear-btn" id="clear-tdiv-a1" onclick="clearAufgabe('tdiv-a1')">✖ Leeren</button>
+        </div>
+        <div class="feedback" id="fb-tdiv-a1"></div>
+        <button class="tipp-toggle" onclick="toggleTipp('tipp-tdiv-a1')">💡 Tipp</button>
+        <div class="tipp-box" id="tipp-tdiv-a1">
+          „In 3 gleiche Teile aufteilen" bedeutet: ÷ 3
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FORTGESCHRITTEN -->
+  <div id="tdiv-level-1" style="display:none">
+    <div class="card">
+      <div class="card-title"><div class="num">📝</div>Textaufgabe: Saft teilen</div>
+      <div class="textaufgabe-box">
+        <div class="kontext">📖 Situation</div>
+        Eine Flasche enthält
+        <span class="frac"><span>5</span><span>6</span></span> Liter Saft.
+        Jedes Glas fasst <span class="frac"><span>5</span><span>18</span></span> Liter.
+        <div class="frage">Wie viele Gläser können vollständig gefüllt werden?</div>
+      </div>
+      <div class="aufgabe">
+        <div class="aufgabe-text">Anzahl der Gläser (ganze Zahl):</div>
+        <div class="eingabe-row">
+          <input type="number" inputmode="numeric" class="ganzzahl" id="tdiv-b1-z" placeholder="?">
+          <button class="check-btn" onclick="checkGanz('tdiv-b1',3,'tdiv',1)">Prüfen</button>
+          <button class="clear-btn" id="clear-tdiv-b1" onclick="clearGanz('tdiv-b1')">✖ Leeren</button>
+        </div>
+        <div class="feedback" id="fb-tdiv-b1"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROFI -->
+  <div id="tdiv-level-2" style="display:none">
+    <div class="card">
+      <div class="card-title"><div class="num">📝</div>Textaufgabe: Zaunbau</div>
+      <div class="textaufgabe-box">
+        <div class="kontext">📖 Situation</div>
+        Herr Müller hat
+        <span class="frac"><span>9</span><span>10</span></span> m Holz.
+        Für jeden Zaunpfahl braucht er <span class="frac"><span>3</span><span>8</span></span> m.
+        <div class="frage">Wie viele vollständige Pfähle kann er bauen? Wie viel Holz bleibt übrig?</div>
+      </div>
+      <div class="aufgabe">
+        <div class="aufgabe-text">Anzahl vollständiger Pfähle:</div>
+        <div class="eingabe-row">
+          <input type="number" inputmode="numeric" class="ganzzahl" id="tdiv-c1-z" placeholder="?">
+          <button class="check-btn" onclick="checkGanz('tdiv-c1',2,'tdiv',2)">Prüfen</button>
+          <button class="clear-btn" id="clear-tdiv-c1" onclick="clearGanz('tdiv-c1')">✖ Leeren</button>
+        </div>
+        <div class="feedback" id="fb-tdiv-c1"></div>
+
+        <div class="aufgabe-text" style="margin-top:0.9rem">Übrig bleibendes Holz in m:</div>
+        <div class="eingabe-row">
+          <div class="bruch-eingabe" id="tdiv-c2">
+            <input type="number" inputmode="numeric" placeholder="Z" id="tdiv-c2-z" min="0">
+            <div class="bruch-linie"></div>
+            <input type="number" inputmode="numeric" placeholder="N" id="tdiv-c2-n" min="1">
+          </div>
+          <button class="check-btn" onclick="checkBruch('tdiv-c2',1,5,'tdiv',2)">Prüfen</button>
+          <button class="clear-btn" id="clear-tdiv-c2" onclick="clearAufgabe('tdiv-c2')">✖ Leeren</button>
+        </div>
+        <div class="feedback" id="fb-tdiv-c2"></div>
+        <button class="tipp-toggle" onclick="toggleTipp('tipp-tdiv-c2')">💡 Tipp</button>
+        <div class="tipp-box" id="tipp-tdiv-c2">
+          <span class="frac"><span>9</span><span>10</span></span> ÷ <span class="frac"><span>3</span><span>8</span></span> = <span class="frac"><span>12</span><span>5</span></span> = 2 Rest ... Rechne: <span class="frac"><span>9</span><span>10</span></span> − 2 · <span class="frac"><span>3</span><span>8</span></span> = ?
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <button class="weiter-btn" id="weiter-tdiv" onclick="showPage(4)">Weiter zur Wiederholung ➜</button>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     SEITE 4: WIEDERHOLUNG Addition & Subtraktion
+═══════════════════════════════════════════════════════ -->
+<div class="page" id="page4">
+
+  <div style="margin-top:1rem;">
+    <div class="wiederholung-badge">🔁 Wiederholung aus Klasse 6</div>
+  </div>
+
+  <div class="level-switcher" id="wdh-levels">
+    <button class="level-btn active" onclick="setLevel('wdh',0,this)">⭐ Grundlagen</button>
+    <button class="level-btn" onclick="setLevel('wdh',1,this)">⭐⭐ Fortgeschritten</button>
+    <button class="level-btn" onclick="setLevel('wdh',2,this)">⭐⭐⭐ Profi</button>
+  </div>
+
+  <!-- GRUNDLAGEN -->
+  <div id="wdh-level-0">
+
+    <div class="card">
+      <div class="card-title"><div class="num">1</div>Addition mit gleichem Nenner</div>
+      <div class="aufgabe">
+        <div class="aufgabe-text">Berechne:
+          <span class="frac"><span>2</span><span>7</span></span>
+          +
+          <span class="frac"><span>3</span><span>7</span></span>
+          = ?
+        </div>
+        <div class="eingabe-row">
+          <div class="bruch-eingabe" id="wdh-a1">
+            <input type="number" inputmode="numeric" placeholder="Z" id="wdh-a1-z" min="0">
+            <div class="bruch-linie"></div>
+            <input type="number" inputmode="numeric" placeholder="N" id="wdh-a1-n" min="1">
+          </div>
+          <button class="check-btn" onclick="checkBruch('wdh-a1',5,7,'wdh',0)">Prüfen</button>
+          <button class="clear-btn" id="clear-wdh-a1" onclick="clearAufgabe('wdh-a1')">✖ Leeren</button>
+        </div>
+        <div class="feedback" id="fb-wdh-a1"></div>
+        <button class="tipp-toggle" onclick="toggleTipp('tipp-wdh-a1')">💡 Tipp</button>
+        <div class="tipp-box" id="tipp-wdh-a1">
+          Gleicher Nenner → Zähler addieren, Nenner bleibt.
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><div class="num">2</div>Subtraktion mit gleichem Nenner</div>
+      <div class="aufgabe">
+        <div class="aufgabe-text">Berechne:
+          <span class="frac"><span>5</span><span>8</span></span>
+          −
+          <span class="frac"><span>1</span><span>8</span></span>
+          = ?
+        </div>
+        <div class="eingabe-row">
+          <div class="bruch-eingabe" id="wdh-a2">
+            <input type="number" inputmode="numeric" placeholder="Z" id="wdh-a2-z" min="0">
+            <div class="bruch-linie"></div>
+            <input type="number" inputmode="numeric" placeholder="N" id="wdh-a2-n" min="1">
+          </div>
+          <button class="check-btn" onclick="checkBruch('wdh-a2',1,2,'wdh',0)">Prüfen</button>
+          <button class="clear-btn" id="clear-wdh-a2" onclick="clearAufgabe('wdh-a2')">✖ Leeren</button>
+        </div>
+        <div class="feedback" id="fb-wdh-a2"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><div class="num">3</div>Verschiedene Nenner</div>
+      <div class="aufgabe">
+        <div class="aufgabe-text">Berechne:
+          <span class="frac"><span>1</span><span>2</span></span>
+          +
+          <span class="frac"><span>1</span><span>4</span></span>
+          = ?
+        </div>
+        <div class="eingabe-row">
+          <div class="bruch-eingabe" id="wdh-a3">
+            <input type="number" inputmode="numeric" placeholder="Z" id="wdh-a3-z" min="0">
+            <div class="bruch-linie"></div>
+            <input type="number" inputmode="numeric" placeholder="N" id="wdh-a3-n" min="1">
+          </div>
+          <button class="check-btn" onclick="checkBruch('wdh-a3',3,4,'wdh',0)">Prüfen</button>
+          <button class="clear-btn" id="clear-wdh-a3" onclick="clearAufgabe('wdh-a3')">✖ Leeren</button>
+        </div>
+        <div class="feedback" id="fb-wdh-a3"></div>
+        <button class="tipp-toggle" onclick="toggleTipp('tipp-wdh-a3')">💡 Tipp</button>
+        <div class="tipp-box" id="tipp-wdh-a3">
+          Erweitere <span class="frac"><span>1</span><span>2</span></span> auf den Nenner 4: <span class="frac"><span>2</span><span>4</span></span>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end grundlagen -->
+
+  <!-- FORTGESCHRITTEN -->
+  <div id="wdh-level-1" style="display:none">
+
+    <div class="card">
+      <div class="card-title"><div class="num">1</div>Hauptnenner finden</div>
+      <div class="aufgabe">
+        <div class="aufgabe-text">Berechne:
+          <span class="frac"><span>2</span><span>3</span></span>
+          +
+          <span class="frac"><span>3</span><span>4</span></span>
+          = ? (als gekürzten Bruch)
+        </div>
+        <div class="eingabe-row">
+          <div class="bruch-eingabe" id="wdh-b1">
+            <input type="number" inputmode="numeric" placeholder="Z" id="wdh-b1-z" min="0">
+            <div class="bruch-linie"></div>
+            <input type="number" inputmode="numeric" placeholder="N" id="wdh-b1-n" min="1">
+          </div>
+          <button class="check-btn" onclick="checkBruch('wdh-b1',17,12,'wdh',1)">Prüfen</button>
+          <button class="clear-btn" id="clear-wdh-b1" onclick="clearAufgabe('wdh-b1')">✖ Leeren</button>
+        </div>
+        <div class="feedback" id="fb-wdh-b1"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><div class="num">2</div>Subtraktion verschiedener Nenner</div>
+      <div class="aufgabe">
+        <div class="aufgabe-text">Berechne:
+          <span class="frac"><span>5</span><span>6</span></span>
+          −
+          <span class="frac"><span>1</span><span>4</span></span>
+          = ?
+        </div>
+        <div class="eingabe-row">
+          <div class="bruch-eingabe" id="wdh-b2">
+            <input type="number" inputmode="numeric" placeholder="Z" id="wdh-b2-z" min="0">
+            <div class="bruch-linie"></div>
+            <input type="number" inputmode="numeric" placeholder="N" id="wdh-b2-n" min="1">
+          </div>
+          <button class="check-btn" onclick="checkBruch('wdh-b2',7,12,'wdh',1)">Prüfen</button>
+          <button class="clear-btn" id="clear-wdh-b2" onclick="clearAufgabe('wdh-b2')">✖ Leeren</button>
+        </div>
+        <div class="feedback" id="fb-wdh-b2"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><div class="num">3</div>Multiple Choice</div>
+      <div class="aufgabe">
+        <div class="aufgabe-text">
+          <span class="frac"><span>3</span><span>5</span></span>
+          +
+          <span class="frac"><span>7</span><span>10</span></span>
+          = ?
+        </div>
+        <div class="mc-options" id="mc-wdh-b3">
+          <button class="mc-btn" onclick="checkMC('mc-wdh-b3', this, false, 'wdh', 1)"><span class="frac"><span>10</span><span>15</span></span></button>
+          <button class="mc-btn" onclick="checkMC('mc-wdh-b3', this, true, 'wdh', 1)"><span class="frac"><span>13</span><span>10</span></span></button>
+          <button class="mc-btn" onclick="checkMC('mc-wdh-b3', this, false, 'wdh', 1)"><span class="frac"><span>10</span><span>50</span></span></button>
+          <button class="mc-btn" onclick="checkMC('mc-wdh-b3', this, false, 'wdh', 1)"><span class="frac"><span>1</span><span>3</span></span></button>
+        </div>
+        <div class="feedback" id="fb-mc-wdh-b3"></div>
+      </div>
+    </div>
+
+  </div><!-- end fortgeschritten -->
+
+  <!-- PROFI -->
+  <div id="wdh-level-2" style="display:none">
+
+    <div class="card">
+      <div class="card-title"><div class="num">1</div>Drei Brüche</div>
+      <div class="aufgabe">
+        <div class="aufgabe-text">Berechne:
+          <span class="frac"><span>1</span><span>2</span></span>
+          +
+          <span class="frac"><span>1</span><span>3</span></span>
+          +
+          <span class="frac"><span>1</span><span>6</span></span>
+          = ?
+        </div>
+        <div class="eingabe-row">
+          <div class="bruch-eingabe" id="wdh-c1">
+            <input type="number" inputmode="numeric" placeholder="Z" id="wdh-c1-z" min="0">
+            <div class="bruch-linie"></div>
+            <input type="number" inputmode="numeric" placeholder="N" id="wdh-c1-n" min="1">
+          </div>
+          <button class="check-btn" onclick="checkBruch('wdh-c1',1,1,'wdh',2)">Prüfen</button>
+          <button class="clear-btn" id="clear-wdh-c1" onclick="clearAufgabe('wdh-c1')">✖ Leeren</button>
+        </div>
+        <div class="feedback" id="fb-wdh-c1"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><div class="num">2</div>Gemischte Rechnung</div>
+      <div class="aufgabe">
+        <div class="aufgabe-text">Berechne:
+          <span class="frac"><span>7</span><span>8</span></span>
+          −
+          <span class="frac"><span>1</span><span>3</span></span>
+          +
+          <span class="frac"><span>1</span><span>6</span></span>
+          = ?
+        </div>
+        <div class="eingabe-row">
+          <div class="bruch-eingabe" id="wdh-c2">
+            <input type="number" inputmode="numeric" placeholder="Z" id="wdh-c2-z" min="0">
+            <div class="bruch-linie"></div>
+            <input type="number" inputmode="numeric" placeholder="N" id="wdh-c2-n" min="1">
+          </div>
+          <button class="check-btn" onclick="checkBruch('wdh-c2',17,24,'wdh',2)">Prüfen</button>
+          <button class="clear-btn" id="clear-wdh-c2" onclick="clearAufgabe('wdh-c2')">✖ Leeren</button>
+        </div>
+        <div class="feedback" id="fb-wdh-c2"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><div class="num">3</div>Textaufgabe Wiederholung</div>
+      <div class="textaufgabe-box">
+        <div class="kontext">📖 Situation</div>
+        Tim hat <span class="frac"><span>3</span><span>8</span></span> einer Pizza gegessen, Anna <span class="frac"><span>5</span><span>12</span></span>.
+        <div class="frage">Wie viel von der Pizza ist noch übrig?</div>
+      </div>
+      <div class="aufgabe">
+        <div class="aufgabe-text">Übrig gebliebener Anteil (vollständig gekürzt):</div>
+        <div class="eingabe-row">
+          <div class="bruch-eingabe" id="wdh-c3">
+            <input type="number" inputmode="numeric" placeholder="Z" id="wdh-c3-z" min="0">
+            <div class="bruch-linie"></div>
+            <input type="number" inputmode="numeric" placeholder="N" id="wdh-c3-n" min="1">
+          </div>
+          <button class="check-btn" onclick="checkBruch('wdh-c3',5,24,'wdh',2)">Prüfen</button>
+          <button class="clear-btn" id="clear-wdh-c3" onclick="clearAufgabe('wdh-c3')">✖ Leeren</button>
+        </div>
+        <div class="feedback" id="fb-wdh-c3"></div>
+      </div>
+    </div>
+
+  </div><!-- end profi -->
+
+  <button class="weiter-btn" id="weiter-wdh" onclick="showPage(5)">Zur Auswertung ➜</button>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     SEITE 5: AUSWERTUNG
+═══════════════════════════════════════════════════════ -->
+<div class="page" id="page5">
+  <div style="margin-top:1.2rem"></div>
+  <div class="card">
+    <div class="auswertung-box" id="auswertung-inhalt">
+      <div class="stern" id="auswertung-stern">🏆</div>
+      <div class="auswertung-kreis" id="auswertung-kreis">–</div>
+      <div class="auswertung-text" id="auswertung-text">Schau dir die Ergebnisse an!</div>
+      <div class="auswertung-detail" id="auswertung-detail"></div>
+    </div>
+  </div>
+
+  <div class="card" id="detail-karten">
+    <div class="card-title" style="margin-bottom:0.6rem">📋 Ergebnis nach Bereich</div>
+    <div id="detail-liste"></div>
+  </div>
+</div>
+
+<!-- T-REX -->
+<div class="trex" id="trex" onclick="toggleTrex()" ontouchend="toggleTrex()">🦖</div>
+<div class="trex-tooltip" id="trex-tooltip">Made by Mathedino</div>
+
+<script>
+// ══════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════
+const state = {
+  pagesDone: new Set(),
+  scores: {}
+};
+
+// Track richtig/falsch pro Aufgaben-ID
+const results = {};
+
+// ══════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════
+function showPage(idx) {
+  document.querySelectorAll('.page').forEach((p,i) => p.classList.toggle('active', i === idx));
+  document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', i === idx));
+  if (idx === 5) buildAuswertung();
+  window.scrollTo(0, 0);
+}
+
+// ══════════════════════════════════════════
+// LEVEL SWITCHER
+// ══════════════════════════════════════════
+function setLevel(prefix, lvl, btn) {
+  const parent = btn.closest('.level-switcher');
+  parent.querySelectorAll('.level-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  [0,1,2].forEach(i => {
+    const el = document.getElementById(`${prefix}-level-${i}`);
+    if (el) el.style.display = i === lvl ? 'block' : 'none';
+  });
+}
+
+// ══════════════════════════════════════════
+// BRUCH PRÜFEN
+// ══════════════════════════════════════════
+function gcd(a, b) { return b === 0 ? a : gcd(b, a % b); }
+
+function isEquivalent(z, n, refZ, refN) {
+  if (n === 0) return false;
+  const g1 = gcd(Math.abs(z), Math.abs(n));
+  const g2 = gcd(Math.abs(refZ), Math.abs(refN));
+  return (z / g1 === refZ / g2) && (n / g1 === refN / g2);
+}
+
+function fracHTML(z, n) {
+  if (n === 1) return `<strong>${z}</strong>`;
+  return `<span class="frac"><span>${z}</span><span>${n}</span></span>`;
+}
+
+function checkBruch(id, refZ, refN, prefix, lvl) {
+  const zEl = document.getElementById(`${id}-z`);
+  const nEl = document.getElementById(`${id}-n`);
+  const fb = document.getElementById(`fb-${id}`);
+  const clrBtn = document.getElementById(`clear-${id}`);
+  const z = parseInt(zEl?.value);
+  const n = parseInt(nEl?.value);
+  if (isNaN(z) || isNaN(n) || n === 0) {
+    fb.className = 'feedback wrong';
+    fb.innerHTML = '❌ Bitte Zähler und Nenner eingeben (Nenner ≠ 0).';
+    return;
+  }
+  const correct = isEquivalent(z, n, refZ, refN);
+  results[id] = correct;
+  if (correct) {
+    fb.className = 'feedback correct';
+    fb.innerHTML = `✅ Richtig! Das Ergebnis ist ${fracHTML(refZ, refN)}.`;
+    if (clrBtn) clrBtn.classList.remove('show');
+    zEl.disabled = nEl.disabled = true;
+  } else {
+    fb.className = 'feedback wrong';
+    fb.innerHTML = `❌ Leider falsch. Richtig ist: ${fracHTML(refZ, refN)}`;
+    if (clrBtn) clrBtn.classList.add('show');
+  }
+  checkPageDone(prefix);
+}
+
+function checkGanz(id, ref, prefix, lvl) {
+  const zEl = document.getElementById(`${id}-z`);
+  const fb = document.getElementById(`fb-${id}`);
+  const clrBtn = document.getElementById(`clear-${id}`);
+  const val = parseInt(zEl?.value);
+  if (isNaN(val)) { fb.className='feedback wrong'; fb.innerHTML='❌ Bitte eine Zahl eingeben.'; return; }
+  const correct = val === ref;
+  results[id] = correct;
+  if (correct) {
+    fb.className='feedback correct';
+    fb.innerHTML=`✅ Richtig! Die Antwort ist ${ref}.`;
+    if(clrBtn) clrBtn.classList.remove('show');
+    zEl.disabled=true;
+  } else {
+    fb.className='feedback wrong';
+    fb.innerHTML=`❌ Leider falsch. Richtig ist: ${ref}`;
+    if(clrBtn) clrBtn.classList.add('show');
+  }
+  checkPageDone(prefix);
+}
+
+function checkMC(groupId, btn, correct, prefix, lvl) {
+  const group = document.getElementById(groupId);
+  if (!group || group.dataset.done) return;
+  group.dataset.done = '1';
+  const btns = group.querySelectorAll('.mc-btn');
+  btns.forEach(b => { b.disabled = true; b.style.cursor='default'; });
+  const fb = document.getElementById(`fb-${groupId}`);
+  if (correct) {
+    btn.classList.add('correct-answer');
+    fb.className='feedback correct';
+    fb.innerHTML='✅ Richtig!';
+    results[groupId] = true;
+  } else {
+    btn.classList.add('wrong-answer');
+    btns.forEach(b => { if(b.onclick && b.onclick.toString().includes('true')) b.classList.add('correct-answer'); });
+    fb.className='feedback wrong';
+    fb.innerHTML='❌ Leider falsch.';
+    results[groupId] = false;
+  }
+  checkPageDone(prefix);
+}
+
+// ══════════════════════════════════════════
+// CLEAR
+// ══════════════════════════════════════════
+function clearAufgabe(id) {
+  const zEl = document.getElementById(`${id}-z`);
+  const nEl = document.getElementById(`${id}-n`);
+  if(zEl) { zEl.value=''; zEl.disabled=false; }
+  if(nEl) { nEl.value=''; nEl.disabled=false; }
+  document.getElementById(`fb-${id}`).className='feedback';
+  document.getElementById(`fb-${id}`).innerHTML='';
+  document.getElementById(`clear-${id}`).classList.remove('show');
+  delete results[id];
+}
+function clearGanz(id) {
+  const zEl = document.getElementById(`${id}-z`);
+  if(zEl) { zEl.value=''; zEl.disabled=false; }
+  document.getElementById(`fb-${id}`).className='feedback';
+  document.getElementById(`fb-${id}`).innerHTML='';
+  document.getElementById(`clear-${id}`).classList.remove('show');
+  delete results[id];
+}
+
+// ══════════════════════════════════════════
+// TIPP
+// ══════════════════════════════════════════
+function toggleTipp(id) {
+  const el = document.getElementById(id);
+  el.classList.toggle('open');
+}
+
+// ══════════════════════════════════════════
+// PAGE COMPLETION CHECK
+// ══════════════════════════════════════════
+// Map: prefix → page index and weiter-btn id
+const prefixMap = {
+  mul: { page: 0, weiter: 'weiter-mul' },
+  tmul: { page: 1, weiter: 'weiter-tmul' },
+  div: { page: 2, weiter: 'weiter-div' },
+  tdiv: { page: 3, weiter: 'weiter-tdiv' },
+  wdh: { page: 4, weiter: 'weiter-wdh' },
+};
+
+function checkPageDone(prefix) {
+  // Find which level is currently active for this prefix
+  const lvlBtns = document.querySelectorAll(`#${prefix}-levels .level-btn`);
+  let activeLevel = 0;
+  lvlBtns.forEach((b,i) => { if(b.classList.contains('active')) activeLevel = i; });
+
+  // Get all feedback elements in the active level div
+  const lvlDiv = document.getElementById(`${prefix}-level-${activeLevel}`);
+  if (!lvlDiv) return;
+
+  const fbs = lvlDiv.querySelectorAll('.feedback');
+  let allDone = fbs.length > 0;
+  fbs.forEach(fb => {
+    if (!fb.classList.contains('correct') && !fb.classList.contains('wrong')) allDone = false;
+  });
+
+  if (allDone) {
+    const info = prefixMap[prefix];
+    if (info) {
+      const btn = document.getElementById(info.weiter);
+      if (btn) btn.classList.add('show');
+    }
+  }
+}
+
+// ══════════════════════════════════════════
+// T-REX
+// ══════════════════════════════════════════
+let trexShown = false;
+function toggleTrex() {
+  trexShown = !trexShown;
+  document.getElementById('trex-tooltip').classList.toggle('show', trexShown);
+  setTimeout(() => { trexShown=false; document.getElementById('trex-tooltip').classList.remove('show'); }, 2500);
+}
+
+// ══════════════════════════════════════════
+// AUSWERTUNG
+// ══════════════════════════════════════════
+function buildAuswertung() {
+  const allKeys = Object.keys(results);
+  const richtig = allKeys.filter(k => results[k]).length;
+  const gesamt = allKeys.length;
+  const pct = gesamt > 0 ? Math.round(richtig/gesamt*100) : 0;
+
+  const kreis = document.getElementById('auswertung-kreis');
+  const text = document.getElementById('auswertung-text');
+  const detail = document.getElementById('auswertung-detail');
+  const stern = document.getElementById('auswertung-stern');
+
+  kreis.textContent = `${richtig}/${gesamt}`;
+  detail.textContent = `${pct}% richtig`;
+
+  if (pct >= 90) { stern.textContent='🌟'; text.textContent='Hervorragend! Du hast alles drauf!'; }
+  else if (pct >= 70) { stern.textContent='👍'; text.textContent='Gut gemacht! Noch etwas Übung und du bist Profi!'; }
+  else if (pct >= 50) { stern.textContent='💪'; text.textContent='Weiter üben! Du bist auf dem richtigen Weg.'; }
+  else { stern.textContent='📚'; text.textContent='Schau dir die Tipps noch einmal an und übe weiter!'; }
+
+  const bereiche = [
+    { label: 'Brüche multiplizieren', keys: Object.keys(results).filter(k => k.startsWith('mul')) },
+    { label: 'Textaufgabe Multiplizieren', keys: Object.keys(results).filter(k => k.startsWith('tmul')) },
+    { label: 'Brüche dividieren', keys: Object.keys(results).filter(k => k.startsWith('div')) },
+    { label: 'Textaufgabe Dividieren', keys: Object.keys(results).filter(k => k.startsWith('tdiv')) },
+    { label: 'Wiederholung: Addition & Subtraktion', keys: Object.keys(results).filter(k => k.startsWith('wdh')) },
+  ];
+
+  const liste = document.getElementById('detail-liste');
+  liste.innerHTML = bereiche.map(b => {
+    const r = b.keys.filter(k => results[k]).length;
+    const g = b.keys.length;
+    if (g === 0) return '';
+    const col = r===g ? 'var(--correct)' : r >= g/2 ? 'var(--accent2)' : 'var(--wrong)';
+    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:0.6rem 0;border-bottom:1px solid var(--border)">
+      <span style="font-weight:700;font-size:0.93rem">${b.label}</span>
+      <span style="font-weight:800;color:${col};font-size:1rem">${r}/${g}</span>
+    </div>`;
+  }).join('');
+}
+
+// Fix MC options – make correct btn work (the display values are identical, mark truly via data)
+// Re-init MC for mul-c3 (both show 3/10 – one is correct, one wrong, need labels)
+document.addEventListener('DOMContentLoaded', () => {
+  if (window.MathJax) MathJax.typesetPromise();
+});
+</script>
+</body>
+</html>

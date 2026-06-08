@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="description" content="Erarbeitungsseite zum Haus der Vierecke: Wähle ein besonderes Viereck und entdecke, welche anderen Vierecke es automatisch auch ist und warum.">
+<meta name="keywords" content="Vierecke, Haus der Vierecke, Quadrat, Rechteck, Raute, Parallelogramm, Trapez, Hierarchie">
+<meta name="typ" content="Lernseite">
+<meta name="klasse" content="5">
+<meta name="fach" content="mathe">
+<meta name="oberthema" content="Geometrie">
+<meta name="thema" content="Besondere Vierecke">
+<title>Haus der Vierecke – Erarbeitung</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --kopf:#e08a2b;          /* Erarbeitung = Orange (nicht knallig) */
+  --kopf2:#eaa14c;
+  --bg:#fdf8f1;
+  --karte:#ffffff;
+  --rand:#ecd9bf;
+  --rand2:#d8e4f2;
+  --text:#2a2218;
+  --grau:#6c6051;
+  --blau:#3a7bd5;
+  --gruen:#1e9e4a;
+  --gruen-bg:#1e9e4a;
+  --rot:#d6312b;
+  --rot-bg:#d6312b;
+  --schatten:0 4px 16px rgba(150,110,40,.12);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;}
+body{
+  font-family:'Nunito',sans-serif;background:var(--bg);
+  background-image:radial-gradient(circle at 10% 6%,#fbeed8 0,transparent 42%),radial-gradient(circle at 92% 96%,#fcefd9 0,transparent 44%);
+  color:var(--text);font-size:17px;line-height:1.5;padding:0 0 90px 0;min-height:100vh;
+}
+h1,h2,h3{font-family:'Fredoka',sans-serif;font-weight:600;}
+.kopf{background:linear-gradient(120deg,var(--kopf),var(--kopf2));color:#fff;padding:18px 20px 16px;box-shadow:0 2px 14px rgba(150,110,40,.25);}
+.kopf h1{margin:0;font-size:1.5rem;}
+.kopf p{margin:4px 0 0;font-size:.95rem;opacity:.95;font-weight:600;}
+.badge{display:inline-block;background:rgba(255,255,255,.24);border-radius:20px;padding:2px 12px;font-size:.8rem;font-weight:700;margin-top:8px;}
+
+.tabs{display:flex;flex-wrap:wrap;gap:6px;padding:12px 14px;position:sticky;top:0;z-index:30;background:var(--bg);box-shadow:0 4px 10px -8px rgba(0,0,0,.3);}
+.tab{flex:1 1 auto;min-width:44px;min-height:44px;border:2px solid var(--rand);background:var(--karte);border-radius:14px;font-family:'Fredoka',sans-serif;font-weight:500;font-size:.95rem;color:var(--grau);cursor:pointer;padding:6px 10px;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:5px;}
+.tab.aktiv{background:var(--kopf);color:#fff;border-color:var(--kopf);box-shadow:var(--schatten);}
+
+.wrap{max-width:920px;margin:0 auto;padding:6px 14px;}
+.karte{background:var(--karte);border:1px solid var(--rand);border-radius:20px;padding:20px 18px;margin:14px 0;box-shadow:var(--schatten);display:none;animation:fade .25s ease;}
+.karte.aktiv{display:block;}
+@keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+.karte h2{margin:0 0 4px;font-size:1.25rem;color:var(--kopf);}
+.karte .unter{color:var(--grau);font-weight:600;font-size:.92rem;margin-bottom:14px;}
+
+/* Haus-Diagramm */
+.haus{display:flex;flex-direction:column;align-items:center;gap:0;margin:6px 0 4px;}
+.etage{display:flex;justify-content:center;gap:16px;flex-wrap:wrap;position:relative;z-index:2;margin:6px 0;}
+.vfig{
+  border:3px solid var(--rand2);background:#f6faff;border-radius:16px;
+  padding:8px 10px 4px;cursor:pointer;min-width:118px;min-height:118px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  transition:transform .12s,border-color .15s,background .15s;
+}
+.vfig:active{transform:scale(.97);}
+.vfig .name{font-family:'Fredoka';font-weight:600;font-size:1rem;color:var(--text);}
+.vfig.gewaehlt{border-color:var(--kopf);background:#fff3e3;box-shadow:0 0 0 4px rgba(224,138,43,.18);transform:scale(1.04);}
+.vfig.ist{border-color:var(--gruen);background:#e7f7ec;}
+.vfig.istnicht{border-color:var(--rot);background:#fdecec;}
+.vfig .marke{font-size:1.05rem;height:1.2em;font-weight:800;}
+.vfig.ist .marke{color:var(--gruen);}
+.vfig.istnicht .marke{color:var(--rot);}
+.vfig svg{max-width:78px;height:auto;}
+
+.hinweisleiste{font-size:.85rem;color:var(--grau);text-align:center;font-weight:600;margin:4px 0 12px;}
+
+/* Erklärbox */
+.erkl{margin-top:10px;border-radius:16px;border:2px solid var(--rand);background:#fffdf9;padding:14px;display:none;}
+.erkl.show{display:block;animation:fade .2s ease;}
+.erkl h3{margin:0 0 8px;font-size:1.1rem;color:var(--kopf);}
+.erkl .zeile{display:flex;gap:10px;align-items:flex-start;padding:9px 10px;border-radius:12px;margin:7px 0;font-weight:600;font-size:.96rem;}
+.erkl .zeile.ja{background:var(--gruen-bg);color:#fff;}
+.erkl .zeile.nein{background:var(--rot-bg);color:#fff;}
+.erkl .zeile .sym{font-size:1.2rem;font-weight:800;line-height:1.3;}
+.erkl .zeile b{font-family:'Fredoka';font-weight:600;}
+.erkl .merksatz{margin-top:12px;background:#fff3e3;border:1px dashed var(--kopf);border-radius:12px;padding:10px 12px;font-size:.95rem;color:#8a5410;font-weight:700;}
+
+/* Flip-Cards */
+.flip-grid{display:flex;flex-wrap:wrap;gap:12px;}
+.flip{flex:1 1 220px;min-height:130px;perspective:1000px;cursor:pointer;}
+.flip-inner{position:relative;width:100%;height:130px;transition:transform .5s;transform-style:preserve-3d;}
+.flip.flipped .flip-inner{transform:rotateY(180deg);}
+.flip-face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:16px;display:flex;align-items:center;justify-content:center;text-align:center;padding:14px;font-weight:700;}
+.flip-front{background:#fff3e3;border:2px solid var(--kopf);color:#8a5410;}
+.flip-back{background:#e7f7ec;border:2px solid var(--gruen);color:#15622f;transform:rotateY(180deg);font-size:.95rem;}
+.flip-hint{font-size:.8rem;color:var(--grau);font-weight:600;margin-top:6px;}
+
+.weiter-bar{position:fixed;left:0;right:0;bottom:0;padding:10px 14px;background:linear-gradient(0deg,var(--bg) 70%,transparent);z-index:40;}
+.weiter-btn{display:block;width:100%;max-width:920px;margin:0 auto;min-height:52px;background:var(--kopf);color:#fff;border:none;border-radius:16px;font-family:'Fredoka';font-weight:600;font-size:1.15rem;cursor:pointer;box-shadow:var(--schatten);}
+
+.trex{position:fixed;right:12px;bottom:74px;font-size:1.7rem;cursor:pointer;z-index:60;filter:drop-shadow(0 2px 3px rgba(0,0,0,.2));user-select:none;}
+.trex .made{position:absolute;right:0;bottom:120%;white-space:nowrap;background:#2a2218;color:#fff;padding:5px 10px;border-radius:10px;font-size:.78rem;font-weight:700;font-family:'Fredoka';display:none;}
+.trex.show .made{display:block;}
+
+@media(max-width:520px){
+  .vfig{min-width:96px;min-height:96px;}
+  .vfig svg{max-width:62px;}
+}
+</style>
+</head>
+<body>
+
+<header class="kopf">
+  <h1>Das Haus der Vierecke</h1>
+  <p>Entdecke, was ein Viereck noch alles ist – und warum</p>
+  <span class="badge">Erarbeitung · Klasse 5</span>
+</header>
+
+<nav class="tabs" id="tabs"></nav>
+<div class="wrap" id="karten"></div>
+
+<div class="weiter-bar">
+  <button class="weiter-btn" onclick="document.location.href='#'">Weiter →</button>
+</div>
+
+<div class="trex" id="trex" onclick="this.classList.toggle('show')">🦖<span class="made">Made by Mathedino</span></div>
+
+<script>
+/* ---------- Figuren ---------- */
+const FIG={
+  quadrat:`<svg viewBox="0 0 100 100"><rect x="15" y="15" width="70" height="70" fill="#eaf2fc" stroke="#3a7bd5" stroke-width="3"/><rect x="15" y="73" width="12" height="12" fill="none" stroke="#d6312b" stroke-width="2"/></svg>`,
+  rechteck:`<svg viewBox="0 0 120 90"><rect x="12" y="22" width="96" height="46" fill="#eaf2fc" stroke="#3a7bd5" stroke-width="3"/><rect x="12" y="56" width="12" height="12" fill="none" stroke="#d6312b" stroke-width="2"/></svg>`,
+  raute:`<svg viewBox="0 0 110 100"><polygon points="55,12 100,50 55,88 10,50" fill="#eaf2fc" stroke="#3a7bd5" stroke-width="3"/></svg>`,
+  parallelogramm:`<svg viewBox="0 0 130 90"><polygon points="30,22 118,22 95,68 7,68" fill="#eaf2fc" stroke="#3a7bd5" stroke-width="3"/></svg>`,
+  trapez:`<svg viewBox="0 0 130 80"><polygon points="35,18 95,18 120,64 10,64" fill="#eaf2fc" stroke="#3a7bd5" stroke-width="3"/></svg>`,
+  symtrapez:`<svg viewBox="0 0 130 80"><polygon points="38,18 92,18 118,64 12,64" fill="#eaf2fc" stroke="#3a7bd5" stroke-width="3"/><line x1="65" y1="10" x2="65" y2="72" stroke="#e08a2b" stroke-width="1.5" stroke-dasharray="4 3"/></svg>`,
+  drachen:`<svg viewBox="0 0 100 110"><polygon points="50,8 86,46 50,100 14,46" fill="#eaf2fc" stroke="#3a7bd5" stroke-width="3"/></svg>`,
+  viereck:`<svg viewBox="0 0 120 100"><polygon points="18,30 100,14 108,78 30,92" fill="#eaf2fc" stroke="#3a7bd5" stroke-width="3"/></svg>`
+};
+
+/* ---------- Wissensbasis: Hierarchie + Begründungen ----------
+   "ist" = die Figur ist IMMER auch dieses Viereck (Oberbegriff)
+   "warum" = welche Eigenschaft dadurch erfüllt ist
+   "istnicht" = nicht garantiert; "fehlt" = welche Bedingung fehlt        */
+const DATEN={
+  quadrat:{
+    label:'Quadrat',
+    ist:{
+      rechteck:'Ein Quadrat hat vier rechte Winkel – genau das macht ein Rechteck aus.',
+      raute:'Ein Quadrat hat vier gleich lange Seiten – genau das macht eine Raute aus.',
+      parallelogramm:'Gegenüberliegende Seiten sind parallel – das ist ein Parallelogramm.',
+      drachen:'Auch benachbarte Seiten sind paarweise gleich lang – das erfüllt den Drachen.',
+      symtrapez:'Es ist achsensymmetrisch und hat parallele Seiten – also ein symmetrisches Trapez.',
+      trapez:'Es gibt parallele Seiten – damit ist es auch ein Trapez.',
+      viereck:'Vier Ecken und vier Seiten – natürlich auch ein allgemeines Viereck.'
+    },
+    istnicht:{},
+    merksatz:'Das Quadrat ist das „besondere" Viereck schlechthin: Es vereint alle Eigenschaften und steht ganz oben im Haus der Vierecke.'
+  },
+  rechteck:{
+    label:'Rechteck',
+    ist:{
+      parallelogramm:'Gegenüberliegende Seiten sind parallel und gleich lang – das ist ein Parallelogramm.',
+      symtrapez:'Es ist achsensymmetrisch und hat parallele Seiten – also ein symmetrisches Trapez.',
+      trapez:'Es hat parallele Seiten – also auch ein Trapez.',
+      viereck:'Vier Ecken und vier Seiten – auch ein allgemeines Viereck.'
+    },
+    istnicht:{
+      quadrat:'Beim Quadrat müssen ALLE vier Seiten gleich lang sein. Ein Rechteck darf aber lang und schmal sein.',
+      raute:'Eine Raute braucht vier gleich lange Seiten. Beim Rechteck sind nur gegenüberliegende Seiten gleich.',
+      drachen:'Ein Drachen braucht zwei Paar benachbarter gleicher Seiten – das hat das Rechteck nicht automatisch.'
+    },
+    merksatz:'Ein Rechteck hat vier rechte Winkel, aber nicht zwingend vier gleiche Seiten – darum ist es nicht jedes Mal ein Quadrat oder eine Raute.'
+  },
+  raute:{
+    label:'Raute',
+    ist:{
+      parallelogramm:'Gegenüberliegende Seiten sind parallel – das ist ein Parallelogramm.',
+      drachen:'Auch benachbarte Seiten sind paarweise gleich lang – das erfüllt den Drachen.',
+      trapez:'Es hat parallele Seiten – also auch ein Trapez.',
+      viereck:'Vier Ecken und vier Seiten – auch ein allgemeines Viereck.'
+    },
+    istnicht:{
+      quadrat:'Ein Quadrat braucht vier rechte Winkel. Eine Raute kann „schief" sein.',
+      rechteck:'Ein Rechteck braucht vier rechte Winkel. Die hat die Raute nicht automatisch.',
+      symtrapez:'Ein symmetrisches Trapez ist achssymmetrisch zu einer Achse durch die parallelen Seiten – die schiefe Raute erfüllt das nicht automatisch.'
+    },
+    merksatz:'Eine Raute hat vier gleich lange Seiten, aber nicht zwingend rechte Winkel – darum ist sie nicht jedes Mal ein Rechteck oder Quadrat.'
+  },
+  parallelogramm:{
+    label:'Parallelogramm',
+    ist:{
+      trapez:'Es hat (sogar zwei Paar) parallele Seiten – damit ist es auch ein Trapez.',
+      viereck:'Vier Ecken und vier Seiten – auch ein allgemeines Viereck.'
+    },
+    istnicht:{
+      rechteck:'Ein Rechteck braucht vier rechte Winkel – die hat das Parallelogramm nicht automatisch.',
+      raute:'Eine Raute braucht vier gleich lange Seiten – beim Parallelogramm sind nur gegenüberliegende gleich.',
+      quadrat:'Ein Quadrat braucht beides zugleich: vier rechte Winkel UND vier gleiche Seiten.',
+      drachen:'Ein Drachen braucht zwei Paar benachbarter gleicher Seiten – das hat das schiefe Parallelogramm nicht.',
+      symtrapez:'Ein symmetrisches Trapez ist achsensymmetrisch – ein schiefes Parallelogramm ist nur punktsymmetrisch.'
+    },
+    merksatz:'Beim Parallelogramm sind gegenüberliegende Seiten parallel und gleich lang – aber Winkel und alle Seitenlängen sind nicht festgelegt.'
+  },
+  drachen:{
+    label:'Drachen',
+    ist:{
+      viereck:'Vier Ecken und vier Seiten – ein allgemeines Viereck.'
+    },
+    istnicht:{
+      raute:'Eine Raute braucht VIER gleich lange Seiten. Der Drachen hat nur zwei Paare benachbarter gleicher Seiten.',
+      parallelogramm:'Beim Drachen sind gegenüberliegende Seiten nicht parallel – das braucht ein Parallelogramm.',
+      trapez:'Ein Trapez braucht ein Paar paralleler Seiten – die hat der allgemeine Drachen nicht.',
+      symtrapez:'Ein symmetrisches Trapez braucht parallele Seiten – die hat der allgemeine Drachen nicht.',
+      rechteck:'Dafür fehlen die vier rechten Winkel.',
+      quadrat:'Dafür fehlt alles auf einmal: rechte Winkel und vier gleiche Seiten.'
+    },
+    merksatz:'Der Drachen hat zwei Paar benachbarter gleich langer Seiten und eine Symmetrieachse. Er steht „neben" der Trapez-Familie: Erst die Raute gehört zu beiden.'
+  },
+  symtrapez:{
+    label:'symm. Trapez',
+    ist:{
+      trapez:'Ein symmetrisches Trapez hat ein Paar paralleler Seiten – also ein Trapez.',
+      viereck:'Vier Ecken und vier Seiten – auch ein allgemeines Viereck.'
+    },
+    istnicht:{
+      parallelogramm:'Ein Parallelogramm braucht ZWEI Paar paralleler Seiten. Das symmetrische Trapez hat nur eins.',
+      rechteck:'Dafür fehlen (im Allgemeinen) die vier rechten Winkel.',
+      raute:'Dafür fehlen die vier gleich langen Seiten.',
+      drachen:'Dafür bräuchte es zwei Paar benachbarter gleicher Seiten.',
+      quadrat:'Dafür fehlt alles auf einmal.'
+    },
+    merksatz:'Das symmetrische (gleichschenklige) Trapez ist achsensymmetrisch: Die Schenkel sind gleich lang. Das Rechteck ist ein besonderes symmetrisches Trapez.'
+  },
+  trapez:{
+    label:'Trapez',
+    ist:{
+      viereck:'Vier Ecken und vier Seiten – ein allgemeines Viereck.'
+    },
+    istnicht:{
+      symtrapez:'Ein symmetrisches Trapez braucht gleich lange Schenkel. Das allgemeine Trapez hat die nicht automatisch.',
+      parallelogramm:'Ein Parallelogramm braucht ZWEI Paar parallele Seiten. Ein Trapez hat nur mindestens eins.',
+      rechteck:'Dafür fehlen die vier rechten Winkel.',
+      raute:'Dafür fehlen die vier gleich langen Seiten.',
+      drachen:'Dafür bräuchte es zwei Paar benachbarter gleicher Seiten.',
+      quadrat:'Dafür fehlt alles auf einmal: rechte Winkel und vier gleiche Seiten.'
+    },
+    merksatz:'Das Trapez braucht nur mindestens ein Paar paralleler Seiten. Viele besondere Vierecke (Parallelogramm, Rechteck, Raute, Quadrat) sind deshalb besondere Trapeze.'
+  },
+  viereck:{
+    label:'allg. Viereck',
+    ist:{},
+    istnicht:{
+      trapez:'Ein Trapez braucht mindestens ein Paar paralleler Seiten – das allgemeine Viereck hat keins davon garantiert.',
+      drachen:'Ein Drachen braucht zwei Paar benachbarter gleicher Seiten.',
+      symtrapez:'Dafür fehlt die Achsensymmetrie mit parallelen Seiten.',
+      parallelogramm:'Dafür fehlen zwei Paar parallele Seiten.',
+      rechteck:'Dafür fehlen die vier rechten Winkel.',
+      raute:'Dafür fehlen die vier gleich langen Seiten.',
+      quadrat:'Dafür fehlt alles auf einmal.'
+    },
+    merksatz:'Das allgemeine Viereck ist der allgemeinste Begriff ganz unten im Haus: Jedes besondere Viereck ist eines – aber nicht umgekehrt.'
+  }
+};
+const REIHE=['quadrat','rechteck','raute','parallelogramm','drachen','symtrapez','trapez','viereck'];
+</script>
+
+<script>
+/* ---------- Tabs / Karten ---------- */
+const KARTEN=[
+  {id:'kh', tab:'🏠 Haus der Vierecke'},
+  {id:'kf', tab:'🔄 Selbstkontrolle'}
+];
+let aktiv='kh';
+const tabsEl=document.getElementById('tabs'), kartenEl=document.getElementById('karten');
+KARTEN.forEach(k=>{
+  const t=document.createElement('button');t.className='tab'+(k.id===aktiv?' aktiv':'');t.id='tab_'+k.id;
+  t.textContent=k.tab;t.onclick=()=>zeige(k.id);tabsEl.appendChild(t);
+  const c=document.createElement('section');c.className='karte'+(k.id===aktiv?' aktiv':'');c.id='karte_'+k.id;
+  kartenEl.appendChild(c);
+});
+function zeige(id){
+  aktiv=id;
+  KARTEN.forEach(k=>{document.getElementById('karte_'+k.id).classList.toggle('aktiv',k.id===id);
+    document.getElementById('tab_'+k.id).classList.toggle('aktiv',k.id===id);});
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+</script>
+
+<script>
+/* ============================================================
+   KARTE H — interaktives Haus der Vierecke
+   ============================================================ */
+(function(){
+  // Anordnung als "Haus": oben speziellster, unten allgemeinster
+  const etagen=[
+    ['quadrat'],
+    ['rechteck','raute'],
+    ['symtrapez','parallelogramm','drachen'],
+    ['trapez'],
+    ['viereck']
+  ];
+  let html='<h2>Tippe ein Viereck an</h2>';
+  html+='<div class="unter">Wähle eine Figur. Du siehst dann <b style="color:var(--gruen)">grün</b>, was diese Figur <b>automatisch auch ist</b>, und <b style="color:var(--rot)">rot</b>, was sie <b>nicht immer</b> ist – jeweils mit Begründung.</div>';
+  html+='<div class="haus" id="haus">';
+  etagen.forEach(et=>{
+    html+='<div class="etage">';
+    et.forEach(key=>{
+      html+='<button class="vfig" id="vf_'+key+'" onclick="vWaehle(\''+key+'\')">'
+        +'<span class="marke" id="mk_'+key+'"></span>'+FIG[key]
+        +'<span class="name">'+DATEN[key].label+'</span></button>';
+    });
+    html+='</div>';
+  });
+  html+='</div>';
+  html+='<div class="hinweisleiste">Tippe verschiedene Figuren an und vergleiche. Nochmal dieselbe antippen blendet die Erklärung aus.</div>';
+  html+='<div class="erkl" id="erkl"></div>';
+  document.getElementById('karte_kh').innerHTML=html;
+})();
+
+let aktuelleFigur=null;
+function vWaehle(key){
+  if(aktuelleFigur===key){ vReset(); return; }   // erneut tippen = ausblenden
+  aktuelleFigur=key;
+  const d=DATEN[key];
+  // alle zurücksetzen
+  REIHE.forEach(k=>{
+    const el=document.getElementById('vf_'+k);
+    el.classList.remove('gewaehlt','ist','istnicht');
+    document.getElementById('mk_'+k).textContent='';
+  });
+  // gewählte markieren
+  document.getElementById('vf_'+key).classList.add('gewaehlt');
+  document.getElementById('mk_'+key).textContent='★';
+  // grün / rot setzen
+  Object.keys(d.ist).forEach(k=>{
+    document.getElementById('vf_'+k).classList.add('ist');
+    document.getElementById('mk_'+k).textContent='✓';
+  });
+  Object.keys(d.istnicht).forEach(k=>{
+    document.getElementById('vf_'+k).classList.add('istnicht');
+    document.getElementById('mk_'+k).textContent='✗';
+  });
+  // Erklärbox
+  let h='<h3>Ein '+d.label+' …</h3>';
+  if(Object.keys(d.ist).length){
+    Object.entries(d.ist).forEach(([k,grund])=>{
+      h+='<div class="zeile ja"><span class="sym">✓</span><span>… ist auch ein <b>'+DATEN[k].label+'</b>. '+grund+'</span></div>';
+    });
+  }
+  if(Object.keys(d.istnicht).length){
+    Object.entries(d.istnicht).forEach(([k,grund])=>{
+      h+='<div class="zeile nein"><span class="sym">✗</span><span>… ist <b>nicht immer</b> ein <b>'+DATEN[k].label+'</b>. '+grund+'</span></div>';
+    });
+  }
+  h+='<div class="merksatz">💡 '+d.merksatz+'</div>';
+  const box=document.getElementById('erkl');
+  box.innerHTML=h; box.classList.add('show');
+}
+function vReset(){
+  aktuelleFigur=null;
+  REIHE.forEach(k=>{document.getElementById('vf_'+k).classList.remove('gewaehlt','ist','istnicht');document.getElementById('mk_'+k).textContent='';});
+  document.getElementById('erkl').classList.remove('show');
+}
+</script>
+
+<script>
+/* ============================================================
+   KARTE F — Selbstkontrolle (Flip-Cards)
+   ============================================================ */
+(function(){
+  const cards=[
+    {f:'Ist jedes Quadrat auch ein Rechteck?', b:'Ja. Ein Quadrat hat vier rechte Winkel – das genügt für ein Rechteck. (Zusätzlich sind alle Seiten gleich.)'},
+    {f:'Ist jedes Rechteck auch ein Quadrat?', b:'Nein. Ein Rechteck darf lang und schmal sein. Erst wenn alle vier Seiten gleich lang sind, wird es ein Quadrat.'},
+    {f:'Ist jede Raute auch ein Drachen?', b:'Ja. Eine Raute hat vier gleiche Seiten – damit erst recht zwei Paar benachbarter gleicher Seiten. Sie ist ein besonderer Drachen.'},
+    {f:'Ist jeder Drachen auch ein Trapez?', b:'Nein. Ein allgemeiner Drachen hat keine parallelen Seiten. Erst die Raute (ein besonderer Drachen) ist auch ein Trapez.'},
+    {f:'Was ist ein symmetrisches Trapez?', b:'Ein Trapez mit gleich langen Schenkeln und einer Symmetrieachse. Das Rechteck ist ein besonderes symmetrisches Trapez.'},
+    {f:'Ist jedes Parallelogramm auch ein Rechteck?', b:'Nein. Dafür fehlen die vier rechten Winkel. Ein Parallelogramm darf „schief" sein.'},
+    {f:'Warum ist jedes Parallelogramm auch ein Trapez?', b:'Weil es (sogar zwei Paar) parallele Seiten hat. Für ein Trapez genügt schon mindestens ein Paar.'},
+    {f:'Welcher Begriff steht ganz unten im Haus?', b:'Das allgemeine Viereck. Jedes besondere Viereck ist auch ein allgemeines Viereck – aber nicht umgekehrt.'}
+  ];
+  let html='<h2>Prüfe dich selbst</h2>';
+  html+='<div class="unter">Tippe eine Karte an, um die Antwort aufzudecken. Überlege vorher selbst!</div>';
+  html+='<div class="flip-grid">';
+  cards.forEach((c,i)=>{
+    html+='<div class="flip" id="flip_'+i+'" onclick="this.classList.toggle(\'flipped\')">'
+      +'<div class="flip-inner"><div class="flip-face flip-front">'+c.f+'</div>'
+      +'<div class="flip-face flip-back">'+c.b+'</div></div></div>';
+  });
+  html+='</div><div class="flip-hint">Diese Karten dienen der Selbstkontrolle – es gibt hier keine Auswertung.</div>';
+  document.getElementById('karte_kf').innerHTML=html;
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Dezimalzahlen multiplizieren – Klasse 6</title>
+
+<!-- MathJax -->
+<script>
+  MathJax = {
+    tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+    svg: { fontCache: 'global' }
+  };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+<!-- Google Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg: #f0f4ff;
+    --card: #ffffff;
+    --primary: #3b5bdb;
+    --primary-light: #e8edff;
+    --accent: #f76707;
+    --accent-light: #fff4e6;
+    --green: #2f9e44;
+    --green-bg: #d3f9d8;
+    --red: #c92a2a;
+    --red-bg: #ffe3e3;
+    --text: #1a1a2e;
+    --muted: #5c6680;
+    --border: #d0d8f0;
+    --shadow: 0 4px 20px rgba(59,91,219,0.10);
+    --radius: 18px;
+    --font-main: 'Nunito', sans-serif;
+    --font-display: 'Fredoka One', cursive;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  -webkit-tap-highlight-color: transparent;
+
+  body {
+    font-family: var(--font-main);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0 0 80px 0;
+    font-size: 17px;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: linear-gradient(135deg, var(--primary) 0%, #4c6ef5 60%, #748ffc 100%);
+    color: white;
+    padding: 22px 24px 18px;
+    text-align: center;
+    position: relative;
+  }
+  header h1 {
+    font-family: var(--font-display);
+    font-size: 1.8rem;
+    letter-spacing: 0.5px;
+  }
+  header p {
+    font-size: 0.95rem;
+    opacity: 0.85;
+    margin-top: 4px;
+  }
+
+  /* ── TAB-NAVIGATION ── */
+  .tab-nav {
+    display: flex;
+    overflow-x: auto;
+    background: white;
+    border-bottom: 2px solid var(--border);
+    gap: 0;
+    padding: 0 8px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .tab-nav::-webkit-scrollbar { display: none; }
+  .tab-btn {
+    flex: none;
+    padding: 13px 18px;
+    font-family: var(--font-main);
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--muted);
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    cursor: pointer;
+    white-space: nowrap;
+    margin-bottom: -2px;
+    transition: color 0.2s, border-color 0.2s;
+    touch-action: manipulation;
+  }
+  .tab-btn.active {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+  }
+  .tab-btn.done::after {
+    content: ' ✓';
+    color: var(--green);
+  }
+
+  /* ── KARTEN ── */
+  .page { display: none; padding: 20px 16px; max-width: 760px; margin: 0 auto; }
+  .page.active { display: block; }
+
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 22px 20px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+  }
+  .card-title {
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    color: var(--primary);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* ── NIVEAU-WÄHLER ── */
+  .niveau-bar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+  }
+  .niveau-btn {
+    padding: 8px 16px;
+    border-radius: 50px;
+    border: 2px solid var(--border);
+    background: white;
+    font-family: var(--font-main);
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--muted);
+    cursor: pointer;
+    touch-action: manipulation;
+    transition: all 0.18s;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+  }
+  .niveau-btn.active {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: white;
+  }
+  .niveau-btn:nth-child(2).active { background: #f76707; border-color: #f76707; }
+  .niveau-btn:nth-child(3).active { background: #862e9c; border-color: #862e9c; }
+
+  /* ── AUFGABEN ── */
+  .aufgabe {
+    background: var(--primary-light);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 14px;
+  }
+  .aufgabe.hidden { display: none; }
+  .aufgabe-text {
+    font-size: 1.05rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+    line-height: 1.5;
+  }
+  .input-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .answer-input {
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-family: var(--font-main);
+    font-size: 1.1rem;
+    font-weight: 700;
+    width: 120px;
+    text-align: center;
+    background: white;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s;
+    min-height: 44px;
+  }
+  .answer-input:focus { border-color: var(--primary); }
+  .answer-input.richtig { border-color: var(--green); background: var(--green-bg); }
+  .answer-input.falsch { border-color: var(--red); background: var(--red-bg); }
+
+  .check-btn {
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 18px;
+    font-family: var(--font-main);
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+    min-height: 44px;
+    touch-action: manipulation;
+    transition: background 0.15s, transform 0.1s;
+  }
+  .check-btn:active { transform: scale(0.96); }
+
+  .clear-btn {
+    background: white;
+    color: var(--red);
+    border: 2px solid var(--red);
+    border-radius: 10px;
+    padding: 8px 14px;
+    font-family: var(--font-main);
+    font-weight: 700;
+    font-size: 0.88rem;
+    cursor: pointer;
+    min-height: 44px;
+    touch-action: manipulation;
+    display: none;
+  }
+
+  .feedback {
+    margin-top: 10px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    display: none;
+  }
+  .feedback.richtig { background: var(--green-bg); color: var(--green); display: block; }
+  .feedback.falsch { background: var(--red-bg); color: var(--red); display: block; }
+
+  /* ── TIPP-BOX ── */
+  .tipp-toggle {
+    background: var(--accent-light);
+    border: none;
+    border-radius: 10px;
+    padding: 10px 16px;
+    font-family: var(--font-main);
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--accent);
+    cursor: pointer;
+    margin-top: 10px;
+    touch-action: manipulation;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .tipp-box {
+    background: var(--accent-light);
+    border-left: 4px solid var(--accent);
+    border-radius: 0 10px 10px 0;
+    padding: 12px 14px;
+    margin-top: 8px;
+    font-size: 0.9rem;
+    display: none;
+  }
+  .tipp-box.show { display: block; }
+
+  /* ── MC AUFGABEN ── */
+  .mc-optionen {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 8px;
+  }
+  .mc-btn {
+    background: white;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 14px;
+    font-family: var(--font-main);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    min-height: 52px;
+    touch-action: manipulation;
+    transition: all 0.15s;
+    text-align: center;
+  }
+  .mc-btn:active { transform: scale(0.97); }
+  .mc-btn.richtig { background: var(--green-bg); border-color: var(--green); color: var(--green); }
+  .mc-btn.falsch { background: var(--red-bg); border-color: var(--red); color: var(--red); }
+  .mc-btn.disabled { pointer-events: none; }
+
+  /* ── AUSWERTUNG ── */
+  .auswertung-box {
+    text-align: center;
+    padding: 28px 20px;
+  }
+  .auswertung-score {
+    font-family: var(--font-display);
+    font-size: 3.5rem;
+    color: var(--primary);
+    margin: 10px 0;
+  }
+  .auswertung-note {
+    font-size: 1.1rem;
+    color: var(--muted);
+    margin-bottom: 20px;
+  }
+  .auswertung-details { text-align: left; }
+  .detail-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.92rem;
+  }
+
+  /* ── WIEDERHOLUNG: Frac ── */
+  .frac {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    vertical-align: middle;
+    font-size: 0.95em;
+    margin: 0 3px;
+  }
+  .frac span:first-child {
+    border-bottom: 2px solid currentColor;
+    padding-bottom: 1px;
+    line-height: 1.2;
+  }
+  .frac span:last-child { line-height: 1.2; }
+
+  /* ── WEITER-BUTTON ── */
+  .weiter-btn {
+    display: none;
+    width: calc(100% - 32px);
+    margin: 10px 16px 30px;
+    padding: 18px;
+    background: var(--green);
+    color: white;
+    border: none;
+    border-radius: var(--radius);
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    cursor: pointer;
+    touch-action: manipulation;
+    letter-spacing: 0.5px;
+    min-height: 56px;
+    box-shadow: 0 4px 16px rgba(47,158,68,0.35);
+    transition: transform 0.15s;
+  }
+  .weiter-btn:active { transform: scale(0.98); }
+
+  /* ── DINO ── */
+  .dino {
+    position: fixed;
+    bottom: 14px;
+    right: 16px;
+    font-size: 1.6rem;
+    cursor: pointer;
+    z-index: 999;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+  .dino-tooltip {
+    position: fixed;
+    bottom: 54px;
+    right: 16px;
+    background: var(--text);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    display: none;
+    white-space: nowrap;
+    z-index: 1000;
+  }
+  .dino:hover + .dino-tooltip,
+  .dino.tipped + .dino-tooltip { display: block; }
+
+  /* ── INFO-BADGE ── */
+  .badge {
+    display: inline-block;
+    background: var(--accent);
+    color: white;
+    border-radius: 50px;
+    padding: 2px 10px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+
+  /* ── REGEL-BOX ── */
+  .regel-box {
+    background: linear-gradient(135deg, #e8edff 0%, #f0f4ff 100%);
+    border-left: 5px solid var(--primary);
+    border-radius: 0 12px 12px 0;
+    padding: 14px 16px;
+    margin-bottom: 18px;
+    font-size: 0.95rem;
+  }
+  .regel-box strong { color: var(--primary); }
+
+  .section-label {
+    font-size: 0.8rem;
+    font-weight: 800;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+    margin-top: 14px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>✖️ Dezimalzahlen multiplizieren</h1>
+  <p>Klasse 6 &nbsp;·&nbsp; Übung</p>
+</header>
+
+<!-- TAB-NAVIGATION -->
+<div class="tab-nav" id="tabNav">
+  <button class="tab-btn active" onclick="showPage(0)" id="tab0">📐 Kommastellen</button>
+  <button class="tab-btn" onclick="showPage(1)" id="tab1">🧮 Mal 10 / 100</button>
+  <button class="tab-btn" onclick="showPage(2)" id="tab2">💡 Sachaufgaben</button>
+  <button class="tab-btn" onclick="showPage(3)" id="tab3">🔁 Wiederholung</button>
+  <button class="tab-btn" onclick="showPage(4)" id="tab4">📊 Auswertung</button>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- SEITE 0: Kommastellen-Regel -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="page active" id="page0">
+
+  <div class="card">
+    <div class="card-title">📐 Die Kommaregel</div>
+    <div class="regel-box">
+      <strong>Regel:</strong> Beim Multiplizieren von Dezimalzahlen zähle alle Nachkommastellen der Faktoren zusammen. So viele Nachkommastellen hat das Ergebnis.
+      <br><br>
+      <strong>Beispiel:</strong> &nbsp; 1,4 · 0,3 &nbsp;→&nbsp; erst 14 · 3 = 42 &nbsp;→&nbsp; 2 Nachkommastellen &nbsp;→&nbsp; <strong>0,42</strong>
+    </div>
+
+    <!-- Niveau-Wähler -->
+    <div class="niveau-bar">
+      <button class="niveau-btn active" onclick="setNiveau(0,'n0')">⭐ Grundlagen</button>
+      <button class="niveau-btn" onclick="setNiveau(0,'n1')">⭐⭐ Fortgeschritten</button>
+      <button class="niveau-btn" onclick="setNiveau(0,'n2')">⭐⭐⭐ Profi</button>
+    </div>
+
+    <!-- Niveau 0: Grundlagen -->
+    <div class="niveau-group" id="page0-n0">
+      <div class="section-label">Wie viele Nachkommastellen hat das Ergebnis?</div>
+
+      <div class="aufgabe" id="p0n0a0">
+        <div class="aufgabe-text">2,3 · 4,1 &nbsp;→&nbsp; Wie viele Nachkommastellen hat das Ergebnis?</div>
+        <div class="mc-optionen">
+          <button class="mc-btn" onclick="checkMC(this,'p0n0a0',false)">1</button>
+          <button class="mc-btn" data-correct="true" onclick="checkMC(this,'p0n0a0',true)">2</button>
+          <button class="mc-btn" onclick="checkMC(this,'p0n0a0',false)">3</button>
+          <button class="mc-btn" onclick="checkMC(this,'p0n0a0',false)">0</button>
+        </div>
+        <div class="feedback" id="p0n0a0-fb"></div>
+      </div>
+
+      <div class="aufgabe" id="p0n0a1">
+        <div class="aufgabe-text">1,5 · 3 &nbsp;→&nbsp; Wie viele Nachkommastellen hat das Ergebnis?</div>
+        <div class="mc-optionen">
+          <button class="mc-btn" onclick="checkMC(this,'p0n0a1',false)">0</button>
+          <button class="mc-btn" data-correct="true" onclick="checkMC(this,'p0n0a1',true)">1</button>
+          <button class="mc-btn" onclick="checkMC(this,'p0n0a1',false)">2</button>
+          <button class="mc-btn" onclick="checkMC(this,'p0n0a1',false)">3</button>
+        </div>
+        <div class="feedback" id="p0n0a1-fb"></div>
+      </div>
+
+      <div class="aufgabe" id="p0n0a2">
+        <div class="aufgabe-text">0,4 · 0,2 &nbsp;→&nbsp; Berechne das Ergebnis.</div>
+        <div class="input-row">
+          <input type="text" inputmode="decimal" class="answer-input" id="p0n0a2-inp" placeholder="?">
+          <button class="check-btn" onclick="checkInput('p0n0a2','0.08')">Prüfen</button>
+          <button class="clear-btn" id="p0n0a2-clr" onclick="clearInput('p0n0a2')">Leeren</button>
+        </div>
+        <button class="tipp-toggle" onclick="toggleTipp('p0n0a2-tipp')">💡 Tipp</button>
+        <div class="tipp-box" id="p0n0a2-tipp">
+          Rechne zuerst 4 · 2 = 8. Dann zähle die Nachkommastellen: 0,4 hat eine, 0,2 hat eine → zusammen 2. Also hat das Ergebnis 2 Nachkommastellen.
+        </div>
+        <div class="feedback" id="p0n0a2-fb"></div>
+      </div>
+    </div>
+
+    <!-- Niveau 1: Fortgeschritten -->
+    <div class="niveau-group hidden" id="page0-n1">
+      <div class="aufgabe" id="p0n1a0">
+        <div class="aufgabe-text">3,6 · 1,4 = ?</div>
+        <div class="input-row">
+          <input type="text" inputmode="decimal" class="answer-input" id="p0n1a0-inp" placeholder="?">
+          <button class="check-btn" onclick="checkInput('p0n1a0','5.04')">Prüfen</button>
+          <button class="clear-btn" id="p0n1a0-clr" onclick="clearInput('p0n1a0')">Leeren</button>
+        </div>
+        <button class="tipp-toggle" onclick="toggleTipp('p0n1a0-tipp')">💡 Tipp</button>
+        <div class="tipp-box" id="p0n1a0-tipp">36 · 14 = ? Probiere: 36 · 10 + 36 · 4. Das Ergebnis hat 2 Nachkommastellen.</div>
+        <div class="feedback" id="p0n1a0-fb"></div>
+      </div>
+
+      <div class="aufgabe" id="p0n1a1">
+        <div class="aufgabe-text">2,5 · 0,8 = ?</div>
+        <div class="input-row">
+          <input type="text" inputmode="decimal" class="answer-input" id="p0n1a1-inp" placeholder="?">
+          <button class="check-btn" onclick="checkInput('p0n1a1','2')">Prüfen</button>
+          <button class="clear-btn" id="p0n1a1-clr" onclick="clearInput('p0n1a1')">Leeren</button>
+        </div>
+        <div class="feedback" id="p0n1a1-fb"></div>
+      </div>
+
+      <div class="aufgabe" id="p0n1a2">
+        <div class="aufgabe-text">0,12 · 3 = ?</div>
+        <div class="input-row">
+          <input type="text" inputmode="decimal" class="answer-input" id="p0n1a2-inp" placeholder="?">
+          <button class="check-btn" onclick="checkInput('p0n1a2','0.36')">Prüfen</button>
+          <button class="clear-btn" id="p0n1a2-clr" onclick="clearInput('p0n1a2')">Leeren</button>
+        </div>
+        <div class="feedback" id="p0n1a2-fb"></div>
+      </div>
+    </div>
+
+    <!-- Niveau 2: Profi -->
+    <div class="niveau-group hidden" id="page0-n2">
+      <div class="aufgabe" id="p0n2a0">
+        <div class="aufgabe-text">0,25 · 0,4 = ?</div>
+        <div class="input-row">
+          <input type="text" inputmode="decimal" class="answer-input" id="p0n2a0-inp" placeholder="?">
+          <button class="check-btn" onclick="checkInput('p0n2a0','0.1')">Prüfen</button>
+          <button class="clear-btn" id="p0n2a0-clr" onclick="clearInput('p0n2a0')">Leeren</button>
+        </div>
+        <div class="feedback" id="p0n2a0-fb"></div>
+      </div>
+
+      <div class="aufgabe" id="p0n2a1">
+        <div class="aufgabe-text">1,25 · 2,4 = ?</div>
+        <div class="input-row">
+          <input type="text" inputmode="decimal" class="answer-input" id="p0n2a1-inp" placeholder="?">
+          <button class="check-btn" onclick="checkInput('p0n2a1','3')">Prüfen</button>
+          <button class="clear-btn" id="p0n2a1-clr" onclick="clearInput('p0n2a1')">Leeren</button>
+        </div>
+        <button class="tipp-toggle" onclick="toggleTipp('p0n2a1-tipp')">💡 Tipp</button>
+        <div class="tipp-box" id="p0n2a1-tipp">Rechne 125 · 24 = ? Dann zähle: 2 + 1 = 3 Nachkommastellen.</div>
+        <div class="feedback" id="p0n2a1-fb"></div>
+      </div>
+
+      <div class="aufgabe" id="p0n2a2">
+        <div class="aufgabe-text">Welches Ergebnis passt? &nbsp; 0,06 · 0,5</div>
+        <div class="mc-optionen">
+          <button class="mc-btn" onclick="checkMC(this,'p0n2a2',false)">0,3</button>
+          <button class="mc-btn" data-correct="true" onclick="checkMC(this,'p0n2a2',true)">0,03</button>
+          <button class="mc-btn" onclick="checkMC(this,'p0n2a2',false)">0,003</button>
+          <button class="mc-btn" onclick="checkMC(this,'p0n2a2',false)">3,0</button>
+        </div>
+        <div class="feedback" id="p0n2a2-fb"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WEITER -->
+  <button class="weiter-btn" id="weiter0" onclick="showPage(1)">Weiter → Mal 10 / 100</button>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- SEITE 1: Mal 10, 100, 1000 -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="page" id="page1">
+
+  <div class="card">
+    <div class="card-title">🧮 Multiplizieren mit 10, 100, 1000</div>
+    <div class="regel-box">
+      <strong>Regel:</strong> Beim Multiplizieren mit 10 verschiebt sich der Dezimalpunkt um eine Stelle nach rechts. Bei 100 → zwei Stellen, bei 1000 → drei Stellen.
+      <br><br>
+      <strong>Beispiel:</strong> &nbsp; 3,7 · 10 = 37 &nbsp;|&nbsp; 3,7 · 100 = 370 &nbsp;|&nbsp; 0,45 · 10 = 4,5
+    </div>
+
+    <div class="niveau-bar">
+      <button class="niveau-btn active" onclick="setNiveau(1,'n0')">⭐ Grundlagen</button>
+      <button class="niveau-btn" onclick="setNiveau(1,'n1')">⭐⭐ Fortgeschritten</button>
+      <button class="niveau-btn" onclick="setNiveau(1,'n2')">⭐⭐⭐ Profi</button>
+    </div>
+
+    <!-- Niveau 0 -->
+    <div class="niveau-group" id="page1-n0">
+      <div class="aufgabe" id="p1n0a0">
+        <div class="aufgabe-text">4,3 · 10 = ?</div>
+        <div class="mc-optionen">
+          <button class="mc-btn" onclick="checkMC(this,'p1n0a0',false)">0,43</button>
+          <button class="mc-btn" data-correct="true" onclick="checkMC(this,'p1n0a0',true)">43</button>
+          <button class="mc-btn" onclick="checkMC(this,'p1n0a0',false)">430</button>
+          <button class="mc-btn" onclick="checkMC(this,'p1n0a0',false)">4300</button>
+        </div>
+        <div class="feedback" id="p1n0a0-fb"></div>
+      </div>
+
+      <div class="aufgabe" id="p1n0a1">
+        <div class="aufgabe-text">0,7 · 100 = ?</div>
+        <div class="input-row">
+          <input type="text" inputmode="decimal" class="answer-input" id="p1n0a1-inp" placeholder="?">
+          <button class="check-btn" onclick="checkInput('p1n0a1','70')">Prüfen</button>
+          <button class="clear-btn" id="p1n0a1-clr" onclick="clearInput('p1n0a1')">Leeren</button>
+        </div>
+        <div class="feedback" id="p1n0a1-fb"></div>
+      </div>
+
+      <div class="aufgabe" id="p1n0a2">
+        <div class="aufgabe-text">2,1 · 10 = ?</div>
+        <div class="input-row">
+          <input type="text" inputmode="decimal" class="answer-input" id="p1n0a2-inp" placeholder="?">
+          <button class="check-btn" onclick="checkInput('p1n0a2','21')">Prüfen</button>
+          <button class="clear-btn" id="p1n0a2-clr" onclick="clearInput('p1n0a2')">Leeren</button>
+        </div>
+        <div class="feedback" id="p1n0a2-fb"></div>
+      </div>
+    </div>
+
+    <!-- Niveau 1 -->
+    <div class="niveau-group hidden" id="page1-n1">
+      <div class="aufgabe" id="p1n1a0">
+        <div class="aufgabe-text">0,035 · 100 = ?</div>
+        <div class="input-row">
+          <input type="text" inputmode="decimal" class="answer-input" id="p1n1a0-inp" placeholder="?">
+          <button class="check-btn" onclick="checkInput('p1n1a0','3.5')">Prüfen</button>
+          <button class="clear-btn" id="p1n1a0-clr" onclick="clearInput('p1n1a0')">Leeren</button>
+        </div>
+        <button class="tipp-toggle" onclick="toggleTipp('p1n1a0-tipp')">💡 Tipp</button>
+        <div class="tipp-box" id="p1n1a0-tipp">Der Dezimalpunkt verschiebt sich um 2 Stellen nach rechts: 0,035 → 0,35 → 3,5</div>
+        <div class="feedback" id="p1n1a0-fb"></div>
+      </div>
+
+      <div class="aufgabe" id="p1n1a1">
+        <div class="aufgabe-text">6,08 · 1000 = ?</div>
+        <div class="input-row">
+          <input type="text" inputmode="decimal" class="answer-input" id="p1n1a1-inp" placeholder="?">
+          <button class="check-btn" onclick="checkInput('p1n1a1','6080')">Prüfen</button>
+          <button class="clear-btn" id="p1n1a1-clr" onclick="clearInput('p1n1a1')">Leeren</button>
+        </div>
+        <div class="feedback" id="p1n1a1-fb"></div>
+      </div>
+
+      <div class="aufgabe" id="p1n1a2">
+        <div class="aufgabe-text">Welche Rechnung ergibt 520?</div>
+        <div class="mc-optionen">
+          <button class="mc-btn" onclick="checkMC(this,'p1n1a2',false)">0,52 · 10</button>
+          <button class="mc-btn" data-correct="true" onclick="checkMC(this,'p1n1a2',true)">5,2 · 100</button>
+          <button class="mc-btn" onclick="checkMC(this,'p1n1a2',false)">52 · 100</button>
+          <button class="mc-btn" onclick="checkMC(this,'p1n1a2',false)">0,052 · 10</button>
+        </div>
+        <div class="feedback" id="p1n1a2-fb"></div>
+      </div>
+    </div>
+
+    <!-- Niveau 2 -->
+    <div class="niveau-group hidden" id="page1-n2">
+      <div class="aufgabe" id="p1n2a0">
+        <div class="aufgabe-text">0,007 · 1000 = ?</div>
+        <div class="input-row">
+          <input type="text" inputmode="decimal" class="answer-input" id="p1n2a0-inp" placeholder="?">
+          <button class="check-btn" onclick="checkInput('p1n2a0','7')">Prüfen</button>
+          <button class="clear-btn" id="p1n2a0-clr" onclick="clearInput('p1n2a0')">Leeren</button>
+        </div>
+        <div class="feedback" id="p1n2a0-fb"></div>
+      </div>
+
+      <div class="aufgabe" id="p1n2a1">
+        <div class="aufgabe-text">Mit welcher Zahl wurde 0,46 multipliziert, wenn das Ergebnis 460 ist?</div>
+        <div class="mc-optionen">
+          <button class="mc-btn" onclick="checkMC(this,'p1n2a1',false)">10</button>
+          <button class="mc-btn" onclick="checkMC(this,'p1n2a1',false)">100</button>
+          <button class="mc-btn" data-correct="true" onclick="checkMC(this,'p1n2a1',true)">1000</button>
+          <button class="mc-btn" onclick="checkMC(this,'p1n2a1',false)">10000</button>
+        </div>
+        <div class="feedback" id="p1n2a1-fb"></div>
+      </div>
+
+      <div class="aufgabe" id="p1n2a2">
+        <div class="aufgabe-text">0,048 · ? = 4,8. Welche Zahl fehlt?</div>
+        <div class="input-row">
+          <input type="text" inputmode="numeric" class="answer-input" id="p1n2a2-inp" placeholder="?">
+          <button class="check-btn" onclick="checkInput('p1n2a2','100')">Prüfen</button>
+          <button class="clear-btn" id="p1n2a2-clr" onclick="clearInput('p1n2a2')">Leeren</button>
+        </div>
+        <div class="feedback" id="p1n2a2-fb"></div>
+      </div>
+    </div>
+  </div>
+
+  <button class="weiter-btn" id="weiter1" onclick="showPage(2)">Weiter → Sachaufgaben</button>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- SEITE 2: Sachaufgaben -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="page" id="page2">
+
+  <div class="card">
+    <div class="card-title">💡 Dezimalzahlen im Alltag</div>
+
+    <div class="niveau-bar">
+      <button class="niveau-btn active" onclick="setNiveau(2,'n0')">⭐ Grundlagen</button>
+      <button class="niveau-btn" onclick="setNiveau(2,'n1')">⭐⭐ Fortgeschritten</button>
+      <button class="niveau-btn" onclick="setNiveau(2,'n2')">⭐⭐⭐ Profi</button>
+    </div>
+
+    <!-- Niveau 0 -->
+    <div class="niveau-group" id="page2-n0">
+      <div class="aufgabe" id="p2n0a0">
+        <div class="aufgabe-text">🍕 Eine Pizza kostet 6,50 €. Lea kauft 2 Pizzen. Was kostet das?</div>
+        <div class="input-row">
+          <input type="text" inputmode="decimal" class="answer-input" id="p2n0a0-inp" placeholder="? €">
+          <button class="check-btn" onclick="checkInput('p2n0a0','13')">Prüfen</button>
+          <button class="clear-btn" id="p2n0a0-clr" onclick="clearInput('p2n0a0')">Leeren</button>
+        </div>
+        <button class="tipp-toggle" onclick="toggleTipp('p2n0a0-tipp')">💡 Tipp</button>
+        <div class="tipp-box" id="p2n0a0-tipp">Rechne: 6,50 · 2. Oder: 650 · 2 = 1300, dann 1 Nachkommastelle → 13,0</div>
+        <div class="feedback" id="p2n0a0-fb"></div>
+      </div>
+
+      <div class="aufgabe" id="p2n0a1">
+        <div class="aufgabe-text">🚗 Ein Auto fährt 1,5 Stunden mit 80 km/h. Wie viele Kilometer legt es zurück?</div>
+        <div class="input-row">
+          <input type="text" inputmode="decimal" class="answer-input" id="p2n0a1-inp" placeholder="? km">
+          <button class="check-btn" onclick="checkInput('p2n0a1','120')">Prüfen</button>
+          <button class="clear-btn" id="p2n0a1-clr" onclick="clearInput('p2n0a1')">Leeren</button>
+        </div>
+        <div class="feedback" id="p2n0a1-fb"></div>
+      </div>
+    </div>
+
+    <!-- Niveau 1 -->
+    <div class="niveau-group hidden" id="page2-n1">
+      <div class="aufgabe" id="p2n1a0">
+        <div class="aufgabe-text">⚡ Strom kostet 0,35 € pro Kilowattstunde. Tim verbraucht 8,4 kWh. Was muss er zahlen?</div>
+        <div class="input-row">
+          <input type="text" inputmode="decimal" class="answer-input" id="p2n1a0-inp" placeholder="? €">
+          <button class="check-btn" onclick="checkInput('p2n1a0','2.94')">Prüfen</button>
+          <button class="clear-btn" id="p2n1a0-clr" onclick="clearInput('p2n1a0')">Leeren</button>
+        </div>
+        <button class="tipp-toggle" onclick="toggleTipp('p2n1a0-tipp')">💡 Tipp</button>
+        <div class="tipp-box" id="p2n1a0-tipp">35 · 84 = ? Dann: 2 + 1 = 3 Nachkommastellen → 2,940 = 2,94</div>
+        <div class="feedback" id="p2n1a0-fb"></div>
+      </div>
+
+      <div class="aufgabe" id="p2n1a1">
+        <div class="aufgabe-text">📐 Ein Rechteck ist 3,2 cm breit und 4,5 cm lang. Berechne den Flächeninhalt.</div>
+        <div class="input-row">
+          <input type="text" inputmode="decimal" class="answer-input" id="p2n1a1-inp" placeholder="? cm²">
+          <button class="check-btn" onclick="checkInput('p2n1a1','14.4')">Prüfen</button>
+          <button class="clear-btn" id="p2n1a1-clr" onclick="clearInput('p2n1a1')">Leeren</button>
+        </div>
+        <div class="feedback" id="p2n1a1-fb"></div>
+      </div>
+    </div>
+
+    <!-- Niveau 2 -->
+    <div class="niveau-group hidden" id="page2-n2">
+      <div class="aufgabe" id="p2n2a0">
+        <div class="aufgabe-text">🏃 Mia läuft täglich 2,75 km. Wie viele Kilometer läuft sie in 12 Tagen?</div>
+        <div class="input-row">
+          <input type="text" inputmode="decimal" class="answer-input" id="p2n2a0-inp" placeholder="? km">
+          <button class="check-btn" onclick="checkInput('p2n2a0','33')">Prüfen</button>
+          <button class="clear-btn" id="p2n2a0-clr" onclick="clearInput('p2n2a0')">Leeren</button>
+        </div>
+        <div class="feedback" id="p2n2a0-fb"></div>
+      </div>
+
+      <div class="aufgabe" id="p2n2a1">
+        <div class="aufgabe-text">💰 Orangensaft kostet 1,29 € pro Liter. Herr Weber kauft 2,5 Liter. Wie viel zahlt er? (Runde auf Cent!)</div>
+        <div class="input-row">
+          <input type="text" inputmode="decimal" class="answer-input" id="p2n2a1-inp" placeholder="? €">
+          <button class="check-btn" onclick="checkInput('p2n2a1','3.23')">Prüfen</button>
+          <button class="clear-btn" id="p2n2a1-clr" onclick="clearInput('p2n2a1')">Leeren</button>
+        </div>
+        <button class="tipp-toggle" onclick="toggleTipp('p2n2a1-tipp')">💡 Tipp</button>
+        <div class="tipp-box" id="p2n2a1-tipp">129 · 25 = 3225 → 3 Nachkommastellen → 3,225 → gerundet: 3,23 €</div>
+        <div class="feedback" id="p2n2a1-fb"></div>
+      </div>
+    </div>
+  </div>
+
+  <button class="weiter-btn" id="weiter2" onclick="showPage(3)">Weiter → Wiederholung</button>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- SEITE 3: WIEDERHOLUNG – Dezimalzahlen addieren/subtrahieren (Klasse 6, Kap. III) -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="page" id="page3">
+
+  <div class="card">
+    <div class="card-title">🔁 Wiederholung <span class="badge">Dezimalzahlen addieren & subtrahieren</span></div>
+    <div class="regel-box">
+      <strong>Erinnerung:</strong> Beim Addieren und Subtrahieren von Dezimalzahlen musst du die Kommas untereinanderschreiben und stellenweise rechnen.
+    </div>
+
+    <div class="niveau-bar">
+      <button class="niveau-btn active" onclick="setNiveau(3,'n0')">⭐ Grundlagen</button>
+      <button class="niveau-btn" onclick="setNiveau(3,'n1')">⭐⭐ Fortgeschritten</button>
+      <button class="niveau-btn" onclick="setNiveau(3,'n2')">⭐⭐⭐ Profi</button>
+    </div>
+
+    <!-- Niveau 0 -->
+    <div class="niveau-group" id="page3-n0">
+      <div class="aufgabe" id="p3n0a0">
+        <div class="aufgabe-text">2,4 + 1,3 = ?</div>
+        <div class="mc-optionen">
+          <button class="mc-btn" onclick="checkMC(this,'p3n0a0',false)">2,7</button>
+          <button class="mc-btn" onclick="checkMC(this,'p3n0a0',false)">3,4</button>
+          <button class="mc-btn" data-correct="true" onclick="checkMC(this,'p3n0a0',true)">3,7</button>
+          <button class="mc-btn" onclick="checkMC(this,'p3n0a0',false)">4,7</button>
+        </div>
+        <div class="feedback" id="p3n0a0-fb"></div>
+      </div>
+
+      <div class="aufgabe" id="p3n0a1">
+        <div class="aufgabe-text">5,8 − 2,3 = ?</div>
+        <div class="input-row">
+          <input type="text" inputmode="decimal" class="answer-input" id="p3n0a1-inp" placeholder="?">
+          <button class="check-btn" onclick="checkInput('p3n0a1','3.5')">Prüfen</button>
+          <button class="clear-btn" id="p3n0a1-clr" onclick="clearInput('p3n0a1')">Leeren</button>
+        </div>
+        <div class="feedback" id="p3n0a1-fb"></div>
+      </div>
+
+      <div class="aufgabe" id="p3n0a2">
+        <div class="aufgabe-text">0,6 + 0,7 = ?</div>
+        <div class="input-row">
+          <input type="text" inputmode="decimal" class="answer-input" id="p3n0a2-inp" placeholder="?">
+          <button class="check-btn" onclick="checkInput('p3n0a2','1.3')">Prüfen</button>
+          <button class="clear-btn" id="p3n0a2-clr" onclick="clearInput('p3n0a2')">Leeren</button>
+        </div>
+        <div class="feedback" id="p3n0a2-fb"></div>
+      </div>
+    </div>
+
+    <!-- Niveau 1 -->
+    <div class="niveau-group hidden" id="page3-n1">
+      <div class="aufgabe" id="p3n1a0">
+        <div class="aufgabe-text">12,45 + 3,8 = ?</div>
+        <div class="input-row">
+          <input type="text" inputmode="decimal" class="answer-input" id="p3n1a0-inp" placeholder="?">
+          <button class="check-btn" onclick="checkInput('p3n1a0','16.25')">Prüfen</button>
+          <button class="clear-btn" id="p3n1a0-clr" onclick="clearInput('p3n1a0')">Leeren</button>
+        </div>
+        <button class="tipp-toggle" onclick="toggleTipp('p3n1a0-tipp')">💡 Tipp</button>
+        <div class="tipp-box" id="p3n1a0-tipp">Schreibe 3,8 als 3,80 und rechne dann stellenweise.</div>
+        <div class="feedback" id="p3n1a0-fb"></div>
+      </div>
+
+      <div class="aufgabe" id="p3n1a1">
+        <div class="aufgabe-text">7,2 − 3,65 = ?</div>
+        <div class="input-row">
+          <input type="text" inputmode="decimal" class="answer-input" id="p3n1a1-inp" placeholder="?">
+          <button class="check-btn" onclick="checkInput('p3n1a1','3.55')">Prüfen</button>
+          <button class="clear-btn" id="p3n1a1-clr" onclick="clearInput('p3n1a1')">Leeren</button>
+        </div>
+        <div class="feedback" id="p3n1a1-fb"></div>
+      </div>
+
+      <div class="aufgabe" id="p3n1a2">
+        <div class="aufgabe-text">0,95 + 1,08 − 0,7 = ?</div>
+        <div class="input-row">
+          <input type="text" inputmode="decimal" class="answer-input" id="p3n1a2-inp" placeholder="?">
+          <button class="check-btn" onclick="checkInput('p3n1a2','1.33')">Prüfen</button>
+          <button class="clear-btn" id="p3n1a2-clr" onclick="clearInput('p3n1a2')">Leeren</button>
+        </div>
+        <div class="feedback" id="p3n1a2-fb"></div>
+      </div>
+    </div>
+
+    <!-- Niveau 2 -->
+    <div class="niveau-group hidden" id="page3-n2">
+      <div class="aufgabe" id="p3n2a0">
+        <div class="aufgabe-text">Sabine hat 20 €. Sie kauft für 7,45 € und 6,80 €. Wie viel Geld hat sie noch?</div>
+        <div class="input-row">
+          <input type="text" inputmode="decimal" class="answer-input" id="p3n2a0-inp" placeholder="? €">
+          <button class="check-btn" onclick="checkInput('p3n2a0','5.75')">Prüfen</button>
+          <button class="clear-btn" id="p3n2a0-clr" onclick="clearInput('p3n2a0')">Leeren</button>
+        </div>
+        <div class="feedback" id="p3n2a0-fb"></div>
+      </div>
+
+      <div class="aufgabe" id="p3n2a1">
+        <div class="aufgabe-text">Welche Summe ergibt genau 10?</div>
+        <div class="mc-optionen">
+          <button class="mc-btn" onclick="checkMC(this,'p3n2a1',false)">3,45 + 6,65</button>
+          <button class="mc-btn" data-correct="true" onclick="checkMC(this,'p3n2a1',true)">4,37 + 5,63</button>
+          <button class="mc-btn" onclick="checkMC(this,'p3n2a1',false)">2,8 + 8,3</button>
+          <button class="mc-btn" onclick="checkMC(this,'p3n2a1',false)">5,5 + 4,6</button>
+        </div>
+        <div class="feedback" id="p3n2a1-fb"></div>
+      </div>
+
+      <div class="aufgabe" id="p3n2a2">
+        <div class="aufgabe-text">99,9 − 0,09 − 0,9 = ?</div>
+        <div class="input-row">
+          <input type="text" inputmode="decimal" class="answer-input" id="p3n2a2-inp" placeholder="?">
+          <button class="check-btn" onclick="checkInput('p3n2a2','98.91')">Prüfen</button>
+          <button class="clear-btn" id="p3n2a2-clr" onclick="clearInput('p3n2a2')">Leeren</button>
+        </div>
+        <div class="feedback" id="p3n2a2-fb"></div>
+      </div>
+    </div>
+  </div>
+
+  <button class="weiter-btn" id="weiter3" onclick="goAuswertung()">Weiter → Auswertung</button>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- SEITE 4: AUSWERTUNG -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="page" id="page4">
+
+  <div class="card">
+    <div class="card-title">📊 Deine Auswertung</div>
+    <div class="auswertung-box" id="auswertungBox">
+      <div style="font-size:2rem;">🏆</div>
+      <div class="auswertung-score" id="scoreDisplay">–</div>
+      <div class="auswertung-note" id="scoreNote">Bearbeite zuerst alle Aufgaben.</div>
+      <div class="auswertung-details" id="scoreDetails"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- DINO -->
+<div class="dino" id="dinoEl" onclick="this.classList.toggle('tipped')" onmouseover="this.classList.add('tipped')" onmouseout="this.classList.remove('tipped')">🦖</div>
+<div class="dino-tooltip">Made by Mathedino</div>
+
+<script>
+// ══════════════════════════════════════════════
+// ZUSTAND
+// ══════════════════════════════════════════════
+const pageCount = 4; // ohne Auswertungsseite
+let pagesDone = [false, false, false, false];
+let scores = {}; // aufgabeId -> true/false
+
+// ── Normalisierung ──
+function normalizeNum(s) {
+  return s.trim().replace(',', '.').replace(/\s/g, '');
+}
+
+// ── Seite anzeigen ──
+function showPage(idx) {
+  document.querySelectorAll('.page').forEach((p,i) => {
+    p.classList.toggle('active', i === idx);
+  });
+  document.querySelectorAll('.tab-btn').forEach((b,i) => {
+    b.classList.toggle('active', i === idx);
+  });
+  if (idx === 4) renderAuswertung();
+}
+
+// ── Niveau umschalten ──
+function setNiveau(pageIdx, niv) {
+  const page = document.getElementById('page' + pageIdx);
+  // Alle Gruppen ausblenden
+  page.querySelectorAll('.niveau-group').forEach(g => g.classList.add('hidden'));
+  // Gewählte einblenden
+  const target = document.getElementById('page' + pageIdx + '-' + niv);
+  if (target) target.classList.remove('hidden');
+  // Buttons markieren
+  const btns = page.querySelectorAll('.niveau-btn');
+  const nIdx = parseInt(niv.replace('n',''));
+  btns.forEach((b,i) => b.classList.toggle('active', i === nIdx));
+  // Weiter-Status prüfen
+  checkPageDone(pageIdx);
+}
+
+// ── Tipp ──
+function toggleTipp(id) {
+  const el = document.getElementById(id);
+  el.classList.toggle('show');
+}
+
+// ── MC prüfen ──
+function checkMC(btn, aufgabeId, isCorrect) {
+  const aufgabe = document.getElementById(aufgabeId);
+  if (aufgabe.dataset.done === 'true') return;
+  const allBtns = aufgabe.querySelectorAll('.mc-btn');
+  allBtns.forEach(b => b.classList.add('disabled'));
+
+  const fb = document.getElementById(aufgabeId + '-fb');
+  if (isCorrect) {
+    btn.classList.add('richtig');
+    fb.className = 'feedback richtig';
+    fb.textContent = '✅ Richtig!';
+    scores[aufgabeId] = true;
+  } else {
+    btn.classList.add('falsch');
+    fb.className = 'feedback falsch';
+    fb.textContent = '❌ Leider falsch.';
+    // korrekte Antwort grün via data-correct
+    allBtns.forEach(b => {
+      if (b.dataset.correct === 'true') b.classList.add('richtig');
+    });
+    scores[aufgabeId] = false;
+  }
+  aufgabe.dataset.done = 'true';
+  checkPageDone(getPageOfAufgabe(aufgabeId));
+  document.getElementById('tab' + getPageOfAufgabe(aufgabeId)).classList.add('done');
+}
+
+// ── Input prüfen ──
+function checkInput(aufgabeId, correctRaw) {
+  const aufgabe = document.getElementById(aufgabeId);
+  if (aufgabe.dataset.done === 'true') return;
+  const inp = document.getElementById(aufgabeId + '-inp');
+  const val = normalizeNum(inp.value);
+  const correct = normalizeNum(correctRaw);
+  const fb = document.getElementById(aufgabeId + '-fb');
+  const clr = document.getElementById(aufgabeId + '-clr');
+
+  // Float-Vergleich mit Rundung
+  const userNum = parseFloat(val);
+  const corrNum = parseFloat(correct);
+  const isOk = !isNaN(userNum) && Math.abs(userNum - corrNum) < 0.001;
+
+  if (isOk) {
+    inp.classList.add('richtig');
+    inp.classList.remove('falsch');
+    fb.className = 'feedback richtig';
+    fb.textContent = '✅ Richtig!';
+    scores[aufgabeId] = true;
+    aufgabe.dataset.done = 'true';
+    inp.readOnly = true;
+    if (clr) clr.style.display = 'none';
+  } else {
+    inp.classList.add('falsch');
+    inp.classList.remove('richtig');
+    fb.className = 'feedback falsch';
+    fb.textContent = '❌ Nicht ganz – versuche es nochmal!';
+    scores[aufgabeId] = false;
+    if (clr) clr.style.display = 'inline-flex';
+  }
+  checkPageDone(getPageOfAufgabe(aufgabeId));
+  document.getElementById('tab' + getPageOfAufgabe(aufgabeId)).classList.add('done');
+}
+
+// ── Input leeren ──
+function clearInput(aufgabeId) {
+  const inp = document.getElementById(aufgabeId + '-inp');
+  const fb = document.getElementById(aufgabeId + '-fb');
+  const clr = document.getElementById(aufgabeId + '-clr');
+  inp.value = '';
+  inp.classList.remove('richtig','falsch');
+  fb.className = 'feedback';
+  fb.textContent = '';
+  if (clr) clr.style.display = 'none';
+  delete scores[aufgabeId];
+  const aufgabe = document.getElementById(aufgabeId);
+  aufgabe.dataset.done = '';
+}
+
+// ── Seite fertig? ──
+function getPageOfAufgabe(id) {
+  const p = id.charAt(1);
+  return parseInt(p);
+}
+
+function checkPageDone(pageIdx) {
+  const page = document.getElementById('page' + pageIdx);
+  // Nur sichtbare Gruppe
+  const visGroup = page.querySelector('.niveau-group:not(.hidden)');
+  if (!visGroup) return;
+  const aufgaben = visGroup.querySelectorAll('.aufgabe:not(.hidden)');
+  let allDone = true;
+  aufgaben.forEach(a => {
+    if (a.dataset.done !== 'true') allDone = false;
+  });
+  if (allDone && aufgaben.length > 0) {
+    pagesDone[pageIdx] = true;
+    const weiter = document.getElementById('weiter' + pageIdx);
+    if (weiter) weiter.style.display = 'block';
+    document.getElementById('tab' + pageIdx).classList.add('done');
+  }
+}
+
+// ── Auswertung ──
+function goAuswertung() {
+  showPage(4);
+}
+
+function renderAuswertung() {
+  const richtig = Object.values(scores).filter(v => v === true).length;
+  const gesamt = Object.keys(scores).length;
+  const pct = gesamt > 0 ? Math.round((richtig / gesamt) * 100) : 0;
+  document.getElementById('scoreDisplay').textContent = richtig + ' / ' + gesamt;
+
+  let note = '';
+  if (pct >= 90) note = '🌟 Hervorragend! Du hast das super drauf!';
+  else if (pct >= 70) note = '👍 Gut gemacht! Noch ein bisschen üben, dann klappt es perfekt.';
+  else if (pct >= 50) note = '🙂 Nicht schlecht! Schau dir die roten Aufgaben nochmal an.';
+  else note = '💪 Weitermachen! Dezimalzahlen brauchen etwas Übung.';
+  document.getElementById('scoreNote').textContent = note;
+
+  const details = document.getElementById('scoreDetails');
+  details.innerHTML = '<div class="section-label" style="margin-top:0">Überblick</div>';
+  const sektionen = [
+    ['Kommastellen-Regel', 'p0'],
+    ['Mal 10 / 100 / 1000', 'p1'],
+    ['Sachaufgaben', 'p2'],
+    ['Wiederholung', 'p3'],
+  ];
+  sektionen.forEach(([label, prefix]) => {
+    const keys = Object.keys(scores).filter(k => k.startsWith(prefix));
+    if (keys.length === 0) return;
+    const r = keys.filter(k => scores[k]).length;
+    const row = document.createElement('div');
+    row.className = 'detail-row';
+    row.innerHTML = `<span>${label}</span><span>${r} / ${keys.length} ✓</span>`;
+    details.appendChild(row);
+  });
+}
+
+// Enter-Taste für Inputs
+document.querySelectorAll('.answer-input').forEach(inp => {
+  inp.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      const id = inp.id.replace('-inp', '');
+      const btn = inp.parentElement.querySelector('.check-btn');
+      if (btn) btn.click();
+    }
+  });
+});
+
+// Init: Seite 0 aktiv, MC-Richtigantworten nicht versehentlich durch toString() ermittelt
+// Die MC-Buttons verwenden direkte isCorrect-Parameter, kein toString()-Hack nötig.
+</script>
+</body>
+</html>
