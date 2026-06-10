@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Konstruktion mit Zirkel und Lineal</title>
+<meta name="description" content="Erarbeitungs-Lernseite zu den vier Grundkonstruktionen mit Zirkel und Lineal: Strecke abtragen, Mittelsenkrechte, Winkelhalbierende und Lot. Mit Ortslinien-Idee als Brücke zu Umkreis und Inkreis.">
+<meta name="keywords" content="Konstruktion, Zirkel und Lineal, Mittelsenkrechte, Winkelhalbierende, Lot, Ortslinie, Dreieck, Kreis">
+<meta name="typ" content="Lernseite">
+<meta name="klasse" content="8">
+<meta name="fach" content="mathe">
+<meta name="oberthema" content="Geometrie">
+<meta name="thema" content="Konstruktion mit Zirkel und Lineal">
+<script>
+  MathJax = {
+    tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+    svg: { fontCache: 'global' }
+  };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+  :root{
+    --kopf:#E8923C;        /* Erarbeitung: Orange, nicht knallig */
+    --kopf-dunkel:#C8762A;
+    --papier:#FBF7F0;
+    --tinte:#2C2A26;
+    --linie:#D8CFC0;
+    --konstruktion:#1C6FB8;  /* Konstruktionsblau für Bögen/Geraden */
+    --konstruktion-hell:#E3F0FA;
+    --gegeben:#2C2A26;       /* gegebene Objekte: dunkel */
+    --erfolg:#1E7A3E;
+    --erfolg-bg:#1E7A3E;
+    --fehler:#C0271E;
+    --akzent:#7A4E8C;        /* Ortslinie/Erkenntnis */
+    --karte:#FFFFFF;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Helvetica,Arial,sans-serif;
+    background:var(--papier);
+    color:var(--tinte);
+    font-size:1.05rem;
+    line-height:1.55;
+    padding-bottom:5.5rem;
+  }
+  .wrap{max-width:62rem;margin:0 auto;padding:0 1rem;}
+
+  /* Kopf */
+  header{
+    background:linear-gradient(180deg,var(--kopf),var(--kopf-dunkel));
+    color:#fff;
+    padding:1.4rem 1rem 1.6rem;
+    box-shadow:0 2px 8px rgba(0,0,0,.12);
+  }
+  header .wrap{display:flex;flex-direction:column;gap:.25rem;}
+  .eyebrow{
+    font-size:.85rem;letter-spacing:.14em;text-transform:uppercase;
+    font-weight:700;opacity:.92;
+  }
+  header h1{margin:.1rem 0 0;font-size:1.7rem;line-height:1.15;}
+  header p{margin:.3rem 0 0;font-size:1rem;opacity:.95;max-width:46rem;}
+
+  /* Tab-Leiste */
+  nav.tabs{
+    position:sticky;top:0;z-index:50;
+    background:var(--papier);
+    border-bottom:1px solid var(--linie);
+    padding:.5rem 0;
+    box-shadow:0 2px 6px rgba(0,0,0,.05);
+  }
+  .tabrow{display:flex;flex-wrap:wrap;gap:.4rem;}
+  .tab{
+    border:1px solid var(--linie);
+    background:#fff;
+    color:var(--tinte);
+    border-radius:.6rem;
+    padding:.55rem .8rem;
+    min-height:44px;
+    font-size:.95rem;
+    font-weight:600;
+    cursor:pointer;
+    display:flex;align-items:center;gap:.45rem;
+    transition:transform .08s ease, background .15s ease;
+  }
+  .tab .num{
+    background:var(--konstruktion-hell);
+    color:var(--konstruktion);
+    border-radius:50%;
+    width:1.6rem;height:1.6rem;
+    display:flex;align-items:center;justify-content:center;
+    font-size:.85rem;font-weight:800;flex:none;
+  }
+  .tab.done .num{background:var(--erfolg);color:#fff;}
+  .tab.active{background:var(--kopf);color:#fff;border-color:var(--kopf-dunkel);}
+  .tab.active .num{background:#fff;color:var(--kopf-dunkel);}
+  .tab:active{transform:scale(.97);}
+
+  /* Karten */
+  .card{display:none;animation:fade .25s ease;}
+  .card.active{display:block;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .panel{
+    background:var(--karte);
+    border:1px solid var(--linie);
+    border-radius:1rem;
+    padding:1.3rem 1.2rem 1.5rem;
+    margin:1.2rem 0;
+    box-shadow:0 1px 4px rgba(0,0,0,.05);
+  }
+  .panel h2{margin:.1rem 0 .2rem;font-size:1.35rem;color:var(--kopf-dunkel);}
+  .panel h3{margin:1.3rem 0 .4rem;font-size:1.1rem;}
+  .lead{font-size:1.08rem;}
+  .meta-zeit{
+    display:inline-block;font-size:.82rem;font-weight:700;
+    color:var(--kopf-dunkel);background:#F6E6D4;
+    padding:.2rem .6rem;border-radius:.5rem;letter-spacing:.03em;
+  }
+
+  /* Konstruktions-Animation */
+  .konstr-box{
+    background:#fff;border:1px solid var(--linie);border-radius:.8rem;
+    padding:1rem;margin:1rem 0;
+  }
+  .konstr-svg{width:100%;height:auto;display:block;touch-action:manipulation;}
+  .konstr-svg .gegeben{stroke:var(--gegeben);stroke-width:2.4;fill:none;}
+  .konstr-svg .punkt{fill:var(--gegeben);}
+  .konstr-svg .punkt-label{font:700 16px 'Segoe UI',sans-serif;fill:var(--gegeben);}
+  .konstr-svg .bogen{stroke:var(--konstruktion);stroke-width:2.2;fill:none;
+    stroke-dasharray:1500;stroke-dashoffset:1500;transition:stroke-dashoffset .9s ease;}
+  .konstr-svg .bogen.show{stroke-dashoffset:0;}
+  .konstr-svg .ergebnis{stroke:var(--akzent);stroke-width:3;fill:none;opacity:0;transition:opacity .6s ease;}
+  .konstr-svg .ergebnis.show{opacity:1;}
+  .konstr-svg .erglabel{font:700 15px 'Segoe UI',sans-serif;fill:var(--akzent);opacity:0;transition:opacity .6s ease;}
+  .konstr-svg .erglabel.show{opacity:1;}
+  .konstr-svg .hilfspunkt{fill:var(--konstruktion);opacity:0;transition:opacity .4s ease;}
+  .konstr-svg .hilfspunkt.show{opacity:1;}
+  .konstr-svg .kreuz line{stroke:var(--konstruktion);stroke-width:2.6;stroke-linecap:round;}
+  .konstr-svg .erg-kreuz line{stroke:var(--akzent);}
+
+  .schritt-text{
+    background:var(--konstruktion-hell);
+    border-left:4px solid var(--konstruktion);
+    border-radius:.4rem;
+    padding:.7rem .9rem;margin:.8rem 0;
+    font-size:1rem;min-height:3.2rem;
+  }
+  .schritt-text .nr{font-weight:800;color:var(--konstruktion);}
+
+  .btnrow{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:.8rem;}
+  button.action{
+    border:none;border-radius:.6rem;
+    background:var(--konstruktion);color:#fff;
+    font-size:1rem;font-weight:700;
+    padding:.7rem 1.1rem;min-height:44px;min-width:44px;
+    cursor:pointer;transition:transform .08s ease,background .15s ease;
+  }
+  button.action:active{transform:scale(.96);}
+  button.action.sekundaer{background:#fff;color:var(--konstruktion);border:1.5px solid var(--konstruktion);}
+  button.action:disabled{background:#C9C2B6;cursor:default;}
+
+  /* Flip-Cards */
+  .flipgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(13rem,1fr));gap:.9rem;margin:1rem 0;}
+  .flip{
+    perspective:1000px;min-height:9rem;cursor:pointer;
+  }
+  .flip-inner{
+    position:relative;width:100%;height:100%;min-height:9rem;
+    transition:transform .5s;transform-style:preserve-3d;
+  }
+  .flip.flipped .flip-inner{transform:rotateY(180deg);}
+  .flip-face{
+    position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;
+    border-radius:.8rem;padding:1rem;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;text-align:center;
+    border:1px solid var(--linie);
+  }
+  .flip-front{background:var(--konstruktion-hell);color:var(--konstruktion);font-weight:800;font-size:1.1rem;}
+  .flip-front small{display:block;font-weight:600;color:var(--tinte);opacity:.7;margin-top:.4rem;font-size:.8rem;}
+  .flip-back{background:#fff;transform:rotateY(180deg);font-size:.97rem;}
+
+  /* Zwischenfragen / MC */
+  .frage{margin:.6rem 0 .2rem;font-weight:600;}
+  .mc{display:flex;flex-direction:column;gap:.5rem;margin:.5rem 0;}
+  .mc button{
+    text-align:left;border:1.5px solid var(--linie);background:#fff;
+    border-radius:.6rem;padding:.7rem .9rem;min-height:44px;
+    font-size:1rem;cursor:pointer;color:var(--tinte);
+    transition:transform .08s ease,border-color .15s ease;
+  }
+  .mc button:active{transform:scale(.99);}
+  .mc button.sel{border-color:var(--konstruktion);background:var(--konstruktion-hell);}
+  .mc button.richtig{background:var(--erfolg-bg);color:#fff;border-color:var(--erfolg-bg);font-weight:700;}
+  .mc button.falsch{background:var(--fehler);color:#fff;border-color:var(--fehler);font-weight:700;}
+  .mc button.disabled{pointer-events:none;}
+  .feedback{margin:.5rem 0;padding:.7rem .9rem;border-radius:.6rem;font-weight:600;display:none;}
+  .feedback.gut{display:block;background:var(--erfolg-bg);color:#fff;}
+  .feedback.schlecht{display:block;background:var(--fehler);color:#fff;}
+
+  /* Heft-Aufgabe */
+  .heft{
+    background:#FEF6E9;border:2px solid var(--kopf);border-radius:.9rem;
+    padding:1rem 1.1rem;margin:1.4rem 0;
+  }
+  .heft .htitel{display:flex;align-items:center;gap:.55rem;font-weight:800;color:var(--kopf-dunkel);font-size:1.12rem;margin-bottom:.3rem;}
+  .heft .htitel .ic{font-size:1.4rem;}
+  .heft .vorlegen{
+    margin-top:.8rem;background:#fff;border:1px dashed var(--kopf-dunkel);
+    border-radius:.6rem;padding:.6rem .8rem;font-size:.95rem;font-weight:600;color:var(--kopf-dunkel);
+    display:flex;align-items:center;gap:.5rem;
+  }
+  .heft ol{margin:.4rem 0 .2rem 1.2rem;padding:0;}
+  .heft ol li{margin:.35rem 0;}
+  details.anleitung{
+    margin:.7rem 0 .2rem;border:1px solid var(--kopf);border-radius:.6rem;
+    background:#fff;overflow:hidden;
+  }
+  details.anleitung>summary{
+    list-style:none;cursor:pointer;padding:.7rem .9rem;min-height:44px;
+    display:flex;align-items:center;gap:.5rem;font-weight:700;color:var(--kopf-dunkel);
+  }
+  details.anleitung>summary::-webkit-details-marker{display:none;}
+  details.anleitung>summary::before{content:'📋';}
+  details.anleitung[open]>summary::before{content:'📖';}
+  details.anleitung .ainhalt{padding:0 .9rem .9rem;}
+
+  /* Tipp aufklappbar */
+  details.tipp{
+    margin:.7rem 0;border:1px solid var(--linie);border-radius:.6rem;
+    background:#FFFDF8;overflow:hidden;
+  }
+  details.tipp>summary{
+    list-style:none;cursor:pointer;padding:.7rem .9rem;min-height:44px;
+    display:flex;align-items:center;gap:.5rem;font-weight:700;color:var(--kopf-dunkel);
+  }
+  details.tipp>summary::-webkit-details-marker{display:none;}
+  details.tipp>summary::before{content:'💡';}
+  details.tipp[open]>summary::before{content:'📖';}
+  details.tipp .tippinhalt{padding:0 .9rem .9rem;}
+
+  /* Erkenntnis-Box */
+  .merk{
+    background:#F3ECF6;border:1px solid #D9C6E4;border-left:5px solid var(--akzent);
+    border-radius:.7rem;padding:1rem 1.1rem;margin:1.1rem 0;
+  }
+  .merk h3{margin:.1rem 0 .4rem;color:var(--akzent);}
+
+  /* Material-Hinweis */
+  .hinweis{
+    background:#FFF4E0;border:1px dashed var(--kopf-dunkel);border-radius:.7rem;
+    padding:.8rem 1rem;margin:1rem 0;font-size:.97rem;
+  }
+  .hinweis b{color:var(--kopf-dunkel);}
+
+  ul.tidy{margin:.4rem 0 .4rem 1.1rem;padding:0;}
+  ul.tidy li{margin:.3rem 0;}
+
+  /* Weiter-Button */
+  .weiter-wrap{text-align:center;margin:2rem 0 1rem;display:none;}
+  .weiter-wrap.show{display:block;animation:fade .4s ease;}
+  a.weiter{
+    display:inline-flex;align-items:center;gap:.6rem;justify-content:center;
+    background:var(--erfolg);color:#fff;text-decoration:none;
+    font-size:1.15rem;font-weight:800;
+    padding:.9rem 2rem;min-height:44px;border-radius:.8rem;width:100%;max-width:30rem;
+    box-shadow:0 3px 10px rgba(30,122,62,.3);
+  }
+  a.weiter:active{transform:scale(.98);}
+  .weiter-hint{font-size:.85rem;color:var(--tinte);opacity:.6;margin-top:.5rem;}
+
+  /* T-Rex */
+  #trex{
+    position:fixed;bottom:.7rem;right:.7rem;font-size:1.7rem;
+    cursor:pointer;z-index:60;user-select:none;
+    filter:drop-shadow(0 1px 2px rgba(0,0,0,.25));
+  }
+  #trex .bubble{
+    position:absolute;bottom:2.1rem;right:0;white-space:nowrap;
+    background:var(--tinte);color:#fff;font-size:.78rem;font-weight:600;
+    padding:.35rem .6rem;border-radius:.5rem;opacity:0;pointer-events:none;
+    transition:opacity .2s ease;
+  }
+  #trex.show .bubble{opacity:1;}
+
+  @media (max-width:520px){
+    header h1{font-size:1.4rem;}
+    .panel{padding:1.1rem .9rem 1.3rem;}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none!important;transition:none!important;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <span class="eyebrow">Geometrie · Klasse 8 · Erarbeitung</span>
+    <h1>Konstruieren mit Zirkel und Lineal</h1>
+    <p>Wie haben Menschen vor 2000 Jahren exakte Winkel und Mittelpunkte gefunden – ganz ohne Geodreieck? Heute lernst du ihre vier wichtigsten Werkzeuge kennen.</p>
+  </div>
+</header>
+
+<nav class="tabs">
+  <div class="wrap">
+    <div class="tabrow" id="tabrow">
+      <button class="tab active" data-i="0"><span class="num">1</span>Einstieg</button>
+      <button class="tab" data-i="1"><span class="num">2</span>Mittelsenkrechte</button>
+      <button class="tab" data-i="2"><span class="num">3</span>Winkelhalbierende</button>
+      <button class="tab" data-i="3"><span class="num">4</span>Lot</button>
+      <button class="tab" data-i="4"><span class="num">5</span>Ortslinien</button>
+      <button class="tab" data-i="5"><span class="num">6</span>Begriffe</button>
+    </div>
+  </div>
+</nav>
+
+<main class="wrap">
+
+  <!-- KARTE 1: Einstieg -->
+  <section class="card active" data-card="0">
+    <div class="panel">
+      <span class="meta-zeit">⏱ ca. 15 Min</span>
+      <h2>Die Regeln des Spiels</h2>
+      <p class="lead">Stell dir vor, du hast <b>nur zwei Werkzeuge</b>: einen <b>Zirkel</b> und ein <b>Lineal ohne Skala</b> (also nur eine gerade Kante, kein Messen!).</p>
+      <p>Damit kannst du genau zwei Dinge tun:</p>
+      <ul class="tidy">
+        <li>Mit dem <b>Lineal</b> eine gerade Linie durch zwei Punkte ziehen.</li>
+        <li>Mit dem <b>Zirkel</b> einen Kreis um einen Punkt zeichnen – alle Punkte auf dem Kreis haben <b>denselben Abstand</b> zum Mittelpunkt.</li>
+      </ul>
+
+      <div class="merk">
+        <h3>Worum geht es?</h3>
+        <p>Der Zirkel ist mehr als ein Kreismaler: Ein Kreis ist die <b>Menge aller Punkte mit gleichem Abstand</b> zu einem Mittelpunkt. Genau diese Idee löst gleich alle unsere Aufgaben.</p>
+      </div>
+
+      <h3>Erste Frage zum Nachdenken</h3>
+      <p class="frage">Du sollst eine Strecke $\overline{AB}$ <b>genau in der Mitte</b> teilen – ohne zu messen. Welche Idee bringt dich ans Ziel?</p>
+      <div class="mc" data-mc="einstieg" data-correct="1">
+        <button data-opt="0">Ich schätze die Mitte mit dem Auge und mache dort einen Punkt.</button>
+        <button data-opt="1">Ich suche Punkte, die zu $A$ <b>und</b> zu $B$ den gleichen Abstand haben.</button>
+        <button data-opt="2">Ich lege das Lineal an und lese die halbe Länge ab.</button>
+      </div>
+      <div class="feedback" data-fb="einstieg"></div>
+
+      <details class="tipp">
+        <summary>Ich brauche einen Hinweis</summary>
+        <div class="tippinhalt">
+          <p>Erinnere dich: Der Zirkel zeichnet alle Punkte mit <b>gleichem Abstand</b>. Wenn ein Punkt gleich weit von $A$ und von $B$ entfernt ist – wo muss er dann ungefähr liegen? Probier es selbst auf Papier mit zwei gleich großen Kreisen um $A$ und $B$.</p>
+        </div>
+      </details>
+
+      <div class="hinweis">
+        <b>Jetzt selbst probieren:</b> Nimm Zirkel und Lineal und versuche auf deinem Blatt, die Strecke zu halbieren. Sammle deine Idee – gleich schauen wir, ob sie funktioniert.
+      </div>
+    </div>
+  </section>
+
+  <!-- KARTE 2: Mittelsenkrechte -->
+  <section class="card" data-card="1">
+    <div class="panel">
+      <span class="meta-zeit">⏱ ca. 12 Min</span>
+      <h2>Konstruktion 1: Die Mittelsenkrechte</h2>
+      <p class="lead">Tippe auf <b>Nächster Schritt</b> und beobachte genau, wie die Konstruktion entsteht.</p>
+
+      <div class="konstr-box">
+        <svg class="konstr-svg" viewBox="0 0 480 360" id="svg-ms" role="img" aria-label="Konstruktion der Mittelsenkrechten">
+          <!-- gegebene Strecke -->
+          <line class="gegeben" x1="110" y1="200" x2="370" y2="200"/>
+          <circle class="punkt" cx="110" cy="200" r="5"/>
+          <circle class="punkt" cx="370" cy="200" r="5"/>
+          <text class="punkt-label" x="98" y="225">A</text>
+          <text class="punkt-label" x="372" y="225">B</text>
+          <!-- Bogen um A (Mittelpunkt 110|200, r=175), reicht über beide Schnittpunkte hinaus -->
+          <path class="bogen" id="ms-b1" d="M 217.68 62.05 A 175 175 0 0 0 217.68 337.95"/>
+          <!-- Bogen um B (Mittelpunkt 370|200, r=175), reicht über beide Schnittpunkte hinaus -->
+          <path class="bogen" id="ms-b2" d="M 262.32 62.05 A 175 175 0 0 1 262.32 337.95"/>
+          <!-- Schnittpunkte als x, exakt auf beiden Kreislinien (240|82.85) und (240|317.15) -->
+          <g class="hilfspunkt kreuz" id="ms-s1"><line x1="233" y1="75.85" x2="247" y2="89.85"/><line x1="247" y1="75.85" x2="233" y2="89.85"/></g>
+          <g class="hilfspunkt kreuz" id="ms-s2"><line x1="233" y1="310.15" x2="247" y2="324.15"/><line x1="247" y1="310.15" x2="233" y2="324.15"/></g>
+          <!-- Ergebnisgerade durch beide Schnittpunkte -->
+          <line class="ergebnis" id="ms-erg" x1="240" y1="68" x2="240" y2="332"/>
+          <g class="hilfspunkt kreuz erg-kreuz" id="ms-m"><line x1="233" y1="193" x2="247" y2="207"/><line x1="247" y1="193" x2="233" y2="207"/></g>
+          <text class="erglabel" id="ms-lab" x="250" y="63">m</text>
+        </svg>
+      </div>
+
+      <div class="schritt-text" id="ms-anz"><span class="nr">Start:</span> Gegeben ist die Strecke $\overline{AB}$. Tippe auf „Nächster Schritt“.</div>
+
+      <div class="btnrow">
+        <button class="action" id="ms-next">Nächster Schritt ▸</button>
+        <button class="action sekundaer" id="ms-reset">Zurück zum Anfang</button>
+      </div>
+
+      <div class="heft">
+        <div class="htitel"><span class="ic">✏️</span>Jetzt du – im Heft</div>
+        <p>Zeichne eine Strecke $\overline{AB}$ (etwa 8&nbsp;cm) in dein Heft und konstruiere ihre Mittelsenkrechte mit Zirkel und Lineal.</p>
+        <details class="anleitung">
+          <summary>Schritt-für-Schritt-Anleitung anzeigen</summary>
+          <div class="ainhalt">
+            <ol>
+              <li>Zeichne die Strecke $\overline{AB}$ mit dem Lineal.</li>
+              <li>Stich den Zirkel in $A$ ein, wähle einen Radius <b>größer als die halbe Strecke</b> und zeichne einen Bogen ober- und unterhalb der Strecke.</li>
+              <li>Stich in $B$ ein und zeichne mit <b>demselben Radius</b> einen zweiten Bogen. Markiere die beiden Schnittpunkte.</li>
+              <li>Verbinde die beiden Schnittpunkte mit dem Lineal – das ist die Mittelsenkrechte $m$.</li>
+            </ol>
+          </div>
+        </details>
+        <div class="vorlegen"><span>👩‍🏫</span> Zeige deine fertige Konstruktion deiner Lehrkraft, bevor du weitermachst.</div>
+      </div>
+
+      <h3>Verstanden?</h3>
+      <p class="frage">Warum müssen beide Zirkelbögen <b>denselben Radius</b> haben?</p>
+      <div class="mc" data-mc="ms" data-correct="0">
+        <button data-opt="0">Damit die Schnittpunkte zu $A$ und $B$ den gleichen Abstand haben.</button>
+        <button data-opt="1">Damit die Bögen schöner aussehen.</button>
+        <button data-opt="2">Das ist egal, der Radius darf beliebig verschieden sein.</button>
+      </div>
+      <div class="feedback" data-fb="ms"></div>
+
+      <details class="tipp">
+        <summary>Ich brauche einen Hinweis</summary>
+        <div class="tippinhalt">
+          <p>Schau dir die beiden Schnittpunkte oben und unten an. Sie liegen jeweils auf dem Bogen um $A$ <i>und</i> auf dem Bogen um $B$. Was bedeutet das für ihren Abstand zu $A$ und zu $B$, wenn die Radien gleich sind?</p>
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <!-- KARTE 3: Winkelhalbierende -->
+  <section class="card" data-card="2">
+    <div class="panel">
+      <span class="meta-zeit">⏱ ca. 12 Min</span>
+      <h2>Konstruktion 2: Die Winkelhalbierende</h2>
+      <p class="lead">Ein Winkel soll <b>in zwei gleich große Teile</b> geteilt werden. Auch hier hilft der Zirkel.</p>
+
+      <div class="konstr-box">
+        <svg class="konstr-svg" viewBox="0 0 480 300" id="svg-wh" role="img" aria-label="Konstruktion der Winkelhalbierenden">
+          <!-- Schenkel: waagerecht und schräg (32°), Scheitel S -->
+          <line class="gegeben" x1="90" y1="250" x2="440" y2="250"/>
+          <line class="gegeben" x1="90" y1="250" x2="378.3" y2="69.8"/>
+          <circle class="punkt" cx="90" cy="250" r="5"/>
+          <text class="punkt-label" x="68" y="262">S</text>
+          <!-- Schritt 1: EIN Bogen um S (Radius 130) schneidet beide Schenkel in A und B -->
+          <path class="bogen" id="wh-b1" d="M 217.16 277.03 A 130 130 0 0 0 183.51 159.69"/>
+          <g class="hilfspunkt kreuz" id="wh-p1"><line x1="213" y1="243" x2="227" y2="257"/><line x1="227" y1="243" x2="213" y2="257"/></g>
+          <g class="hilfspunkt kreuz" id="wh-p2"><line x1="193.25" y1="174.11" x2="207.25" y2="188.11"/><line x1="207.25" y1="174.11" x2="193.25" y2="188.11"/></g>
+          <!-- Schritt 2: zwei Bögen mit GLEICHEM Radius 130 — Mittelpunkte sind A und B, Schnittpunkt X auf w -->
+          <path class="bogen" id="wh-b2" d="M 281.03 135.22 A 130 130 0 0 1 349.92 245.46"/>
+          <path class="bogen" id="wh-b3" d="M 312.83 116.11 A 130 130 0 0 1 312.83 246.11"/>
+          <g class="hilfspunkt kreuz" id="wh-s"><line x1="323.25" y1="174.11" x2="337.25" y2="188.11"/><line x1="337.25" y1="174.11" x2="323.25" y2="188.11"/></g>
+          <!-- Ergebnis: Winkelhalbierende durch S und X -->
+          <line class="ergebnis" id="wh-erg" x1="90" y1="250" x2="436.1" y2="150.8"/>
+          <text class="erglabel" id="wh-lab" x="441" y="149">w</text>
+        </svg>
+        </svg>
+      </div>
+
+      <div class="schritt-text" id="wh-anz"><span class="nr">Start:</span> Gegeben ist ein Winkel mit Scheitel $S$. Tippe auf „Nächster Schritt“.</div>
+
+      <div class="btnrow">
+        <button class="action" id="wh-next">Nächster Schritt ▸</button>
+        <button class="action sekundaer" id="wh-reset">Zurück zum Anfang</button>
+      </div>
+
+      <div class="heft">
+        <div class="htitel"><span class="ic">✏️</span>Jetzt du – im Heft</div>
+        <p>Zeichne einen beliebigen Winkel mit Scheitel $S$ in dein Heft und konstruiere seine Winkelhalbierende.</p>
+        <details class="anleitung">
+          <summary>Schritt-für-Schritt-Anleitung anzeigen</summary>
+          <div class="ainhalt">
+            <ol>
+              <li>Zeichne zwei Schenkel, die im Scheitel $S$ zusammentreffen.</li>
+              <li>Stich in $S$ ein und zeichne einen Bogen, der <b>beide Schenkel</b> schneidet. Markiere die zwei Schnittpunkte.</li>
+              <li>Stich nacheinander in beide Schnittpunkte ein und zeichne mit <b>gleichem Radius</b> je einen Bogen im Inneren des Winkels. Markiere ihren Schnittpunkt.</li>
+              <li>Verbinde $S$ mit diesem Schnittpunkt – das ist die Winkelhalbierende $w$.</li>
+            </ol>
+          </div>
+        </details>
+        <div class="vorlegen"><span>👩‍🏫</span> Zeige deine fertige Konstruktion deiner Lehrkraft, bevor du weitermachst.</div>
+      </div>
+
+      <h3>Verstanden?</h3>
+      <p class="frage">Was haben Mittelsenkrechte und Winkelhalbierende gemeinsam?</p>
+      <div class="mc" data-mc="wh" data-correct="2">
+        <button data-opt="0">Bei beiden braucht man ein Geodreieck zum Messen.</button>
+        <button data-opt="1">Beide funktionieren nur bei rechten Winkeln.</button>
+        <button data-opt="2">Beide nutzen Schnittpunkte von Kreisbögen mit gleichem Abstand.</button>
+      </div>
+      <div class="feedback" data-fb="wh"></div>
+
+      <details class="tipp">
+        <summary>Ich brauche einen Hinweis</summary>
+        <div class="tippinhalt">
+          <p>Denk daran, womit jede Konstruktion startet: einem Zirkelbogen. Und was macht ein Zirkelbogen mit dem Abstand zum Mittelpunkt? Vergleiche die beiden Vorgehensweisen Schritt für Schritt.</p>
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <!-- KARTE 4: Lot -->
+  <section class="card" data-card="3">
+    <div class="panel">
+      <span class="meta-zeit">⏱ ca. 11 Min</span>
+      <h2>Konstruktion 3: Das Lot auf eine Gerade</h2>
+      <p class="lead">Von einem Punkt $P$ aus soll eine Linie <b>senkrecht</b> auf eine Gerade $g$ treffen. So entsteht ein exakter rechter Winkel.</p>
+
+      <div class="konstr-box">
+        <svg class="konstr-svg" viewBox="0 0 480 390" id="svg-lot" role="img" aria-label="Konstruktion des Lotes">
+          <line class="gegeben" x1="50" y1="220" x2="440" y2="220"/>
+          <text class="punkt-label" x="445" y="225">g</text>
+          <circle class="punkt" cx="245" cy="80" r="5"/>
+          <text class="punkt-label" x="252" y="78">P</text>
+          <!-- Schritt 1: Bogen um P (r=160) schneidet g in L1, L2 -->
+          <path class="bogen" id="lot-b1" d="M 167.5 220 A 160 160 0 0 0 322.5 220"/>
+          <g class="hilfspunkt kreuz" id="lot-p1"><line x1="161.5" y1="214" x2="173.5" y2="226"/><line x1="173.5" y1="214" x2="161.5" y2="226"/></g>
+          <g class="hilfspunkt kreuz" id="lot-p2"><line x1="316.5" y1="214" x2="328.5" y2="226"/><line x1="328.5" y1="214" x2="316.5" y2="226"/></g>
+          <!-- Schritt 2: Bögen um L1, L2 (r=150) schneiden sich in Y unterhalb -->
+          <path class="bogen" id="lot-b2" d="M 301.3 287.9 A 150 150 0 0 1 165.2 370"/>
+          <path class="bogen" id="lot-b3" d="M 324.8 370 A 150 150 0 0 1 188.7 287.9"/>
+          <g class="hilfspunkt kreuz" id="lot-s"><line x1="239" y1="342.5" x2="251" y2="354.5"/><line x1="251" y1="342.5" x2="239" y2="354.5"/></g>
+          <!-- Ergebnis: Lot durch P und Y -->
+          <line class="ergebnis" id="lot-erg" x1="245" y1="60" x2="245" y2="368"/>
+          <!-- rechter-Winkel-Markierung am Schnitt mit g -->
+          <path class="ergebnis" id="lot-rw" d="M 245 205 L 260 205 L 260 220" stroke-width="2"/>
+          <text class="erglabel" id="lot-lab" x="255" y="50">l</text>
+        </svg>
+      </div>
+
+      <div class="schritt-text" id="lot-anz"><span class="nr">Start:</span> Gegeben sind die Gerade $g$ und der Punkt $P$. Tippe auf „Nächster Schritt“.</div>
+
+      <div class="btnrow">
+        <button class="action" id="lot-next">Nächster Schritt ▸</button>
+        <button class="action sekundaer" id="lot-reset">Zurück zum Anfang</button>
+      </div>
+
+      <div class="heft">
+        <div class="htitel"><span class="ic">✏️</span>Jetzt du – im Heft</div>
+        <p>Zeichne eine Gerade $g$ und einen Punkt $P$ <b>oberhalb</b> der Geraden in dein Heft. Konstruiere das Lot von $P$ auf $g$.</p>
+        <details class="anleitung">
+          <summary>Schritt-für-Schritt-Anleitung anzeigen</summary>
+          <div class="ainhalt">
+            <ol>
+              <li>Zeichne die Gerade $g$ und den Punkt $P$ darüber.</li>
+              <li>Stich in $P$ ein und zeichne einen Bogen, der $g$ in <b>zwei Punkten</b> schneidet. Markiere sie.</li>
+              <li>Stich nacheinander in beide Punkte ein und zeichne mit <b>gleichem Radius</b> je einen Bogen <b>unterhalb</b> von $g$. Markiere ihren Schnittpunkt.</li>
+              <li>Verbinde $P$ mit diesem Schnittpunkt – das Lot $l$ trifft $g$ im rechten Winkel.</li>
+            </ol>
+          </div>
+        </details>
+        <div class="vorlegen"><span>👩‍🏫</span> Zeige deine fertige Konstruktion deiner Lehrkraft, bevor du weitermachst.</div>
+      </div>
+
+      <h3>Verstanden?</h3>
+      <p class="frage">Wieso ist die entstandene Linie wirklich <b>senkrecht</b> zu $g$?</p>
+      <div class="mc" data-mc="lot" data-correct="1">
+        <button data-opt="0">Weil sie genau durch den Punkt $P$ geht.</button>
+        <button data-opt="1">Weil sie die Mittelsenkrechte der beiden Schnittpunkte auf $g$ ist.</button>
+        <button data-opt="2">Weil der Zirkel immer rechte Winkel zeichnet.</button>
+      </div>
+      <div class="feedback" data-fb="lot"></div>
+
+      <details class="tipp">
+        <summary>Ich brauche einen Hinweis</summary>
+        <div class="tippinhalt">
+          <p>Schau, was der erste Bogen um $P$ macht: Er schneidet $g$ in zwei Punkten, die <b>gleich weit von $P$</b> entfernt sind. Erinnert dich das an eine Konstruktion von vorhin? Welche Linie verbindet zwei Punkte rechtwinklig?</p>
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <!-- KARTE 5: Ortslinien -->
+  <section class="card" data-card="4">
+    <div class="panel">
+      <span class="meta-zeit">⏱ ca. 18 Min · Kernidee</span>
+      <h2>Die große Idee: Ortslinien</h2>
+      <p class="lead">Alle drei Konstruktionen folgen <b>einem einzigen Gedanken</b>. Wenn du den verstehst, verstehst du das ganze Kapitel.</p>
+
+      <div class="merk">
+        <h3>Ortslinie</h3>
+        <p>Eine <b>Ortslinie</b> ist die Menge aller Punkte, die eine bestimmte Bedingung erfüllen.</p>
+        <ul class="tidy">
+          <li>Ein <b>Kreis</b> ist die Ortslinie aller Punkte mit gleichem Abstand zu einem Mittelpunkt.</li>
+          <li>Die <b>Mittelsenkrechte</b> von $\overline{AB}$ ist die Ortslinie aller Punkte mit gleichem Abstand zu $A$ und $B$.</li>
+          <li>Die <b>Winkelhalbierende</b> ist die Ortslinie aller Punkte mit gleichem Abstand zu beiden Schenkeln.</li>
+        </ul>
+      </div>
+
+      <h3>Zuordnung: Welche Bedingung gehört zu welcher Linie?</h3>
+      <p>Tippe zuerst eine <b>Bedingung</b> links an, dann die passende <b>Linie</b> rechts. Ein falsches Paar kannst du durch erneutes Antippen wieder lösen.</p>
+
+      <div id="zuordnung" style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin:1rem 0;">
+        <div>
+          <div style="font-weight:700;margin-bottom:.4rem;color:var(--akzent);">Bedingung</div>
+          <div class="zo-col" id="zo-links"></div>
+        </div>
+        <div>
+          <div style="font-weight:700;margin-bottom:.4rem;color:var(--konstruktion);">Linie</div>
+          <div class="zo-col" id="zo-rechts"></div>
+        </div>
+      </div>
+      <div class="btnrow">
+        <button class="action" id="zo-pruef">Prüfen</button>
+        <button class="action sekundaer" id="zo-leeren" style="display:none;">Leeren</button>
+      </div>
+      <div class="feedback" data-fb="zo"></div>
+
+      <div class="hinweis" id="ausblick" style="display:none;">
+        <b>Ausblick:</b> Schneiden sich mehrere solcher Ortslinien in einem Dreieck, entstehen die <b>besonderen Punkte</b> – Umkreismittelpunkt, Inkreismittelpunkt und Schwerpunkt. Genau die untersuchen wir in den nächsten Stunden!
+      </div>
+
+      <details class="tipp">
+        <summary>Ich brauche einen Hinweis</summary>
+        <div class="tippinhalt">
+          <p>Geh die Merksätze in der lila Box oben durch. Jede Linie ist über einen <b>Abstand</b> definiert: gleich weit zu zwei Punkten, gleich weit zu zwei Schenkeln, gleich weit zu einem Mittelpunkt. Ordne nach dem Wort „Abstand“.</p>
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <!-- KARTE 6: Begriffe -->
+  <section class="card" data-card="5">
+    <div class="panel">
+      <span class="meta-zeit">⏱ ca. 10 Min · Sicherung</span>
+      <h2>Fachbegriffe sichern</h2>
+      <p class="lead">Tippe jede Karte an, um die Antwort zu sehen. Diese Begriffe brauchst du im ganzen Kapitel.</p>
+
+      <div class="flipgrid" id="flips">
+        <div class="flip"><div class="flip-inner">
+          <div class="flip-face flip-front">Mittelsenkrechte<small>Tippen zum Umdrehen</small></div>
+          <div class="flip-face flip-back">Gerade, die senkrecht durch die Mitte einer Strecke verläuft. Alle ihre Punkte haben gleichen Abstand zu den beiden Endpunkten.</div>
+        </div></div>
+        <div class="flip"><div class="flip-inner">
+          <div class="flip-face flip-front">Winkelhalbierende<small>Tippen zum Umdrehen</small></div>
+          <div class="flip-face flip-back">Halbgerade vom Scheitel aus, die einen Winkel in zwei gleich große Teilwinkel teilt.</div>
+        </div></div>
+        <div class="flip"><div class="flip-inner">
+          <div class="flip-face flip-front">Lot<small>Tippen zum Umdrehen</small></div>
+          <div class="flip-face flip-back">Strecke oder Gerade, die senkrecht (im rechten Winkel) auf eine andere Gerade trifft.</div>
+        </div></div>
+        <div class="flip"><div class="flip-inner">
+          <div class="flip-face flip-front">Ortslinie<small>Tippen zum Umdrehen</small></div>
+          <div class="flip-face flip-back">Menge aller Punkte, die eine bestimmte Bedingung erfüllen – z. B. „gleicher Abstand zu zwei Punkten“.</div>
+        </div></div>
+      </div>
+
+      <div class="merk">
+        <h3>Das nimmst du mit</h3>
+        <ul class="tidy">
+          <li>Mit Zirkel und Lineal konstruierst du <b>exakt</b> statt zu messen.</li>
+          <li>Der Zirkel erzeugt Punkte mit <b>gleichem Abstand</b> – das ist der Schlüssel.</li>
+          <li>Mittelsenkrechte, Winkelhalbierende und Lot sind alles <b>Ortslinien</b>.</li>
+        </ul>
+      </div>
+
+      <div class="hinweis">
+        <b>Geschafft!</b> Du kennst jetzt die Werkzeuge. In der Übung wendest du sie selbst an und beschreibst die Konstruktionsschritte mit den richtigen Fachbegriffen.
+      </div>
+    </div>
+  </section>
+
+  <!-- Weiter-Button -->
+  <div class="weiter-wrap" id="weiterwrap">
+    <a class="weiter" href="konstruktion_zirkel_lineal_ue.html">Weiter zur Übung ▸</a>
+    <div class="weiter-hint">Du hast alle Karten dieser Lernseite bearbeitet.</div>
+  </div>
+
+</main>
+
+<div id="trex" title="Made by Mathedino">🦖<span class="bubble">Made by Mathedino</span></div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------- Zustand im JS-Speicher (kein localStorage) ---------- */
+  const State = {
+    cardSeen: [true,false,false,false,false,false], // Karte 1 ist initial sichtbar
+    mc: {},        // pro mc-Key: {answered:bool}
+    zo: { paare:{}, geprueft:false, fertig:false } // Zuordnung
+  };
+
+  /* ---------- Tab-Navigation ---------- */
+  const tabs = Array.from(document.querySelectorAll('.tab'));
+  const cards = Array.from(document.querySelectorAll('.card'));
+  function showCard(i){
+    cards.forEach(c=>c.classList.toggle('active', +c.dataset.card===i));
+    tabs.forEach(t=>t.classList.toggle('active', +t.dataset.i===i));
+    State.cardSeen[i]=true;
+    markDone();
+    checkComplete();
+    window.scrollTo({top:0,behavior:'smooth'});
+    if(window.MathJax && MathJax.typesetPromise){ MathJax.typesetPromise(); }
+  }
+  tabs.forEach(t=>t.addEventListener('click',()=>showCard(+t.dataset.i)));
+
+  function markDone(){
+    tabs.forEach((t,i)=>{
+      if(State.cardSeen[i]) t.classList.add('done');
+    });
+  }
+
+  /* ---------- MC-Fragen ---------- */
+  document.querySelectorAll('.mc').forEach(group=>{
+    const key = group.dataset.mc;
+    const correct = +group.dataset.correct;
+    State.mc[key] = {answered:false};
+    const fb = document.querySelector('[data-fb="'+key+'"]');
+    group.querySelectorAll('button').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        if(State.mc[key].answered) return;
+        const opt = +btn.dataset.opt;
+        State.mc[key].answered = true;
+        group.querySelectorAll('button').forEach(b=>b.classList.add('disabled'));
+        if(opt===correct){
+          btn.classList.add('richtig');
+          fb.className='feedback gut';
+          fb.textContent='✅ Richtig! Gut erkannt.';
+        }else{
+          btn.classList.add('falsch');
+          group.querySelector('[data-opt="'+correct+'"]').classList.add('richtig');
+          fb.className='feedback schlecht';
+          fb.innerHTML='❌ Nicht ganz. Die richtige Antwort ist grün markiert.';
+        }
+        checkComplete();
+      });
+    });
+  });
+
+  /* ---------- Konstruktions-Animationen ---------- */
+  function buildKonstruktion(prefix, schritte){
+    let step = 0;
+    const anz = document.getElementById(prefix+'-anz');
+    const nextBtn = document.getElementById(prefix+'-next');
+    const resetBtn = document.getElementById(prefix+'-reset');
+    function render(){
+      if(step===0){
+        anz.innerHTML='<span class="nr">Start:</span> '+schritte[0].text;
+      }else{
+        anz.innerHTML='<span class="nr">Schritt '+step+':</span> '+schritte[step].text;
+      }
+      nextBtn.disabled = (step>=schritte.length-1);
+      nextBtn.textContent = (step>=schritte.length-1) ? 'Fertig ✓' : 'Nächster Schritt ▸';
+      if(window.MathJax && MathJax.typesetPromise){ MathJax.typesetPromise([anz]); }
+    }
+    function applyShow(){
+      // alle Elemente bis zum aktuellen Schritt einblenden
+      schritte.forEach((s,idx)=>{
+        (s.ids||[]).forEach(id=>{
+          const el=document.getElementById(id);
+          if(!el) return;
+          if(idx<=step) el.classList.add('show'); else el.classList.remove('show');
+        });
+      });
+    }
+    nextBtn.addEventListener('click',()=>{
+      if(step<schritte.length-1){ step++; applyShow(); render(); }
+    });
+    resetBtn.addEventListener('click',()=>{
+      step=0; applyShow(); render();
+    });
+    render();
+  }
+
+  buildKonstruktion('ms',[
+    {text:'Gegeben ist die Strecke $\\overline{AB}$. Tippe auf „Nächster Schritt“.', ids:[]},
+    {text:'Zeichne einen Kreisbogen um $A$ mit einem Radius, der größer als die halbe Strecke ist.', ids:['ms-b1']},
+    {text:'Zeichne mit <b>demselben Radius</b> einen Kreisbogen um $B$. Die Bögen schneiden sich in zwei Punkten.', ids:['ms-b2','ms-s1','ms-s2']},
+    {text:'Verbinde die beiden Schnittpunkte mit dem Lineal. Das ist die <b>Mittelsenkrechte</b> $m$ – sie steht senkrecht auf $\\overline{AB}$ und trifft genau die Mitte $M$.', ids:['ms-erg','ms-m','ms-lab']}
+  ]);
+
+  buildKonstruktion('wh',[
+    {text:'Gegeben ist ein Winkel mit Scheitel $S$. Tippe auf „Nächster Schritt“.', ids:[]},
+    {text:'Zeichne einen Kreisbogen um $S$. Er schneidet beide Schenkel – das ergibt zwei Punkte mit gleichem Abstand zu $S$.', ids:['wh-b1','wh-p1','wh-p2']},
+    {text:'Zeichne um jeden der beiden Punkte einen Bogen mit gleichem Radius. Sie schneiden sich in einem neuen Punkt.', ids:['wh-b2','wh-b3','wh-s']},
+    {text:'Verbinde $S$ mit diesem Schnittpunkt. Das ist die <b>Winkelhalbierende</b> $w$ – sie teilt den Winkel in zwei gleiche Hälften.', ids:['wh-erg','wh-lab']}
+  ]);
+
+  buildKonstruktion('lot',[
+    {text:'Gegeben sind die Gerade $g$ und der Punkt $P$. Tippe auf „Nächster Schritt“.', ids:[]},
+    {text:'Zeichne einen Kreisbogen um $P$, der die Gerade $g$ in zwei Punkten schneidet. Beide sind gleich weit von $P$ entfernt.', ids:['lot-b1','lot-p1','lot-p2']},
+    {text:'Zeichne um beide Schnittpunkte je einen Bogen mit gleichem Radius. Sie treffen sich unterhalb von $g$.', ids:['lot-b2','lot-b3','lot-s']},
+    {text:'Verbinde $P$ mit diesem Punkt. Das <b>Lot</b> $l$ trifft $g$ im rechten Winkel – es ist die Mittelsenkrechte der beiden Schnittpunkte!', ids:['lot-erg','lot-rw','lot-lab']}
+  ]);
+
+  /* ---------- Zuordnung (Antippen-Prinzip) ---------- */
+  const ZO_PAARE = [
+    {id:'a', bed:'Gleicher Abstand zu zwei Punkten $A$ und $B$', linie:'Mittelsenkrechte'},
+    {id:'b', bed:'Gleicher Abstand zu beiden Schenkeln eines Winkels', linie:'Winkelhalbierende'},
+    {id:'c', bed:'Gleicher Abstand zu einem festen Mittelpunkt', linie:'Kreis'}
+  ];
+  const linksEl = document.getElementById('zo-links');
+  const rechtsEl = document.getElementById('zo-rechts');
+  const zoFb = document.querySelector('[data-fb="zo"]');
+  const zoPruef = document.getElementById('zo-pruef');
+  const zoLeeren = document.getElementById('zo-leeren');
+
+  // gemischte Reihenfolge rechts
+  const rechtsReihen = [ZO_PAARE[2], ZO_PAARE[0], ZO_PAARE[1]];
+  let selLinks = null;
+
+  function zoCellStyle(){
+    return 'border:1.5px solid var(--linie);background:#fff;border-radius:.6rem;'+
+           'padding:.7rem .8rem;min-height:48px;font-size:.96rem;cursor:pointer;'+
+           'display:flex;align-items:center;transition:transform .08s ease,border-color .15s;';
+  }
+  function renderZuordnung(){
+    linksEl.innerHTML=''; rechtsEl.innerHTML='';
+    ZO_PAARE.forEach(p=>{
+      const d=document.createElement('div');
+      d.setAttribute('style',zoCellStyle());
+      d.dataset.id=p.id; d.dataset.side='l';
+      d.innerHTML=p.bed;
+      const partner = State.zo.paare[p.id];
+      if(partner){ d.style.background='var(--konstruktion-hell)'; d.style.borderColor='var(--konstruktion)'; }
+      if(selLinks===p.id){ d.style.borderColor='var(--akzent)'; d.style.background='#F3ECF6'; }
+      linksEl.appendChild(d);
+    });
+    rechtsReihen.forEach(p=>{
+      const d=document.createElement('div');
+      d.setAttribute('style',zoCellStyle());
+      d.dataset.id=p.id; d.dataset.side='r';
+      d.textContent=p.linie;
+      const used = Object.values(State.zo.paare).includes(p.id);
+      if(used){ d.style.background='var(--konstruktion-hell)'; d.style.borderColor='var(--konstruktion)'; }
+      rechtsEl.appendChild(d);
+    });
+    if(window.MathJax && MathJax.typesetPromise){ MathJax.typesetPromise([linksEl]); }
+  }
+  linksEl.addEventListener('click',e=>{
+    const cell=e.target.closest('[data-side="l"]'); if(!cell || State.zo.geprueft) return;
+    const id=cell.dataset.id;
+    if(State.zo.paare[id]){ delete State.zo.paare[id]; selLinks=null; renderZuordnung(); return; }
+    selLinks = (selLinks===id)?null:id;
+    renderZuordnung();
+  });
+  rechtsEl.addEventListener('click',e=>{
+    const cell=e.target.closest('[data-side="r"]'); if(!cell || State.zo.geprueft) return;
+    const rid=cell.dataset.id;
+    if(selLinks){
+      // bestehende Zuordnung dieses rechten Elements lösen
+      for(const k in State.zo.paare){ if(State.zo.paare[k]===rid) delete State.zo.paare[k]; }
+      State.zo.paare[selLinks]=rid;
+      selLinks=null;
+      renderZuordnung();
+    }
+  });
+  zoPruef.addEventListener('click',()=>{
+    if(State.zo.geprueft) return;
+    const keys=Object.keys(State.zo.paare);
+    if(keys.length<ZO_PAARE.length){
+      zoFb.className='feedback schlecht';
+      zoFb.textContent='Ordne erst alle drei Bedingungen einer Linie zu.';
+      return;
+    }
+    let alleRichtig=true;
+    keys.forEach(k=>{ if(State.zo.paare[k]!==k) alleRichtig=false; });
+    State.zo.geprueft=true;
+    if(alleRichtig){
+      State.zo.fertig=true;
+      zoFb.className='feedback gut';
+      zoFb.textContent='✅ Alles richtig zugeordnet! Du hast die Ortslinien-Idee verstanden.';
+      document.getElementById('ausblick').style.display='block';
+    }else{
+      zoFb.className='feedback schlecht';
+      zoFb.innerHTML='❌ Da passt noch nicht alles. Richtig ist: gleicher Abstand zu zwei Punkten → Mittelsenkrechte, zu beiden Schenkeln → Winkelhalbierende, zu einem Mittelpunkt → Kreis. Tippe „Leeren“ und versuche es erneut.';
+      zoLeeren.style.display='inline-block';
+    }
+    checkComplete();
+  });
+  zoLeeren.addEventListener('click',()=>{
+    State.zo.paare={}; State.zo.geprueft=false; State.zo.fertig=false; selLinks=null;
+    zoFb.className='feedback'; zoFb.textContent='';
+    zoLeeren.style.display='none';
+    document.getElementById('ausblick').style.display='none';
+    renderZuordnung();
+  });
+  renderZuordnung();
+
+  /* ---------- Flip-Cards ---------- */
+  document.querySelectorAll('.flip').forEach(f=>{
+    f.addEventListener('click',()=>f.classList.toggle('flipped'));
+  });
+
+  /* ---------- Weiter-Button: erscheint, wenn alles bearbeitet ---------- */
+  function checkComplete(){
+    const alleKarten = State.cardSeen.every(Boolean);
+    const alleMc = Object.values(State.mc).every(m=>m.answered);
+    const zoFertig = State.zo.geprueft; // geprüft (auch nach Korrektur) reicht
+    if(alleKarten && alleMc && zoFertig){
+      document.getElementById('weiterwrap').classList.add('show');
+    }
+  }
+  checkComplete();
+
+  /* ---------- T-Rex ---------- */
+  const trex=document.getElementById('trex');
+  trex.addEventListener('click',()=>{
+    trex.classList.add('show');
+    clearTimeout(trex._t);
+    trex._t=setTimeout(()=>trex.classList.remove('show'),1800);
+  });
+  trex.addEventListener('mouseenter',()=>trex.classList.add('show'));
+  trex.addEventListener('mouseleave',()=>trex.classList.remove('show'));
+
+  /* ---------- MathJax: gesamtes Dokument nach dem Laden rendern ---------- */
+  function typesetAll(){
+    if(window.MathJax && MathJax.typesetPromise){ MathJax.typesetPromise(); }
+    else { setTimeout(typesetAll, 200); }
+  }
+  if(window.MathJax && MathJax.startup && MathJax.startup.promise){
+    MathJax.startup.promise.then(()=>{ MathJax.typesetPromise(); });
+  } else {
+    window.addEventListener('load', ()=>setTimeout(typesetAll, 100));
+  }
+
+})();
+</script>
+</body>
+</html>

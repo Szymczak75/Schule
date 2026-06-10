@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Übung: Konstruktion mit Zirkel und Lineal</title>
+<meta name="description" content="Übungsseite zu Konstruktionen im Koordinatensystem: Punkte einzeichnen, Strecken, Strahlen und Geraden konstruieren, Mittelpunkte, Mittelsenkrechten, Umkreismittelpunkte und Winkelhalbierende bestimmen und Schnittpunkte zur Kontrolle angeben.">
+<meta name="keywords" content="Konstruktion, Koordinatensystem, Mittelsenkrechte, Winkelhalbierende, Mittelpunkt, Umkreismittelpunkt, Schnittpunkt, Zirkel und Lineal">
+<meta name="typ" content="Übung">
+<meta name="klasse" content="8">
+<meta name="fach" content="mathe">
+<meta name="oberthema" content="Geometrie">
+<meta name="thema" content="Konstruktion im Koordinatensystem">
+<script>
+  MathJax = {
+    tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+    svg: { fontCache: 'global' }
+  };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+  :root{
+    --kopf:#2E7BC4;          /* Übung: Blau */
+    --kopf-dunkel:#1F5C97;
+    --kopf-hell:#E4F0FB;
+    --papier:#F7FAFD;
+    --tinte:#23303B;
+    --linie:#CFDCE8;
+    --erfolg:#1E7A3E;
+    --fehler:#C0271E;
+    --akzent:#7A4E8C;
+    --karte:#FFFFFF;
+    --gitter:#D8E2EC;
+    --achse:#5A6B7A;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Helvetica,Arial,sans-serif;
+    background:var(--papier);color:var(--tinte);
+    font-size:1.05rem;line-height:1.55;padding-bottom:5.5rem;
+  }
+  .wrap{max-width:62rem;margin:0 auto;padding:0 1rem;}
+
+  header{
+    background:linear-gradient(180deg,var(--kopf),var(--kopf-dunkel));
+    color:#fff;padding:1.4rem 1rem 1.6rem;box-shadow:0 2px 8px rgba(0,0,0,.12);
+  }
+  header .wrap{display:flex;flex-direction:column;gap:.25rem;}
+  .eyebrow{font-size:.85rem;letter-spacing:.14em;text-transform:uppercase;font-weight:700;opacity:.92;}
+  header h1{margin:.1rem 0 0;font-size:1.6rem;line-height:1.15;}
+  header p{margin:.3rem 0 0;font-size:1rem;opacity:.95;max-width:46rem;}
+
+  nav.tabs{position:sticky;top:0;z-index:50;background:var(--papier);
+    border-bottom:1px solid var(--linie);padding:.5rem 0;box-shadow:0 2px 6px rgba(0,0,0,.05);}
+  .tabrow{display:flex;flex-wrap:wrap;gap:.4rem;}
+  .tab{border:1px solid var(--linie);background:#fff;color:var(--tinte);border-radius:.6rem;
+    padding:.55rem .8rem;min-height:44px;font-size:.95rem;font-weight:600;cursor:pointer;
+    display:flex;align-items:center;gap:.45rem;transition:transform .08s ease,background .15s ease;}
+  .tab .num{background:var(--kopf-hell);color:var(--kopf-dunkel);border-radius:50%;
+    width:1.6rem;height:1.6rem;display:flex;align-items:center;justify-content:center;
+    font-size:.85rem;font-weight:800;flex:none;}
+  .tab.done .num{background:var(--erfolg);color:#fff;}
+  .tab.active{background:var(--kopf);color:#fff;border-color:var(--kopf-dunkel);}
+  .tab.active .num{background:#fff;color:var(--kopf-dunkel);}
+  .tab:active{transform:scale(.97);}
+
+  .card{display:none;animation:fade .25s ease;}
+  .card.active{display:block;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .panel{background:var(--karte);border:1px solid var(--linie);border-radius:1rem;
+    padding:1.3rem 1.2rem 1.5rem;margin:1.2rem 0;box-shadow:0 1px 4px rgba(0,0,0,.05);}
+  .panel h2{margin:.1rem 0 .2rem;font-size:1.35rem;color:var(--kopf-dunkel);}
+  .panel h3{margin:1.2rem 0 .4rem;font-size:1.08rem;}
+
+  /* Niveaustufen-Umschalter */
+  .stufen{display:flex;flex-wrap:wrap;gap:.5rem;margin:.2rem 0 1rem;}
+  .stufe-btn{border:1.5px solid var(--linie);background:#fff;border-radius:2rem;
+    padding:.5rem 1rem;min-height:44px;font-size:.95rem;font-weight:700;cursor:pointer;color:var(--tinte);
+    transition:transform .08s ease;}
+  .stufe-btn:active{transform:scale(.97);}
+  .stufe-btn.aktiv{background:var(--kopf);color:#fff;border-color:var(--kopf-dunkel);}
+  .stufe-hint{font-size:.85rem;color:var(--tinte);opacity:.65;margin-bottom:.6rem;}
+
+  /* Koordinatensystem */
+  .ksys-box{background:#fff;border:1px solid var(--linie);border-radius:.8rem;padding:.8rem;margin:1rem 0;}
+  .ksys{width:100%;height:auto;display:block;touch-action:manipulation;}
+  .ksys .grid{stroke:var(--gitter);stroke-width:1;}
+  .ksys .axis{stroke:var(--achse);stroke-width:2;}
+  .ksys .tick{stroke:var(--achse);stroke-width:1.5;}
+  .ksys .ticklbl{font:600 11px 'Segoe UI',sans-serif;fill:var(--achse);}
+  .ksys .axlbl{font:700 14px 'Segoe UI',sans-serif;fill:var(--achse);}
+  .ksys .ptlbl{font:800 15px 'Segoe UI',sans-serif;}
+
+  .aufg{border-top:1px solid var(--linie);padding-top:1rem;margin-top:1.2rem;}
+  .aufg:first-of-type{border-top:none;padding-top:0;margin-top:0;}
+  .aufgkopf{font-weight:800;color:var(--kopf-dunkel);font-size:1.05rem;}
+  .arbeitsauftrag{background:var(--kopf-hell);border-left:4px solid var(--kopf);
+    border-radius:.4rem;padding:.7rem .9rem;margin:.7rem 0;}
+  ul.tidy{margin:.4rem 0 .4rem 1.1rem;padding:0;}
+  ul.tidy li{margin:.3rem 0;}
+
+  /* Eingabefelder */
+  .frage-zeile{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem;margin:.8rem 0;}
+  .frage-zeile label{font-weight:600;}
+  .koord-eingabe{display:inline-flex;align-items:center;gap:.2rem;
+    border:1.5px solid var(--linie);border-radius:.5rem;padding:.25rem .5rem;background:#fff;}
+  .koord-eingabe input{border:none;width:3.2rem;font-size:1.05rem;text-align:center;
+    min-height:38px;background:transparent;color:var(--tinte);}
+  .koord-eingabe input:focus{outline:none;}
+  .koord-eingabe .sep{font-weight:700;color:var(--achse);font-size:1.1rem;}
+  .koord-eingabe .kl{font-weight:700;color:var(--achse);font-size:1.2rem;}
+  input.einzel{border:1.5px solid var(--linie);border-radius:.5rem;width:4rem;
+    min-height:42px;font-size:1.05rem;text-align:center;padding:.2rem;background:#fff;color:var(--tinte);}
+  input:focus{outline:2px solid var(--kopf);}
+
+  .btnrow{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:.6rem;}
+  button.action{border:none;border-radius:.6rem;background:var(--kopf);color:#fff;
+    font-size:1rem;font-weight:700;padding:.65rem 1.1rem;min-height:44px;min-width:44px;
+    cursor:pointer;transition:transform .08s ease,background .15s ease;}
+  button.action:active{transform:scale(.96);}
+  button.action.leeren{background:#fff;color:var(--fehler);border:1.5px solid var(--fehler);}
+  button.action:disabled{background:#C2CDD8;cursor:default;}
+
+  .feedback{margin:.7rem 0 0;padding:.75rem .95rem;border-radius:.6rem;font-weight:600;display:none;}
+  .feedback.gut{display:block;background:var(--erfolg);color:#fff;}
+  .feedback.schlecht{display:block;background:var(--fehler);color:#fff;}
+
+  details.tipp{margin:.7rem 0 0;border:1px solid var(--linie);border-radius:.6rem;background:#FBFDFF;overflow:hidden;}
+  details.tipp>summary{list-style:none;cursor:pointer;padding:.7rem .9rem;min-height:44px;
+    display:flex;align-items:center;gap:.5rem;font-weight:700;color:var(--kopf-dunkel);}
+  details.tipp>summary::-webkit-details-marker{display:none;}
+  details.tipp>summary::before{content:'💡';}
+  details.tipp[open]>summary::before{content:'📖';}
+  details.tipp .tippinhalt{padding:0 .9rem .9rem;}
+  .tippstufe{margin:.5rem 0;padding:.5rem .7rem;border-left:3px solid var(--kopf);background:var(--kopf-hell);border-radius:.3rem;display:none;}
+  .tippstufe.show{display:block;}
+  .tipp-mehr{margin-top:.5rem;}
+
+  .merk{background:#F3ECF6;border:1px solid #D9C6E4;border-left:5px solid var(--akzent);
+    border-radius:.7rem;padding:1rem 1.1rem;margin:1.1rem 0;}
+  .merk h3{margin:.1rem 0 .4rem;color:var(--akzent);}
+
+  /* Entdeckungs-Block */
+  .entdeck{background:#FBF6FC;border:1.5px solid #D9C6E4;border-radius:.8rem;
+    padding:1rem 1.1rem;margin:1.1rem 0;}
+  .entdeck .etitel{display:flex;align-items:center;gap:.5rem;font-weight:800;color:var(--akzent);font-size:1.05rem;margin-bottom:.4rem;}
+  .beob-feld{width:100%;min-height:4.5rem;border:1.5px solid var(--linie);border-radius:.6rem;
+    padding:.6rem .7rem;font-size:1rem;font-family:inherit;color:var(--tinte);resize:vertical;background:#fff;}
+  .beob-feld:focus{outline:2px solid var(--akzent);}
+  details.beob{margin:.7rem 0 0;border:1px solid #D9C6E4;border-radius:.6rem;background:#fff;overflow:hidden;}
+  details.beob>summary{list-style:none;cursor:pointer;padding:.7rem .9rem;min-height:44px;
+    display:flex;align-items:center;gap:.5rem;font-weight:700;color:var(--akzent);}
+  details.beob>summary::-webkit-details-marker{display:none;}
+  details.beob>summary::before{content:'🔍';}
+  details.beob[open]>summary::before{content:'✅';}
+  details.beob .binhalt{padding:0 .9rem .9rem;}
+  .ecke-marker{display:inline-block;font-weight:800;color:var(--erfolg);}
+
+  /* Auswertung */
+  .ausw-zeile{display:flex;align-items:center;gap:.6rem;padding:.6rem 0;border-bottom:1px solid var(--linie);}
+  .ausw-zeile:last-child{border-bottom:none;}
+  .ausw-ic{font-size:1.3rem;flex:none;}
+  .score{font-size:1.5rem;font-weight:800;color:var(--kopf-dunkel);margin:.5rem 0;}
+  .balken{height:14px;background:var(--kopf-hell);border-radius:7px;overflow:hidden;margin:.4rem 0;}
+  .balken>div{height:100%;background:var(--erfolg);width:0;transition:width .6s ease;}
+
+  .weiter-wrap{text-align:center;margin:2rem 0 1rem;display:none;}
+  .weiter-wrap.show{display:block;animation:fade .4s ease;}
+  a.weiter{display:inline-flex;align-items:center;gap:.6rem;justify-content:center;
+    background:var(--erfolg);color:#fff;text-decoration:none;font-size:1.15rem;font-weight:800;
+    padding:.9rem 2rem;min-height:44px;border-radius:.8rem;width:100%;max-width:30rem;
+    box-shadow:0 3px 10px rgba(30,122,62,.3);}
+  a.weiter:active{transform:scale(.98);}
+  .weiter-hint{font-size:.85rem;color:var(--tinte);opacity:.6;margin-top:.5rem;}
+
+  #trex{position:fixed;bottom:.7rem;right:.7rem;font-size:1.7rem;cursor:pointer;z-index:60;
+    user-select:none;filter:drop-shadow(0 1px 2px rgba(0,0,0,.25));}
+  #trex .bubble{position:absolute;bottom:2.1rem;right:0;white-space:nowrap;background:var(--tinte);
+    color:#fff;font-size:.78rem;font-weight:600;padding:.35rem .6rem;border-radius:.5rem;
+    opacity:0;pointer-events:none;transition:opacity .2s ease;}
+  #trex.show .bubble{opacity:1;}
+
+  @media (max-width:520px){header h1{font-size:1.35rem;}.panel{padding:1.1rem .9rem 1.3rem;}}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <span class="eyebrow">Geometrie · Klasse 8 · Übung</span>
+    <h1>Konstruieren im Koordinatensystem</h1>
+    <p>Zeichne die Punkte und Linien sauber in dein Heft, konstruiere mit Zirkel und Lineal – und gib zur Kontrolle die gesuchten Koordinaten hier ein.</p>
+  </div>
+</header>
+
+<nav class="tabs">
+  <div class="wrap">
+    <div class="tabrow" id="tabrow">
+      <button class="tab active" data-i="0"><span class="num">1</span>Mittelpunkt &amp; Mittelsenkrechte</button>
+      <button class="tab" data-i="1"><span class="num">2</span>Winkelhalbierende</button>
+      <button class="tab" data-i="2"><span class="num">3</span>Kreis ums Dreieck</button>
+      <button class="tab" data-i="3"><span class="num">4</span>Wiederholung</button>
+      <button class="tab" data-i="4"><span class="num">5</span>Auswertung</button>
+    </div>
+  </div>
+</nav>
+
+<main class="wrap">
+
+  <!-- KARTE 1 -->
+  <section class="card active" data-card="0">
+    <div class="panel">
+      <h2>Aufgabe 1: Mittelpunkt &amp; Mittelsenkrechte</h2>
+
+      <div class="stufen" data-stufen="a1">
+        <button class="stufe-btn aktiv" data-stufe="fortg">Fortgeschritten</button>
+        <button class="stufe-btn" data-stufe="profi">Profi</button>
+      </div>
+      <div class="stufe-hint">Tippe auf eine Stufe zum Wechseln. Dein Stand pro Stufe bleibt erhalten.</div>
+
+      <div class="ksys-box">
+        <svg class="ksys" id="ksys-a1" viewBox="0 0 360 360" role="img" aria-label="Koordinatensystem zu Aufgabe 1"></svg>
+      </div>
+
+      <!-- FORTGESCHRITTEN -->
+      <div class="stufe-inhalt" data-stufe-inhalt="a1-fortg">
+        <div class="arbeitsauftrag">
+          <p><b>Gegeben:</b> $A(2|1)$ und $B(6|5)$.</p>
+          <ul class="tidy">
+            <li>Zeichne beide Punkte und die Strecke $\overline{AB}$ in dein Heft.</li>
+            <li>Konstruiere die <b>Mittelsenkrechte</b> von $\overline{AB}$ mit Zirkel und Lineal.</li>
+          </ul>
+        </div>
+        <div class="frage-zeile">
+          <label>Koordinaten des <b>Mittelpunkts</b> $M$ von $\overline{AB}$:</label>
+          <span class="koord-eingabe"><span class="kl">(</span><input data-k="a1-fortg-mx" inputmode="decimal" aria-label="x-Koordinate M"><span class="sep">|</span><input data-k="a1-fortg-my" inputmode="decimal" aria-label="y-Koordinate M"><span class="kl">)</span></span>
+        </div>
+        <div class="frage-zeile">
+          <label>An welcher Stelle schneidet die Mittelsenkrechte die <b>x-Achse</b>? &nbsp;$x =$</label>
+          <input class="einzel" data-k="a1-fortg-sx" inputmode="decimal" aria-label="x-Achsenschnittpunkt">
+        </div>
+        <div class="btnrow">
+          <button class="action" data-pruef="a1-fortg">Prüfen</button>
+          <button class="action leeren" data-leeren="a1-fortg" style="display:none;">Leeren</button>
+        </div>
+        <div class="feedback" data-fb="a1-fortg"></div>
+        <details class="tipp" data-tipp="a1-fortg">
+          <summary>Tipp anzeigen</summary>
+          <div class="tippinhalt">
+            <div class="tippstufe" data-ts="0">Den Mittelpunkt findest du, indem du die x-Werte und die y-Werte der Endpunkte jeweils mittelst: $M\left(\frac{x_A+x_B}{2}\,\middle|\,\frac{y_A+y_B}{2}\right)$.</div>
+            <div class="tippstufe" data-ts="1">Die Mittelsenkrechte geht durch $M$ und steht senkrecht auf $\overline{AB}$. $\overline{AB}$ steigt um 1 nach rechts (Steigung 1), die Mittelsenkrechte hat dann die Steigung $-1$.</div>
+            <div class="tippstufe" data-ts="2">Lösung: $M(4|3)$. Die Mittelsenkrechte hat die Gleichung $y=-x+7$. Für $y=0$ folgt $x=7$.</div>
+            <button class="action tipp-mehr" data-mehr="a1-fortg">Nächster Tipp ▸</button>
+          </div>
+        </details>
+      </div>
+
+      <!-- PROFI -->
+      <div class="stufe-inhalt" data-stufe-inhalt="a1-profi" style="display:none;">
+        <div class="arbeitsauftrag">
+          <p><b>Gegeben:</b> $A(1|3)$, $B(7|1)$ und $C(9|7)$.</p>
+          <ul class="tidy">
+            <li>Zeichne die drei Punkte in dein Heft.</li>
+            <li>Konstruiere den <b>Mittelpunkt</b> von $\overline{AC}$ und die <b>Mittelsenkrechte</b> von $\overline{AC}$.</li>
+          </ul>
+        </div>
+        <div class="frage-zeile">
+          <label>Koordinaten des Mittelpunkts $M$ von $\overline{AC}$:</label>
+          <span class="koord-eingabe"><span class="kl">(</span><input data-k="a1-profi-mx" inputmode="decimal" aria-label="x-Koordinate M"><span class="sep">|</span><input data-k="a1-profi-my" inputmode="decimal" aria-label="y-Koordinate M"><span class="kl">)</span></span>
+        </div>
+        <div class="frage-zeile">
+          <label>Wo schneidet die Mittelsenkrechte von $\overline{AC}$ die <b>x-Achse</b>? &nbsp;$x =$</label>
+          <input class="einzel" data-k="a1-profi-sx" inputmode="decimal" aria-label="x-Achsenschnittpunkt">
+        </div>
+        <div class="btnrow">
+          <button class="action" data-pruef="a1-profi">Prüfen</button>
+          <button class="action leeren" data-leeren="a1-profi" style="display:none;">Leeren</button>
+        </div>
+        <div class="feedback" data-fb="a1-profi"></div>
+        <details class="tipp" data-tipp="a1-profi">
+          <summary>Tipp anzeigen</summary>
+          <div class="tippinhalt">
+            <div class="tippstufe" data-ts="0">Bilde zuerst den Mittelpunkt von $A(1|3)$ und $C(9|7)$ durch Mitteln der Koordinaten.</div>
+            <div class="tippstufe" data-ts="1">$\overline{AC}$ hat die Steigung $\frac{7-3}{9-1}=\frac{1}{2}$. Die Mittelsenkrechte steht senkrecht dazu, also Steigung $-2$, und geht durch $M$.</div>
+            <div class="tippstufe" data-ts="2">Lösung: $M(5|5)$. Mittelsenkrechte: $y=-2x+15$. Für $y=0$ folgt $x=7{,}5$.</div>
+            <button class="action tipp-mehr" data-mehr="a1-profi">Nächster Tipp ▸</button>
+          </div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- KARTE 2 -->
+  <section class="card" data-card="1">
+    <div class="panel">
+      <h2>Aufgabe 2: Winkelhalbierende</h2>
+
+      <div class="stufen" data-stufen="a2">
+        <button class="stufe-btn aktiv" data-stufe="fortg">Fortgeschritten</button>
+        <button class="stufe-btn" data-stufe="profi">Profi</button>
+      </div>
+      <div class="stufe-hint">Tippe auf eine Stufe zum Wechseln. Dein Stand pro Stufe bleibt erhalten.</div>
+
+      <div class="ksys-box">
+        <svg class="ksys" id="ksys-a2" viewBox="0 0 360 360" role="img" aria-label="Koordinatensystem zu Aufgabe 2"></svg>
+      </div>
+
+      <div class="stufe-inhalt" data-stufe-inhalt="a2-fortg">
+        <div class="arbeitsauftrag">
+          <p><b>Gegeben:</b> der Scheitel $S(1|1)$, der Punkt $A(9|1)$ und der Punkt $C(1|9)$.</p>
+          <ul class="tidy">
+            <li>Zeichne die Strahlen von $S$ durch $A$ und von $S$ durch $C$.</li>
+            <li>Konstruiere die <b>Winkelhalbierende</b> der beiden Strahlen.</li>
+            <li>Zeichne zusätzlich die Strecke $\overline{AC}$ ein.</li>
+          </ul>
+        </div>
+        <div class="frage-zeile">
+          <label>In welchem Punkt schneidet die Winkelhalbierende die Strecke $\overline{AC}$?</label>
+          <span class="koord-eingabe"><span class="kl">(</span><input data-k="a2-fortg-x" inputmode="decimal" aria-label="x"><span class="sep">|</span><input data-k="a2-fortg-y" inputmode="decimal" aria-label="y"><span class="kl">)</span></span>
+        </div>
+        <div class="btnrow">
+          <button class="action" data-pruef="a2-fortg">Prüfen</button>
+          <button class="action leeren" data-leeren="a2-fortg" style="display:none;">Leeren</button>
+        </div>
+        <div class="feedback" data-fb="a2-fortg"></div>
+        <details class="tipp" data-tipp="a2-fortg">
+          <summary>Tipp anzeigen</summary>
+          <div class="tippinhalt">
+            <div class="tippstufe" data-ts="0">Der Strahl von $S$ durch $A$ verläuft waagerecht, der Strahl von $S$ durch $C$ senkrecht. Zwischen ihnen liegt ein rechter Winkel.</div>
+            <div class="tippstufe" data-ts="1">Die Winkelhalbierende eines rechten Winkels halbiert ihn in zwei $45°$-Winkel – sie verläuft also als Diagonale durch $S(1|1)$ mit Steigung 1.</div>
+            <div class="tippstufe" data-ts="2">Lösung: Die Winkelhalbierende ist $y=x$. Die Strecke $\overline{AC}$ trifft sie genau in der Mitte: $(5|5)$.</div>
+            <button class="action tipp-mehr" data-mehr="a2-fortg">Nächster Tipp ▸</button>
+          </div>
+        </details>
+      </div>
+
+      <div class="stufe-inhalt" data-stufe-inhalt="a2-profi" style="display:none;">
+        <div class="arbeitsauftrag">
+          <p><b>Gegeben:</b> $A(1|3)$, $B(7|1)$ und $C(9|7)$ (dasselbe Dreieck wie in Aufgabe 1).</p>
+          <ul class="tidy">
+            <li>Zeichne das Dreieck $ABC$ in dein Heft.</li>
+            <li>Konstruiere die <b>Winkelhalbierende</b> des Winkels bei $B$ und die des Winkels bei $A$.</li>
+            <li>Markiere den <b>Schnittpunkt</b> $P$ der beiden Winkelhalbierenden.</li>
+          </ul>
+        </div>
+        <div class="frage-zeile">
+          <label>Lies die Koordinaten des Schnittpunkts $P$ ab (auf halbe Einheit genau):</label>
+        </div>
+        <div class="frage-zeile">
+          <span class="koord-eingabe"><span class="kl">(</span><input data-k="a2-profi-x" inputmode="decimal" aria-label="x"><span class="sep">|</span><input data-k="a2-profi-y" inputmode="decimal" aria-label="y"><span class="kl">)</span></span>
+        </div>
+        <div class="btnrow">
+          <button class="action" data-pruef="a2-profi">Prüfen</button>
+          <button class="action leeren" data-leeren="a2-profi" style="display:none;">Leeren</button>
+        </div>
+        <div class="feedback" data-fb="a2-profi"></div>
+        <details class="tipp" data-tipp="a2-profi">
+          <summary>Tipp anzeigen</summary>
+          <div class="tippinhalt">
+            <div class="tippstufe" data-ts="0">Konstruiere beide Winkelhalbierenden sauber mit dem Zirkel (Bogen um den Scheitel, dann zwei gleiche Bögen um die Schnittpunkte auf den Schenkeln).</div>
+            <div class="tippstufe" data-ts="1">Verlängere beide Winkelhalbierenden ins Innere des Dreiecks, bis sie sich kreuzen. Lies dort möglichst genau ab.</div>
+            <div class="tippstufe" data-ts="2">Lösung: $P$ liegt bei etwa $(5{,}5|3{,}5)$. Akzeptiert wird auch $(5|3{,}5)$ oder $(5{,}5|4)$, je nach Zeichengenauigkeit.</div>
+            <button class="action tipp-mehr" data-mehr="a2-profi">Nächster Tipp ▸</button>
+          </div>
+        </details>
+
+        <div class="entdeck">
+          <div class="etitel">🔎 Beobachten &amp; beschreiben</div>
+          <p>Stich den Zirkel jetzt in den Schnittpunkt $P$ und stelle den Radius so ein, dass der Kreis die Seite $\overline{AB}$ <b>gerade berührt</b> (er soll sie nur antippen, nicht schneiden). Zeichne diesen Kreis.</p>
+          <p><b>Was fällt dir auf?</b> Beschreibe, wie der Kreis zu den <b>anderen beiden Seiten</b> $\overline{BC}$ und $\overline{AC}$ liegt.</p>
+          <textarea class="beob-feld" data-k="a2-profi-beob" aria-label="Deine Beobachtung" placeholder="Schreibe hier deine Beobachtung auf …"></textarea>
+          <details class="beob">
+            <summary>Vergleiche deine Beobachtung</summary>
+            <div class="binhalt">
+              <p>Der Kreis berührt nicht nur $\overline{AB}$, sondern <b>alle drei Seiten</b> des Dreiecks – er passt genau hinein. Der Schnittpunkt $P$ hat also zu allen drei Seiten denselben Abstand.</p>
+            </div>
+          </details>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- KARTE 3 -->
+  <section class="card" data-card="2">
+    <div class="panel">
+      <h2>Aufgabe 3: Der Kreis um ein Dreieck</h2>
+
+      <div class="stufen" data-stufen="a3">
+        <button class="stufe-btn aktiv" data-stufe="fortg">Fortgeschritten</button>
+        <button class="stufe-btn" data-stufe="profi">Profi</button>
+      </div>
+      <div class="stufe-hint">Tippe auf eine Stufe zum Wechseln. Dein Stand pro Stufe bleibt erhalten.</div>
+
+      <div class="ksys-box">
+        <svg class="ksys" id="ksys-a3" viewBox="0 0 360 360" role="img" aria-label="Koordinatensystem zu Aufgabe 3"></svg>
+      </div>
+
+      <div class="stufe-inhalt" data-stufe-inhalt="a3-fortg">
+        <div class="arbeitsauftrag">
+          <p><b>Gegeben:</b> das Dreieck $A(1|1)$, $B(7|1)$, $C(1|9)$.</p>
+          <ul class="tidy">
+            <li>Zeichne das Dreieck in dein Heft.</li>
+            <li>Konstruiere die Mittelsenkrechten von <b>zwei</b> Seiten.</li>
+            <li>Markiere ihren <b>Schnittpunkt</b> $M$.</li>
+          </ul>
+        </div>
+        <div class="frage-zeile">
+          <label>Koordinaten des Schnittpunkts $M$:</label>
+          <span class="koord-eingabe"><span class="kl">(</span><input data-k="a3-fortg-x" inputmode="decimal" aria-label="x"><span class="sep">|</span><input data-k="a3-fortg-y" inputmode="decimal" aria-label="y"><span class="kl">)</span></span>
+        </div>
+        <div class="btnrow">
+          <button class="action" data-pruef="a3-fortg">Prüfen</button>
+          <button class="action leeren" data-leeren="a3-fortg" style="display:none;">Leeren</button>
+        </div>
+        <div class="feedback" data-fb="a3-fortg"></div>
+        <details class="tipp" data-tipp="a3-fortg">
+          <summary>Tipp anzeigen</summary>
+          <div class="tippinhalt">
+            <div class="tippstufe" data-ts="0">Konstruiere zwei Mittelsenkrechten so wie auf der Lernseite (Bögen um die Streckenenden, gleicher Radius, Schnittpunkte verbinden).</div>
+            <div class="tippstufe" data-ts="1">Verlängere beide Mittelsenkrechten, bis sie sich kreuzen. Lies dort die Koordinaten ab.</div>
+            <div class="tippstufe" data-ts="2">Lösung: $M(4|5)$.</div>
+            <button class="action tipp-mehr" data-mehr="a3-fortg">Nächster Tipp ▸</button>
+          </div>
+        </details>
+
+        <div class="entdeck">
+          <div class="etitel">🔎 Beobachten &amp; beschreiben</div>
+          <p>Stich den Zirkel jetzt in den Schnittpunkt $M$ und stelle den Radius so ein, dass der Kreis <b>durch die Ecke $A$</b> geht. Zeichne diesen Kreis.</p>
+          <p><b>Was fällt dir auf?</b> Beschreibe, wie der Kreis zu den <b>anderen beiden Ecken</b> $B$ und $C$ liegt.</p>
+          <textarea class="beob-feld" data-k="a3-fortg-beob" aria-label="Deine Beobachtung" placeholder="Schreibe hier deine Beobachtung auf …"></textarea>
+          <details class="beob">
+            <summary>Vergleiche deine Beobachtung</summary>
+            <div class="binhalt">
+              <p>Der Kreis geht nicht nur durch $A$, sondern <b>durch alle drei Ecken</b> $A$, $B$ und $C$. Der Schnittpunkt $M$ hat also zu allen drei Ecken denselben Abstand.</p>
+            </div>
+          </details>
+        </div>
+      </div>
+
+      <div class="stufe-inhalt" data-stufe-inhalt="a3-profi" style="display:none;">
+        <div class="arbeitsauftrag">
+          <p><b>Gegeben:</b> das Dreieck $A(2|2)$, $B(10|2)$, $C(4|8)$.</p>
+          <ul class="tidy">
+            <li>Zeichne das Dreieck in dein Heft.</li>
+            <li>Konstruiere die Mittelsenkrechten von zwei Seiten und markiere ihren <b>Schnittpunkt</b> $M$.</li>
+            <li>Dieses Dreieck ist <b>nicht</b> rechtwinklig – du musst wirklich konstruieren.</li>
+          </ul>
+        </div>
+        <div class="frage-zeile">
+          <label>Koordinaten des Schnittpunkts $M$:</label>
+          <span class="koord-eingabe"><span class="kl">(</span><input data-k="a3-profi-x" inputmode="decimal" aria-label="x"><span class="sep">|</span><input data-k="a3-profi-y" inputmode="decimal" aria-label="y"><span class="kl">)</span></span>
+        </div>
+        <div class="frage-zeile">
+          <label>Wo schneidet die Mittelsenkrechte von $\overline{AB}$ die <b>x-Achse</b>? &nbsp;$x =$</label>
+          <input class="einzel" data-k="a3-profi-sx" inputmode="decimal" aria-label="x-Achsenschnittpunkt">
+        </div>
+        <div class="btnrow">
+          <button class="action" data-pruef="a3-profi">Prüfen</button>
+          <button class="action leeren" data-leeren="a3-profi" style="display:none;">Leeren</button>
+        </div>
+        <div class="feedback" data-fb="a3-profi"></div>
+        <details class="tipp" data-tipp="a3-profi">
+          <summary>Tipp anzeigen</summary>
+          <div class="tippinhalt">
+            <div class="tippstufe" data-ts="0">$\overline{AB}$ liegt waagerecht von $(2|2)$ bis $(10|2)$. Seine Mittelsenkrechte ist eine senkrechte Gerade durch den Mittelpunkt von $\overline{AB}$.</div>
+            <div class="tippstufe" data-ts="1">Der Mittelpunkt von $\overline{AB}$ ist $(6|2)$, die Mittelsenkrechte ist also die senkrechte Gerade $x=6$. Sie schneidet die x-Achse bei $x=6$. Der gesuchte Schnittpunkt liegt ebenfalls auf dieser Geraden.</div>
+            <div class="tippstufe" data-ts="2">Lösung: $M(6|4)$; die Mittelsenkrechte von $\overline{AB}$ schneidet die x-Achse bei $x=6$.</div>
+            <button class="action tipp-mehr" data-mehr="a3-profi">Nächster Tipp ▸</button>
+          </div>
+        </details>
+
+        <div class="entdeck">
+          <div class="etitel">🔎 Beobachten &amp; beschreiben</div>
+          <p>Stich den Zirkel in den Schnittpunkt $M$ und stelle den Radius so ein, dass der Kreis <b>durch die Ecke $A$</b> geht. Zeichne diesen Kreis.</p>
+          <p><b>Was fällt dir auf?</b> Beschreibe, wie der Kreis zu den Ecken $B$ und $C$ liegt – und ob das auch bei diesem schiefen Dreieck gilt.</p>
+          <textarea class="beob-feld" data-k="a3-profi-beob" aria-label="Deine Beobachtung" placeholder="Schreibe hier deine Beobachtung auf …"></textarea>
+          <details class="beob">
+            <summary>Vergleiche deine Beobachtung</summary>
+            <div class="binhalt">
+              <p>Auch hier geht der Kreis durch <b>alle drei Ecken</b> – egal wie das Dreieck liegt. Der Schnittpunkt der Mittelsenkrechten hat immer zu allen drei Ecken denselben Abstand.</p>
+            </div>
+          </details>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- KARTE 4: Wiederholung -->
+  <section class="card" data-card="3">
+    <div class="panel">
+      <h2>Wiederholung: Koordinaten &amp; Mittelpunkt</h2>
+      <p>Diese Aufgabe wiederholt ein Thema aus einer früheren Stunde: das Arbeiten im Koordinatensystem.</p>
+
+      <div class="stufen" data-stufen="w">
+        <button class="stufe-btn aktiv" data-stufe="fortg">Fortgeschritten</button>
+        <button class="stufe-btn" data-stufe="profi">Profi</button>
+      </div>
+      <div class="stufe-hint">Tippe auf eine Stufe zum Wechseln. Dein Stand pro Stufe bleibt erhalten.</div>
+
+      <div class="ksys-box">
+        <svg class="ksys" id="ksys-w" viewBox="0 0 360 360" role="img" aria-label="Koordinatensystem zur Wiederholung"></svg>
+      </div>
+
+      <div class="stufe-inhalt" data-stufe-inhalt="w-fortg">
+        <div class="arbeitsauftrag">
+          <p><b>Gegeben:</b> $P(2|3)$ und $Q(8|3)$.</p>
+          <ul class="tidy">
+            <li>Trage beide Punkte in dein Heft ein.</li>
+            <li>Bestimme den Mittelpunkt von $\overline{PQ}$ durch Mitteln der Koordinaten (ohne Konstruktion).</li>
+          </ul>
+        </div>
+        <div class="frage-zeile">
+          <label>Mittelpunkt von $\overline{PQ}$:</label>
+          <span class="koord-eingabe"><span class="kl">(</span><input data-k="w-fortg-x" inputmode="decimal" aria-label="x"><span class="sep">|</span><input data-k="w-fortg-y" inputmode="decimal" aria-label="y"><span class="kl">)</span></span>
+        </div>
+        <div class="btnrow">
+          <button class="action" data-pruef="w-fortg">Prüfen</button>
+          <button class="action leeren" data-leeren="w-fortg" style="display:none;">Leeren</button>
+        </div>
+        <div class="feedback" data-fb="w-fortg"></div>
+        <details class="tipp" data-tipp="w-fortg">
+          <summary>Tipp anzeigen</summary>
+          <div class="tippinhalt">
+            <div class="tippstufe" data-ts="0">Mittle die x-Werte und getrennt die y-Werte: $\frac{2+8}{2}$ und $\frac{3+3}{2}$.</div>
+            <div class="tippstufe" data-ts="1">Lösung: $(5|3)$.</div>
+            <button class="action tipp-mehr" data-mehr="w-fortg">Nächster Tipp ▸</button>
+          </div>
+        </details>
+      </div>
+
+      <div class="stufe-inhalt" data-stufe-inhalt="w-profi" style="display:none;">
+        <div class="arbeitsauftrag">
+          <p><b>Gegeben:</b> $P(-3|2)$ und $Q(5|6)$.</p>
+          <ul class="tidy">
+            <li>Trage beide Punkte in dein Heft ein (Achtung: negativer x-Wert).</li>
+            <li>Bestimme den Mittelpunkt von $\overline{PQ}$ durch Mitteln der Koordinaten.</li>
+          </ul>
+        </div>
+        <div class="frage-zeile">
+          <label>Mittelpunkt von $\overline{PQ}$:</label>
+          <span class="koord-eingabe"><span class="kl">(</span><input data-k="w-profi-x" inputmode="decimal" aria-label="x"><span class="sep">|</span><input data-k="w-profi-y" inputmode="decimal" aria-label="y"><span class="kl">)</span></span>
+        </div>
+        <div class="btnrow">
+          <button class="action" data-pruef="w-profi">Prüfen</button>
+          <button class="action leeren" data-leeren="w-profi" style="display:none;">Leeren</button>
+        </div>
+        <div class="feedback" data-fb="w-profi"></div>
+        <details class="tipp" data-tipp="w-profi">
+          <summary>Tipp anzeigen</summary>
+          <div class="tippinhalt">
+            <div class="tippstufe" data-ts="0">Auch bei negativen Werten gilt: x-Werte mitteln, y-Werte mitteln. $\frac{-3+5}{2}$ und $\frac{2+6}{2}$.</div>
+            <div class="tippstufe" data-ts="1">Lösung: $(1|4)$.</div>
+            <button class="action tipp-mehr" data-mehr="w-profi">Nächster Tipp ▸</button>
+          </div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- KARTE 5: Auswertung -->
+  <section class="card" data-card="4">
+    <div class="panel">
+      <h2>Deine Auswertung</h2>
+      <p>Hier siehst du, wie viele Aufgaben du in der aktuell gewählten Stufe richtig gelöst hast.</p>
+      <div class="score" id="score-text">– von – Aufgaben gelöst</div>
+      <div class="balken"><div id="score-bar"></div></div>
+      <div id="ausw-liste"></div>
+      <div class="merk">
+        <h3>🎯 Eure Entdeckung – die Folgerung</h3>
+        <p>In den Aufgaben hast du zwei besondere Kreise gefunden. Jetzt bekommen sie ihre Namen:</p>
+        <p style="margin-top:.6rem;"><b>Der Umkreis.</b> Der Schnittpunkt der <b>Mittelsenkrechten</b> hat zu allen drei <b>Ecken</b> denselben Abstand. Der Kreis um diesen Punkt geht durch alle drei Ecken – er heißt <b>Umkreis</b>, sein Mittelpunkt <b>Umkreismittelpunkt</b>.</p>
+        <p style="margin-top:.4rem;"><b>Der Inkreis.</b> Der Schnittpunkt der <b>Winkelhalbierenden</b> hat zu allen drei <b>Seiten</b> denselben Abstand. Der Kreis um diesen Punkt berührt alle drei Seiten von innen – er heißt <b>Inkreis</b>, sein Mittelpunkt <b>Inkreismittelpunkt</b>.</p>
+        <p style="margin-top:.6rem;">Der gemeinsame Gedanke dahinter ist die <b>Ortslinie</b> von der Lernseite: Mittelsenkrechte = gleicher Abstand zu zwei Ecken, Winkelhalbierende = gleicher Abstand zu zwei Seiten.</p>
+      </div>
+      <div class="merk" style="background:#EAF3FB;border-color:#BcdAF0;border-left-color:var(--kopf);">
+        <h3 style="color:var(--kopf-dunkel);">Ausblick</h3>
+        <p>In Aufgabe 3 (Fortgeschritten) lag der Umkreismittelpunkt genau auf der Mitte der längsten Seite – weil das Dreieck dort einen rechten Winkel hatte. Warum das so ist, untersuchen wir in der nächsten Stunde: der <b>Satz des Thales</b>.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="weiter-wrap" id="weiterwrap">
+    <a class="weiter" href="#">Übung abgeschlossen ✓</a>
+    <div class="weiter-hint">Du hast alle Aufgaben dieser Übung bearbeitet.</div>
+  </div>
+
+</main>
+
+<div id="trex" title="Made by Mathedino">🦖<span class="bubble">Made by Mathedino</span></div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ===== Aufgaben-Lösungen (verifiziert) ===== */
+  // tol = erlaubte Abweichung beim Ablesen
+  const LOES = {
+    'a1-fortg': {felder:{'a1-fortg-mx':4,'a1-fortg-my':3,'a1-fortg-sx':7}, tol:0},
+    'a1-profi': {felder:{'a1-profi-mx':5,'a1-profi-my':5,'a1-profi-sx':7.5}, tol:0},
+    'a2-fortg': {felder:{'a2-fortg-x':5,'a2-fortg-y':5}, tol:0},
+    'a2-profi': {felder:{'a2-profi-x':5.5,'a2-profi-y':3.5}, tol:0.5},
+    'a3-fortg': {felder:{'a3-fortg-x':4,'a3-fortg-y':5}, tol:0},
+    'a3-profi': {felder:{'a3-profi-x':6,'a3-profi-y':4,'a3-profi-sx':6}, tol:0},
+    'w-fortg':  {felder:{'w-fortg-x':5,'w-fortg-y':3}, tol:0},
+    'w-profi':  {felder:{'w-profi-x':1,'w-profi-y':4}, tol:0}
+  };
+
+  /* ===== Zustand im JS-Speicher (kein localStorage) ===== */
+  // Pro Aufgabe-Stufe getrennt: Eingaben + Status
+  const State = {
+    cardSeen:[true,false,false,false,false],
+    stufe:{a1:'fortg',a2:'fortg',a3:'fortg',w:'fortg'},
+    eingaben:{},   // key -> wert
+    status:{}      // aufgKey -> 'gut'|'schlecht'|undefined
+  };
+  // aktive Aufgaben je Stufe (für Auswertung)
+  const AUFG_PRO_STUFE = {
+    fortg:['a1-fortg','a2-fortg','a3-fortg','w-fortg'],
+    profi:['a1-profi','a2-profi','a3-profi','w-profi']
+  };
+
+  /* ===== Koordinatensysteme zeichnen ===== */
+  function zeichneKsys(svgId, opts){
+    const svg=document.getElementById(svgId);
+    if(!svg) return;
+    const minX=opts.minX, maxX=opts.maxX, minY=opts.minY, maxY=opts.maxY;
+    const pad=28;
+    const W=360,H=360;
+    const plotW=W-2*pad, plotH=H-2*pad;
+    const sx = plotW/(maxX-minX);
+    const sy = plotH/(maxY-minY);
+    function X(x){ return pad + (x-minX)*sx; }
+    function Y(y){ return H-pad - (y-minY)*sy; }
+    let g='';
+    // Gitter
+    for(let x=minX;x<=maxX;x++){ g+=`<line class="grid" x1="${X(x)}" y1="${Y(minY)}" x2="${X(x)}" y2="${Y(maxY)}"/>`; }
+    for(let y=minY;y<=maxY;y++){ g+=`<line class="grid" x1="${X(minX)}" y1="${Y(y)}" x2="${X(maxX)}" y2="${Y(y)}"/>`; }
+    // Achsen
+    const x0=X(0), y0=Y(0);
+    g+=`<line class="axis" x1="${X(minX)}" y1="${y0}" x2="${X(maxX)}" y2="${y0}"/>`;
+    g+=`<line class="axis" x1="${x0}" y1="${Y(minY)}" x2="${x0}" y2="${Y(maxY)}"/>`;
+    // Pfeile
+    g+=`<polygon points="${X(maxX)},${y0} ${X(maxX)-7},${y0-4} ${X(maxX)-7},${y0+4}" fill="var(--achse)"/>`;
+    g+=`<polygon points="${x0},${Y(maxY)} ${x0-4},${Y(maxY)+7} ${x0+4},${Y(maxY)+7}" fill="var(--achse)"/>`;
+    g+=`<text class="axlbl" x="${X(maxX)-2}" y="${y0+16}">x</text>`;
+    g+=`<text class="axlbl" x="${x0+6}" y="${Y(maxY)+10}">y</text>`;
+    // Ticks + Labels (jede 2. Einheit beschriften, sonst zu eng)
+    for(let x=minX;x<=maxX;x++){ if(x===0) continue;
+      g+=`<line class="tick" x1="${X(x)}" y1="${y0-3}" x2="${X(x)}" y2="${y0+3}"/>`;
+      if(x%2===0) g+=`<text class="ticklbl" x="${X(x)}" y="${y0+15}" text-anchor="middle">${x}</text>`;
+    }
+    for(let y=minY;y<=maxY;y++){ if(y===0) continue;
+      g+=`<line class="tick" x1="${x0-3}" y1="${Y(y)}" x2="${x0+3}" y2="${Y(y)}"/>`;
+      if(y%2===0) g+=`<text class="ticklbl" x="${x0-8}" y="${Y(y)+4}" text-anchor="end">${y}</text>`;
+    }
+    // Punkte
+    (opts.punkte||[]).forEach(p=>{
+      g+=`<circle cx="${X(p.x)}" cy="${Y(p.y)}" r="4.5" fill="${p.farbe||'#23303B'}"/>`;
+      g+=`<text class="ptlbl" x="${X(p.x)+8}" y="${Y(p.y)-7}" fill="${p.farbe||'#23303B'}">${p.name}</text>`;
+    });
+    svg.innerHTML=g;
+  }
+
+  // Punkte je Stufe vorbereiten und passend zeichnen
+  const KSYS_DATEN = {
+    'ksys-a1':{
+      fortg:{minX:-1,maxX:9,minY:-1,maxY:9,punkte:[{name:'A',x:2,y:1,farbe:'#1F5C97'},{name:'B',x:6,y:5,farbe:'#1F5C97'}]},
+      profi:{minX:-1,maxX:11,minY:-1,maxY:9,punkte:[{name:'A',x:1,y:3,farbe:'#1F5C97'},{name:'B',x:7,y:1,farbe:'#1F5C97'},{name:'C',x:9,y:7,farbe:'#1F5C97'}]}
+    },
+    'ksys-a2':{
+      fortg:{minX:-1,maxX:11,minY:-1,maxY:11,punkte:[{name:'S',x:1,y:1,farbe:'#7A4E8C'},{name:'A',x:9,y:1,farbe:'#1F5C97'},{name:'C',x:1,y:9,farbe:'#1F5C97'}]},
+      profi:{minX:-1,maxX:11,minY:-1,maxY:9,punkte:[{name:'A',x:1,y:3,farbe:'#1F5C97'},{name:'B',x:7,y:1,farbe:'#7A4E8C'},{name:'C',x:9,y:7,farbe:'#1F5C97'}]}
+    },
+    'ksys-a3':{
+      fortg:{minX:-1,maxX:9,minY:-1,maxY:11,punkte:[{name:'A',x:1,y:1,farbe:'#1F5C97'},{name:'B',x:7,y:1,farbe:'#1F5C97'},{name:'C',x:1,y:9,farbe:'#1F5C97'}]},
+      profi:{minX:-1,maxX:12,minY:-1,maxY:10,punkte:[{name:'A',x:2,y:2,farbe:'#1F5C97'},{name:'B',x:10,y:2,farbe:'#1F5C97'},{name:'C',x:4,y:8,farbe:'#1F5C97'}]}
+    },
+    'ksys-w':{
+      fortg:{minX:-1,maxX:10,minY:-1,maxY:8,punkte:[{name:'P',x:2,y:3,farbe:'#1F5C97'},{name:'Q',x:8,y:3,farbe:'#1F5C97'}]},
+      profi:{minX:-5,maxX:7,minY:-1,maxY:8,punkte:[{name:'P',x:-3,y:2,farbe:'#1F5C97'},{name:'Q',x:5,y:6,farbe:'#1F5C97'}]}
+    }
+  };
+  function ksysFuer(svgId, stufe){ zeichneKsys(svgId, KSYS_DATEN[svgId][stufe]); }
+
+  /* ===== Tab-Navigation ===== */
+  const tabs=Array.from(document.querySelectorAll('.tab'));
+  const cards=Array.from(document.querySelectorAll('.card'));
+  function showCard(i){
+    cards.forEach(c=>c.classList.toggle('active',+c.dataset.card===i));
+    tabs.forEach(t=>t.classList.toggle('active',+t.dataset.i===i));
+    State.cardSeen[i]=true;
+    tabs.forEach((t,k)=>{ if(State.cardSeen[k]) t.classList.add('done'); });
+    if(i===4) renderAuswertung();
+    window.scrollTo({top:0,behavior:'smooth'});
+    if(window.MathJax&&MathJax.typesetPromise){MathJax.typesetPromise();}
+  }
+  tabs.forEach(t=>t.addEventListener('click',()=>showCard(+t.dataset.i)));
+
+  /* ===== Niveaustufen-Umschalter ===== */
+  document.querySelectorAll('.stufen').forEach(box=>{
+    const grp=box.dataset.stufen;
+    box.querySelectorAll('.stufe-btn').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        const stufe=btn.dataset.stufe;
+        State.stufe[grp]=stufe;
+        box.querySelectorAll('.stufe-btn').forEach(b=>b.classList.toggle('aktiv',b===btn));
+        // Inhalte umschalten (nur ein-/ausblenden, kein Reset)
+        document.querySelectorAll('[data-stufe-inhalt^="'+grp+'-"]').forEach(div=>{
+          div.style.display = (div.dataset.stufeInhalt===grp+'-'+stufe)?'block':'none';
+        });
+        // passendes Koordinatensystem zeichnen
+        ksysFuer('ksys-'+grp, stufe);
+        if(window.MathJax&&MathJax.typesetPromise){MathJax.typesetPromise();}
+      });
+    });
+  });
+
+  /* ===== Eingaben merken ===== */
+  document.querySelectorAll('input[data-k], textarea[data-k]').forEach(inp=>{
+    inp.addEventListener('input',()=>{ State.eingaben[inp.dataset.k]=inp.value; });
+  });
+
+  /* ===== Prüfen ===== */
+  function normNum(s){
+    if(s==null) return null;
+    s=String(s).trim().replace(',','.').replace(/\s/g,'');
+    if(s==='') return null;
+    const v=parseFloat(s);
+    return isNaN(v)?null:v;
+  }
+  document.querySelectorAll('[data-pruef]').forEach(btn=>{
+    const key=btn.dataset.pruef;
+    btn.addEventListener('click',()=>{
+      const loes=LOES[key];
+      const fb=document.querySelector('[data-fb="'+key+'"]');
+      const leerBtn=document.querySelector('[data-leeren="'+key+'"]');
+      let alleGefuellt=true, alleRichtig=true;
+      for(const f in loes.felder){
+        const inp=document.querySelector('input[data-k="'+f+'"]');
+        const v=normNum(inp.value);
+        if(v===null){ alleGefuellt=false; alleRichtig=false; continue; }
+        if(Math.abs(v-loes.felder[f])>loes.tol+1e-9){ alleRichtig=false; }
+      }
+      if(!alleGefuellt){
+        fb.className='feedback schlecht';
+        fb.textContent='Bitte fülle zuerst alle Felder aus.';
+        return;
+      }
+      if(alleRichtig){
+        State.status[key]='gut';
+        fb.className='feedback gut';
+        fb.textContent='✅ Richtig! Sauber konstruiert.';
+        leerBtn.style.display='none';
+        // Felder sperren? Nein – Stand bleibt, aber wir markieren grün
+      }else{
+        State.status[key]='schlecht';
+        fb.className='feedback schlecht';
+        fb.innerHTML='❌ Das stimmt noch nicht. Prüfe deine Konstruktion und nutze den Tipp. Mit „Leeren“ kannst du deine Eingabe löschen.';
+        leerBtn.style.display='inline-block';
+      }
+      checkComplete();
+    });
+  });
+
+  /* ===== Leeren ===== */
+  document.querySelectorAll('[data-leeren]').forEach(btn=>{
+    const key=btn.dataset.leeren;
+    btn.addEventListener('click',()=>{
+      const loes=LOES[key];
+      for(const f in loes.felder){
+        const inp=document.querySelector('input[data-k="'+f+'"]');
+        inp.value=''; delete State.eingaben[f];
+      }
+      delete State.status[key];
+      const fb=document.querySelector('[data-fb="'+key+'"]');
+      fb.className='feedback'; fb.textContent='';
+      btn.style.display='none';
+    });
+  });
+
+  /* ===== Gestufte Tipps ===== */
+  document.querySelectorAll('[data-mehr]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const cont=btn.closest('.tippinhalt');
+      const stufen=Array.from(cont.querySelectorAll('.tippstufe'));
+      const naechste=stufen.find(s=>!s.classList.contains('show'));
+      if(naechste){ naechste.classList.add('show'); if(window.MathJax&&MathJax.typesetPromise){MathJax.typesetPromise([naechste]);} }
+      const offen=stufen.filter(s=>s.classList.contains('show')).length;
+      if(offen>=stufen.length){ btn.style.display='none'; }
+    });
+  });
+  // erster Tipp beim Öffnen sichtbar
+  document.querySelectorAll('details.tipp').forEach(d=>{
+    d.addEventListener('toggle',()=>{
+      if(d.open){
+        const erste=d.querySelector('.tippstufe');
+        if(erste && !erste.classList.contains('show')){ erste.classList.add('show'); if(window.MathJax&&MathJax.typesetPromise){MathJax.typesetPromise([erste]);} }
+      }
+    });
+  });
+
+  /* ===== Auswertung ===== */
+  function renderAuswertung(){
+    // Auswertung bezieht sich auf die zuletzt je Aufgabe gewählte Stufe
+    const liste=document.getElementById('ausw-liste');
+    const namen={a1:'Aufgabe 1 – Mittelpunkt & Mittelsenkrechte',a2:'Aufgabe 2 – Winkelhalbierende',a3:'Aufgabe 3 – Kreis um ein Dreieck',w:'Wiederholung – Mittelpunkt'};
+    let html=''; let geloest=0, gesamt=0;
+    ['a1','a2','a3','w'].forEach(grp=>{
+      const stufe=State.stufe[grp];
+      const key=grp+'-'+stufe;
+      const st=State.status[key];
+      gesamt++;
+      let ic='⬜', txt='noch nicht bearbeitet';
+      if(st==='gut'){ ic='✅'; txt='richtig gelöst'; geloest++; }
+      else if(st==='schlecht'){ ic='❌'; txt='noch nicht richtig'; }
+      html+=`<div class="ausw-zeile"><span class="ausw-ic">${ic}</span><div><b>${namen[grp]}</b><br><span style="opacity:.7;font-size:.92rem;">Stufe: ${stufe==='fortg'?'Fortgeschritten':'Profi'} · ${txt}</span></div></div>`;
+    });
+    liste.innerHTML=html;
+    document.getElementById('score-text').textContent=geloest+' von '+gesamt+' Aufgaben gelöst';
+    document.getElementById('score-bar').style.width=Math.round(geloest/gesamt*100)+'%';
+  }
+
+  /* ===== Weiter-Button: erscheint, wenn alle 4 Aufgaben in ihrer Stufe richtig ===== */
+  function checkComplete(){
+    const alleKarten=State.cardSeen.every(Boolean);
+    let alleRichtig=true;
+    ['a1','a2','a3','w'].forEach(grp=>{
+      const key=grp+'-'+State.stufe[grp];
+      if(State.status[key]!=='gut') alleRichtig=false;
+    });
+    if(alleRichtig && alleKarten){
+      document.getElementById('weiterwrap').classList.add('show');
+    }
+  }
+
+  /* ===== Init ===== */
+  ['a1','a2','a3','w'].forEach(grp=>ksysFuer('ksys-'+grp,'fortg'));
+
+  /* ===== T-Rex ===== */
+  const trex=document.getElementById('trex');
+  trex.addEventListener('click',()=>{trex.classList.add('show');clearTimeout(trex._t);trex._t=setTimeout(()=>trex.classList.remove('show'),1800);});
+  trex.addEventListener('mouseenter',()=>trex.classList.add('show'));
+  trex.addEventListener('mouseleave',()=>trex.classList.remove('show'));
+
+  /* ===== MathJax voll rendern ===== */
+  if(window.MathJax&&MathJax.startup&&MathJax.startup.promise){
+    MathJax.startup.promise.then(()=>MathJax.typesetPromise());
+  }
+})();
+</script>
+</body>
+</html>
