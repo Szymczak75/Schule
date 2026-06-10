@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Geraden in Parameterform – Einstieg</title>
+
+<meta name="description" content="Erarbeitung: Geraden in Parameterform darstellen. Begriffe Parameter, Stützvektor und Richtungsvektor anschaulich erklärt – erst in der Ebene, dann Ausblick in den Raum.">
+<meta name="keywords" content="Geraden, Parameterform, Stützvektor, Richtungsvektor, Parameter, Vektoren, analytische Geometrie, EF">
+<meta name="typ" content="Lernseite">
+<meta name="klasse" content="EF">
+<meta name="fach" content="mathe">
+<meta name="oberthema" content="Analytische Geometrie">
+<meta name="thema" content="Geraden in Parameterform">
+
+<script>
+  MathJax = {
+    tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+    svg: { fontCache: 'global' }
+  };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+<style>
+  :root{
+    --orange:#d98324;
+    --orange-soft:#f3e3cf;
+    --orange-line:#e0a85c;
+    --ink:#2b2b2b;
+    --muted:#6a6a6a;
+    --bg:#fbf8f3;
+    --card:#ffffff;
+    --green:#1f9d55;
+    --green-bg:#1f9d55;
+    --red:#d22f2f;
+    --blue:#2f6db0;
+    --blue-bg:#e8f0f9;
+    --stuetz:#2f6db0;   /* Stützvektor blau */
+    --richt:#d98324;    /* Richtungsvektor orange */
+    --line:#dcd4c7;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    font-size:17px;
+    line-height:1.55;
+    padding:0 0 120px;
+  }
+  .wrap{max-width:920px;margin:0 auto;padding:0 16px;}
+
+  header.page{
+    background:linear-gradient(180deg,var(--orange) 0%,#c9761d 100%);
+    color:#fff;padding:22px 16px 20px;
+  }
+  header.page .wrap{padding:0 16px;}
+  .eyebrow{font-size:14px;letter-spacing:.12em;text-transform:uppercase;opacity:.9;margin:0 0 6px;}
+  header.page h1{margin:0;font-size:26px;line-height:1.2;font-weight:800;}
+  header.page p{margin:8px 0 0;font-size:16px;opacity:.96;max-width:680px;}
+
+  /* Tabs */
+  .tabs{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 4px;}
+  .tab{
+    border:2px solid var(--orange-line);
+    background:#fff;color:var(--orange);
+    padding:10px 14px;border-radius:999px;
+    font-weight:700;font-size:15px;cursor:pointer;
+    min-height:44px;display:flex;align-items:center;gap:8px;
+    transition:transform .05s ease;
+  }
+  .tab .num{
+    background:var(--orange-soft);color:#9a5c12;
+    border-radius:50%;width:24px;height:24px;display:flex;
+    align-items:center;justify-content:center;font-size:13px;font-weight:800;
+  }
+  .tab[aria-selected="true"]{background:var(--orange);color:#fff;border-color:var(--orange);}
+  .tab[aria-selected="true"] .num{background:#fff;color:var(--orange);}
+  .tab.done::after{content:"✓";font-weight:900;color:var(--green);margin-left:2px;}
+  .tab[aria-selected="true"].done::after{color:#fff;}
+  .tab:active{transform:scale(.97);}
+
+  .panel{display:none;animation:fade .25s ease;}
+  .panel.active{display:block;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+
+  .card{
+    background:var(--card);border:1px solid var(--line);
+    border-radius:var(--radius);padding:20px;margin:16px 0;
+    box-shadow:0 1px 2px rgba(0,0,0,.04);
+  }
+  .card h2{margin:0 0 4px;font-size:21px;color:#9a5c12;}
+  .card h3{margin:18px 0 6px;font-size:18px;}
+  .lead{color:var(--muted);margin:0 0 14px;font-size:16px;}
+
+  .note{
+    border-left:5px solid var(--orange);background:var(--orange-soft);
+    padding:12px 14px;border-radius:8px;margin:14px 0;
+  }
+  .note b{color:#9a5c12;}
+
+  .def{
+    border:2px solid var(--orange-line);border-radius:12px;
+    padding:14px 16px;background:#fffdf9;margin:16px 0;
+  }
+  .def .tag{
+    display:inline-block;background:var(--orange);color:#fff;
+    font-size:13px;font-weight:800;padding:3px 10px;border-radius:999px;margin-bottom:8px;
+  }
+
+  .stuetz{color:var(--stuetz);font-weight:700;}
+  .richt{color:var(--richt);font-weight:700;}
+
+  /* Step reveal */
+  .steps{margin:10px 0;}
+  .step{
+    border:1px solid var(--line);border-radius:12px;
+    margin:10px 0;overflow:hidden;background:#fff;
+  }
+  .step .head{
+    display:flex;align-items:center;gap:10px;padding:12px 14px;
+    cursor:pointer;min-height:44px;font-weight:700;
+  }
+  .step .head .dot{
+    background:var(--orange-soft);color:#9a5c12;border-radius:50%;
+    width:26px;height:26px;flex:none;display:flex;align-items:center;
+    justify-content:center;font-size:14px;font-weight:800;
+  }
+  .step .head .chev{margin-left:auto;color:var(--orange);font-weight:900;transition:transform .2s;}
+  .step.open .head .chev{transform:rotate(90deg);}
+  .step .body{display:none;padding:0 14px 14px;border-top:1px solid var(--line);}
+  .step.open .body{display:block;}
+
+  /* Flip cards */
+  .flips{display:flex;flex-wrap:wrap;gap:12px;margin:14px 0;}
+  .flip{
+    flex:1 1 220px;min-height:150px;perspective:1000px;cursor:pointer;
+  }
+  .flip-inner{
+    position:relative;width:100%;height:100%;min-height:150px;
+    transition:transform .5s;transform-style:preserve-3d;
+  }
+  .flip.flipped .flip-inner{transform:rotateY(180deg);}
+  .flip-face{
+    position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;
+    border-radius:12px;padding:14px;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;text-align:center;
+  }
+  .flip-front{background:var(--orange);color:#fff;}
+  .flip-front .q{font-size:18px;font-weight:800;}
+  .flip-front .hint{font-size:13px;opacity:.9;margin-top:8px;}
+  .flip-back{background:#fff;border:2px solid var(--orange-line);color:var(--ink);transform:rotateY(180deg);font-size:15px;}
+
+  /* Graph */
+  .graphbox{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start;}
+  .graphbox svg{width:100%;max-width:420px;height:auto;background:#fff;border:1px solid var(--line);border-radius:12px;touch-action:none;}
+  .controls{flex:1 1 240px;min-width:240px;}
+  .ctrl{margin:10px 0;}
+  .ctrl label{display:block;font-weight:700;margin-bottom:4px;font-size:15px;}
+  .ctrl .val{color:var(--orange);font-weight:800;}
+  input[type=range]{width:100%;height:38px;accent-color:var(--orange);}
+  .ctrl .sub{display:block;font-size:13px;color:var(--muted);margin:2px 0 4px;}
+  hr.div{border:none;border-top:1px solid var(--line);margin:14px 0;}
+  .legend{display:flex;flex-wrap:wrap;gap:14px;font-size:14px;color:var(--muted);margin:0 0 12px;}
+  .legend span{display:inline-flex;align-items:center;gap:6px;}
+  .dotc{width:12px;height:12px;border-radius:50%;display:inline-block;}
+  mjx-container[display="false"]{max-width:100%;}
+  .readout{
+    background:var(--blue-bg);border-radius:10px;padding:10px 12px;margin-top:8px;font-size:15px;
+  }
+
+  /* Inputs / quiz */
+  .qbox{margin:14px 0;}
+  .qtext{font-weight:600;margin-bottom:10px;}
+  input[type=text]{
+    font-size:17px;padding:10px 12px;border:2px solid var(--line);border-radius:10px;
+    width:120px;text-align:center;min-height:44px;
+  }
+  input[type=text]:focus{outline:none;border-color:var(--orange);}
+  .mc{display:flex;flex-direction:column;gap:10px;margin:8px 0;}
+  .opt{
+    border:2px solid var(--line);background:#fff;border-radius:10px;
+    padding:12px 14px;text-align:left;font-size:16px;cursor:pointer;min-height:44px;
+  }
+  .opt[aria-pressed="true"]{border-color:var(--orange);background:var(--orange-soft);}
+  .opt.correct{border-color:var(--green);background:var(--green-bg);color:#fff;font-weight:700;}
+  .opt.wrong{border-color:var(--red);background:var(--red);color:#fff;font-weight:700;}
+
+  .btn{
+    border:none;border-radius:10px;font-weight:800;font-size:16px;
+    padding:12px 18px;min-height:44px;cursor:pointer;
+  }
+  .btn-check{background:var(--orange);color:#fff;}
+  .btn-clear{background:#fff;color:var(--red);border:2px solid var(--red);margin-left:8px;}
+  .btn:active{transform:scale(.98);}
+  .btnrow{margin-top:10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
+
+  .fb{margin-top:12px;padding:12px 14px;border-radius:10px;font-weight:700;display:none;}
+  .fb.ok{display:block;background:var(--green-bg);color:#fff;}
+  .fb.no{display:block;background:var(--red);color:#fff;}
+  .fb .corr{display:block;font-weight:600;margin-top:4px;font-size:15px;}
+
+  .tip{margin-top:10px;}
+  .tip details{border:1px solid var(--orange-line);border-radius:10px;margin:6px 0;background:#fffdf9;}
+  .tip summary{padding:11px 14px;cursor:pointer;font-weight:700;color:#9a5c12;min-height:44px;list-style:none;}
+  .tip summary::-webkit-details-marker{display:none;}
+  .tip summary::before{content:"💡 ";}
+  .tip .tipbody{padding:0 14px 12px;}
+
+  /* Brüche */
+  .frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;margin:0 2px;}
+  .frac>span:first-child{border-bottom:2px solid currentColor;padding:0 4px;}
+  .frac>span:last-child{padding:0 4px;}
+
+  /* Vektor inline */
+  .vec{display:inline-flex;align-items:center;vertical-align:middle;margin:0 2px;}
+  .vec .br{font-size:1.6em;line-height:.9;}
+  .vec .col{display:inline-flex;flex-direction:column;text-align:center;padding:0 2px;font-size:.92em;}
+
+  .videolink{
+    display:flex;align-items:center;gap:14px;border:2px solid var(--orange-line);
+    border-radius:12px;padding:14px;background:#fffdf9;text-decoration:none;color:var(--ink);
+    min-height:44px;margin:14px 0;
+  }
+  .videolink .ic{font-size:28px;}
+  .videolink .meta b{display:block;color:#9a5c12;}
+  .videolink .meta span{font-size:13px;color:var(--muted);}
+
+  /* Weiter */
+  .weiter-wrap{position:fixed;left:0;right:0;bottom:0;padding:12px 16px;
+    background:linear-gradient(180deg,rgba(251,248,243,0) 0%,var(--bg) 40%);
+    display:none;z-index:30;}
+  .weiter-wrap.show{display:block;}
+  .weiter{
+    display:block;max-width:920px;margin:0 auto;text-align:center;
+    background:var(--green-bg);color:#fff;border:none;border-radius:12px;
+    padding:16px;font-size:18px;font-weight:800;text-decoration:none;min-height:44px;
+  }
+  .progress-hint{max-width:920px;margin:0 auto 8px;text-align:center;font-size:13px;color:var(--muted);}
+
+  .trex{position:fixed;right:14px;bottom:88px;font-size:26px;cursor:pointer;z-index:40;user-select:none;}
+  .trex .bubble{
+    position:absolute;right:34px;bottom:6px;white-space:nowrap;background:#333;color:#fff;
+    font-size:13px;padding:6px 10px;border-radius:8px;display:none;
+  }
+  .trex.show .bubble{display:block;}
+
+  @media (max-width:520px){
+    header.page h1{font-size:22px;}
+    .card{padding:16px;}
+  }
+</style>
+</head>
+<body>
+
+<header class="page">
+  <div class="wrap">
+    <p class="eyebrow">Mathematik · EF · Erarbeitung</p>
+    <h1>Geraden in Parameterform</h1>
+    <p>Wie beschreibt man eine Gerade nur mit Vektoren? In dieser Lernseite klären wir die Bausteine: <span style="text-decoration:underline">Stützvektor</span>, <span style="text-decoration:underline">Richtungsvektor</span> und den <span style="text-decoration:underline">Parameter</span>. Lass dir Zeit – tippe dich Schritt für Schritt durch.</p>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" aria-selected="true" data-tab="0"><span class="num">1</span>Idee</button>
+    <button class="tab" role="tab" aria-selected="false" data-tab="1"><span class="num">2</span>Bausteine</button>
+    <button class="tab" role="tab" aria-selected="false" data-tab="2"><span class="num">3</span>Ausprobieren</button>
+    <button class="tab" role="tab" aria-selected="false" data-tab="3"><span class="num">4</span>Begriffe</button>
+    <button class="tab" role="tab" aria-selected="false" data-tab="4"><span class="num">5</span>Check</button>
+  </div>
+
+  <!-- ============ PANEL 1: IDEE ============ -->
+  <section class="panel active" data-panel="0">
+    <div class="card">
+      <h2>Eine Gerade als „Wanderung"</h2>
+      <p class="lead">Eine Gerade besteht aus unendlich vielen Punkten. Wie kann man sie alle auf einmal beschreiben – ohne eine Funktionsgleichung wie $y = m\cdot x + b$?</p>
+
+      <p>Stell dir vor, du <b>startest</b> an einem festen Punkt und <b>läufst</b> dann immer in dieselbe Richtung – vorwärts und rückwärts, beliebig weit. Alle Punkte, die du so erreichst, bilden zusammen eine Gerade.</p>
+
+      <div class="note">
+        Dafür brauchst du nur <b>zwei Vektoren</b>:
+        <br>• einen <span class="stuetz">Startpunkt</span> (wohin du dich zuerst stellst),
+        <br>• eine <span class="richt">Laufrichtung</span> (in welche Richtung du gehst).
+      </div>
+
+      <p>Aus der Vektorrechnung weißt du schon: Mit einem Ortsvektor kommst du vom Ursprung zu einem Punkt, und einen Vektor kannst du mit einer Zahl strecken oder stauchen. Genau das setzen wir jetzt zusammen.</p>
+
+      <div class="steps">
+        <div class="step">
+          <div class="head"><span class="dot">?</span> Warum reicht eine normale Geradengleichung $y=m\cdot x+b$ nicht immer? <span class="chev">›</span></div>
+          <div class="body">
+            <p>Eine Gleichung der Form $y=m\cdot x+b$ funktioniert nur in der Ebene und nicht für senkrechte Geraden. Im Raum (mit drei Koordinaten) versagt sie ganz. Die Vektor-Schreibweise dagegen funktioniert in der Ebene <b>und</b> im Raum – darum lohnt sie sich.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <a class="videolink" href="https://www.youtube.com/watch?v=4_jyKGvtZpA" target="_blank" rel="noopener">
+      <span class="ic">▶️</span>
+      <span class="meta"><b>Optional: Geradengleichung in Parameterform</b><span>YouTube · ca. 8 Min · zum Nachschauen, falls du es nochmal hören willst</span></span>
+    </a>
+  </section>
+
+  <!-- ============ PANEL 2: BAUSTEINE ============ -->
+  <section class="panel" data-panel="1">
+    <div class="card">
+      <h2>Die zwei Bausteine</h2>
+      <p class="lead">Wir machen es konkret in der Ebene. Tippe die Schritte nacheinander auf.</p>
+
+      <div class="steps">
+        <div class="step">
+          <div class="head"><span class="dot">1</span> Der <span class="stuetz" style="margin:0 4px">Stützvektor</span> – der Startpunkt <span class="chev">›</span></div>
+          <div class="body">
+            <p>Wir wählen einen festen Punkt auf der Geraden, z.&nbsp;B. $P(1\,|\,2)$. Sein Ortsvektor bringt uns vom Ursprung dorthin:</p>
+            <p style="text-align:center">$\vec{p} = \begin{pmatrix} 1 \\ 2 \end{pmatrix}$</p>
+            <p>Dieser Vektor <b>stützt</b> die Gerade – er hält sie an ihrer Stelle fest. Ohne ihn wüssten wir nur die Richtung, aber nicht <i>wo</i> die Gerade liegt.</p>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="head"><span class="dot">2</span> Der <span class="richt" style="margin:0 4px">Richtungsvektor</span> – die Laufrichtung <span class="chev">›</span></div>
+          <div class="body">
+            <p>Jetzt brauchen wir die Richtung, in die die Gerade verläuft, z.&nbsp;B.</p>
+            <p style="text-align:center">$\vec{u} = \begin{pmatrix} 2 \\ 1 \end{pmatrix}$</p>
+            <p>Das bedeutet: 2 nach rechts, 1 nach oben. Der Richtungsvektor sagt <b>wohin</b> die Gerade zeigt – aber nicht, wo sie startet.</p>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="head"><span class="dot">3</span> Beides zusammen <span class="chev">›</span></div>
+          <div class="body">
+            <p>Vom Startpunkt aus laufen wir ein Stück in die Richtung. „Ein Stück" heißt: den Richtungsvektor mit einer Zahl $t$ multiplizieren und draufaddieren:</p>
+            <p style="text-align:center">$\vec{x} = \underbrace{\begin{pmatrix} 1 \\ 2 \end{pmatrix}}_{\text{Start}} + t \cdot \underbrace{\begin{pmatrix} 2 \\ 1 \end{pmatrix}}_{\text{Richtung}}$</p>
+            <p>Für jede Wahl von $t$ erhältst du einen Punkt der Geraden. Setzt du <b>alle</b> reellen Zahlen für $t$ ein, bekommst du die ganze Gerade.</p>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="head"><span class="dot">4</span> Was macht der <b style="margin:0 4px">Parameter</b> $t$? <span class="chev">›</span></div>
+          <div class="body">
+            <p>$t$ ist die „Schrittzahl". $t=0$ lässt dich am Startpunkt stehen, $t=1$ bringt dich genau einen Richtungsvektor weiter, $t=2$ zwei usw. Negative Werte führen rückwärts.</p>
+            <p>Im nächsten Schritt darfst du selbst am $t$-Regler drehen und zusehen, wie der Punkt über die Gerade wandert.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="note"><b>Schreibweise:</b> Die Gerade nennt man oft $g$ und schreibt $g:\ \vec{x} = \vec{p} + t\cdot\vec{u}$ mit $t\in\mathbb{R}$.</div>
+    </div>
+  </section>
+
+  <!-- ============ PANEL 3: AUSPROBIEREN ============ -->
+  <section class="panel" data-panel="2">
+    <div class="card">
+      <h2>Selbst ausprobieren</h2>
+      <p class="lead">Jeder Regler verändert einen Teil der Geradengleichung. Probiere aus, was passiert:</p>
+      <div class="legend">
+        <span><span class="dotc" style="background:#d22f2f"></span>roter Punkt = aktueller Punkt $\vec{x}$</span>
+        <span><span class="dotc" style="background:#2f6db0"></span>Stützvektor (Startpunkt)</span>
+        <span><span class="dotc" style="background:#d98324"></span>Richtungsvektor</span>
+      </div>
+
+      <div class="graphbox">
+        <svg id="graph" viewBox="0 0 360 360" aria-label="Koordinatensystem mit Gerade"></svg>
+        <div class="controls">
+          <div class="ctrl">
+            <label>Parameter <span class="richt">t</span> = <span class="val" id="tval">1.0</span></label>
+            <span class="sub">Schrittzahl – lässt den roten Punkt über die Gerade wandern.</span>
+            <input type="range" id="t" min="-3" max="3" step="0.1" value="1">
+          </div>
+          <hr class="div">
+          <div class="ctrl">
+            <label><span class="stuetz">Stützvektor</span>: x-Wert des Starts (p<sub>1</sub>) = <span class="val" id="p1v">1</span></label>
+            <input type="range" id="p1" min="-4" max="4" step="1" value="1">
+          </div>
+          <div class="ctrl">
+            <label><span class="stuetz">Stützvektor</span>: y-Wert des Starts (p<sub>2</sub>) = <span class="val" id="p2v">2</span></label>
+            <span class="sub">Verschiebt die ganze Gerade, ohne ihre Neigung zu ändern.</span>
+            <input type="range" id="p2" min="-4" max="4" step="1" value="2">
+          </div>
+          <hr class="div">
+          <div class="ctrl">
+            <label><span class="richt">Richtungsvektor</span>: nach rechts (u<sub>1</sub>) = <span class="val" id="u1v">2</span></label>
+            <input type="range" id="u1" min="-4" max="4" step="1" value="2">
+          </div>
+          <div class="ctrl">
+            <label><span class="richt">Richtungsvektor</span>: nach oben (u<sub>2</sub>) = <span class="val" id="u2v">1</span></label>
+            <span class="sub">Ändert die Neigung der Geraden.</span>
+            <input type="range" id="u2" min="-4" max="4" step="1" value="1">
+          </div>
+          <div class="readout" id="readout"></div>
+        </div>
+      </div>
+
+      <div class="steps">
+        <div class="step">
+          <div class="head"><span class="dot">?</span> Probier mal: Stell $u_1=0$ und $u_2=0$ ein. Was passiert? <span class="chev">›</span></div>
+          <div class="body">
+            <p>Der Richtungsvektor ist dann der Nullvektor – es gibt keine Richtung mehr. Statt einer Geraden bleibt nur ein einzelner Punkt übrig. Deshalb darf der Richtungsvektor <b>nie</b> der Nullvektor sein.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PANEL 4: BEGRIFFE ============ -->
+  <section class="panel" data-panel="3">
+    <div class="card">
+      <h2>Begriffe festigen</h2>
+      <p class="lead">Tippe jede Karte an, um sie umzudrehen. Versuch erst, die Antwort selbst zu sagen.</p>
+
+      <div class="flips">
+        <div class="flip" tabindex="0">
+          <div class="flip-inner">
+            <div class="flip-face flip-front"><span class="q">Stützvektor</span><span class="hint">Tippen zum Umdrehen</span></div>
+            <div class="flip-face flip-back">Ortsvektor eines festen Punktes <b>auf</b> der Geraden. Legt fest, <b>wo</b> die Gerade liegt.</div>
+          </div>
+        </div>
+        <div class="flip" tabindex="0">
+          <div class="flip-inner">
+            <div class="flip-face flip-front"><span class="q">Richtungsvektor</span><span class="hint">Tippen zum Umdrehen</span></div>
+            <div class="flip-face flip-back">Gibt an, in welche <b>Richtung</b> die Gerade verläuft. Darf nicht der Nullvektor sein.</div>
+          </div>
+        </div>
+        <div class="flip" tabindex="0">
+          <div class="flip-inner">
+            <div class="flip-face flip-front"><span class="q">Parameter $t$</span><span class="hint">Tippen zum Umdrehen</span></div>
+            <div class="flip-face flip-back">Reelle Zahl. Jeder Wert von $t$ liefert genau einen Punkt der Geraden.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="def">
+        <span class="tag">Merksatz</span>
+        <p style="margin:0">Eine Gerade $g$ in <b>Parameterform</b>:</p>
+        <p style="text-align:center;margin:10px 0">$g:\ \vec{x} = \color{#2f6db0}{\vec{p}} + t\cdot\color{#d98324}{\vec{u}}\,,\quad t\in\mathbb{R}$</p>
+        <p style="margin:0"><span class="stuetz">$\vec{p}$ = Stützvektor</span> &nbsp;·&nbsp; <span class="richt">$\vec{u}$ = Richtungsvektor</span> &nbsp;·&nbsp; $t$ = Parameter</p>
+      </div>
+
+      <h3>Ausblick: derselbe Bauplan im Raum</h3>
+      <p>Im dreidimensionalen Raum kommt einfach eine dritte Koordinate dazu – der Aufbau bleibt <b>genau gleich</b>. Beispiel mit $P(1\,|\,2\,|\,5)$ und Richtung $\vec{u}=\begin{pmatrix}3\\8\\-7\end{pmatrix}$:</p>
+      <p style="text-align:center">$g:\ \vec{x} = \begin{pmatrix} 1 \\ 2 \\ 5 \end{pmatrix} + t\cdot\begin{pmatrix} 3 \\ 8 \\ -7 \end{pmatrix}$</p>
+      <p>Genau das ist der Grund, warum die Parameterform so praktisch ist: Sie funktioniert in der Ebene und im Raum nach demselben Muster.</p>
+    </div>
+  </section>
+
+  <!-- ============ PANEL 5: CHECK ============ -->
+  <section class="panel" data-panel="4">
+    <div class="card">
+      <h2>Kurzer Check</h2>
+      <p class="lead">Drei kleine Aufgaben zum Verständnis. Du bekommst direkt Rückmeldung.</p>
+
+      <!-- Q1 MC -->
+      <div class="qbox" id="q1">
+        <div class="qtext">1) In $\;g:\ \vec{x} = \begin{pmatrix} 4 \\ 1 \end{pmatrix} + t\cdot\begin{pmatrix} 2 \\ 3 \end{pmatrix}\;$ – welcher Vektor ist der <span class="stuetz">Stützvektor</span>?</div>
+        <div class="mc">
+          <button class="opt" data-c="0">$\begin{pmatrix} 4 \\ 1 \end{pmatrix}$</button>
+          <button class="opt" data-c="1">$\begin{pmatrix} 2 \\ 3 \end{pmatrix}$</button>
+          <button class="opt" data-c="2">$t$</button>
+        </div>
+        <div class="btnrow">
+          <button class="btn btn-check" onclick="checkMC('q1',0)">Prüfen</button>
+          <button class="btn btn-clear" style="display:none" onclick="clearMC('q1')">Leeren</button>
+        </div>
+        <div class="fb" id="fb-q1"></div>
+      </div>
+
+      <!-- Q2 Texteingabe -->
+      <div class="qbox" id="q2">
+        <div class="qtext">2) Setze in $\;\vec{x} = \begin{pmatrix} 1 \\ 2 \end{pmatrix} + t\cdot\begin{pmatrix} 2 \\ 1 \end{pmatrix}\;$ den Wert $t=2$ ein. Welche <b>erste</b> Koordinate hat der Punkt? (nur die Zahl)</div>
+        <div>
+          <input type="text" id="q2in" inputmode="numeric" placeholder="?">
+        </div>
+        <div class="btnrow">
+          <button class="btn btn-check" onclick="checkText('q2','5')">Prüfen</button>
+          <button class="btn btn-clear" style="display:none" onclick="clearText('q2')">Leeren</button>
+        </div>
+        <div class="fb" id="fb-q2"></div>
+        <div class="tip" id="tip-q2" style="display:none">
+          <details><summary>Tipp 1</summary><div class="tipbody">Die erste Koordinate berechnest du nur aus den ersten Zeilen: $1 + t\cdot 2$.</div></details>
+          <details><summary>Tipp 2</summary><div class="tipbody">Setze $t=2$ ein: $1 + 2\cdot 2$. Rechne den Term aus.</div></details>
+          <details><summary>Tipp 3 (Lösung)</summary><div class="tipbody">$1 + 2\cdot 2 = 1 + 4 = 5$. Die erste Koordinate ist also $5$.</div></details>
+        </div>
+      </div>
+
+      <!-- Q3 Wahr/Falsch -->
+      <div class="qbox" id="q3">
+        <div class="qtext">3) Wahr oder falsch? <i>„Der Richtungsvektor einer Geraden darf der Nullvektor sein."</i></div>
+        <div class="mc" style="flex-direction:row;flex-wrap:wrap">
+          <button class="opt" data-c="0" style="flex:1 1 120px;text-align:center">Wahr</button>
+          <button class="opt" data-c="1" style="flex:1 1 120px;text-align:center">Falsch</button>
+        </div>
+        <div class="btnrow">
+          <button class="btn btn-check" onclick="checkMC('q3',1)">Prüfen</button>
+          <button class="btn btn-clear" style="display:none" onclick="clearMC('q3')">Leeren</button>
+        </div>
+        <div class="fb" id="fb-q3"></div>
+      </div>
+    </div>
+
+    <div class="card" id="summary" style="display:none;border-color:var(--green);">
+      <h2 style="color:var(--green)">Geschafft! 🎉</h2>
+      <p style="margin:0">Du hast alle drei Aufgaben bearbeitet. Du kennst jetzt Stützvektor, Richtungsvektor und Parameter und kannst eine Gerade in Parameterform aufschreiben.</p>
+    </div>
+  </section>
+
+</div>
+
+<!-- Weiter -->
+<div class="weiter-wrap" id="weiterWrap">
+  <div class="progress-hint" id="progHint"></div>
+  <a class="weiter" id="weiterBtn" href="#">Weiter →</a>
+</div>
+
+<!-- T-Rex -->
+<div class="trex" id="trex" onclick="toggleRex()"><span class="bubble">Made by Mathedino</span>🦖</div>
+
+<script>
+/* ---------- TABS ---------- */
+const tabs=[...document.querySelectorAll('.tab')];
+const panels=[...document.querySelectorAll('.panel')];
+function showTab(i){
+  tabs.forEach(t=>t.setAttribute('aria-selected', t.dataset.tab==i?'true':'false'));
+  panels.forEach(p=>p.classList.toggle('active', p.dataset.panel==i));
+  visited[i]=true;
+  updateWeiter();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+tabs.forEach(t=>t.addEventListener('click',()=>showTab(t.dataset.tab)));
+
+/* ---------- STEP REVEAL (Zustand bleibt) ---------- */
+document.querySelectorAll('.step .head').forEach(h=>{
+  h.addEventListener('click',()=>h.parentElement.classList.toggle('open'));
+});
+
+/* ---------- FLIP CARDS (Zustand bleibt) ---------- */
+document.querySelectorAll('.flip').forEach(f=>{
+  const flip=()=>f.classList.toggle('flipped');
+  f.addEventListener('click',flip);
+  f.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();flip();}});
+});
+
+/* ---------- GRAPH ---------- */
+const svg=document.getElementById('graph');
+const SVGNS='http://www.w3.org/2000/svg';
+const O={x:180,y:180}, U=30; // Ursprung + Einheit in px
+function X(x){return O.x + x*U;}
+function Y(y){return O.y - y*U;}
+const G={p1:1,p2:2,u1:2,u2:1,t:1};
+function el(tag,attrs){const e=document.createElementNS(SVGNS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);return e;}
+function drawGraph(){
+  svg.innerHTML='';
+  // grid
+  for(let i=-6;i<=6;i++){
+    svg.appendChild(el('line',{x1:X(i),y1:Y(-6),x2:X(i),y2:Y(6),stroke:'#eee',"stroke-width":1}));
+    svg.appendChild(el('line',{x1:X(-6),y1:Y(i),x2:X(6),y2:Y(i),stroke:'#eee',"stroke-width":1}));
+  }
+  // axes
+  svg.appendChild(el('line',{x1:X(-6),y1:Y(0),x2:X(6),y2:Y(0),stroke:'#999',"stroke-width":2}));
+  svg.appendChild(el('line',{x1:X(0),y1:Y(-6),x2:X(0),y2:Y(6),stroke:'#999',"stroke-width":2}));
+  // Gerade: nur zeichnen, wenn Richtungsvektor != 0
+  const hasDir = !(G.u1===0 && G.u2===0);
+  if(hasDir){
+    const tmin=-12,tmax=12;
+    svg.appendChild(el('line',{
+      x1:X(G.p1+tmin*G.u1),y1:Y(G.p2+tmin*G.u2),
+      x2:X(G.p1+tmax*G.u1),y2:Y(G.p2+tmax*G.u2),
+      stroke:'#bbb',"stroke-width":2}));
+  }
+  // Stützvektor (blau) vom Ursprung zu P
+  svg.appendChild(el('line',{x1:X(0),y1:Y(0),x2:X(G.p1),y2:Y(G.p2),stroke:'#2f6db0',"stroke-width":3}));
+  svg.appendChild(el('circle',{cx:X(G.p1),cy:Y(G.p2),r:5,fill:'#2f6db0'}));
+  // Richtungsvektor (orange) ab P
+  if(hasDir){
+    svg.appendChild(el('line',{x1:X(G.p1),y1:Y(G.p2),x2:X(G.p1+G.u1),y2:Y(G.p2+G.u2),stroke:'#d98324',"stroke-width":3}));
+  }
+  // wandernder Punkt
+  const px=G.p1+G.t*G.u1, py=G.p2+G.t*G.u2;
+  svg.appendChild(el('circle',{cx:X(px),cy:Y(py),r:7,fill:'#d22f2f',stroke:'#fff',"stroke-width":2}));
+  // readout
+  const ro=document.getElementById('readout');
+  ro.innerHTML = 'Aktueller Punkt bei <b>t = '+G.t.toFixed(1)+'</b>:<br>'+
+    'X('+ (px%1===0?px:px.toFixed(1)) +' | '+ (py%1===0?py:py.toFixed(1)) +')';
+}
+function bindRange(id,key,labelId){
+  const r=document.getElementById(id);
+  r.addEventListener('input',()=>{
+    G[key]= (id==='t')? parseFloat(r.value) : parseInt(r.value,10);
+    document.getElementById(labelId).textContent = (id==='t')? G[key].toFixed(1): G[key];
+    drawGraph();
+  });
+}
+bindRange('t','t','tval');
+bindRange('p1','p1','p1v');
+bindRange('p2','p2','p2v');
+bindRange('u1','u1','u1v');
+bindRange('u2','u2','u2v');
+drawGraph();
+
+/* ---------- QUIZ STATE (im JS-Speicher) ---------- */
+const qState={q1:null,q2:null,q3:null}; // null=offen, true=richtig, false=falsch
+const correctMC={q1:0,q3:1};
+
+function selectMC(box){
+  box.querySelectorAll('.opt').forEach(o=>{
+    o.addEventListener('click',()=>{
+      if(qState[box.id]===true) return; // gelöst, gesperrt
+      box.querySelectorAll('.opt').forEach(x=>x.setAttribute('aria-pressed','false'));
+      o.setAttribute('aria-pressed','true');
+    });
+  });
+}
+['q1','q3'].forEach(id=>selectMC(document.getElementById(id)));
+
+function checkMC(id,correct){
+  const box=document.getElementById(id);
+  const sel=box.querySelector('.opt[aria-pressed="true"]');
+  const fb=document.getElementById('fb-'+id);
+  if(!sel){fb.className='fb no';fb.textContent='Bitte zuerst eine Antwort antippen.';return;}
+  const ci=parseInt(sel.dataset.c,10);
+  box.querySelectorAll('.opt').forEach(o=>o.classList.remove('correct','wrong'));
+  if(ci===correct){
+    sel.classList.add('correct');
+    fb.className='fb ok';fb.innerHTML='✅ Richtig!';
+    qState[id]=true;
+    box.querySelector('.btn-clear').style.display='none';
+  }else{
+    sel.classList.add('wrong');
+    box.querySelector('.opt[data-c="'+correct+'"]').classList.add('correct');
+    fb.className='fb no';
+    fb.innerHTML='❌ Nicht ganz.<span class="corr">Richtig ist die grün markierte Option.</span>';
+    qState[id]=false;
+    box.querySelector('.btn-clear').style.display='inline-block';
+  }
+  updateWeiter();
+}
+function clearMC(id){
+  const box=document.getElementById(id);
+  box.querySelectorAll('.opt').forEach(o=>{o.classList.remove('correct','wrong');o.setAttribute('aria-pressed','false');});
+  document.getElementById('fb-'+id).className='fb';
+  box.querySelector('.btn-clear').style.display='none';
+  qState[id]=null;
+  updateWeiter();
+}
+
+function checkText(id,answer){
+  const box=document.getElementById(id);
+  const inp=box.querySelector('input');
+  const fb=document.getElementById('fb-'+id);
+  const val=inp.value.trim().replace(',','.');
+  if(val===''){fb.className='fb no';fb.textContent='Bitte trage eine Zahl ein.';return;}
+  if(val===answer){
+    fb.className='fb ok';fb.innerHTML='✅ Richtig!';
+    qState[id]=true;
+    inp.disabled=true;
+    box.querySelector('.btn-clear').style.display='none';
+    const tip=document.getElementById('tip-'+id); if(tip)tip.style.display='none';
+  }else{
+    fb.className='fb no';
+    fb.innerHTML='❌ Das stimmt noch nicht. Schau dir die Tipps an und korrigiere.';
+    qState[id]=false;
+    box.querySelector('.btn-clear').style.display='inline-block';
+    const tip=document.getElementById('tip-'+id); if(tip)tip.style.display='block';
+  }
+  updateWeiter();
+}
+function clearText(id){
+  const box=document.getElementById(id);
+  const inp=box.querySelector('input');
+  inp.value='';inp.disabled=false;
+  document.getElementById('fb-'+id).className='fb';
+  box.querySelector('.btn-clear').style.display='none';
+  qState[id]=null;
+  updateWeiter();
+}
+
+/* ---------- WEITER-LOGIK ---------- */
+const visited={0:true,1:false,2:false,3:false,4:false};
+function allQuizDone(){return qState.q1===true && qState.q2===true && qState.q3===true;}
+function updateWeiter(){
+  // Summary einblenden, sobald alle Check-Aufgaben richtig
+  document.getElementById('summary').style.display = allQuizDone()?'block':'none';
+  // Weiter sichtbar, wenn alle Tabs besucht UND alle Aufgaben gelöst
+  const seenAll=Object.values(visited).every(Boolean);
+  const ww=document.getElementById('weiterWrap');
+  if(seenAll && allQuizDone()){
+    ww.classList.add('show');
+    document.getElementById('progHint').textContent='Alles bearbeitet – weiter zur nächsten Seite.';
+  }else{
+    ww.classList.remove('show');
+  }
+  // Tab als erledigt markieren
+  tabs[4].classList.toggle('done', allQuizDone());
+}
+updateWeiter();
+
+/* ---------- T-REX ---------- */
+function toggleRex(){
+  const t=document.getElementById('trex');
+  t.classList.toggle('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+</script>
+</body>
+</html>
