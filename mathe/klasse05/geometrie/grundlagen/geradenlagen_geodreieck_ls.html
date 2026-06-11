@@ -110,22 +110,19 @@ header.page-head .sub{font-weight:700;opacity:.95;font-size:1.02rem;}
 #geoStage{width:100%;max-width:520px;touch-action:none;border-radius:16px;
   background:repeating-linear-gradient(0deg,#f4f8fd,#f4f8fd 27px,#e7eef7 28px),
             repeating-linear-gradient(90deg,transparent,transparent 27px,#e7eef7 28px);
-  border:2px solid #cdd8e6;display:block;cursor:grab;}
+  border:2px solid #cdd8e6;display:block;cursor:grab;
+  -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;}
 #geoStage:active{cursor:grabbing;}
+#geoStage text{-webkit-user-select:none;user-select:none;pointer-events:none;}
+#geoTri{pointer-events:none;}
+#geoTri .geoGrip{pointer-events:auto;}
 .controls{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;align-items:center;width:100%;}
 .ctrl-group{display:flex;flex-direction:column;align-items:center;gap:6px;flex:1 1 200px;min-width:180px;}
 .ctrl-group label{font-weight:800;font-size:.95rem;}
 .ctrl-rot{flex:1 1 100%;background:#eef4fb;border:2px solid #cdd8e6;border-radius:14px;padding:10px 12px;}
 .ctrl-rot label{font-size:1.05rem;color:#2f5fa6;}
-.rot-row{display:flex;align-items:center;gap:10px;width:100%;}
-.rot-step{min-width:52px;min-height:52px;font-size:1.6rem;font-weight:700;padding:0;border-radius:14px;line-height:1;}
-input[type=range]{width:100%;height:52px;-webkit-appearance:none;appearance:none;background:transparent;}
-input[type=range]:focus{outline:none;}
-input[type=range]::-webkit-slider-runnable-track{height:12px;border-radius:6px;background:linear-gradient(90deg,#9cc0ec,#2f5fa6);}
-input[type=range]::-moz-range-track{height:12px;border-radius:6px;background:linear-gradient(90deg,#9cc0ec,#2f5fa6);}
-input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:40px;height:40px;border-radius:50%;
-  background:#2f5fa6;border:4px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.3);margin-top:-14px;cursor:pointer;}
-input[type=range]::-moz-range-thumb{width:40px;height:40px;border-radius:50%;background:#2f5fa6;border:4px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.3);cursor:pointer;}
+.geoGrip{cursor:grab;}
+.geoGrip:active{cursor:grabbing;}
 .rot-presets{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;}
 .rot-set{min-height:44px;padding:6px 14px;font-size:.98rem;}
 .example-nav{display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;width:100%;}
@@ -316,7 +313,7 @@ input.txt:focus{outline:none;border-color:var(--blau);}
   <!-- KARTE 2: Werkstatt mit Geodreieck -->
   <section class="card" id="c2">
     <h2>2 · Die Geodreieck-Werkstatt</h2>
-    <p>Wähle ein Beispiel. <b>Drehe</b> das Geodreieck mit dem Regler und <b>verschiebe</b> es mit dem Finger.
+    <p>Wähle ein Beispiel. <b>Drehe</b> das Geodreieck am orangen Griff und <b>verschiebe</b> es mit dem Finger.
        Lege es an die Geraden an und untersuche, wie sie zueinander liegen. Erst dann die Lösung aufdecken!</p>
 
     <div class="legende">
@@ -333,17 +330,12 @@ input.txt:focus{outline:none;border-color:var(--blau);}
 
       <svg id="geoStage" viewBox="0 0 400 400" aria-label="Zeichenfläche mit zwei Geraden und Geodreieck"></svg>
       <p style="font-size:.92rem;color:#5a6b7d;margin:2px 0 0;text-align:center;">
-        👆 Mit dem Finger auf der Fläche <b>verschieben</b> · mit dem Regler unten <b>drehen</b>.
+        👆 Auf der Fläche ziehen = <b>verschieben</b> · am <b style="color:#e8862e">orangen Griff</b> ziehen = <b>drehen</b>.
       </p>
 
       <div class="controls">
         <div class="ctrl-group ctrl-rot">
-          <label for="rotSlider">🔄 Geodreieck drehen: <span id="rotVal">0°</span></label>
-          <div class="rot-row">
-            <button class="btn btn-grau rot-step" data-step="-1" aria-label="ein Grad weniger">−</button>
-            <input type="range" id="rotSlider" min="0" max="180" value="0" step="1">
-            <button class="btn btn-grau rot-step" data-step="1" aria-label="ein Grad mehr">+</button>
-          </div>
+          <label>🔄 Drehung: <span id="rotVal">0°</span> <span style="font-weight:600;color:#5a6b7d;font-size:.85em;">(am orangen Griff ziehen oder Winkel tippen)</span></label>
           <div class="rot-presets">
             <button class="btn btn-grau rot-set" data-deg="0">0°</button>
             <button class="btn btn-grau rot-set" data-deg="45">45°</button>
@@ -530,72 +522,87 @@ function buildGeo(){
   // mittlere 0-Marke
   g.appendChild(el('line',{x1:0,y1:0,x2:0,y2:10,stroke:EDGE,'stroke-width':1.6}));
 
-  // --- Gradskala: Halbkreisbogen + Striche alle 10°, voll beziffert ---
-  const Rs=W*0.60, cx=0, cy=0;
+  // --- Gradskala: Striche jeden 1°, länger alle 5°, beziffert alle 10° ---
+  const Rs=W*0.66, cx=0, cy=0;
   g.appendChild(el('path',{d:`M ${cx-Rs} ${cy} A ${Rs} ${Rs} 0 0 1 ${cx+Rs} ${cy}`,fill:'none',stroke:COL,'stroke-width':1,opacity:.7}));
-  const Ri=Rs*0.84;
+  const Ri=Rs*0.86;
   g.appendChild(el('path',{d:`M ${cx-Ri} ${cy} A ${Ri} ${Ri} 0 0 1 ${cx+Ri} ${cy}`,fill:'none',stroke:COL,'stroke-width':0.8,opacity:.5}));
-  for(let a=0;a<=180;a+=10){
+  for(let a=0;a<=180;a+=1){
     const rad=Math.PI*a/180;
-    const big=(a%30===0);
-    const r2=big?Rs-11:Rs-6;
+    const zehn=(a%10===0), fuenf=(a%5===0);
+    const len=zehn?13:(fuenf?9:5);
+    const r2=Rs-len;
     const x1=cx-Math.cos(rad)*Rs, y1=cy-Math.sin(rad)*Rs;
     const x2=cx-Math.cos(rad)*r2, y2=cy-Math.sin(rad)*r2;
-    g.appendChild(el('line',{x1,y1,x2,y2,stroke:COL,'stroke-width':big?1.5:0.8,opacity:.8}));
-    if(big){
-      const tr=r2-9;
+    g.appendChild(el('line',{x1,y1,x2,y2,stroke:COL,'stroke-width':zehn?1.5:(fuenf?1:0.6),opacity:zehn?0.9:(fuenf?0.8:0.6)}));
+    if(zehn){
+      const tr=r2-8;
       const tx=cx-Math.cos(rad)*tr, ty=cy-Math.sin(rad)*tr+3;
-      const t=el('text',{x:tx,y:ty,'text-anchor':'middle','font-size':8.5,fill:COL,opacity:.85,'font-family':'Nunito'});
+      const t=el('text',{x:tx,y:ty,'text-anchor':'middle','font-size':8,fill:COL,opacity:.85,'font-family':'Nunito'});
       t.textContent=a;
       g.appendChild(t);
     }
   }
 
   // --- 90°-Markierung am rechten Winkel (Spitze) ---
-  g.appendChild(el('rect',{x:-9,y:-H+8,width:9,height:9,fill:'none',stroke:EDGE,'stroke-width':1.8,transform:`rotate(0)`}));
-  const t90=el('text',{x:0,y:-H-4,'text-anchor':'middle','font-size':14,fill:EDGE,'font-weight':'bold','font-family':'Nunito'});
+  g.appendChild(el('rect',{x:-9,y:-H+8,width:9,height:9,fill:'none',stroke:EDGE,'stroke-width':1.8}));
+  const t90=el('text',{x:0,y:-H-22,'text-anchor':'middle','font-size':14,fill:EDGE,'font-weight':'bold','font-family':'Nunito'});
   t90.textContent='90°';
   g.appendChild(t90);
+
+  // --- Dreh-Griff (orange) – anfassen und im Kreis ziehen ---
+  const gy=-H-2;
+  g.appendChild(el('line',{x1:0,y1:-H+8,x2:0,y2:gy,stroke:'#e8862e','stroke-width':3}));
+  g.appendChild(el('circle',{cx:0,cy:gy,r:26,fill:'transparent',class:'geoGrip'})); // großer Trefferbereich
+  g.appendChild(el('circle',{cx:0,cy:gy,r:16,fill:'#e8862e',stroke:'#fff','stroke-width':3,class:'geoGrip'}));
+  g.appendChild(el('path',{d:`M -6,${gy} A 6 6 0 1 1 6,${gy}`,fill:'none',stroke:'#fff','stroke-width':2}));
+  g.appendChild(el('path',{d:`M 6,${gy-4} L 6,${gy+3} L 11,${gy}`,fill:'#fff'}));
 
   return g;
 }
 
-/* Drehen per Slider (nur Slider/Buttons – kein Finger-Drehen, verhindert Springen) */
-const rotSlider=document.getElementById('rotSlider');
+/* Drehen: per Griff ziehen ODER Presets (kein Slider mehr) */
 const rotVal=document.getElementById('rotVal');
 function setRot(deg){
-  deg=Math.max(0,Math.min(180,Math.round(deg)));
-  geo.rot=deg;rotSlider.value=deg;rotVal.textContent=deg+'°';updateGeoTransform();
+  deg=((Math.round(deg)%360)+360)%360;     // voller Kreis 0..359
+  geo.rot=deg;rotVal.textContent=deg+'°';updateGeoTransform();
 }
-rotSlider.addEventListener('input',()=>setRot(+rotSlider.value));
-document.querySelectorAll('.rot-step').forEach(b=>b.addEventListener('click',()=>setRot(geo.rot+(+b.dataset.step))));
 document.querySelectorAll('.rot-set').forEach(b=>b.addEventListener('click',()=>setRot(+b.dataset.deg)));
 
-/* Verschieben per Pointer (Maus + Touch) – mit Pointer-Capture gegen Springen */
-let dragging=false, dragStart=null, activePointer=null;
+/* Finger-Interaktion: Griff => drehen (Winkel-Delta), Fläche => verschieben */
+let mode=null, activePointer=null, dragStart=null, rotStart=null;
 function svgPoint(evt){
   const r=stage.getBoundingClientRect();
   return {x:(evt.clientX-r.left)/r.width*400, y:(evt.clientY-r.top)/r.height*400};
 }
+function winkelZuMitte(p){ return Math.atan2(p.y-geo.y, p.x-geo.x)*180/Math.PI; }
 function startDrag(e){
-  if(activePointer!==null)return;          // nur ein Finger zum Verschieben
+  if(activePointer!==null)return;
   activePointer=e.pointerId;
   try{stage.setPointerCapture(e.pointerId);}catch(_){}
   const p=svgPoint(e);
-  dragging=true;dragStart={px:p.x,py:p.y,gx:geo.x,gy:geo.y};
+  if(e.target&&e.target.classList&&e.target.classList.contains('geoGrip')){
+    mode='rotate'; rotStart={pw:winkelZuMitte(p),r0:geo.rot};
+  }else{
+    mode='move'; dragStart={px:p.x,py:p.y,gx:geo.x,gy:geo.y};
+  }
   e.preventDefault();
 }
 function moveDrag(e){
-  if(!dragging||e.pointerId!==activePointer)return;
+  if(mode===null||e.pointerId!==activePointer)return;
   const p=svgPoint(e);
-  geo.x=Math.max(-60,Math.min(460,dragStart.gx+(p.x-dragStart.px)));
-  geo.y=Math.max(-60,Math.min(460,dragStart.gy+(p.y-dragStart.py)));
-  updateGeoTransform();
+  if(mode==='rotate'){
+    setRot(rotStart.r0 + (winkelZuMitte(p)-rotStart.pw));
+  }else{
+    geo.x=Math.max(-60,Math.min(460,dragStart.gx+(p.x-dragStart.px)));
+    geo.y=Math.max(-60,Math.min(460,dragStart.gy+(p.y-dragStart.py)));
+    updateGeoTransform();
+  }
   e.preventDefault();
 }
 function endDrag(e){
   if(e&&e.pointerId!==activePointer)return;
-  dragging=false;activePointer=null;
+  mode=null;activePointer=null;
 }
 function updateGeoTransform(){
   const g=document.getElementById('geoTri');
@@ -605,14 +612,13 @@ stage.addEventListener('pointerdown',startDrag);
 stage.addEventListener('pointermove',moveDrag);
 stage.addEventListener('pointerup',endDrag);
 stage.addEventListener('pointercancel',endDrag);
-stage.addEventListener('pointerleave',endDrag);
 
 /* Beispiel wechseln */
 function ladeBeispiel(i){
   curBsp=(i+BEISPIELE.length)%BEISPIELE.length;
   sel.value=curBsp;
   geo={x:200,y:200,rot:0};
-  rotSlider.value=0;rotVal.textContent='0°';
+  rotVal.textContent='0°';
   loesungOffen=false;
   const lf=document.getElementById('loesungFeld');
   lf.classList.remove('show');
@@ -623,7 +629,7 @@ document.getElementById('prevBsp').addEventListener('click',()=>ladeBeispiel(cur
 document.getElementById('nextBsp').addEventListener('click',()=>ladeBeispiel(curBsp+1));
 sel.addEventListener('change',()=>ladeBeispiel(+sel.value));
 document.getElementById('resetGeo').addEventListener('click',()=>{
-  geo={x:200,y:200,rot:0};rotSlider.value=0;rotVal.textContent='0°';drawStage();
+  geo={x:200,y:200,rot:0};rotVal.textContent='0°';drawStage();
 });
 document.getElementById('loesungBtn').addEventListener('click',()=>{
   loesungOffen=!loesungOffen;
