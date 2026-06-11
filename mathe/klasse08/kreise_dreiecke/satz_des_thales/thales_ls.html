@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Der Satz des Thales – Entdecken</title>
+<meta name="description" content="Erarbeitungs-Lernseite zum Satz des Thales: Punkt C über den Halbkreis bewegen, den Winkel bei C beobachten, die Vermktung formulieren und erste Anwendungen kennenlernen.">
+<meta name="keywords" content="Satz des Thales, Thaleskreis, Halbkreis, rechter Winkel, Durchmesser, Dreieck, Kreis, Geometrie">
+<meta name="typ" content="Lernseite">
+<meta name="klasse" content="8">
+<meta name="fach" content="mathe">
+<meta name="oberthema" content="Geometrie">
+<meta name="thema" content="Satz des Thales">
+<script>
+  MathJax = {
+    tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+    svg: { fontCache: 'global' }
+  };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+  :root{
+    --kopf:#E8923C;--kopf-dunkel:#C8762A;
+    --papier:#FBF7F0;--tinte:#2C2A26;--linie:#D8CFC0;
+    --konstruktion:#1C6FB8;--konstruktion-hell:#E3F0FA;
+    --gegeben:#2C2A26;--erfolg:#1E7A3E;--erfolg-bg:#1E7A3E;--fehler:#C0271E;
+    --akzent:#7A4E8C;--rechtwinkel:#C0271E;--karte:#FFFFFF;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Helvetica,Arial,sans-serif;
+    background:var(--papier);color:var(--tinte);font-size:1.05rem;line-height:1.55;padding-bottom:5.5rem;}
+  .wrap{max-width:62rem;margin:0 auto;padding:0 1rem;}
+
+  header{background:linear-gradient(180deg,var(--kopf),var(--kopf-dunkel));color:#fff;
+    padding:1.4rem 1rem 1.6rem;box-shadow:0 2px 8px rgba(0,0,0,.12);}
+  header .wrap{display:flex;flex-direction:column;gap:.25rem;}
+  .eyebrow{font-size:.85rem;letter-spacing:.14em;text-transform:uppercase;font-weight:700;opacity:.92;}
+  header h1{margin:.1rem 0 0;font-size:1.7rem;line-height:1.15;}
+  header p{margin:.3rem 0 0;font-size:1rem;opacity:.95;max-width:46rem;}
+
+  nav.tabs{position:sticky;top:0;z-index:50;background:var(--papier);
+    border-bottom:1px solid var(--linie);padding:.5rem 0;box-shadow:0 2px 6px rgba(0,0,0,.05);}
+  .tabrow{display:flex;flex-wrap:wrap;gap:.4rem;}
+  .tab{border:1px solid var(--linie);background:#fff;color:var(--tinte);border-radius:.6rem;
+    padding:.55rem .8rem;min-height:44px;font-size:.95rem;font-weight:600;cursor:pointer;
+    display:flex;align-items:center;gap:.45rem;transition:transform .08s ease,background .15s ease;}
+  .tab .num{background:var(--konstruktion-hell);color:var(--konstruktion);border-radius:50%;
+    width:1.6rem;height:1.6rem;display:flex;align-items:center;justify-content:center;
+    font-size:.85rem;font-weight:800;flex:none;}
+  .tab.done .num{background:var(--erfolg);color:#fff;}
+  .tab.active{background:var(--kopf);color:#fff;border-color:var(--kopf-dunkel);}
+  .tab.active .num{background:#fff;color:var(--kopf-dunkel);}
+  .tab:active{transform:scale(.97);}
+
+  .card{display:none;animation:fade .25s ease;}
+  .card.active{display:block;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .panel{background:var(--karte);border:1px solid var(--linie);border-radius:1rem;
+    padding:1.3rem 1.2rem 1.5rem;margin:1.2rem 0;box-shadow:0 1px 4px rgba(0,0,0,.05);}
+  .panel h2{margin:.1rem 0 .2rem;font-size:1.35rem;color:var(--kopf-dunkel);}
+  .panel h3{margin:1.3rem 0 .4rem;font-size:1.1rem;}
+  .lead{font-size:1.08rem;}
+  .meta-zeit{display:inline-block;font-size:.82rem;font-weight:700;color:var(--kopf-dunkel);
+    background:#F6E6D4;padding:.2rem .6rem;border-radius:.5rem;letter-spacing:.03em;}
+
+  .figur-box{background:#fff;border:1px solid var(--linie);border-radius:.8rem;padding:1rem;margin:1rem 0;}
+  .figur-svg{width:100%;height:auto;display:block;touch-action:manipulation;}
+  .figur-svg .kreis{stroke:var(--konstruktion);stroke-width:2;fill:none;}
+  .figur-svg .durchmesser{stroke:var(--gegeben);stroke-width:2.4;}
+  .figur-svg .seite{stroke:var(--akzent);stroke-width:2.4;fill:none;}
+  .figur-svg .punkt{fill:var(--gegeben);}
+  .figur-svg .punktC{fill:var(--akzent);}
+  .figur-svg .ptlabel{font:700 16px 'Segoe UI',sans-serif;fill:var(--gegeben);}
+  .figur-svg .ptlabelC{font:700 16px 'Segoe UI',sans-serif;fill:var(--akzent);}
+  .figur-svg .winkelbogen{stroke:var(--rechtwinkel);stroke-width:2.2;fill:none;}
+  .figur-svg .winkeltext{font:800 17px 'Segoe UI',sans-serif;fill:var(--rechtwinkel);}
+  .figur-svg .rwzeichen{stroke:var(--rechtwinkel);stroke-width:2;fill:none;}
+  .figur-svg .mittel{fill:var(--konstruktion);}
+  .figur-svg .spur{stroke:var(--konstruktion);stroke-width:2.5;fill:none;stroke-dasharray:4 4;opacity:.85;}
+
+  .slider-row{display:flex;align-items:center;gap:.8rem;margin:1rem 0 .4rem;flex-wrap:wrap;}
+  .slider-row label{font-weight:700;min-width:7rem;}
+  input[type=range]{flex:1;min-width:12rem;height:38px;accent-color:var(--akzent);}
+  .winkel-anzeige{font-size:1.3rem;font-weight:800;color:var(--rechtwinkel);
+    background:#FBEAE8;border-radius:.6rem;padding:.3rem .9rem;min-width:6rem;text-align:center;}
+
+  .mess-tabelle{width:100%;border-collapse:collapse;margin:1rem 0;font-size:1rem;}
+  .mess-tabelle th,.mess-tabelle td{border:1px solid var(--linie);padding:.5rem .6rem;text-align:center;}
+  .mess-tabelle th{background:var(--konstruktion-hell);color:var(--konstruktion);font-weight:700;}
+  .mess-tabelle td input{width:4rem;min-height:40px;text-align:center;font-size:1rem;
+    border:1.5px solid var(--linie);border-radius:.4rem;}
+  .mess-tabelle td input:focus{outline:2px solid var(--kopf);}
+
+  .btnrow{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:.6rem;}
+  button.action{border:none;border-radius:.6rem;background:var(--konstruktion);color:#fff;
+    font-size:1rem;font-weight:700;padding:.7rem 1.1rem;min-height:44px;min-width:44px;
+    cursor:pointer;transition:transform .08s ease,background .15s ease;}
+  button.action:active{transform:scale(.96);}
+  button.action.sekundaer{background:#fff;color:var(--konstruktion);border:1.5px solid var(--konstruktion);}
+  button.action:disabled{background:#C9C2B6;cursor:default;}
+
+  .frage{margin:.6rem 0 .2rem;font-weight:600;}
+  .mc{display:flex;flex-direction:column;gap:.5rem;margin:.5rem 0;}
+  .mc button{text-align:left;border:1.5px solid var(--linie);background:#fff;border-radius:.6rem;
+    padding:.7rem .9rem;min-height:44px;font-size:1rem;cursor:pointer;color:var(--tinte);
+    transition:transform .08s ease,border-color .15s ease;}
+  .mc button:active{transform:scale(.99);}
+  .mc button.richtig{background:var(--erfolg-bg);color:#fff;border-color:var(--erfolg-bg);font-weight:700;}
+  .mc button.falsch{background:var(--fehler);color:#fff;border-color:var(--fehler);font-weight:700;}
+  .mc button.disabled{pointer-events:none;}
+  .feedback{margin:.5rem 0;padding:.7rem .9rem;border-radius:.6rem;font-weight:600;display:none;}
+  .feedback.gut{display:block;background:var(--erfolg-bg);color:#fff;}
+  .feedback.schlecht{display:block;background:var(--fehler);color:#fff;}
+
+  details.tipp{margin:.7rem 0;border:1px solid var(--linie);border-radius:.6rem;background:#FFFDF8;overflow:hidden;}
+  details.tipp>summary{list-style:none;cursor:pointer;padding:.7rem .9rem;min-height:44px;
+    display:flex;align-items:center;gap:.5rem;font-weight:700;color:var(--kopf-dunkel);}
+  details.tipp>summary::-webkit-details-marker{display:none;}
+  details.tipp>summary::before{content:'💡';}
+  details.tipp[open]>summary::before{content:'📖';}
+  details.tipp .tippinhalt{padding:0 .9rem .9rem;}
+
+  .merk{background:#F3ECF6;border:1px solid #D9C6E4;border-left:5px solid var(--akzent);
+    border-radius:.7rem;padding:1rem 1.1rem;margin:1.1rem 0;}
+  .merk h3{margin:.1rem 0 .4rem;color:var(--akzent);}
+  .satz{background:#FFF4E0;border:2px solid var(--kopf);border-radius:.8rem;padding:1.1rem 1.2rem;margin:1.1rem 0;font-size:1.1rem;}
+  .satz b{color:var(--kopf-dunkel);}
+
+  .heft{background:#FEF6E9;border:2px solid var(--kopf);border-radius:.9rem;padding:1rem 1.1rem;margin:1.4rem 0;}
+  .heft .htitel{display:flex;align-items:center;gap:.55rem;font-weight:800;color:var(--kopf-dunkel);font-size:1.12rem;margin-bottom:.3rem;}
+  .heft .htitel .ic{font-size:1.4rem;}
+  .heft ol{margin:.4rem 0 .2rem 1.2rem;padding:0;}
+  .heft ol li{margin:.35rem 0;}
+  .heft .vorlegen{margin-top:.8rem;background:#fff;border:1px dashed var(--kopf-dunkel);border-radius:.6rem;
+    padding:.6rem .8rem;font-size:.95rem;font-weight:600;color:var(--kopf-dunkel);display:flex;align-items:center;gap:.5rem;}
+  details.anleitung{margin:.7rem 0 .2rem;border:1px solid var(--kopf);border-radius:.6rem;background:#fff;overflow:hidden;}
+  details.anleitung>summary{list-style:none;cursor:pointer;padding:.7rem .9rem;min-height:44px;
+    display:flex;align-items:center;gap:.5rem;font-weight:700;color:var(--kopf-dunkel);}
+  details.anleitung>summary::-webkit-details-marker{display:none;}
+  details.anleitung>summary::before{content:'📋';}
+  details.anleitung[open]>summary::before{content:'📖';}
+  details.anleitung .ainhalt{padding:0 .9rem .9rem;}
+
+  .hinweis{background:#FFF4E0;border:1px dashed var(--kopf-dunkel);border-radius:.7rem;
+    padding:.8rem 1rem;margin:1rem 0;font-size:.97rem;}
+  .hinweis b{color:var(--kopf-dunkel);}
+  ul.tidy{margin:.4rem 0 .4rem 1.1rem;padding:0;}
+  ul.tidy li{margin:.3rem 0;}
+
+  .weiter-wrap{text-align:center;margin:2rem 0 1rem;display:none;}
+  .weiter-wrap.show{display:block;animation:fade .4s ease;}
+  a.weiter{display:inline-flex;align-items:center;gap:.6rem;justify-content:center;
+    background:var(--erfolg);color:#fff;text-decoration:none;font-size:1.15rem;font-weight:800;
+    padding:.9rem 2rem;min-height:44px;border-radius:.8rem;width:100%;max-width:30rem;
+    box-shadow:0 3px 10px rgba(30,122,62,.3);}
+  a.weiter:active{transform:scale(.98);}
+  .weiter-hint{font-size:.85rem;color:var(--tinte);opacity:.6;margin-top:.5rem;}
+
+  #trex{position:fixed;bottom:.7rem;right:.7rem;font-size:1.7rem;cursor:pointer;z-index:60;
+    user-select:none;filter:drop-shadow(0 1px 2px rgba(0,0,0,.25));}
+  #trex .bubble{position:absolute;bottom:2.1rem;right:0;white-space:nowrap;background:var(--tinte);
+    color:#fff;font-size:.78rem;font-weight:600;padding:.35rem .6rem;border-radius:.5rem;
+    opacity:0;pointer-events:none;transition:opacity .2s ease;}
+  #trex.show .bubble{opacity:1;}
+
+  @media (max-width:520px){header h1{font-size:1.4rem;}.panel{padding:1.1rem .9rem 1.3rem;}}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <span class="eyebrow">Geometrie · Klasse 8 · Erarbeitung</span>
+    <h1>Der Satz des Thales</h1>
+    <p>Letzte Stunde lag der Kreis-Mittelpunkt eines rechtwinkligen Dreiecks genau auf der Mitte der längsten Seite. Heute drehen wir die Frage um – und entdecken einen der ältesten Sätze der Mathematik.</p>
+  </div>
+</header>
+
+<nav class="tabs">
+  <div class="wrap">
+    <div class="tabrow" id="tabrow">
+      <button class="tab active" data-i="0"><span class="num">1</span>Die Frage</button>
+      <button class="tab" data-i="1"><span class="num">2</span>Erkundung</button>
+      <button class="tab" data-i="2"><span class="num">3</span>Messen</button>
+      <button class="tab" data-i="3"><span class="num">4</span>Nur Durchmesser?</button>
+      <button class="tab" data-i="4"><span class="num">5</span>Der Satz</button>
+      <button class="tab" data-i="5"><span class="num">6</span>Umkehrung</button>
+      <button class="tab" data-i="6"><span class="num">7</span>Anwenden</button>
+    </div>
+  </div>
+</nav>
+
+<main class="wrap">
+
+  <!-- KARTE 1: Die Frage -->
+  <section class="card active" data-card="0">
+    <div class="panel">
+      <span class="meta-zeit">⏱ ca. 15 Min</span>
+      <h2>Eine alte Frage</h2>
+      <p class="lead">Vor etwa 2600 Jahren untersuchte der griechische Gelehrte <b>Thales von Milet</b> Dreiecke, die in einen Kreis gezeichnet sind.</p>
+
+      <div class="figur-box">
+        <svg class="figur-svg" viewBox="0 0 500 280" role="img" aria-label="Halbkreis mit Durchmesser AB und Punkt C">
+          <path class="kreis" d="M 100 200 A 150 150 0 0 1 400 200"/>
+          <line class="durchmesser" x1="100" y1="200" x2="400" y2="200"/>
+          <line class="seite" x1="100" y1="200" x2="250" y2="50"/>
+          <line class="seite" x1="400" y1="200" x2="250" y2="50"/>
+          <circle class="punkt" cx="100" cy="200" r="5"/>
+          <circle class="punkt" cx="400" cy="200" r="5"/>
+          <circle class="punktC" cx="250" cy="50" r="5"/>
+          <circle class="mittel" cx="250" cy="200" r="4"/>
+          <text class="ptlabel" x="84" y="222">A</text>
+          <text class="ptlabel" x="404" y="222">B</text>
+          <text class="ptlabelC" x="256" y="46">C</text>
+          <text class="ptlabel" x="244" y="222">M</text>
+        </svg>
+      </div>
+
+      <p>Die Strecke $\overline{AB}$ ist der <b>Durchmesser</b> des Kreises, $M$ sein Mittelpunkt. Der Punkt $C$ liegt irgendwo auf dem <b>Halbkreis</b>. So entsteht das Dreieck $ABC$.</p>
+
+      <h3>Die Leitfrage der Stunde</h3>
+      <p class="frage">Was vermutest du: Welchen Winkel hat das Dreieck bei der Ecke $C$ – und ändert er sich, wenn $C$ auf dem Halbkreis wandert?</p>
+
+      <div class="heft">
+        <div class="htitel"><span class="ic">✏️</span>Notiere deine Vermutung im Heft</div>
+        <p>Schreibe in einem Satz auf, was du vermutest – noch ohne zu messen. Zum Beispiel: „Ich vermute, dass der Winkel bei $C$ … ist und sich … verhält, wenn $C$ wandert.“</p>
+        <p style="margin:.4rem 0 0;font-size:.95rem;opacity:.8;">Es gibt hier kein Richtig oder Falsch – deine Vermutung ist der Ausgangspunkt für die Erkundung.</p>
+      </div>
+
+      <div class="hinweis">
+        <b>Forscherauftrag:</b> Auf der nächsten Karte kannst du $C$ selbst über den Halbkreis bewegen und beobachten, was mit dem Winkel passiert. Vergleiche es dann mit deiner Vermutung.
+      </div>
+    </div>
+  </section>
+
+  <!-- KARTE 2: Erkundung (interaktiv) -->
+  <section class="card" data-card="1">
+    <div class="panel">
+      <span class="meta-zeit">⏱ ca. 20 Min</span>
+      <h2>Erkundung: Bewege den Punkt C</h2>
+      <p class="lead">Ziehe den Schieberegler und beobachte, wie sich das Dreieck verändert. Achte besonders auf den Winkel bei $C$.</p>
+
+      <div class="figur-box">
+        <svg class="figur-svg" viewBox="0 0 500 290" id="svg-erk" role="img" aria-label="Interaktiver Thaleskreis">
+          <path class="kreis" d="M 100 200 A 150 150 0 0 1 400 200"/>
+          <line class="durchmesser" x1="100" y1="200" x2="400" y2="200"/>
+          <circle class="punkt" cx="100" cy="200" r="5"/>
+          <circle class="punkt" cx="400" cy="200" r="5"/>
+          <circle class="mittel" cx="250" cy="200" r="4"/>
+          <text class="ptlabel" x="84" y="222">A</text>
+          <text class="ptlabel" x="404" y="222">B</text>
+          <text class="ptlabel" x="244" y="222">M</text>
+          <!-- dynamisch: Seiten, Punkt C, Winkelmarkierung -->
+          <line class="seite" id="erk-ca" x1="250" y1="50" x2="100" y2="200"/>
+          <line class="seite" id="erk-cb" x1="250" y1="50" x2="400" y2="200"/>
+          <path class="rwzeichen" id="erk-rw" d=""/>
+          <circle class="punktC" id="erk-c" cx="250" cy="50" r="6"/>
+          <text class="ptlabelC" id="erk-clab" x="256" y="46">C</text>
+          <text class="winkeltext" id="erk-wt" x="250" y="95" text-anchor="middle">90°</text>
+        </svg>
+      </div>
+
+      <div class="slider-row">
+        <label for="erk-slider">Position von C:</label>
+        <input type="range" id="erk-slider" min="8" max="172" value="90" step="1" aria-label="Position des Punktes C auf dem Halbkreis">
+      </div>
+      <p style="font-size:.92rem;opacity:.75;margin:.2rem 0 0;">Achte auf den Winkel, der direkt bei $C$ in der Zeichnung angezeigt wird.</p>
+
+      <h3>Was beobachtest du?</h3>
+      <p class="frage">Bewege $C$ einmal von ganz links nach ganz rechts. Was passiert mit dem Winkel bei $C$?</p>
+      <div class="mc" data-mc="erk" data-correct="1">
+        <button data-opt="0">Er ändert sich ständig und wird mal größer, mal kleiner.</button>
+        <button data-opt="1">Er bleibt immer gleich – genau $90°$.</button>
+        <button data-opt="2">Er wird in der Mitte am kleinsten.</button>
+      </div>
+      <div class="feedback" data-fb="erk"></div>
+
+      <details class="tipp">
+        <summary>Ich brauche einen Hinweis</summary>
+        <div class="tippinhalt">
+          <p>Schau nicht auf die Form des Dreiecks (die ändert sich), sondern nur auf die Zahl in der Winkelanzeige, während du den Regler bewegst. Bleibt sie konstant?</p>
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <!-- KARTE 3: Messen & Vermutung -->
+  <section class="card" data-card="2">
+    <div class="panel">
+      <span class="meta-zeit">⏱ ca. 25 Min</span>
+      <h2>Im Heft überprüfen</h2>
+      <p class="lead">Am Bildschirm sieht es immer nach $90°$ aus. Überprüfe diese Vermutung jetzt auch im Heft – mit <b>mehreren</b> Zeichnungen und <b>verschiedenen Durchmessern</b>.</p>
+
+      <div class="heft">
+        <div class="htitel"><span class="ic">✏️</span>Jetzt du – im Heft</div>
+        <p>Zeichne <b>mehrere Thaleskreise mit unterschiedlich großen Durchmessern</b> und setze in jeden Kreis ein Dreieck. Miss jeweils den Winkel bei $C$.</p>
+        <details class="anleitung">
+          <summary>Schritt-für-Schritt-Anleitung anzeigen</summary>
+          <div class="ainhalt">
+            <ol>
+              <li>Zeichne eine Strecke $\overline{AB}$ – einmal kurz (z.&nbsp;B. 6&nbsp;cm), einmal lang (z.&nbsp;B. 12&nbsp;cm).</li>
+              <li>Markiere jeweils den Mittelpunkt $M$ und zeichne den Halbkreis um $M$ durch $A$ und $B$.</li>
+              <li>Wähle in jedem Kreis einen Punkt $C$ auf dem Halbkreis und verbinde ihn mit $A$ und $B$.</li>
+              <li>Miss den Winkel bei $C$ mit dem Geodreieck und trage ihn unten ein.</li>
+            </ol>
+          </div>
+        </details>
+        <div class="vorlegen"><span>👩‍🏫</span> Zeige deine Zeichnungen mit den verschiedenen Durchmessern deiner Lehrkraft, bevor du weitermachst.</div>
+      </div>
+
+      <h3>Deine Messwerte</h3>
+      <table class="mess-tabelle">
+        <thead><tr><th>Zeichnung</th><th>Winkel bei C</th></tr></thead>
+        <tbody>
+          <tr><td>kurzer Durchmesser</td><td><input inputmode="numeric" data-mess="0" aria-label="Winkel kurzer Durchmesser">°</td></tr>
+          <tr><td>langer Durchmesser</td><td><input inputmode="numeric" data-mess="1" aria-label="Winkel langer Durchmesser">°</td></tr>
+          <tr><td>frei gewählt</td><td><input inputmode="numeric" data-mess="2" aria-label="Winkel frei gewählt">°</td></tr>
+        </tbody>
+      </table>
+      <div class="btnrow">
+        <button class="action" id="mess-pruef">Vermutung prüfen</button>
+      </div>
+      <div class="feedback" data-fb="mess"></div>
+
+      <details class="tipp">
+        <summary>Ich brauche einen Hinweis</summary>
+        <div class="tippinhalt">
+          <p>Beim Messen mit dem Geodreieck sind kleine Abweichungen normal (z. B. $89°$ oder $91°$). Wichtig ist die Erkenntnis: Die Größe des Durchmessers ändert nichts – der Winkel bei $C$ liegt immer ganz nah bei $90°$.</p>
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <!-- KARTE 4: Nur bei Durchmesser? (interaktiv, 2 Slider) -->
+  <section class="card" data-card="3">
+    <div class="panel">
+      <span class="meta-zeit">⏱ ca. 20 Min</span>
+      <h2>Forscherfrage: Muss es der Durchmesser sein?</h2>
+      <p class="lead">Bisher war $\overline{AB}$ immer der Durchmesser. Was passiert, wenn $A$ und $B$ zwar auf dem Kreis liegen, $\overline{AB}$ aber <b>kein</b> Durchmesser ist?</p>
+      <p>Bewege mit dem ersten Regler den Punkt $C$ und mit dem zweiten den Punkt $B$ über den Kreis. Beobachte den Winkel bei $C$.</p>
+
+      <div class="figur-box">
+        <svg class="figur-svg" viewBox="0 0 500 360" id="svg-dm" role="img" aria-label="Kreis mit verschiebbarem B und C">
+          <circle class="kreis" cx="250" cy="180" r="140"/>
+          <circle class="mittel" cx="250" cy="180" r="4"/>
+          <text class="ptlabel" x="256" y="176">M</text>
+          <!-- Sehne AB -->
+          <line class="durchmesser" id="dm-ab" x1="0" y1="0" x2="0" y2="0"/>
+          <!-- Seiten CA, CB -->
+          <line class="seite" id="dm-ca" x1="0" y1="0" x2="0" y2="0"/>
+          <line class="seite" id="dm-cb" x1="0" y1="0" x2="0" y2="0"/>
+          <path class="rwzeichen" id="dm-rw" d=""/>
+          <circle class="punkt" id="dm-a" cx="0" cy="0" r="5"/>
+          <circle class="punkt" id="dm-b" cx="0" cy="0" r="5"/>
+          <circle class="punktC" id="dm-c" cx="0" cy="0" r="6"/>
+          <text class="ptlabel" id="dm-alab" x="0" y="0">A</text>
+          <text class="ptlabel" id="dm-blab" x="0" y="0">B</text>
+          <text class="ptlabelC" id="dm-clab" x="0" y="0">C</text>
+          <text class="winkeltext" id="dm-wt" x="0" y="0" text-anchor="middle">90°</text>
+        </svg>
+      </div>
+
+      <div class="slider-row">
+        <label for="dm-cslider">Position von C:</label>
+        <input type="range" id="dm-cslider" min="0" max="100" value="50" step="1" aria-label="Position von C">
+      </div>
+      <div class="slider-row">
+        <label for="dm-bslider">Position von B:</label>
+        <input type="range" id="dm-bslider" min="0" max="100" value="50" step="1" aria-label="Position von B">
+      </div>
+      <div id="dm-status" style="margin:.5rem 0;font-weight:700;"></div>
+
+      <div class="hinweis">
+        <b>Tipp:</b> Es gibt eine Stellung von $B$, bei der $\overline{AB}$ genau durch den Mittelpunkt $M$ läuft. Suche sie mit dem zweiten Regler – dann wird die Linie dick markiert.
+      </div>
+
+      <h3>Was stellst du fest?</h3>
+      <p class="frage">Wann ist der Winkel bei $C$ genau $90°$?</p>
+      <div class="mc" data-mc="dm" data-correct="1">
+        <button data-opt="0">Immer, sobald $A$, $B$ und $C$ auf dem Kreis liegen.</button>
+        <button data-opt="1">Nur dann, wenn $\overline{AB}$ durch den Mittelpunkt $M$ geht – also ein Durchmesser ist.</button>
+        <button data-opt="2">Nur, wenn $C$ ganz oben auf dem Kreis liegt.</button>
+      </div>
+      <div class="feedback" data-fb="dm"></div>
+
+      <details class="tipp">
+        <summary>Ich brauche einen Hinweis</summary>
+        <div class="tippinhalt">
+          <p>Stelle $B$ zuerst so, dass die Linie $\overline{AB}$ dick markiert ist (Durchmesser), und bewege dann $C$ – welcher Winkel steht da? Verschiebe danach $B$ ein Stück weg vom Durchmesser und beobachte, wie sich der Winkel ändert.</p>
+        </div>
+      </details>
+
+      <div class="heft">
+        <div class="htitel"><span class="ic">✏️</span>Jetzt du – im Heft</div>
+        <p>Überprüfe deine Entdeckung mit einer eigenen Zeichnung.</p>
+        <details class="anleitung">
+          <summary>Schritt-für-Schritt-Anleitung anzeigen</summary>
+          <div class="ainhalt">
+            <ol>
+              <li>Zeichne einen Kreis mit Mittelpunkt $M$.</li>
+              <li>Wähle zwei Punkte $A$ und $B$ auf dem Kreis, deren Verbindung <b>nicht</b> durch $M$ geht. Wähle einen Punkt $C$ auf dem Kreis und miss den Winkel bei $C$.</li>
+              <li>Verschiebe nun (in einer zweiten Zeichnung) $B$ so, dass $\overline{AB}$ durch $M$ geht. Miss erneut den Winkel bei $C$.</li>
+              <li>Vergleiche: In welchem Fall sind es $90°$?</li>
+            </ol>
+          </div>
+        </details>
+        <div class="vorlegen"><span>👩‍🏫</span> Zeige beide Zeichnungen deiner Lehrkraft.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- KARTE 5: Der Satz -->
+  <section class="card" data-card="4">
+    <div class="panel">
+      <span class="meta-zeit">⏱ ca. 15 Min</span>
+      <h2>Der Satz des Thales</h2>
+      <p class="lead">Deine Beobachtung lässt sich als mathematischer Satz formulieren:</p>
+
+      <div class="satz">
+        <b>Satz des Thales.</b> Liegt der Punkt $C$ auf einem <b>Halbkreis</b> über der Strecke $\overline{AB}$, dann ist der Winkel bei $C$ im Dreieck $ABC$ ein <b>rechter Winkel</b> ($90°$).
+      </div>
+
+      <p>Die Strecke $\overline{AB}$ ist dabei der Durchmesser des Kreises. Diesen Kreis nennt man den <b>Thaleskreis</b> über $\overline{AB}$.</p>
+
+      <h3>Begriffe sortieren</h3>
+      <p class="frage">Welche Aussage beschreibt den Satz des Thales <b>richtig</b>?</p>
+      <div class="mc" data-mc="satz" data-correct="1">
+        <button data-opt="0">Jedes Dreieck in einem Kreis hat einen rechten Winkel.</button>
+        <button data-opt="1">Wenn eine Dreiecksseite der Durchmesser ist und die dritte Ecke auf dem Kreis liegt, ist der Winkel an dieser Ecke $90°$.</button>
+        <button data-opt="2">Der Mittelpunkt eines Kreises bildet immer einen rechten Winkel.</button>
+      </div>
+      <div class="feedback" data-fb="satz"></div>
+
+      <details class="tipp">
+        <summary>Ich brauche einen Hinweis</summary>
+        <div class="tippinhalt">
+          <p>Zwei Bedingungen müssen erfüllt sein: Eine Seite des Dreiecks muss <b>der Durchmesser</b> sein, und die dritte Ecke muss <b>auf dem Kreis</b> liegen. Welche Aussage nennt genau beide?</p>
+        </div>
+      </details>
+
+      <div class="merk">
+        <h3>Warum eigentlich 90°?</h3>
+        <p>Das hast du jetzt entdeckt und gemessen – aber noch nicht <b>bewiesen</b>. In der nächsten Stunde zeigen wir mit dem gleichschenkligen Dreieck und der Winkelsumme, <i>warum</i> es immer genau $90°$ sein müssen.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- KARTE 6: Umkehrung -->
+  <section class="card" data-card="5">
+    <div class="panel">
+      <span class="meta-zeit">⏱ ca. 15 Min</span>
+      <h2>Die Umkehrung</h2>
+      <p class="lead">Bisher galt: <i>Liegt $C$ auf dem Thaleskreis, dann ist der Winkel bei $C$ gleich $90°$.</i> Jetzt drehen wir den Satz um und fragen andersherum.</p>
+      <p class="frage">Wenn ein Dreieck $ABC$ bei $C$ einen <b>rechten Winkel</b> hat – wo liegt dann der Punkt $C$?</p>
+
+      <div class="figur-box">
+        <svg class="figur-svg" viewBox="0 0 500 290" id="svg-umk" role="img" aria-label="Umkehrung: rechter Winkel bei C, C liegt auf dem Thaleskreis">
+          <!-- gespurter Thaleskreis (wird beim Bewegen sichtbar) -->
+          <path class="spur" id="umk-spur" d="" />
+          <line class="durchmesser" x1="110" y1="190" x2="390" y2="190"/>
+          <circle class="mittel" cx="250" cy="190" r="4"/>
+          <circle class="punkt" cx="110" cy="190" r="5"/>
+          <circle class="punkt" cx="390" cy="190" r="5"/>
+          <text class="ptlabel" x="94" y="212">A</text>
+          <text class="ptlabel" x="394" y="212">B</text>
+          <text class="ptlabel" x="244" y="212">M</text>
+          <line class="seite" id="umk-ca" x1="250" y1="50" x2="110" y2="190"/>
+          <line class="seite" id="umk-cb" x1="250" y1="50" x2="390" y2="190"/>
+          <path class="rwzeichen" id="umk-rw" d="" />
+          <circle class="punktC" id="umk-c" cx="250" cy="50" r="6"/>
+          <text class="ptlabelC" id="umk-clab" x="256" y="46">C</text>
+        </svg>
+      </div>
+
+      <div class="slider-row">
+        <label for="umk-slider">Bewege C (Winkel bleibt 90°):</label>
+        <input type="range" id="umk-slider" min="12" max="168" value="90" step="1" aria-label="Position von C bei festem rechten Winkel">
+      </div>
+      <div class="btnrow">
+        <button class="action sekundaer" id="umk-spur-btn">Spur von C anzeigen</button>
+        <button class="action sekundaer" id="umk-spur-reset">Spur löschen</button>
+      </div>
+      <p style="font-size:.92rem;opacity:.75;margin:.5rem 0 0;">Der Winkel bei $C$ ist immer genau $90°$. Schalte die Spur ein und bewege $C$ – welche Form fährt $C$ ab?</p>
+
+      <h3>Was beobachtest du?</h3>
+      <p class="frage">Der rechte Winkel bei $C$ bleibt erhalten, während $C$ wandert. Auf welcher Linie bewegt sich $C$?</p>
+      <div class="mc" data-mc="umk" data-correct="2">
+        <button data-opt="0">Auf einer geraden Linie parallel zu $\overline{AB}$.</button>
+        <button data-opt="1">Kreuz und quer – es gibt keine feste Linie.</button>
+        <button data-opt="2">Auf einem Kreis – dem Thaleskreis über $\overline{AB}$.</button>
+      </div>
+      <div class="feedback" data-fb="umk"></div>
+
+      <details class="tipp">
+        <summary>Ich brauche einen Hinweis</summary>
+        <div class="tippinhalt">
+          <p>Schalte die Spur ein und bewege $C$ langsam von links nach rechts. Die einzelnen Positionen von $C$ liegen alle auf einer bekannten Form. Vergleiche sie mit dem Halbkreis aus den ersten Karten.</p>
+        </div>
+      </details>
+
+      <div class="satz">
+        <b>Umkehrung des Satzes von Thales.</b> Hat das Dreieck $ABC$ bei $C$ einen <b>rechten Winkel</b>, dann liegt $C$ auf dem <b>Thaleskreis</b> über $\overline{AB}$ – und $\overline{AB}$ ist dessen Durchmesser.
+      </div>
+
+      <div class="merk">
+        <h3>Beide Richtungen zusammen</h3>
+        <ul class="tidy">
+          <li><b>Satz:</b> $C$ liegt auf dem Thaleskreis $\;\Rightarrow\;$ Winkel bei $C$ ist $90°$.</li>
+          <li><b>Umkehrung:</b> Winkel bei $C$ ist $90°\;\Rightarrow\;$ $C$ liegt auf dem Thaleskreis.</li>
+        </ul>
+        <p>Der Thaleskreis ist also die <b>Ortslinie aller Punkte</b>, von denen aus man die Strecke $\overline{AB}$ unter einem rechten Winkel sieht.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- KARTE 7: Anwenden -->
+  <section class="card" data-card="6">
+    <div class="panel">
+      <span class="meta-zeit">⏱ ca. 15 Min</span>
+      <h2>Wozu ist das gut?</h2>
+      <p class="lead">Mit dem Satz des Thales kannst du einen <b>exakten rechten Winkel</b> erzeugen – ganz ohne Geodreieck.</p>
+
+      <div class="figur-box">
+        <svg class="figur-svg" viewBox="0 0 500 280" role="img" aria-label="Anwendung: rechtwinkliges Dreieck über Durchmesser">
+          <path class="kreis" d="M 110 210 A 140 140 0 0 1 390 210"/>
+          <line class="durchmesser" x1="110" y1="210" x2="390" y2="210"/>
+          <line class="seite" x1="110" y1="210" x2="330" y2="123.2"/>
+          <line class="seite" x1="390" y1="210" x2="330" y2="123.2"/>
+          <circle class="punkt" cx="110" cy="210" r="5"/>
+          <circle class="punkt" cx="390" cy="210" r="5"/>
+          <circle class="punktC" cx="330" cy="123.2" r="5"/>
+          <path class="rwzeichen" d="M 318.1 132.7 L 327.6 144.6 L 339.5 135.1" />
+          <text class="ptlabel" x="94" y="232">A</text>
+          <text class="ptlabel" x="394" y="232">B</text>
+          <text class="ptlabelC" x="336" y="119">C</text>
+        </svg>
+      </div>
+
+      <div class="heft">
+        <div class="htitel"><span class="ic">✏️</span>Jetzt du – im Heft</div>
+        <p>Konstruiere ein rechtwinkliges Dreieck, dessen rechter Winkel bei $C$ liegt – nur mit Zirkel und Lineal.</p>
+        <details class="anleitung">
+          <summary>Schritt-für-Schritt-Anleitung anzeigen</summary>
+          <div class="ainhalt">
+            <ol>
+              <li>Zeichne eine Strecke $\overline{AB}$ – sie wird die längste Seite (Hypotenuse).</li>
+              <li>Konstruiere den Mittelpunkt $M$ von $\overline{AB}$ mit der Mittelsenkrechten.</li>
+              <li>Zeichne den Thaleskreis um $M$ durch $A$ und $B$.</li>
+              <li>Wähle einen beliebigen Punkt $C$ auf dem Halbkreis und verbinde ihn mit $A$ und $B$. Der Winkel bei $C$ ist automatisch $90°$.</li>
+            </ol>
+          </div>
+        </details>
+        <div class="vorlegen"><span>👩‍🏫</span> Zeige deine Konstruktion deiner Lehrkraft.</div>
+      </div>
+
+      <h3>Knobelaufgabe</h3>
+      <p class="frage">Ein Dreieck $ABC$ hat die Seite $\overline{AB}$ als Durchmesser eines Kreises, und $C$ liegt auf diesem Kreis. Der Winkel bei $A$ beträgt $35°$. Wie groß ist der Winkel bei $B$?</p>
+      <div class="mc" data-mc="anwend" data-correct="0">
+        <button data-opt="0">$55°$, denn die Winkelsumme ist $180°$ und der Winkel bei $C$ ist $90°$.</button>
+        <button data-opt="1">$35°$, weil das Dreieck gleichschenklig ist.</button>
+        <button data-opt="2">Das lässt sich nicht bestimmen.</button>
+      </div>
+      <div class="feedback" data-fb="anwend"></div>
+
+      <details class="tipp">
+        <summary>Ich brauche einen Hinweis</summary>
+        <div class="tippinhalt">
+          <p>Nach dem Satz des Thales ist der Winkel bei $C$ genau $90°$. In jedem Dreieck ergeben die drei Winkel zusammen $180°$. Rechne: $180° - 90° - 35°$.</p>
+        </div>
+      </details>
+
+      <div class="hinweis">
+        <b>Geschafft!</b> Du hast den Satz des Thales selbst entdeckt, formuliert und angewendet. In der Übung vertiefst du das – und in der nächsten Stunde beweisen wir, warum er gilt.
+      </div>
+    </div>
+  </section>
+
+  <div class="weiter-wrap" id="weiterwrap">
+    <a class="weiter" href="thales_ue.html">Weiter zur Übung ▸</a>
+    <div class="weiter-hint">Du hast alle Karten dieser Lernseite bearbeitet.</div>
+  </div>
+
+</main>
+
+<div id="trex" title="Made by Mathedino">🦖<span class="bubble">Made by Mathedino</span></div>
+
+<script>
+(function(){
+  "use strict";
+
+  const State = {
+    cardSeen:[true,false,false,false,false,false,false],
+    mc:{},
+    mess:{geprueft:false}
+  };
+
+  /* ---- Tabs ---- */
+  const tabs=Array.from(document.querySelectorAll('.tab'));
+  const cards=Array.from(document.querySelectorAll('.card'));
+  function showCard(i){
+    cards.forEach(c=>c.classList.toggle('active',+c.dataset.card===i));
+    tabs.forEach(t=>t.classList.toggle('active',+t.dataset.i===i));
+    State.cardSeen[i]=true;
+    tabs.forEach((t,k)=>{if(State.cardSeen[k])t.classList.add('done');});
+    checkComplete();
+    window.scrollTo({top:0,behavior:'smooth'});
+    if(window.MathJax&&MathJax.typesetPromise){MathJax.typesetPromise();}
+  }
+  tabs.forEach(t=>t.addEventListener('click',()=>showCard(+t.dataset.i)));
+
+  /* ---- MC ---- */
+  document.querySelectorAll('.mc').forEach(group=>{
+    const key=group.dataset.mc; const correct=+group.dataset.correct;
+    State.mc[key]={answered:false};
+    const fb=document.querySelector('[data-fb="'+key+'"]');
+    group.querySelectorAll('button').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        if(State.mc[key].answered)return;
+        const opt=+btn.dataset.opt; State.mc[key].answered=true;
+        group.querySelectorAll('button').forEach(b=>b.classList.add('disabled'));
+        if(opt===correct){btn.classList.add('richtig');fb.className='feedback gut';fb.textContent='✅ Richtig!';}
+        else{btn.classList.add('falsch');group.querySelector('[data-opt="'+correct+'"]').classList.add('richtig');
+          fb.className='feedback schlecht';fb.innerHTML='❌ Nicht ganz – die richtige Antwort ist grün markiert.';}
+        checkComplete();
+      });
+    });
+  });
+
+  /* ---- Interaktive Erkundung: Punkt C auf Halbkreis, Winkel live ---- */
+  const M={x:250,y:200}, r=150;
+  const A={x:100,y:200}, B={x:400,y:200};
+  const slider=document.getElementById('erk-slider');
+  const cEl=document.getElementById('erk-c');
+  const cLab=document.getElementById('erk-clab');
+  const caEl=document.getElementById('erk-ca');
+  const cbEl=document.getElementById('erk-cb');
+  const rwEl=document.getElementById('erk-rw');
+  const wtEl=document.getElementById('erk-wt');
+
+  function winkelBei(C){
+    const va={x:A.x-C.x,y:A.y-C.y}, vb={x:B.x-C.x,y:B.y-C.y};
+    const dot=va.x*vb.x+va.y*vb.y;
+    const la=Math.hypot(va.x,va.y), lb=Math.hypot(vb.x,vb.y);
+    let cos=dot/(la*lb); cos=Math.max(-1,Math.min(1,cos));
+    return Math.acos(cos)*180/Math.PI;
+  }
+  function rechtwinkelPfad(C){
+    // kleines Quadrat-Zeichen am rechten Winkel bei C
+    const ua={x:A.x-C.x,y:A.y-C.y}, ub={x:B.x-C.x,y:B.y-C.y};
+    const la=Math.hypot(ua.x,ua.y), lb=Math.hypot(ub.x,ub.y);
+    const na={x:ua.x/la,y:ua.y/la}, nb={x:ub.x/lb,y:ub.y/lb};
+    const d=16;
+    const p1={x:C.x+na.x*d,y:C.y+na.y*d};
+    const p2={x:C.x+na.x*d+nb.x*d,y:C.y+na.y*d+nb.y*d};
+    const p3={x:C.x+nb.x*d,y:C.y+nb.y*d};
+    return `M ${p1.x.toFixed(1)} ${p1.y.toFixed(1)} L ${p2.x.toFixed(1)} ${p2.y.toFixed(1)} L ${p3.x.toFixed(1)} ${p3.y.toFixed(1)}`;
+  }
+  function updateErk(){
+    const t=(+slider.value)*Math.PI/180;
+    const C={x:M.x+r*Math.cos(t), y:M.y-r*Math.sin(t)};
+    cEl.setAttribute('cx',C.x); cEl.setAttribute('cy',C.y);
+    cLab.setAttribute('x', C.x+ (C.x<M.x?-18:8)); cLab.setAttribute('y', C.y-8);
+    caEl.setAttribute('x1',C.x); caEl.setAttribute('y1',C.y);
+    cbEl.setAttribute('x1',C.x); cbEl.setAttribute('y1',C.y);
+    rwEl.setAttribute('d', rechtwinkelPfad(C));
+    const w=winkelBei(C);
+    wtEl.setAttribute('x', C.x); wtEl.setAttribute('y', C.y+ (C.y<120?40:-22));
+    wtEl.textContent = Math.round(w)+'°';
+  }
+  slider.addEventListener('input',updateErk);
+  updateErk();
+
+  /* ---- Karte 4: Kreis mit verschiebbarem B und C ---- */
+  const DM={x:250,y:180}, dr=140;
+  function onCircle(deg){const t=deg*Math.PI/180;return {x:DM.x+dr*Math.cos(t), y:DM.y-dr*Math.sin(t)};}
+  const dmCs=document.getElementById('dm-cslider');
+  const dmBs=document.getElementById('dm-bslider');
+  const dmEls={
+    ab:document.getElementById('dm-ab'), ca:document.getElementById('dm-ca'), cb:document.getElementById('dm-cb'),
+    rw:document.getElementById('dm-rw'), a:document.getElementById('dm-a'), b:document.getElementById('dm-b'), c:document.getElementById('dm-c'),
+    alab:document.getElementById('dm-alab'), blab:document.getElementById('dm-blab'), clab:document.getElementById('dm-clab'),
+    wt:document.getElementById('dm-wt'), status:document.getElementById('dm-status')
+  };
+  function dmWinkel(C,A,B){
+    const va={x:A.x-C.x,y:A.y-C.y}, vb={x:B.x-C.x,y:B.y-C.y};
+    let cos=(va.x*vb.x+va.y*vb.y)/(Math.hypot(va.x,va.y)*Math.hypot(vb.x,vb.y));
+    cos=Math.max(-1,Math.min(1,cos)); return Math.acos(cos)*180/Math.PI;
+  }
+  function dmRw(C,A,B){
+    const ua={x:A.x-C.x,y:A.y-C.y}, ub={x:B.x-C.x,y:B.y-C.y};
+    const la=Math.hypot(ua.x,ua.y), lb=Math.hypot(ub.x,ub.y);
+    const na={x:ua.x/la,y:ua.y/la}, nb={x:ub.x/lb,y:ub.y/lb};
+    const d=15;
+    const p1={x:C.x+na.x*d,y:C.y+na.y*d};
+    const p2={x:p1.x+nb.x*d,y:p1.y+nb.y*d};
+    const p3={x:C.x+nb.x*d,y:C.y+nb.y*d};
+    return `M ${p1.x.toFixed(1)} ${p1.y.toFixed(1)} L ${p2.x.toFixed(1)} ${p2.y.toFixed(1)} L ${p3.x.toFixed(1)} ${p3.y.toFixed(1)}`;
+  }
+  function renderDm(){
+    const A=onCircle(180);                       // A fest links
+    // B-Winkel von 290° bis 70° (über 0), Durchmesser (B=0°) liegt bei Slider-Mitte
+    const bRaw = 290 + (+dmBs.value)/100*140;     // 290 .. 430
+    const bDeg = bRaw % 360;
+    const B=onCircle(bDeg);
+    // C im oberen Bogen 40°..140° (nie zwischen A und B)
+    const cDeg = 40 + (+dmCs.value)/100*100;
+    const C=onCircle(cDeg);
+    // Durchmesser, wenn AB durch M: B-Winkel nahe 0°/360° (gegenüber A=180°)
+    const diff = Math.min(bDeg, 360-bDeg);       // Abstand zu 0/360
+    const istDurchmesser = diff < 4;
+    dmEls.a.setAttribute('cx',A.x); dmEls.a.setAttribute('cy',A.y);
+    dmEls.b.setAttribute('cx',B.x); dmEls.b.setAttribute('cy',B.y);
+    dmEls.c.setAttribute('cx',C.x); dmEls.c.setAttribute('cy',C.y);
+    dmEls.alab.setAttribute('x',A.x-20); dmEls.alab.setAttribute('y',A.y+6);
+    dmEls.blab.setAttribute('x',B.x+8); dmEls.blab.setAttribute('y',B.y+16);
+    dmEls.clab.setAttribute('x',C.x+14); dmEls.clab.setAttribute('y',C.y+4);
+    dmEls.ab.setAttribute('x1',A.x); dmEls.ab.setAttribute('y1',A.y);
+    dmEls.ab.setAttribute('x2',B.x); dmEls.ab.setAttribute('y2',B.y);
+    dmEls.ab.setAttribute('stroke-width', istDurchmesser?'4.5':'2.4');
+    dmEls.ab.setAttribute('stroke', istDurchmesser?'#1C6FB8':'#2C2A26');
+    dmEls.ca.setAttribute('x1',C.x); dmEls.ca.setAttribute('y1',C.y); dmEls.ca.setAttribute('x2',A.x); dmEls.ca.setAttribute('y2',A.y);
+    dmEls.cb.setAttribute('x1',C.x); dmEls.cb.setAttribute('y1',C.y); dmEls.cb.setAttribute('x2',B.x); dmEls.cb.setAttribute('y2',B.y);
+    const w=dmWinkel(C,A,B);
+    const rund=Math.round(w);
+    dmEls.wt.setAttribute('x',C.x); dmEls.wt.setAttribute('y',C.y-18);
+    dmEls.wt.textContent=rund+'°';
+    if(Math.abs(w-90)<1){ dmEls.rw.setAttribute('d', dmRw(C,A,B)); dmEls.wt.style.display='none'; }
+    else { dmEls.rw.setAttribute('d',''); dmEls.wt.style.display=''; }
+    if(istDurchmesser){
+      dmEls.status.textContent='✓ AB geht durch M – das ist ein Durchmesser! Der Winkel bei C ist 90°.';
+      dmEls.status.style.color='#1E7A3E';
+    }else{
+      dmEls.status.textContent='AB ist hier kein Durchmesser (geht nicht durch M). Der Winkel bei C ist nicht 90°.';
+      dmEls.status.style.color='#C8762A';
+    }
+  }
+  dmCs.addEventListener('input',renderDm);
+  dmBs.addEventListener('input',renderDm);
+  renderDm();
+
+  /* ---- Karte 6: Umkehrung – C mit festem 90°-Winkel, Spur zeigt Thaleskreis ---- */
+  const UM={x:250,y:190}, ur=140;
+  const uA={x:UM.x-ur,y:UM.y}, uB={x:UM.x+ur,y:UM.y};
+  function uOnCircle(deg){const t=deg*Math.PI/180;return {x:UM.x+ur*Math.cos(t), y:UM.y-ur*Math.sin(t)};}
+  const umkSlider=document.getElementById('umk-slider');
+  const umkC=document.getElementById('umk-c');
+  const umkClab=document.getElementById('umk-clab');
+  const umkCa=document.getElementById('umk-ca');
+  const umkCb=document.getElementById('umk-cb');
+  const umkRw=document.getElementById('umk-rw');
+  const umkSpur=document.getElementById('umk-spur');
+  let spurAn=false;
+  function umkRwPfad(C){
+    const ua={x:uA.x-C.x,y:uA.y-C.y}, ub={x:uB.x-C.x,y:uB.y-C.y};
+    const la=Math.hypot(ua.x,ua.y), lb=Math.hypot(ub.x,ub.y);
+    const na={x:ua.x/la,y:ua.y/la}, nb={x:ub.x/lb,y:ub.y/lb};
+    const d=15;
+    const p1={x:C.x+na.x*d,y:C.y+na.y*d};
+    const p2={x:p1.x+nb.x*d,y:p1.y+nb.y*d};
+    const p3={x:C.x+nb.x*d,y:C.y+nb.y*d};
+    return `M ${p1.x.toFixed(1)} ${p1.y.toFixed(1)} L ${p2.x.toFixed(1)} ${p2.y.toFixed(1)} L ${p3.x.toFixed(1)} ${p3.y.toFixed(1)}`;
+  }
+  function updateUmk(){
+    const t=(+umkSlider.value)*Math.PI/180;
+    const C={x:UM.x+ur*Math.cos(t), y:UM.y-ur*Math.sin(t)};
+    umkC.setAttribute('cx',C.x); umkC.setAttribute('cy',C.y);
+    umkClab.setAttribute('x', C.x+(C.x<UM.x?-18:8)); umkClab.setAttribute('y', C.y-8);
+    umkCa.setAttribute('x1',C.x); umkCa.setAttribute('y1',C.y);
+    umkCb.setAttribute('x1',C.x); umkCb.setAttribute('y1',C.y);
+    umkRw.setAttribute('d', umkRwPfad(C));
+  }
+  function zeichneSpur(){
+    // oberer Halbkreis als gestrichelte Spur
+    const start=uOnCircle(12), end=uOnCircle(168);
+    umkSpur.setAttribute('d', `M ${end.x.toFixed(1)} ${end.y.toFixed(1)} A ${ur} ${ur} 0 0 1 ${start.x.toFixed(1)} ${start.y.toFixed(1)}`);
+  }
+  umkSlider.addEventListener('input',updateUmk);
+  document.getElementById('umk-spur-btn').addEventListener('click',()=>{spurAn=true;zeichneSpur();});
+  document.getElementById('umk-spur-reset').addEventListener('click',()=>{spurAn=false;umkSpur.setAttribute('d','');});
+  updateUmk();
+
+  /* ---- Messwerte prüfen ---- */
+  document.getElementById('mess-pruef').addEventListener('click',()=>{
+    const fb=document.querySelector('[data-fb="mess"]');
+    const werte=[0,1,2].map(i=>{
+      const inp=document.querySelector('input[data-mess="'+i+'"]');
+      const v=parseFloat((inp.value||'').replace(',','.'));
+      return isNaN(v)?null:v;
+    });
+    if(werte.some(v=>v===null)){
+      fb.className='feedback schlecht'; fb.textContent='Trage zuerst alle drei gemessenen Winkel ein.';
+      return;
+    }
+    // Messtoleranz: alle nahe 90° (zwischen 85 und 95)
+    const alleNah=werte.every(v=>Math.abs(v-90)<=5);
+    State.mess.geprueft=true;
+    if(alleNah){
+      fb.className='feedback gut';
+      fb.innerHTML='✅ Genau! Alle deine Werte liegen nahe bei $90°$. Das ist kein Zufall – es ist immer ein rechter Winkel.';
+    }else{
+      fb.className='feedback schlecht';
+      fb.innerHTML='❌ Deine Werte liegen noch weit auseinander. Miss noch einmal genau nach – sie sollten alle ganz nah bei $90°$ liegen. (Kleine Messfehler sind okay.)';
+    }
+    if(window.MathJax&&MathJax.typesetPromise){MathJax.typesetPromise([fb]);}
+    checkComplete();
+  });
+
+  /* ---- Weiter-Button ---- */
+  function checkComplete(){
+    const alleKarten=State.cardSeen.every(Boolean);
+    const alleMc=Object.values(State.mc).every(m=>m.answered);
+    const messOk=State.mess.geprueft;
+    if(alleKarten&&alleMc&&messOk){document.getElementById('weiterwrap').classList.add('show');}
+  }
+  checkComplete();
+
+  /* ---- T-Rex ---- */
+  const trex=document.getElementById('trex');
+  trex.addEventListener('click',()=>{trex.classList.add('show');clearTimeout(trex._t);trex._t=setTimeout(()=>trex.classList.remove('show'),1800);});
+  trex.addEventListener('mouseenter',()=>trex.classList.add('show'));
+  trex.addEventListener('mouseleave',()=>trex.classList.remove('show'));
+
+  /* ---- MathJax voll rendern ---- */
+  if(window.MathJax&&MathJax.startup&&MathJax.startup.promise){
+    MathJax.startup.promise.then(()=>MathJax.typesetPromise());
+  }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Übung: Satz des Thales</title>
+<meta name="description" content="Übungsseite zum Satz des Thales und seiner Umkehrung: Winkel berechnen, rechtwinklige Dreiecke über dem Thaleskreis konstruieren, die Umkehrung anwenden und im Koordinatensystem arbeiten. Mit Heft-Aufgaben.">
+<meta name="keywords" content="Satz des Thales, Thaleskreis, Umkehrung, rechter Winkel, Winkelsumme, Konstruktion, Durchmesser, Geometrie">
+<meta name="typ" content="Übung">
+<meta name="klasse" content="8">
+<meta name="fach" content="mathe">
+<meta name="oberthema" content="Geometrie">
+<meta name="thema" content="Satz des Thales">
+<script>
+  MathJax = {
+    tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+    svg: { fontCache: 'global' }
+  };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+  :root{
+    --kopf:#2E7BC4;--kopf-dunkel:#1F5C97;--kopf-hell:#E4F0FB;
+    --papier:#F7FAFD;--tinte:#23303B;--linie:#CFDCE8;
+    --erfolg:#1E7A3E;--fehler:#C0271E;--akzent:#7A4E8C;--karte:#FFFFFF;
+    --gitter:#D8E2EC;--achse:#5A6B7A;--rechtwinkel:#C0271E;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Helvetica,Arial,sans-serif;
+    background:var(--papier);color:var(--tinte);font-size:1.05rem;line-height:1.55;padding-bottom:5.5rem;}
+  .wrap{max-width:62rem;margin:0 auto;padding:0 1rem;}
+
+  header{background:linear-gradient(180deg,var(--kopf),var(--kopf-dunkel));color:#fff;
+    padding:1.4rem 1rem 1.6rem;box-shadow:0 2px 8px rgba(0,0,0,.12);}
+  header .wrap{display:flex;flex-direction:column;gap:.25rem;}
+  .eyebrow{font-size:.85rem;letter-spacing:.14em;text-transform:uppercase;font-weight:700;opacity:.92;}
+  header h1{margin:.1rem 0 0;font-size:1.6rem;line-height:1.15;}
+  header p{margin:.3rem 0 0;font-size:1rem;opacity:.95;max-width:46rem;}
+
+  nav.tabs{position:sticky;top:0;z-index:50;background:var(--papier);
+    border-bottom:1px solid var(--linie);padding:.5rem 0;box-shadow:0 2px 6px rgba(0,0,0,.05);}
+  .tabrow{display:flex;flex-wrap:wrap;gap:.4rem;}
+  .tab{border:1px solid var(--linie);background:#fff;color:var(--tinte);border-radius:.6rem;
+    padding:.55rem .8rem;min-height:44px;font-size:.95rem;font-weight:600;cursor:pointer;
+    display:flex;align-items:center;gap:.45rem;transition:transform .08s ease,background .15s ease;}
+  .tab .num{background:var(--kopf-hell);color:var(--kopf-dunkel);border-radius:50%;
+    width:1.6rem;height:1.6rem;display:flex;align-items:center;justify-content:center;
+    font-size:.85rem;font-weight:800;flex:none;}
+  .tab.done .num{background:var(--erfolg);color:#fff;}
+  .tab.active{background:var(--kopf);color:#fff;border-color:var(--kopf-dunkel);}
+  .tab.active .num{background:#fff;color:var(--kopf-dunkel);}
+  .tab:active{transform:scale(.97);}
+
+  .card{display:none;animation:fade .25s ease;}
+  .card.active{display:block;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .panel{background:var(--karte);border:1px solid var(--linie);border-radius:1rem;
+    padding:1.3rem 1.2rem 1.5rem;margin:1.2rem 0;box-shadow:0 1px 4px rgba(0,0,0,.05);}
+  .panel h2{margin:.1rem 0 .2rem;font-size:1.35rem;color:var(--kopf-dunkel);}
+  .panel h3{margin:1.2rem 0 .4rem;font-size:1.08rem;}
+
+  .stufen{display:flex;flex-wrap:wrap;gap:.5rem;margin:.2rem 0 1rem;}
+  .stufe-btn{border:1.5px solid var(--linie);background:#fff;border-radius:2rem;
+    padding:.5rem 1rem;min-height:44px;font-size:.95rem;font-weight:700;cursor:pointer;color:var(--tinte);transition:transform .08s ease;}
+  .stufe-btn:active{transform:scale(.97);}
+  .stufe-btn.aktiv{background:var(--kopf);color:#fff;border-color:var(--kopf-dunkel);}
+  .stufe-hint{font-size:.85rem;color:var(--tinte);opacity:.65;margin-bottom:.6rem;}
+
+  .figur-box{background:#fff;border:1px solid var(--linie);border-radius:.8rem;padding:.8rem;margin:1rem 0;}
+  .figur{width:100%;height:auto;display:block;}
+  .figur .kreis{stroke:var(--kopf);stroke-width:2;fill:none;}
+  .figur .durchmesser{stroke:var(--tinte);stroke-width:2.4;}
+  .figur .seite{stroke:var(--akzent);stroke-width:2.4;fill:none;}
+  .figur .punkt{fill:var(--tinte);}
+  .figur .punktC{fill:var(--akzent);}
+  .figur .ptlabel{font:700 16px 'Segoe UI',sans-serif;fill:var(--tinte);}
+  .figur .ptlabelC{font:700 16px 'Segoe UI',sans-serif;fill:var(--akzent);}
+  .figur .rwzeichen{stroke:var(--rechtwinkel);stroke-width:2;fill:none;}
+  .figur .kreuz-pt line{stroke:var(--akzent);stroke-width:2.6;stroke-linecap:round;}
+  .figur .winkellbl{font:700 14px 'Segoe UI',sans-serif;fill:var(--tinte);}
+  .figur .mittel{fill:var(--kopf);}
+
+  .ksys-box{background:#fff;border:1px solid var(--linie);border-radius:.8rem;padding:.8rem;margin:1rem 0;}
+  .ksys{width:100%;height:auto;display:block;}
+  .ksys .grid{stroke:var(--gitter);stroke-width:1;}
+  .ksys .axis{stroke:var(--achse);stroke-width:2;}
+  .ksys .tick{stroke:var(--achse);stroke-width:1.5;}
+  .ksys .ticklbl{font:600 11px 'Segoe UI',sans-serif;fill:var(--achse);}
+  .ksys .axlbl{font:700 14px 'Segoe UI',sans-serif;fill:var(--achse);}
+
+  .arbeitsauftrag{background:var(--kopf-hell);border-left:4px solid var(--kopf);border-radius:.4rem;padding:.7rem .9rem;margin:.7rem 0;}
+  ul.tidy{margin:.4rem 0 .4rem 1.1rem;padding:0;}
+  ul.tidy li{margin:.3rem 0;}
+
+  .frage-zeile{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem;margin:.8rem 0;}
+  .frage-zeile label{font-weight:600;}
+  .koord-eingabe{display:inline-flex;align-items:center;gap:.2rem;border:1.5px solid var(--linie);border-radius:.5rem;padding:.25rem .5rem;background:#fff;}
+  .koord-eingabe input{border:none;width:3.2rem;font-size:1.05rem;text-align:center;min-height:38px;background:transparent;color:var(--tinte);}
+  .koord-eingabe input:focus{outline:none;}
+  .koord-eingabe .sep{font-weight:700;color:var(--achse);font-size:1.1rem;}
+  .koord-eingabe .kl{font-weight:700;color:var(--achse);font-size:1.2rem;}
+  input.einzel{border:1.5px solid var(--linie);border-radius:.5rem;width:4.5rem;min-height:42px;font-size:1.05rem;text-align:center;padding:.2rem;background:#fff;color:var(--tinte);}
+  input:focus{outline:2px solid var(--kopf);}
+  .einheit{font-weight:600;color:var(--achse);}
+
+  .mc{display:flex;flex-direction:column;gap:.5rem;margin:.5rem 0;}
+  .mc button{text-align:left;border:1.5px solid var(--linie);background:#fff;border-radius:.6rem;
+    padding:.8rem 1rem;min-height:44px;font-size:1rem;line-height:1.6;cursor:pointer;color:var(--tinte);transition:transform .08s ease,border-color .15s ease;}
+  .mc button:active{transform:scale(.99);}
+  .mc button.richtig{background:var(--erfolg);color:#fff;border-color:var(--erfolg);font-weight:700;}
+  .mc button.falsch{background:var(--fehler);color:#fff;border-color:var(--fehler);font-weight:700;}
+  .mc button.disabled{pointer-events:none;}
+
+  .btnrow{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:.6rem;}
+  button.action{border:none;border-radius:.6rem;background:var(--kopf);color:#fff;font-size:1rem;font-weight:700;
+    padding:.65rem 1.1rem;min-height:44px;min-width:44px;cursor:pointer;transition:transform .08s ease,background .15s ease;}
+  button.action:active{transform:scale(.96);}
+  button.action.leeren{background:#fff;color:var(--fehler);border:1.5px solid var(--fehler);}
+  button.action:disabled{background:#C2CDD8;cursor:default;}
+
+  .feedback{margin:.7rem 0 0;padding:.75rem .95rem;border-radius:.6rem;font-weight:600;display:none;}
+  .feedback.gut{display:block;background:var(--erfolg);color:#fff;}
+  .feedback.schlecht{display:block;background:var(--fehler);color:#fff;}
+
+  details.tipp{margin:.7rem 0 0;border:1px solid var(--linie);border-radius:.6rem;background:#FBFDFF;overflow:hidden;}
+  details.tipp>summary{list-style:none;cursor:pointer;padding:.7rem .9rem;min-height:44px;display:flex;align-items:center;gap:.5rem;font-weight:700;color:var(--kopf-dunkel);}
+  details.tipp>summary::-webkit-details-marker{display:none;}
+  details.tipp>summary::before{content:'💡';}
+  details.tipp[open]>summary::before{content:'📖';}
+  details.tipp .tippinhalt{padding:0 .9rem .9rem;}
+  .tippstufe{margin:.5rem 0;padding:.5rem .7rem;border-left:3px solid var(--kopf);background:var(--kopf-hell);border-radius:.3rem;display:none;}
+  .tippstufe.show{display:block;}
+  .tipp-mehr{margin-top:.5rem;}
+
+  .heft{background:#FEF6E9;border:2px solid #E8923C;border-radius:.9rem;padding:1rem 1.1rem;margin:1.4rem 0;}
+  .heft .htitel{display:flex;align-items:center;gap:.55rem;font-weight:800;color:#C8762A;font-size:1.12rem;margin-bottom:.3rem;}
+  .heft .htitel .ic{font-size:1.4rem;}
+  .heft ol{margin:.4rem 0 .2rem 1.2rem;padding:0;}
+  .heft ol li{margin:.35rem 0;}
+  .heft .vorlegen{margin-top:.8rem;background:#fff;border:1px dashed #C8762A;border-radius:.6rem;padding:.6rem .8rem;font-size:.95rem;font-weight:600;color:#C8762A;display:flex;align-items:center;gap:.5rem;}
+  details.anleitung{margin:.7rem 0 .2rem;border:1px solid #E8923C;border-radius:.6rem;background:#fff;overflow:hidden;}
+  details.anleitung>summary{list-style:none;cursor:pointer;padding:.7rem .9rem;min-height:44px;display:flex;align-items:center;gap:.5rem;font-weight:700;color:#C8762A;}
+  details.anleitung>summary::-webkit-details-marker{display:none;}
+  details.anleitung>summary::before{content:'📋';}
+  details.anleitung[open]>summary::before{content:'📖';}
+  details.anleitung .ainhalt{padding:0 .9rem .9rem;}
+
+  .merk{background:#F3ECF6;border:1px solid #D9C6E4;border-left:5px solid var(--akzent);border-radius:.7rem;padding:1rem 1.1rem;margin:1.1rem 0;}
+  .merk h3{margin:.1rem 0 .4rem;color:var(--akzent);}
+
+  .ausw-zeile{display:flex;align-items:center;gap:.6rem;padding:.6rem 0;border-bottom:1px solid var(--linie);}
+  .ausw-zeile:last-child{border-bottom:none;}
+  .ausw-ic{font-size:1.3rem;flex:none;}
+  .score{font-size:1.5rem;font-weight:800;color:var(--kopf-dunkel);margin:.5rem 0;}
+  .balken{height:14px;background:var(--kopf-hell);border-radius:7px;overflow:hidden;margin:.4rem 0;}
+  .balken>div{height:100%;background:var(--erfolg);width:0;transition:width .6s ease;}
+
+  .weiter-wrap{text-align:center;margin:2rem 0 1rem;display:none;}
+  .weiter-wrap.show{display:block;animation:fade .4s ease;}
+  a.weiter{display:inline-flex;align-items:center;gap:.6rem;justify-content:center;background:var(--erfolg);color:#fff;text-decoration:none;
+    font-size:1.15rem;font-weight:800;padding:.9rem 2rem;min-height:44px;border-radius:.8rem;width:100%;max-width:30rem;box-shadow:0 3px 10px rgba(30,122,62,.3);}
+  a.weiter:active{transform:scale(.98);}
+  .weiter-hint{font-size:.85rem;color:var(--tinte);opacity:.6;margin-top:.5rem;}
+
+  #trex{position:fixed;bottom:.7rem;right:.7rem;font-size:1.7rem;cursor:pointer;z-index:60;user-select:none;filter:drop-shadow(0 1px 2px rgba(0,0,0,.25));}
+  #trex .bubble{position:absolute;bottom:2.1rem;right:0;white-space:nowrap;background:var(--tinte);color:#fff;font-size:.78rem;font-weight:600;padding:.35rem .6rem;border-radius:.5rem;opacity:0;pointer-events:none;transition:opacity .2s ease;}
+  #trex.show .bubble{opacity:1;}
+
+  @media (max-width:520px){header h1{font-size:1.35rem;}.panel{padding:1.1rem .9rem 1.3rem;}}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <span class="eyebrow">Geometrie · Klasse 8 · Übung</span>
+    <h1>Satz des Thales – üben &amp; anwenden</h1>
+    <p>Berechne Winkel, konstruiere rechtwinklige Dreiecke und wende die Umkehrung an. Zu jeder Aufgabe gehört etwas zum Rechnen oder Ankreuzen <b>und</b> eine Aufgabe für dein Heft.</p>
+  </div>
+</header>
+
+<nav class="tabs">
+  <div class="wrap">
+    <div class="tabrow" id="tabrow">
+      <button class="tab active" data-i="0"><span class="num">1</span>Winkel berechnen</button>
+      <button class="tab" data-i="1"><span class="num">2</span>Umkehrung</button>
+      <button class="tab" data-i="2"><span class="num">3</span>Konstruieren</button>
+      <button class="tab" data-i="3"><span class="num">4</span>Im Koordinatensystem</button>
+      <button class="tab" data-i="4"><span class="num">5</span>Wiederholung</button>
+      <button class="tab" data-i="5"><span class="num">6</span>Auswertung</button>
+    </div>
+  </div>
+</nav>
+
+<main class="wrap">
+
+  <!-- KARTE 1: Winkel berechnen -->
+  <section class="card active" data-card="0">
+    <div class="panel">
+      <h2>Aufgabe 1: Winkel im Thaleskreis</h2>
+      <div class="stufen" data-stufen="a1">
+        <button class="stufe-btn aktiv" data-stufe="grund">Grundlagen</button>
+        <button class="stufe-btn" data-stufe="fortg">Fortgeschritten</button>
+        <button class="stufe-btn" data-stufe="profi">Profi</button>
+      </div>
+      <div class="stufe-hint">Tippe auf eine Stufe zum Wechseln. Dein Stand pro Stufe bleibt erhalten.</div>
+
+      <div class="figur-box">
+        <svg class="figur" viewBox="0 0 460 250" role="img" aria-label="Thaleskreis mit Dreieck ABC">
+          <path class="kreis" d="M 90 190 A 140 140 0 0 1 370 190"/>
+          <line class="durchmesser" x1="90" y1="190" x2="370" y2="190"/>
+          <line class="seite" x1="90" y1="190" x2="316.2" y2="79.7"/>
+          <line class="seite" x1="370" y1="190" x2="316.2" y2="79.7"/>
+          <g class="kreuz-pt"><line x1="310.2" y1="73.7" x2="322.2" y2="85.7"/><line x1="322.2" y1="73.7" x2="310.2" y2="85.7"/></g>
+          <circle class="punkt" cx="90" cy="190" r="5"/>
+          <circle class="punkt" cx="370" cy="190" r="5"/>
+          <circle class="mittel" cx="230" cy="190" r="4"/>
+          <text class="ptlabel" x="74" y="212">A</text>
+          <text class="ptlabel" x="374" y="212">B</text>
+          <text class="ptlabelC" x="326" y="74">C</text>
+          <text class="ptlabel" x="224" y="212">M</text>
+        </svg>
+      </div>
+
+      <div class="stufe-inhalt" data-stufe-inhalt="a1-grund">
+        <div class="arbeitsauftrag">
+          <p>Die Strecke $\overline{AB}$ ist der Durchmesser, $C$ liegt auf dem Thaleskreis. Der Winkel bei $A$ beträgt $30^\circ$.</p>
+        </div>
+        <div class="frage-zeile">
+          <label>Wie groß ist der Winkel bei $C$? &nbsp;$\gamma =$</label>
+          <input class="einzel" data-k="a1-grund-c" inputmode="numeric"><span class="einheit">°</span>
+        </div>
+        <div class="frage-zeile">
+          <label>Wie groß ist der Winkel bei $B$? &nbsp;$\beta =$</label>
+          <input class="einzel" data-k="a1-grund-b" inputmode="numeric"><span class="einheit">°</span>
+        </div>
+        <div class="btnrow"><button class="action" data-pruef="a1-grund">Prüfen</button><button class="action leeren" data-leeren="a1-grund" style="display:none;">Leeren</button></div>
+        <div class="feedback" data-fb="a1-grund"></div>
+        <details class="tipp" data-tipp="a1-grund"><summary>Tipp anzeigen</summary><div class="tippinhalt">
+          <div class="tippstufe" data-ts="0">Nach dem Satz des Thales liegt $C$ auf dem Halbkreis über dem Durchmesser $\overline{AB}$ – welcher Winkel entsteht dort immer?</div>
+          <div class="tippstufe" data-ts="1">Der Winkel bei $C$ ist $90^\circ$. In jedem Dreieck ergeben die drei Winkel zusammen $180^\circ$.</div>
+          <div class="tippstufe" data-ts="2">Lösung: $\gamma=90^\circ$ und $\beta=180^\circ-90^\circ-30^\circ=60^\circ$.</div>
+          <button class="action tipp-mehr" data-mehr="a1-grund">Nächster Tipp ▸</button>
+        </div></details>
+        <div class="heft">
+          <div class="htitel"><span class="ic">✏️</span>Jetzt du – im Heft</div>
+          <p>Zeichne den Thaleskreis mit dem Dreieck $ABC$ ab und trage alle drei Winkel ($30^\circ$, $90^\circ$, $60^\circ$) farbig in die passenden Ecken ein.</p>
+          <div class="vorlegen"><span>👩‍🏫</span> Zeige deine beschriftete Zeichnung deiner Lehrkraft.</div>
+        </div>
+      </div>
+
+      <div class="stufe-inhalt" data-stufe-inhalt="a1-fortg" style="display:none;">
+        <div class="arbeitsauftrag">
+          <p>$\overline{AB}$ ist Durchmesser, $C$ liegt auf dem Thaleskreis. Der Winkel bei $A$ ist <b>$15^\circ$ größer</b> als der Winkel bei $B$.</p>
+        </div>
+        <div class="frage-zeile">
+          <label>Winkel bei $A$: &nbsp;$\alpha =$</label>
+          <input class="einzel" data-k="a1-fortg-a" inputmode="decimal"><span class="einheit">°</span>
+        </div>
+        <div class="frage-zeile">
+          <label>Winkel bei $B$: &nbsp;$\beta =$</label>
+          <input class="einzel" data-k="a1-fortg-b" inputmode="decimal"><span class="einheit">°</span>
+        </div>
+        <div class="btnrow"><button class="action" data-pruef="a1-fortg">Prüfen</button><button class="action leeren" data-leeren="a1-fortg" style="display:none;">Leeren</button></div>
+        <div class="feedback" data-fb="a1-fortg"></div>
+        <details class="tipp" data-tipp="a1-fortg"><summary>Tipp anzeigen</summary><div class="tippinhalt">
+          <div class="tippstufe" data-ts="0">Der Winkel bei $C$ ist nach dem Satz des Thales $90^\circ$. Also gilt $\alpha+\beta=90^\circ$.</div>
+          <div class="tippstufe" data-ts="1">Setze $\alpha=\beta+15^\circ$ ein: $(\beta+15^\circ)+\beta=90^\circ$, also $2\beta=75^\circ$.</div>
+          <div class="tippstufe" data-ts="2">Lösung: $\beta=37{,}5^\circ$ und $\alpha=52{,}5^\circ$.</div>
+          <button class="action tipp-mehr" data-mehr="a1-fortg">Nächster Tipp ▸</button>
+        </div></details>
+        <div class="heft">
+          <div class="htitel"><span class="ic">✏️</span>Jetzt du – im Heft</div>
+          <p>Notiere deinen Rechenweg: Beginne mit $\alpha+\beta=90^\circ$, setze $\alpha=\beta+15^\circ$ ein und löse die Gleichung Schritt für Schritt auf.</p>
+          <div class="vorlegen"><span>👩‍🏫</span> Zeige deinen Rechenweg deiner Lehrkraft.</div>
+        </div>
+      </div>
+
+      <div class="stufe-inhalt" data-stufe-inhalt="a1-profi" style="display:none;">
+        <div class="arbeitsauftrag">
+          <p>$\overline{AB}$ ist Durchmesser, $C$ liegt auf dem Thaleskreis. Der Winkel bei $A$ ist <b>doppelt so groß</b> wie der Winkel bei $B$.</p>
+        </div>
+        <div class="frage-zeile">
+          <label>Winkel bei $A$: &nbsp;$\alpha =$</label>
+          <input class="einzel" data-k="a1-profi-a" inputmode="numeric"><span class="einheit">°</span>
+        </div>
+        <div class="frage-zeile">
+          <label>Winkel bei $B$: &nbsp;$\beta =$</label>
+          <input class="einzel" data-k="a1-profi-b" inputmode="numeric"><span class="einheit">°</span>
+        </div>
+        <div class="btnrow"><button class="action" data-pruef="a1-profi">Prüfen</button><button class="action leeren" data-leeren="a1-profi" style="display:none;">Leeren</button></div>
+        <div class="feedback" data-fb="a1-profi"></div>
+        <details class="tipp" data-tipp="a1-profi"><summary>Tipp anzeigen</summary><div class="tippinhalt">
+          <div class="tippstufe" data-ts="0">Der Winkel bei $C$ ist $90^\circ$. Also gilt $\alpha+\beta=90^\circ$.</div>
+          <div class="tippstufe" data-ts="1">Setze $\alpha=2\cdot\beta$. Dann ist $2\beta+\beta=90^\circ$, also $3\beta=90^\circ$.</div>
+          <div class="tippstufe" data-ts="2">Lösung: $\beta=30^\circ$ und $\alpha=60^\circ$.</div>
+          <button class="action tipp-mehr" data-mehr="a1-profi">Nächster Tipp ▸</button>
+        </div></details>
+        <div class="heft">
+          <div class="htitel"><span class="ic">✏️</span>Jetzt du – im Heft</div>
+          <p>Notiere deinen Rechenweg vollständig: Beginne mit $\alpha+\beta=90^\circ$, setze $\alpha=2\beta$ ein und löse die Gleichung Schritt für Schritt auf.</p>
+          <div class="vorlegen"><span>👩‍🏫</span> Zeige deinen Rechenweg deiner Lehrkraft.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- KARTE 2: Umkehrung -->
+  <section class="card" data-card="1">
+    <div class="panel">
+      <h2>Aufgabe 2: Die Umkehrung anwenden</h2>
+      <div class="stufen" data-stufen="a2">
+        <button class="stufe-btn aktiv" data-stufe="grund">Grundlagen</button>
+        <button class="stufe-btn" data-stufe="fortg">Fortgeschritten</button>
+        <button class="stufe-btn" data-stufe="profi">Profi</button>
+      </div>
+      <div class="stufe-hint">Die Umkehrung sagt: Ist der Winkel bei $C$ gleich $90^\circ$, dann liegt $C$ auf dem Thaleskreis über $\overline{AB}$.</div>
+
+      <div class="stufe-inhalt" data-stufe-inhalt="a2-grund">
+        <div class="arbeitsauftrag">
+          <p>Ein Dreieck $ABC$ hat bei $A$ den Winkel $40^\circ$ und bei $B$ den Winkel $50^\circ$.</p>
+        </div>
+        <p class="frage-zeile" style="font-weight:600;">Liegt $C$ auf dem Thaleskreis über $\overline{AB}$?</p>
+        <div class="mc" data-mc="a2-grund" data-correct="0">
+          <button data-opt="0">Ja, denn der Winkel bei $C$ ist 180°&nbsp;−&nbsp;40°&nbsp;−&nbsp;50°&nbsp;=&nbsp;90°.</button>
+          <button data-opt="1">Nein, denn 40°&nbsp;+&nbsp;50°&nbsp;=&nbsp;90° ist zu klein.</button>
+          <button data-opt="2">Das kann man ohne den Durchmesser nicht entscheiden.</button>
+        </div>
+        <div class="feedback" data-fb="a2-grund"></div>
+        <details class="tipp" data-tipp="a2-grund"><summary>Tipp anzeigen</summary><div class="tippinhalt">
+          <div class="tippstufe" data-ts="0">Berechne zuerst den Winkel bei $C$ mit der Winkelsumme $180^\circ$.</div>
+          <div class="tippstufe" data-ts="1">Ist der Winkel bei $C$ genau $90^\circ$, dann liegt $C$ nach der Umkehrung auf dem Thaleskreis.</div>
+          <div class="tippstufe" data-ts="2">Lösung: $C$-Winkel $=90^\circ$, also liegt $C$ auf dem Thaleskreis – Antwort „Ja“.</div>
+          <button class="action tipp-mehr" data-mehr="a2-grund">Nächster Tipp ▸</button>
+        </div></details>
+        <div class="heft">
+          <div class="htitel"><span class="ic">✏️</span>Jetzt du – im Heft</div>
+          <p>Begründe in einem Satz, warum $C$ auf dem Thaleskreis liegt. Verwende dabei die Wörter „rechter Winkel“ und „Umkehrung“.</p>
+          <div class="vorlegen"><span>👩‍🏫</span> Zeige deinen Begründungssatz deiner Lehrkraft.</div>
+        </div>
+      </div>
+
+      <div class="stufe-inhalt" data-stufe-inhalt="a2-fortg" style="display:none;">
+        <div class="arbeitsauftrag">
+          <p>Drei Dreiecke. Kreuze <b>alle</b> an, bei denen $C$ auf dem Thaleskreis über $\overline{AB}$ liegt.</p>
+        </div>
+        <div class="mc" data-mc="a2-fortg" data-correct="0,2" data-multi="1">
+          <button data-opt="0">$\alpha=63^\circ$, $\beta=27^\circ$</button>
+          <button data-opt="1">$\alpha=55^\circ$, $\beta=40^\circ$</button>
+          <button data-opt="2">$\alpha=18^\circ$, $\beta=72^\circ$</button>
+        </div>
+        <div class="btnrow"><button class="action" data-pruef-mc="a2-fortg">Prüfen</button></div>
+        <div class="feedback" data-fb="a2-fortg"></div>
+        <details class="tipp" data-tipp="a2-fortg"><summary>Tipp anzeigen</summary><div class="tippinhalt">
+          <div class="tippstufe" data-ts="0">Berechne für jedes Dreieck den Winkel bei $C$: $180^\circ-\alpha-\beta$.</div>
+          <div class="tippstufe" data-ts="1">$C$ liegt nur dann auf dem Thaleskreis, wenn dieser Winkel genau $90^\circ$ ist – also wenn $\alpha+\beta=90^\circ$.</div>
+          <div class="tippstufe" data-ts="2">Lösung: $63^\circ+27^\circ=90^\circ$ ✓, $55^\circ+40^\circ=95^\circ$ ✗, $18^\circ+72^\circ=90^\circ$ ✓. Richtig sind das erste und das dritte.</div>
+          <button class="action tipp-mehr" data-mehr="a2-fortg">Nächster Tipp ▸</button>
+        </div></details>
+        <div class="heft">
+          <div class="htitel"><span class="ic">✏️</span>Jetzt du – im Heft</div>
+          <p>Schreibe für jedes der drei Dreiecke die Rechnung $180^\circ-\alpha-\beta$ auf und notiere jeweils, ob $C$ auf dem Thaleskreis liegt.</p>
+          <div class="vorlegen"><span>👩‍🏫</span> Zeige deine drei Rechnungen deiner Lehrkraft.</div>
+        </div>
+      </div>
+
+      <div class="stufe-inhalt" data-stufe-inhalt="a2-profi" style="display:none;">
+        <div class="arbeitsauftrag">
+          <p>Von einem Dreieck $ABC$ ist nur bekannt: Der Winkel bei $A$ ist $34^\circ$ und der Winkel bei $B$ ist $56^\circ$. Eine Schülerin behauptet: „Dann ist $\overline{AB}$ der Durchmesser eines Kreises, auf dem $C$ liegt.“</p>
+        </div>
+        <p class="frage-zeile" style="font-weight:600;">Hat sie recht?</p>
+        <div class="mc" data-mc="a2-profi" data-correct="0">
+          <button data-opt="0">Ja – der Winkel bei $C$ ist $90^\circ$, also liegt $C$ nach der Umkehrung auf dem Thaleskreis über $\overline{AB}$.</button>
+          <button data-opt="1">Nein – die Umkehrung gilt nur, wenn man den Kreis schon gezeichnet hat.</button>
+          <button data-opt="2">Nein – dazu müsste der Winkel bei $C$ bekannt sein, er ist es aber nicht.</button>
+        </div>
+        <div class="feedback" data-fb="a2-profi"></div>
+        <details class="tipp" data-tipp="a2-profi"><summary>Tipp anzeigen</summary><div class="tippinhalt">
+          <div class="tippstufe" data-ts="0">Der Winkel bei $C$ lässt sich sehr wohl berechnen: $180^\circ-34^\circ-56^\circ$.</div>
+          <div class="tippstufe" data-ts="1">Das ergibt $90^\circ$. Genau für diesen Fall gilt die Umkehrung des Satzes von Thales.</div>
+          <div class="tippstufe" data-ts="2">Lösung: Sie hat recht – Antwort „Ja“. Der Thaleskreis hat $\overline{AB}$ als Durchmesser.</div>
+          <button class="action tipp-mehr" data-mehr="a2-profi">Nächster Tipp ▸</button>
+        </div></details>
+        <div class="heft">
+          <div class="htitel"><span class="ic">✏️</span>Jetzt du – im Heft</div>
+          <p>Formuliere die Umkehrung des Satzes von Thales vollständig in deinen eigenen Worten und zeichne eine passende Skizze dazu.</p>
+          <div class="vorlegen"><span>👩‍🏫</span> Zeige Formulierung und Skizze deiner Lehrkraft.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- KARTE 3: Konstruieren -->
+  <section class="card" data-card="2">
+    <div class="panel">
+      <h2>Aufgabe 3: Rechtwinklige Dreiecke konstruieren</h2>
+      <div class="stufen" data-stufen="a3">
+        <button class="stufe-btn aktiv" data-stufe="grund">Grundlagen</button>
+        <button class="stufe-btn" data-stufe="fortg">Fortgeschritten</button>
+        <button class="stufe-btn" data-stufe="profi">Profi</button>
+      </div>
+      <div class="stufe-hint">Diese Aufgabe konstruierst du im Heft. Die Eingabe dient nur zur Selbstkontrolle.</div>
+
+      <div class="stufe-inhalt" data-stufe-inhalt="a3-grund">
+        <div class="heft">
+          <div class="htitel"><span class="ic">✏️</span>Konstruieren im Heft</div>
+          <p>Konstruiere ein rechtwinkliges Dreieck mit der Hypotenuse $\overline{AB}=8\text{ cm}$ und rechtem Winkel bei $C$.</p>
+          <details class="anleitung"><summary>Schritt-für-Schritt-Anleitung anzeigen</summary><div class="ainhalt">
+            <ol>
+              <li>Zeichne die Strecke $\overline{AB}=8\text{ cm}$.</li>
+              <li>Konstruiere den Mittelpunkt $M$ mit der Mittelsenkrechten.</li>
+              <li>Zeichne den Thaleskreis um $M$ durch $A$ und $B$.</li>
+              <li>Wähle einen Punkt $C$ auf dem Halbkreis und verbinde ihn mit $A$ und $B$.</li>
+            </ol>
+          </div></details>
+          <div class="vorlegen"><span>👩‍🏫</span> Zeige deine Konstruktion deiner Lehrkraft.</div>
+        </div>
+        <div class="frage-zeile">
+          <label>Zur Kontrolle: Welchen Radius hat dein Thaleskreis? &nbsp;$r =$</label>
+          <input class="einzel" data-k="a3-grund-r" inputmode="decimal"><span class="einheit">cm</span>
+        </div>
+        <div class="btnrow"><button class="action" data-pruef="a3-grund">Prüfen</button><button class="action leeren" data-leeren="a3-grund" style="display:none;">Leeren</button></div>
+        <div class="feedback" data-fb="a3-grund"></div>
+        <details class="tipp" data-tipp="a3-grund"><summary>Tipp anzeigen</summary><div class="tippinhalt">
+          <div class="tippstufe" data-ts="0">Der Radius des Thaleskreises ist immer halb so groß wie der Durchmesser $\overline{AB}$.</div>
+          <div class="tippstufe" data-ts="1">Lösung: $r=8\text{ cm}:2=4\text{ cm}$.</div>
+          <button class="action tipp-mehr" data-mehr="a3-grund">Nächster Tipp ▸</button>
+        </div></details>
+      </div>
+
+      <div class="stufe-inhalt" data-stufe-inhalt="a3-fortg" style="display:none;">
+        <div class="heft">
+          <div class="htitel"><span class="ic">✏️</span>Konstruieren im Heft</div>
+          <p>Konstruiere ein rechtwinkliges Dreieck mit der Hypotenuse $\overline{AB}=10\text{ cm}$, bei dem eine Kathete $\overline{AC}=6\text{ cm}$ lang ist.</p>
+          <details class="anleitung"><summary>Schritt-für-Schritt-Anleitung anzeigen</summary><div class="ainhalt">
+            <ol>
+              <li>Zeichne $\overline{AB}=10\text{ cm}$ und konstruiere den Thaleskreis darüber.</li>
+              <li>Zeichne um $A$ einen Kreisbogen mit Radius $6\text{ cm}$.</li>
+              <li>Der Schnittpunkt dieses Bogens mit dem Thaleskreis ist der Punkt $C$.</li>
+              <li>Verbinde $C$ mit $A$ und $B$. Der Winkel bei $C$ ist automatisch $90^\circ$.</li>
+            </ol>
+          </div></details>
+          <div class="vorlegen"><span>👩‍🏫</span> Zeige deine Konstruktion deiner Lehrkraft.</div>
+        </div>
+        <div class="frage-zeile">
+          <label>Miss die zweite Kathete $\overline{BC}$ in deiner Zeichnung. &nbsp;$\overline{BC}\approx$</label>
+          <input class="einzel" data-k="a3-fortg-bc" inputmode="decimal"><span class="einheit">cm</span>
+        </div>
+        <div class="btnrow"><button class="action" data-pruef="a3-fortg">Prüfen</button><button class="action leeren" data-leeren="a3-fortg" style="display:none;">Leeren</button></div>
+        <div class="feedback" data-fb="a3-fortg"></div>
+        <details class="tipp" data-tipp="a3-fortg"><summary>Tipp anzeigen</summary><div class="tippinhalt">
+          <div class="tippstufe" data-ts="0">Im rechtwinkligen Dreieck gilt der Satz des Pythagoras: $\overline{AC}^2+\overline{BC}^2=\overline{AB}^2$.</div>
+          <div class="tippstufe" data-ts="1">Setze ein: $6^2+\overline{BC}^2=10^2$, also $\overline{BC}^2=100-36=64$.</div>
+          <div class="tippstufe" data-ts="2">Lösung: $\overline{BC}=8\text{ cm}$. (Beim Messen sind Werte um $8\text{ cm}$ in Ordnung.)</div>
+          <button class="action tipp-mehr" data-mehr="a3-fortg">Nächster Tipp ▸</button>
+        </div></details>
+      </div>
+
+      <div class="stufe-inhalt" data-stufe-inhalt="a3-profi" style="display:none;">
+        <div class="heft">
+          <div class="htitel"><span class="ic">✏️</span>Konstruieren im Heft</div>
+          <p>Gegeben ist ein Kreis $k$ und ein Punkt $P$ <b>außerhalb</b> des Kreises. Konstruiere die beiden <b>Tangenten</b> von $P$ an den Kreis.</p>
+          <details class="anleitung"><summary>Schritt-für-Schritt-Anleitung anzeigen</summary><div class="ainhalt">
+            <ol>
+              <li>Zeichne den Kreis $k$ mit Mittelpunkt $M$ und den Punkt $P$ außerhalb.</li>
+              <li>Verbinde $M$ und $P$ und konstruiere den Mittelpunkt $Z$ der Strecke $\overline{MP}$.</li>
+              <li>Zeichne den Thaleskreis um $Z$ durch $M$ und $P$.</li>
+              <li>Die Schnittpunkte dieses Thaleskreises mit dem Kreis $k$ sind die Berührpunkte $B_1$ und $B_2$. Verbinde $P$ mit ihnen.</li>
+            </ol>
+          </div></details>
+          <div class="vorlegen"><span>👩‍🏫</span> Zeige deine Tangentenkonstruktion deiner Lehrkraft.</div>
+        </div>
+        <p class="frage-zeile" style="font-weight:600;">Warum entsteht an den Berührpunkten ein rechter Winkel?</p>
+        <div class="mc" data-mc="a3-profi" data-correct="1">
+          <button data-opt="0">Weil $P$ außerhalb des Kreises liegt.</button>
+          <button data-opt="1">Weil der Berührpunkt auf dem Thaleskreis über $\overline{MP}$ liegt – nach dem Satz des Thales ist der Winkel dort $90^\circ$.</button>
+          <button data-opt="2">Weil eine Tangente immer durch den Mittelpunkt geht.</button>
+        </div>
+        <div class="feedback" data-fb="a3-profi"></div>
+        <details class="tipp" data-tipp="a3-profi"><summary>Tipp anzeigen</summary><div class="tippinhalt">
+          <div class="tippstufe" data-ts="0">Eine Tangente steht im Berührpunkt immer senkrecht auf dem Radius. Der Berührpunkt liegt auf zwei Kreisen.</div>
+          <div class="tippstufe" data-ts="1">Der Berührpunkt liegt auf dem Thaleskreis über $\overline{MP}$. Das Dreieck aus $M$, $P$ und dem Berührpunkt hat $\overline{MP}$ als Durchmesser.</div>
+          <div class="tippstufe" data-ts="2">Lösung: Antwort 2 – der Satz des Thales liefert genau hier den rechten Winkel zwischen Radius und Tangente.</div>
+          <button class="action tipp-mehr" data-mehr="a3-profi">Nächster Tipp ▸</button>
+        </div></details>
+      </div>
+    </div>
+  </section>
+
+  <!-- KARTE 4: Koordinatensystem -->
+  <section class="card" data-card="3">
+    <div class="panel">
+      <h2>Aufgabe 4: Thaleskreis im Koordinatensystem</h2>
+      <div class="stufen" data-stufen="a4">
+        <button class="stufe-btn aktiv" data-stufe="grund">Grundlagen</button>
+        <button class="stufe-btn" data-stufe="fortg">Fortgeschritten</button>
+        <button class="stufe-btn" data-stufe="profi">Profi</button>
+      </div>
+      <div class="stufe-hint">Tippe auf eine Stufe zum Wechseln. Dein Stand pro Stufe bleibt erhalten.</div>
+
+      <div class="ksys-box"><svg class="ksys" id="ksys-a4" viewBox="0 0 360 360" role="img" aria-label="Koordinatensystem zu Aufgabe 4"></svg></div>
+
+      <div class="stufe-inhalt" data-stufe-inhalt="a4-grund">
+        <div class="arbeitsauftrag">
+          <p>Die Strecke von $A(2|3)$ nach $B(8|3)$ ist der Durchmesser eines Thaleskreises.</p>
+        </div>
+        <div class="frage-zeile">
+          <label>Mittelpunkt $M$ des Kreises:</label>
+          <span class="koord-eingabe"><span class="kl">(</span><input data-k="a4-grund-mx" inputmode="decimal"><span class="sep">|</span><input data-k="a4-grund-my" inputmode="decimal"><span class="kl">)</span></span>
+        </div>
+        <div class="frage-zeile">
+          <label>Radius $r$ des Kreises: &nbsp;$r =$</label>
+          <input class="einzel" data-k="a4-grund-r" inputmode="decimal">
+        </div>
+        <div class="btnrow"><button class="action" data-pruef="a4-grund">Prüfen</button><button class="action leeren" data-leeren="a4-grund" style="display:none;">Leeren</button></div>
+        <div class="feedback" data-fb="a4-grund"></div>
+        <details class="tipp" data-tipp="a4-grund"><summary>Tipp anzeigen</summary><div class="tippinhalt">
+          <div class="tippstufe" data-ts="0">Der Mittelpunkt liegt genau in der Mitte von $\overline{AB}$. Mittle die Koordinaten.</div>
+          <div class="tippstufe" data-ts="1">Der Radius ist der halbe Abstand von $A$ und $B$. Hier liegt $\overline{AB}$ waagerecht.</div>
+          <div class="tippstufe" data-ts="2">Lösung: $M(5|3)$, $r=3$.</div>
+          <button class="action tipp-mehr" data-mehr="a4-grund">Nächster Tipp ▸</button>
+        </div></details>
+        <div class="heft">
+          <div class="htitel"><span class="ic">✏️</span>Jetzt du – im Heft</div>
+          <p>Zeichne das Koordinatensystem mit $A$, $B$ und dem Thaleskreis ab. Wähle einen Punkt $C$ auf dem Kreis und überprüfe mit dem Geodreieck, dass der Winkel bei $C$ ein rechter ist.</p>
+          <div class="vorlegen"><span>👩‍🏫</span> Zeige deine Zeichnung deiner Lehrkraft.</div>
+        </div>
+      </div>
+
+      <div class="stufe-inhalt" data-stufe-inhalt="a4-fortg" style="display:none;">
+        <div class="arbeitsauftrag">
+          <p>Die Strecke von $A(1|2)$ nach $B(7|10)$ ist der Durchmesser eines Thaleskreises.</p>
+        </div>
+        <div class="frage-zeile">
+          <label>Mittelpunkt $M$:</label>
+          <span class="koord-eingabe"><span class="kl">(</span><input data-k="a4-fortg-mx" inputmode="decimal"><span class="sep">|</span><input data-k="a4-fortg-my" inputmode="decimal"><span class="kl">)</span></span>
+        </div>
+        <div class="frage-zeile">
+          <label>Radius $r$ (ganzzahlig): &nbsp;$r =$</label>
+          <input class="einzel" data-k="a4-fortg-r" inputmode="decimal">
+        </div>
+        <div class="btnrow"><button class="action" data-pruef="a4-fortg">Prüfen</button><button class="action leeren" data-leeren="a4-fortg" style="display:none;">Leeren</button></div>
+        <div class="feedback" data-fb="a4-fortg"></div>
+        <details class="tipp" data-tipp="a4-fortg"><summary>Tipp anzeigen</summary><div class="tippinhalt">
+          <div class="tippstufe" data-ts="0">Mittelpunkt: x-Werte und y-Werte getrennt mitteln.</div>
+          <div class="tippstufe" data-ts="1">Radius über den Abstand: Von $A$ zu $B$ sind es $6$ nach rechts und $8$ nach oben. Nutze $r=\frac{1}{2}\sqrt{6^2+8^2}$.</div>
+          <div class="tippstufe" data-ts="2">Lösung: $M(4|6)$, $r=\frac{1}{2}\cdot 10 = 5$.</div>
+          <button class="action tipp-mehr" data-mehr="a4-fortg">Nächster Tipp ▸</button>
+        </div></details>
+        <div class="heft">
+          <div class="htitel"><span class="ic">✏️</span>Jetzt du – im Heft</div>
+          <p>Zeichne $A$, $B$ und den Thaleskreis sauber ins Koordinatensystem. Lies die Koordinaten des höchsten Punktes des Kreises ab und notiere sie.</p>
+          <div class="vorlegen"><span>👩‍🏫</span> Zeige deine Zeichnung deiner Lehrkraft.</div>
+        </div>
+      </div>
+
+      <div class="stufe-inhalt" data-stufe-inhalt="a4-profi" style="display:none;">
+        <div class="arbeitsauftrag">
+          <p>Die Strecke von $A(-1|1)$ nach $B(7|7)$ ist der Durchmesser eines Thaleskreises. Der Punkt $C(0|8)$ ist gegeben.</p>
+        </div>
+        <div class="frage-zeile">
+          <label>Mittelpunkt $M$:</label>
+          <span class="koord-eingabe"><span class="kl">(</span><input data-k="a4-profi-mx" inputmode="decimal"><span class="sep">|</span><input data-k="a4-profi-my" inputmode="decimal"><span class="kl">)</span></span>
+        </div>
+        <div class="frage-zeile">
+          <label>Radius $r$ (ganzzahlig): &nbsp;$r =$</label>
+          <input class="einzel" data-k="a4-profi-r" inputmode="decimal">
+        </div>
+        <p class="frage-zeile" style="font-weight:600;">Liegt $C(0|8)$ auf dem Thaleskreis – und ist der Winkel bei $C$ damit $90^\circ$?</p>
+        <div class="mc" data-mc="a4-profi" data-correct="0">
+          <button data-opt="0">Ja, denn der Abstand von $C$ zu $M$ ist gleich dem Radius.</button>
+          <button data-opt="1">Nein, $C$ liegt innerhalb des Kreises.</button>
+          <button data-opt="2">Das kann man nur durch Messen herausfinden.</button>
+        </div>
+        <div class="btnrow"><button class="action" data-pruef="a4-profi">Prüfen</button><button class="action leeren" data-leeren="a4-profi" style="display:none;">Leeren</button></div>
+        <div class="feedback" data-fb="a4-profi"></div>
+        <details class="tipp" data-tipp="a4-profi"><summary>Tipp anzeigen</summary><div class="tippinhalt">
+          <div class="tippstufe" data-ts="0">Bestimme zuerst $M$ und $r$. Dann berechne den Abstand von $C(0|8)$ zu $M$.</div>
+          <div class="tippstufe" data-ts="1">$M(3|4)$, $r=5$. Abstand $C$ zu $M$: $\sqrt{(0-3)^2+(8-4)^2}=\sqrt{9+16}=\sqrt{25}$.</div>
+          <div class="tippstufe" data-ts="2">Lösung: $M(3|4)$, $r=5$. Abstand $=5=r$, also liegt $C$ auf dem Kreis und der Winkel bei $C$ ist $90^\circ$ (Antwort „Ja“).</div>
+          <button class="action tipp-mehr" data-mehr="a4-profi">Nächster Tipp ▸</button>
+        </div></details>
+        <div class="heft">
+          <div class="htitel"><span class="ic">✏️</span>Jetzt du – im Heft</div>
+          <p>Zeichne $A$, $B$, $C$ und den Thaleskreis ins Koordinatensystem. Bestätige durch Nachmessen, dass der Winkel bei $C$ ein rechter ist.</p>
+          <div class="vorlegen"><span>👩‍🏫</span> Zeige deine Zeichnung deiner Lehrkraft.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- KARTE 5: Wiederholung -->
+  <section class="card" data-card="4">
+    <div class="panel">
+      <h2>Wiederholung: Mittelpunkt &amp; Mittelsenkrechte</h2>
+      <p>Für den Thaleskreis brauchst du den Mittelpunkt einer Strecke. Das wiederholst du hier – ein Thema aus einer früheren Stunde.</p>
+      <div class="stufen" data-stufen="w">
+        <button class="stufe-btn aktiv" data-stufe="grund">Grundlagen</button>
+        <button class="stufe-btn" data-stufe="fortg">Fortgeschritten</button>
+        <button class="stufe-btn" data-stufe="profi">Profi</button>
+      </div>
+      <div class="stufe-hint">Tippe auf eine Stufe zum Wechseln. Dein Stand pro Stufe bleibt erhalten.</div>
+
+      <div class="stufe-inhalt" data-stufe-inhalt="w-grund">
+        <div class="arbeitsauftrag"><p>Gegeben sind $P(1|4)$ und $Q(7|4)$.</p></div>
+        <div class="frage-zeile">
+          <label>Mittelpunkt von $\overline{PQ}$:</label>
+          <span class="koord-eingabe"><span class="kl">(</span><input data-k="w-grund-x" inputmode="decimal"><span class="sep">|</span><input data-k="w-grund-y" inputmode="decimal"><span class="kl">)</span></span>
+        </div>
+        <div class="btnrow"><button class="action" data-pruef="w-grund">Prüfen</button><button class="action leeren" data-leeren="w-grund" style="display:none;">Leeren</button></div>
+        <div class="feedback" data-fb="w-grund"></div>
+        <details class="tipp" data-tipp="w-grund"><summary>Tipp anzeigen</summary><div class="tippinhalt">
+          <div class="tippstufe" data-ts="0">Mittle die x-Werte und die y-Werte: $\frac{1+7}{2}$ und $\frac{4+4}{2}$.</div>
+          <div class="tippstufe" data-ts="1">Lösung: $(4|4)$.</div>
+          <button class="action tipp-mehr" data-mehr="w-grund">Nächster Tipp ▸</button>
+        </div></details>
+        <div class="heft">
+          <div class="htitel"><span class="ic">✏️</span>Jetzt du – im Heft</div>
+          <p>Zeichne $\overline{PQ}$ und konstruiere den Mittelpunkt mit der Mittelsenkrechten (Zirkel und Lineal).</p>
+          <div class="vorlegen"><span>👩‍🏫</span> Zeige deine Konstruktion deiner Lehrkraft.</div>
+        </div>
+      </div>
+
+      <div class="stufe-inhalt" data-stufe-inhalt="w-fortg" style="display:none;">
+        <div class="arbeitsauftrag"><p>Gegeben sind $P(2|1)$ und $Q(8|9)$.</p></div>
+        <div class="frage-zeile">
+          <label>Mittelpunkt von $\overline{PQ}$:</label>
+          <span class="koord-eingabe"><span class="kl">(</span><input data-k="w-fortg-x" inputmode="decimal"><span class="sep">|</span><input data-k="w-fortg-y" inputmode="decimal"><span class="kl">)</span></span>
+        </div>
+        <div class="btnrow"><button class="action" data-pruef="w-fortg">Prüfen</button><button class="action leeren" data-leeren="w-fortg" style="display:none;">Leeren</button></div>
+        <div class="feedback" data-fb="w-fortg"></div>
+        <details class="tipp" data-tipp="w-fortg"><summary>Tipp anzeigen</summary><div class="tippinhalt">
+          <div class="tippstufe" data-ts="0">Mittle die x-Werte und die y-Werte einzeln.</div>
+          <div class="tippstufe" data-ts="1">Lösung: $(5|5)$.</div>
+          <button class="action tipp-mehr" data-mehr="w-fortg">Nächster Tipp ▸</button>
+        </div></details>
+        <div class="heft">
+          <div class="htitel"><span class="ic">✏️</span>Jetzt du – im Heft</div>
+          <p>Konstruiere die Mittelsenkrechte von $\overline{PQ}$ und überprüfe, ob dein berechneter Mittelpunkt auf ihr liegt.</p>
+          <div class="vorlegen"><span>👩‍🏫</span> Zeige deine Konstruktion deiner Lehrkraft.</div>
+        </div>
+      </div>
+
+      <div class="stufe-inhalt" data-stufe-inhalt="w-profi" style="display:none;">
+        <div class="arbeitsauftrag"><p>Gegeben sind $P(-3|2)$ und $Q(5|8)$.</p></div>
+        <div class="frage-zeile">
+          <label>Mittelpunkt von $\overline{PQ}$:</label>
+          <span class="koord-eingabe"><span class="kl">(</span><input data-k="w-profi-x" inputmode="decimal"><span class="sep">|</span><input data-k="w-profi-y" inputmode="decimal"><span class="kl">)</span></span>
+        </div>
+        <div class="frage-zeile">
+          <label>Länge von $\overline{PQ}$: &nbsp;$\overline{PQ}=$</label>
+          <input class="einzel" data-k="w-profi-l" inputmode="decimal">
+        </div>
+        <div class="btnrow"><button class="action" data-pruef="w-profi">Prüfen</button><button class="action leeren" data-leeren="w-profi" style="display:none;">Leeren</button></div>
+        <div class="feedback" data-fb="w-profi"></div>
+        <details class="tipp" data-tipp="w-profi"><summary>Tipp anzeigen</summary><div class="tippinhalt">
+          <div class="tippstufe" data-ts="0">Mittelpunkt: x- und y-Werte mitteln (auch bei negativen Zahlen).</div>
+          <div class="tippstufe" data-ts="1">Länge mit Pythagoras: Von $P$ zu $Q$ sind es $8$ nach rechts und $6$ nach oben. $\overline{PQ}=\sqrt{8^2+6^2}$.</div>
+          <div class="tippstufe" data-ts="2">Lösung: $M(1|5)$, $\overline{PQ}=\sqrt{64+36}=\sqrt{100}=10$.</div>
+          <button class="action tipp-mehr" data-mehr="w-profi">Nächster Tipp ▸</button>
+        </div></details>
+        <div class="heft">
+          <div class="htitel"><span class="ic">✏️</span>Jetzt du – im Heft</div>
+          <p>Zeichne $\overline{PQ}$ ins Koordinatensystem, konstruiere die Mittelsenkrechte und zeichne anschließend den Thaleskreis über $\overline{PQ}$.</p>
+          <div class="vorlegen"><span>👩‍🏫</span> Zeige deine Zeichnung deiner Lehrkraft.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- KARTE 6: Auswertung -->
+  <section class="card" data-card="5">
+    <div class="panel">
+      <h2>Deine Auswertung</h2>
+      <p>Hier siehst du, wie viele Aufgaben du in der aktuell gewählten Stufe richtig gelöst hast.</p>
+      <div class="score" id="score-text">– von – Aufgaben gelöst</div>
+      <div class="balken"><div id="score-bar"></div></div>
+      <div id="ausw-liste"></div>
+      <div class="merk">
+        <h3>Das kannst du jetzt</h3>
+        <p>Du kannst mit dem Satz des Thales Winkel berechnen, mit der <b>Umkehrung</b> entscheiden, ob ein Punkt auf dem Thaleskreis liegt, rechtwinklige Dreiecke konstruieren und im Koordinatensystem arbeiten. In der nächsten Stunde <b>beweisen</b> wir, warum der Winkel immer genau $90^\circ$ ist.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="weiter-wrap" id="weiterwrap">
+    <a class="weiter" href="#">Übung abgeschlossen ✓</a>
+    <div class="weiter-hint">Du hast alle Aufgaben dieser Übung bearbeitet.</div>
+  </div>
+
+</main>
+
+<div id="trex" title="Made by Mathedino">🦖<span class="bubble">Made by Mathedino</span></div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* Lösungen, tol = Toleranz (für Messwerte) */
+  const LOES = {
+    'a1-grund':{felder:{'a1-grund-c':90,'a1-grund-b':60},tol:0},
+    'a1-fortg':{felder:{'a1-fortg-a':52.5,'a1-fortg-b':37.5},tol:0},
+    'a1-profi':{felder:{'a1-profi-a':60,'a1-profi-b':30},tol:0},
+    'a3-grund':{felder:{'a3-grund-r':4},tol:0},
+    'a3-fortg':{felder:{'a3-fortg-bc':8},tol:0.6},
+    'a4-grund':{felder:{'a4-grund-mx':5,'a4-grund-my':3,'a4-grund-r':3},tol:0},
+    'a4-fortg':{felder:{'a4-fortg-mx':4,'a4-fortg-my':6,'a4-fortg-r':5},tol:0},
+    'w-grund':{felder:{'w-grund-x':4,'w-grund-y':4},tol:0},
+    'w-fortg':{felder:{'w-fortg-x':5,'w-fortg-y':5},tol:0},
+    'w-profi':{felder:{'w-profi-x':1,'w-profi-y':5,'w-profi-l':10},tol:0}
+  };
+  // Aufgaben mit MC-Anteil (Single) zusätzlich zu Feldern
+  const MC_SINGLE={'a2-grund':0,'a2-profi':0,'a3-profi':1,'a4-profi':0};
+  // Aufgabe 4 Profi hat Felder UND MC
+  const MIX_FELDER={'a4-profi':{'a4-profi-mx':3,'a4-profi-my':4,'a4-profi-r':5}};
+
+  const State = {
+    cardSeen:[true,false,false,false,false,false],
+    stufe:{a1:'grund',a2:'grund',a3:'grund',a4:'grund',w:'grund'},
+    eingaben:{}, status:{}, mcSel:{}
+  };
+
+  /* Koordinatensystem zeichnen */
+  function zeichneKsys(svgId,opts){
+    const svg=document.getElementById(svgId); if(!svg) return;
+    const {minX,maxX,minY,maxY}=opts; const pad=28,W=360,H=360;
+    const sx=(W-2*pad)/(maxX-minX), sy=(H-2*pad)/(maxY-minY);
+    const X=x=>pad+(x-minX)*sx, Y=y=>H-pad-(y-minY)*sy;
+    let g='';
+    for(let x=minX;x<=maxX;x++) g+=`<line class="grid" x1="${X(x)}" y1="${Y(minY)}" x2="${X(x)}" y2="${Y(maxY)}"/>`;
+    for(let y=minY;y<=maxY;y++) g+=`<line class="grid" x1="${X(minX)}" y1="${Y(y)}" x2="${X(maxX)}" y2="${Y(y)}"/>`;
+    const x0=X(0),y0=Y(0);
+    g+=`<line class="axis" x1="${X(minX)}" y1="${y0}" x2="${X(maxX)}" y2="${y0}"/>`;
+    g+=`<line class="axis" x1="${x0}" y1="${Y(minY)}" x2="${x0}" y2="${Y(maxY)}"/>`;
+    g+=`<polygon points="${X(maxX)},${y0} ${X(maxX)-7},${y0-4} ${X(maxX)-7},${y0+4}" fill="var(--achse)"/>`;
+    g+=`<polygon points="${x0},${Y(maxY)} ${x0-4},${Y(maxY)+7} ${x0+4},${Y(maxY)+7}" fill="var(--achse)"/>`;
+    g+=`<text class="axlbl" x="${X(maxX)-2}" y="${y0+16}">x</text><text class="axlbl" x="${x0+6}" y="${Y(maxY)+10}">y</text>`;
+    for(let x=minX;x<=maxX;x++){if(x===0)continue;g+=`<line class="tick" x1="${X(x)}" y1="${y0-3}" x2="${X(x)}" y2="${y0+3}"/>`;if(x%2===0)g+=`<text class="ticklbl" x="${X(x)}" y="${y0+15}" text-anchor="middle">${x}</text>`;}
+    for(let y=minY;y<=maxY;y++){if(y===0)continue;g+=`<line class="tick" x1="${x0-3}" y1="${Y(y)}" x2="${x0+3}" y2="${Y(y)}"/>`;if(y%2===0)g+=`<text class="ticklbl" x="${x0-8}" y="${Y(y)+4}" text-anchor="end">${y}</text>`;}
+    (opts.punkte||[]).forEach(p=>{const cx=X(p.x),cy=Y(p.y),s=6,col=p.farbe||'#23303B';g+=`<line x1="${cx-s}" y1="${cy-s}" x2="${cx+s}" y2="${cy+s}" stroke="${col}" stroke-width="2.6" stroke-linecap="round"/><line x1="${cx+s}" y1="${cy-s}" x2="${cx-s}" y2="${cy+s}" stroke="${col}" stroke-width="2.6" stroke-linecap="round"/><text x="${cx+9}" y="${cy-8}" style="font:800 15px Segoe UI,sans-serif;fill:${col}">${p.name}</text>`;});
+    svg.innerHTML=g;
+  }
+  const KSYS={
+    grund:{minX:-1,maxX:10,minY:-1,maxY:8,punkte:[{name:'A',x:2,y:3,farbe:'#1F5C97'},{name:'B',x:8,y:3,farbe:'#1F5C97'}]},
+    fortg:{minX:-1,maxX:9,minY:-1,maxY:12,punkte:[{name:'A',x:1,y:2,farbe:'#1F5C97'},{name:'B',x:7,y:10,farbe:'#1F5C97'}]},
+    profi:{minX:-3,maxX:9,minY:-1,maxY:10,punkte:[{name:'A',x:-1,y:1,farbe:'#1F5C97'},{name:'B',x:7,y:7,farbe:'#1F5C97'},{name:'C',x:0,y:8,farbe:'#7A4E8C'}]}
+  };
+  function ksysA4(stufe){ zeichneKsys('ksys-a4',KSYS[stufe]); }
+
+  /* Tabs */
+  const tabs=Array.from(document.querySelectorAll('.tab'));
+  const cards=Array.from(document.querySelectorAll('.card'));
+  function showCard(i){
+    cards.forEach(c=>c.classList.toggle('active',+c.dataset.card===i));
+    tabs.forEach(t=>t.classList.toggle('active',+t.dataset.i===i));
+    State.cardSeen[i]=true;
+    tabs.forEach((t,k)=>{if(State.cardSeen[k])t.classList.add('done');});
+    if(i===5) renderAuswertung();
+    window.scrollTo({top:0,behavior:'smooth'});
+    if(window.MathJax&&MathJax.typesetPromise){MathJax.typesetPromise();}
+  }
+  tabs.forEach(t=>t.addEventListener('click',()=>showCard(+t.dataset.i)));
+
+  /* Stufen umschalten */
+  document.querySelectorAll('.stufen').forEach(box=>{
+    const grp=box.dataset.stufen;
+    box.querySelectorAll('.stufe-btn').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        const stufe=btn.dataset.stufe; State.stufe[grp]=stufe;
+        box.querySelectorAll('.stufe-btn').forEach(b=>b.classList.toggle('aktiv',b===btn));
+        document.querySelectorAll('[data-stufe-inhalt^="'+grp+'-"]').forEach(div=>{
+          div.style.display=(div.dataset.stufeInhalt===grp+'-'+stufe)?'block':'none';
+        });
+        if(grp==='a4') ksysA4(stufe);
+        if(window.MathJax&&MathJax.typesetPromise){MathJax.typesetPromise();}
+      });
+    });
+  });
+
+  /* Eingaben merken */
+  document.querySelectorAll('input[data-k]').forEach(inp=>{
+    inp.addEventListener('input',()=>{State.eingaben[inp.dataset.k]=inp.value;});
+  });
+
+  function normNum(s){if(s==null)return null;s=String(s).trim().replace(',','.').replace(/\s/g,'');if(s==='')return null;const v=parseFloat(s);return isNaN(v)?null:v;}
+
+  /* MC Single (auch innerhalb gemischter Aufgaben) */
+  document.querySelectorAll('.mc:not([data-multi])').forEach(group=>{
+    const key=group.dataset.mc; const correct=+group.dataset.correct;
+    // Wenn diese MC zu einer Aufgabe mit eigenem Prüfen-Button gehört (a4-profi), nur Auswahl merken
+    const istMix = MIX_FELDER[key]!==undefined;
+    group.querySelectorAll('button').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        if(istMix){
+          group.querySelectorAll('button').forEach(b=>b.style.outline='');
+          btn.style.outline='3px solid var(--kopf)'; State.mcSel[key]=+btn.dataset.opt; return;
+        }
+        if(State.status[key]==='gut'||State.status[key]==='locked')return;
+        const opt=+btn.dataset.opt;
+        group.querySelectorAll('button').forEach(b=>b.classList.add('disabled'));
+        const fb=document.querySelector('[data-fb="'+key+'"]');
+        if(opt===correct){btn.classList.add('richtig');State.status[key]='gut';fb.className='feedback gut';fb.textContent='✅ Richtig!';}
+        else{btn.classList.add('falsch');group.querySelector('[data-opt="'+correct+'"]').classList.add('richtig');State.status[key]='schlecht';fb.className='feedback schlecht';fb.innerHTML='❌ Nicht ganz – die richtige Antwort ist grün markiert.';}
+        checkComplete();
+      });
+    });
+  });
+
+  /* MC Multi (a2-fortg) */
+  document.querySelectorAll('.mc[data-multi]').forEach(group=>{
+    const key=group.dataset.mc;
+    State.mcSel[key]=new Set();
+    group.querySelectorAll('button').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        if(State.status[key]==='gut')return;
+        const opt=+btn.dataset.opt;
+        if(State.mcSel[key].has(opt)){State.mcSel[key].delete(opt);btn.style.outline='';}
+        else{State.mcSel[key].add(opt);btn.style.outline='3px solid var(--kopf)';}
+      });
+    });
+  });
+  document.querySelectorAll('[data-pruef-mc]').forEach(btn=>{
+    const key=btn.dataset.pruefMc;
+    btn.addEventListener('click',()=>{
+      const group=document.querySelector('.mc[data-mc="'+key+'"]');
+      const correct=new Set(group.dataset.correct.split(',').map(Number));
+      const sel=State.mcSel[key];
+      const fb=document.querySelector('[data-fb="'+key+'"]');
+      let ok = sel.size===correct.size && [...sel].every(o=>correct.has(o));
+      group.querySelectorAll('button').forEach(b=>{
+        const o=+b.dataset.opt; b.style.outline='';
+        if(correct.has(o)) b.classList.add('richtig');
+        else if(sel.has(o)) b.classList.add('falsch');
+        b.classList.add('disabled');
+      });
+      if(ok){State.status[key]='gut';fb.className='feedback gut';fb.textContent='✅ Alles richtig angekreuzt!';}
+      else{State.status[key]='schlecht';fb.className='feedback schlecht';fb.innerHTML='❌ Noch nicht ganz. Richtig markiert ist grün, falsch Angekreuztes rot.';}
+      checkComplete();
+    });
+  });
+
+  /* Prüfen (Felder, ggf. + MC bei Mix) */
+  document.querySelectorAll('[data-pruef]').forEach(btn=>{
+    const key=btn.dataset.pruef;
+    btn.addEventListener('click',()=>{
+      const fb=document.querySelector('[data-fb="'+key+'"]');
+      const leerBtn=document.querySelector('[data-leeren="'+key+'"]');
+      const felder = (LOES[key]&&LOES[key].felder) || MIX_FELDER[key];
+      const tol=(LOES[key]&&LOES[key].tol)||0;
+      let alleGefuellt=true, alleRichtig=true;
+      for(const f in felder){
+        const inp=document.querySelector('input[data-k="'+f+'"]'); const v=normNum(inp.value);
+        if(v===null){alleGefuellt=false;alleRichtig=false;continue;}
+        if(Math.abs(v-felder[f])>tol+1e-9) alleRichtig=false;
+      }
+      // Mix: zusätzlich MC prüfen
+      if(MIX_FELDER[key]){
+        const mcCorrect=+document.querySelector('.mc[data-mc="'+key+'"]').dataset.correct;
+        if(State.mcSel[key]===undefined){alleGefuellt=false;}
+        else if(State.mcSel[key]!==mcCorrect){alleRichtig=false;}
+      }
+      if(!alleGefuellt){fb.className='feedback schlecht';fb.textContent='Bitte fülle alle Felder aus'+(MIX_FELDER[key]?' und kreuze eine Antwort an.':'.');return;}
+      if(alleRichtig){
+        State.status[key]='gut';fb.className='feedback gut';fb.textContent='✅ Richtig! Saubere Arbeit.';leerBtn.style.display='none';
+        if(MIX_FELDER[key]){const g=document.querySelector('.mc[data-mc="'+key+'"]');const c=+g.dataset.correct;g.querySelector('[data-opt="'+c+'"]').classList.add('richtig');g.querySelectorAll('button').forEach(b=>b.classList.add('disabled'));}
+      }else{
+        State.status[key]='schlecht';fb.className='feedback schlecht';fb.innerHTML='❌ Das stimmt noch nicht. Nutze den Tipp und korrigiere mit „Leeren“.';leerBtn.style.display='inline-block';
+      }
+      checkComplete();
+    });
+  });
+
+  /* Leeren */
+  document.querySelectorAll('[data-leeren]').forEach(btn=>{
+    const key=btn.dataset.leeren;
+    btn.addEventListener('click',()=>{
+      const felder=(LOES[key]&&LOES[key].felder)||MIX_FELDER[key]||{};
+      for(const f in felder){const inp=document.querySelector('input[data-k="'+f+'"]');if(inp){inp.value='';delete State.eingaben[f];}}
+      delete State.status[key];
+      const fb=document.querySelector('[data-fb="'+key+'"]');fb.className='feedback';fb.textContent='';
+      btn.style.display='none';
+    });
+  });
+
+  /* Gestufte Tipps */
+  document.querySelectorAll('[data-mehr]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const cont=btn.closest('.tippinhalt'); const stufen=Array.from(cont.querySelectorAll('.tippstufe'));
+      const naechste=stufen.find(s=>!s.classList.contains('show'));
+      if(naechste){naechste.classList.add('show');if(window.MathJax&&MathJax.typesetPromise){MathJax.typesetPromise([naechste]);}}
+      if(stufen.filter(s=>s.classList.contains('show')).length>=stufen.length) btn.style.display='none';
+    });
+  });
+  document.querySelectorAll('details.tipp').forEach(d=>{
+    d.addEventListener('toggle',()=>{if(d.open){const e=d.querySelector('.tippstufe');if(e&&!e.classList.contains('show')){e.classList.add('show');if(window.MathJax&&MathJax.typesetPromise){MathJax.typesetPromise([e]);}}}});
+  });
+
+  /* Auswertung */
+  function aufgKeyFuer(grp){
+    const stufe=State.stufe[grp];
+    if(grp==='a2'){ return 'a2-'+stufe; }
+    if(grp==='a3'){ return 'a3-'+stufe; }
+    return grp+'-'+stufe;
+  }
+  function renderAuswertung(){
+    const namen={a1:'Aufgabe 1 – Winkel berechnen',a2:'Aufgabe 2 – Umkehrung',a3:'Aufgabe 3 – Konstruieren',a4:'Aufgabe 4 – Koordinatensystem',w:'Wiederholung – Mittelpunkt'};
+    let html='',geloest=0,gesamt=0;
+    ['a1','a2','a3','a4','w'].forEach(grp=>{
+      const stufe=State.stufe[grp]; const key=aufgKeyFuer(grp); const st=State.status[key];
+      gesamt++; let ic='⬜',txt='noch nicht bearbeitet';
+      if(st==='gut'){ic='✅';txt='richtig gelöst';geloest++;}
+      else if(st==='schlecht'){ic='❌';txt='noch nicht richtig';}
+      const sName=stufe==='grund'?'Grundlagen':(stufe==='fortg'?'Fortgeschritten':'Profi');
+      html+=`<div class="ausw-zeile"><span class="ausw-ic">${ic}</span><div><b>${namen[grp]}</b><br><span style="opacity:.7;font-size:.92rem;">Stufe: ${sName} · ${txt}</span></div></div>`;
+    });
+    document.getElementById('ausw-liste').innerHTML=html;
+    document.getElementById('score-text').textContent=geloest+' von '+gesamt+' Aufgaben gelöst';
+    document.getElementById('score-bar').style.width=Math.round(geloest/gesamt*100)+'%';
+  }
+
+  function checkComplete(){
+    const alleKarten=State.cardSeen.every(Boolean);
+    let alle=true; ['a1','a2','a3','a4','w'].forEach(grp=>{if(State.status[aufgKeyFuer(grp)]!=='gut')alle=false;});
+    if(alle&&alleKarten) document.getElementById('weiterwrap').classList.add('show');
+  }
+
+  ksysA4('grund');
+
+  const trex=document.getElementById('trex');
+  trex.addEventListener('click',()=>{trex.classList.add('show');clearTimeout(trex._t);trex._t=setTimeout(()=>trex.classList.remove('show'),1800);});
+  trex.addEventListener('mouseenter',()=>trex.classList.add('show'));
+  trex.addEventListener('mouseleave',()=>trex.classList.remove('show'));
+
+  if(window.MathJax&&MathJax.startup&&MathJax.startup.promise){MathJax.startup.promise.then(()=>MathJax.typesetPromise());}
+})();
+</script>
+</body>
+</html>
