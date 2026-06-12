@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Übung: Beweis des Satzes von Thales</title>
+<meta name="description" content="Übungsseite zum Beweis des Satzes von Thales: Beweislücken füllen, Begründungen zuordnen, Winkel im gleichschenkligen Teildreieck berechnen und die Beweisidee selbst übertragen. Mit Heft-Aufgaben.">
+<meta name="keywords" content="Satz des Thales, Beweis, Argumentation, gleichschenklig, Basiswinkelsatz, Winkelsumme, begründen, Geometrie">
+<meta name="typ" content="Übung">
+<meta name="klasse" content="8">
+<meta name="fach" content="mathe">
+<meta name="oberthema" content="Geometrie">
+<meta name="thema" content="Satz des Thales – Beweis">
+<script>
+  MathJax = {
+    tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+    svg: { fontCache: 'global' }
+  };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+  :root{
+    --kopf:#2E7BC4;--kopf-dunkel:#1F5C97;--kopf-hell:#E4F0FB;
+    --papier:#F7FAFD;--tinte:#23303B;--linie:#CFDCE8;
+    --erfolg:#1E7A3E;--fehler:#C0271E;--akzent:#7A4E8C;--karte:#FFFFFF;
+    --gitter:#D8E2EC;--achse:#5A6B7A;--rechtwinkel:#C0271E;--alpha:#1C6FB8;--beta:#C0271E;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Helvetica,Arial,sans-serif;
+    background:var(--papier);color:var(--tinte);font-size:1.05rem;line-height:1.55;padding-bottom:5.5rem;}
+  .wrap{max-width:62rem;margin:0 auto;padding:0 1rem;}
+
+  header{background:linear-gradient(180deg,var(--kopf),var(--kopf-dunkel));color:#fff;
+    padding:1.4rem 1rem 1.6rem;box-shadow:0 2px 8px rgba(0,0,0,.12);}
+  header .wrap{display:flex;flex-direction:column;gap:.25rem;}
+  .eyebrow{font-size:.85rem;letter-spacing:.14em;text-transform:uppercase;font-weight:700;opacity:.92;}
+  header h1{margin:.1rem 0 0;font-size:1.6rem;line-height:1.15;}
+  header p{margin:.3rem 0 0;font-size:1rem;opacity:.95;max-width:46rem;}
+
+  nav.tabs{position:sticky;top:0;z-index:50;background:var(--papier);border-bottom:1px solid var(--linie);padding:.5rem 0;box-shadow:0 2px 6px rgba(0,0,0,.05);}
+  .tabrow{display:flex;flex-wrap:wrap;gap:.4rem;}
+  .tab{border:1px solid var(--linie);background:#fff;color:var(--tinte);border-radius:.6rem;padding:.55rem .8rem;min-height:44px;font-size:.95rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:.45rem;transition:transform .08s ease,background .15s ease;}
+  .tab .num{background:var(--kopf-hell);color:var(--kopf-dunkel);border-radius:50%;width:1.6rem;height:1.6rem;display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:800;flex:none;}
+  .tab.done .num{background:var(--erfolg);color:#fff;}
+  .tab.active{background:var(--kopf);color:#fff;border-color:var(--kopf-dunkel);}
+  .tab.active .num{background:#fff;color:var(--kopf-dunkel);}
+  .tab:active{transform:scale(.97);}
+
+  .card{display:none;animation:fade .25s ease;}
+  .card.active{display:block;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .panel{background:var(--karte);border:1px solid var(--linie);border-radius:1rem;padding:1.3rem 1.2rem 1.5rem;margin:1.2rem 0;box-shadow:0 1px 4px rgba(0,0,0,.05);}
+  .panel h2{margin:.1rem 0 .2rem;font-size:1.35rem;color:var(--kopf-dunkel);}
+  .panel h3{margin:1.2rem 0 .4rem;font-size:1.08rem;}
+
+  .stufen{display:flex;flex-wrap:wrap;gap:.5rem;margin:.2rem 0 1rem;}
+  .stufe-btn{border:1.5px solid var(--linie);background:#fff;border-radius:2rem;padding:.5rem 1rem;min-height:44px;font-size:.95rem;font-weight:700;cursor:pointer;color:var(--tinte);transition:transform .08s ease;}
+  .stufe-btn:active{transform:scale(.97);}
+  .stufe-btn.aktiv{background:var(--kopf);color:#fff;border-color:var(--kopf-dunkel);}
+  .stufe-hint{font-size:.85rem;color:var(--tinte);opacity:.65;margin-bottom:.6rem;}
+
+  .figur-box{background:#fff;border:1px solid var(--linie);border-radius:.8rem;padding:.8rem;margin:1rem 0;}
+  .figur{width:100%;height:auto;display:block;}
+  .figur .kreis{stroke:var(--kopf);stroke-width:2;fill:none;}
+  .figur .durchmesser{stroke:var(--tinte);stroke-width:2.4;}
+  .figur .seite{stroke:var(--akzent);stroke-width:2.6;fill:none;}
+  .figur .radius{stroke:var(--erfolg);stroke-width:2.6;fill:none;}
+  .figur .punkt{fill:var(--tinte);}
+  .figur .punktC{fill:var(--akzent);}
+  .figur .ptlabel{font:700 16px 'Segoe UI',sans-serif;fill:var(--tinte);}
+  .figur .ptlabelC{font:700 16px 'Segoe UI',sans-serif;fill:var(--akzent);}
+  .figur .mittel{fill:var(--kopf);}
+  .figur .kreuz-pt line{stroke-width:2.6;stroke-linecap:round;}
+  .figur .kreuz-ab line{stroke:var(--tinte);}
+  .figur .kreuz-c line{stroke:var(--akzent);}
+  .figur .kreuz-m line{stroke:var(--kopf);}
+  .figur .gleich-mark{stroke:var(--erfolg);stroke-width:2;}
+  .figur .rlbl{fill:var(--erfolg);font:italic 700 15px 'Segoe UI',sans-serif;}
+  .figur .bogen-a{stroke:var(--alpha);stroke-width:2;fill:none;}
+  .figur .bogen-b{stroke:var(--beta);stroke-width:2;fill:none;}
+  .figur .wa{fill:var(--alpha);font:800 15px 'Segoe UI',sans-serif;}
+  .figur .wb{fill:var(--beta);font:800 15px 'Segoe UI',sans-serif;}
+
+  .arbeitsauftrag{background:var(--kopf-hell);border-left:4px solid var(--kopf);border-radius:.4rem;padding:.7rem .9rem;margin:.7rem 0;}
+  ul.tidy{margin:.4rem 0 .4rem 1.1rem;padding:0;}
+  ul.tidy li{margin:.3rem 0;}
+
+  /* Lückentext-Beweis */
+  .luecken-beweis{background:#fff;border:1px solid var(--linie);border-radius:.7rem;padding:1rem 1.1rem;margin:1rem 0;line-height:2.2;}
+  .luecke{display:inline-block;border:1.5px solid var(--kopf);border-radius:.4rem;background:#fff;min-width:7rem;min-height:40px;padding:.2rem .5rem;font-size:1rem;color:var(--tinte);text-align:center;vertical-align:middle;}
+  .luecke:focus{outline:2px solid var(--kopf);}
+  .wortbank{display:flex;flex-wrap:wrap;gap:.5rem;margin:.6rem 0;}
+  .wortbank .wort{background:var(--kopf-hell);border:1.5px solid var(--kopf);border-radius:.5rem;padding:.4rem .8rem;font-weight:600;color:var(--kopf-dunkel);font-size:.95rem;}
+  details.wortbank-klapp{margin:.6rem 0;border:1px solid var(--linie);border-radius:.6rem;background:#FBFDFF;overflow:hidden;}
+  details.wortbank-klapp>summary{list-style:none;cursor:pointer;padding:.7rem .9rem;min-height:44px;display:flex;align-items:center;gap:.5rem;font-weight:700;color:var(--kopf-dunkel);}
+  details.wortbank-klapp>summary::-webkit-details-marker{display:none;}
+  details.wortbank-klapp>summary::before{content:'🗂️';}
+  details.wortbank-klapp[open]>summary::before{content:'📂';}
+  details.wortbank-klapp .wb-inhalt{padding:.2rem .9rem .9rem;}
+  details.wortbank-klapp .wb-hint{font-size:.85rem;color:var(--tinte);opacity:.65;margin:0 0 .5rem;}
+
+  .frage-zeile{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem;margin:.8rem 0;}
+  .frage-zeile label{font-weight:600;}
+  input.einzel{border:1.5px solid var(--linie);border-radius:.5rem;width:4.5rem;min-height:42px;font-size:1.05rem;text-align:center;padding:.2rem;background:#fff;color:var(--tinte);}
+  input:focus{outline:2px solid var(--kopf);}
+  .einheit{font-weight:600;color:var(--achse);}
+
+  /* Paare verbinden */
+  .paare{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin:1rem 0;}
+  .paar-spalte{display:flex;flex-direction:column;gap:.5rem;}
+  .paar-titel{font-weight:700;color:var(--kopf-dunkel);font-size:.9rem;text-transform:uppercase;letter-spacing:.05em;}
+  .paar-item{border:1.5px solid var(--linie);background:#fff;border-radius:.6rem;padding:.7rem .8rem;min-height:48px;cursor:pointer;font-size:.98rem;display:flex;align-items:center;gap:.55rem;transition:transform .08s ease,border-color .15s;}
+  .paar-item:active{transform:scale(.98);}
+  .paar-item.markiert{border-color:var(--akzent);background:#F3ECF6;box-shadow:0 0 0 2px rgba(122,78,140,.2);}
+  .paar-item.verbunden{border-color:var(--erfolg);}
+  .paar-item .badge{flex:none;width:1.7rem;height:1.7rem;border-radius:50%;color:#fff;font-weight:800;font-size:.95rem;display:none;align-items:center;justify-content:center;}
+  .paar-item.verbunden .badge{display:flex;}
+  /* Paar-Farben: jedes Paar bekommt links und rechts dieselbe Farbe + Nummer */
+  .paar-item.paar-1{border-color:#1C6FB8;background:#EAF3FB;}
+  .paar-item.paar-1 .badge{background:#1C6FB8;}
+  .paar-item.paar-2{border-color:#1E7A3E;background:#EAF6EE;}
+  .paar-item.paar-2 .badge{background:#1E7A3E;}
+  .paar-item.paar-3{border-color:#C8762A;background:#FBF0E4;}
+  .paar-item.paar-3 .badge{background:#C8762A;}
+  .paar-item.paar-4{border-color:#7A4E8C;background:#F3ECF6;}
+  .paar-item.paar-4 .badge{background:#7A4E8C;}
+
+  .mc{display:flex;flex-direction:column;gap:.5rem;margin:.5rem 0;}
+  .mc button{text-align:left;border:1.5px solid var(--linie);background:#fff;border-radius:.6rem;padding:.8rem 1rem;min-height:44px;font-size:1rem;line-height:1.6;cursor:pointer;color:var(--tinte);transition:transform .08s ease,border-color .15s ease;}
+  .mc button:active{transform:scale(.99);}
+  .mc button.richtig{background:var(--erfolg);color:#fff;border-color:var(--erfolg);font-weight:700;}
+  .mc button.falsch{background:var(--fehler);color:#fff;border-color:var(--fehler);font-weight:700;}
+  .mc button.disabled{pointer-events:none;}
+
+  .btnrow{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:.6rem;}
+  button.action{border:none;border-radius:.6rem;background:var(--kopf);color:#fff;font-size:1rem;font-weight:700;padding:.65rem 1.1rem;min-height:44px;min-width:44px;cursor:pointer;transition:transform .08s ease,background .15s ease;}
+  button.action:active{transform:scale(.96);}
+  button.action.leeren{background:#fff;color:var(--fehler);border:1.5px solid var(--fehler);}
+  button.action:disabled{background:#C2CDD8;cursor:default;}
+
+  .feedback{margin:.7rem 0 0;padding:.75rem .95rem;border-radius:.6rem;font-weight:600;display:none;}
+  .feedback.gut{display:block;background:var(--erfolg);color:#fff;}
+  .feedback.schlecht{display:block;background:var(--fehler);color:#fff;}
+
+  details.tipp{margin:.7rem 0 0;border:1px solid var(--linie);border-radius:.6rem;background:#FBFDFF;overflow:hidden;}
+  details.tipp>summary{list-style:none;cursor:pointer;padding:.7rem .9rem;min-height:44px;display:flex;align-items:center;gap:.5rem;font-weight:700;color:var(--kopf-dunkel);}
+  details.tipp>summary::-webkit-details-marker{display:none;}
+  details.tipp>summary::before{content:'💡';}
+  details.tipp[open]>summary::before{content:'📖';}
+  details.tipp .tippinhalt{padding:0 .9rem .9rem;}
+  .tippstufe{margin:.5rem 0;padding:.5rem .7rem;border-left:3px solid var(--kopf);background:var(--kopf-hell);border-radius:.3rem;display:none;}
+  .tippstufe.show{display:block;}
+  .tipp-mehr{margin-top:.5rem;}
+
+  .heft{background:#FEF6E9;border:2px solid #E8923C;border-radius:.9rem;padding:1rem 1.1rem;margin:1.4rem 0;}
+  .heft .htitel{display:flex;align-items:center;gap:.55rem;font-weight:800;color:#C8762A;font-size:1.12rem;margin-bottom:.3rem;}
+  .heft .htitel .ic{font-size:1.4rem;}
+  .heft ol{margin:.4rem 0 .2rem 1.2rem;padding:0;}
+  .heft ol li{margin:.35rem 0;}
+  .heft .vorlegen{margin-top:.8rem;background:#fff;border:1px dashed #C8762A;border-radius:.6rem;padding:.6rem .8rem;font-size:.95rem;font-weight:600;color:#C8762A;display:flex;align-items:center;gap:.5rem;}
+  details.anleitung{margin:.7rem 0 .2rem;border:1px solid #E8923C;border-radius:.6rem;background:#fff;overflow:hidden;}
+  details.anleitung>summary{list-style:none;cursor:pointer;padding:.7rem .9rem;min-height:44px;display:flex;align-items:center;gap:.5rem;font-weight:700;color:#C8762A;}
+  details.anleitung>summary::-webkit-details-marker{display:none;}
+  details.anleitung>summary::before{content:'📋';}
+  details.anleitung[open]>summary::before{content:'📖';}
+  details.anleitung .ainhalt{padding:0 .9rem .9rem;}
+
+  .merk{background:#F3ECF6;border:1px solid #D9C6E4;border-left:5px solid var(--akzent);border-radius:.7rem;padding:1rem 1.1rem;margin:1.1rem 0;}
+  .merk h3{margin:.1rem 0 .4rem;color:var(--akzent);}
+
+  .ausw-zeile{display:flex;align-items:center;gap:.6rem;padding:.6rem 0;border-bottom:1px solid var(--linie);}
+  .ausw-zeile:last-child{border-bottom:none;}
+  .ausw-ic{font-size:1.3rem;flex:none;}
+  .score{font-size:1.5rem;font-weight:800;color:var(--kopf-dunkel);margin:.5rem 0;}
+  .balken{height:14px;background:var(--kopf-hell);border-radius:7px;overflow:hidden;margin:.4rem 0;}
+  .balken>div{height:100%;background:var(--erfolg);width:0;transition:width .6s ease;}
+
+  .weiter-wrap{text-align:center;margin:2rem 0 1rem;display:none;}
+  .weiter-wrap.show{display:block;animation:fade .4s ease;}
+  a.weiter{display:inline-flex;align-items:center;gap:.6rem;justify-content:center;background:var(--erfolg);color:#fff;text-decoration:none;font-size:1.15rem;font-weight:800;padding:.9rem 2rem;min-height:44px;border-radius:.8rem;width:100%;max-width:30rem;box-shadow:0 3px 10px rgba(30,122,62,.3);}
+  a.weiter:active{transform:scale(.98);}
+  .weiter-hint{font-size:.85rem;color:var(--tinte);opacity:.6;margin-top:.5rem;}
+
+  #trex{position:fixed;bottom:.7rem;right:.7rem;font-size:1.7rem;cursor:pointer;z-index:60;user-select:none;filter:drop-shadow(0 1px 2px rgba(0,0,0,.25));}
+  #trex .bubble{position:absolute;bottom:2.1rem;right:0;white-space:nowrap;background:var(--tinte);color:#fff;font-size:.78rem;font-weight:600;padding:.35rem .6rem;border-radius:.5rem;opacity:0;pointer-events:none;transition:opacity .2s ease;}
+  #trex.show .bubble{opacity:1;}
+
+  @media (max-width:560px){header h1{font-size:1.35rem;}.panel{padding:1.1rem .9rem 1.3rem;}.paare{grid-template-columns:1fr;gap:.5rem;}}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <span class="eyebrow">Geometrie · Klasse 8 · Übung</span>
+    <h1>Den Beweis üben &amp; selbst führen</h1>
+    <p>Fülle Beweislücken, ordne Begründungen zu, rechne Winkel im gleichschenkligen Teildreieck und überträge die Beweisidee. Zu jeder Aufgabe gehört auch eine Aufgabe für dein Heft.</p>
+  </div>
+</header>
+
+<nav class="tabs">
+  <div class="wrap">
+    <div class="tabrow" id="tabrow">
+      <button class="tab active" data-i="0"><span class="num">1</span>Beweis vervollständigen</button>
+      <button class="tab" data-i="1"><span class="num">2</span>Begründungen zuordnen</button>
+      <button class="tab" data-i="2"><span class="num">3</span>Winkel berechnen</button>
+      <button class="tab" data-i="3"><span class="num">4</span>Beweisidee übertragen</button>
+      <button class="tab" data-i="4"><span class="num">5</span>Wiederholung</button>
+      <button class="tab" data-i="5"><span class="num">6</span>Auswertung</button>
+    </div>
+  </div>
+</nav>
+
+<main class="wrap">
+
+  <!-- KARTE 1: Beweis vervollständigen -->
+  <section class="card active" data-card="0">
+    <div class="panel">
+      <h2>Aufgabe 1: Den Beweis vervollständigen</h2>
+      <div class="stufen" data-stufen="a1">
+        <button class="stufe-btn aktiv" data-stufe="fortg">Fortgeschritten</button>
+        <button class="stufe-btn" data-stufe="profi">Profi</button>
+      </div>
+      <div class="stufe-hint">Tippe auf eine Stufe zum Wechseln. Dein Stand pro Stufe bleibt erhalten.</div>
+
+      <div class="figur-box">
+        <svg class="figur" viewBox="0 0 460 250" role="img" aria-label="Beweisfigur Thaleskreis">
+          <polygon points="70,190 230,190 310,51.4" fill="rgba(28,111,184,.12)"/>
+          <polygon points="390,190 230,190 310,51.4" fill="rgba(192,39,30,.10)"/>
+          <path class="kreis" d="M 70 190 A 160 160 0 0 1 390 190"/>
+          <line class="durchmesser" x1="70" y1="190" x2="390" y2="190"/>
+          <line class="seite" x1="70" y1="190" x2="310" y2="51.4"/>
+          <line class="seite" x1="390" y1="190" x2="310" y2="51.4"/>
+          <line class="radius" x1="230" y1="190" x2="310" y2="51.4"/>
+          <g class="gleich-mark"><line x1="146" y1="184" x2="154" y2="196"/><line x1="306" y1="184" x2="314" y2="196"/><line x1="264" y1="114.7" x2="276" y2="126.7"/></g>
+          <text class="rlbl" x="146" y="208">r</text>
+          <text class="rlbl" x="306" y="208">r</text>
+          <text class="rlbl" x="284" y="129">r</text>
+          <g class="kreuz-pt kreuz-ab"><line x1="64" y1="184" x2="76" y2="196"/><line x1="76" y1="184" x2="64" y2="196"/></g>
+          <g class="kreuz-pt kreuz-ab"><line x1="384" y1="184" x2="396" y2="196"/><line x1="396" y1="184" x2="384" y2="196"/></g>
+          <g class="kreuz-pt kreuz-c"><line x1="304" y1="45.4" x2="316" y2="57.4"/><line x1="316" y1="45.4" x2="304" y2="57.4"/></g>
+          <g class="kreuz-pt kreuz-m"><line x1="225.5" y1="185.5" x2="234.5" y2="194.5"/><line x1="234.5" y1="185.5" x2="225.5" y2="194.5"/></g>
+          <text class="ptlabel" x="54" y="210">A</text>
+          <text class="ptlabel" x="394" y="210">B</text>
+          <text class="ptlabelC" x="320" y="50">C</text>
+          <text class="ptlabel" x="222" y="212">M</text>
+          <text class="wa" x="104" y="182">α</text>
+          <text class="wb" x="360" y="178">β</text>
+        </svg>
+      </div>
+
+      <div class="stufe-inhalt" data-stufe-inhalt="a1-fortg">
+        <div class="arbeitsauftrag"><p>Ziehe die passenden Begriffe aus der Wortbank in die Lücken (eintippen). Jeder Begriff wird genau einmal gebraucht.</p></div>
+        <div class="wortbank"><span class="wort">Radien</span><span class="wort">gleichschenklig</span><span class="wort">Basiswinkelsatz</span><span class="wort">180</span></div>
+        <div class="luecken-beweis">
+          Wir zeichnen den Radius $\overline{MC}$ ein. Dann sind $\overline{MA}$, $\overline{MB}$ und $\overline{MC}$ alle gleich lang, denn sie sind
+          <input class="luecke" data-k="a1f-1" aria-label="Lücke 1"> des Kreises.<br>
+          Deshalb sind die Dreiecke $AMC$ und $BMC$
+          <input class="luecke" data-k="a1f-2" aria-label="Lücke 2">.<br>
+          Nach dem <input class="luecke" data-k="a1f-3" aria-label="Lücke 3"> sind die Basiswinkel jeweils gleich groß ($\alpha$ bzw. $\beta$).<br>
+          Die Winkelsumme im Dreieck $ABC$ beträgt <input class="luecke" data-k="a1f-4" aria-label="Lücke 4">$^\circ$, also $2(\alpha+\beta)=180^\circ$ und damit $\alpha+\beta=90^\circ$.
+        </div>
+        <div class="btnrow"><button class="action" data-pruef="a1-fortg">Prüfen</button><button class="action leeren" data-leeren="a1-fortg" style="display:none;">Leeren</button></div>
+        <div class="feedback" data-fb="a1-fortg"></div>
+        <details class="tipp" data-tipp="a1-fortg"><summary>Tipp anzeigen</summary><div class="tippinhalt">
+          <div class="tippstufe" data-ts="0">Strecken vom Mittelpunkt zum Kreis heißen alle gleich – schau in die Wortbank.</div>
+          <div class="tippstufe" data-ts="1">Ein Dreieck mit zwei gleich langen Seiten ist „gleichschenklig“. Der Satz über seine Basiswinkel heißt „Basiswinkelsatz“.</div>
+          <div class="tippstufe" data-ts="2">Lösung: Radien · gleichschenklig · Basiswinkelsatz · 180.</div>
+          <button class="action tipp-mehr" data-mehr="a1-fortg">Nächster Tipp ▸</button>
+        </div></details>
+        <div class="heft">
+          <div class="htitel"><span class="ic">✏️</span>Jetzt du – im Heft</div>
+          <p>Schreibe den vervollständigten Beweis in eigenen Worten in dein Heft und zeichne die Beweisfigur dazu.</p>
+          <div class="vorlegen"><span>👩‍🏫</span> Zeige deinen Beweis deiner Lehrkraft.</div>
+        </div>
+      </div>
+
+      <div class="stufe-inhalt" data-stufe-inhalt="a1-profi" style="display:none;">
+        <div class="arbeitsauftrag"><p>Hier fehlen auch die <b>Begründungen</b>. Trage die fehlenden Begriffe und Zahlen ein.</p></div>
+        <details class="wortbank-klapp">
+          <summary>Wortliste anzeigen</summary>
+          <div class="wb-inhalt">
+            <p class="wb-hint">Vorsicht: Hier sind auch Wörter dabei, die <b>nicht</b> in den Beweis gehören. Wähle nur die passenden.</p>
+            <div class="wortbank"><span class="wort">Winkelsumme</span><span class="wort">gleichseitig</span><span class="wort">90</span><span class="wort">Radien</span><span class="wort">Durchmesser</span><span class="wort">Basiswinkelsatz</span><span class="wort">gleichschenklig</span><span class="wort">60</span></div>
+          </div>
+        </details>
+        <div class="luecken-beweis">
+          Der Radius $\overline{MC}$ wird eingezeichnet. Es gilt $\overline{MA}=\overline{MB}=\overline{MC}$, weil alle
+          <input class="luecke" data-k="a1p-1" aria-label="Lücke 1"> sind.<br>
+          Daraus folgt: $AMC$ und $BMC$ sind <input class="luecke" data-k="a1p-2" aria-label="Lücke 2">.<br>
+          Der <input class="luecke" data-k="a1p-3" aria-label="Lücke 3"> liefert: Winkel bei $A$ = Winkel bei $C$ (links) $=\alpha$, Winkel bei $B$ = Winkel bei $C$ (rechts) $=\beta$.<br>
+          Mit der <input class="luecke" data-k="a1p-4" aria-label="Lücke 4"> gilt $\alpha+\beta+(\alpha+\beta)=180^\circ$.<br>
+          Also $2(\alpha+\beta)=180^\circ$, somit ist der Winkel bei $C$ gleich <input class="luecke" data-k="a1p-5" aria-label="Lücke 5">$^\circ$.
+        </div>
+        <div class="btnrow"><button class="action" data-pruef="a1-profi">Prüfen</button><button class="action leeren" data-leeren="a1-profi" style="display:none;">Leeren</button></div>
+        <div class="feedback" data-fb="a1-profi"></div>
+        <details class="tipp" data-tipp="a1-profi"><summary>Tipp anzeigen</summary><div class="tippinhalt">
+          <div class="tippstufe" data-ts="0">Gehe die Beweiskette von oben durch: Welcher Grund passt zu welcher Aussage?</div>
+          <div class="tippstufe" data-ts="1">Der vorletzte Schritt nutzt die Winkelsumme im Dreieck ($180^\circ$). Der letzte Schritt halbiert das.</div>
+          <div class="tippstufe" data-ts="2">Lösung: Radien · gleichschenklig · Basiswinkelsatz · Winkelsumme · 90.</div>
+          <button class="action tipp-mehr" data-mehr="a1-profi">Nächster Tipp ▸</button>
+        </div></details>
+        <div class="heft">
+          <div class="htitel"><span class="ic">✏️</span>Jetzt du – im Heft</div>
+          <p>Schreibe den vollständigen Beweis mit allen Begründungen sauber ins Heft – jede Aussage mit ihrem Grund (z. B. „… weil … “).</p>
+          <div class="vorlegen"><span>👩‍🏫</span> Zeige deinen begründeten Beweis deiner Lehrkraft.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- KARTE 2: Begründungen zuordnen (Paare) -->
+  <section class="card" data-card="1">
+    <div class="panel">
+      <h2>Aufgabe 2: Aussage und Begründung verbinden</h2>
+      <div class="stufe-hint">Tippe links eine Aussage an, dann rechts die passende Begründung – so entsteht ein Paar. Erneutes Antippen löst eine Markierung wieder.</div>
+
+      <div class="paare" id="paare-box">
+        <div class="paar-spalte" id="paare-links">
+          <div class="paar-titel">Aussage</div>
+        </div>
+        <div class="paar-spalte" id="paare-rechts">
+          <div class="paar-titel">Begründung</div>
+        </div>
+      </div>
+      <div class="btnrow"><button class="action" id="paare-pruef">Prüfen</button><button class="action leeren" id="paare-leeren" style="display:none;">Neu beginnen</button></div>
+      <div class="feedback" data-fb="paare"></div>
+      <details class="tipp"><summary>Tipp anzeigen</summary><div class="tippinhalt"><p>Frag dich bei jeder Aussage: <i>Warum</i> gilt sie? Die Gleichheit der Strecken kommt von den Radien; die gleichen Winkel vom Basiswinkelsatz; die $90^\circ$ von der Winkelsumme.</p></div></details>
+
+      <div class="heft">
+        <div class="htitel"><span class="ic">✏️</span>Jetzt du – im Heft</div>
+        <p>Schreibe die vier Paare als vollständige Sätze ins Heft, z. B.: „$\overline{MA}=\overline{MB}=\overline{MC}$, <b>weil</b> alle drei Radien des Kreises sind.“</p>
+        <div class="vorlegen"><span>👩‍🏫</span> Zeige deine vier Begründungssätze deiner Lehrkraft.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- KARTE 3: Winkel berechnen -->
+  <section class="card" data-card="2">
+    <div class="panel">
+      <h2>Aufgabe 3: Winkel im Teildreieck berechnen</h2>
+      <div class="stufen" data-stufen="a3">
+        <button class="stufe-btn aktiv" data-stufe="fortg">Fortgeschritten</button>
+        <button class="stufe-btn" data-stufe="profi">Profi</button>
+      </div>
+      <div class="stufe-hint">Nutze, dass die Teildreiecke gleichschenklig sind und der Winkel bei $C$ insgesamt $90^\circ$ ergibt.</div>
+
+      <div class="stufe-inhalt" data-stufe-inhalt="a3-fortg">
+        <div class="arbeitsauftrag">
+          <p>$\overline{AB}$ ist Durchmesser, $C$ liegt auf dem Kreis. Der Radius $\overline{MC}$ ist eingezeichnet. Im gleichschenkligen Dreieck $AMC$ beträgt der Basiswinkel bei $A$ genau $34^\circ$.</p>
+        </div>
+        <div class="frage-zeile">
+          <label>Wie groß ist der Basiswinkel bei $C$ im Dreieck $AMC$? &nbsp;$\alpha =$</label>
+          <input class="einzel" data-k="a3-fortg-alpha" inputmode="numeric"><span class="einheit">°</span>
+        </div>
+        <div class="frage-zeile">
+          <label>Wie groß ist dann der Basiswinkel $\beta$ im Dreieck $BMC$? &nbsp;$\beta =$</label>
+          <input class="einzel" data-k="a3-fortg-beta" inputmode="numeric"><span class="einheit">°</span>
+        </div>
+        <div class="btnrow"><button class="action" data-pruef="a3-fortg">Prüfen</button><button class="action leeren" data-leeren="a3-fortg" style="display:none;">Leeren</button></div>
+        <div class="feedback" data-fb="a3-fortg"></div>
+        <details class="tipp" data-tipp="a3-fortg"><summary>Tipp anzeigen</summary><div class="tippinhalt">
+          <div class="tippstufe" data-ts="0">Im gleichschenkligen Dreieck $AMC$ sind beide Basiswinkel gleich – also ist der bei $C$ genauso groß wie der bei $A$.</div>
+          <div class="tippstufe" data-ts="1">Der gesamte Winkel bei $C$ ist $\alpha+\beta=90^\circ$. Stelle nach $\beta$ um.</div>
+          <div class="tippstufe" data-ts="2">Lösung: $\alpha=34^\circ$, also $\beta=90^\circ-34^\circ=56^\circ$.</div>
+          <button class="action tipp-mehr" data-mehr="a3-fortg">Nächster Tipp ▸</button>
+        </div></details>
+        <div class="heft">
+          <div class="htitel"><span class="ic">✏️</span>Jetzt du – im Heft</div>
+          <p>Zeichne die Figur und trage alle vier Basiswinkel ($\alpha$ bei $A$ und $C$, $\beta$ bei $B$ und $C$) farbig ein. Prüfe, dass bei $C$ insgesamt $90^\circ$ stehen.</p>
+          <div class="vorlegen"><span>👩‍🏫</span> Zeige deine beschriftete Zeichnung deiner Lehrkraft.</div>
+        </div>
+      </div>
+
+      <div class="stufe-inhalt" data-stufe-inhalt="a3-profi" style="display:none;">
+        <div class="arbeitsauftrag">
+          <p>$\overline{AB}$ ist Durchmesser, $\overline{MC}$ ist eingezeichnet. Der <b>Mittelpunktswinkel</b> $\angle AMC$ (im Dreieck $AMC$ bei $M$) beträgt $126^\circ$.</p>
+        </div>
+        <div class="frage-zeile">
+          <label>Basiswinkel $\alpha$ im Dreieck $AMC$: &nbsp;$\alpha =$</label>
+          <input class="einzel" data-k="a3-profi-alpha" inputmode="numeric"><span class="einheit">°</span>
+        </div>
+        <div class="frage-zeile">
+          <label>Basiswinkel $\beta$ im Dreieck $BMC$: &nbsp;$\beta =$</label>
+          <input class="einzel" data-k="a3-profi-beta" inputmode="numeric"><span class="einheit">°</span>
+        </div>
+        <div class="btnrow"><button class="action" data-pruef="a3-profi">Prüfen</button><button class="action leeren" data-leeren="a3-profi" style="display:none;">Leeren</button></div>
+        <div class="feedback" data-fb="a3-profi"></div>
+        <details class="tipp" data-tipp="a3-profi"><summary>Tipp anzeigen</summary><div class="tippinhalt">
+          <div class="tippstufe" data-ts="0">Im Dreieck $AMC$ ist die Winkelsumme $180^\circ$. Die beiden Basiswinkel sind gleich groß.</div>
+          <div class="tippstufe" data-ts="1">$\alpha=\frac{180^\circ-126^\circ}{2}$. Den Winkel $\beta$ findest du über $\alpha+\beta=90^\circ$.</div>
+          <div class="tippstufe" data-ts="2">Lösung: $\alpha=27^\circ$, $\beta=90^\circ-27^\circ=63^\circ$.</div>
+          <button class="action tipp-mehr" data-mehr="a3-profi">Nächster Tipp ▸</button>
+        </div></details>
+        <div class="heft">
+          <div class="htitel"><span class="ic">✏️</span>Jetzt du – im Heft</div>
+          <p>Notiere den vollständigen Rechenweg: vom Mittelpunktswinkel über den Basiswinkel $\alpha$ bis zu $\beta$. Begründe jeden Schritt.</p>
+          <div class="vorlegen"><span>👩‍🏫</span> Zeige deinen Rechenweg deiner Lehrkraft.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- KARTE 4: Beweisidee übertragen -->
+  <section class="card" data-card="3">
+    <div class="panel">
+      <h2>Aufgabe 4: Die Beweisidee übertragen</h2>
+      <div class="stufen" data-stufen="a4">
+        <button class="stufe-btn aktiv" data-stufe="fortg">Fortgeschritten</button>
+        <button class="stufe-btn" data-stufe="profi">Profi</button>
+      </div>
+      <div class="stufe-hint">Hier wendest du die Idee „Radien sind gleich lang → gleichschenklig“ auf eine neue Situation an.</div>
+
+      <div class="stufe-inhalt" data-stufe-inhalt="a4-fortg">
+        <div class="arbeitsauftrag">
+          <p>In einem Kreis mit Mittelpunkt $M$ liegen zwei Punkte $P$ und $Q$ auf dem Kreis. Man verbindet $M$ mit $P$ und mit $Q$.</p>
+        </div>
+        <p class="frage-zeile" style="font-weight:600;">Warum ist das Dreieck $MPQ$ immer gleichschenklig?</p>
+        <div class="mc" data-mc="a4-fortg" data-correct="1">
+          <button data-opt="0">Weil $P$ und $Q$ immer gleich weit voneinander entfernt sind.</button>
+          <button data-opt="1">Weil $\overline{MP}$ und $\overline{MQ}$ beide Radien sind und daher gleich lang.</button>
+          <button data-opt="2">Weil jeder Punkt im Kreis denselben Abstand zum Rand hat.</button>
+        </div>
+        <div class="feedback" data-fb="a4-fortg"></div>
+        <details class="tipp" data-tipp="a4-fortg"><summary>Tipp anzeigen</summary><div class="tippinhalt">
+          <div class="tippstufe" data-ts="0">Das war auch die Schlüsselidee im Thales-Beweis: Welche Strecken sind dort gleich lang?</div>
+          <div class="tippstufe" data-ts="1">Strecken vom Mittelpunkt zu einem Kreispunkt sind Radien – und alle Radien eines Kreises sind gleich lang.</div>
+          <div class="tippstufe" data-ts="2">Lösung: Antwort 2 – $\overline{MP}$ und $\overline{MQ}$ sind beide Radien, also gleich lang. Damit ist $MPQ$ gleichschenklig.</div>
+          <button class="action tipp-mehr" data-mehr="a4-fortg">Nächster Tipp ▸</button>
+        </div></details>
+        <div class="heft">
+          <div class="htitel"><span class="ic">✏️</span>Jetzt du – im Heft</div>
+          <p>Zeichne einen Kreis mit zwei Radien $\overline{MP}$ und $\overline{MQ}$ und begründe in einem Satz, warum das Dreieck gleichschenklig ist.</p>
+          <div class="vorlegen"><span>👩‍🏫</span> Zeige Zeichnung und Begründung deiner Lehrkraft.</div>
+        </div>
+      </div>
+
+      <div class="stufe-inhalt" data-stufe-inhalt="a4-profi" style="display:none;">
+        <div class="arbeitsauftrag">
+          <p>Lukas behauptet, er habe den Satz des Thales bewiesen:<br>
+          <i>„Ich zeichne den Radius $\overline{MC}$. Weil $\overline{MA}=\overline{MB}=\overline{MC}$ ist, ist das Dreieck $ABC$ gleichseitig. In einem gleichseitigen Dreieck sind alle Winkel $60^\circ$ – also auch bei $C$.“</i></p>
+        </div>
+        <p class="frage-zeile" style="font-weight:600;">Wo steckt der Fehler in Lukas’ Beweis?</p>
+        <div class="mc" data-mc="a4-profi" data-correct="0">
+          <button data-opt="0">Das Dreieck $ABC$ ist <b>nicht</b> gleichseitig. Gleich lang sind nur die Radien $\overline{MA}=\overline{MB}=\overline{MC}$ – das macht die Teildreiecke $AMC$ und $BMC$ gleichschenklig, nicht $ABC$ gleichseitig.</button>
+          <button data-opt="1">Der Fehler ist, dass $\overline{MC}$ gar kein Radius ist.</button>
+          <button data-opt="2">Es gibt keinen Fehler, der Beweis ist richtig.</button>
+        </div>
+        <div class="feedback" data-fb="a4-profi"></div>
+        <details class="tipp" data-tipp="a4-profi"><summary>Tipp anzeigen</summary><div class="tippinhalt">
+          <div class="tippstufe" data-ts="0">Prüfe Lukas’ Schluss genau: Folgt aus „drei gleiche Radien“ wirklich, dass die Dreiecksseiten $\overline{AB}$, $\overline{BC}$, $\overline{CA}$ gleich lang sind?</div>
+          <div class="tippstufe" data-ts="1">$\overline{MA}$, $\overline{MB}$, $\overline{MC}$ sind Radien – aber das sind <i>nicht</i> die Seiten des Dreiecks $ABC$. Die Seiten $\overline{AC}$ und $\overline{BC}$ sind unterschiedlich lang.</div>
+          <div class="tippstufe" data-ts="2">Lösung: Antwort 1 – richtig ist „gleichschenklige Teildreiecke“, nicht „gleichseitiges Dreieck $ABC$“.</div>
+          <button class="action tipp-mehr" data-mehr="a4-profi">Nächster Tipp ▸</button>
+        </div></details>
+        <div class="heft">
+          <div class="htitel"><span class="ic">✏️</span>Jetzt du – im Heft</div>
+          <p>Schreibe Lukas eine kurze Rückmeldung: Erkläre den Fehler und gib den korrekten Beweisschritt an dieser Stelle an.</p>
+          <div class="vorlegen"><span>👩‍🏫</span> Zeige deine Rückmeldung deiner Lehrkraft.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- KARTE 5: Wiederholung -->
+  <section class="card" data-card="4">
+    <div class="panel">
+      <h2>Wiederholung: Winkel im gleichschenkligen Dreieck</h2>
+      <p>Der Beweis stützt sich auf gleichschenklige Dreiecke. Das wiederholst du hier.</p>
+      <div class="stufen" data-stufen="w">
+        <button class="stufe-btn aktiv" data-stufe="fortg">Fortgeschritten</button>
+        <button class="stufe-btn" data-stufe="profi">Profi</button>
+      </div>
+      <div class="stufe-hint">Tippe auf eine Stufe zum Wechseln. Dein Stand pro Stufe bleibt erhalten.</div>
+
+      <div class="stufe-inhalt" data-stufe-inhalt="w-fortg">
+        <div class="arbeitsauftrag"><p>Ein gleichschenkliges Dreieck hat zwei Basiswinkel von je $50^\circ$.</p></div>
+        <div class="frage-zeile">
+          <label>Wie groß ist der Spitzenwinkel (an der Spitze gegenüber der Basis)? &nbsp;$\gamma =$</label>
+          <input class="einzel" data-k="w-fortg-g" inputmode="numeric"><span class="einheit">°</span>
+        </div>
+        <div class="btnrow"><button class="action" data-pruef="w-fortg">Prüfen</button><button class="action leeren" data-leeren="w-fortg" style="display:none;">Leeren</button></div>
+        <div class="feedback" data-fb="w-fortg"></div>
+        <details class="tipp" data-tipp="w-fortg"><summary>Tipp anzeigen</summary><div class="tippinhalt">
+          <div class="tippstufe" data-ts="0">Die drei Winkel ergeben zusammen $180^\circ$. Zwei davon kennst du.</div>
+          <div class="tippstufe" data-ts="1">$\gamma=180^\circ-50^\circ-50^\circ$.</div>
+          <div class="tippstufe" data-ts="2">Lösung: $\gamma=80^\circ$.</div>
+          <button class="action tipp-mehr" data-mehr="w-fortg">Nächster Tipp ▸</button>
+        </div></details>
+        <div class="heft">
+          <div class="htitel"><span class="ic">✏️</span>Jetzt du – im Heft</div>
+          <p>Zeichne das gleichschenklige Dreieck und markiere die beiden gleichen Basiswinkel und den Spitzenwinkel.</p>
+          <div class="vorlegen"><span>👩‍🏫</span> Zeige deine Zeichnung deiner Lehrkraft.</div>
+        </div>
+      </div>
+
+      <div class="stufe-inhalt" data-stufe-inhalt="w-profi" style="display:none;">
+        <div class="arbeitsauftrag"><p>Ein gleichschenkliges Dreieck hat den Spitzenwinkel $\gamma=36^\circ$.</p></div>
+        <div class="frage-zeile">
+          <label>Wie groß ist jeder der beiden Basiswinkel? &nbsp;$\alpha =$</label>
+          <input class="einzel" data-k="w-profi-a" inputmode="numeric"><span class="einheit">°</span>
+        </div>
+        <div class="btnrow"><button class="action" data-pruef="w-profi">Prüfen</button><button class="action leeren" data-leeren="w-profi" style="display:none;">Leeren</button></div>
+        <div class="feedback" data-fb="w-profi"></div>
+        <details class="tipp" data-tipp="w-profi"><summary>Tipp anzeigen</summary><div class="tippinhalt">
+          <div class="tippstufe" data-ts="0">Die beiden Basiswinkel sind gleich groß. Zusammen mit $\gamma$ ergeben sie $180^\circ$.</div>
+          <div class="tippstufe" data-ts="1">$2\alpha=180^\circ-36^\circ=144^\circ$. Teile durch $2$.</div>
+          <div class="tippstufe" data-ts="2">Lösung: $\alpha=72^\circ$.</div>
+          <button class="action tipp-mehr" data-mehr="w-profi">Nächster Tipp ▸</button>
+        </div></details>
+        <div class="heft">
+          <div class="htitel"><span class="ic">✏️</span>Jetzt du – im Heft</div>
+          <p>Notiere den Rechenweg: von der Winkelsumme über $2\alpha=144^\circ$ bis zum Basiswinkel. Zeichne das Dreieck dazu.</p>
+          <div class="vorlegen"><span>👩‍🏫</span> Zeige Rechnung und Zeichnung deiner Lehrkraft.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- KARTE 6: Auswertung -->
+  <section class="card" data-card="5">
+    <div class="panel">
+      <h2>Deine Auswertung</h2>
+      <p>Hier siehst du, wie viele Aufgaben du in der aktuell gewählten Stufe richtig gelöst hast.</p>
+      <div class="score" id="score-text">– von – Aufgaben gelöst</div>
+      <div class="balken"><div id="score-bar"></div></div>
+      <div id="ausw-liste"></div>
+      <div class="merk">
+        <h3>Das kannst du jetzt</h3>
+        <p>Du kannst den Beweis des Satzes von Thales vervollständigen, jede Aussage <b>begründen</b>, Winkel in den gleichschenkligen Teildreiecken berechnen und die Beweisidee auf neue Situationen übertragen. Damit hast du nicht nur einen Satz gelernt, sondern <b>mathematisches Argumentieren</b> geübt.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="weiter-wrap" id="weiterwrap">
+    <a class="weiter" href="#">Übung abgeschlossen ✓</a>
+    <div class="weiter-hint">Du hast alle Aufgaben dieser Übung bearbeitet.</div>
+  </div>
+
+</main>
+
+<div id="trex" title="Made by Mathedino">🦖<span class="bubble">Made by Mathedino</span></div>
+
+<script>
+(function(){
+  "use strict";
+
+  const State={
+    cardSeen:[true,false,false,false,false,false],
+    stufe:{a1:'fortg',a3:'fortg',a4:'fortg',w:'fortg'},
+    eingaben:{}, status:{}, mcSel:{},
+    paare:{links:null, verbunden:{}, geprueft:false}
+  };
+
+  /* Lückentext-Lösungen (Normalisierung: lowercase, ohne Leerzeichen) */
+  const LUECKEN={
+    'a1-fortg':{'a1f-1':['radien'],'a1f-2':['gleichschenklig'],'a1f-3':['basiswinkelsatz'],'a1f-4':['180']},
+    'a1-profi':{'a1p-1':['radien'],'a1p-2':['gleichschenklig'],'a1p-3':['basiswinkelsatz'],'a1p-4':['winkelsumme'],'a1p-5':['90']}
+  };
+  /* Zahl-/Feld-Lösungen */
+  const FELDER={
+    'a3-fortg':{'a3-fortg-alpha':34,'a3-fortg-beta':56},
+    'a3-profi':{'a3-profi-alpha':27,'a3-profi-beta':63},
+    'w-fortg':{'w-fortg-g':80},
+    'w-profi':{'w-profi-a':72}
+  };
+  /* MC-Single Lösungen */
+  const MC={'a4-fortg':1,'a4-profi':0};
+
+  /* Paare: links-id -> rechts-id */
+  const PAARE_DATEN={
+    links:[
+      {id:'L1',txt:'$\\overline{MA}=\\overline{MB}=\\overline{MC}$'},
+      {id:'L2',txt:'Dreieck $AMC$ ist gleichschenklig'},
+      {id:'L3',txt:'Winkel bei $A$ = Winkel bei $C$ (im Dreieck $AMC$)'},
+      {id:'L4',txt:'$\\alpha+\\beta=90^\\circ$'}
+    ],
+    rechts:[
+      {id:'R3',txt:'nach dem Basiswinkelsatz'},
+      {id:'R1',txt:'weil alle drei Radien des Kreises sind'},
+      {id:'R4',txt:'weil $2(\\alpha+\\beta)=180^\\circ$ (Winkelsumme)'},
+      {id:'R2',txt:'weil $\\overline{MA}=\\overline{MC}$ (zwei gleiche Schenkel)'}
+    ],
+    loesung:{'L1':'R1','L2':'R2','L3':'R3','L4':'R4'}
+  };
+
+  /* Tabs */
+  const tabs=Array.from(document.querySelectorAll('.tab'));
+  const cards=Array.from(document.querySelectorAll('.card'));
+  function showCard(i){
+    cards.forEach(c=>c.classList.toggle('active',+c.dataset.card===i));
+    tabs.forEach(t=>t.classList.toggle('active',+t.dataset.i===i));
+    State.cardSeen[i]=true;
+    tabs.forEach((t,k)=>{if(State.cardSeen[k])t.classList.add('done');});
+    if(i===5) renderAuswertung();
+    window.scrollTo({top:0,behavior:'smooth'});
+    if(window.MathJax&&MathJax.typesetPromise){MathJax.typesetPromise();}
+  }
+  tabs.forEach(t=>t.addEventListener('click',()=>showCard(+t.dataset.i)));
+
+  /* Stufen */
+  document.querySelectorAll('.stufen').forEach(box=>{
+    const grp=box.dataset.stufen;
+    box.querySelectorAll('.stufe-btn').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        const stufe=btn.dataset.stufe; State.stufe[grp]=stufe;
+        box.querySelectorAll('.stufe-btn').forEach(b=>b.classList.toggle('aktiv',b===btn));
+        document.querySelectorAll('[data-stufe-inhalt^="'+grp+'-"]').forEach(div=>{
+          div.style.display=(div.dataset.stufeInhalt===grp+'-'+stufe)?'block':'none';
+        });
+        if(window.MathJax&&MathJax.typesetPromise){MathJax.typesetPromise();}
+      });
+    });
+  });
+
+  /* Eingaben merken */
+  document.querySelectorAll('input[data-k]').forEach(inp=>{
+    inp.addEventListener('input',()=>{State.eingaben[inp.dataset.k]=inp.value;});
+  });
+  function norm(s){return String(s==null?'':s).trim().toLowerCase().replace(/\s/g,'');}
+  function normNum(s){if(s==null)return null;s=String(s).trim().replace(',','.').replace(/\s/g,'').replace('°','');if(s==='')return null;const v=parseFloat(s);return isNaN(v)?null:v;}
+
+  /* Prüfen: Lücken + Felder gemeinsam */
+  document.querySelectorAll('[data-pruef]').forEach(btn=>{
+    const key=btn.dataset.pruef;
+    btn.addEventListener('click',()=>{
+      const fb=document.querySelector('[data-fb="'+key+'"]');
+      const leerBtn=document.querySelector('[data-leeren="'+key+'"]');
+      const luecken=LUECKEN[key]; const felder=FELDER[key];
+      let alleGefuellt=true, alleRichtig=true;
+      if(luecken){
+        for(const f in luecken){
+          const inp=document.querySelector('input[data-k="'+f+'"]'); const v=norm(inp.value);
+          if(v===''){alleGefuellt=false;alleRichtig=false;continue;}
+          if(!luecken[f].includes(v)) alleRichtig=false;
+        }
+      }
+      if(felder){
+        for(const f in felder){
+          const inp=document.querySelector('input[data-k="'+f+'"]'); const v=normNum(inp.value);
+          if(v===null){alleGefuellt=false;alleRichtig=false;continue;}
+          if(Math.abs(v-felder[f])>1e-9) alleRichtig=false;
+        }
+      }
+      if(!alleGefuellt){fb.className='feedback schlecht';fb.textContent='Bitte fülle alle Felder aus.';return;}
+      if(alleRichtig){State.status[key]='gut';fb.className='feedback gut';fb.textContent='✅ Richtig! Saubere Argumentation.';leerBtn.style.display='none';}
+      else{State.status[key]='schlecht';fb.className='feedback schlecht';fb.innerHTML='❌ Da stimmt noch etwas nicht. Nutze den Tipp und korrigiere mit „Leeren“.';leerBtn.style.display='inline-block';}
+      checkComplete();
+    });
+  });
+  document.querySelectorAll('[data-leeren]').forEach(btn=>{
+    const key=btn.dataset.leeren;
+    btn.addEventListener('click',()=>{
+      const luecken=LUECKEN[key]||{}; const felder=FELDER[key]||{};
+      [...Object.keys(luecken),...Object.keys(felder)].forEach(f=>{const inp=document.querySelector('input[data-k="'+f+'"]');if(inp){inp.value='';delete State.eingaben[f];}});
+      delete State.status[key];
+      const fb=document.querySelector('[data-fb="'+key+'"]');fb.className='feedback';fb.textContent='';
+      btn.style.display='none';
+    });
+  });
+
+  /* MC Single */
+  document.querySelectorAll('.mc').forEach(group=>{
+    const key=group.dataset.mc; const correct=+group.dataset.correct;
+    const fb=document.querySelector('[data-fb="'+key+'"]');
+    group.querySelectorAll('button').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        if(State.status[key]==='gut')return;
+        const opt=+btn.dataset.opt;
+        group.querySelectorAll('button').forEach(b=>b.classList.add('disabled'));
+        if(opt===correct){btn.classList.add('richtig');State.status[key]='gut';fb.className='feedback gut';fb.textContent='✅ Richtig!';}
+        else{btn.classList.add('falsch');group.querySelector('[data-opt="'+correct+'"]').classList.add('richtig');State.status[key]='schlecht';fb.className='feedback schlecht';fb.innerHTML='❌ Nicht ganz – die richtige Antwort ist grün markiert.';}
+        checkComplete();
+      });
+    });
+  });
+
+  /* Paare verbinden (Antippen) */
+  function renderPaare(){
+    const lEl=document.getElementById('paare-links'); const rEl=document.getElementById('paare-rechts');
+    lEl.querySelectorAll('.paar-item').forEach(e=>e.remove());
+    rEl.querySelectorAll('.paar-item').forEach(e=>e.remove());
+    // Paar-Nummern vergeben: in fester Reihenfolge der linken Items, die verbunden sind
+    const paarNr={}; // L-id -> Nummer
+    let nr=0;
+    PAARE_DATEN.links.forEach(it=>{ if(State.paare.verbunden[it.id]){ nr++; paarNr[it.id]=nr; } });
+    PAARE_DATEN.links.forEach(it=>{
+      const d=document.createElement('div'); d.className='paar-item'; d.dataset.id=it.id; d.dataset.seite='L';
+      const vb=State.paare.verbunden[it.id];
+      let badge='';
+      if(vb){ const n=paarNr[it.id]; d.classList.add('verbunden','paar-'+n); badge='<span class="badge">'+n+'</span>'; }
+      if(State.paare.links===it.id) d.classList.add('markiert');
+      d.innerHTML=badge+'<span>'+it.txt+'</span>';
+      lEl.appendChild(d);
+    });
+    PAARE_DATEN.rechts.forEach(it=>{
+      const d=document.createElement('div'); d.className='paar-item'; d.dataset.id=it.id; d.dataset.seite='R';
+      // finde, welches L mit diesem R verbunden ist
+      let lk=null; for(const k in State.paare.verbunden){ if(State.paare.verbunden[k]===it.id){ lk=k; break; } }
+      let badge='';
+      if(lk){ const n=paarNr[lk]; d.classList.add('verbunden','paar-'+n); badge='<span class="badge">'+n+'</span>'; }
+      d.innerHTML=badge+'<span>'+it.txt+'</span>';
+      rEl.appendChild(d);
+    });
+    if(window.MathJax&&MathJax.typesetPromise){MathJax.typesetPromise([document.getElementById('paare-box')]);}
+  }
+  document.getElementById('paare-box').addEventListener('click',e=>{
+    if(State.paare.geprueft) return;
+    const item=e.target.closest('.paar-item'); if(!item) return;
+    const id=item.dataset.id, seite=item.dataset.seite;
+    if(seite==='L'){
+      // links angetippt: bereits verbunden? -> lösen
+      if(State.paare.verbunden[id]){delete State.paare.verbunden[id];State.paare.links=null;renderPaare();return;}
+      State.paare.links=(State.paare.links===id)?null:id; renderPaare();
+    }else{
+      // rechts angetippt: nur wenn links markiert
+      if(!State.paare.links) return;
+      // falls dieses R schon mit anderem L verbunden -> erst lösen
+      for(const lk in State.paare.verbunden){if(State.paare.verbunden[lk]===id) delete State.paare.verbunden[lk];}
+      State.paare.verbunden[State.paare.links]=id; State.paare.links=null; renderPaare();
+    }
+  });
+  document.getElementById('paare-pruef').addEventListener('click',()=>{
+    const fb=document.querySelector('[data-fb="paare"]');
+    const anzahl=Object.keys(State.paare.verbunden).length;
+    if(anzahl<PAARE_DATEN.links.length){fb.className='feedback schlecht';fb.textContent='Verbinde zuerst alle vier Aussagen mit einer Begründung.';return;}
+    let allesRichtig=true;
+    for(const lk in PAARE_DATEN.loesung){if(State.paare.verbunden[lk]!==PAARE_DATEN.loesung[lk])allesRichtig=false;}
+    State.paare.geprueft=true;
+    // visuelles Feedback: richtige Paare grün, falsche rot
+    document.querySelectorAll('#paare-links .paar-item').forEach(li=>{
+      const lid=li.dataset.id; const rid=State.paare.verbunden[lid];
+      const richtig = rid===PAARE_DATEN.loesung[lid];
+      const ri=document.querySelector('#paare-rechts .paar-item[data-id="'+rid+'"]');
+      [li,ri].forEach(el=>{ if(!el)return; el.classList.remove('paar-1','paar-2','paar-3','paar-4'); el.style.borderColor=richtig?'#1E7A3E':'#C0271E'; el.style.background=richtig?'#EAF6EE':'#FBE9E8'; const bd=el.querySelector('.badge'); if(bd){bd.style.background=richtig?'#1E7A3E':'#C0271E';bd.textContent=richtig?'✓':'✗';} });
+    });
+    if(allesRichtig){State.status['paare']='gut';fb.className='feedback gut';fb.textContent='✅ Alle Begründungen richtig zugeordnet!';}
+    else{State.status['paare']='schlecht';fb.className='feedback schlecht';fb.innerHTML='❌ Die rot markierten Paare stimmen noch nicht. Tippe „Neu beginnen“ und versuch es noch einmal.';document.getElementById('paare-leeren').style.display='inline-block';}
+    checkComplete();
+  });
+  document.getElementById('paare-leeren').addEventListener('click',()=>{
+    State.paare={links:null,verbunden:{},geprueft:false};delete State.status['paare'];
+    const fb=document.querySelector('[data-fb="paare"]');fb.className='feedback';fb.textContent='';
+    document.getElementById('paare-leeren').style.display='none';
+    document.querySelectorAll('#paare-box .paar-item').forEach(el=>{el.style.borderColor='';el.style.background='';});
+    renderPaare();
+  });
+
+  /* Gestufte Tipps */
+  document.querySelectorAll('[data-mehr]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const cont=btn.closest('.tippinhalt'); const stufen=Array.from(cont.querySelectorAll('.tippstufe'));
+      const naechste=stufen.find(s=>!s.classList.contains('show'));
+      if(naechste){naechste.classList.add('show');if(window.MathJax&&MathJax.typesetPromise){MathJax.typesetPromise([naechste]);}}
+      if(stufen.filter(s=>s.classList.contains('show')).length>=stufen.length) btn.style.display='none';
+    });
+  });
+  document.querySelectorAll('details.tipp').forEach(d=>{
+    d.addEventListener('toggle',()=>{if(d.open){const e=d.querySelector('.tippstufe');if(e&&!e.classList.contains('show')){e.classList.add('show');if(window.MathJax&&MathJax.typesetPromise){MathJax.typesetPromise([e]);}}}});
+  });
+
+  /* Auswertung */
+  function aufgKey(grp){
+    if(grp==='a2') return 'paare';
+    return grp+'-'+State.stufe[grp];
+  }
+  function renderAuswertung(){
+    const namen={a1:'Aufgabe 1 – Beweis vervollständigen',a2:'Aufgabe 2 – Begründungen zuordnen',a3:'Aufgabe 3 – Winkel berechnen',a4:'Aufgabe 4 – Beweisidee übertragen',w:'Wiederholung – gleichschenkliges Dreieck'};
+    let html='',geloest=0,gesamt=0;
+    ['a1','a2','a3','a4','w'].forEach(grp=>{
+      const key=aufgKey(grp); const st=State.status[key]; gesamt++;
+      let ic='⬜',txt='noch nicht bearbeitet';
+      if(st==='gut'){ic='✅';txt='richtig gelöst';geloest++;}
+      else if(st==='schlecht'){ic='❌';txt='noch nicht richtig';}
+      let sName='';
+      if(grp!=='a2'){const s=State.stufe[grp];sName=' · Stufe: '+(s==='fortg'?'Fortgeschritten':'Profi');}
+      html+=`<div class="ausw-zeile"><span class="ausw-ic">${ic}</span><div><b>${namen[grp]}</b><br><span style="opacity:.7;font-size:.92rem;">${txt}${sName}</span></div></div>`;
+    });
+    document.getElementById('ausw-liste').innerHTML=html;
+    document.getElementById('score-text').textContent=geloest+' von '+gesamt+' Aufgaben gelöst';
+    document.getElementById('score-bar').style.width=Math.round(geloest/gesamt*100)+'%';
+  }
+
+  function checkComplete(){
+    const alleKarten=State.cardSeen.every(Boolean);
+    let alle=true; ['a1','a2','a3','a4','w'].forEach(grp=>{if(State.status[aufgKey(grp)]!=='gut')alle=false;});
+    if(alle&&alleKarten) document.getElementById('weiterwrap').classList.add('show');
+  }
+
+  renderPaare();
+
+  const trex=document.getElementById('trex');
+  trex.addEventListener('click',()=>{trex.classList.add('show');clearTimeout(trex._t);trex._t=setTimeout(()=>trex.classList.remove('show'),1800);});
+  trex.addEventListener('mouseenter',()=>trex.classList.add('show'));
+  trex.addEventListener('mouseleave',()=>trex.classList.remove('show'));
+
+  if(window.MathJax&&MathJax.startup&&MathJax.startup.promise){MathJax.startup.promise.then(()=>MathJax.typesetPromise());}
+})();
+</script>
+</body>
+</html>
