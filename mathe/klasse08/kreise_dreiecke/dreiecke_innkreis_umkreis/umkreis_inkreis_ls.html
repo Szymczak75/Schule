@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Umkreis und Inkreis</title>
+<meta name="description" content="Erarbeitungs-Lernseite zu Umkreis und Inkreis eines Dreiecks: Konstruktion mit Mittelsenkrechten und Winkelhalbierenden, Begründung über Ortslinien, Vergleich beider Kreise und das Wandern des Umkreismittelpunkts.">
+<meta name="keywords" content="Umkreis, Inkreis, Mittelsenkrechte, Winkelhalbierende, Ortslinie, Dreieck, Konstruktion, Geometrie">
+<meta name="typ" content="Lernseite">
+<meta name="klasse" content="8">
+<meta name="fach" content="mathe">
+<meta name="oberthema" content="Geometrie">
+<meta name="thema" content="Umkreis und Inkreis">
+<script>
+  MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] }, svg: { fontCache: 'global' } };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+  :root{
+    --kopf:#E8923C;--kopf-dunkel:#C8762A;
+    --papier:#FBF7F0;--tinte:#2C2A26;--linie:#D8CFC0;
+    --umkreis:#1C6FB8;--umkreis-hell:#E3F0FA;--inkreis:#1E7A3E;--inkreis-hell:#E6F4EC;
+    --gegeben:#2C2A26;--erfolg:#1E7A3E;--erfolg-bg:#1E7A3E;--fehler:#C0271E;
+    --akzent:#7A4E8C;--karte:#FFFFFF;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Helvetica,Arial,sans-serif;
+    background:var(--papier);color:var(--tinte);font-size:1.05rem;line-height:1.55;padding-bottom:5.5rem;}
+  .wrap{max-width:62rem;margin:0 auto;padding:0 1rem;}
+
+  header{background:linear-gradient(180deg,var(--kopf),var(--kopf-dunkel));color:#fff;padding:1.4rem 1rem 1.6rem;box-shadow:0 2px 8px rgba(0,0,0,.12);}
+  header .wrap{display:flex;flex-direction:column;gap:.25rem;}
+  .eyebrow{font-size:.85rem;letter-spacing:.14em;text-transform:uppercase;font-weight:700;opacity:.92;}
+  header h1{margin:.1rem 0 0;font-size:1.7rem;line-height:1.15;}
+  header p{margin:.3rem 0 0;font-size:1rem;opacity:.95;max-width:46rem;}
+
+  nav.tabs{position:sticky;top:0;z-index:50;background:var(--papier);border-bottom:1px solid var(--linie);padding:.5rem 0;box-shadow:0 2px 6px rgba(0,0,0,.05);}
+  .tabrow{display:flex;flex-wrap:wrap;gap:.4rem;}
+  .tab{border:1px solid var(--linie);background:#fff;color:var(--tinte);border-radius:.6rem;padding:.55rem .8rem;min-height:44px;font-size:.95rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:.45rem;transition:transform .08s ease,background .15s ease;}
+  .tab .num{background:var(--umkreis-hell);color:var(--umkreis);border-radius:50%;width:1.6rem;height:1.6rem;display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:800;flex:none;}
+  .tab.done .num{background:var(--erfolg);color:#fff;}
+  .tab.active{background:var(--kopf);color:#fff;border-color:var(--kopf-dunkel);}
+  .tab.active .num{background:#fff;color:var(--kopf-dunkel);}
+  .tab:active{transform:scale(.97);}
+
+  .card{display:none;animation:fade .25s ease;}
+  .card.active{display:block;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .panel{background:var(--karte);border:1px solid var(--linie);border-radius:1rem;padding:1.3rem 1.2rem 1.5rem;margin:1.2rem 0;box-shadow:0 1px 4px rgba(0,0,0,.05);}
+  .panel h2{margin:.1rem 0 .2rem;font-size:1.35rem;color:var(--kopf-dunkel);}
+  .panel h3{margin:1.3rem 0 .4rem;font-size:1.1rem;}
+  .lead{font-size:1.08rem;}
+  .meta-zeit{display:inline-block;font-size:.82rem;font-weight:700;color:var(--kopf-dunkel);background:#F6E6D4;padding:.2rem .6rem;border-radius:.5rem;letter-spacing:.03em;}
+
+  .figur-box{background:#fff;border:1px solid var(--linie);border-radius:.8rem;padding:1rem;margin:1rem 0;}
+  .figur-svg{width:100%;height:auto;display:block;touch-action:manipulation;}
+  .figur-svg .seite{stroke:var(--gegeben);stroke-width:2.4;fill:none;}
+  .figur-svg .hilfs{stroke-width:2;fill:none;stroke-dasharray:5 4;opacity:0;transition:opacity .5s ease;}
+  .figur-svg .hilfs.show{opacity:1;}
+  .figur-svg .hilfs-um{stroke:var(--umkreis);}
+  .figur-svg .hilfs-in{stroke:var(--inkreis);}
+  .figur-svg .kreis-um{stroke:var(--umkreis);stroke-width:2.4;fill:rgba(28,111,184,.06);opacity:0;transition:opacity .6s ease;}
+  .figur-svg .kreis-um.show{opacity:1;}
+  .figur-svg .kreis-in{stroke:var(--inkreis);stroke-width:2.4;fill:rgba(30,122,62,.06);opacity:0;transition:opacity .6s ease;}
+  .figur-svg .kreis-in.show{opacity:1;}
+  .figur-svg .punkt{fill:var(--gegeben);}
+  .figur-svg .kreuz-pt line{stroke-width:2.6;stroke-linecap:round;}
+  .figur-svg .kreuz-eck line{stroke:var(--gegeben);}
+  .figur-svg .kreuz-c line{stroke:var(--akzent);}
+  .figur-svg .mp-um{fill:var(--umkreis);opacity:0;transition:opacity .4s ease;}
+  .figur-svg .mp-um.show{opacity:1;}
+  .figur-svg .mp-in{fill:var(--inkreis);opacity:0;transition:opacity .4s ease;}
+  .figur-svg .mp-in.show{opacity:1;}
+  .figur-svg .ptlabel{font:700 16px 'Segoe UI',sans-serif;fill:var(--gegeben);}
+  .figur-svg .lbl-um{font:700 15px 'Segoe UI',sans-serif;fill:var(--umkreis);opacity:0;transition:opacity .4s ease;}
+  .figur-svg .lbl-um.show{opacity:1;}
+  .figur-svg .lbl-in{font:700 15px 'Segoe UI',sans-serif;fill:var(--inkreis);opacity:0;transition:opacity .4s ease;}
+  .figur-svg .lbl-in.show{opacity:1;}
+  .figur-svg .beruehr{fill:var(--inkreis);opacity:0;transition:opacity .4s ease;}
+  .figur-svg .beruehr.show{opacity:1;}
+  .figur-svg .radius-lin{stroke-width:2;opacity:0;transition:opacity .4s ease;}
+  .figur-svg .radius-lin.show{opacity:1;}
+
+  .schritt-anzeige{border-left:4px solid var(--kopf);border-radius:.4rem;padding:.8rem 1rem;margin:.8rem 0;min-height:3.5rem;font-size:1.02rem;background:#F6E6D4;}
+  .schritt-anzeige .nr{font-weight:800;color:var(--kopf-dunkel);}
+
+  .btnrow{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:.8rem;}
+  button.action{border:none;border-radius:.6rem;background:var(--umkreis);color:#fff;font-size:1rem;font-weight:700;padding:.7rem 1.1rem;min-height:44px;min-width:44px;cursor:pointer;transition:transform .08s ease,background .15s ease;}
+  button.action:active{transform:scale(.96);}
+  button.action.gruen{background:var(--inkreis);}
+  button.action.sekundaer{background:#fff;color:var(--umkreis);border:1.5px solid var(--umkreis);}
+  button.action:disabled{background:#C9C2B6;cursor:default;}
+
+  .frage{margin:.6rem 0 .2rem;font-weight:600;}
+  .mc{display:flex;flex-direction:column;gap:.5rem;margin:.5rem 0;}
+  .mc button{text-align:left;border:1.5px solid var(--linie);background:#fff;border-radius:.6rem;padding:.8rem 1rem;min-height:44px;font-size:1rem;line-height:1.6;cursor:pointer;color:var(--tinte);transition:transform .08s ease,border-color .15s ease;}
+  .mc button:active{transform:scale(.99);}
+  .mc button.richtig{background:var(--erfolg-bg);color:#fff;border-color:var(--erfolg-bg);font-weight:700;}
+  .mc button.falsch{background:var(--fehler);color:#fff;border-color:var(--fehler);font-weight:700;}
+  .mc button.disabled{pointer-events:none;}
+  .feedback{margin:.5rem 0;padding:.7rem .9rem;border-radius:.6rem;font-weight:600;display:none;}
+  .feedback.gut{display:block;background:var(--erfolg-bg);color:#fff;}
+  .feedback.schlecht{display:block;background:var(--fehler);color:#fff;}
+
+  details.tipp{margin:.7rem 0;border:1px solid var(--linie);border-radius:.6rem;background:#FFFDF8;overflow:hidden;}
+  details.tipp>summary{list-style:none;cursor:pointer;padding:.7rem .9rem;min-height:44px;display:flex;align-items:center;gap:.5rem;font-weight:700;color:var(--kopf-dunkel);}
+  details.tipp>summary::-webkit-details-marker{display:none;}
+  details.tipp>summary::before{content:'💡';}
+  details.tipp[open]>summary::before{content:'📖';}
+  details.tipp .tippinhalt{padding:0 .9rem .9rem;}
+
+  .merk{background:#F3ECF6;border:1px solid #D9C6E4;border-left:5px solid var(--akzent);border-radius:.7rem;padding:1rem 1.1rem;margin:1.1rem 0;}
+  .merk h3{margin:.1rem 0 .4rem;color:var(--akzent);}
+  .satz{background:#FFF4E0;border:2px solid var(--kopf);border-radius:.8rem;padding:1.1rem 1.2rem;margin:1.1rem 0;font-size:1.06rem;}
+  .satz b{color:var(--kopf-dunkel);}
+  .satz.um{background:var(--umkreis-hell);border-color:var(--umkreis);}
+  .satz.um b{color:var(--umkreis);}
+  .satz.in{background:var(--inkreis-hell);border-color:var(--inkreis);}
+  .satz.in b{color:var(--inkreis);}
+
+  table.vergleich{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.97rem;}
+  table.vergleich th,table.vergleich td{border:1px solid var(--linie);padding:.6rem .7rem;text-align:left;vertical-align:top;}
+  table.vergleich th{background:#F6E6D4;color:var(--kopf-dunkel);}
+  table.vergleich th.um{background:var(--umkreis-hell);color:var(--umkreis);}
+  table.vergleich th.in{background:var(--inkreis-hell);color:var(--inkreis);}
+  table.vergleich td:first-child{font-weight:600;background:#FBF7F0;}
+
+  .heft{background:#FEF6E9;border:2px solid var(--kopf);border-radius:.9rem;padding:1rem 1.1rem;margin:1.4rem 0;}
+  .heft .htitel{display:flex;align-items:center;gap:.55rem;font-weight:800;color:var(--kopf-dunkel);font-size:1.12rem;margin-bottom:.3rem;}
+  .heft .htitel .ic{font-size:1.4rem;}
+  .heft ol{margin:.4rem 0 .2rem 1.2rem;padding:0;}
+  .heft ol li{margin:.35rem 0;}
+  .heft .vorlegen{margin-top:.8rem;background:#fff;border:1px dashed var(--kopf-dunkel);border-radius:.6rem;padding:.6rem .8rem;font-size:.95rem;font-weight:600;color:var(--kopf-dunkel);display:flex;align-items:center;gap:.5rem;}
+  details.anleitung{margin:.7rem 0 .2rem;border:1px solid var(--kopf);border-radius:.6rem;background:#fff;overflow:hidden;}
+  details.anleitung>summary{list-style:none;cursor:pointer;padding:.7rem .9rem;min-height:44px;display:flex;align-items:center;gap:.5rem;font-weight:700;color:var(--kopf-dunkel);}
+  details.anleitung>summary::-webkit-details-marker{display:none;}
+  details.anleitung>summary::before{content:'📋';}
+  details.anleitung[open]>summary::before{content:'📖';}
+  details.anleitung .ainhalt{padding:0 .9rem .9rem;}
+
+  .hinweis{background:#FFF4E0;border:1px dashed var(--kopf-dunkel);border-radius:.7rem;padding:.8rem 1rem;margin:1rem 0;font-size:.97rem;}
+  .hinweis b{color:var(--kopf-dunkel);}
+  ul.tidy{margin:.4rem 0 .4rem 1.1rem;padding:0;}
+  ul.tidy li{margin:.3rem 0;}
+
+  .slider-row{display:flex;align-items:center;gap:.8rem;margin:1rem 0 .4rem;flex-wrap:wrap;}
+  .slider-row label{font-weight:700;min-width:8rem;}
+  input[type=range]{flex:1;min-width:12rem;height:38px;accent-color:var(--umkreis);}
+  .status-box{margin:.5rem 0;padding:.6rem .9rem;border-radius:.6rem;font-weight:700;font-size:1rem;}
+
+  .weiter-wrap{text-align:center;margin:2rem 0 1rem;display:none;}
+  .weiter-wrap.show{display:block;animation:fade .4s ease;}
+  a.weiter{display:inline-flex;align-items:center;gap:.6rem;justify-content:center;background:var(--erfolg);color:#fff;text-decoration:none;font-size:1.15rem;font-weight:800;padding:.9rem 2rem;min-height:44px;border-radius:.8rem;width:100%;max-width:30rem;box-shadow:0 3px 10px rgba(30,122,62,.3);}
+  a.weiter:active{transform:scale(.98);}
+  .weiter-hint{font-size:.85rem;color:var(--tinte);opacity:.6;margin-top:.5rem;}
+
+  #trex{position:fixed;bottom:.7rem;right:.7rem;font-size:1.7rem;cursor:pointer;z-index:60;user-select:none;filter:drop-shadow(0 1px 2px rgba(0,0,0,.25));}
+  #trex .bubble{position:absolute;bottom:2.1rem;right:0;white-space:nowrap;background:var(--tinte);color:#fff;font-size:.78rem;font-weight:600;padding:.35rem .6rem;border-radius:.5rem;opacity:0;pointer-events:none;transition:opacity .2s ease;}
+  #trex.show .bubble{opacity:1;}
+
+  @media (max-width:520px){header h1{font-size:1.4rem;}.panel{padding:1.1rem .9rem 1.3rem;}}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <span class="eyebrow">Geometrie · Klasse 8 · Erarbeitung</span>
+    <h1>Umkreis und Inkreis</h1>
+    <p>In der Konstruktionsstunde hast du zwei besondere Kreise schon entdeckt. Jetzt konstruierst du sie sauber, verstehst <i>warum</i> sie funktionieren – und siehst, wie eng Umkreis und Inkreis miteinander verwandt sind.</p>
+  </div>
+</header>
+
+<nav class="tabs">
+  <div class="wrap">
+    <div class="tabrow" id="tabrow">
+      <button class="tab active" data-i="0"><span class="num">1</span>Rückblick</button>
+      <button class="tab" data-i="1"><span class="num">2</span>Umkreis</button>
+      <button class="tab" data-i="2"><span class="num">3</span>Inkreis</button>
+      <button class="tab" data-i="3"><span class="num">4</span>Vergleich</button>
+      <button class="tab" data-i="4"><span class="num">5</span>U wandert</button>
+      <button class="tab" data-i="5"><span class="num">6</span>I bleibt innen</button>
+      <button class="tab" data-i="6"><span class="num">7</span>Sichern</button>
+    </div>
+  </div>
+</nav>
+
+<main class="wrap">
+
+  <!-- KARTE 1: Rückblick -->
+  <section class="card active" data-card="0">
+    <div class="panel">
+      <span class="meta-zeit">⏱ ca. 15 Min</span>
+      <h2>Was du schon entdeckt hast</h2>
+      <p class="lead">In der Konstruktionsstunde hast du zwei Dinge herausgefunden, die heute der Schlüssel sind:</p>
+      <div class="merk" style="border-left-color:var(--umkreis);background:var(--umkreis-hell);border-color:#BcdAF0;">
+        <h3 style="color:var(--umkreis);">Mittelsenkrechte</h3>
+        <p>Jeder Punkt auf der <b>Mittelsenkrechten</b> einer Strecke $\overline{AB}$ hat <b>denselben Abstand</b> zu $A$ und zu $B$. (Das ist ihre Ortslinien-Eigenschaft.)</p>
+      </div>
+      <div class="merk" style="border-left-color:var(--inkreis);background:var(--inkreis-hell);border-color:#BFE3CC;">
+        <h3 style="color:var(--inkreis);">Winkelhalbierende</h3>
+        <p>Jeder Punkt auf der <b>Winkelhalbierenden</b> eines Winkels hat <b>denselben Abstand</b> zu den beiden Schenkeln (Seiten).</p>
+      </div>
+
+      <h3>Die Leitfrage der Stunde</h3>
+      <p class="frage">Beide Linien beschreiben „gleicher Abstand". Was vermutest du: Wozu kann man das nutzen?</p>
+      <div class="mc" data-mc="rueck" data-correct="1">
+        <button data-opt="0">Zu nichts Besonderem – das ist nur eine Eigenschaft.</button>
+        <button data-opt="1">Um einen Punkt zu finden, der zu allen Ecken (oder allen Seiten) gleich weit weg ist – den Mittelpunkt eines Kreises.</button>
+        <button data-opt="2">Um die Fläche des Dreiecks zu berechnen.</button>
+      </div>
+      <div class="feedback" data-fb="rueck"></div>
+      <div class="hinweis"><b>Heute:</b> Aus „gleicher Abstand zu zwei Punkten" wird der <b>Umkreis</b>, aus „gleicher Abstand zu zwei Seiten" der <b>Inkreis</b>.</div>
+    </div>
+  </section>
+
+  <!-- KARTE 2: Umkreis -->
+  <section class="card" data-card="1">
+    <div class="panel">
+      <span class="meta-zeit">⏱ ca. 22 Min</span>
+      <h2>Der Umkreis</h2>
+      <p class="lead">Der Umkreis geht durch <b>alle drei Ecken</b> des Dreiecks. Tippe dich Schritt für Schritt durch die Konstruktion.</p>
+
+      <div class="figur-box">
+        <svg class="figur-svg" viewBox="0 0 460 360" id="svg-um" role="img" aria-label="Konstruktion des Umkreises">
+          <circle class="kreis-um" id="um-kreis" cx="220" cy="214.2" r="147.3"/>
+          <polygon class="seite" points="80,260 360,260 250,70"/>
+          <!-- Mittelsenkrechten -->
+          <line class="hilfs hilfs-um" id="um-ms1" x1="220" y1="100" x2="220" y2="360"/>
+          <line class="hilfs hilfs-um" id="um-ms2" x1="131.9" y1="265.2" x2="478.1" y2="64.8"/>
+          <!-- Mittelpunkte der Seiten -->
+          <circle class="mp-um" id="um-mab" cx="220" cy="260" r="3.5"/>
+          <circle class="mp-um" id="um-mbc" cx="305" cy="165" r="3.5"/>
+          <!-- Umkreismittelpunkt U -->
+          <circle class="mp-um" id="um-u" cx="220" cy="214.2" r="5"/>
+          <!-- Ecken -->
+          <g class="kreuz-pt kreuz-eck"><line x1="74" y1="254" x2="86" y2="266"/><line x1="86" y1="254" x2="74" y2="266"/></g>
+          <g class="kreuz-pt kreuz-eck"><line x1="354" y1="254" x2="366" y2="266"/><line x1="366" y1="254" x2="354" y2="266"/></g>
+          <g class="kreuz-pt kreuz-eck"><line x1="244" y1="64" x2="256" y2="76"/><line x1="256" y1="64" x2="244" y2="76"/></g>
+          <text class="ptlabel" x="62" y="278">A</text>
+          <text class="ptlabel" x="366" y="278">B</text>
+          <text class="ptlabel" x="248" y="58">C</text>
+          <text class="lbl-um" id="um-ulbl" x="228" y="210">U</text>
+        </svg>
+      </div>
+
+      <div class="schritt-anzeige" id="um-anz"><span class="nr">Start:</span> Gegeben ist das Dreieck $ABC$. Tippe auf „Nächster Schritt“.</div>
+      <div class="btnrow">
+        <button class="action" id="um-next">Nächster Schritt ▸</button>
+        <button class="action sekundaer" id="um-reset">Zurück zum Anfang</button>
+      </div>
+
+      <div class="satz um">
+        <b>Umkreismittelpunkt.</b> Der Schnittpunkt der Mittelsenkrechten heißt $U$. Er hat zu allen drei Ecken denselben Abstand – deshalb geht der Kreis um $U$ durch $A$, $B$ und $C$.
+      </div>
+      <details class="tipp"><summary>Warum genügen zwei Mittelsenkrechten?</summary><div class="tippinhalt">
+        <p>$U$ liegt auf der Mittelsenkrechten von $\overline{AB}$, also gilt $\overline{UA}=\overline{UB}$. $U$ liegt auch auf der von $\overline{BC}$, also $\overline{UB}=\overline{UC}$. Daraus folgt $\overline{UA}=\overline{UB}=\overline{UC}$ – die dritte Mittelsenkrechte geht automatisch durch $U$.</p>
+      </div></details>
+
+      <div class="heft">
+        <div class="htitel"><span class="ic">✏️</span>Jetzt du – im Heft</div>
+        <p>Konstruiere den Umkreis eines selbst gezeichneten Dreiecks.</p>
+        <details class="anleitung"><summary>Schritt-für-Schritt-Anleitung anzeigen</summary><div class="ainhalt">
+          <ol>
+            <li>Zeichne ein beliebiges Dreieck $ABC$.</li>
+            <li>Konstruiere die Mittelsenkrechten von <b>zwei</b> Seiten (Zirkelbögen wie auf der Lernseite).</li>
+            <li>Ihr Schnittpunkt ist der Umkreismittelpunkt $U$.</li>
+            <li>Stich den Zirkel in $U$ und zeichne den Kreis durch eine Ecke – er geht durch alle drei.</li>
+          </ol>
+        </div></details>
+        <div class="vorlegen"><span>👩‍🏫</span> Zeige deine Umkreis-Konstruktion deiner Lehrkraft.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- KARTE 3: Inkreis -->
+  <section class="card" data-card="2">
+    <div class="panel">
+      <span class="meta-zeit">⏱ ca. 22 Min</span>
+      <h2>Der Inkreis</h2>
+      <p class="lead">Der Inkreis liegt <b>innen</b> und berührt <b>alle drei Seiten</b>. Die Idee ist dieselbe wie beim Umkreis – nur mit Winkelhalbierenden.</p>
+
+      <div class="figur-box">
+        <svg class="figur-svg" viewBox="0 0 460 320" id="svg-in" role="img" aria-label="Konstruktion des Inkreises">
+          <circle class="kreis-in" id="in-kreis" cx="237.7" cy="189.5" r="70.5"/>
+          <polygon class="seite" points="80,260 360,260 250,70"/>
+          <!-- Winkelhalbierende von A und B -->
+          <line class="hilfs hilfs-in" id="in-wh1" x1="80" y1="260" x2="317.4" y2="153.9"/>
+          <line class="hilfs hilfs-in" id="in-wh2" x1="360" y1="260" x2="152.1" y2="140.1"/>
+          <!-- Inkreismittelpunkt I -->
+          <circle class="mp-in" id="in-i" cx="237.7" cy="189.5" r="5"/>
+          <!-- Berührpunkte (Lotfußpunkte) -->
+          <circle class="beruehr" id="in-b1" cx="237.7" cy="260" r="3.5"/>
+          <circle class="beruehr" id="in-b2" cx="298.7" cy="154.2" r="3.5"/>
+          <circle class="beruehr" id="in-b3" cx="185.2" cy="142.5" r="3.5"/>
+          <!-- Radius-Lot zu AB -->
+          <line class="radius-lin hilfs-in" id="in-radlot" x1="237.7" y1="189.5" x2="237.7" y2="260" stroke="#1E7A3E"/>
+          <g class="kreuz-pt kreuz-eck"><line x1="74" y1="254" x2="86" y2="266"/><line x1="86" y1="254" x2="74" y2="266"/></g>
+          <g class="kreuz-pt kreuz-eck"><line x1="354" y1="254" x2="366" y2="266"/><line x1="366" y1="254" x2="354" y2="266"/></g>
+          <g class="kreuz-pt kreuz-eck"><line x1="244" y1="64" x2="256" y2="76"/><line x1="256" y1="64" x2="244" y2="76"/></g>
+          <text class="ptlabel" x="62" y="278">A</text>
+          <text class="ptlabel" x="366" y="278">B</text>
+          <text class="ptlabel" x="248" y="58">C</text>
+          <text class="lbl-in" id="in-ilbl" x="245" y="186">I</text>
+        </svg>
+      </div>
+
+      <div class="schritt-anzeige" id="in-anz" style="border-left-color:var(--inkreis);background:var(--inkreis-hell);"><span class="nr" style="color:var(--inkreis);">Start:</span> Dasselbe Dreieck $ABC$. Tippe auf „Nächster Schritt“.</div>
+      <div class="btnrow">
+        <button class="action gruen" id="in-next">Nächster Schritt ▸</button>
+        <button class="action sekundaer" id="in-reset" style="color:var(--inkreis);border-color:var(--inkreis);">Zurück zum Anfang</button>
+      </div>
+
+      <div class="satz in">
+        <b>Inkreismittelpunkt.</b> Der Schnittpunkt der Winkelhalbierenden heißt $I$. Er hat zu allen drei Seiten denselben Abstand – deshalb berührt der Kreis um $I$ alle drei Seiten.
+      </div>
+      <div class="hinweis"><b>Wichtig:</b> Den Radius des Inkreises findest du nicht über eine Ecke, sondern über das <b>Lot</b> von $I$ auf eine Seite – der Abstand $I$ zur Seite ist der Radius.</div>
+
+      <div class="heft">
+        <div class="htitel"><span class="ic">✏️</span>Jetzt du – im Heft</div>
+        <p>Konstruiere den Inkreis eines Dreiecks.</p>
+        <details class="anleitung"><summary>Schritt-für-Schritt-Anleitung anzeigen</summary><div class="ainhalt">
+          <ol>
+            <li>Zeichne ein Dreieck $ABC$ (gern dasselbe wie beim Umkreis).</li>
+            <li>Konstruiere die Winkelhalbierenden von <b>zwei</b> Winkeln.</li>
+            <li>Ihr Schnittpunkt ist der Inkreismittelpunkt $I$.</li>
+            <li>Fälle das Lot von $I$ auf eine Seite. Der Abstand ist der Radius. Zeichne den Kreis um $I$ – er berührt alle drei Seiten.</li>
+          </ol>
+        </div></details>
+        <div class="vorlegen"><span>👩‍🏫</span> Zeige deine Inkreis-Konstruktion deiner Lehrkraft.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- KARTE 4: Vergleich -->
+  <section class="card" data-card="3">
+    <div class="panel">
+      <span class="meta-zeit">⏱ ca. 12 Min</span>
+      <h2>Umkreis und Inkreis im Vergleich</h2>
+      <p class="lead">Beide Konzepte folgen derselben Idee – „gleicher Abstand" –, nur einmal zu Ecken, einmal zu Seiten.</p>
+
+      <table class="vergleich">
+        <tr><th>&nbsp;</th><th class="um">Umkreis</th><th class="in">Inkreis</th></tr>
+        <tr><td>Welche Linien?</td><td>Mittelsenkrechten</td><td>Winkelhalbierende</td></tr>
+        <tr><td>Gleicher Abstand zu …</td><td>den drei <b>Ecken</b></td><td>den drei <b>Seiten</b></td></tr>
+        <tr><td>Mittelpunkt</td><td>$U$ (Umkreismittelpunkt)</td><td>$I$ (Inkreismittelpunkt)</td></tr>
+        <tr><td>Der Kreis …</td><td>geht durch alle Ecken</td><td>berührt alle Seiten</td></tr>
+        <tr><td>Radius ist …</td><td>Abstand $U$ zu einer Ecke</td><td>Abstand $I$ zu einer Seite (Lot)</td></tr>
+        <tr><td>Lage des Mittelpunkts</td><td>kann <b>außerhalb</b> liegen</td><td>immer <b>innen</b></td></tr>
+      </table>
+
+      <h3>Prüfe dein Verständnis</h3>
+      <p class="frage">Welche Linien brauchst du, um den <b>Inkreis</b> zu konstruieren?</p>
+      <div class="mc" data-mc="verg" data-correct="1">
+        <button data-opt="0">Die Mittelsenkrechten der Seiten.</button>
+        <button data-opt="1">Die Winkelhalbierenden der Winkel.</button>
+        <button data-opt="2">Die Höhen des Dreiecks.</button>
+      </div>
+      <div class="feedback" data-fb="verg"></div>
+      <details class="tipp"><summary>Ich brauche einen Hinweis</summary><div class="tippinhalt"><p>Der Inkreis berührt die <b>Seiten</b>. Welche Linie beschreibt „gleicher Abstand zu zwei Seiten"?</p></div></details>
+    </div>
+  </section>
+
+  <!-- KARTE 5: U wandert (interaktiv) -->
+  <section class="card" data-card="4">
+    <div class="panel">
+      <span class="meta-zeit">⏱ ca. 14 Min</span>
+      <h2>Wo liegt der Umkreismittelpunkt?</h2>
+      <p class="lead">Anders als der Inkreis liegt der Umkreismittelpunkt nicht immer innen. <b>Ziehe die Ecken $B$ und $C$</b> mit dem Finger und beobachte $U$.</p>
+
+      <div class="figur-box">
+        <svg class="figur-svg" viewBox="0 0 480 430" id="svg-wander" role="img" aria-label="Bewegliches Dreieck mit Umkreismittelpunkt" style="touch-action:none;">
+          <circle id="w-kreis" cx="240" cy="0" r="100" stroke="#1C6FB8" stroke-width="2" fill="rgba(28,111,184,.05)"/>
+          <polygon id="w-tri" points="120,300 360,300 240,120" fill="rgba(0,0,0,.03)" stroke="#2C2A26" stroke-width="2.4"/>
+          <!-- U als blaues Kreuz -->
+          <g id="w-u" class="kreuz-pt"><line x1="234" y1="194" x2="246" y2="206" stroke="#1C6FB8"/><line x1="246" y1="194" x2="234" y2="206" stroke="#1C6FB8"/></g>
+          <!-- A fest (Kreuz) -->
+          <g class="kreuz-pt kreuz-eck"><line x1="114" y1="294" x2="126" y2="306"/><line x1="126" y1="294" x2="114" y2="306"/></g>
+          <!-- B und C verschiebbar: große unsichtbare Grifffläche + sichtbares Kreuz -->
+          <g id="w-bgrip" style="cursor:grab;">
+            <circle cx="360" cy="300" r="22" fill="rgba(28,111,184,.10)"/>
+            <g class="kreuz-pt" id="w-bx"><line x1="354" y1="294" x2="366" y2="306" stroke="#1C6FB8"/><line x1="366" y1="294" x2="354" y2="306" stroke="#1C6FB8"/></g>
+          </g>
+          <g id="w-cgrip" style="cursor:grab;">
+            <circle cx="240" cy="120" r="22" fill="rgba(122,78,140,.10)"/>
+            <g class="kreuz-pt kreuz-c" id="w-cx"><line x1="234" y1="114" x2="246" y2="126"/><line x1="246" y1="114" x2="234" y2="126"/></g>
+          </g>
+          <text class="ptlabel" x="102" y="320">A</text>
+          <text class="ptlabel" id="w-blbl" x="372" y="306" fill="#1C6FB8">B</text>
+          <text class="ptlabel" id="w-clbl" x="250" y="114" fill="#7A4E8C">C</text>
+          <text id="w-ulbl" x="250" y="198" fill="#1C6FB8" style="font:700 15px Segoe UI,sans-serif">U</text>
+        </svg>
+      </div>
+      <div class="hinweis" style="margin-top:.4rem;"><b>Tipp:</b> Zieh $C$ weit nach unten oder $B$ nah an $A$ – dann entsteht ein stumpfer Winkel und $U$ rutscht aus dem Dreieck heraus.</div>
+      <div class="status-box" id="w-status"></div>
+
+      <h3>Was stellst du fest?</h3>
+      <p class="frage">Wann liegt der Umkreismittelpunkt $U$ <b>außerhalb</b> des Dreiecks?</p>
+      <div class="mc" data-mc="wander" data-correct="2">
+        <button data-opt="0">Wenn das Dreieck gleichseitig ist.</button>
+        <button data-opt="1">Wenn alle Winkel spitz sind.</button>
+        <button data-opt="2">Wenn das Dreieck einen <b>stumpfen</b> Winkel hat (über $90^\circ$).</button>
+      </div>
+      <div class="feedback" data-fb="wander"></div>
+      <details class="tipp"><summary>Ich brauche einen Hinweis</summary><div class="tippinhalt"><p>Schiebe $C$ ganz nach unten, sodass das Dreieck flach wird und ein Winkel sehr groß. Wohin wandert $U$? Beim rechten Winkel liegt $U$ genau auf einer Seite (das kennst du vom Thaleskreis!).</p></div></details>
+    </div>
+  </section>
+
+  <!-- KARTE 6: Inkreismittelpunkt bleibt innen -->
+  <section class="card" data-card="5">
+    <div class="panel">
+      <span class="meta-zeit">⏱ ca. 10 Min</span>
+      <h2>Und der Inkreismittelpunkt?</h2>
+      <p class="lead">Beim Umkreis wandert $U$ heraus. Probiere dasselbe mit dem Inkreis: <b>Ziehe $B$ und $C$</b> und beobachte den Inkreismittelpunkt $I$.</p>
+
+      <div class="figur-box">
+        <svg class="figur-svg" viewBox="0 0 480 380" id="svg-iwander" role="img" aria-label="Bewegliches Dreieck mit Inkreismittelpunkt" style="touch-action:none;">
+          <circle id="iw-kreis" cx="240" cy="240" r="60" stroke="#1E7A3E" stroke-width="2.2" fill="rgba(30,122,62,.07)"/>
+          <polygon id="iw-tri" points="120,300 360,300 240,120" fill="rgba(0,0,0,.03)" stroke="#2C2A26" stroke-width="2.4"/>
+          <g id="iw-i" class="kreuz-pt"><line x1="234" y1="234" x2="246" y2="246" stroke="#1E7A3E"/><line x1="246" y1="234" x2="234" y2="246" stroke="#1E7A3E"/></g>
+          <g class="kreuz-pt kreuz-eck"><line x1="114" y1="294" x2="126" y2="306"/><line x1="126" y1="294" x2="114" y2="306"/></g>
+          <g id="iw-bgrip" style="cursor:grab;">
+            <circle cx="360" cy="300" r="22" fill="rgba(30,122,62,.10)"/>
+            <g class="kreuz-pt" id="iw-bx"><line x1="354" y1="294" x2="366" y2="306" stroke="#1E7A3E"/><line x1="366" y1="294" x2="354" y2="306" stroke="#1E7A3E"/></g>
+          </g>
+          <g id="iw-cgrip" style="cursor:grab;">
+            <circle cx="240" cy="120" r="22" fill="rgba(122,78,140,.10)"/>
+            <g class="kreuz-pt kreuz-c" id="iw-cx"><line x1="234" y1="114" x2="246" y2="126"/><line x1="246" y1="114" x2="234" y2="126"/></g>
+          </g>
+          <text class="ptlabel" x="102" y="320">A</text>
+          <text class="ptlabel" id="iw-blbl" x="372" y="306" fill="#1E7A3E">B</text>
+          <text class="ptlabel" id="iw-clbl" x="250" y="114" fill="#7A4E8C">C</text>
+          <text id="iw-ilbl" x="250" y="238" fill="#1E7A3E" style="font:700 15px Segoe UI,sans-serif">I</text>
+        </svg>
+      </div>
+      <div class="status-box" id="iw-status" style="background:var(--inkreis-hell);color:var(--inkreis);">Der Inkreismittelpunkt $I$ liegt immer innerhalb des Dreiecks.</div>
+
+      <h3>Was ist der Unterschied?</h3>
+      <p class="frage">Warum liegt $I$ – anders als $U$ – <b>immer innen</b>?</p>
+      <div class="mc" data-mc="iwander" data-correct="0">
+        <button data-opt="0">Weil die Winkelhalbierenden immer <b>im Inneren</b> des Dreiecks verlaufen und sich dort schneiden.</button>
+        <button data-opt="1">Weil der Inkreis kleiner ist als der Umkreis.</button>
+        <button data-opt="2">Das ist Zufall und hängt vom Dreieck ab.</button>
+      </div>
+      <div class="feedback" data-fb="iwander"></div>
+      <details class="tipp"><summary>Ich brauche einen Hinweis</summary><div class="tippinhalt"><p>Eine Winkelhalbierende startet in einer Ecke und zeigt ins Dreieck hinein. Wo müssen sich solche Linien treffen? Die Mittelsenkrechten dagegen können sich auch außerhalb kreuzen.</p></div></details>
+
+      <div class="merk">
+        <h3>Der Unterschied auf den Punkt gebracht</h3>
+        <p>Der <b>Inkreismittelpunkt $I$</b> liegt immer im Inneren, weil die Winkelhalbierenden ins Dreieck zeigen. Der <b>Umkreismittelpunkt $U$</b> kann je nach Dreiecksform innen, auf einer Seite oder außen liegen.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- KARTE 7: Sichern -->
+  <section class="card" data-card="6">
+    <div class="panel">
+      <span class="meta-zeit">⏱ ca. 15 Min · Sicherung</span>
+      <h2>Zusammenfassung</h2>
+
+      <div class="satz um"><b>Umkreis.</b> Die drei <b>Mittelsenkrechten</b> eines Dreiecks schneiden sich in einem Punkt $U$. Er hat zu allen Ecken denselben Abstand. Der Kreis um $U$ durch die Ecken ist der <b>Umkreis</b>.</div>
+      <div class="satz in"><b>Inkreis.</b> Die drei <b>Winkelhalbierenden</b> schneiden sich in einem Punkt $I$. Er hat zu allen Seiten denselben Abstand. Der Kreis um $I$, der die Seiten berührt, ist der <b>Inkreis</b>.</div>
+
+      <div class="merk">
+        <h3>Die gemeinsame Idee</h3>
+        <p>Beide Male nutzt man eine <b>Ortslinie</b> des „gleichen Abstands": die Mittelsenkrechte für gleichen Abstand zu zwei <b>Ecken</b>, die Winkelhalbierende für gleichen Abstand zu zwei <b>Seiten</b>. Der Schnittpunkt zweier solcher Linien erfüllt die Bedingung dann für alle drei – deshalb genügen jeweils zwei Linien.</p>
+      </div>
+
+      <div class="heft">
+        <div class="htitel"><span class="ic">✏️</span>Jetzt du – im Heft</div>
+        <p>Schreibe eine <b>Konstruktionsbeschreibung</b> für Umkreis und Inkreis in dein Heft – mit den richtigen Fachbegriffen, Schritt für Schritt.</p>
+        <details class="anleitung"><summary>Was gehört in eine Konstruktionsbeschreibung?</summary><div class="ainhalt">
+          <ol>
+            <li>Was ist gegeben? (das Dreieck $ABC$)</li>
+            <li>Welche Linien konstruierst du? (Mittelsenkrechten bzw. Winkelhalbierende – mit Zirkel)</li>
+            <li>Wie findest du den Mittelpunkt? (Schnittpunkt der Linien)</li>
+            <li>Wie zeichnest du den Kreis? (Radius: bei $U$ zur Ecke, bei $I$ als Lot zur Seite)</li>
+          </ol>
+        </div></details>
+        <div class="vorlegen"><span>👩‍🏫</span> Zeige deine beiden Konstruktionsbeschreibungen deiner Lehrkraft.</div>
+      </div>
+
+      <div class="hinweis"><b>Geschafft!</b> Du kennst jetzt Umkreis und Inkreis, kannst beide konstruieren und begründen. In der Übung vertiefst du das.</div>
+    </div>
+  </section>
+
+  <div class="weiter-wrap" id="weiterwrap">
+    <a class="weiter" href="umkreis_inkreis_ue.html">Weiter zur Übung ▸</a>
+    <div class="weiter-hint">Du hast alle Karten dieser Lernseite bearbeitet.</div>
+  </div>
+
+</main>
+
+<div id="trex" title="Made by Mathedino">🦖<span class="bubble">Made by Mathedino</span></div>
+
+<script>
+(function(){
+  "use strict";
+  const State={cardSeen:[true,false,false,false,false,false,false],mc:{},umFertig:false,inFertig:false};
+
+  /* Tabs */
+  const tabs=Array.from(document.querySelectorAll('.tab'));
+  const cards=Array.from(document.querySelectorAll('.card'));
+  function showCard(i){
+    cards.forEach(c=>c.classList.toggle('active',+c.dataset.card===i));
+    tabs.forEach(t=>t.classList.toggle('active',+t.dataset.i===i));
+    State.cardSeen[i]=true;
+    tabs.forEach((t,k)=>{if(State.cardSeen[k])t.classList.add('done');});
+    checkComplete();
+    window.scrollTo({top:0,behavior:'smooth'});
+    if(window.MathJax&&MathJax.typesetPromise){MathJax.typesetPromise();}
+  }
+  tabs.forEach(t=>t.addEventListener('click',()=>showCard(+t.dataset.i)));
+
+  /* MC */
+  document.querySelectorAll('.mc').forEach(group=>{
+    const key=group.dataset.mc; const correct=+group.dataset.correct;
+    State.mc[key]={answered:false};
+    const fb=document.querySelector('[data-fb="'+key+'"]');
+    group.querySelectorAll('button').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        if(State.mc[key].answered)return;
+        const opt=+btn.dataset.opt; State.mc[key].answered=true;
+        group.querySelectorAll('button').forEach(b=>b.classList.add('disabled'));
+        if(opt===correct){btn.classList.add('richtig');fb.className='feedback gut';fb.textContent='✅ Richtig!';}
+        else{btn.classList.add('falsch');group.querySelector('[data-opt="'+correct+'"]').classList.add('richtig');fb.className='feedback schlecht';fb.innerHTML='❌ Nicht ganz – die richtige Antwort ist grün markiert.';}
+        checkComplete();
+      });
+    });
+  });
+
+  /* Umkreis-Animation */
+  const umSchritte=[
+    {t:'Gegeben ist das Dreieck $ABC$.', ids:[]},
+    {t:'Konstruiere die <b>Mittelsenkrechte</b> der Seite $\\overline{AB}$ (Markierung am Seitenmittelpunkt).', ids:['um-ms1','um-mab']},
+    {t:'Konstruiere die <b>Mittelsenkrechte</b> der Seite $\\overline{BC}$.', ids:['um-ms1','um-mab','um-ms2','um-mbc']},
+    {t:'Beide schneiden sich im <b>Umkreismittelpunkt</b> $U$.', ids:['um-ms1','um-ms2','um-mab','um-mbc','um-u','um-ulbl']},
+    {t:'Der Kreis um $U$ durch eine Ecke geht durch <b>alle drei Ecken</b> – das ist der <b>Umkreis</b>.', ids:['um-ms1','um-ms2','um-u','um-ulbl','um-kreis']}
+  ];
+  setupAnim('um', umSchritte, ()=>{State.umFertig=true;checkComplete();});
+
+  /* Inkreis-Animation */
+  const inSchritte=[
+    {t:'Dasselbe Dreieck $ABC$.', ids:[]},
+    {t:'Konstruiere die <b>Winkelhalbierende</b> des Winkels bei $A$.', ids:['in-wh1']},
+    {t:'Konstruiere die <b>Winkelhalbierende</b> des Winkels bei $B$.', ids:['in-wh1','in-wh2']},
+    {t:'Beide schneiden sich im <b>Inkreismittelpunkt</b> $I$.', ids:['in-wh1','in-wh2','in-i','in-ilbl']},
+    {t:'Fälle das <b>Lot</b> von $I$ auf eine Seite – der Abstand ist der Radius.', ids:['in-wh1','in-wh2','in-i','in-ilbl','in-radlot','in-b1']},
+    {t:'Der Kreis um $I$ <b>berührt alle drei Seiten</b> – das ist der <b>Inkreis</b>.', ids:['in-i','in-ilbl','in-kreis','in-b1','in-b2','in-b3']}
+  ];
+  setupAnim('in', inSchritte, ()=>{State.inFertig=true;checkComplete();});
+
+  function setupAnim(prefix, schritte, onDone){
+    let step=0;
+    const anz=document.getElementById(prefix+'-anz');
+    const nextBtn=document.getElementById(prefix+'-next');
+    const resetBtn=document.getElementById(prefix+'-reset');
+    const alleIds=[...new Set(schritte.flatMap(s=>s.ids))];
+    function render(){
+      const label = step===0?'Start':'Schritt '+step;
+      anz.innerHTML='<span class="nr">'+label+':</span> '+schritte[step].t;
+      nextBtn.disabled=(step>=schritte.length-1);
+      nextBtn.textContent=(step>=schritte.length-1)?'Fertig ✓':'Nächster Schritt ▸';
+      const aktiv=new Set(schritte[step].ids);
+      alleIds.forEach(id=>{const el=document.getElementById(id);if(el)el.classList.toggle('show',aktiv.has(id));});
+      if(window.MathJax&&MathJax.typesetPromise){MathJax.typesetPromise([anz]);}
+      if(step>=schritte.length-1) onDone();
+    }
+    nextBtn.addEventListener('click',()=>{if(step<schritte.length-1){step++;render();}});
+    resetBtn.addEventListener('click',()=>{step=0;render();});
+    render();
+  }
+
+  /* Karte 5: bewegliches Dreieck mit verschiebbaren Ecken B und C */
+  const wA={x:120,y:300};
+  const wState={B:{x:360,y:300}, C:{x:240,y:120}};
+  const wTri=document.getElementById('w-tri');
+  const wU=document.getElementById('w-u');
+  const wKreis=document.getElementById('w-kreis');
+  const wStatus=document.getElementById('w-status');
+  const svgW=document.getElementById('svg-wander');
+  function umkreisJS(A,B,C){
+    const d=2*(A.x*(B.y-C.y)+B.x*(C.y-A.y)+C.x*(A.y-B.y));
+    if(Math.abs(d)<1e-6) return null;
+    const ux=((A.x*A.x+A.y*A.y)*(B.y-C.y)+(B.x*B.x+B.y*B.y)*(C.y-A.y)+(C.x*C.x+C.y*C.y)*(A.y-B.y))/d;
+    const uy=((A.x*A.x+A.y*A.y)*(C.x-B.x)+(B.x*B.x+B.y*B.y)*(A.x-C.x)+(C.x*C.x+C.y*C.y)*(B.x-A.x))/d;
+    return {x:ux,y:uy,r:Math.hypot(ux-A.x,uy-A.y)};
+  }
+  function winkelBei(P,Q,R){
+    const a={x:P.x-Q.x,y:P.y-Q.y}, b={x:R.x-Q.x,y:R.y-Q.y};
+    let c=(a.x*b.x+a.y*b.y)/(Math.hypot(a.x,a.y)*Math.hypot(b.x,b.y));
+    return Math.acos(Math.max(-1,Math.min(1,c)))*180/Math.PI;
+  }
+  function setKreuz(gId,cx,cy,s){ // verschiebt ein Kreuz-<g> über seine zwei Linien
+    const g=document.getElementById(gId); const ls=g.querySelectorAll('line');
+    ls[0].setAttribute('x1',cx-s);ls[0].setAttribute('y1',cy-s);ls[0].setAttribute('x2',cx+s);ls[0].setAttribute('y2',cy+s);
+    ls[1].setAttribute('x1',cx+s);ls[1].setAttribute('y1',cy-s);ls[1].setAttribute('x2',cx-s);ls[1].setAttribute('y2',cy+s);
+  }
+  function updateWander(){
+    const B=wState.B, C=wState.C;
+    wTri.setAttribute('points',`${wA.x},${wA.y} ${B.x},${B.y} ${C.x},${C.y}`);
+    // Griffflächen + Kreuze B, C
+    document.querySelector('#w-bgrip circle').setAttribute('cx',B.x);
+    document.querySelector('#w-bgrip circle').setAttribute('cy',B.y);
+    setKreuz('w-bx',B.x,B.y,6);
+    document.querySelector('#w-cgrip circle').setAttribute('cx',C.x);
+    document.querySelector('#w-cgrip circle').setAttribute('cy',C.y);
+    setKreuz('w-cx',C.x,C.y,6);
+    document.getElementById('w-blbl').setAttribute('x',B.x+12); document.getElementById('w-blbl').setAttribute('y',B.y+6);
+    document.getElementById('w-clbl').setAttribute('x',C.x+10); document.getElementById('w-clbl').setAttribute('y',C.y-10);
+    const U=umkreisJS(wA,B,C);
+    if(U){
+      setKreuz('w-u',U.x,U.y,6);
+      wKreis.setAttribute('cx',U.x); wKreis.setAttribute('cy',U.y); wKreis.setAttribute('r',U.r);
+      document.getElementById('w-ulbl').setAttribute('x',U.x+10);
+      document.getElementById('w-ulbl').setAttribute('y',U.y-8);
+    }
+    const wa=winkelBei(B,wA,C), wb=winkelBei(wA,B,C), wc=winkelBei(wA,C,B);
+    const maxW=Math.max(wa,wb,wc);
+    let txt,farbe,bg;
+    if(maxW>92){txt='Stumpfwinkliges Dreieck (größter Winkel '+Math.round(maxW)+'°) – U liegt außerhalb!';farbe='#C0271E';bg='#FBE9E8';}
+    else if(maxW>=88){txt='Fast rechtwinklig ('+Math.round(maxW)+'°) – U liegt genau auf einer Seite.';farbe='#C8762A';bg='#FBF0E4';}
+    else{txt='Spitzwinkliges Dreieck (größter Winkel '+Math.round(maxW)+'°) – U liegt innen.';farbe='#1E7A3E';bg='#E6F4EC';}
+    wStatus.textContent=txt; wStatus.style.color=farbe; wStatus.style.background=bg;
+  }
+  // Pointer-Drag für B und C
+  function svgPoint(evt){
+    const r=svgW.getBoundingClientRect();
+    const vb=svgW.viewBox.baseVal;
+    const x=(evt.clientX-r.left)/r.width*vb.width;
+    const y=(evt.clientY-r.top)/r.height*vb.height;
+    return {x:Math.max(8,Math.min(vb.width-8,x)), y:Math.max(8,Math.min(vb.height-8,y))};
+  }
+  let drag=null;
+  function startDrag(which){
+    return (e)=>{ drag=which; e.target.setPointerCapture&&e.target.setPointerCapture(e.pointerId); e.preventDefault(); };
+  }
+  document.getElementById('w-bgrip').addEventListener('pointerdown',startDrag('B'));
+  document.getElementById('w-cgrip').addEventListener('pointerdown',startDrag('C'));
+  svgW.addEventListener('pointermove',(e)=>{
+    if(!drag) return;
+    const p=svgPoint(e);
+    if(drag==='B'){ wState.B.x=p.x; wState.B.y=Math.max(250,Math.min(330,p.y)); }
+    else { wState.C.x=p.x; wState.C.y=p.y; }
+    updateWander();
+  });
+  svgW.addEventListener('pointerup',()=>{drag=null;});
+  svgW.addEventListener('pointercancel',()=>{drag=null;});
+  updateWander();
+
+  /* Karte 6: Inkreismittelpunkt, verschiebbare B und C */
+  const iwA={x:120,y:300};
+  const iwState={B:{x:360,y:300}, C:{x:240,y:120}};
+  const iwTri=document.getElementById('iw-tri');
+  const iwKreis=document.getElementById('iw-kreis');
+  const svgIW=document.getElementById('svg-iwander');
+  function inkreisJS(A,B,C){
+    const a=Math.hypot(B.x-C.x,B.y-C.y), b=Math.hypot(A.x-C.x,A.y-C.y), c=Math.hypot(A.x-B.x,A.y-B.y);
+    const per=a+b+c; if(per<1e-6) return null;
+    const px=(a*A.x+b*B.x+c*C.x)/per, py=(a*A.y+b*B.y+c*C.y)/per;
+    const s=per/2; const area=Math.abs((B.x-A.x)*(C.y-A.y)-(C.x-A.x)*(B.y-A.y))/2;
+    return {x:px,y:py,r:area/s};
+  }
+  function updateIWander(){
+    const B=iwState.B, C=iwState.C;
+    iwTri.setAttribute('points',`${iwA.x},${iwA.y} ${B.x},${B.y} ${C.x},${C.y}`);
+    document.querySelector('#iw-bgrip circle').setAttribute('cx',B.x);
+    document.querySelector('#iw-bgrip circle').setAttribute('cy',B.y);
+    setKreuz('iw-bx',B.x,B.y,6);
+    document.querySelector('#iw-cgrip circle').setAttribute('cx',C.x);
+    document.querySelector('#iw-cgrip circle').setAttribute('cy',C.y);
+    setKreuz('iw-cx',C.x,C.y,6);
+    document.getElementById('iw-blbl').setAttribute('x',B.x+12); document.getElementById('iw-blbl').setAttribute('y',B.y+6);
+    document.getElementById('iw-clbl').setAttribute('x',C.x+10); document.getElementById('iw-clbl').setAttribute('y',C.y-10);
+    const I=inkreisJS(iwA,B,C);
+    if(I){
+      setKreuz('iw-i',I.x,I.y,6);
+      iwKreis.setAttribute('cx',I.x); iwKreis.setAttribute('cy',I.y); iwKreis.setAttribute('r',I.r);
+      document.getElementById('iw-ilbl').setAttribute('x',I.x+10);
+      document.getElementById('iw-ilbl').setAttribute('y',I.y-8);
+    }
+  }
+  document.getElementById('iw-bgrip').addEventListener('pointerdown',(e)=>{idrag='B';e.target.setPointerCapture&&e.target.setPointerCapture(e.pointerId);e.preventDefault();});
+  document.getElementById('iw-cgrip').addEventListener('pointerdown',(e)=>{idrag='C';e.target.setPointerCapture&&e.target.setPointerCapture(e.pointerId);e.preventDefault();});
+  let idrag=null;
+  function svgPointIW(evt){
+    const r=svgIW.getBoundingClientRect(); const vb=svgIW.viewBox.baseVal;
+    const x=(evt.clientX-r.left)/r.width*vb.width;
+    const y=(evt.clientY-r.top)/r.height*vb.height;
+    return {x:Math.max(8,Math.min(vb.width-8,x)), y:Math.max(8,Math.min(vb.height-8,y))};
+  }
+  svgIW.addEventListener('pointermove',(e)=>{
+    if(!idrag) return;
+    const p=svgPointIW(e);
+    if(idrag==='B'){ iwState.B.x=p.x; iwState.B.y=Math.max(250,Math.min(330,p.y)); }
+    else { iwState.C.x=p.x; iwState.C.y=Math.max(40,Math.min(270,p.y)); }
+    updateIWander();
+  });
+  svgIW.addEventListener('pointerup',()=>{idrag=null;});
+  svgIW.addEventListener('pointercancel',()=>{idrag=null;});
+  updateIWander();
+
+  function checkComplete(){
+    const alleKarten=State.cardSeen.every(Boolean);
+    const alleMc=Object.values(State.mc).every(m=>m.answered);
+    if(alleKarten&&alleMc&&State.umFertig&&State.inFertig){document.getElementById('weiterwrap').classList.add('show');}
+  }
+  checkComplete();
+
+  const trex=document.getElementById('trex');
+  trex.addEventListener('click',()=>{trex.classList.add('show');clearTimeout(trex._t);trex._t=setTimeout(()=>trex.classList.remove('show'),1800);});
+  trex.addEventListener('mouseenter',()=>trex.classList.add('show'));
+  trex.addEventListener('mouseleave',()=>trex.classList.remove('show'));
+
+  if(window.MathJax&&MathJax.startup&&MathJax.startup.promise){MathJax.startup.promise.then(()=>MathJax.typesetPromise());}
+})();
+</script>
+</body>
+</html>
