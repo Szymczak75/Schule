@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Winkel messen mit dem Geodreieck – Lernseite</title>
+<meta name="description" content="Erarbeitungsseite Klasse 6: Winkelarten unterscheiden und Winkel mit dem Geodreieck messen. Mit interaktivem Geodreieck zum Anlegen und Ablesen.">
+<meta name="keywords" content="Winkel, Geodreieck, messen, Scheitelpunkt, Schenkel, spitzer Winkel, stumpfer Winkel, Grad, Klasse 6">
+<meta name="typ" content="Lernseite">
+<meta name="klasse" content="6">
+<meta name="fach" content="mathe">
+<meta name="oberthema" content="Geometrie">
+<meta name="thema" content="Winkel messen mit dem Geodreieck">
+<style>
+  :root{
+    --kopf:#E8943A;
+    --kopf-dunkel:#C9721A;
+    --bg:#FFFDF7;
+    --karte:#FFFFFF;
+    --rand:#E7DDC8;
+    --text:#2B2620;
+    --gruen:#1E8E3E;
+    --gruen-bg:#1E8E3E;
+    --rot:#D32F2F;
+    --rot-bg:#D32F2F;
+    --akzent:#3A6EA5;
+    --geo:#2f5fa6; --geo-edge:#244e86;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);color:var(--text);
+    font-family:'Segoe UI',Verdana,'Helvetica Neue',sans-serif;
+    font-size:1.05rem;line-height:1.5;padding-bottom:5rem;
+  }
+  header{background:linear-gradient(135deg,var(--kopf),var(--kopf-dunkel));color:#fff;padding:1.3rem 1.2rem;box-shadow:0 3px 10px rgba(0,0,0,.12);}
+  header .typ{display:inline-block;background:rgba(255,255,255,.25);padding:.2rem .7rem;border-radius:1rem;font-size:.85rem;font-weight:700;letter-spacing:.04em;margin-bottom:.5rem;}
+  header h1{margin:0;font-size:1.6rem;line-height:1.2;}
+  header p{margin:.4rem 0 0;font-size:1rem;opacity:.95;}
+
+  .tabs{display:flex;flex-wrap:wrap;gap:.5rem;padding:1rem 1rem 0;max-width:1024px;margin:0 auto;}
+  .tab{flex:1 1 auto;min-width:8rem;min-height:44px;border:2px solid var(--rand);background:#fff;color:var(--text);font-size:1rem;font-weight:600;border-radius:.7rem .7rem 0 0;padding:.6rem .5rem;cursor:pointer;transition:background .15s,border-color .15s,transform .05s;}
+  .tab:active{transform:scale(.97);}
+  .tab.aktiv{background:var(--kopf);color:#fff;border-color:var(--kopf-dunkel);}
+  .tab .done{margin-left:.3rem;}
+
+  main{max-width:1024px;margin:0 auto;padding:0 1rem;}
+  .karte{display:none;background:var(--karte);border:2px solid var(--rand);border-radius:0 .9rem .9rem .9rem;padding:1.3rem 1.2rem;margin-top:-2px;box-shadow:0 2px 8px rgba(0,0,0,.05);animation:einblenden .25s ease;}
+  .karte.aktiv{display:block;}
+  @keyframes einblenden{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .karte h2{margin-top:0;font-size:1.35rem;color:var(--kopf-dunkel);}
+  .frage{font-weight:700;margin:1rem 0 .6rem;}
+  .hinweis{background:#FBF3E2;border-left:5px solid var(--kopf);padding:.7rem .9rem;border-radius:.4rem;margin:1rem 0;}
+
+  button{font-family:inherit;}
+  .btn{min-height:44px;border:none;border-radius:.6rem;padding:.6rem 1.1rem;font-size:1rem;font-weight:700;cursor:pointer;transition:transform .05s,filter .15s;}
+  .btn:active{transform:scale(.97);}
+  .btn-pruefen{background:var(--akzent);color:#fff;}
+  .btn-leeren{background:#8a7e6a;color:#fff;margin-left:.5rem;}
+  .btn-sek{background:#EFE6D2;color:var(--text);}
+
+  .kswrap{text-align:center;margin:1rem 0;}
+  .kswrap svg{display:block;margin:0 auto;background:#fff;border:2px solid var(--rand);border-radius:.5rem;max-width:100%;}
+  .mess-bsp{display:flex;flex-wrap:wrap;gap:1rem;justify-content:center;margin:.8rem 0;}
+  .mess-bsp .bsp{flex:1 1 13rem;max-width:15rem;text-align:center;}
+  .mess-bsp .bsp svg{background:#fff;border:2px solid var(--rand);border-radius:.5rem;display:block;margin:0 auto .3rem;max-width:100%;}
+  .mess-bsp .bsp .cap{font-size:.9rem;font-weight:700;color:var(--akzent);}
+
+  .feedback{margin:.8rem 0;padding:.8rem 1rem;border-radius:.5rem;font-weight:700;display:none;}
+  .feedback.zeig{display:block;}
+  .feedback.ok{background:var(--gruen-bg);color:#fff;}
+  .feedback.nok{background:var(--rot-bg);color:#fff;}
+
+  .koord-eingabe{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem;margin:.6rem 0;}
+  input[type=number]{font-family:inherit;font-size:1.1rem;min-height:44px;border:2px solid var(--rand);border-radius:.5rem;padding:.4rem .6rem;width:6rem;text-align:center;}
+  input:focus{outline:none;border-color:var(--akzent);}
+
+  /* MC / Zuordnung */
+  .wahl{display:flex;flex-wrap:wrap;gap:.6rem;margin:.8rem 0;}
+  .wahl button{flex:1 1 9rem;min-height:48px;border:2px solid var(--rand);background:#fff;color:var(--text);border-radius:.6rem;font-size:1.02rem;font-weight:700;cursor:pointer;transition:background .12s,border-color .12s,transform .05s;}
+  .wahl button:active{transform:scale(.97);}
+  .wahl button.gewaehlt{background:#DCE9F7;border-color:var(--akzent);}
+  .wahl button.richtig{background:var(--gruen-bg);color:#fff;border-color:var(--gruen);}
+  .wahl button.falsch{background:var(--rot-bg);color:#fff;border-color:var(--rot);}
+
+  /* Zuordnungs-Aufgabe (Antippen) */
+  .zuord{display:flex;flex-wrap:wrap;gap:1rem;margin:1rem 0;justify-content:center;}
+  .zuord-fig{flex:1 1 9rem;max-width:11rem;text-align:center;border:2px solid var(--rand);border-radius:.6rem;padding:.6rem;cursor:pointer;background:#fff;transition:border-color .12s,background .12s;}
+  .zuord-fig.aktiv{border-color:var(--akzent);background:#DCE9F7;}
+  .zuord-fig.richtig{border-color:var(--gruen);background:#E3F4E8;}
+  .zuord-fig.falsch{border-color:var(--rot);background:#FBE3E3;}
+  .zuord-fig svg{display:block;margin:0 auto .3rem;}
+  .zuord-fig .lab{font-weight:700;font-size:.95rem;}
+  .zuord-fig .zuw{margin-top:.3rem;font-size:.9rem;font-weight:800;color:var(--gruen);}
+  .kat-zeile{display:flex;flex-wrap:wrap;gap:.6rem;justify-content:center;margin:.8rem 0;}
+  .kat-btn{flex:1 1 8rem;min-height:48px;border:2px dashed var(--kopf);background:#FBF3E2;color:var(--kopf-dunkel);border-radius:.6rem;font-weight:700;font-size:1rem;cursor:pointer;}
+  .kat-btn:active{transform:scale(.97);}
+  .zuordstatus{text-align:center;color:#6b6354;font-size:.95rem;}
+
+  /* Flip-Cards */
+  .flips{display:flex;flex-wrap:wrap;gap:1rem;margin:1rem 0;}
+  .flip{flex:1 1 13rem;min-height:9rem;perspective:1000px;cursor:pointer;}
+  .flip-inner{position:relative;width:100%;height:9rem;transition:transform .5s;transform-style:preserve-3d;}
+  .flip.gedreht .flip-inner{transform:rotateY(180deg);}
+  .flip-front,.flip-back{position:absolute;inset:0;-webkit-backface-visibility:hidden;backface-visibility:hidden;border-radius:.7rem;padding:1rem;display:flex;align-items:center;justify-content:center;text-align:center;font-weight:600;}
+  .flip-front{background:#FBF3E2;border:2px solid var(--kopf);color:var(--kopf-dunkel);font-size:1.1rem;}
+  .flip-back{background:var(--akzent);color:#fff;transform:rotateY(180deg);font-size:.95rem;}
+  .flip-tipp{text-align:center;font-size:.95rem;color:#6b6354;margin-top:.3rem;}
+
+  .tooltip{border-bottom:2px dotted var(--akzent);cursor:pointer;font-weight:700;color:var(--akzent);}
+  .tt-box{display:none;background:#2B2620;color:#fff;padding:.5rem .7rem;border-radius:.5rem;margin:.5rem 0;font-size:.95rem;font-weight:400;}
+  .tt-box.zeig{display:block;}
+
+  .weiter-wrap{max-width:1024px;margin:1.5rem auto 0;padding:0 1rem;}
+  .weiter{display:none;width:100%;min-height:52px;background:var(--gruen-bg);color:#fff;border:none;border-radius:.7rem;font-size:1.15rem;font-weight:800;cursor:pointer;text-decoration:none;align-items:center;justify-content:center;}
+  .weiter.zeig{display:flex;}
+  .weiter:active{transform:scale(.99);}
+
+  .trex{position:fixed;right:.7rem;bottom:.7rem;font-size:1.8rem;cursor:pointer;z-index:50;user-select:none;}
+  .trex .bubble{position:absolute;right:2.2rem;bottom:.2rem;white-space:nowrap;background:#2B2620;color:#fff;padding:.3rem .6rem;border-radius:.5rem;font-size:.85rem;opacity:0;pointer-events:none;transition:opacity .2s;}
+  .trex.zeig .bubble{opacity:1;}
+
+  /* ---- Geodreieck-Baustein-Styles (aus geodreieck_baustein.html übernommen) ---- */
+  .geo-stage{width:100%;max-width:520px;touch-action:none;border-radius:16px;display:block;margin:0 auto;
+    background:repeating-linear-gradient(0deg,#f4f8fd,#f4f8fd 27px,#e7eef7 28px),
+              repeating-linear-gradient(90deg,transparent,transparent 27px,#e7eef7 28px);
+    border:2px solid #cdd8e6;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;}
+  .geo-stage text{-webkit-user-select:none;user-select:none;pointer-events:none;}
+  .geoTri{pointer-events:none;}
+  .geoGrip{pointer-events:auto;cursor:grab;}
+  .geoGrip:active{cursor:grabbing;}
+  .geo-controls{max-width:520px;margin:10px auto 0;display:flex;flex-direction:column;gap:10px;}
+  .geo-rot{background:#eef4fb;border:2px solid #cdd8e6;border-radius:14px;padding:10px 12px;}
+  .geo-rot label{font-weight:700;color:var(--geo);display:block;text-align:center;margin-bottom:6px;}
+  .geo-rot-hint{font-weight:600;color:#5a6b7d;font-size:.85em;}
+  .geo-presets{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;}
+  .geo-btn{min-height:44px;padding:6px 14px;border:2px solid #cdd8e6;background:#fff;border-radius:11px;font-weight:700;cursor:pointer;color:#243447;}
+  .geo-btn:active{transform:scale(.96);}
+  .geo-hint{font-size:.9rem;color:#5a6b7d;text-align:center;margin:4px 0 0;}
+</style>
+</head>
+<body>
+<header>
+  <span class="typ">Erarbeitung · Klasse 6</span>
+  <h1>Winkel messen mit dem Geodreieck</h1>
+  <p>Wie groß ist ein Winkel? Heute lernst du, Winkelarten zu unterscheiden und Winkel mit dem Geodreieck genau zu messen.</p>
+</header>
+
+<nav class="tabs" id="tabs">
+  <button class="tab aktiv" data-ziel="k1">1 · Winkelarten <span class="done" id="d1"></span></button>
+  <button class="tab" data-ziel="k2">2 · So misst man <span class="done" id="d2"></span></button>
+  <button class="tab" data-ziel="k3">3 · Selbst messen <span class="done" id="d3"></span></button>
+  <button class="tab" data-ziel="k4">4 · Begriffe <span class="done" id="d4"></span></button>
+</nav>
+
+<main>
+  <!-- KARTE 1: Winkelarten unterscheiden (Zuordnung per Antippen) -->
+  <section class="karte aktiv" id="k1">
+    <h2>Welche Winkelarten gibt es?</h2>
+    <p>Ein <span class="tooltip" data-tt="tt-w">Winkel</span> wird von zwei <b>Schenkeln</b> mit gemeinsamem <b>Scheitelpunkt</b> S eingeschlossen. Seine Größe gibt man in <b>Grad (°)</b> an.</p>
+    <div class="tt-box" id="tt-w">Winkel: das „Auseinanderklaffen" zweier Schenkel, gemessen vom gemeinsamen Punkt (Scheitel) aus.</div>
+
+    <div class="hinweis">
+      <b>Die sechs Winkelarten:</b><br>
+      spitzer Winkel: $0° < \alpha < 90°$ · rechter Winkel: $\alpha = 90°$ · stumpfer Winkel: $90° < \alpha < 180°$ · gestreckter Winkel: $\alpha = 180°$ · überstumpfer Winkel: $180° < \alpha < 360°$ · Vollwinkel: $\alpha = 360°$
+    </div>
+
+    <p class="frage">Tippe einen Winkel an, dann die passende Winkelart. Ordne alle Winkel richtig zu.</p>
+
+    <div class="zuord" id="zuordFiguren"><!-- per JS --></div>
+    <div class="kat-zeile" id="zuordKats">
+      <button class="kat-btn" data-kat="spitz">spitzer Winkel</button>
+      <button class="kat-btn" data-kat="recht">rechter Winkel</button>
+      <button class="kat-btn" data-kat="stumpf">stumpfer Winkel</button>
+      <button class="kat-btn" data-kat="gestreckt">gestreckter Winkel</button>
+      <button class="kat-btn" data-kat="ueberstumpf">überstumpfer Winkel</button>
+      <button class="kat-btn" data-kat="voll">Vollwinkel</button>
+    </div>
+    <p class="zuordstatus">Richtig zugeordnet: <b id="zuordFortschritt">0</b> von 6</p>
+
+    <button class="btn btn-leeren" id="leeren1" style="display:none" onclick="leereZuord()">Neu beginnen</button>
+    <div class="feedback" id="fb1"></div>
+  </section>
+
+  <!-- KARTE 2: Messprinzip Schritt für Schritt -->
+  <section class="karte" id="k2">
+    <h2>So misst man mit dem Geodreieck</h2>
+    <p>Auf dem Geodreieck ist ein Halbkreis von $0°$ bis $180°$ aufgedruckt. So gehst du beim Messen vor – decke die Schritte nacheinander auf.</p>
+
+    <div class="schritt-liste" id="schritte">
+      <div class="schritt versteckt" data-schritt>
+        <button class="btn btn-sek aufdeck-btn" style="width:100%;border:2px dashed var(--kopf);">Schritt 1 aufdecken</button>
+        <div class="schritt-inhalt" style="display:none;padding-top:.6rem;">
+          <b>Schritt 1 – Mitte auf den Scheitel.</b> Lege die <b>Nullmarke</b> (Mitte der Grundkante) des Geodreiecks genau auf den Scheitelpunkt S.
+        </div>
+      </div>
+      <div class="schritt versteckt" data-schritt>
+        <button class="btn btn-sek aufdeck-btn" style="width:100%;border:2px dashed var(--kopf);">Schritt 2 aufdecken</button>
+        <div class="schritt-inhalt" style="display:none;padding-top:.6rem;">
+          <b>Schritt 2 – Grundkante auf den 1. Schenkel.</b> Drehe das Geodreieck so, dass die Grundkante genau auf dem ersten Schenkel liegt. Die $0°$-Marke zeigt am ersten Schenkel entlang.
+        </div>
+      </div>
+      <div class="schritt versteckt" data-schritt>
+        <button class="btn btn-sek aufdeck-btn" style="width:100%;border:2px dashed var(--kopf);">Schritt 3 aufdecken</button>
+        <div class="schritt-inhalt" style="display:none;padding-top:.6rem;">
+          <b>Schritt 3 – am 2. Schenkel ablesen.</b> Dort, wo der zweite Schenkel die Skala kreuzt, liest du die <b>Winkelgröße</b> ab. (Ist der Schenkel zu kurz, verlängere ihn.)
+          <div class="hinweis" style="margin:.8rem 0 0;background:#FDF5E6;">
+            <b>Zwei Skalen – aufgepasst!</b> Auf dem Geodreieck stehen <b>zwei Zahlenreihen</b>: eine läuft von links $0° → 180°$, die andere von rechts $0° → 180°$. Lies immer die Skala, die <b>am ersten Schenkel bei $0°$ beginnt</b>. Sonst bekommst du den Nebenwinkel (z. B. $50°$ statt $130°$).
+            <div id="skalenBsp" style="margin-top:.6rem;text-align:center;"></div>
+          </div>
+        </div>
+      </div>
+      <div class="schritt versteckt" data-schritt>
+        <button class="btn btn-sek aufdeck-btn" style="width:100%;border:2px dashed var(--kopf);">Schritt 4 aufdecken – überstumpfe Winkel</button>
+        <div class="schritt-inhalt" style="display:none;padding-top:.6rem;">
+          <b>Schritt 4 – überstumpfe Winkel ($180° < \alpha < 360°$).</b> Der Geodreieck-Halbkreis geht nur bis $180°$. Für größere Winkel gibt es zwei Wege. Beispiel: $\alpha = 210°$.
+          <div class="mess-bsp" id="messBspWrap"></div>
+          <p style="margin:.4rem 0 0;"><b>Weg 1:</b> Miss den Rest über $180°$ hinaus und rechne $180° + 30° = 210°$.<br>
+          <b>Weg 2:</b> Miss den kleineren Winkel daneben und rechne $360° - 150° = 210°$.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="hinweis" id="k2fertig" style="display:none;">Alles aufgedeckt! Jetzt darfst du selbst messen – wechsle zur Karte „Selbst messen".</div>
+  </section>
+
+  <!-- KARTE 3: Selbst messen mit interaktivem Geodreieck -->
+  <section class="karte" id="k3">
+    <h2>Jetzt misst du selbst</h2>
+    <p>Lege das Geodreieck an den Winkel an: Mitte auf den Scheitelpunkt <b>×</b>, Grundkante auf den unteren Schenkel. <b>Verschiebe</b> mit dem Finger, <b>drehe</b> am orangen Griff. Lies dann ab und trage die Größe ein.</p>
+
+    <p class="frage">Miss Winkel <b id="messName">α</b> und trage die Größe ein:</p>
+    <div class="hinweis" id="messHinweis" style="display:none;"></div>
+
+    <!-- interaktives Geodreieck-Modul -->
+    <div id="messGeo"></div>
+
+    <div class="koord-eingabe" style="justify-content:center;margin-top:1rem;">
+      <label><b id="messLabel">α</b> =</label>
+      <input type="number" id="messWert" inputmode="numeric" min="0" max="360" placeholder="?">
+      <span><b>°</b></span>
+    </div>
+    <div style="text-align:center;">
+      <button class="btn btn-pruefen" onclick="pruefeMessen()">Prüfen</button>
+      <button class="btn btn-leeren" id="leeren3" style="display:none" onclick="leereMessen()">Leeren</button>
+    </div>
+    <div class="feedback" id="fb3"></div>
+
+    <div style="text-align:center;margin-top:1rem;">
+      <button class="btn btn-sek" id="naechsterWinkel" style="display:none" onclick="naechsterMessWinkel()">Nächster Winkel →</button>
+    </div>
+  </section>
+
+  <!-- KARTE 4: Begriffe -->
+  <section class="karte" id="k4">
+    <h2>Wichtige Begriffe</h2>
+    <p>Tippe jede Karte einmal an, um sie umzudrehen.</p>
+    <div class="flips" id="flips">
+      <div class="flip" data-flip><div class="flip-inner">
+        <div class="flip-front">Scheitelpunkt S</div>
+        <div class="flip-back">Der gemeinsame Punkt der beiden Schenkel. Hier liegt beim Messen die Nullmarke.</div>
+      </div></div>
+      <div class="flip" data-flip><div class="flip-inner">
+        <div class="flip-front">Schenkel</div>
+        <div class="flip-back">Die beiden Halbgeraden, die vom Scheitelpunkt ausgehen und den Winkel begrenzen.</div>
+      </div></div>
+      <div class="flip" data-flip><div class="flip-inner">
+        <div class="flip-front">Nullmarke</div>
+        <div class="flip-back">Die Mitte der Grundkante des Geodreiecks. Sie kommt genau auf den Scheitelpunkt.</div>
+      </div></div>
+      <div class="flip" data-flip><div class="flip-inner">
+        <div class="flip-front">Winkelgröße</div>
+        <div class="flip-back">Die in Grad (°) abgelesene Größe – dort, wo der 2. Schenkel die Skala kreuzt.</div>
+      </div></div>
+    </div>
+    <p class="flip-tipp">Dreh alle vier Karten um – dann erscheint der Weiter-Button. 🃏</p>
+    <div class="hinweis">Geschafft! Du kennst die Winkelarten und kannst mit dem Geodreieck messen. In der Übung wendest du das selbst an.</div>
+  </section>
+</main>
+
+<div class="weiter-wrap">
+  <a href="#" class="weiter" id="weiter">Weiter zur Übung →</a>
+</div>
+
+<div class="trex" id="trex">🦖<span class="bubble">Made by Mathedino</span></div>
+
+<script>
+  MathJax = { tex:{ inlineMath:[['$','$'],['\\(','\\)']] }, svg:{ fontCache:'global' } };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+<!-- ===== Geodreieck-Baustein (1:1 aus geodreieck_baustein.html übernommen) ===== -->
+<script>
+function mountGeodreieck(container, geraden, optionen){
+  const SVGNS='http://www.w3.org/2000/svg';
+  const root = (typeof container==='string') ? document.getElementById(container) : container;
+  const opt = Object.assign({start:{x:200,y:200,rot:0}, hint:true, presets:[0,45,90,135]}, optionen||{});
+  let geraden_ = geraden.slice();
+  const geo = { x:opt.start.x, y:opt.start.y, rot:opt.start.rot };
+
+  root.innerHTML='';
+  const stage = document.createElementNS(SVGNS,'svg');
+  stage.setAttribute('viewBox','0 0 400 400');
+  stage.setAttribute('class','geo-stage');
+  root.appendChild(stage);
+
+  const controls=document.createElement('div'); controls.className='geo-controls';
+  controls.innerHTML =
+    `<div class="geo-rot">
+       <label>🔄 Drehung: <span class="geo-rotval">0°</span> <span class="geo-rot-hint">(am orangen Griff ziehen)</span></label>
+       <div class="geo-presets">`+
+         opt.presets.map(d=>`<button class="geo-btn geo-set" data-deg="${d}">${d}°</button>`).join('')+
+       `</div>
+     </div>
+     <button class="geo-btn geo-reset">📐 Geodreieck zurücklegen</button>`;
+  root.appendChild(controls);
+  if(opt.hint){
+    const h=document.createElement('p'); h.className='geo-hint';
+    h.innerHTML='👆 Auf der Fläche ziehen = <b>verschieben</b> · am <b style="color:#e8862e">orangen Griff</b> ziehen = <b>drehen</b>.';
+    root.appendChild(h);
+  }
+  const rotval = controls.querySelector('.geo-rotval');
+  function el(tag,attrs){const e=document.createElementNS(SVGNS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);return e;}
+
+  function buildGeo(){
+    const W=180, H=180, COL='#2f5fa6', EDGE='#244e86';
+    const g=el('g',{transform:`translate(${geo.x} ${geo.y}) rotate(${geo.rot})`,class:'geoTri'});
+    g.appendChild(el('path',{d:`M ${-W+8},0 Q ${-W},0 ${-W+6},-4 L -4,${-H+6} Q 0,${-H} 4,${-H+6} L ${W-6},-4 Q ${W},0 ${W-8},0 Z`,
+      fill:'rgba(150,200,235,0.22)',stroke:EDGE,'stroke-width':2.5,'stroke-linejoin':'round'}));
+    for(let y=16;y<H-10;y+=16){const half=W*(1-y/H)-4;
+      g.appendChild(el('line',{x1:-half,y1:-y,x2:half,y2:-y,stroke:COL,'stroke-width':0.8,opacity:.38}));}
+    g.appendChild(el('line',{x1:0,y1:4,x2:0,y2:-H+8,stroke:EDGE,'stroke-width':1.6,'stroke-dasharray':'7 5',opacity:.85}));
+    g.appendChild(el('path',{d:`M -4,${-H+16} L 0,${-H+8} L 4,${-H+16}`,fill:'none',stroke:EDGE,'stroke-width':1.6,opacity:.85}));
+    g.appendChild(el('line',{x1:-W+6,y1:0,x2:W-6,y2:0,stroke:EDGE,'stroke-width':2.4}));
+    const cm=20;
+    for(let n=1;n*cm<=W-12;n++){[-1,1].forEach(sgn=>{const x=sgn*n*cm,lang=(n%5===0);
+      g.appendChild(el('line',{x1:x,y1:0,x2:x,y2:lang?9:5,stroke:COL,'stroke-width':lang?1.4:0.9,opacity:.7}));
+      if(lang){const t=el('text',{x:x,y:19,'text-anchor':'middle','font-size':9,fill:COL,opacity:.8});t.textContent=n;g.appendChild(t);}});}
+    g.appendChild(el('line',{x1:0,y1:0,x2:0,y2:10,stroke:EDGE,'stroke-width':1.6}));
+    const Rs=W*0.66,cx=0,cy=0,Ri=Rs*0.86;
+    g.appendChild(el('path',{d:`M ${cx-Rs} ${cy} A ${Rs} ${Rs} 0 0 1 ${cx+Rs} ${cy}`,fill:'none',stroke:COL,'stroke-width':1,opacity:.7}));
+    g.appendChild(el('path',{d:`M ${cx-Ri} ${cy} A ${Ri} ${Ri} 0 0 1 ${cx+Ri} ${cy}`,fill:'none',stroke:COL,'stroke-width':0.8,opacity:.5}));
+    for(let a=0;a<=180;a+=1){const rad=Math.PI*a/180;
+      const zehn=(a%10===0), fuenf=(a%5===0);
+      const len=zehn?13:(fuenf?9:5);
+      const r2=Rs-len;
+      g.appendChild(el('line',{x1:cx-Math.cos(rad)*Rs,y1:cy-Math.sin(rad)*Rs,x2:cx-Math.cos(rad)*r2,y2:cy-Math.sin(rad)*r2,
+        stroke:COL,'stroke-width':zehn?1.5:(fuenf?1:0.6),opacity:zehn?0.9:(fuenf?0.8:0.6)}));
+      if(zehn){const tr=r2-8,tx=cx-Math.cos(rad)*tr,ty=cy-Math.sin(rad)*tr+3;
+        const t=el('text',{x:tx,y:ty,'text-anchor':'middle','font-size':8,fill:COL,opacity:.85});t.textContent=a;g.appendChild(t);}}
+    g.appendChild(el('rect',{x:-9,y:-H+8,width:9,height:9,fill:'none',stroke:EDGE,'stroke-width':1.8}));
+    const t90=el('text',{x:0,y:-H-22,'text-anchor':'middle','font-size':14,fill:EDGE,'font-weight':'bold'});t90.textContent='90°';g.appendChild(t90);
+    const gy=-H-2;
+    g.appendChild(el('line',{x1:0,y1:-H+8,x2:0,y2:gy,stroke:'#e8862e','stroke-width':3}));
+    const grip=el('circle',{cx:0,cy:gy,r:16,fill:'#e8862e',stroke:'#fff','stroke-width':3,class:'geoGrip'});
+    g.appendChild(el('circle',{cx:0,cy:gy,r:26,fill:'transparent',class:'geoGrip'}));
+    g.appendChild(grip);
+    g.appendChild(el('path',{d:`M -6,${gy} A 6 6 0 1 1 6,${gy}`,fill:'none',stroke:'#fff','stroke-width':2}));
+    g.appendChild(el('path',{d:`M 6,${gy-4} L 6,${gy+3} L 11,${gy}`,fill:'#fff'}));
+    return g;
+  }
+  function draw(){
+    stage.innerHTML='';
+    geraden_.forEach(L=>stage.appendChild(el('line',
+      {x1:L.x1,y1:L.y1,x2:L.x2,y2:L.y2,stroke:L.color||'#d6336c','stroke-width':6,'stroke-linecap':'round'})));
+    if(typeof opt.extra==='function') opt.extra(stage, el);   // Verfeinerung: Scheitel-×, Schenkel-Label
+    stage.appendChild(buildGeo());
+  }
+  function applyTransform(){
+    const g=stage.querySelector('.geoTri');
+    if(g)g.setAttribute('transform',`translate(${geo.x} ${geo.y}) rotate(${geo.rot})`);
+  }
+  function setRot(deg){
+    deg=((Math.round(deg)%360)+360)%360;
+    geo.rot=deg; rotval.textContent=deg+'°'; applyTransform();
+  }
+  controls.querySelectorAll('.geo-set').forEach(b=>b.addEventListener('click',()=>setRot(+b.dataset.deg)));
+  controls.querySelector('.geo-reset').addEventListener('click',()=>{
+    geo.x=opt.start.x; geo.y=opt.start.y; setRot(opt.start.rot); applyTransform();
+  });
+  let mode=null, activePointer=null, dragStart=null, rotStart=null;
+  function pt(evt){const r=stage.getBoundingClientRect();
+    return {x:(evt.clientX-r.left)/r.width*400, y:(evt.clientY-r.top)/r.height*400};}
+  function winkelZuMitte(p){ return Math.atan2(p.y-geo.y, p.x-geo.x)*180/Math.PI; }
+  stage.addEventListener('pointerdown',e=>{
+    if(activePointer!==null)return;
+    activePointer=e.pointerId;
+    try{stage.setPointerCapture(e.pointerId);}catch(_){}
+    const p=pt(e);
+    if(e.target && e.target.classList && e.target.classList.contains('geoGrip')){
+      mode='rotate';
+      rotStart={ pointerWinkel:winkelZuMitte(p), rotAnfang:geo.rot };
+    }else{
+      mode='move';
+      dragStart={px:p.x,py:p.y,gx:geo.x,gy:geo.y};
+    }
+    e.preventDefault();
+  });
+  stage.addEventListener('pointermove',e=>{
+    if(mode===null||e.pointerId!==activePointer)return;
+    const p=pt(e);
+    if(mode==='rotate'){
+      const delta=winkelZuMitte(p)-rotStart.pointerWinkel;
+      setRot(rotStart.rotAnfang+delta);
+    }else{
+      geo.x=Math.max(-60,Math.min(460,dragStart.gx+(p.x-dragStart.px)));
+      geo.y=Math.max(-60,Math.min(460,dragStart.gy+(p.y-dragStart.py)));
+      applyTransform();
+    }
+    e.preventDefault();
+  });
+  function endDrag(e){if(e&&e.pointerId!==activePointer)return;mode=null;activePointer=null;}
+  stage.addEventListener('pointerup',endDrag);
+  stage.addEventListener('pointercancel',endDrag);
+  setRot(geo.rot); draw();
+  return {
+    setRot,
+    reset(){geo.x=opt.start.x;geo.y=opt.start.y;setRot(opt.start.rot);applyTransform();},
+    getState(){return {x:geo.x,y:geo.y,rot:geo.rot};},
+    setGeraden(arr){geraden_=arr.slice();draw();}
+  };
+}
+</script>
+
+<script>
+/* =========================================================
+   Zustand – nur im JS-Speicher (kein localStorage)
+   ========================================================= */
+const state = {
+  k1:{zuordnung:{}, aktiveFigur:null, erledigt:false},
+  k2:{aufgedeckt:[false,false,false,false], erledigt:false},
+  k3:{idx:0, geprueft:false, geloest:[false,false,false], erledigt:false, steuer:null},
+  k4:{gedreht:[false,false,false,false], erledigt:false}
+};
+const NS='http://www.w3.org/2000/svg';
+function elns(svg,name,attrs){const e=document.createElementNS(NS,name);for(const k in attrs)e.setAttribute(k,attrs[k]);svg.appendChild(e);return e;}
+
+/* Halbkreis-Skala mit beiden Zahlenreihen; die "richtige" (von links) hervorgehoben */
+function zeichneSkalen(){
+  const wrap=document.getElementById('skalenBsp');
+  if(!wrap || wrap.dataset.fertig) return;
+  const svg=document.createElementNS(NS,'svg');
+  svg.setAttribute('viewBox','0 0 260 150'); svg.setAttribute('width','260'); svg.setAttribute('height','150');
+  svg.style.maxWidth='100%'; svg.style.background='#fff'; svg.style.border='2px solid #E7DDC8'; svg.style.borderRadius='.5rem';
+  const cx=130, cy=120, R=92, Ri=70;
+  // Halbkreise
+  elns(svg,'path',{d:`M ${cx-R} ${cy} A ${R} ${R} 0 0 1 ${cx+R} ${cy}`,fill:'none',stroke:'#2f5fa6','stroke-width':1.5});
+  elns(svg,'path',{d:`M ${cx-Ri} ${cy} A ${Ri} ${Ri} 0 0 1 ${cx+Ri} ${cy}`,fill:'none',stroke:'#9bb4d4','stroke-width':1});
+  elns(svg,'line',{x1:cx-R-6,y1:cy,x2:cx+R+6,y2:cy,stroke:'#2f5fa6','stroke-width':1.5});
+  // Gradzahlen außen (äußere Skala: 0 links -> 180 rechts) HERVORGEHOBEN
+  // und innen (innere Skala: 180 links -> 0 rechts) blass
+  [0,30,60,90,120,150,180].forEach(a=>{
+    const rad=Math.PI*a/180;
+    const ax=cx-Math.cos(rad)*R, ay=cy-Math.sin(rad)*R;
+    const ix=cx-Math.cos(rad)*Ri, iy=cy-Math.sin(rad)*Ri;
+    // Markierungsstrich
+    const mx=cx-Math.cos(rad)*(R-8), my=cy-Math.sin(rad)*(R-8);
+    elns(svg,'line',{x1:ax,y1:ay,x2:mx,y2:my,stroke:'#2f5fa6','stroke-width':1.2});
+    // äußere Zahl (hervorgehoben, orange)
+    const ox=cx-Math.cos(rad)*(R+12), oy=cy-Math.sin(rad)*(R+12)+4;
+    let t=elns(svg,'text',{x:ox,y:oy,'font-size':12,'font-weight':'bold',fill:'#C9721A','text-anchor':'middle'}); t.textContent=a;
+    // innere Zahl (blass): 180 - a
+    const inx=cx-Math.cos(rad)*(Ri-12), iny=cy-Math.sin(rad)*(Ri-12)+4;
+    t=elns(svg,'text',{x:inx,y:iny,'font-size':10,fill:'#9bb4d4','text-anchor':'middle'}); t.textContent=(180-a);
+  });
+  // Scheitel ×
+  elns(svg,'line',{x1:cx-5,y1:cy-5,x2:cx+5,y2:cy+5,stroke:'#244e86','stroke-width':2.2});
+  elns(svg,'line',{x1:cx-5,y1:cy+5,x2:cx+5,y2:cy-5,stroke:'#244e86','stroke-width':2.2});
+  // Legende
+  let t=elns(svg,'text',{x:6,y:14,'font-size':11,'font-weight':'bold',fill:'#C9721A'}); t.textContent='■ diese Skala lesen';
+  t=elns(svg,'text',{x:6,y:30,'font-size':11,fill:'#9bb4d4'}); t.textContent='■ andere Skala (Nebenwinkel)';
+  wrap.appendChild(svg);
+  wrap.dataset.fertig='1';
+}
+function zeichneUeberstumpf(){
+  const wrap=document.getElementById('messBspWrap');
+  if(!wrap || wrap.dataset.fertig) return;
+  // gemeinsame Geometrie: Scheitel (70,80), 1. Schenkel waagerecht rechts,
+  // 2. Schenkel bei 210° (= 30° unterhalb der Waagerechten nach links)
+  function basis(titel){
+    const svg=document.createElementNS(NS,'svg');
+    svg.setAttribute('viewBox','0 0 200 120'); svg.setAttribute('width','200'); svg.setAttribute('height','120');
+    const sx=70, sy=64, L=70;
+    const g2=210, r2=Math.PI*g2/180;
+    // Schenkel
+    elns(svg,'line',{x1:sx,y1:sy,x2:sx+L,y2:sy,stroke:'#33414f','stroke-width':2.5,'stroke-linecap':'round'});
+    elns(svg,'line',{x1:sx,y1:sy,x2:sx+Math.cos(r2)*L,y2:sy-Math.sin(r2)*L,stroke:'#33414f','stroke-width':2.5,'stroke-linecap':'round'});
+    // Scheitel ×
+    elns(svg,'line',{x1:sx-5,y1:sy-5,x2:sx+5,y2:sy+5,stroke:'#244e86','stroke-width':2.2});
+    elns(svg,'line',{x1:sx-5,y1:sy+5,x2:sx+5,y2:sy-5,stroke:'#244e86','stroke-width':2.2});
+    return {svg,sx,sy};
+  }
+  // Weg 1: 180° + 30°
+  const a=basis();
+  // 180°-Bogen (gestreckt, oben herum)
+  elns(a.svg,'path',{d:`M ${a.sx+24} ${a.sy} A 24 24 0 0 0 ${a.sx-24} ${a.sy}`,fill:'none',stroke:'#1f9d55','stroke-width':2});
+  // +30°-Bogen (von 180° weiter unten herum bis 210°)
+  const r210=Math.PI*210/180;
+  elns(a.svg,'path',{d:`M ${a.sx-30} ${a.sy} A 30 30 0 0 0 ${a.sx+Math.cos(r210)*30} ${a.sy-Math.sin(r210)*30}`,fill:'none',stroke:'#C9721A','stroke-width':2});
+  let t;
+  t=elns(a.svg,'text',{x:a.sx,y:a.sy-30,'font-size':11,fill:'#1f9d55','text-anchor':'middle','font-weight':'bold'}); t.textContent='180°';
+  t=elns(a.svg,'text',{x:a.sx-44,y:a.sy+22,'font-size':11,fill:'#C9721A','font-weight':'bold'}); t.textContent='+30°';
+  // Weg 2: 360° − 150°
+  const b=basis();
+  // großer Bogen 210° (unten herum, large-arc)
+  elns(b.svg,'path',{d:`M ${b.sx+26} ${b.sy} A 26 26 0 1 0 ${b.sx+Math.cos(r210)*26} ${b.sy-Math.sin(r210)*26}`,fill:'none',stroke:'#C9721A','stroke-width':2});
+  // kleiner Gegenwinkel 150° (oben herum)
+  elns(b.svg,'path',{d:`M ${b.sx+34} ${b.sy} A 34 34 0 0 1 ${b.sx+Math.cos(r210)*34} ${b.sy-Math.sin(r210)*34}`,fill:'none',stroke:'#1f9d55','stroke-width':2});
+  t=elns(b.svg,'text',{x:b.sx+8,y:b.sy+34,'font-size':11,fill:'#C9721A','text-anchor':'middle','font-weight':'bold'}); t.textContent='210°';
+  t=elns(b.svg,'text',{x:b.sx-2,y:b.sy-26,'font-size':11,fill:'#1f9d55','text-anchor':'middle','font-weight':'bold'}); t.textContent='150°';
+
+  const d1=document.createElement('div'); d1.className='bsp';
+  d1.appendChild(a.svg);
+  const c1=document.createElement('div'); c1.className='cap'; c1.textContent='Weg 1: 180° + 30°'; d1.appendChild(c1);
+  const d2=document.createElement('div'); d2.className='bsp';
+  d2.appendChild(b.svg);
+  const c2=document.createElement('div'); c2.className='cap'; c2.textContent='Weg 2: 360° − 150°'; d2.appendChild(c2);
+  wrap.appendChild(d1); wrap.appendChild(d2);
+  wrap.dataset.fertig='1';
+}
+
+/* =========================================================
+   KARTE 1 – Winkelarten zuordnen (Antippen)
+   Kleine Winkel-Skizzen als SVG, Scheitel mit ×, offene Schenkel.
+   ========================================================= */
+const ZUORD = [
+  {id:'f3', grad:130, art:'stumpf'},
+  {id:'f6', grad:360, art:'voll'},
+  {id:'f1', grad:40,  art:'spitz'},
+  {id:'f5', grad:235, art:'ueberstumpf'},
+  {id:'f2', grad:90,  art:'recht'},
+  {id:'f4', grad:180, art:'gestreckt'}
+];
+function zeichneWinkelMini(grad){
+  // SVG 130x100, Scheitel bei (24,78). 1. Schenkel waagerecht nach rechts.
+  const svg=document.createElementNS(NS,'svg');
+  svg.setAttribute('width','130'); svg.setAttribute('height','100'); svg.setAttribute('viewBox','0 0 130 100');
+  const sxp=44, syp=58, len=60;
+  const r2rad=Math.PI*grad/180;
+  // 1. Schenkel (waagerecht nach rechts) – bei Vollwinkel fällt 2. mit 1. zusammen
+  elns(svg,'line',{x1:sxp,y1:syp,x2:sxp+len,y2:syp,stroke:'#33414f','stroke-width':2.5,'stroke-linecap':'round'});
+  // 2. Schenkel: um grad gegen den Uhrzeigersinn (nach oben).
+  // Bei 360° (Vollwinkel) überdecken sich beide Schenkel exakt -> nur einen zeichnen.
+  if(grad<360){
+    const ex=sxp+Math.cos(r2rad)*len, ey=syp-Math.sin(r2rad)*len;
+    elns(svg,'line',{x1:sxp,y1:syp,x2:ex,y2:ey,stroke:'#33414f','stroke-width':2.5,'stroke-linecap':'round'});
+  }
+  // Winkelbogen (immer der eingeschlossene Winkel grad, gegen den Uhrzeigersinn vom 1. Schenkel)
+  const br=22;
+  const bx=sxp+br, by=syp;                                   // Start auf 1. Schenkel
+  const aex=sxp+Math.cos(r2rad)*br, aey=syp-Math.sin(r2rad)*br;
+  const largeArc = grad>180?1:0;
+  if(grad>=360){
+    // Vollkreis als zwei Halbbögen (Schenkel überdecken sich, nur ein Schenkel sichtbar)
+    elns(svg,'path',{d:`M ${bx} ${by} A ${br} ${br} 0 1 0 ${sxp-br} ${by} A ${br} ${br} 0 1 0 ${bx} ${by}`,fill:'none',stroke:'#C9721A','stroke-width':2});
+    // kleiner Pfeil, der den vollen Umlauf andeutet
+    elns(svg,'path',{d:`M ${bx-4} ${by-6} L ${bx} ${by} L ${bx+6} ${by-4}`,fill:'none',stroke:'#C9721A','stroke-width':2,'stroke-linejoin':'round'});
+  } else if(Math.abs(grad-180)<0.5){
+    elns(svg,'path',{d:`M ${bx} ${by} A ${br} ${br} 0 0 0 ${sxp-br} ${by}`,fill:'none',stroke:'#C9721A','stroke-width':2});
+  } else {
+    elns(svg,'path',{d:`M ${bx} ${by} A ${br} ${br} 0 ${largeArc} 0 ${aex} ${aey}`,fill:'none',stroke:'#C9721A','stroke-width':2});
+  }
+  // rechter Winkel: kleines Quadrat
+  if(Math.abs(grad-90)<0.5){
+    elns(svg,'rect',{x:sxp,y:syp-14,width:14,height:14,fill:'none',stroke:'#C9721A','stroke-width':1.6});
+  }
+  // Scheitel als ×
+  elns(svg,'line',{x1:sxp-5,y1:syp-5,x2:sxp+5,y2:syp+5,stroke:'#244e86','stroke-width':2.2});
+  elns(svg,'line',{x1:sxp-5,y1:syp+5,x2:sxp+5,y2:syp-5,stroke:'#244e86','stroke-width':2.2});
+  return svg;
+}
+function baueZuord(){
+  const wrap=document.getElementById('zuordFiguren');
+  wrap.innerHTML='';
+  ZUORD.forEach(f=>{
+    const div=document.createElement('div');
+    div.className='zuord-fig'; div.dataset.id=f.id;
+    div.appendChild(zeichneWinkelMini(f.grad));
+    const lab=document.createElement('div'); lab.className='lab';
+    lab.textContent='Winkel '+f.grad+'°';
+    div.appendChild(lab);
+    // Status aus state
+    if(state.k1.zuordnung[f.id]==='ok'){
+      div.classList.add('richtig');
+      const artName={spitz:'spitzer Winkel',recht:'rechter Winkel',stumpf:'stumpfer Winkel',gestreckt:'gestreckter Winkel',ueberstumpf:'überstumpfer Winkel',voll:'Vollwinkel'}[f.art];
+      const zuw=document.createElement('div'); zuw.className='zuw'; zuw.textContent='→ '+artName; div.appendChild(zuw);
+    }
+    div.addEventListener('click',()=>{
+      if(state.k1.zuordnung[f.id]==='ok') return;
+      document.querySelectorAll('.zuord-fig').forEach(x=>x.classList.remove('aktiv'));
+      div.classList.add('aktiv');
+      state.k1.aktiveFigur=f.id;
+    });
+    wrap.appendChild(div);
+  });
+}
+document.querySelectorAll('#zuordKats .kat-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    if(state.k1.aktiveFigur===null) return;
+    const fid=state.k1.aktiveFigur;
+    const f=ZUORD.find(z=>z.id===fid);
+    const div=document.querySelector('.zuord-fig[data-id="'+fid+'"]');
+    const fb=document.getElementById('fb1');
+    if(btn.dataset.kat===f.art){
+      state.k1.zuordnung[fid]='ok';
+      div.classList.remove('aktiv','falsch'); div.classList.add('richtig');
+      // gewählten Begriff sichtbar an der Figur anzeigen
+      const artName={spitz:'spitzer Winkel',recht:'rechter Winkel',stumpf:'stumpfer Winkel',gestreckt:'gestreckter Winkel',ueberstumpf:'überstumpfer Winkel',voll:'Vollwinkel'}[f.art];
+      let zuw=div.querySelector('.zuw'); if(!zuw){zuw=document.createElement('div');zuw.className='zuw';div.appendChild(zuw);}
+      zuw.textContent='→ '+artName;
+      fb.className='feedback';
+      const n=Object.values(state.k1.zuordnung).filter(v=>v==='ok').length;
+      document.getElementById('zuordFortschritt').textContent=n;
+      state.k1.aktiveFigur=null;
+      if(n===6){
+        state.k1.erledigt=true;
+        fb.className='feedback zeig ok';
+        fb.textContent='✅ Alle sechs richtig zugeordnet! Du erkennst jetzt spitze, rechte, stumpfe, gestreckte, überstumpfe und volle Winkel.';
+      }
+    }else{
+      div.classList.add('falsch');
+      fb.className='feedback zeig nok';
+      const artText={spitz:'spitzer (< 90°)',recht:'rechter (= 90°)',stumpf:'stumpfer (90°–180°)',gestreckt:'gestreckter (= 180°)',ueberstumpf:'überstumpfer (180°–360°)',voll:'Vollwinkel (= 360°)'}[f.art];
+      fb.textContent='❌ Nicht ganz. '+f.grad+'° ist ein '+artText+' Winkel. Vergleiche die Größe mit 90°.';
+      document.getElementById('leeren1').style.display='inline-block';
+      setTimeout(()=>div.classList.remove('falsch'),900);
+    }
+    pruefeFortschritt();
+  });
+});
+function leereZuord(){
+  state.k1={zuordnung:{}, aktiveFigur:null, erledigt:false};
+  document.getElementById('zuordFortschritt').textContent='0';
+  document.getElementById('fb1').className='feedback';
+  document.getElementById('leeren1').style.display='none';
+  baueZuord();
+  pruefeFortschritt();
+}
+
+/* =========================================================
+   KARTE 2 – Messprinzip aufdecken
+   ========================================================= */
+document.querySelectorAll('#schritte .schritt').forEach((s,i)=>{
+  s.querySelector('.aufdeck-btn').addEventListener('click',function(){
+    s.classList.remove('versteckt');
+    s.querySelector('.schritt-inhalt').style.display='block';
+    this.style.display='none';
+    state.k2.aufgedeckt[i]=true;
+    if(i===2){ zeichneSkalen(); }
+    if(i===3){ zeichneUeberstumpf(); }
+    if(state.k2.aufgedeckt.every(Boolean)){
+      state.k2.erledigt=true;
+      document.getElementById('k2fertig').style.display='block';
+      pruefeFortschritt();
+    }
+  });
+});
+
+/* =========================================================
+   KARTE 3 – Selbst messen mit Geodreieck
+   Winkel als zwei Geraden im 0–400-Raster. Scheitel S(200,250).
+   1. Schenkel waagerecht nach rechts, 2. Schenkel um grad nach oben.
+   ========================================================= */
+const MESS = [
+  {name:'α', grad:50,  start:{x:200,y:120,rot:0}},
+  {name:'β', grad:120, start:{x:120,y:120,rot:0}},
+  {name:'γ', grad:210, start:{x:120,y:120,rot:0}}
+];
+const SX=200, SY=250, SCHENKEL=150;
+function messGeraden(grad){
+  const rad=Math.PI*grad/180;
+  return [
+    // 1. Schenkel: waagerecht nach rechts
+    {x1:SX, y1:SY, x2:SX+SCHENKEL, y2:SY, color:'#d6336c'},
+    // 2. Schenkel: um grad nach oben (SVG y nach unten -> minus)
+    {x1:SX, y1:SY, x2:SX+Math.cos(rad)*SCHENKEL, y2:SY-Math.sin(rad)*SCHENKEL, color:'#1f9d55'}
+  ];
+}
+// Verfeinerung: Scheitel als ×, Schenkel-Beschriftung, Winkelbogen + Name
+function messExtra(svg, el){
+  const m=MESS[state.k3.idx];
+  const rad=Math.PI*m.grad/180;
+  // Winkelbogen – bei überstumpfem Winkel den großen Bogen (large-arc) zeichnen
+  const r=30;
+  const ax=SX+r, ay=SY;
+  const bx=SX+Math.cos(rad)*r, by=SY-Math.sin(rad)*r;
+  const largeArc = m.grad>180?1:0;
+  svg.appendChild(el('path',{d:`M ${ax} ${ay} A ${r} ${r} 0 ${largeArc} 0 ${bx} ${by}`,fill:'none',stroke:'#C9721A','stroke-width':2}));
+  // Name des Winkels – Position je nach Größe
+  const lr=50, lwinkel=m.grad/2;
+  const lrad=Math.PI*lwinkel/180;
+  const tx=SX+Math.cos(lrad)*lr, ty=SY-Math.sin(lrad)*lr;
+  const t=el('text',{x:tx,y:ty,'font-size':18,'font-weight':'bold',fill:'#C9721A','text-anchor':'middle'}); t.textContent=m.name; svg.appendChild(t);
+  // Scheitel als ×
+  svg.appendChild(el('line',{x1:SX-7,y1:SY-7,x2:SX+7,y2:SY+7,stroke:'#244e86','stroke-width':3}));
+  svg.appendChild(el('line',{x1:SX-7,y1:SY+7,x2:SX+7,y2:SY-7,stroke:'#244e86','stroke-width':3}));
+  const ts=el('text',{x:SX-14,y:SY+20,'font-size':14,'font-weight':'bold',fill:'#244e86'}); ts.textContent='S'; svg.appendChild(ts);
+}
+function ladeMessWinkel(){
+  const m=MESS[state.k3.idx];
+  document.getElementById('messName').textContent=m.name;
+  document.getElementById('messLabel').textContent=m.name;
+  const hw=document.getElementById('messHinweis');
+  if(m.grad>180){
+    hw.style.display='block';
+    hw.innerHTML='Achtung: '+m.name+' ist <b>überstumpfer</b> als 180°. Der Halbkreis reicht nicht – nutze einen der beiden Wege von Karte 2 (180° + Rest oder 360° − Gegenwinkel).';
+  }else{
+    hw.style.display='none';
+  }
+  state.k3.steuer = mountGeodreieck('messGeo', messGeraden(m.grad), {
+    start:m.start, hint:true, presets:[0,45,90,135], extra:messExtra
+  });
+}
+function pruefeMessen(){
+  const m=MESS[state.k3.idx];
+  const wert=document.getElementById('messWert').value.trim();
+  if(wert===''){ return; }
+  const w=parseInt(wert,10);
+  const fb=document.getElementById('fb3');
+  state.k3.geprueft=true;
+  // Toleranz ±2° (Ablesen am Geodreieck)
+  if(Math.abs(w-m.grad)<=2){
+    fb.className='feedback zeig ok';
+    let art;
+    if(m.grad<90) art='Ein spitzer Winkel.';
+    else if(m.grad===90) art='Ein rechter Winkel.';
+    else if(m.grad<180) art='Ein stumpfer Winkel.';
+    else if(m.grad===180) art='Ein gestreckter Winkel.';
+    else art='Ein überstumpfer Winkel.';
+    fb.textContent='✅ Richtig gemessen! '+m.name+' = '+m.grad+'°. '+art;
+    state.k3.geloest[state.k3.idx]=true;
+    if(state.k3.geloest.every(Boolean)){ state.k3.erledigt=true; }
+    else { document.getElementById('naechsterWinkel').style.display='inline-block'; }
+  }else{
+    fb.className='feedback zeig nok';
+    let tipp;
+    if(m.grad>180 && Math.abs(w-(360-m.grad))<=3){
+      tipp=' Du hast den kleineren Nebenwinkel ('+(360-m.grad)+'°) abgelesen. Der gesuchte Winkel ist der große: 360° − '+(360-m.grad)+'° = '+m.grad+'°.';
+    } else if(m.grad>180 && Math.abs(w-(m.grad-180))<=3){
+      tipp=' Du hast nur den Teil über 180° gemessen. Rechne 180° + '+(m.grad-180)+'° = '+m.grad+'°.';
+    } else if(w>180 && m.grad<180){
+      tipp=' Du hast die falsche Skala benutzt – lies die Skala ab, die am 1. Schenkel bei 0° beginnt.';
+    } else if(Math.abs(w-(180-m.grad))<=2){
+      tipp=' Das ist der Nebenwinkel – beginne am richtigen Schenkel (0°-Marke).';
+    } else {
+      tipp=' Lege die Mitte genau auf S, die Grundkante auf den unteren Schenkel, und lies am oberen Schenkel ab.';
+    }
+    fb.textContent='❌ Noch nicht. Richtig ist '+m.grad+'°.'+tipp+' Tippe „Leeren" und miss noch einmal.';
+    document.getElementById('leeren3').style.display='inline-block';
+  }
+  pruefeFortschritt();
+}
+function leereMessen(){
+  state.k3.geprueft=false;
+  document.getElementById('messWert').value='';
+  document.getElementById('fb3').className='feedback';
+  document.getElementById('leeren3').style.display='none';
+  if(state.k3.steuer) state.k3.steuer.reset();
+}
+function naechsterMessWinkel(){
+  state.k3.idx=Math.min(state.k3.idx+1,MESS.length-1);
+  state.k3.geprueft=false;
+  document.getElementById('messWert').value='';
+  document.getElementById('fb3').className='feedback';
+  document.getElementById('leeren3').style.display='none';
+  document.getElementById('naechsterWinkel').style.display='none';
+  ladeMessWinkel();
+}
+
+/* =========================================================
+   KARTE 4 – Flip-Cards
+   ========================================================= */
+document.querySelectorAll('[data-flip]').forEach((f,i)=>{
+  f.addEventListener('click',()=>{
+    f.classList.toggle('gedreht');
+    state.k4.gedreht[i]=f.classList.contains('gedreht');
+    if(state.k4.gedreht.every(Boolean)){
+      state.k4.erledigt=true;
+      pruefeFortschritt();
+    }
+  });
+});
+
+/* =========================================================
+   Tabs, Tooltips, Fortschritt, T-Rex
+   ========================================================= */
+document.querySelectorAll('.tab').forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('aktiv'));
+    document.querySelectorAll('.karte').forEach(k=>k.classList.remove('aktiv'));
+    tab.classList.add('aktiv');
+    document.getElementById(tab.dataset.ziel).classList.add('aktiv');
+  });
+});
+document.querySelectorAll('.tooltip').forEach(t=>{
+  t.addEventListener('click',()=>{ document.getElementById(t.dataset.tt).classList.toggle('zeig'); });
+});
+function pruefeFortschritt(){
+  [['k1','d1'],['k2','d2'],['k3','d3'],['k4','d4']].forEach(([k,d])=>{
+    document.getElementById(d).textContent = state[k].erledigt ? '✅' : '';
+  });
+  const fertig = state.k1.erledigt && state.k2.erledigt && state.k3.erledigt && state.k4.erledigt;
+  document.getElementById('weiter').classList.toggle('zeig',fertig);
+}
+const trex=document.getElementById('trex');
+trex.addEventListener('click',()=>{
+  trex.classList.add('zeig');
+  setTimeout(()=>trex.classList.remove('zeig'),1800);
+});
+
+/* Init */
+baueZuord();
+ladeMessWinkel();
+pruefeFortschritt();
+</script>
+</body>
+</html>
