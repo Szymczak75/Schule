@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bonus: Das Geheimnis der besonderen Punkte</title>
+<meta name="description" content="Knobel-Bonusseite zum Kapitel Kreise und Dreiecke: Entdecke die Euler-Gerade, auf der Umkreismittelpunkt, Schwerpunkt und Höhenschnittpunkt jedes Dreiecks liegen, löse das 1:2-Zahlenrätsel und enttarne die besonderen Punkte.">
+<meta name="keywords" content="Euler-Gerade, Umkreismittelpunkt, Schwerpunkt, Höhenschnittpunkt, besondere Punkte, Knobeln, Bonus, Geometrie">
+<meta name="typ" content="Bonus">
+<meta name="klasse" content="8">
+<meta name="fach" content="mathe">
+<meta name="oberthema" content="Geometrie">
+<meta name="thema" content="Euler-Gerade und besondere Punkte">
+<script>
+  MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] }, svg: { fontCache: 'global' } };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+  :root{
+    --kopf:#5B3A8C;--kopf-dunkel:#43286B;--kopf-hell:#EDE6F7;
+    --papier:#F8F5FC;--tinte:#262030;--linie:#D8CEE8;
+    --erfolg:#1E7A3E;--fehler:#C0271E;--gold:#D9A521;
+    --umkreis:#1C6FB8;--inkreis:#1E7A3E;--schwer:#B0357A;--hoehe:#D9651C;
+    --karte:#FFFFFF;--akzent:#5B3A8C;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Helvetica,Arial,sans-serif;
+    background:var(--papier);color:var(--tinte);font-size:1.05rem;line-height:1.55;padding-bottom:5.5rem;}
+  .wrap{max-width:62rem;margin:0 auto;padding:0 1rem;}
+
+  header{background:linear-gradient(135deg,var(--kopf),var(--kopf-dunkel));color:#fff;padding:1.5rem 1rem 1.7rem;box-shadow:0 2px 12px rgba(67,40,107,.25);position:relative;overflow:hidden;}
+  header::after{content:'✦';position:absolute;font-size:9rem;opacity:.08;right:-1rem;top:-2rem;transform:rotate(15deg);}
+  header .wrap{display:flex;flex-direction:column;gap:.25rem;position:relative;z-index:1;}
+  .eyebrow{font-size:.85rem;letter-spacing:.16em;text-transform:uppercase;font-weight:700;opacity:.92;display:flex;align-items:center;gap:.4rem;}
+  header h1{margin:.1rem 0 0;font-size:1.75rem;line-height:1.12;}
+  header p{margin:.4rem 0 0;font-size:1.02rem;opacity:.95;max-width:46rem;}
+
+  nav.tabs{position:sticky;top:0;z-index:50;background:var(--papier);border-bottom:1px solid var(--linie);padding:.5rem 0;box-shadow:0 2px 6px rgba(0,0,0,.05);}
+  .tabrow{display:flex;flex-wrap:wrap;gap:.4rem;}
+  .tab{border:1px solid var(--linie);background:#fff;color:var(--tinte);border-radius:.6rem;padding:.55rem .8rem;min-height:44px;font-size:.92rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:.45rem;transition:transform .08s ease,background .15s ease;}
+  .tab .num{background:var(--kopf-hell);color:var(--kopf-dunkel);border-radius:50%;width:1.6rem;height:1.6rem;display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:800;flex:none;}
+  .tab.done .num{background:var(--erfolg);color:#fff;}
+  .tab.active{background:var(--kopf);color:#fff;border-color:var(--kopf-dunkel);}
+  .tab.active .num{background:#fff;color:var(--kopf-dunkel);}
+  .tab:active{transform:scale(.97);}
+
+  .card{display:none;animation:fade .3s ease;}
+  .card.active{display:block;}
+  @keyframes fade{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+  .panel{background:var(--karte);border:1px solid var(--linie);border-radius:1rem;padding:1.3rem 1.2rem 1.5rem;margin:1.2rem 0;box-shadow:0 1px 5px rgba(67,40,107,.07);}
+  .panel h2{margin:.1rem 0 .2rem;font-size:1.35rem;color:var(--kopf-dunkel);}
+  .panel h3{margin:1.2rem 0 .4rem;font-size:1.1rem;}
+  .lead{font-size:1.08rem;}
+
+  .story{background:var(--kopf-hell);border-left:4px solid var(--kopf);border-radius:.5rem;padding:.9rem 1.1rem;margin:1rem 0;font-size:1.04rem;}
+  .story b{color:var(--kopf-dunkel);}
+  .badge-bonus{display:inline-block;background:var(--gold);color:#3a2a00;font-size:.75rem;font-weight:800;padding:.15rem .55rem;border-radius:1rem;letter-spacing:.05em;text-transform:uppercase;}
+
+  .figur-box{background:#fff;border:1px solid var(--linie);border-radius:.8rem;padding:1rem;margin:1rem 0;}
+  .figur-svg{width:100%;height:auto;display:block;touch-action:manipulation;}
+  .figur-svg .seite{stroke:#3a3346;stroke-width:2.4;fill:none;}
+  .figur-svg .kreuz-pt line{stroke-width:2.8;stroke-linecap:round;}
+  .figur-svg .euler{stroke:var(--gold);stroke-width:3;opacity:0;transition:opacity .8s ease;}
+  .figur-svg .euler.show{opacity:1;}
+  .ptlabel{font:800 15px 'Segoe UI',sans-serif;}
+
+  .btnrow{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:.8rem;}
+  button.action{border:none;border-radius:.6rem;background:var(--kopf);color:#fff;font-size:1rem;font-weight:700;padding:.7rem 1.1rem;min-height:44px;min-width:44px;cursor:pointer;transition:transform .08s ease,background .15s ease;}
+  button.action:active{transform:scale(.96);}
+  button.action.gold{background:var(--gold);color:#3a2a00;}
+  button.action.sekundaer{background:#fff;color:var(--kopf);border:1.5px solid var(--kopf);}
+  button.action:disabled{background:#C9C2D6;cursor:default;}
+
+  .frage{margin:.6rem 0 .2rem;font-weight:600;}
+  .frage-zeile{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem;margin:.8rem 0;}
+  .frage-zeile label{font-weight:600;}
+  input.einzel{border:1.5px solid var(--linie);border-radius:.5rem;width:4.5rem;min-height:42px;font-size:1.05rem;text-align:center;padding:.2rem;background:#fff;color:var(--tinte);}
+  input:focus{outline:2px solid var(--kopf);}
+  .einheit{font-weight:600;color:#6a6080;}
+
+  .mc{display:flex;flex-direction:column;gap:.5rem;margin:.5rem 0;}
+  .mc button{text-align:left;border:1.5px solid var(--linie);background:#fff;border-radius:.6rem;padding:.8rem 1rem;min-height:44px;font-size:1rem;line-height:1.6;cursor:pointer;color:var(--tinte);transition:transform .08s ease,border-color .15s ease;}
+  .mc button:active{transform:scale(.99);}
+  .mc button.richtig{background:var(--erfolg);color:#fff;border-color:var(--erfolg);font-weight:700;}
+  .mc button.falsch{background:var(--fehler);color:#fff;border-color:var(--fehler);font-weight:700;}
+  .mc button.disabled{pointer-events:none;}
+  .feedback{margin:.7rem 0 0;padding:.75rem .95rem;border-radius:.6rem;font-weight:600;display:none;}
+  .feedback.gut{display:block;background:var(--erfolg);color:#fff;}
+  .feedback.schlecht{display:block;background:var(--fehler);color:#fff;}
+
+  details.tipp{margin:.7rem 0 0;border:1px solid var(--linie);border-radius:.6rem;background:#FBFAFE;overflow:hidden;}
+  details.tipp>summary{list-style:none;cursor:pointer;padding:.7rem .9rem;min-height:44px;display:flex;align-items:center;gap:.5rem;font-weight:700;color:var(--kopf-dunkel);}
+  details.tipp>summary::-webkit-details-marker{display:none;}
+  details.tipp>summary::before{content:'🔍';}
+  details.tipp[open]>summary::before{content:'📖';}
+  details.tipp .tippinhalt{padding:0 .9rem .9rem;}
+  .tippstufe{margin:.5rem 0;padding:.5rem .7rem;border-left:3px solid var(--kopf);background:var(--kopf-hell);border-radius:.3rem;display:none;}
+  .tippstufe.show{display:block;}
+  .tipp-mehr{margin-top:.5rem;}
+
+  .merk{background:#FFF8E8;border:1px solid #EAD8A0;border-left:5px solid var(--gold);border-radius:.7rem;padding:1rem 1.1rem;margin:1.1rem 0;}
+  .merk h3{margin:.1rem 0 .4rem;color:#9a7415;}
+  .euler-satz{background:linear-gradient(135deg,#FFF8E8,#FBF0D8);border:2px solid var(--gold);border-radius:.9rem;padding:1.1rem 1.2rem;margin:1.2rem 0;font-size:1.06rem;box-shadow:0 2px 8px rgba(217,165,33,.15);}
+  .euler-satz b{color:#9a7415;}
+
+  .status-box{margin:.6rem 0;padding:.7rem .95rem;border-radius:.6rem;font-weight:700;font-size:1.02rem;text-align:center;}
+
+  .steckbrief{border:1.5px solid var(--linie);border-radius:.8rem;padding:1rem 1.1rem;margin:1rem 0;background:#fff;}
+  .steckbrief .kopf{display:flex;align-items:center;gap:.6rem;font-weight:800;font-size:1.05rem;margin-bottom:.5rem;}
+  .steckbrief .icon{width:2rem;height:2rem;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;flex:none;}
+  .steckbrief .clue{font-style:italic;color:#4a4458;margin:.3rem 0 .7rem;}
+  .wahl{display:flex;flex-wrap:wrap;gap:.5rem;}
+  .wahl button{border:1.5px solid var(--linie);background:#fff;border-radius:.6rem;padding:.55rem .9rem;min-height:44px;font-size:.95rem;font-weight:700;cursor:pointer;color:var(--tinte);transition:transform .08s ease;}
+  .wahl button:active{transform:scale(.97);}
+  .wahl button.gewaehlt{border-color:var(--kopf);background:var(--kopf-hell);}
+  .wahl button.richtig{background:var(--erfolg);color:#fff;border-color:var(--erfolg);}
+  .wahl button.falsch{background:var(--fehler);color:#fff;border-color:var(--fehler);}
+  .wahl button.disabled{pointer-events:none;}
+
+  .konfetti-wrap{text-align:center;margin:2rem 0 1rem;display:none;}
+  .konfetti-wrap.show{display:block;animation:fade .5s ease;}
+  .urkunde{background:linear-gradient(135deg,#fff,#FBF0D8);border:3px double var(--gold);border-radius:1rem;padding:1.6rem 1.3rem;box-shadow:0 4px 16px rgba(217,165,33,.2);}
+  .urkunde .siegel{font-size:3rem;}
+  .urkunde h2{color:#9a7415;margin:.3rem 0;}
+  .urkunde p{margin:.4rem 0;}
+
+  .hinweis{background:#FFF8E8;border:1px dashed #9a7415;border-radius:.7rem;padding:.8rem 1rem;margin:1rem 0;font-size:.97rem;}
+  .hinweis b{color:#9a7415;}
+  ul.tidy{margin:.4rem 0 .4rem 1.1rem;padding:0;}
+  ul.tidy li{margin:.35rem 0;}
+
+  #trex{position:fixed;bottom:.7rem;right:.7rem;font-size:1.7rem;cursor:pointer;z-index:60;user-select:none;filter:drop-shadow(0 1px 2px rgba(0,0,0,.25));}
+  #trex .bubble{position:absolute;bottom:2.1rem;right:0;white-space:nowrap;background:var(--tinte);color:#fff;font-size:.78rem;font-weight:600;padding:.35rem .6rem;border-radius:.5rem;opacity:0;pointer-events:none;transition:opacity .2s ease;}
+  #trex.show .bubble{opacity:1;}
+
+  @media (max-width:520px){header h1{font-size:1.45rem;}.panel{padding:1.1rem .9rem 1.3rem;}}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <span class="eyebrow">✦ Bonus · Knobeln für Profis</span>
+    <h1>Das Geheimnis der besonderen Punkte</h1>
+    <p>Du kennst jetzt Umkreismittelpunkt, Inkreismittelpunkt und Schwerpunkt. Aber zwischen dreien von ihnen versteckt sich eine verblüffende Beziehung, die ein berühmter Mathematiker entdeckt hat. Findest du sie?</p>
+  </div>
+</header>
+
+<nav class="tabs">
+  <div class="wrap">
+    <div class="tabrow" id="tabrow">
+      <button class="tab active" data-i="0"><span class="num">1</span>Der Fall</button>
+      <button class="tab" data-i="1"><span class="num">2</span>Die Spur</button>
+      <button class="tab" data-i="2"><span class="num">3</span>Das 1:2-Rätsel</button>
+      <button class="tab" data-i="3"><span class="num">4</span>Steckbriefe</button>
+      <button class="tab" data-i="4"><span class="num">5</span>Der Sonderfall</button>
+      <button class="tab" data-i="5"><span class="num">6</span>Urkunde</button>
+    </div>
+  </div>
+</nav>
+
+<main class="wrap">
+
+  <!-- KARTE 1: Der Fall -->
+  <section class="card active" data-card="0">
+    <div class="panel">
+      <span class="badge-bonus">Ermittlung startet</span>
+      <h2>Drei Punkte, ein Verdacht</h2>
+      <div class="story">
+        <p>In jedem Dreieck wohnen mehrere besondere Punkte. Drei davon nehmen wir heute unter die Lupe:</p>
+        <ul class="tidy">
+          <li><b style="color:var(--umkreis)">U</b> – der <b style="color:var(--umkreis)">Umkreismittelpunkt</b> (Schnittpunkt der Mittelsenkrechten),</li>
+          <li><b style="color:var(--schwer)">S</b> – der <b style="color:var(--schwer)">Schwerpunkt</b> (Schnittpunkt der Seitenhalbierenden),</li>
+          <li><b style="color:var(--hoehe)">H</b> – der <b style="color:var(--hoehe)">Höhenschnittpunkt</b> (Schnittpunkt der drei Höhen).</li>
+        </ul>
+      </div>
+      <p>Hier siehst du ein ganz normales, schiefes Dreieck mit diesen drei Punkten. Schau sie dir genau an.</p>
+
+      <div class="figur-box">
+        <svg class="figur-svg" viewBox="0 0 460 360" id="svg-fall" role="img" aria-label="Dreieck mit U, S und H">
+          <polygon class="seite" points="70,310 390,310 290,110"/>
+          <g class="kreuz-pt"><line x1="224" y1="259" x2="236" y2="271" stroke="#1C6FB8"/><line x1="236" y1="259" x2="224" y2="271" stroke="#1C6FB8"/></g>
+          <g class="kreuz-pt"><line x1="244" y1="237" x2="256" y2="249" stroke="#B0357A"/><line x1="256" y1="237" x2="244" y2="249" stroke="#B0357A"/></g>
+          <g class="kreuz-pt"><line x1="284" y1="194" x2="296" y2="206" stroke="#D9651C"/><line x1="296" y1="194" x2="284" y2="206" stroke="#D9651C"/></g>
+          <g class="kreuz-pt"><line x1="64" y1="304" x2="76" y2="316" stroke="#3a3346"/><line x1="76" y1="304" x2="64" y2="316" stroke="#3a3346"/></g>
+          <g class="kreuz-pt"><line x1="384" y1="304" x2="396" y2="316" stroke="#3a3346"/><line x1="396" y1="304" x2="384" y2="316" stroke="#3a3346"/></g>
+          <g class="kreuz-pt"><line x1="284" y1="104" x2="296" y2="116" stroke="#3a3346"/><line x1="296" y1="104" x2="284" y2="116" stroke="#3a3346"/></g>
+          <text class="ptlabel" x="58" y="330" fill="#3a3346">A</text>
+          <text class="ptlabel" x="392" y="330" fill="#3a3346">B</text>
+          <text class="ptlabel" x="298" y="104" fill="#3a3346">C</text>
+          <text class="ptlabel" x="206" y="268" fill="#1C6FB8">U</text>
+          <text class="ptlabel" x="258" y="246" fill="#B0357A">S</text>
+          <text class="ptlabel" x="300" y="202" fill="#D9651C">H</text>
+        </svg>
+      </div>
+
+      <p class="frage">Fällt dir etwas an der Lage von $U$, $S$ und $H$ auf?</p>
+      <div class="mc" data-mc="fall" data-correct="2">
+        <button data-opt="0">Sie bilden ein gleichseitiges Dreieck.</button>
+        <button data-opt="1">Sie liegen kreuz und quer ohne Zusammenhang.</button>
+        <button data-opt="2">Sie scheinen alle drei auf <b>einer geraden Linie</b> zu liegen.</button>
+      </div>
+      <div class="feedback" data-fb="fall"></div>
+      <div class="hinweis"><b>Verdacht:</b> Liegen die drei Punkte wirklich immer auf einer Linie – oder ist das Zufall bei genau diesem Dreieck? Das klären wir auf der nächsten Karte.</div>
+    </div>
+  </section>
+
+  <!-- KARTE 2: Die Spur (interaktiv) -->
+  <section class="card" data-card="1">
+    <div class="panel">
+      <span class="badge-bonus">Beweisaufnahme</span>
+      <h2>Die Spur – verschiebe das Dreieck</h2>
+      <p class="lead"><b>Zieh die Ecken $B$ und $C$</b> mit dem Finger. Beobachte $U$, $S$ und $H$: Bleiben sie auf einer Linie?</p>
+
+      <div class="figur-box">
+        <svg class="figur-svg" viewBox="0 0 460 380" id="svg-euler" role="img" aria-label="Interaktive Euler-Gerade" style="touch-action:none;">
+          <line class="euler" id="e-line" x1="0" y1="0" x2="0" y2="0"/>
+          <polygon id="e-tri" class="seite" points="70,310 390,310 290,110"/>
+          <!-- U, S, H als Kreuze -->
+          <g class="kreuz-pt" id="e-u"><line stroke="#1C6FB8"/><line stroke="#1C6FB8"/></g>
+          <g class="kreuz-pt" id="e-s"><line stroke="#B0357A"/><line stroke="#B0357A"/></g>
+          <g class="kreuz-pt" id="e-h"><line stroke="#D9651C"/><line stroke="#D9651C"/></g>
+          <!-- A fest -->
+          <g class="kreuz-pt"><line x1="64" y1="304" x2="76" y2="316" stroke="#3a3346"/><line x1="76" y1="304" x2="64" y2="316" stroke="#3a3346"/></g>
+          <!-- B, C verschiebbar -->
+          <g id="e-bgrip" style="cursor:grab;"><circle cx="390" cy="310" r="22" fill="rgba(91,58,140,.10)"/><g class="kreuz-pt" id="e-bx"><line stroke="#3a3346"/><line stroke="#3a3346"/></g></g>
+          <g id="e-cgrip" style="cursor:grab;"><circle cx="290" cy="110" r="22" fill="rgba(91,58,140,.10)"/><g class="kreuz-pt" id="e-cx"><line stroke="#3a3346"/><line stroke="#3a3346"/></g></g>
+          <text class="ptlabel" x="58" y="330" fill="#3a3346">A</text>
+          <text class="ptlabel" id="e-blbl" x="398" y="324" fill="#3a3346">B</text>
+          <text class="ptlabel" id="e-clbl" x="298" y="104" fill="#3a3346">C</text>
+          <text class="ptlabel" id="e-ulbl" x="206" y="268" fill="#1C6FB8">U</text>
+          <text class="ptlabel" id="e-slbl" x="258" y="246" fill="#B0357A">S</text>
+          <text class="ptlabel" id="e-hlbl" x="300" y="202" fill="#D9651C">H</text>
+        </svg>
+      </div>
+      <div class="btnrow">
+        <button class="action gold" id="e-toggle">✨ Linie einblenden</button>
+        <button class="action sekundaer" id="e-reset">Dreieck zurücksetzen</button>
+      </div>
+      <div class="status-box" id="e-status" style="background:var(--kopf-hell);color:var(--kopf-dunkel);">Verschiebe $B$ oder $C$ und blende die Linie ein.</div>
+
+      <div class="euler-satz">
+        <b>Die Euler-Gerade.</b> In <i>jedem</i> Dreieck liegen der Umkreismittelpunkt $U$, der Schwerpunkt $S$ und der Höhenschnittpunkt $H$ auf <b>einer gemeinsamen Geraden</b>. Sie heißt nach dem Mathematiker Leonhard Euler die <b>Euler-Gerade</b>. (Der Inkreismittelpunkt $I$ macht übrigens <i>nicht</i> mit – er ist der Eigenbrötler.)
+      </div>
+    </div>
+  </section>
+
+  <!-- KARTE 3: Das 1:2-Rätsel -->
+  <section class="card" data-card="2">
+    <div class="panel">
+      <span class="badge-bonus">Versteckte Zahl</span>
+      <h2>Das 1 : 2 - Rätsel</h2>
+      <p class="lead">Auf der Euler-Geraden steckt eine genaue Regel. Der Schwerpunkt $S$ liegt zwischen $U$ und $H$ – und teilt die Strecke immer im selben Verhältnis:</p>
+
+      <div class="euler-satz" style="text-align:center;font-size:1.15rem;">
+        <b>$\overline{US} : \overline{SH} = 1 : 2$</b><br>
+        <span style="font-size:.95rem;">Das Stück von $S$ zu $H$ ist <b>doppelt so lang</b> wie das von $U$ zu $S$.</span>
+      </div>
+
+      <p class="frage">Bei einem Dreieck misst man $\overline{US}=4\text{ cm}$. Wie lang ist dann $\overline{SH}$?</p>
+      <div class="frage-zeile">
+        <label>$\overline{SH} =$</label>
+        <input class="einzel" data-k="r-sh" inputmode="decimal"><span class="einheit">cm</span>
+      </div>
+      <p class="frage">Und wie lang ist die ganze Euler-Strecke $\overline{UH}$?</p>
+      <div class="frage-zeile">
+        <label>$\overline{UH} =$</label>
+        <input class="einzel" data-k="r-uh" inputmode="decimal"><span class="einheit">cm</span>
+      </div>
+      <div class="btnrow"><button class="action" data-pruef="raetsel">Prüfen</button><button class="action sekundaer leeren" data-leeren="raetsel" style="display:none;">Leeren</button></div>
+      <div class="feedback" data-fb="raetsel"></div>
+      <details class="tipp" data-tipp="raetsel"><summary>Spür-Hinweis</summary><div class="tippinhalt">
+        <div class="tippstufe" data-ts="0">$\overline{SH}$ ist doppelt so lang wie $\overline{US}$. Verdopple die $4\text{ cm}$.</div>
+        <div class="tippstufe" data-ts="1">$\overline{UH}$ ist die ganze Strecke: $\overline{US}+\overline{SH}$.</div>
+        <div class="tippstufe" data-ts="2">Lösung: $\overline{SH}=8\text{ cm}$, $\overline{UH}=4+8=12\text{ cm}$.</div>
+        <button class="action tipp-mehr" data-mehr="raetsel">Nächster Hinweis ▸</button>
+      </div></details>
+
+      <h3>Knack-Frage</h3>
+      <p class="frage">Bei einem anderen Dreieck ist die ganze Euler-Strecke $\overline{UH}=18\text{ cm}$ lang. Wo liegt $S$?</p>
+      <div class="mc" data-mc="knack" data-correct="1">
+        <button data-opt="0">Genau in der Mitte, also $9\text{ cm}$ von beiden entfernt.</button>
+        <button data-opt="1">$6\text{ cm}$ von $U$ und $12\text{ cm}$ von $H$ entfernt.</button>
+        <button data-opt="2">$12\text{ cm}$ von $U$ und $6\text{ cm}$ von $H$ entfernt.</button>
+      </div>
+      <div class="feedback" data-fb="knack"></div>
+      <details class="tipp"><summary>Spür-Hinweis</summary><div class="tippinhalt"><p>Bei $1:2$ wird die Strecke in $1+2=3$ Teile geteilt. Ein Teil ist $18\text{ cm}:3=6\text{ cm}$. Von $U$ aus ist es <b>ein</b> Teil bis $S$ (das kürzere Stück), von $H$ aus sind es zwei.</p></div></details>
+    </div>
+  </section>
+
+  <!-- KARTE 4: Steckbriefe -->
+  <section class="card" data-card="3">
+    <div class="panel">
+      <span class="badge-bonus">Enttarnung</span>
+      <h2>Welcher Punkt bin ich?</h2>
+      <p class="lead">Vier besondere Punkte haben sich versteckt und geben dir nur einen Hinweis auf ihre Identität. Enttarne jeden!</p>
+
+      <div class="steckbrief">
+        <div class="kopf"><span class="icon" style="background:var(--umkreis)">?</span> Verdächtiger 1</div>
+        <p class="clue">„Ich bin von allen drei <b>Ecken</b> gleich weit entfernt. Bei einem stumpfen Dreieck verstecke ich mich sogar außerhalb."</p>
+        <div class="wahl" data-sb="sb1" data-correct="U">
+          <button data-w="U">Umkreismittelpunkt $U$</button>
+          <button data-w="I">Inkreismittelpunkt $I$</button>
+          <button data-w="S">Schwerpunkt $S$</button>
+          <button data-w="H">Höhenschnittpunkt $H$</button>
+        </div>
+      </div>
+
+      <div class="steckbrief">
+        <div class="kopf"><span class="icon" style="background:var(--inkreis)">?</span> Verdächtiger 2</div>
+        <p class="clue">„Ich habe zu allen drei <b>Seiten</b> denselben Abstand und sitze immer gemütlich im Inneren. Auf der Euler-Geraden suchst du mich vergeblich."</p>
+        <div class="wahl" data-sb="sb2" data-correct="I">
+          <button data-w="U">Umkreismittelpunkt $U$</button>
+          <button data-w="I">Inkreismittelpunkt $I$</button>
+          <button data-w="S">Schwerpunkt $S$</button>
+          <button data-w="H">Höhenschnittpunkt $H$</button>
+        </div>
+      </div>
+
+      <div class="steckbrief">
+        <div class="kopf"><span class="icon" style="background:var(--schwer)">?</span> Verdächtiger 3</div>
+        <p class="clue">„Ich bin der <b>Gleichgewichtspunkt</b> – auf mir balanciert das Dreieck. Ich teile jede Seitenhalbierende im Verhältnis $2:1$ und sitze mittendrin auf der Euler-Geraden."</p>
+        <div class="wahl" data-sb="sb3" data-correct="S">
+          <button data-w="U">Umkreismittelpunkt $U$</button>
+          <button data-w="I">Inkreismittelpunkt $I$</button>
+          <button data-w="S">Schwerpunkt $S$</button>
+          <button data-w="H">Höhenschnittpunkt $H$</button>
+        </div>
+      </div>
+
+      <div class="steckbrief">
+        <div class="kopf"><span class="icon" style="background:var(--hoehe)">?</span> Verdächtiger 4</div>
+        <p class="clue">„Ich entstehe, wo sich die drei <b>Höhen</b> treffen. Bei einem rechtwinkligen Dreieck setze ich mich genau in die rechtwinklige Ecke."</p>
+        <div class="wahl" data-sb="sb4" data-correct="H">
+          <button data-w="U">Umkreismittelpunkt $U$</button>
+          <button data-w="I">Inkreismittelpunkt $I$</button>
+          <button data-w="S">Schwerpunkt $S$</button>
+          <button data-w="H">Höhenschnittpunkt $H$</button>
+        </div>
+      </div>
+
+      <div class="feedback" data-fb="steck"></div>
+    </div>
+  </section>
+
+  <!-- KARTE 5: Der Sonderfall -->
+  <section class="card" data-card="4">
+    <div class="panel">
+      <span class="badge-bonus">Der letzte Twist</span>
+      <h2>Wenn alle verschmelzen</h2>
+      <p class="lead">Es gibt ein ganz besonderes Dreieck, bei dem die Euler-Gerade plötzlich verschwindet – weil $U$, $S$ und $H$ <b>auf demselben Punkt</b> liegen.</p>
+
+      <div class="figur-box">
+        <svg class="figur-svg" viewBox="0 0 460 340" id="svg-gleich" role="img" aria-label="Gleichseitiges Dreieck">
+          <polygon class="seite" points="230,60 360,285 100,285"/>
+          <circle cx="230" cy="210" r="150" fill="none" stroke="#1C6FB8" stroke-width="1.5" stroke-dasharray="5 4" opacity=".5"/>
+          <g class="kreuz-pt"><line x1="222" y1="202" x2="238" y2="218" stroke="#5B3A8C"/><line x1="238" y1="202" x2="222" y2="218" stroke="#5B3A8C"/></g>
+          <g class="kreuz-pt"><line x1="224" y1="54" x2="236" y2="66" stroke="#3a3346"/><line x1="236" y1="54" x2="224" y2="66" stroke="#3a3346"/></g>
+          <g class="kreuz-pt"><line x1="354" y1="279" x2="366" y2="291" stroke="#3a3346"/><line x1="366" y1="279" x2="354" y2="291" stroke="#3a3346"/></g>
+          <g class="kreuz-pt"><line x1="94" y1="279" x2="106" y2="291" stroke="#3a3346"/><line x1="106" y1="279" x2="94" y2="291" stroke="#3a3346"/></g>
+          <text class="ptlabel" x="224" y="50" fill="#3a3346">A</text>
+          <text class="ptlabel" x="368" y="298" fill="#3a3346">B</text>
+          <text class="ptlabel" x="84" y="298" fill="#3a3346">C</text>
+          <text class="ptlabel" x="244" y="206" fill="#5B3A8C">U=S=H</text>
+        </svg>
+      </div>
+
+      <p class="frage">Um welches Dreieck handelt es sich?</p>
+      <div class="mc" data-mc="sonder" data-correct="1">
+        <button data-opt="0">Ein rechtwinkliges Dreieck.</button>
+        <button data-opt="1">Ein gleichseitiges Dreieck (alle Seiten und Winkel gleich).</button>
+        <button data-opt="2">Ein ganz beliebiges, schiefes Dreieck.</button>
+      </div>
+      <div class="feedback" data-fb="sonder"></div>
+      <details class="tipp"><summary>Spür-Hinweis</summary><div class="tippinhalt"><p>Wenn ein Dreieck perfekt symmetrisch ist, fallen Mittelsenkrechte, Seitenhalbierende und Höhe für jede Ecke zusammen – dann gibt es nur noch <i>einen</i> Mittelpunkt. Welches Dreieck ist „perfekt symmetrisch"?</p></div></details>
+
+      <div class="merk">
+        <h3>🎁 Bonus-Fakt zum Angeben</h3>
+        <p>Es gibt noch einen vierten Euler-Star: den <b>Feuerbach-Kreis</b> (auch „Neunpunktekreis"). Er geht durch die drei Seitenmitten, die drei Höhenfußpunkte und drei weitere Punkte – und sein Mittelpunkt liegt ebenfalls auf der Euler-Geraden, genau zwischen $U$ und $H$. Aber das ist eine Geschichte für die Oberstufe …</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- KARTE 6: Urkunde -->
+  <section class="card" data-card="5">
+    <div class="panel">
+      <h2>Fall gelöst?</h2>
+      <p>Hier siehst du, wie viele Knobel-Stationen du geknackt hast.</p>
+      <div class="status-box" id="bonus-score" style="background:var(--kopf-hell);color:var(--kopf-dunkel);">– von – Stationen gelöst</div>
+    </div>
+    <div class="konfetti-wrap" id="urkundewrap">
+      <div class="urkunde">
+        <div class="siegel">🏅</div>
+        <h2>Meisterdetektiv der Geometrie</h2>
+        <p>Du hast die <b>Euler-Gerade</b> aufgespürt, das $1:2$-Geheimnis geknackt, alle besonderen Punkte enttarnt und den Sonderfall durchschaut.</p>
+        <p style="font-style:italic;color:#9a7415;">Verliehen für herausragendes Knobeln im Kapitel „Kreise und Dreiecke".</p>
+        <p style="font-size:2rem;margin-top:.5rem;">📐✦🔺</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="konfetti-wrap" id="endhint" style="display:none;"></div>
+
+</main>
+
+<div id="trex" title="Made by Mathedino">🦖<span class="bubble">Made by Mathedino</span></div>
+
+<script>
+(function(){
+  "use strict";
+  const State={cardSeen:[true,false,false,false,false,false],mc:{},felder:{},steck:{},eingaben:{}};
+
+  /* ---- Geometrie ---- */
+  function umkreis(A,B,C){
+    const d=2*(A.x*(B.y-C.y)+B.x*(C.y-A.y)+C.x*(A.y-B.y));
+    if(Math.abs(d)<1e-6) return null;
+    const ux=((A.x*A.x+A.y*A.y)*(B.y-C.y)+(B.x*B.x+B.y*B.y)*(C.y-A.y)+(C.x*C.x+C.y*C.y)*(A.y-B.y))/d;
+    const uy=((A.x*A.x+A.y*A.y)*(C.x-B.x)+(B.x*B.x+B.y*B.y)*(A.x-C.x)+(C.x*C.x+C.y*C.y)*(B.x-A.x))/d;
+    return {x:ux,y:uy};
+  }
+  function schwer(A,B,C){return {x:(A.x+B.x+C.x)/3,y:(A.y+B.y+C.y)/3};}
+  function hoehe(A,B,C){const U=umkreis(A,B,C),S=schwer(A,B,C);if(!U)return null;return {x:3*S.x-2*U.x,y:3*S.y-2*U.y};}
+  function setKreuz(gId,cx,cy,s){
+    const g=document.getElementById(gId);if(!g)return;const ls=g.querySelectorAll('line');
+    ls[0].setAttribute('x1',cx-s);ls[0].setAttribute('y1',cy-s);ls[0].setAttribute('x2',cx+s);ls[0].setAttribute('y2',cy+s);
+    ls[1].setAttribute('x1',cx+s);ls[1].setAttribute('y1',cy-s);ls[1].setAttribute('x2',cx-s);ls[1].setAttribute('y2',cy+s);
+  }
+
+  /* ---- Tabs ---- */
+  const tabs=Array.from(document.querySelectorAll('.tab'));
+  const cards=Array.from(document.querySelectorAll('.card'));
+  function showCard(i){
+    cards.forEach(c=>c.classList.toggle('active',+c.dataset.card===i));
+    tabs.forEach(t=>t.classList.toggle('active',+t.dataset.i===i));
+    State.cardSeen[i]=true;
+    tabs.forEach((t,k)=>{if(State.cardSeen[k])t.classList.add('done');});
+    if(i===5) renderScore();
+    window.scrollTo({top:0,behavior:'smooth'});
+    if(window.MathJax&&MathJax.typesetPromise){MathJax.typesetPromise();}
+  }
+  tabs.forEach(t=>t.addEventListener('click',()=>showCard(+t.dataset.i)));
+
+  /* ---- MC ---- */
+  document.querySelectorAll('.mc').forEach(group=>{
+    const key=group.dataset.mc; const correct=+group.dataset.correct;
+    State.mc[key]={answered:false};
+    const fb=document.querySelector('[data-fb="'+key+'"]');
+    group.querySelectorAll('button').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        if(State.mc[key].answered)return;
+        const opt=+btn.dataset.opt; State.mc[key].answered=true; State.mc[key].correct=(opt===correct);
+        group.querySelectorAll('button').forEach(b=>b.classList.add('disabled'));
+        if(opt===correct){btn.classList.add('richtig');fb.className='feedback gut';fb.textContent='✅ Richtig erkannt!';}
+        else{btn.classList.add('falsch');group.querySelector('[data-opt="'+correct+'"]').classList.add('richtig');fb.className='feedback schlecht';fb.innerHTML='❌ Knapp daneben – die richtige Spur ist grün markiert.';}
+        checkComplete();
+      });
+    });
+  });
+
+  /* ---- Felder (Rätsel Karte 3) ---- */
+  const FELDER={'raetsel':{'r-sh':8,'r-uh':12}};
+  document.querySelectorAll('input[data-k]').forEach(inp=>{inp.addEventListener('input',()=>{State.eingaben[inp.dataset.k]=inp.value;});});
+  function normNum(s){if(s==null)return null;s=String(s).trim().replace(',','.').replace(/\s/g,'').replace('cm','');if(s==='')return null;const v=parseFloat(s);return isNaN(v)?null:v;}
+  document.querySelectorAll('[data-pruef]').forEach(btn=>{
+    const key=btn.dataset.pruef;
+    btn.addEventListener('click',()=>{
+      const fb=document.querySelector('[data-fb="'+key+'"]');
+      const leerBtn=document.querySelector('[data-leeren="'+key+'"]');
+      const felder=FELDER[key]; let alleGefuellt=true, alleRichtig=true;
+      for(const f in felder){const inp=document.querySelector('input[data-k="'+f+'"]');const v=normNum(inp.value);
+        if(v===null){alleGefuellt=false;alleRichtig=false;continue;}
+        if(Math.abs(v-felder[f])>1e-9)alleRichtig=false;}
+      if(!alleGefuellt){fb.className='feedback schlecht';fb.textContent='Bitte fülle beide Felder aus.';return;}
+      if(alleRichtig){State.felder[key]=true;fb.className='feedback gut';fb.textContent='✅ Stark! Du hast das 1:2-Geheimnis durchschaut.';leerBtn.style.display='none';}
+      else{State.felder[key]=false;fb.className='feedback schlecht';fb.innerHTML='❌ Noch nicht ganz. Nutze den Spür-Hinweis und korrigiere mit „Leeren“.';leerBtn.style.display='inline-block';}
+      checkComplete();
+    });
+  });
+  document.querySelectorAll('[data-leeren]').forEach(btn=>{
+    const key=btn.dataset.leeren;
+    btn.addEventListener('click',()=>{
+      const felder=FELDER[key]||{};
+      for(const f in felder){const inp=document.querySelector('input[data-k="'+f+'"]');if(inp){inp.value='';delete State.eingaben[f];}}
+      delete State.felder[key];
+      const fb=document.querySelector('[data-fb="'+key+'"]');fb.className='feedback';fb.textContent='';
+      btn.style.display='none';
+    });
+  });
+
+  /* ---- Steckbriefe (Karte 4) ---- */
+  document.querySelectorAll('.wahl').forEach(group=>{
+    const key=group.dataset.sb; const correct=group.dataset.correct;
+    State.steck[key]={answered:false};
+    group.querySelectorAll('button').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        if(State.steck[key].answered)return;
+        const w=btn.dataset.w; State.steck[key].answered=true; State.steck[key].correct=(w===correct);
+        group.querySelectorAll('button').forEach(b=>b.classList.add('disabled'));
+        if(w===correct){btn.classList.add('richtig');}
+        else{btn.classList.add('falsch');group.querySelector('[data-w="'+correct+'"]').classList.add('richtig');}
+        // Feedback wenn alle vier beantwortet
+        const alle=Object.values(State.steck).every(s=>s.answered);
+        if(alle){
+          const fb=document.querySelector('[data-fb="steck"]');
+          const richtig=Object.values(State.steck).filter(s=>s.correct).length;
+          if(richtig===4){fb.className='feedback gut';fb.textContent='✅ Alle vier enttarnt – Glückwunsch, Meisterdetektiv!';}
+          else{fb.className='feedback schlecht';fb.innerHTML='Du hast '+richtig+' von 4 enttarnt. Die richtigen Namen sind grün markiert.';}
+        }
+        checkComplete();
+      });
+    });
+  });
+
+  /* ---- Gestufte Tipps ---- */
+  document.querySelectorAll('[data-mehr]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const cont=btn.closest('.tippinhalt'); const stufen=Array.from(cont.querySelectorAll('.tippstufe'));
+      const naechste=stufen.find(s=>!s.classList.contains('show'));
+      if(naechste){naechste.classList.add('show');if(window.MathJax&&MathJax.typesetPromise){MathJax.typesetPromise([naechste]);}}
+      if(stufen.filter(s=>s.classList.contains('show')).length>=stufen.length) btn.style.display='none';
+    });
+  });
+  document.querySelectorAll('details.tipp').forEach(d=>{
+    d.addEventListener('toggle',()=>{if(d.open){const e=d.querySelector('.tippstufe');if(e&&!e.classList.contains('show')){e.classList.add('show');if(window.MathJax&&MathJax.typesetPromise){MathJax.typesetPromise([e]);}}}});
+  });
+
+  /* ---- Karte 2: interaktive Euler-Gerade ---- */
+  const eA={x:70,y:310};
+  const eState={B:{x:390,y:310}, C:{x:290,y:110}};
+  const svgE=document.getElementById('svg-euler');
+  let lineVisible=false;
+  function updateEuler(){
+    const A=eA,B=eState.B,C=eState.C;
+    document.getElementById('e-tri').setAttribute('points',`${A.x},${A.y} ${B.x},${B.y} ${C.x},${C.y}`);
+    const U=umkreis(A,B,C),S=schwer(A,B,C),H=hoehe(A,B,C);
+    if(U&&H){
+      setKreuz('e-u',U.x,U.y,7);setKreuz('e-s',S.x,S.y,7);setKreuz('e-h',H.x,H.y,7);
+      document.getElementById('e-ulbl').setAttribute('x',U.x-22);document.getElementById('e-ulbl').setAttribute('y',U.y+5);
+      document.getElementById('e-slbl').setAttribute('x',S.x+10);document.getElementById('e-slbl').setAttribute('y',S.y-8);
+      document.getElementById('e-hlbl').setAttribute('x',H.x+10);document.getElementById('e-hlbl').setAttribute('y',H.y+5);
+      // Euler-Linie verlängert
+      const dx=H.x-U.x,dy=H.y-U.y,len=Math.hypot(dx,dy)||1;const ex=dx/len,ey=dy/len;const L=600;
+      const ln=document.getElementById('e-line');
+      ln.setAttribute('x1',U.x-ex*L);ln.setAttribute('y1',U.y-ey*L);ln.setAttribute('x2',H.x+ex*L);ln.setAttribute('y2',H.y+ey*L);
+    }
+    setKreuz('e-bx',B.x,B.y,7);document.querySelector('#e-bgrip circle').setAttribute('cx',B.x);document.querySelector('#e-bgrip circle').setAttribute('cy',B.y);
+    setKreuz('e-cx',C.x,C.y,7);document.querySelector('#e-cgrip circle').setAttribute('cx',C.x);document.querySelector('#e-cgrip circle').setAttribute('cy',C.y);
+    document.getElementById('e-blbl').setAttribute('x',B.x+10);document.getElementById('e-blbl').setAttribute('y',B.y+16);
+    document.getElementById('e-clbl').setAttribute('x',C.x+10);document.getElementById('e-clbl').setAttribute('y',C.y-8);
+    // Kollinearitäts-Status
+    if(U&&H){
+      const st=document.getElementById('e-status');
+      if(lineVisible){st.textContent='U, S und H liegen perfekt auf der goldenen Linie – egal wie du ziehst!';st.style.background='#FFF8E8';st.style.color='#9a7415';}
+    }
+  }
+  function makeDrag(){
+    let drag=null;
+    function pt(evt){const r=svgE.getBoundingClientRect();const vb=svgE.viewBox.baseVal;return {x:(evt.clientX-r.left)/r.width*vb.width,y:(evt.clientY-r.top)/r.height*vb.height};}
+    document.getElementById('e-bgrip').addEventListener('pointerdown',e=>{drag='B';e.target.setPointerCapture&&e.target.setPointerCapture(e.pointerId);e.preventDefault();});
+    document.getElementById('e-cgrip').addEventListener('pointerdown',e=>{drag='C';e.target.setPointerCapture&&e.target.setPointerCapture(e.pointerId);e.preventDefault();});
+    svgE.addEventListener('pointermove',e=>{
+      if(!drag)return;const p=pt(e);
+      if(drag==='B'){eState.B.x=Math.max(180,Math.min(440,p.x));eState.B.y=Math.max(250,Math.min(340,p.y));}
+      else{eState.C.x=Math.max(40,Math.min(440,p.x));eState.C.y=Math.max(40,Math.min(250,p.y));}
+      updateEuler();
+    });
+    svgE.addEventListener('pointerup',()=>{drag=null;});
+    svgE.addEventListener('pointercancel',()=>{drag=null;});
+  }
+  document.getElementById('e-toggle').addEventListener('click',()=>{
+    lineVisible=!lineVisible;
+    document.getElementById('e-line').classList.toggle('show',lineVisible);
+    document.getElementById('e-toggle').textContent=lineVisible?'Linie ausblenden':'✨ Linie einblenden';
+    State.eulerEntdeckt=true; updateEuler(); checkComplete();
+  });
+  document.getElementById('e-reset').addEventListener('click',()=>{
+    eState.B={x:390,y:310};eState.C={x:290,y:110};updateEuler();
+  });
+  makeDrag(); updateEuler();
+
+  /* ---- Score / Urkunde ---- */
+  function stationenGeloest(){
+    let n=0;
+    if(State.mc['fall']&&State.mc['fall'].correct) n++;          // 1 Der Fall
+    if(State.eulerEntdeckt) n++;                                  // 2 Linie eingeblendet
+    if(State.felder['raetsel']&&State.mc['knack']&&State.mc['knack'].correct) n++; // 3 Rätsel
+    if(Object.keys(State.steck).length===4 && Object.values(State.steck).every(s=>s.answered&&s.correct)) n++; // 4 Steckbriefe
+    if(State.mc['sonder']&&State.mc['sonder'].correct) n++;       // 5 Sonderfall
+    return n;
+  }
+  function renderScore(){
+    const n=stationenGeloest();
+    document.getElementById('bonus-score').textContent=n+' von 5 Stationen gelöst';
+    document.getElementById('urkundewrap').classList.toggle('show', n>=5);
+    if(n<5){
+      const e=document.getElementById('bonus-score');
+      e.textContent=n+' von 5 Stationen gelöst – knack alle fünf für die Urkunde!';
+    }
+  }
+  function checkComplete(){ if(document.querySelector('.card[data-card="5"]').classList.contains('active')) renderScore(); }
+
+  const trex=document.getElementById('trex');
+  trex.addEventListener('click',()=>{trex.classList.add('show');clearTimeout(trex._t);trex._t=setTimeout(()=>trex.classList.remove('show'),1800);});
+  trex.addEventListener('mouseenter',()=>trex.classList.add('show'));
+  trex.addEventListener('mouseleave',()=>trex.classList.remove('show'));
+
+  if(window.MathJax&&MathJax.startup&&MathJax.startup.promise){MathJax.startup.promise.then(()=>MathJax.typesetPromise());}
+})();
+</script>
+</body>
+</html>

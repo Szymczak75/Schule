@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Der Schwerpunkt eines Dreiecks</title>
+<meta name="description" content="Erarbeitungs-Lernseite zum Schwerpunkt eines Dreiecks: Seitenhalbierende konstruieren, den Schwerpunkt als Schnittpunkt finden, die 2:1-Teilung und die Flächengleichheit der Teildreiecke verstehen und alle besonderen Punkte des Dreiecks vernetzen.">
+<meta name="keywords" content="Schwerpunkt, Seitenhalbierende, Dreieck, 2:1-Teilung, Flächengleichheit, besondere Punkte, Vernetzung, Geometrie">
+<meta name="typ" content="Lernseite">
+<meta name="klasse" content="8">
+<meta name="fach" content="mathe">
+<meta name="oberthema" content="Geometrie">
+<meta name="thema" content="Schwerpunkt und Vernetzung">
+<script>
+  MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] }, svg: { fontCache: 'global' } };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+  :root{
+    --kopf:#E8923C;--kopf-dunkel:#C8762A;
+    --papier:#FBF7F0;--tinte:#2C2A26;--linie:#D8CFC0;
+    --schwer:#B0357A;--schwer-hell:#FBE8F2;
+    --umkreis:#1C6FB8;--umkreis-hell:#E3F0FA;--inkreis:#1E7A3E;--inkreis-hell:#E6F4EC;
+    --gegeben:#2C2A26;--erfolg:#1E7A3E;--erfolg-bg:#1E7A3E;--fehler:#C0271E;
+    --akzent:#7A4E8C;--karte:#FFFFFF;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Helvetica,Arial,sans-serif;
+    background:var(--papier);color:var(--tinte);font-size:1.05rem;line-height:1.55;padding-bottom:5.5rem;}
+  .wrap{max-width:62rem;margin:0 auto;padding:0 1rem;}
+
+  header{background:linear-gradient(180deg,var(--kopf),var(--kopf-dunkel));color:#fff;padding:1.4rem 1rem 1.6rem;box-shadow:0 2px 8px rgba(0,0,0,.12);}
+  header .wrap{display:flex;flex-direction:column;gap:.25rem;}
+  .eyebrow{font-size:.85rem;letter-spacing:.14em;text-transform:uppercase;font-weight:700;opacity:.92;}
+  header h1{margin:.1rem 0 0;font-size:1.7rem;line-height:1.15;}
+  header p{margin:.3rem 0 0;font-size:1rem;opacity:.95;max-width:46rem;}
+
+  nav.tabs{position:sticky;top:0;z-index:50;background:var(--papier);border-bottom:1px solid var(--linie);padding:.5rem 0;box-shadow:0 2px 6px rgba(0,0,0,.05);}
+  .tabrow{display:flex;flex-wrap:wrap;gap:.4rem;}
+  .tab{border:1px solid var(--linie);background:#fff;color:var(--tinte);border-radius:.6rem;padding:.55rem .8rem;min-height:44px;font-size:.95rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:.45rem;transition:transform .08s ease,background .15s ease;}
+  .tab .num{background:var(--schwer-hell);color:var(--schwer);border-radius:50%;width:1.6rem;height:1.6rem;display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:800;flex:none;}
+  .tab.done .num{background:var(--erfolg);color:#fff;}
+  .tab.active{background:var(--kopf);color:#fff;border-color:var(--kopf-dunkel);}
+  .tab.active .num{background:#fff;color:var(--kopf-dunkel);}
+  .tab:active{transform:scale(.97);}
+
+  .card{display:none;animation:fade .25s ease;}
+  .card.active{display:block;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .panel{background:var(--karte);border:1px solid var(--linie);border-radius:1rem;padding:1.3rem 1.2rem 1.5rem;margin:1.2rem 0;box-shadow:0 1px 4px rgba(0,0,0,.05);}
+  .panel h2{margin:.1rem 0 .2rem;font-size:1.35rem;color:var(--kopf-dunkel);}
+  .panel h3{margin:1.3rem 0 .4rem;font-size:1.1rem;}
+  .lead{font-size:1.08rem;}
+  .meta-zeit{display:inline-block;font-size:.82rem;font-weight:700;color:var(--kopf-dunkel);background:#F6E6D4;padding:.2rem .6rem;border-radius:.5rem;letter-spacing:.03em;}
+
+  .figur-box{background:#fff;border:1px solid var(--linie);border-radius:.8rem;padding:1rem;margin:1rem 0;}
+  .figur-svg{width:100%;height:auto;display:block;touch-action:manipulation;}
+  .figur-svg .seite{stroke:var(--gegeben);stroke-width:2.4;fill:none;}
+  .figur-svg .shalb{stroke:var(--schwer);stroke-width:2.4;fill:none;opacity:0;transition:opacity .6s ease;}
+  .figur-svg .shalb.show{opacity:1;}
+  .figur-svg .seitenmitte{opacity:0;transition:opacity .4s ease;}
+  .figur-svg .seitenmitte.show{opacity:1;}
+  .figur-svg .sp{opacity:0;transition:opacity .5s ease;}
+  .figur-svg .sp.show{opacity:1;}
+  .figur-svg .ptlabel{font:700 16px 'Segoe UI',sans-serif;fill:var(--gegeben);}
+  .figur-svg .lbl-s{font:700 16px 'Segoe UI',sans-serif;fill:var(--schwer);opacity:0;transition:opacity .5s ease;}
+  .figur-svg .lbl-s.show{opacity:1;}
+  .figur-svg .kreuz-pt line{stroke-width:2.6;stroke-linecap:round;}
+  .figur-svg .kreuz-eck line{stroke:var(--gegeben);}
+  .figur-svg .kreuz-s line{stroke:var(--schwer);}
+  .figur-svg .kreuz-m line{stroke:var(--schwer);}
+
+  .schritt-anzeige{border-left:4px solid var(--kopf);border-radius:.4rem;padding:.8rem 1rem;margin:.8rem 0;min-height:3.5rem;font-size:1.02rem;background:#F6E6D4;}
+  .schritt-anzeige .nr{font-weight:800;color:var(--kopf-dunkel);}
+
+  .btnrow{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:.8rem;}
+  button.action{border:none;border-radius:.6rem;background:var(--schwer);color:#fff;font-size:1rem;font-weight:700;padding:.7rem 1.1rem;min-height:44px;min-width:44px;cursor:pointer;transition:transform .08s ease,background .15s ease;}
+  button.action:active{transform:scale(.96);}
+  button.action.sekundaer{background:#fff;color:var(--schwer);border:1.5px solid var(--schwer);}
+  button.action:disabled{background:#C9C2B6;cursor:default;}
+
+  .frage{margin:.6rem 0 .2rem;font-weight:600;}
+  .mc{display:flex;flex-direction:column;gap:.5rem;margin:.5rem 0;}
+  .mc button{text-align:left;border:1.5px solid var(--linie);background:#fff;border-radius:.6rem;padding:.8rem 1rem;min-height:44px;font-size:1rem;line-height:1.6;cursor:pointer;color:var(--tinte);transition:transform .08s ease,border-color .15s ease;}
+  .mc button:active{transform:scale(.99);}
+  .mc button.richtig{background:var(--erfolg-bg);color:#fff;border-color:var(--erfolg-bg);font-weight:700;}
+  .mc button.falsch{background:var(--fehler);color:#fff;border-color:var(--fehler);font-weight:700;}
+  .mc button.disabled{pointer-events:none;}
+  .feedback{margin:.5rem 0;padding:.7rem .9rem;border-radius:.6rem;font-weight:600;display:none;}
+  .feedback.gut{display:block;background:var(--erfolg-bg);color:#fff;}
+  .feedback.schlecht{display:block;background:var(--fehler);color:#fff;}
+
+  details.tipp{margin:.7rem 0;border:1px solid var(--linie);border-radius:.6rem;background:#FFFDF8;overflow:hidden;}
+  details.tipp>summary{list-style:none;cursor:pointer;padding:.7rem .9rem;min-height:44px;display:flex;align-items:center;gap:.5rem;font-weight:700;color:var(--kopf-dunkel);}
+  details.tipp>summary::-webkit-details-marker{display:none;}
+  details.tipp>summary::before{content:'💡';}
+  details.tipp[open]>summary::before{content:'📖';}
+  details.tipp .tippinhalt{padding:0 .9rem .9rem;}
+
+  .merk{background:#F3ECF6;border:1px solid #D9C6E4;border-left:5px solid var(--akzent);border-radius:.7rem;padding:1rem 1.1rem;margin:1.1rem 0;}
+  .merk h3{margin:.1rem 0 .4rem;color:var(--akzent);}
+  .satz{background:#FFF4E0;border:2px solid var(--kopf);border-radius:.8rem;padding:1.1rem 1.2rem;margin:1.1rem 0;font-size:1.06rem;}
+  .satz b{color:var(--kopf-dunkel);}
+  .satz.s{background:var(--schwer-hell);border-color:var(--schwer);}
+  .satz.s b{color:var(--schwer);}
+
+  table.vergleich{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.95rem;}
+  table.vergleich th,table.vergleich td{border:1px solid var(--linie);padding:.55rem .6rem;text-align:left;vertical-align:top;}
+  table.vergleich th{background:#F6E6D4;color:var(--kopf-dunkel);}
+  table.vergleich td:first-child{font-weight:600;background:#FBF7F0;}
+  .pill{display:inline-block;padding:.1rem .5rem;border-radius:1rem;font-size:.85rem;font-weight:700;}
+  .pill.um{background:var(--umkreis-hell);color:var(--umkreis);}
+  .pill.in{background:var(--inkreis-hell);color:var(--inkreis);}
+  .pill.s{background:var(--schwer-hell);color:var(--schwer);}
+
+  .heft{background:#FEF6E9;border:2px solid var(--kopf);border-radius:.9rem;padding:1rem 1.1rem;margin:1.4rem 0;}
+  .heft .htitel{display:flex;align-items:center;gap:.55rem;font-weight:800;color:var(--kopf-dunkel);font-size:1.12rem;margin-bottom:.3rem;}
+  .heft .htitel .ic{font-size:1.4rem;}
+  .heft ol{margin:.4rem 0 .2rem 1.2rem;padding:0;}
+  .heft ol li{margin:.35rem 0;}
+  .heft .vorlegen{margin-top:.8rem;background:#fff;border:1px dashed var(--kopf-dunkel);border-radius:.6rem;padding:.6rem .8rem;font-size:.95rem;font-weight:600;color:var(--kopf-dunkel);display:flex;align-items:center;gap:.5rem;}
+  details.anleitung{margin:.7rem 0 .2rem;border:1px solid var(--kopf);border-radius:.6rem;background:#fff;overflow:hidden;}
+  details.anleitung>summary{list-style:none;cursor:pointer;padding:.7rem .9rem;min-height:44px;display:flex;align-items:center;gap:.5rem;font-weight:700;color:var(--kopf-dunkel);}
+  details.anleitung>summary::-webkit-details-marker{display:none;}
+  details.anleitung>summary::before{content:'📋';}
+  details.anleitung[open]>summary::before{content:'📖';}
+  details.anleitung .ainhalt{padding:0 .9rem .9rem;}
+
+  .hinweis{background:#FFF4E0;border:1px dashed var(--kopf-dunkel);border-radius:.7rem;padding:.8rem 1rem;margin:1rem 0;font-size:.97rem;}
+  .hinweis b{color:var(--kopf-dunkel);}
+  ul.tidy{margin:.4rem 0 .4rem 1.1rem;padding:0;}
+  ul.tidy li{margin:.3rem 0;}
+
+  .status-box{margin:.5rem 0;padding:.6rem .9rem;border-radius:.6rem;font-weight:700;font-size:1rem;}
+
+  .weiter-wrap{text-align:center;margin:2rem 0 1rem;display:none;}
+  .weiter-wrap.show{display:block;animation:fade .4s ease;}
+  a.weiter{display:inline-flex;align-items:center;gap:.6rem;justify-content:center;background:var(--erfolg);color:#fff;text-decoration:none;font-size:1.15rem;font-weight:800;padding:.9rem 2rem;min-height:44px;border-radius:.8rem;width:100%;max-width:30rem;box-shadow:0 3px 10px rgba(30,122,62,.3);}
+  a.weiter:active{transform:scale(.98);}
+  .weiter-hint{font-size:.85rem;color:var(--tinte);opacity:.6;margin-top:.5rem;}
+
+  #trex{position:fixed;bottom:.7rem;right:.7rem;font-size:1.7rem;cursor:pointer;z-index:60;user-select:none;filter:drop-shadow(0 1px 2px rgba(0,0,0,.25));}
+  #trex .bubble{position:absolute;bottom:2.1rem;right:0;white-space:nowrap;background:var(--tinte);color:#fff;font-size:.78rem;font-weight:600;padding:.35rem .6rem;border-radius:.5rem;opacity:0;pointer-events:none;transition:opacity .2s ease;}
+  #trex.show .bubble{opacity:1;}
+
+  @media (max-width:520px){header h1{font-size:1.4rem;}.panel{padding:1.1rem .9rem 1.3rem;}}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <span class="eyebrow">Geometrie · Klasse 8 · Erarbeitung</span>
+    <h1>Der Schwerpunkt eines Dreiecks</h1>
+    <p>Du kennst schon drei besondere Linien im Dreieck. Heute kommt die vierte dazu – die Seitenhalbierende. Sie führt zum Schwerpunkt: dem Punkt, in dem ein Dreieck genau im Gleichgewicht ist.</p>
+  </div>
+</header>
+
+<nav class="tabs">
+  <div class="wrap">
+    <div class="tabrow" id="tabrow">
+      <button class="tab active" data-i="0"><span class="num">1</span>Die vierte Linie</button>
+      <button class="tab" data-i="1"><span class="num">2</span>Schwerpunkt</button>
+      <button class="tab" data-i="2"><span class="num">3</span>Die 2:1-Teilung</button>
+      <button class="tab" data-i="3"><span class="num">4</span>Gleiche Flächen</button>
+      <button class="tab" data-i="4"><span class="num">5</span>Vernetzung</button>
+      <button class="tab" data-i="5"><span class="num">6</span>Sichern</button>
+    </div>
+  </div>
+</nav>
+
+<main class="wrap">
+
+  <!-- KARTE 1: Die vierte Linie -->
+  <section class="card active" data-card="0">
+    <div class="panel">
+      <span class="meta-zeit">⏱ ca. 15 Min</span>
+      <h2>Die vierte besondere Linie</h2>
+      <p class="lead">Im Dreieck kennst du schon drei besondere Linien:</p>
+      <ul class="tidy">
+        <li>die <b>Mittelsenkrechte</b> (führt zum Umkreis),</li>
+        <li>die <b>Winkelhalbierende</b> (führt zum Inkreis),</li>
+        <li>das <b>Lot</b> (der senkrechte Abstand).</li>
+      </ul>
+      <p>Es fehlt eine naheliegende vierte Linie. Sie verbindet eine <b>Ecke</b> mit der <b>Mitte der gegenüberliegenden Seite</b>.</p>
+
+      <div class="merk" style="border-left-color:var(--schwer);background:var(--schwer-hell);border-color:#E4BBD2;">
+        <h3 style="color:var(--schwer);">Seitenhalbierende</h3>
+        <p>Eine <b>Seitenhalbierende</b> verläuft von einer Ecke des Dreiecks zur Mitte der gegenüberliegenden Seite. Jedes Dreieck hat drei davon.</p>
+      </div>
+
+      <p class="frage">Beim Umkreis schneiden sich die drei Mittelsenkrechten in einem Punkt, beim Inkreis die drei Winkelhalbierenden. Was vermutest du für die Seitenhalbierenden?</p>
+      <div class="mc" data-mc="vermut" data-correct="0">
+        <button data-opt="0">Auch die drei Seitenhalbierenden schneiden sich in einem einzigen Punkt.</button>
+        <button data-opt="1">Sie schneiden sich in drei verschiedenen Punkten.</button>
+        <button data-opt="2">Sie sind alle parallel und schneiden sich nie.</button>
+      </div>
+      <div class="feedback" data-fb="vermut"></div>
+      <div class="hinweis"><b>Auf der nächsten Karte</b> prüfst du deine Vermutung – und lernst den Schwerpunkt kennen.</div>
+    </div>
+  </section>
+
+  <!-- KARTE 2: Schwerpunkt (Animation) -->
+  <section class="card" data-card="1">
+    <div class="panel">
+      <span class="meta-zeit">⏱ ca. 25 Min</span>
+      <h2>Der Schwerpunkt entsteht</h2>
+      <p class="lead">Tippe dich Schritt für Schritt durch die Konstruktion.</p>
+
+      <div class="figur-box">
+        <svg class="figur-svg" viewBox="0 0 460 360" id="svg-sp" role="img" aria-label="Konstruktion des Schwerpunkts">
+          <polygon class="seite" points="80,300 380,300 230,80"/>
+          <!-- Seitenmitten -->
+          <g class="seitenmitte" id="sp-mab"><g class="kreuz-pt kreuz-m"><line x1="225" y1="295" x2="235" y2="305"/><line x1="235" y1="295" x2="225" y2="305"/></g></g>
+          <g class="seitenmitte" id="sp-mbc"><g class="kreuz-pt kreuz-m"><line x1="300" y1="185" x2="310" y2="195"/><line x1="310" y1="185" x2="300" y2="195"/></g></g>
+          <g class="seitenmitte" id="sp-mac"><g class="kreuz-pt kreuz-m"><line x1="150" y1="185" x2="160" y2="195"/><line x1="160" y1="185" x2="150" y2="195"/></g></g>
+          <!-- Seitenhalbierende -->
+          <line class="shalb" id="sp-sh1" x1="230" y1="80" x2="230" y2="300"/>
+          <line class="shalb" id="sp-sh2" x1="80" y1="300" x2="305" y2="190"/>
+          <line class="shalb" id="sp-sh3" x1="380" y1="300" x2="155" y2="190"/>
+          <!-- Schwerpunkt -->
+          <g class="sp" id="sp-s"><g class="kreuz-pt kreuz-s"><line x1="223" y1="219.7" x2="237" y2="233.7"/><line x1="237" y1="219.7" x2="223" y2="233.7"/></g></g>
+          <!-- Ecken als Kreuze -->
+          <g class="kreuz-pt kreuz-eck"><line x1="74" y1="294" x2="86" y2="306"/><line x1="86" y1="294" x2="74" y2="306"/></g>
+          <g class="kreuz-pt kreuz-eck"><line x1="374" y1="294" x2="386" y2="306"/><line x1="386" y1="294" x2="374" y2="306"/></g>
+          <g class="kreuz-pt kreuz-eck"><line x1="224" y1="74" x2="236" y2="86"/><line x1="236" y1="74" x2="224" y2="86"/></g>
+          <text class="ptlabel" x="62" y="320">A</text>
+          <text class="ptlabel" x="384" y="320">B</text>
+          <text class="ptlabel" x="224" y="68">C</text>
+          <text class="lbl-s" id="sp-slbl" x="244" y="232">S</text>
+        </svg>
+      </div>
+
+      <div class="schritt-anzeige" id="sp-anz"><span class="nr">Start:</span> Gegeben ist das Dreieck $ABC$. Tippe auf „Nächster Schritt“.</div>
+      <div class="btnrow">
+        <button class="action" id="sp-next">Nächster Schritt ▸</button>
+        <button class="action sekundaer" id="sp-reset">Zurück zum Anfang</button>
+      </div>
+
+      <div class="satz s">
+        <b>Schwerpunkt.</b> Die drei Seitenhalbierenden eines Dreiecks schneiden sich in einem Punkt – dem <b>Schwerpunkt $S$</b>. Er liegt immer <b>innerhalb</b> des Dreiecks.
+      </div>
+      <div class="hinweis"><b>Gut zu wissen:</b> Der Schwerpunkt ist der <b>Gleichgewichtspunkt</b>. Schneidest du ein Dreieck aus Pappe aus, balanciert es auf einer Bleistiftspitze genau in $S$.</div>
+    </div>
+  </section>
+
+  <!-- KARTE 3: 2:1-Teilung -->
+  <section class="card" data-card="2">
+    <div class="panel">
+      <span class="meta-zeit">⏱ ca. 13 Min</span>
+      <h2>Die 2 : 1 - Teilung</h2>
+      <p class="lead">Der Schwerpunkt teilt jede Seitenhalbierende in einem besonderen Verhältnis. Beobachte die Längen.</p>
+
+      <div class="figur-box">
+        <svg class="figur-svg" viewBox="0 0 460 360" id="svg-teil" role="img" aria-label="2 zu 1 Teilung der Seitenhalbierenden" style="touch-action:none;">
+          <polygon id="t-tri" class="seite" points="80,300 380,300 180,90"/>
+          <!-- Seitenhalbierende C -> Mab, zweifarbig (2:1) -->
+          <line id="t-sh2" x1="180" y1="90" x2="213.3" y2="230" stroke="var(--schwer)" stroke-width="4"/>
+          <line id="t-sh1" x1="213.3" y1="230" x2="230" y2="300" stroke="#E59BC6" stroke-width="4"/>
+          <text id="t-lbl2" x="225" y="160" style="font:800 15px Segoe UI,sans-serif;fill:var(--schwer)">2 Teile</text>
+          <text id="t-lbl1" x="232" y="270" style="font:800 15px Segoe UI,sans-serif;fill:#C86BA3">1 Teil</text>
+          <!-- Seitenmitte M + Schwerpunkt S (Kreuze) -->
+          <g id="t-m" class="kreuz-pt kreuz-m"><line x1="225" y1="295" x2="235" y2="305"/><line x1="235" y1="295" x2="225" y2="305"/></g>
+          <g id="t-s" class="kreuz-pt kreuz-s"><line x1="206.3" y1="223" x2="220.3" y2="237"/><line x1="220.3" y1="223" x2="206.3" y2="237"/></g>
+          <!-- A fest -->
+          <g class="kreuz-pt kreuz-eck"><line x1="74" y1="294" x2="86" y2="306"/><line x1="86" y1="294" x2="74" y2="306"/></g>
+          <!-- B, C verschiebbar: Grifffläche + Kreuz -->
+          <g id="t-bgrip" style="cursor:grab;"><circle cx="380" cy="300" r="22" fill="rgba(176,53,122,.10)"/><g class="kreuz-pt" id="t-bx"><line x1="374" y1="294" x2="386" y2="306" stroke="var(--schwer)"/><line x1="386" y1="294" x2="374" y2="306" stroke="var(--schwer)"/></g></g>
+          <g id="t-cgrip" style="cursor:grab;"><circle cx="180" cy="90" r="22" fill="rgba(176,53,122,.10)"/><g class="kreuz-pt" id="t-cx"><line x1="174" y1="84" x2="186" y2="96" stroke="var(--schwer)"/><line x1="186" y1="84" x2="174" y2="96" stroke="var(--schwer)"/></g></g>
+          <text class="ptlabel" x="62" y="320">A</text>
+          <text class="ptlabel" id="t-blbl" x="392" y="306" fill="var(--schwer)">B</text>
+          <text class="ptlabel" id="t-clbl" x="190" y="84" fill="var(--schwer)">C</text>
+          <text class="lbl-s show" id="t-slbl" x="190" y="226">S</text>
+          <text class="ptlabel" id="t-mlbl" x="238" y="318" style="font-size:13px;">M</text>
+        </svg>
+      </div>
+      <div class="hinweis" style="margin-top:.4rem;"><b>Zieh $B$ und $C$</b> mit dem Finger – das Verhältnis $2:1$ bleibt immer gleich, egal wie das Dreieck aussieht.</div>
+
+      <div class="satz s">
+        <b>2 : 1 - Regel.</b> Der Schwerpunkt teilt jede Seitenhalbierende im Verhältnis <b>2 : 1</b>. Das längere Stück (zur Ecke) ist <b>doppelt so lang</b> wie das kürzere Stück (zur Seitenmitte).
+      </div>
+
+      <p class="frage">Eine Seitenhalbierende ist insgesamt $18\text{ cm}$ lang. Wie lang ist das Stück von der Ecke bis zum Schwerpunkt?</p>
+      <div class="mc" data-mc="teilung" data-correct="1">
+        <button data-opt="0">$9\text{ cm}$ (genau die Hälfte).</button>
+        <button data-opt="1">$12\text{ cm}$ (zwei von drei Teilen).</button>
+        <button data-opt="2">$6\text{ cm}$ (ein Drittel).</button>
+      </div>
+      <div class="feedback" data-fb="teilung"></div>
+      <details class="tipp"><summary>Ich brauche einen Hinweis</summary><div class="tippinhalt"><p>Bei 2:1 wird die Strecke in $2+1=3$ gleiche Teile geteilt. Ein Teil ist $18\text{ cm}:3=6\text{ cm}$. Das Stück zur Ecke sind zwei Teile.</p></div></details>
+
+      <div class="heft">
+        <div class="htitel"><span class="ic">✏️</span>Jetzt du – im Heft</div>
+        <p>Zeichne ein großes Dreieck, konstruiere eine Seitenhalbierende und miss beide Stücke (Ecke–$S$ und $S$–Seitenmitte). Prüfe das Verhältnis $2:1$ nach.</p>
+        <div class="vorlegen"><span>👩‍🏫</span> Zeige deine Messung deiner Lehrkraft.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- KARTE 4: Gleiche Flächen -->
+  <section class="card" data-card="3">
+    <div class="panel">
+      <span class="meta-zeit">⏱ ca. 14 Min</span>
+      <h2>Warum „halbiert" – auch die Fläche?</h2>
+      <p class="lead">Eine Seitenhalbierende halbiert nicht nur die Seite, sondern teilt das ganze Dreieck in <b>zwei flächengleiche Hälften</b>. Schau, warum.</p>
+
+      <div class="figur-box">
+        <svg class="figur-svg" viewBox="0 0 460 360" id="svg-flaeche" role="img" aria-label="Flächengleichheit der beiden Teildreiecke" style="touch-action:none;">
+          <!-- Teildreiecke (gefüllt) -->
+          <polygon id="f-tri-l" points="80,300 180,90 230,300" fill="rgba(28,111,184,.16)" stroke="none"/>
+          <polygon id="f-tri-r" points="230,300 180,90 380,300" fill="rgba(30,122,62,.16)" stroke="none"/>
+          <!-- Höhe von C (senkrecht auf AB) -->
+          <line id="f-hoehe" x1="180" y1="90" x2="180" y2="300" stroke="var(--kopf-dunkel)" stroke-width="2" stroke-dasharray="5 4"/>
+          <text id="f-hlbl" x="186" y="170" style="font:700 14px Segoe UI,sans-serif;fill:var(--kopf-dunkel)">Höhe h</text>
+          <!-- Dreiecksumriss -->
+          <polygon id="f-tri" class="seite" points="80,300 380,300 180,90"/>
+          <!-- Seitenhalbierende C->M -->
+          <line id="f-sh" x1="180" y1="90" x2="230" y2="300" stroke="var(--schwer)" stroke-width="2.6"/>
+          <!-- Grundseiten-Markierung gleich lang -->
+          <line id="f-g1" x1="80" y1="312" x2="230" y2="312" stroke="var(--umkreis)" stroke-width="3"/>
+          <line id="f-g2" x1="230" y1="312" x2="380" y2="312" stroke="var(--inkreis)" stroke-width="3"/>
+          <text id="f-g1lbl" x="148" y="328" style="font:700 13px Segoe UI,sans-serif;fill:var(--umkreis)">g</text>
+          <text id="f-g2lbl" x="300" y="328" style="font:700 13px Segoe UI,sans-serif;fill:var(--inkreis)">g</text>
+          <!-- A fest, M Kreuz -->
+          <g class="kreuz-pt kreuz-eck"><line x1="74" y1="294" x2="86" y2="306"/><line x1="86" y1="294" x2="74" y2="306"/></g>
+          <g id="f-m" class="kreuz-pt kreuz-m"><line x1="225" y1="295" x2="235" y2="305"/><line x1="235" y1="295" x2="225" y2="305"/></g>
+          <!-- B, C verschiebbar -->
+          <g id="f-bgrip" style="cursor:grab;"><circle cx="380" cy="300" r="22" fill="rgba(30,122,62,.10)"/><g class="kreuz-pt" id="f-bx"><line x1="374" y1="294" x2="386" y2="306" stroke="var(--inkreis)"/><line x1="386" y1="294" x2="374" y2="306" stroke="var(--inkreis)"/></g></g>
+          <g id="f-cgrip" style="cursor:grab;"><circle cx="180" cy="90" r="22" fill="rgba(176,53,122,.10)"/><g class="kreuz-pt" id="f-cx"><line x1="174" y1="84" x2="186" y2="96" stroke="var(--schwer)"/><line x1="186" y1="84" x2="174" y2="96" stroke="var(--schwer)"/></g></g>
+          <text class="ptlabel" x="60" y="296">A</text>
+          <text class="ptlabel" id="f-blbl" x="392" y="296" fill="var(--inkreis)">B</text>
+          <text class="ptlabel" id="f-clbl" x="190" y="84" fill="var(--schwer)">C</text>
+          <text class="ptlabel" id="f-mlbl" x="232" y="294" style="font-size:13px;">M</text>
+        </svg>
+      </div>
+      <div class="hinweis" style="margin-top:.4rem;"><b>Zieh $B$ und $C$</b> – die beiden Teilflächen bleiben immer gleich groß, weil Grundseite und Höhe gleich bleiben.</div>
+
+      <p>Die Seitenhalbierende von $C$ trifft die Mitte $M$ der Seite $\overline{AB}$. Dadurch entstehen zwei Teildreiecke: $ACM$ (blau) und $CBM$ (grün). Vergleiche sie:</p>
+      <ul class="tidy">
+        <li><b>Gleiche Grundseite:</b> $\overline{AM}$ und $\overline{MB}$ sind gleich lang, weil $M$ die Mitte ist ($g=g$).</li>
+        <li><b>Gleiche Höhe:</b> Beide Teildreiecke haben dieselbe Spitze $C$. Die Höhe von $C$ auf die Gerade $\overline{AB}$ ist für beide dieselbe ($h$).</li>
+      </ul>
+
+      <div class="satz s">
+        <b>Flächengleichheit.</b> Beide Teildreiecke haben <b>gleiche Grundseite</b> $g$ und <b>gleiche Höhe</b> $h$. Mit $A=\frac{1}{2}\cdot g\cdot h$ folgt: Sie haben denselben Flächeninhalt. Die Seitenhalbierende teilt das Dreieck in zwei flächengleiche Hälften.
+      </div>
+
+      <p class="frage">Warum haben die beiden Teildreiecke dieselbe Höhe?</p>
+      <div class="mc" data-mc="flaeche" data-correct="2">
+        <button data-opt="0">Weil sie gleich aussehen.</button>
+        <button data-opt="1">Weil die Seitenhalbierende senkrecht steht.</button>
+        <button data-opt="2">Weil sie dieselbe Spitze $C$ haben – das Lot von $C$ auf $\overline{AB}$ ist für beide gleich.</button>
+      </div>
+      <div class="feedback" data-fb="flaeche"></div>
+      <details class="tipp"><summary>Ich brauche einen Hinweis</summary><div class="tippinhalt"><p>Die Höhe eines Dreiecks ist der senkrechte Abstand der Spitze von der Grundseite. Beide Teildreiecke teilen sich die Spitze $C$ und liegen auf derselben Grundgeraden $\overline{AB}$.</p></div></details>
+    </div>
+  </section>
+
+  <!-- KARTE 5: Vernetzung -->
+  <section class="card" data-card="4">
+    <div class="panel">
+      <span class="meta-zeit">⏱ ca. 18 Min</span>
+      <h2>Alle besonderen Punkte im Überblick</h2>
+      <p class="lead">Du kennst jetzt alle besonderen Linien und Punkte des Dreiecks. Sie folgen alle demselben Muster: eine Linie dreimal → ein gemeinsamer Schnittpunkt.</p>
+
+      <table class="vergleich">
+        <tr><th>Linie (dreimal)</th><th>Schnittpunkt</th><th>Besonderheit</th><th>Lage</th></tr>
+        <tr><td><span class="pill um">Mittelsenkrechte</span></td><td>Umkreismittelpunkt $U$</td><td>gleicher Abstand zu den Ecken → <b>Umkreis</b> durch die Ecken</td><td>innen / auf Seite / außen</td></tr>
+        <tr><td><span class="pill in">Winkelhalbierende</span></td><td>Inkreismittelpunkt $I$</td><td>gleicher Abstand zu den Seiten → <b>Inkreis</b> berührt Seiten</td><td>immer innen</td></tr>
+        <tr><td><span class="pill s">Seitenhalbierende</span></td><td>Schwerpunkt $S$</td><td>Gleichgewichtspunkt, teilt $2:1$</td><td>immer innen</td></tr>
+      </table>
+
+      <div class="hinweis"><b>Und der Thaleskreis?</b> Er ist ein <b>Spezialfall des Umkreises</b>: Beim rechtwinkligen Dreieck ist der Umkreis genau der Thaleskreis, sein Mittelpunkt liegt auf der Mitte der Hypotenuse.</div>
+
+      <h3>Prüfe dein Überblickswissen</h3>
+      <p class="frage">Welcher Punkt liegt <b>immer</b> innerhalb des Dreiecks, kann aber <b>kein</b> Gleichgewichtspunkt sein?</p>
+      <div class="mc" data-mc="netz" data-correct="1">
+        <button data-opt="0">Der Schwerpunkt $S$.</button>
+        <button data-opt="1">Der Inkreismittelpunkt $I$.</button>
+        <button data-opt="2">Der Umkreismittelpunkt $U$.</button>
+      </div>
+      <div class="feedback" data-fb="netz"></div>
+      <details class="tipp"><summary>Ich brauche einen Hinweis</summary><div class="tippinhalt"><p>„Immer innen“ trifft auf $I$ und $S$ zu. Der Gleichgewichtspunkt ist aber genau $S$ – gesucht ist also der andere.</p></div></details>
+    </div>
+  </section>
+
+  <!-- KARTE 6: Sichern -->
+  <section class="card" data-card="5">
+    <div class="panel">
+      <span class="meta-zeit">⏱ ca. 15 Min · Sicherung</span>
+      <h2>Das ganze Kapitel sichern</h2>
+
+      <div class="satz s"><b>Schwerpunkt.</b> Die drei <b>Seitenhalbierenden</b> schneiden sich im <b>Schwerpunkt $S$</b>. Er liegt immer innen, ist der Gleichgewichtspunkt und teilt jede Seitenhalbierende im Verhältnis $2:1$.</div>
+
+      <div class="merk">
+        <h3>Die vier besonderen Linien – ein Muster</h3>
+        <p>Mittelsenkrechte → Umkreis · Winkelhalbierende → Inkreis · Seitenhalbierende → Schwerpunkt. Immer gilt: Drei gleichartige Linien treffen sich in einem Punkt. Der Thaleskreis ist der Umkreis des rechtwinkligen Dreiecks.</p>
+      </div>
+
+      <div class="heft">
+        <div class="htitel"><span class="ic">✏️</span>Jetzt du – im Heft</div>
+        <p>Erstelle eine <b>Kapitel-Übersicht</b> in deinem Heft: eine Tabelle mit allen vier besonderen Linien, ihren Schnittpunkten und Besonderheiten.</p>
+        <details class="anleitung"><summary>Was gehört in die Übersicht?</summary><div class="ainhalt">
+          <ol>
+            <li>Spalten: Linie – Schnittpunkt – Besonderheit – Lage.</li>
+            <li>Zeilen: Mittelsenkrechte/Umkreis, Winkelhalbierende/Inkreis, Seitenhalbierende/Schwerpunkt.</li>
+            <li>Ergänze unten den Thaleskreis als Spezialfall des Umkreises.</li>
+            <li>Zeichne zu jeder Zeile eine kleine Skizze.</li>
+          </ol>
+        </div></details>
+        <div class="vorlegen"><span>👩‍🏫</span> Zeige deine Kapitel-Übersicht deiner Lehrkraft.</div>
+      </div>
+
+      <div class="hinweis"><b>Geschafft!</b> Du hast das ganze Kapitel „Kreise und Dreiecke“ zusammengeführt – von der Konstruktion über den Satz des Thales bis zu den vier besonderen Punkten. In der Übung wendest du alles noch einmal an.</div>
+    </div>
+  </section>
+
+  <div class="weiter-wrap" id="weiterwrap">
+    <a class="weiter" href="schwerpunkt_ue.html">Weiter zur Übung ▸</a>
+    <div class="weiter-hint">Du hast alle Karten dieser Lernseite bearbeitet.</div>
+  </div>
+
+</main>
+
+<div id="trex" title="Made by Mathedino">🦖<span class="bubble">Made by Mathedino</span></div>
+
+<script>
+(function(){
+  "use strict";
+  const State={cardSeen:[true,false,false,false,false,false],mc:{},spFertig:false};
+
+  const tabs=Array.from(document.querySelectorAll('.tab'));
+  const cards=Array.from(document.querySelectorAll('.card'));
+  function showCard(i){
+    cards.forEach(c=>c.classList.toggle('active',+c.dataset.card===i));
+    tabs.forEach(t=>t.classList.toggle('active',+t.dataset.i===i));
+    State.cardSeen[i]=true;
+    tabs.forEach((t,k)=>{if(State.cardSeen[k])t.classList.add('done');});
+    checkComplete();
+    window.scrollTo({top:0,behavior:'smooth'});
+    if(window.MathJax&&MathJax.typesetPromise){MathJax.typesetPromise();}
+  }
+  tabs.forEach(t=>t.addEventListener('click',()=>showCard(+t.dataset.i)));
+
+  document.querySelectorAll('.mc').forEach(group=>{
+    const key=group.dataset.mc; const correct=+group.dataset.correct;
+    State.mc[key]={answered:false};
+    const fb=document.querySelector('[data-fb="'+key+'"]');
+    group.querySelectorAll('button').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        if(State.mc[key].answered)return;
+        const opt=+btn.dataset.opt; State.mc[key].answered=true;
+        group.querySelectorAll('button').forEach(b=>b.classList.add('disabled'));
+        if(opt===correct){btn.classList.add('richtig');fb.className='feedback gut';fb.textContent='✅ Richtig!';}
+        else{btn.classList.add('falsch');group.querySelector('[data-opt="'+correct+'"]').classList.add('richtig');fb.className='feedback schlecht';fb.innerHTML='❌ Nicht ganz – die richtige Antwort ist grün markiert.';}
+        checkComplete();
+      });
+    });
+  });
+
+  /* Schwerpunkt-Animation */
+  const spSchritte=[
+    {t:'Gegeben ist das Dreieck $ABC$.', ids:[]},
+    {t:'Markiere die <b>Mitten</b> der drei Seiten.', ids:['sp-mab','sp-mbc','sp-mac']},
+    {t:'Zeichne die erste <b>Seitenhalbierende</b>: von $C$ zur Mitte von $\\overline{AB}$.', ids:['sp-mab','sp-mbc','sp-mac','sp-sh1']},
+    {t:'Zeichne die zweite Seitenhalbierende: von $A$ zur Mitte von $\\overline{BC}$.', ids:['sp-mab','sp-mbc','sp-mac','sp-sh1','sp-sh2']},
+    {t:'Zeichne die dritte Seitenhalbierende: von $B$ zur Mitte von $\\overline{AC}$.', ids:['sp-mab','sp-mbc','sp-mac','sp-sh1','sp-sh2','sp-sh3']},
+    {t:'Alle drei treffen sich in einem Punkt – dem <b>Schwerpunkt $S$</b>. Er liegt immer innen.', ids:['sp-sh1','sp-sh2','sp-sh3','sp-s','sp-slbl']}
+  ];
+  let step=0;
+  const anz=document.getElementById('sp-anz');
+  const nextBtn=document.getElementById('sp-next');
+  const resetBtn=document.getElementById('sp-reset');
+  const alleIds=[...new Set(spSchritte.flatMap(s=>s.ids))];
+  function render(){
+    const label=step===0?'Start':'Schritt '+step;
+    anz.innerHTML='<span class="nr">'+label+':</span> '+spSchritte[step].t;
+    nextBtn.disabled=(step>=spSchritte.length-1);
+    nextBtn.textContent=(step>=spSchritte.length-1)?'Fertig ✓':'Nächster Schritt ▸';
+    const aktiv=new Set(spSchritte[step].ids);
+    alleIds.forEach(id=>{const el=document.getElementById(id);if(el)el.classList.toggle('show',aktiv.has(id));});
+    if(window.MathJax&&MathJax.typesetPromise){MathJax.typesetPromise([anz]);}
+    if(step>=spSchritte.length-1){State.spFertig=true;checkComplete();}
+  }
+  nextBtn.addEventListener('click',()=>{if(step<spSchritte.length-1){step++;render();}});
+  resetBtn.addEventListener('click',()=>{step=0;render();});
+  render();
+
+  /* ===== Interaktive Figuren Karte 3 & 4: verschiebbare B und C ===== */
+  const A0={x:80,y:300};
+  function mid(P,Q){return {x:(P.x+Q.x)/2,y:(P.y+Q.y)/2};}
+  function setKreuzG(gId,cx,cy,s){
+    const g=document.getElementById(gId); if(!g) return; const ls=g.querySelectorAll('line');
+    ls[0].setAttribute('x1',cx-s);ls[0].setAttribute('y1',cy-s);ls[0].setAttribute('x2',cx+s);ls[0].setAttribute('y2',cy+s);
+    ls[1].setAttribute('x1',cx+s);ls[1].setAttribute('y1',cy-s);ls[1].setAttribute('x2',cx-s);ls[1].setAttribute('y2',cy+s);
+  }
+  function makeDraggable(svgId, state, onUpdate){
+    const svg=document.getElementById(svgId);
+    let drag=null;
+    function pt(evt){
+      const r=svg.getBoundingClientRect(); const vb=svg.viewBox.baseVal;
+      return {x:(evt.clientX-r.left)/r.width*vb.width, y:(evt.clientY-r.top)/r.height*vb.height};
+    }
+    svg.querySelector('[id$="-bgrip"]').addEventListener('pointerdown',e=>{drag='B';e.target.setPointerCapture&&e.target.setPointerCapture(e.pointerId);e.preventDefault();});
+    svg.querySelector('[id$="-cgrip"]').addEventListener('pointerdown',e=>{drag='C';e.target.setPointerCapture&&e.target.setPointerCapture(e.pointerId);e.preventDefault();});
+    svg.addEventListener('pointermove',e=>{
+      if(!drag) return; const p=pt(e);
+      if(drag==='B'){ state.B.x=Math.max(250,Math.min(440,p.x)); state.B.y=300; }
+      else { state.C.x=Math.max(40,Math.min(420,p.x)); state.C.y=Math.max(40,Math.min(250,p.y)); }
+      onUpdate();
+    });
+    svg.addEventListener('pointerup',()=>{drag=null;});
+    svg.addEventListener('pointercancel',()=>{drag=null;});
+  }
+
+  /* Karte 3: 2:1-Teilung */
+  const t_state={B:{x:380,y:300}, C:{x:180,y:90}};
+  function updateTeil(){
+    const A=A0, B=t_state.B, C=t_state.C;
+    const M=mid(A,B);
+    const S={x:(A.x+B.x+C.x)/3, y:(A.y+B.y+C.y)/3};
+    document.getElementById('t-tri').setAttribute('points',`${A.x},${A.y} ${B.x},${B.y} ${C.x},${C.y}`);
+    // Seitenhalbierende C->S (2 Teile) und S->M (1 Teil)
+    const sh2=document.getElementById('t-sh2'); sh2.setAttribute('x1',C.x);sh2.setAttribute('y1',C.y);sh2.setAttribute('x2',S.x);sh2.setAttribute('y2',S.y);
+    const sh1=document.getElementById('t-sh1'); sh1.setAttribute('x1',S.x);sh1.setAttribute('y1',S.y);sh1.setAttribute('x2',M.x);sh1.setAttribute('y2',M.y);
+    // Labels an Segmentmitten
+    const cs=mid(C,S), sm=mid(S,M);
+    const l2=document.getElementById('t-lbl2'); l2.setAttribute('x',cs.x+10);l2.setAttribute('y',cs.y);
+    const l1=document.getElementById('t-lbl1'); l1.setAttribute('x',sm.x+10);l1.setAttribute('y',sm.y);
+    // Kreuze + Griffe
+    setKreuzG('t-bx',B.x,B.y,6); document.querySelector('#t-bgrip circle').setAttribute('cx',B.x); document.querySelector('#t-bgrip circle').setAttribute('cy',B.y);
+    setKreuzG('t-cx',C.x,C.y,6); document.querySelector('#t-cgrip circle').setAttribute('cx',C.x); document.querySelector('#t-cgrip circle').setAttribute('cy',C.y);
+    setKreuzG('t-m',M.x,M.y,5); setKreuzG('t-s',S.x,S.y,7);
+    document.getElementById('t-blbl').setAttribute('x',B.x+12); document.getElementById('t-blbl').setAttribute('y',B.y+6);
+    document.getElementById('t-clbl').setAttribute('x',C.x+10); document.getElementById('t-clbl').setAttribute('y',C.y-6);
+    document.getElementById('t-slbl').setAttribute('x',S.x-20); document.getElementById('t-slbl').setAttribute('y',S.y+4);
+    document.getElementById('t-mlbl').setAttribute('x',M.x+8); document.getElementById('t-mlbl').setAttribute('y',M.y+18);
+  }
+  makeDraggable('svg-teil', t_state, updateTeil);
+  updateTeil();
+
+  /* Karte 4: Flächengleichheit */
+  const f_state={B:{x:380,y:300}, C:{x:180,y:90}};
+  function updateFlaeche(){
+    const A=A0, B=f_state.B, C=f_state.C;
+    const M=mid(A,B);
+    document.getElementById('f-tri').setAttribute('points',`${A.x},${A.y} ${B.x},${B.y} ${C.x},${C.y}`);
+    document.getElementById('f-tri-l').setAttribute('points',`${A.x},${A.y} ${C.x},${C.y} ${M.x},${M.y}`);
+    document.getElementById('f-tri-r').setAttribute('points',`${M.x},${M.y} ${C.x},${C.y} ${B.x},${B.y}`);
+    // Seitenhalbierende C->M
+    const sh=document.getElementById('f-sh'); sh.setAttribute('x1',C.x);sh.setAttribute('y1',C.y);sh.setAttribute('x2',M.x);sh.setAttribute('y2',M.y);
+    // Höhe: senkrecht von C auf AB (y=300)
+    const h=document.getElementById('f-hoehe'); h.setAttribute('x1',C.x);h.setAttribute('y1',C.y);h.setAttribute('x2',C.x);h.setAttribute('y2',300);
+    document.getElementById('f-hlbl').setAttribute('x',C.x+6); document.getElementById('f-hlbl').setAttribute('y',(C.y+300)/2);
+    // Grundseiten A-M und M-B
+    const g1=document.getElementById('f-g1'); g1.setAttribute('x1',A.x);g1.setAttribute('x2',M.x);
+    const g2=document.getElementById('f-g2'); g2.setAttribute('x1',M.x);g2.setAttribute('x2',B.x);
+    document.getElementById('f-g1lbl').setAttribute('x',(A.x+M.x)/2-4);
+    document.getElementById('f-g2lbl').setAttribute('x',(M.x+B.x)/2-4);
+    // Kreuze + Griffe
+    setKreuzG('f-bx',B.x,B.y,6); document.querySelector('#f-bgrip circle').setAttribute('cx',B.x); document.querySelector('#f-bgrip circle').setAttribute('cy',B.y);
+    setKreuzG('f-cx',C.x,C.y,6); document.querySelector('#f-cgrip circle').setAttribute('cx',C.x); document.querySelector('#f-cgrip circle').setAttribute('cy',C.y);
+    setKreuzG('f-m',M.x,M.y,5);
+    document.getElementById('f-blbl').setAttribute('x',B.x+12); document.getElementById('f-blbl').setAttribute('y',B.y-4);
+    document.getElementById('f-clbl').setAttribute('x',C.x+10); document.getElementById('f-clbl').setAttribute('y',C.y-6);
+    document.getElementById('f-mlbl').setAttribute('x',M.x+2); document.getElementById('f-mlbl').setAttribute('y',M.y-8);
+  }
+  makeDraggable('svg-flaeche', f_state, updateFlaeche);
+  updateFlaeche();
+
+  function checkComplete(){
+    const alleKarten=State.cardSeen.every(Boolean);
+    const alleMc=Object.values(State.mc).every(m=>m.answered);
+    if(alleKarten&&alleMc&&State.spFertig){document.getElementById('weiterwrap').classList.add('show');}
+  }
+  checkComplete();
+
+  const trex=document.getElementById('trex');
+  trex.addEventListener('click',()=>{trex.classList.add('show');clearTimeout(trex._t);trex._t=setTimeout(()=>trex.classList.remove('show'),1800);});
+  trex.addEventListener('mouseenter',()=>trex.classList.add('show'));
+  trex.addEventListener('mouseleave',()=>trex.classList.remove('show'));
+
+  if(window.MathJax&&MathJax.startup&&MathJax.startup.promise){MathJax.startup.promise.then(()=>MathJax.typesetPromise());}
+})();
+</script>
+</body>
+</html>
