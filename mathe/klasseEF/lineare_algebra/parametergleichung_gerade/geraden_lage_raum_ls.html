@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lernseite: Lagebeziehung von Geraden im Raum</title>
+
+<meta name="description" content="Erarbeitung der vier Lagebeziehungen von Geraden im Raum: identisch, parallel, schneidend, windschief – mit Entscheidungsbaum, Schnittpunktberechnung und Sachkontext Kollision.">
+<meta name="keywords" content="Lagebeziehung, windschief, schneidend, parallel, identisch, Geraden im Raum, kollinear, Schnittpunkt, Kollision, LGS">
+<meta name="typ" content="Lernseite">
+<meta name="klasse" content="EF">
+<meta name="fach" content="mathe">
+<meta name="oberthema" content="Analytische Geometrie">
+<meta name="thema" content="Lagebeziehung von Geraden im Raum">
+
+<script>
+  MathJax = {
+    tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+    svg: { fontCache: 'global' }
+  };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+<style>
+:root{
+  --bg:#fbf4ec;--card:#ffffff;
+  --head:#e07b1a;--head-d:#b5610f;--head-soft:#fcefe0;
+  --ink:#2a2018;--muted:#7a6a5b;--line:#ecd9c4;
+  --accent:#cf6f12;--accent-d:#9a5009;
+  --ok:#1b8a3a;--ok-bg:#1e9e44;
+  --bad:#c62128;--bad-bg:#d32f2f;
+  --info:#2d6da3;--info-soft:#e8f1f9;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;}
+body{background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;font-size:1.05rem;line-height:1.55;padding:0 0 6rem;}
+.wrap{max-width:60rem;margin:0 auto;padding:0 1rem;}
+
+.pagehead{background:var(--head);color:#fff;padding:1.1rem 1rem 1.2rem;border-radius:0 0 18px 18px;margin-bottom:1rem;}
+.pagehead .kicker{font-size:.85rem;letter-spacing:.08em;text-transform:uppercase;opacity:.9;}
+.pagehead h1{margin:.25rem 0 .35rem;font-size:1.5rem;line-height:1.2;}
+.pagehead p{margin:0;opacity:.95;font-size:.98rem;}
+
+.tabs{display:flex;flex-wrap:wrap;gap:.5rem;margin:0 0 1rem;}
+.tab{flex:1 1 auto;min-width:6.6rem;min-height:44px;border:2px solid var(--line);background:#fff;color:var(--accent-d);border-radius:12px;font-size:.98rem;font-weight:600;padding:.5rem .5rem;cursor:pointer;}
+.tab .lab{display:block;font-size:.72rem;font-weight:700;color:var(--muted);letter-spacing:.02em;}
+.tab.active{background:var(--head);color:#fff;border-color:var(--head);}
+.tab.active .lab{color:#ffe6cc;}
+.tab.done::after{content:" ✓";color:var(--ok);font-weight:800;}
+.tab.active.done::after{color:#d6f5dd;}
+.tab:active{transform:scale(.98);}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:1.1rem 1.1rem 1.3rem;margin-bottom:1rem;box-shadow:0 1px 2px rgba(120,80,30,.06);}
+.card h2{margin:.1rem 0 .2rem;font-size:1.28rem;color:var(--accent-d);}
+.card .sub{color:var(--muted);font-size:.95rem;margin:0 0 .9rem;}
+.page{display:none;}
+.page.active{display:block;animation:fade .18s ease;}
+@keyframes fade{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:none;}}
+
+.step{border-top:1px dashed var(--line);padding-top:1rem;margin-top:1rem;}
+.step:first-of-type{border-top:none;margin-top:0;padding-top:0;}
+.stepnum{display:inline-block;background:var(--head-soft);color:var(--accent-d);font-weight:800;border-radius:8px;padding:.05rem .55rem;margin-right:.4rem;}
+
+.merk{background:var(--info-soft);border:1px solid #b9d4ea;border-left:5px solid var(--info);border-radius:12px;padding:.8rem .9rem;margin:.9rem 0;}
+.merk h3{margin:0 0 .35rem;font-size:1rem;color:#1f5480;}
+.merk ul{margin:.3rem 0 0;padding-left:1.2rem;}
+.merk li{margin:.25rem 0;}
+
+.bsp{background:#fff8f0;border:1px solid #f0d3ad;border-radius:12px;padding:.8rem .9rem;margin:.9rem 0;}
+.bsp .bt{font-weight:800;color:var(--accent-d);margin-bottom:.3rem;}
+.given{background:#f7faff;border:1px solid #cfe0f0;border-radius:10px;padding:.6rem .75rem;margin:.5rem 0;}
+
+.reveal{margin-top:.6rem;}
+.revstep{background:#fff;border:1px solid var(--line);border-radius:10px;padding:.6rem .75rem;margin-top:.5rem;display:none;}
+.revstep.show{display:block;animation:fade .2s ease;}
+.btn{min-height:44px;border:none;border-radius:11px;font-size:1rem;font-weight:700;padding:.55rem 1.1rem;cursor:pointer;margin:.5rem .4rem 0 0;}
+.btn:active{transform:scale(.98);}
+.btn-rev{background:var(--head);color:#fff;}
+.btn-rev:disabled{background:#e6c9a8;cursor:default;}
+.btn-check{background:var(--accent);color:#fff;}
+.btn-clear{background:#fff;color:var(--bad);border:2px solid var(--bad);}
+
+.tip{background:#fff8ef;border:1px solid #efcfa3;border-radius:10px;padding:.55rem .7rem;margin-top:.45rem;}
+.tip summary{cursor:pointer;font-weight:700;color:#9a5009;min-height:32px;}
+.tip[open] summary{margin-bottom:.3rem;}
+
+.opts{display:flex;flex-direction:column;gap:.5rem;margin:.5rem 0;}
+.opt{min-height:44px;text-align:left;border:2px solid var(--line);background:#fff;color:var(--ink);border-radius:11px;padding:.55rem .7rem;cursor:pointer;font-size:1rem;}
+.opt.sel{border-color:var(--accent);background:var(--head-soft);}
+.opt.lock-ok{border-color:var(--ok);background:var(--ok-bg);color:#fff;}
+.opt.lock-bad{border-color:var(--bad);background:var(--bad-bg);color:#fff;}
+
+input[type=text]{font-size:1.05rem;padding:.5rem .6rem;border:2px solid var(--line);border-radius:10px;min-height:44px;background:#fff;color:var(--ink);}
+.inline{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;}
+.numin{width:4.6rem;max-width:4.6rem;text-align:center;}
+.valin{width:6rem;max-width:6rem;}
+.vecin{display:inline-flex;align-items:center;gap:.35rem;margin:.3rem .4rem .3rem 0;}
+.vecin .par{font-size:3.6rem;line-height:1;color:var(--accent-d);font-weight:300;}
+.vecin .col{display:flex;flex-direction:column;gap:.3rem;}
+.vecin input{width:4.6rem;max-width:4.6rem;text-align:center;}
+
+.fb{margin-top:.7rem;border-radius:11px;padding:.7rem .8rem;font-weight:600;display:none;}
+.fb.show{display:block;}
+.fb.good{background:var(--ok-bg);color:#fff;}
+.fb.bad{background:var(--bad-bg);color:#fff;}
+.fb .corr{display:block;font-weight:700;margin-top:.3rem;background:rgba(255,255,255,.18);border-radius:8px;padding:.3rem .5rem;}
+
+/* Entscheidungsbaum */
+.tree{margin:.6rem 0;}
+.tnode{background:#eaf2fb;border:1px solid #b9d4ea;border-radius:10px;padding:.55rem .7rem;font-weight:600;color:#1f5480;text-align:center;}
+.tbranch{display:flex;gap:.6rem;margin-top:.5rem;}
+.tbranch>div{flex:1 1 0;}
+.tlabel{font-size:.8rem;font-weight:800;color:var(--muted);text-align:center;margin:.3rem 0;}
+.tleaf{border-radius:10px;padding:.5rem .6rem;text-align:center;font-weight:700;font-size:.95rem;}
+.tleaf.id{background:#e8f5ec;border:1px solid #b7ddc0;color:#1b6b30;}
+.tleaf.par{background:#fff3df;border:1px solid #f0c987;color:#9a5009;}
+.tleaf.cut{background:#e8f1f9;border:1px solid #b9d4ea;color:#1f5480;}
+.tleaf.skew{background:#fbe7e7;border:1px solid #e6a6a6;color:#9c2a2a;}
+
+.lgs{font-variant-numeric:tabular-nums;background:#fafafa;border:1px solid var(--line);border-radius:8px;padding:.5rem .65rem;margin:.4rem 0;}
+
+.flips{display:flex;flex-wrap:wrap;gap:.6rem;margin:.6rem 0;}
+.flip{flex:1 1 14rem;min-height:6.5rem;background:var(--head-soft);border:1px solid var(--line);border-radius:12px;padding:.7rem .8rem;cursor:pointer;}
+.flip .back{display:none;}
+.flip.turned{background:#eef6ef;border-color:#b7ddc0;}
+.flip.turned .front{display:none;}
+.flip.turned .back{display:block;}
+.flip .ttl{font-weight:800;color:var(--accent-d);font-size:.85rem;text-transform:uppercase;letter-spacing:.03em;margin-bottom:.25rem;}
+.flip.turned .ttl{color:#1b8a3a;}
+
+.nextwrap{position:fixed;left:0;right:0;bottom:0;padding:.7rem 1rem env(safe-area-inset-bottom);background:linear-gradient(180deg,rgba(251,244,236,0) 0,var(--bg) 40%);display:none;}
+.nextwrap.show{display:block;}
+.next{display:block;max-width:60rem;margin:0 auto;min-height:48px;width:100%;background:var(--ok-bg);color:#fff;border:none;border-radius:13px;font-size:1.1rem;font-weight:800;cursor:pointer;}
+
+.rex{position:fixed;right:.7rem;bottom:5rem;font-size:1.6rem;cursor:pointer;z-index:30;filter:drop-shadow(0 1px 2px rgba(0,0,0,.2));}
+.rex .bub{position:absolute;right:2rem;bottom:.2rem;white-space:nowrap;background:#2a2018;color:#fff;font-size:.8rem;padding:.25rem .5rem;border-radius:8px;display:none;}
+.rex.show .bub{display:block;}
+small.note{color:var(--muted);}
+.tag{font-weight:800;color:var(--accent-d);background:var(--head-soft);border-radius:7px;padding:0 .4rem;}
+</style>
+</head>
+<body>
+
+<div class="pagehead">
+  <div class="wrap">
+    <div class="kicker">Mathematik · EF · Erarbeitung</div>
+    <h1>Lagebeziehung von Geraden im Raum</h1>
+    <p>Die vier Fälle – mit Schwerpunkt auf Schneiden und Windschief.</p>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <div class="tabs" id="tabs">
+    <button class="tab active" data-go="p0">Überblick<span class="lab">4 Fälle &amp; Baum</span></button>
+    <button class="tab" data-go="p1">Auffrischen<span class="lab">identisch &amp; parallel</span></button>
+    <button class="tab" data-go="p2">Schneiden<span class="lab">Schnittpunkt via LGS</span></button>
+    <button class="tab" data-go="p3">Windschief<span class="lab">LGS ohne Lösung</span></button>
+    <button class="tab" data-go="p4">Sachkontext<span class="lab">Kollision: Ort + Zeit</span></button>
+    <button class="tab" data-go="p5">Merken<span class="lab">Flip-Cards</span></button>
+  </div>
+
+  <!-- ============ KARTE 0: ÜBERBLICK ============ -->
+  <section class="page active" id="p0">
+    <div class="card">
+      <h2>Vier Möglichkeiten – ein Entscheidungsbaum</h2>
+      <p class="sub">Zwei Geraden $g\colon\vec{x}=\vec{p}+r\cdot\vec{u}$ und $h\colon\vec{x}=\vec{q}+s\cdot\vec{v}$ im Raum.</p>
+
+      <p>In der Ebene liegen zwei Geraden parallel, identisch oder sie schneiden sich. Im Raum kommt ein
+        vierter Fall dazu: Geraden können <strong>aneinander vorbeilaufen</strong>, ohne sich zu treffen und
+        ohne parallel zu sein – sie heißen dann <strong>windschief</strong>.</p>
+
+      <div class="tree">
+        <div class="tnode">Sind die Richtungsvektoren $\vec{u}$ und $\vec{v}$ kollinear (Vielfache voneinander)?</div>
+        <div class="tbranch">
+          <div>
+            <div class="tlabel">ja ↓</div>
+            <div class="tnode" style="font-size:.9rem">Liegt der Stützpunkt $\vec{p}$ von $g$ auch auf $h$?</div>
+            <div class="tbranch" style="margin-top:.4rem">
+              <div><div class="tlabel">ja</div><div class="tleaf id">identisch</div></div>
+              <div><div class="tlabel">nein</div><div class="tleaf par">parallel</div></div>
+            </div>
+          </div>
+          <div>
+            <div class="tlabel">nein ↓</div>
+            <div class="tnode" style="font-size:.9rem">Hat das Gleichsetzen $\vec{p}+r\vec{u}=\vec{q}+s\vec{v}$ eine Lösung?</div>
+            <div class="tbranch" style="margin-top:.4rem">
+              <div><div class="tlabel">ja</div><div class="tleaf cut">schneiden sich</div></div>
+              <div><div class="tlabel">nein</div><div class="tleaf skew">windschief</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="merk">
+        <h3>So liest man den Baum</h3>
+        <ul>
+          <li><strong>Erst die Richtungen:</strong> kollinear → es bleibt nur identisch oder parallel. Nicht kollinear → schneidend oder windschief.</li>
+          <li><strong>Dann der zweite Test:</strong> bei kollinearen Richtungen eine Punktprobe; bei nicht-kollinearen das Gleichsetzen (ein Gleichungssystem).</li>
+        </ul>
+      </div>
+      <p>Die Fälle „identisch" und „parallel" frischen wir kurz auf. Der Schwerpunkt liegt dann auf
+        <strong>Schneiden</strong> (mit Schnittpunkt) und <strong>Windschief</strong>.</p>
+      <button class="btn btn-check" onclick="markDone('p0');switchPage('p1')">Los geht's →</button>
+    </div>
+  </section>
+
+  <!-- ============ KARTE 1: AUFFRISCHEN ============ -->
+  <section class="page" id="p1">
+    <div class="card">
+      <h2>Kurz aufgefrischt: identisch &amp; parallel</h2>
+      <p class="sub">Beide Fälle haben <em>kollineare</em> Richtungsvektoren – die Punktprobe entscheidet.</p>
+
+      <div class="merk">
+        <h3>Wenn die Richtungen kollinear sind</h3>
+        <ul>
+          <li>Stützpunkt der einen liegt auf der anderen → <strong>identisch</strong>.</li>
+          <li>Stützpunkt liegt <em>nicht</em> auf der anderen → <strong>(echt) parallel</strong>.</li>
+        </ul>
+      </div>
+
+      <div class="bsp">
+        <div class="bt">Kurzbeispiel</div>
+        <p>$g\colon\vec{x}=\begin{pmatrix}1\\0\\2\end{pmatrix}+r\begin{pmatrix}2\\1\\3\end{pmatrix}$ und
+           $h\colon\vec{x}=\begin{pmatrix}7\\3\\11\end{pmatrix}+s\begin{pmatrix}4\\2\\6\end{pmatrix}$.</p>
+        <p>$\begin{pmatrix}4\\2\\6\end{pmatrix}=2\begin{pmatrix}2\\1\\3\end{pmatrix}$ → kollinear. Punktprobe:
+           liegt $(7\,|\,3\,|\,11)$ auf $g$? Mit $r=3$: $(1+6\,|\,0+3\,|\,2+9)=(7\,|\,3\,|\,11)$ ✓ → die Geraden sind <strong>identisch</strong>.</p>
+      </div>
+
+      <div class="step">
+        <p><span class="stepnum">?</span> <strong>Zwischenfrage.</strong> Zwei Geraden haben kollineare
+          Richtungsvektoren, aber der Stützpunkt der einen liegt nicht auf der anderen. Wie liegen sie?</p>
+        <div class="opts" id="opts-q1" data-single="1">
+          <button class="opt" data-ok="0">Sie sind identisch.</button>
+          <button class="opt" data-ok="1">Sie sind echt parallel.</button>
+          <button class="opt" data-ok="0">Sie schneiden sich.</button>
+          <button class="opt" data-ok="0">Sie sind windschief.</button>
+        </div>
+        <button class="btn btn-check" onclick="checkMC('q1')">Prüfen</button>
+        <button class="btn btn-clear" id="clr-q1" style="display:none" onclick="clearMC('q1')">Leeren</button>
+        <div class="fb" id="fb-q1"></div>
+        <details class="tip"><summary>Hilfe</summary>Kollinear schließt „schneiden" und „windschief" aus. Es bleibt identisch oder parallel – und der Punkttest ist negativ.</details>
+      </div>
+      <button class="btn btn-check" onclick="markDone('p1')">Auffrischung erledigt ✓</button>
+    </div>
+  </section>
+
+  <!-- ============ KARTE 2: SCHNEIDEN ============ -->
+  <section class="page" id="p2">
+    <div class="card">
+      <h2>Schwerpunkt 1 · Sich schneidende Geraden</h2>
+      <p class="sub">Nicht-kollineare Richtungen: gleichsetzen, Gleichungssystem lösen, Kontrolle in der dritten Zeile.</p>
+
+      <div class="step">
+        <p><span class="stepnum">Idee</span> Sind die Richtungen <strong>nicht</strong> kollinear, treffen sich die Geraden
+          höchstens in einem Punkt. Man setzt die Geradengleichungen gleich – wichtig: jede mit ihrem
+          <strong>eigenen Parameter</strong> ($r$ für $g$, $s$ für $h$). Das ergibt drei Gleichungen. Aus zwei Zeilen
+          bestimmt man $r$ und $s$; die dritte Zeile ist die <strong>Kontrolle</strong>: Stimmt sie, schneiden sich die Geraden.</p>
+      </div>
+
+      <div class="bsp">
+        <div class="bt">Beispiel</div>
+        <p>$g\colon\vec{x}=\begin{pmatrix}1\\0\\2\end{pmatrix}+r\begin{pmatrix}2\\1\\1\end{pmatrix}$,&nbsp;
+           $h\colon\vec{x}=\begin{pmatrix}4\\3\\2\end{pmatrix}+s\begin{pmatrix}1\\-1\\2\end{pmatrix}$. Schneiden sie sich?</p>
+        <div class="reveal" id="rev-2">
+          <button class="btn btn-rev" id="rb-2" onclick="revealNext('rev-2','rb-2')">Nächsten Schritt aufdecken</button>
+          <div class="revstep">
+            <strong>1. Richtungen prüfen.</strong> $\begin{pmatrix}2\\1\\1\end{pmatrix}$ und $\begin{pmatrix}1\\-1\\2\end{pmatrix}$
+            sind nicht kollinear (kein gemeinsamer Faktor). Also: schneidend oder windschief.
+          </div>
+          <div class="revstep">
+            <strong>2. Gleichsetzen.</strong> $\begin{pmatrix}1\\0\\2\end{pmatrix}+r\begin{pmatrix}2\\1\\1\end{pmatrix}=\begin{pmatrix}4\\3\\2\end{pmatrix}+s\begin{pmatrix}1\\-1\\2\end{pmatrix}$ ergibt:
+            <div class="lgs">I&nbsp;&nbsp; $1+2r=4+s$<br>II&nbsp; $0+r=3-s$<br>III $2+r=2+2s$</div>
+          </div>
+          <div class="revstep">
+            <strong>3. Zwei Zeilen lösen.</strong> Aus I und II (umgestellt: $2r-s=3$ und $r+s=3$) folgt $r=2$, $s=1$.
+          </div>
+          <div class="revstep">
+            <strong>4. Kontrolle in Zeile III.</strong> Links $2+2=4$, rechts $2+2\cdot1=4$ ✓ – die dritte Zeile passt.
+          </div>
+          <div class="revstep">
+            <strong>5. Schnittpunkt.</strong> $r=2$ in $g$: $\begin{pmatrix}1\\0\\2\end{pmatrix}+2\begin{pmatrix}2\\1\\1\end{pmatrix}=\begin{pmatrix}5\\2\\4\end{pmatrix}$.
+            Die Geraden schneiden sich in $S(5\,|\,2\,|\,4)$.
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <p><span class="stepnum">→</span> <strong>Jetzt du (Teil 1).</strong> Für ein anderes Geradenpaar liefern Zeile I und II
+          die Werte $r=3$ und $s=2$. Setze sie in die Kontrollzeile $\;1+2r=5+3s\;$ ein und entscheide, ob diese Zeile passt.</p>
+        <div class="inline">
+          <span>Linke Seite $=$</span><input type="text" id="m1-l" class="valin" inputmode="numeric" placeholder="?">
+          <span>Rechte Seite $=$</span><input type="text" id="m1-r" class="valin" inputmode="numeric" placeholder="?">
+        </div>
+        <div class="opts" id="opts-m1" data-single="1" style="margin-top:.5rem">
+          <button class="opt" data-ok="1">Beide Seiten gleich → Kontrolle passt → die Geraden schneiden sich.</button>
+          <button class="opt" data-ok="0">Beide Seiten verschieden → Kontrolle scheitert → windschief.</button>
+        </div>
+        <button class="btn btn-check" onclick="checkM1()">Prüfen</button>
+        <button class="btn btn-clear" id="clr-m1" style="display:none" onclick="clearM1()">Leeren</button>
+        <div class="fb" id="fb-m1"></div>
+        <div class="reveal" id="tip-m1" style="display:none">
+          <details class="tip"><summary>Tipp 1</summary>Linke Seite: $1+2\cdot 3$. Rechte Seite: $5+3\cdot 2$.</details>
+          <details class="tip"><summary>Lösung</summary>Links $1+6=7$, rechts $5+6=11$. $7\neq 11$ – wäre also windschief. Hier zeigt sich: die Kontrollzeile entscheidet!</details>
+        </div>
+      </div>
+
+      <div class="merk">
+        <h3>Merke · Schneiden prüfen</h3>
+        <ul>
+          <li>Richtungen nicht kollinear → gleichsetzen mit <em>zwei verschiedenen</em> Parametern.</li>
+          <li>$r,s$ aus zwei Zeilen bestimmen, dritte Zeile als Kontrolle.</li>
+          <li>Kontrolle erfüllt → Schnittpunkt: $r$ (oder $s$) in die passende Geradengleichung einsetzen.</li>
+        </ul>
+      </div>
+      <button class="btn btn-check" onclick="markDone('p2')">Schwerpunkt 1 erledigt ✓</button>
+    </div>
+  </section>
+
+  <!-- ============ KARTE 3: WINDSCHIEF ============ -->
+  <section class="page" id="p3">
+    <div class="card">
+      <h2>Schwerpunkt 2 · Windschiefe Geraden</h2>
+      <p class="sub">Gleicher Ablauf wie beim Schneiden – nur scheitert hier die Kontrollzeile.</p>
+
+      <div class="step">
+        <p><span class="stepnum">Idee</span> Windschief heißt: Richtungen <strong>nicht kollinear</strong>
+          <em>und</em> es gibt <strong>keinen</strong> gemeinsamen Punkt. Beim Gleichsetzen findet man zwar aus zwei
+          Zeilen ein $r$ und $s$ – aber die dritte Zeile ergibt einen Widerspruch. Das Gleichungssystem ist nicht lösbar.</p>
+      </div>
+
+      <div class="bsp">
+        <div class="bt">Beispiel</div>
+        <p>$g\colon\vec{x}=\begin{pmatrix}1\\0\\2\end{pmatrix}+r\begin{pmatrix}2\\1\\1\end{pmatrix}$,&nbsp;
+           $h\colon\vec{x}=\begin{pmatrix}4\\3\\5\end{pmatrix}+s\begin{pmatrix}1\\-1\\2\end{pmatrix}$.
+           <small class="note">(Nur die dritte Stützpunkt-Koordinate von $h$ ist anders als auf der Schneiden-Karte!)</small></p>
+        <div class="reveal" id="rev-3">
+          <button class="btn btn-rev" id="rb-3" onclick="revealNext('rev-3','rb-3')">Nächsten Schritt aufdecken</button>
+          <div class="revstep">
+            <strong>1. Richtungen.</strong> Dieselben wie vorhin: $\begin{pmatrix}2\\1\\1\end{pmatrix}$ und $\begin{pmatrix}1\\-1\\2\end{pmatrix}$ – nicht kollinear.
+          </div>
+          <div class="revstep">
+            <strong>2. Gleichsetzen.</strong>
+            <div class="lgs">I&nbsp;&nbsp; $1+2r=4+s$<br>II&nbsp; $0+r=3-s$<br>III $2+r=5+2s$</div>
+          </div>
+          <div class="revstep">
+            <strong>3. Zwei Zeilen lösen.</strong> I und II liefern wie vorhin $r=2$, $s=1$.
+          </div>
+          <div class="revstep">
+            <strong>4. Kontrolle in Zeile III.</strong> Links $2+2=4$, rechts $5+2\cdot1=7$. $4\neq 7$ – <strong>Widerspruch</strong>.
+          </div>
+          <div class="revstep">
+            <strong>Ergebnis.</strong> Kein gemeinsames $r,s$ → kein Schnittpunkt, und die Richtungen sind nicht kollinear → die Geraden sind <strong>windschief</strong>.
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <p><span class="stepnum">?</span> <strong>Zwischenfrage.</strong> Beim Gleichsetzen zweier Geraden mit
+          <em>nicht</em> kollinearen Richtungen ergibt die Kontrollzeile einen Widerspruch. Was folgt daraus?</p>
+        <div class="opts" id="opts-q3" data-single="1">
+          <button class="opt" data-ok="0">Die Geraden sind parallel.</button>
+          <button class="opt" data-ok="1">Die Geraden sind windschief.</button>
+          <button class="opt" data-ok="0">Die Geraden sind identisch.</button>
+          <button class="opt" data-ok="0">Die Geraden schneiden sich.</button>
+        </div>
+        <button class="btn btn-check" onclick="checkMC('q3')">Prüfen</button>
+        <button class="btn btn-clear" id="clr-q3" style="display:none" onclick="clearMC('q3')">Leeren</button>
+        <div class="fb" id="fb-q3"></div>
+        <details class="tip"><summary>Hilfe</summary>Parallel und identisch bräuchten kollineare Richtungen – die sind hier ausgeschlossen. Kein gemeinsamer Punkt schließt „schneiden" aus.</details>
+      </div>
+
+      <div class="merk">
+        <h3>Merke · Schneiden vs. windschief</h3>
+        <ul>
+          <li>Beide starten gleich: nicht kollinear → gleichsetzen → $r,s$ aus zwei Zeilen.</li>
+          <li>Kontrollzeile <strong>passt</strong> → <span class="tag">schneidend</span> (mit Schnittpunkt).</li>
+          <li>Kontrollzeile <strong>scheitert</strong> → <span class="tag">windschief</span> (kein Schnittpunkt).</li>
+        </ul>
+      </div>
+      <button class="btn btn-check" onclick="markDone('p3')">Schwerpunkt 2 erledigt ✓</button>
+    </div>
+  </section>
+
+  <!-- ============ KARTE 4: SACHKONTEXT ============ -->
+  <section class="page" id="p4">
+    <div class="card">
+      <h2>Sachkontext · Kollision: gleicher Ort <em>und</em> gleiche Zeit</h2>
+      <p class="sub">Bei Bewegungen zählt nicht nur, ob sich die Bahnen kreuzen, sondern ob beide gleichzeitig am Kreuzungspunkt sind.</p>
+
+      <div class="step">
+        <p><span class="stepnum">Idee</span> Schneiden sich zwei <em>Bahnen</em>, heißt das noch nicht, dass die
+          Objekte zusammenstoßen – sie könnten den Kreuzungspunkt zu verschiedenen Zeiten passieren. Für eine
+          <strong>Kollision</strong> braucht man <strong>denselben Zeitpunkt</strong> $t$ in beiden Bewegungsgleichungen.
+          Deshalb nimmt man hier <em>nicht</em> zwei Parameter, sondern in beiden Gleichungen <strong>dasselbe $t$</strong>.</p>
+      </div>
+
+      <div class="bsp">
+        <div class="bt">Beispiel (2D, eine Einheit = 1 km, Zeit in Stunden)</div>
+        <p>Schiff A: $\vec{x}(t)=\begin{pmatrix}0\\0\end{pmatrix}+t\begin{pmatrix}2\\3\end{pmatrix}$,&nbsp;
+           Schiff B: $\vec{x}(t)=\begin{pmatrix}12\\0\end{pmatrix}+t\begin{pmatrix}-1\\3\end{pmatrix}$. Drohen sie zu kollidieren?</p>
+        <div class="reveal" id="rev-4">
+          <button class="btn btn-rev" id="rb-4" onclick="revealNext('rev-4','rb-4')">Nächsten Schritt aufdecken</button>
+          <div class="revstep">
+            <strong>1. Gleicher Ort zur gleichen Zeit.</strong> Man setzt beide Orte mit <em>demselben</em> $t$ gleich:
+            <div class="lgs">x: $0+2t=12-1t$<br>y: $0+3t=0+3t$</div>
+          </div>
+          <div class="revstep">
+            <strong>2. Lösen.</strong> Aus der x-Zeile: $3t=12$, also $t=4$. Die y-Zeile ist für jedes $t$ erfüllt.
+          </div>
+          <div class="revstep">
+            <strong>3. Probe / Ort.</strong> Bei $t=4$: A bei $(8\,|\,12)$, B bei $(12-4\,|\,12)=(8\,|\,12)$ – gleicher Ort.
+          </div>
+          <div class="revstep">
+            <strong>Ergebnis.</strong> Beide sind zur selben Zeit $t=4$ am selben Ort → <strong>Kollisionsgefahr</strong>.
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <p><span class="stepnum">→</span> <strong>Jetzt du.</strong> Zwei andere Schiffe kreuzen ihre <em>Bahnen</em> im
+          Punkt $(4\,|\,4)$. Schiff C ist dort bei $t=4$, Schiff D bei $t=2$. Besteht Kollisionsgefahr?</p>
+        <div class="opts" id="opts-m4" data-single="1">
+          <button class="opt" data-ok="0">Ja – sie sind beide am selben Punkt, das genügt.</button>
+          <button class="opt" data-ok="1">Nein – sie sind dort zu verschiedenen Zeiten ($t=4$ bzw. $t=2$), also kein Zusammenstoß.</button>
+        </div>
+        <button class="btn btn-check" onclick="checkMC('m4')">Prüfen</button>
+        <button class="btn btn-clear" id="clr-m4" style="display:none" onclick="clearMC('m4')">Leeren</button>
+        <div class="fb" id="fb-m4"></div>
+        <details class="tip"><summary>Hilfe</summary>Kollision verlangt gleichen Ort <em>und</em> gleiche Zeit. Hier stimmt der Ort, aber die Zeiten sind verschieden.</details>
+      </div>
+
+      <div class="merk">
+        <h3>Merke · Bahnen kreuzen vs. Kollision</h3>
+        <ul>
+          <li>Lagebeziehung der <em>Geraden</em>: zwei verschiedene Parameter ($r$ und $s$) – fragt nur nach gemeinsamen Punkten.</li>
+          <li>Kollision von <em>Bewegungen</em>: in beiden Gleichungen <em>dasselbe</em> $t$ – fragt nach gleichem Ort zur gleichen Zeit.</li>
+          <li>Bahnen können sich kreuzen, ohne dass es kracht (verschiedene Zeiten am Kreuzungspunkt).</li>
+        </ul>
+      </div>
+      <button class="btn btn-check" onclick="markDone('p4')">Sachkontext erledigt ✓</button>
+    </div>
+  </section>
+
+  <!-- ============ KARTE 5: MERKEN ============ -->
+  <section class="page" id="p5">
+    <div class="card">
+      <h2>Zusammenfassung &amp; Flip-Cards</h2>
+      <p class="sub">Karten antippen zum Umdrehen, dann der Abschluss-Check.</p>
+
+      <div class="flips" id="flips">
+        <div class="flip" onclick="this.classList.toggle('turned')">
+          <div class="front"><div class="ttl">Frage</div>Welche zwei Fälle bleiben, wenn die Richtungen kollinear sind?</div>
+          <div class="back"><div class="ttl">Antwort</div>Identisch oder (echt) parallel – die Punktprobe entscheidet.</div>
+        </div>
+        <div class="flip" onclick="this.classList.toggle('turned')">
+          <div class="front"><div class="ttl">Frage</div>Richtungen nicht kollinear – wie geht es weiter?</div>
+          <div class="back"><div class="ttl">Antwort</div>Gleichsetzen mit zwei Parametern, $r,s$ aus zwei Zeilen, dritte Zeile als Kontrolle.</div>
+        </div>
+        <div class="flip" onclick="this.classList.toggle('turned')">
+          <div class="front"><div class="ttl">Frage</div>Kontrollzeile passt / scheitert – was bedeutet das?</div>
+          <div class="back"><div class="ttl">Antwort</div>Passt → schneidend (Schnittpunkt). Scheitert → windschief (kein gemeinsamer Punkt).</div>
+        </div>
+        <div class="flip" onclick="this.classList.toggle('turned')">
+          <div class="front"><div class="ttl">Frage</div>Bahnen kreuzen sich – ist das schon eine Kollision?</div>
+          <div class="back"><div class="ttl">Antwort</div>Nein. Kollision braucht denselben Zeitpunkt $t$ in beiden Bewegungen.</div>
+        </div>
+      </div>
+
+      <div class="step">
+        <p><span class="stepnum">✓</span> <strong>Abschluss-Check.</strong> Welche Fälle setzen <em>nicht</em> kollineare Richtungsvektoren voraus? (Mehrfachauswahl)</p>
+        <div class="opts" id="opts-q5" data-multi="1">
+          <button class="opt" data-ok="1">schneiden sich</button>
+          <button class="opt" data-ok="1">windschief</button>
+          <button class="opt" data-ok="0">parallel</button>
+          <button class="opt" data-ok="0">identisch</button>
+        </div>
+        <button class="btn btn-check" onclick="checkQ5()">Prüfen</button>
+        <button class="btn btn-clear" id="clr-q5" style="display:none" onclick="clearQ5()">Leeren</button>
+        <div class="fb" id="fb-q5"></div>
+        <details class="tip"><summary>Hilfe</summary>Parallel und identisch brauchen kollineare Richtungen. Die beiden anderen Fälle entstehen gerade, wenn die Richtungen nicht kollinear sind.</details>
+      </div>
+      <button class="btn btn-check" onclick="markDone('p5')">Geschafft ✓</button>
+    </div>
+  </section>
+
+</div>
+
+<div class="nextwrap" id="nextwrap">
+  <button class="next" onclick="goNext()">Weiter zur nächsten Seite →</button>
+</div>
+
+<div class="rex" id="rex" onclick="toggleRex()">🦖<span class="bub">Made by Mathedino</span></div>
+
+<script>
+/* ============ STATE ============ */
+const state={
+  p0:{done:false},
+  p1:{done:false}, q1:{done:false,ok:false,sel:null},
+  p2:{done:false}, m1:{done:false,ok:false,sel:null},
+  p3:{done:false}, q3:{done:false,ok:false,sel:null},
+  p4:{done:false}, m4:{done:false,ok:false,sel:null},
+  p5:{done:false}, q5:{done:false,ok:false,sel:{}}
+};
+
+/* ============ TABS ============ */
+const pages=['p0','p1','p2','p3','p4','p5'];
+function switchPage(id){
+  pages.forEach(p=>{
+    document.getElementById(p).classList.toggle('active',p===id);
+    document.querySelector('.tab[data-go="'+p+'"]').classList.toggle('active',p===id);
+  });
+  updateNext();window.scrollTo({top:0,behavior:'smooth'});typeset();
+}
+document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>switchPage(t.dataset.go)));
+
+/* ============ HELPERS ============ */
+function fbGood(id,msg){const e=document.getElementById(id);e.className='fb show good';e.innerHTML='✅ '+msg;typeset();}
+function fbBad(id,msg,corr){const e=document.getElementById(id);e.className='fb show bad';e.innerHTML='❌ '+msg+(corr?'<span class="corr">'+corr+'</span>':'');typeset();}
+function showClear(id){document.getElementById(id).style.display='inline-block';}
+function hideClear(id){document.getElementById(id).style.display='none';}
+function showTipBox(id){const t=document.getElementById(id);if(t)t.style.display='block';}
+function hideTipBox(id){const t=document.getElementById(id);if(t)t.style.display='none';}
+function typeset(){if(window.MathJax&&MathJax.typesetPromise)MathJax.typesetPromise();}
+
+/* ============ AUFDECKEN ============ */
+function revealNext(wrapId,btnId){
+  const steps=[...document.querySelectorAll('#'+wrapId+' .revstep')];
+  const next=steps.find(s=>!s.classList.contains('show'));
+  if(next)next.classList.add('show');
+  const remaining=steps.some(s=>!s.classList.contains('show'));
+  const btn=document.getElementById(btnId);
+  if(!remaining){btn.disabled=true;btn.textContent='Alle Schritte sichtbar';}
+  typeset();
+}
+
+/* ============ MC SINGLE (q1, q3, m4) ============ */
+function bindSingle(wrapId,key){
+  document.querySelectorAll('#'+wrapId+' .opt').forEach((o,idx)=>{
+    o.addEventListener('click',()=>{
+      if(state[key].ok)return;
+      document.querySelectorAll('#'+wrapId+' .opt').forEach(x=>x.classList.remove('sel'));
+      o.classList.add('sel');state[key].sel=idx;
+    });
+  });
+}
+bindSingle('opts-q1','q1');
+bindSingle('opts-q3','q3');
+bindSingle('opts-m4','m4');
+function checkMC(key){
+  const wrap='opts-'+key, fb='fb-'+key, clr='clr-'+key;
+  const s=state[key];
+  if(s.sel==null){fbBad(fb,'Wähle zuerst eine Antwort.');return;}
+  const opts=[...document.querySelectorAll('#'+wrap+' .opt')];
+  const ok=opts[s.sel].dataset.ok==='1';
+  s.done=true;s.ok=ok;
+  if(ok){opts[s.sel].classList.remove('sel');opts[s.sel].classList.add('lock-ok');fbGood(fb,'Genau richtig.');hideClear(clr);}
+  else{fbBad(fb,'Das passt noch nicht – sieh dir die Hilfe an und versuch es erneut.');showClear(clr);}
+  afterCheck();
+}
+function clearMC(key){
+  const wrap='opts-'+key;
+  state[key].sel=null;state[key].done=false;state[key].ok=false;
+  document.querySelectorAll('#'+wrap+' .opt').forEach(o=>o.classList.remove('sel','lock-ok'));
+  document.getElementById('fb-'+key).className='fb';hideClear('clr-'+key);afterCheck();
+}
+
+/* ============ M1: Kontrollzeile rechnen + entscheiden ============ */
+bindSingle('opts-m1','m1');
+function checkM1(){
+  const l=document.getElementById('m1-l').value.trim().replace(',','.');
+  const r=document.getElementById('m1-r').value.trim().replace(',','.');
+  const s=state.m1;
+  if(l===''||r===''){fbBad('fb-m1','Trage beide Seiten ein.');return;}
+  if(s.sel==null){fbBad('fb-m1','Wähle auch die Schlussfolgerung.');return;}
+  const lOk=Math.abs(parseFloat(l)-7)<1e-9;   // 1+2*3=7
+  const rOk=Math.abs(parseFloat(r)-11)<1e-9;  // 5+3*2=11
+  const choiceOk=[...document.querySelectorAll('#opts-m1 .opt')][s.sel].dataset.ok==='0'; // verschieden -> windschief
+  const ok=lOk&&rOk&&choiceOk;
+  s.done=true;s.ok=ok;
+  if(ok){[...document.querySelectorAll('#opts-m1 .opt')][s.sel].classList.remove('sel');
+    [...document.querySelectorAll('#opts-m1 .opt')][s.sel].classList.add('lock-ok');
+    fbGood('fb-m1','Richtig: $7\\neq 11$, die Kontrolle scheitert – dieses Paar wäre windschief.');hideClear('clr-m1');hideTipBox('tip-m1');}
+  else{
+    let m='Noch nicht ganz.';
+    if(!lOk||!rOk)m='Rechne genau: links $1+2\\cdot 3$, rechts $5+3\\cdot 2$.';
+    else if(!choiceOk)m='Vergleiche die beiden Seiten – sind sie gleich oder verschieden?';
+    fbBad('fb-m1',m,'Links $7$, rechts $11$ → verschieden → Kontrolle scheitert → windschief.');showClear('clr-m1');showTipBox('tip-m1');
+  }
+  afterCheck();
+}
+function clearM1(){['m1-l','m1-r'].forEach(i=>document.getElementById(i).value='');
+  state.m1.sel=null;state.m1.done=false;state.m1.ok=false;
+  document.querySelectorAll('#opts-m1 .opt').forEach(o=>o.classList.remove('sel','lock-ok'));
+  document.getElementById('fb-m1').className='fb';hideClear('clr-m1');hideTipBox('tip-m1');afterCheck();}
+
+/* ============ Q5: Mehrfachauswahl ============ */
+document.querySelectorAll('#opts-q5 .opt').forEach((o,idx)=>{
+  o.addEventListener('click',()=>{
+    if(state.q5.ok)return;
+    state.q5.sel[idx]=!state.q5.sel[idx];
+    o.classList.toggle('sel',!!state.q5.sel[idx]);
+  });
+});
+function checkQ5(){
+  const opts=[...document.querySelectorAll('#opts-q5 .opt')];
+  let ok=true,any=false;
+  opts.forEach((o,i)=>{const want=o.dataset.ok==='1';const got=!!state.q5.sel[i];if(got)any=true;if(want!==got)ok=false;});
+  if(!any){fbBad('fb-q5','Wähle mindestens eine Möglichkeit.');return;}
+  state.q5.done=true;state.q5.ok=ok;
+  if(ok){opts.forEach(o=>{if(o.dataset.ok==='1')o.classList.add('lock-ok');});
+    fbGood('fb-q5','Richtig: „schneiden" und „windschief" setzen nicht-kollineare Richtungen voraus.');hideClear('clr-q5');}
+  else{fbBad('fb-q5','Noch nicht ganz.','Nicht kollinear → „schneiden sich" oder „windschief". Parallel und identisch brauchen kollineare Richtungen.');showClear('clr-q5');}
+  afterCheck();
+}
+function clearQ5(){state.q5.sel={};state.q5.done=false;state.q5.ok=false;
+  document.querySelectorAll('#opts-q5 .opt').forEach(o=>o.classList.remove('sel','lock-ok'));
+  document.getElementById('fb-q5').className='fb';hideClear('clr-q5');afterCheck();}
+
+/* ============ DONE / NAV ============ */
+function markDone(pid){state[pid].done=true;afterCheck();}
+function pageComplete(pid){
+  if(pid==='p0')return state.p0.done;
+  if(pid==='p1')return state.p1.done&&state.q1.done;
+  if(pid==='p2')return state.p2.done&&state.m1.done;
+  if(pid==='p3')return state.p3.done&&state.q3.done;
+  if(pid==='p4')return state.p4.done&&state.m4.done;
+  if(pid==='p5')return state.p5.done&&state.q5.done;
+  return false;
+}
+function updateTabsDone(){pages.forEach(p=>document.querySelector('.tab[data-go="'+p+'"]').classList.toggle('done',pageComplete(p)));}
+function allComplete(){return pages.every(p=>pageComplete(p));}
+function updateNext(){document.getElementById('nextwrap').classList.toggle('show',allComplete());}
+function afterCheck(){updateTabsDone();updateNext();}
+function goNext(){window.location.href='#';}
+
+/* ============ T-REX ============ */
+let rexT=null;
+function toggleRex(){const r=document.getElementById('rex');r.classList.add('show');clearTimeout(rexT);rexT=setTimeout(()=>r.classList.remove('show'),1800);}
+
+/* init */
+updateTabsDone();updateNext();typeset();
+</script>
+</body>
+</html>
