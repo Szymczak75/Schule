@@ -1,0 +1,1344 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vektorrechnung im Raum – EF</title>
+<script>
+  MathJax = {
+    tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+    svg: { fontCache: 'global' }
+  };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #22263a;
+    --surface3: #2a2f47;
+    --accent: #6c8fff;
+    --accent2: #a78bfa;
+    --accent3: #34d399;
+    --gold: #fbbf24;
+    --text: #e8ecf4;
+    --text-muted: #8892b0;
+    --border: #2e3550;
+    --correct: #065f46;
+    --correct-border: #34d399;
+    --wrong: #7f1d1d;
+    --wrong-border: #f87171;
+    --card-radius: 18px;
+    --shadow: 0 8px 32px rgba(0,0,0,0.4);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Nunito', sans-serif;
+    font-size: 17px;
+    min-height: 100vh;
+    padding-bottom: 120px;
+  }
+
+  /* Header */
+  .page-header {
+    background: linear-gradient(135deg, #1a1d27 0%, #0f1117 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 20px 24px 16px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .subject-tag {
+    background: var(--accent);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 20px;
+  }
+  .grade-tag {
+    background: var(--surface3);
+    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    padding: 4px 12px;
+    border-radius: 20px;
+  }
+  h1 {
+    font-size: clamp(18px, 4vw, 26px);
+    font-weight: 900;
+    color: var(--text);
+    line-height: 1.2;
+  }
+  h1 span { color: var(--accent); }
+
+  /* Tab Navigation */
+  .tab-nav {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding: 0 24px;
+    padding-bottom: 2px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .tab-nav::-webkit-scrollbar { display: none; }
+
+  .tab-btn {
+    flex-shrink: 0;
+    background: var(--surface2);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    color: var(--text-muted);
+    font-family: 'Nunito', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 8px 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+    min-height: 44px;
+  }
+  .tab-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+  .tab-btn .tab-num {
+    background: rgba(255,255,255,0.2);
+    border-radius: 8px;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+  }
+  .tab-btn.done { border-color: var(--correct-border); color: var(--correct-border); }
+  .tab-btn.done.active { background: var(--correct); border-color: var(--correct-border); color: #fff; }
+  .tab-btn .check-icon { display: none; }
+  .tab-btn.done .check-icon { display: inline; }
+  .tab-btn.done .tab-num { display: none; }
+
+  /* Main content */
+  main { padding: 24px 16px; max-width: 820px; margin: 0 auto; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--card-radius);
+    padding: 24px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+    display: none;
+  }
+  .card.active { display: block; animation: fadeIn 0.3s ease; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .card-label {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+  .card h2 {
+    font-size: clamp(17px, 3.5vw, 22px);
+    font-weight: 900;
+    margin-bottom: 16px;
+    color: var(--text);
+  }
+
+  /* Info boxes */
+  .info-box {
+    background: var(--surface2);
+    border-left: 4px solid var(--accent);
+    border-radius: 10px;
+    padding: 16px 18px;
+    margin: 16px 0;
+    line-height: 1.7;
+  }
+  .info-box.green { border-color: var(--accent3); }
+  .info-box.gold { border-color: var(--gold); }
+  .info-box.purple { border-color: var(--accent2); }
+
+  .info-box h3 {
+    font-size: 15px;
+    font-weight: 800;
+    margin-bottom: 8px;
+    color: var(--accent);
+  }
+  .info-box.green h3 { color: var(--accent3); }
+  .info-box.gold h3 { color: var(--gold); }
+  .info-box.purple h3 { color: var(--accent2); }
+
+  /* Step containers */
+  .step {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px;
+    margin: 14px 0;
+  }
+  .step-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 800;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 12px;
+  }
+
+  /* Coordinate display */
+  .coord-display {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin: 12px 0;
+  }
+  .point-card {
+    background: var(--surface3);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 18px;
+    text-align: center;
+    min-width: 100px;
+  }
+  .point-card .point-name {
+    font-size: 20px;
+    font-weight: 900;
+    color: var(--accent);
+    margin-bottom: 4px;
+  }
+  .point-card .point-coords {
+    font-size: 14px;
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .arrow-display {
+    font-size: 28px;
+    color: var(--text-muted);
+  }
+
+  /* Vector display */
+  .vec-box {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 8px 12px;
+    vertical-align: middle;
+  }
+  .vec-bracket-wrap {
+    display: flex;
+    align-items: stretch;
+    gap: 4px;
+  }
+  .vec-bracket {
+    font-size: 52px;
+    line-height: 1;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    font-weight: 300;
+  }
+  .vec-components {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 8px 0;
+    min-width: 40px;
+  }
+  .vec-comp {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    text-align: center;
+    min-width: 36px;
+  }
+  .vec-comp.highlight { color: var(--accent); }
+  .vec-label {
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--accent2);
+    margin-bottom: 4px;
+  }
+
+  /* Frac */
+  .frac {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    vertical-align: middle;
+    margin: 0 3px;
+    line-height: 1.1;
+  }
+  .frac > span:first-child {
+    border-bottom: 2px solid currentColor;
+    padding: 0 3px;
+    font-size: 0.9em;
+  }
+  .frac > span:last-child { padding: 0 3px; font-size: 0.9em; }
+
+  /* Input fields */
+  .input-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin: 10px 0;
+  }
+  .input-label {
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--text-muted);
+    min-width: 80px;
+  }
+
+  .num-input {
+    background: var(--surface3);
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 17px;
+    font-weight: 700;
+    padding: 10px 14px;
+    text-align: center;
+    width: 72px;
+    min-height: 44px;
+    transition: border-color 0.2s;
+    -webkit-appearance: none;
+  }
+  .num-input:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+  .num-input.correct { border-color: var(--correct-border); background: rgba(52,211,153,0.08); }
+  .num-input.wrong { border-color: var(--wrong-border); background: rgba(248,113,113,0.08); }
+
+  /* Check button */
+  .check-btn {
+    background: var(--accent);
+    border: none;
+    border-radius: 12px;
+    color: #fff;
+    font-family: 'Nunito', sans-serif;
+    font-size: 15px;
+    font-weight: 800;
+    padding: 12px 24px;
+    cursor: pointer;
+    min-height: 44px;
+    min-width: 44px;
+    transition: all 0.15s;
+    margin-top: 12px;
+  }
+  .check-btn:active { transform: scale(0.96); background: #4d6fff; }
+
+  /* Feedback */
+  .feedback {
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-top: 12px;
+    font-weight: 700;
+    font-size: 15px;
+    display: none;
+    line-height: 1.6;
+  }
+  .feedback.show { display: block; }
+  .feedback.correct {
+    background: rgba(6,95,70,0.4);
+    border: 2px solid var(--correct-border);
+    color: #6ee7b7;
+  }
+  .feedback.wrong {
+    background: rgba(127,29,29,0.4);
+    border: 2px solid var(--wrong-border);
+    color: #fca5a5;
+  }
+
+  /* Tipp / Aufklapp */
+  .tipp-toggle {
+    background: none;
+    border: 1.5px solid var(--accent2);
+    border-radius: 10px;
+    color: var(--accent2);
+    font-family: 'Nunito', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    padding: 8px 16px;
+    cursor: pointer;
+    min-height: 44px;
+    margin-top: 10px;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .tipp-toggle:active { background: rgba(167,139,250,0.1); }
+  .tipp-content {
+    background: rgba(167,139,250,0.08);
+    border: 1px solid rgba(167,139,250,0.3);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-top: 10px;
+    display: none;
+    line-height: 1.7;
+    font-size: 15px;
+    color: #c4b5fd;
+  }
+  .tipp-content.open { display: block; }
+
+  /* MC Options */
+  .mc-options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 14px;
+  }
+  .mc-btn {
+    background: var(--surface2);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    color: var(--text);
+    font-family: 'Nunito', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    padding: 14px 18px;
+    cursor: pointer;
+    text-align: left;
+    min-height: 44px;
+    transition: all 0.15s;
+    line-height: 1.5;
+  }
+  .mc-btn:active { transform: scale(0.98); }
+  .mc-btn.selected { border-color: var(--accent); background: rgba(108,143,255,0.1); }
+  .mc-btn.correct-ans { border-color: var(--correct-border); background: rgba(52,211,153,0.12); color: #6ee7b7; }
+  .mc-btn.wrong-ans { border-color: var(--wrong-border); background: rgba(248,113,113,0.12); color: #fca5a5; }
+  .mc-btn:disabled { cursor: default; }
+
+  /* Progress bar */
+  .progress-bar-wrap {
+    background: var(--surface2);
+    border-radius: 8px;
+    height: 6px;
+    overflow: hidden;
+    margin: 12px 0;
+  }
+  .progress-bar-fill {
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    height: 100%;
+    border-radius: 8px;
+    transition: width 0.4s ease;
+  }
+
+  /* Formula display */
+  .formula-block {
+    background: var(--surface3);
+    border-radius: 12px;
+    padding: 18px;
+    margin: 14px 0;
+    text-align: center;
+    font-size: 17px;
+    line-height: 2;
+  }
+
+  /* Divider */
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 20px 0;
+  }
+
+  p { line-height: 1.75; margin-bottom: 10px; }
+
+  /* Weiter button */
+  #weiter-btn {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: linear-gradient(135deg, #6c8fff, #a78bfa);
+    border: none;
+    color: #fff;
+    font-family: 'Nunito', sans-serif;
+    font-size: 18px;
+    font-weight: 900;
+    padding: 18px;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 64px;
+    letter-spacing: 0.5px;
+    box-shadow: 0 -4px 24px rgba(108,143,255,0.3);
+    z-index: 200;
+    transition: all 0.2s;
+  }
+  #weiter-btn:active { opacity: 0.9; transform: scale(0.99); }
+  #weiter-btn.visible { display: flex; animation: slideUp 0.4s ease; }
+  @keyframes slideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+
+  /* Dino */
+  #dino {
+    position: fixed;
+    bottom: 72px;
+    right: 14px;
+    font-size: 22px;
+    cursor: pointer;
+    z-index: 300;
+    user-select: none;
+    transition: transform 0.2s;
+  }
+  #dino:active { transform: scale(1.2); }
+  #dino-tooltip {
+    position: fixed;
+    bottom: 100px;
+    right: 14px;
+    background: var(--surface3);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-muted);
+    white-space: nowrap;
+    display: none;
+    z-index: 301;
+  }
+  #dino-tooltip.show { display: block; }
+
+  /* Completion banner */
+  .complete-banner {
+    background: linear-gradient(135deg, rgba(52,211,153,0.15), rgba(108,143,255,0.15));
+    border: 2px solid var(--correct-border);
+    border-radius: 16px;
+    padding: 20px;
+    text-align: center;
+    margin-top: 20px;
+  }
+  .complete-banner h3 {
+    font-size: 20px;
+    font-weight: 900;
+    color: var(--accent3);
+    margin-bottom: 8px;
+  }
+
+  /* Tooltip for Fachbegriffe */
+  .term {
+    border-bottom: 2px dashed var(--accent2);
+    cursor: help;
+    position: relative;
+  }
+  .term-tooltip {
+    display: none;
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--surface3);
+    border: 1px solid var(--accent2);
+    border-radius: 10px;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+    z-index: 500;
+    max-width: 260px;
+    white-space: normal;
+    text-align: center;
+    pointer-events: none;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+  }
+  .term.active .term-tooltip { display: block; }
+
+  /* Responsive */
+  @media (max-width: 480px) {
+    .coord-display { flex-direction: column; align-items: flex-start; }
+    .arrow-display { transform: rotate(90deg); }
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="header-top">
+    <span class="subject-tag">Mathematik</span>
+    <span class="grade-tag">EF · Analytische Geometrie</span>
+  </div>
+  <h1>Vektoren im <span>Raum</span></h1>
+  <div style="margin-top:12px; margin-bottom:10px;">
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="main-progress" style="width:0%"></div>
+    </div>
+    <p style="font-size:12px; color:var(--text-muted); margin:0;" id="progress-text">Abschnitt 1 von 5</p>
+  </div>
+  <div class="tab-nav" id="tab-nav">
+    <button class="tab-btn active" onclick="showTab(0)" id="tab0"><span class="tab-num">1</span><span class="check-icon">✓</span> Punkte & Vektoren</button>
+    <button class="tab-btn" onclick="showTab(1)" id="tab1"><span class="tab-num">2</span><span class="check-icon">✓</span> Länge</button>
+    <button class="tab-btn" onclick="showTab(2)" id="tab2"><span class="tab-num">3</span><span class="check-icon">✓</span> Addition</button>
+    <button class="tab-btn" onclick="showTab(3)" id="tab3"><span class="tab-num">4</span><span class="check-icon">✓</span> Skalare Mult.</button>
+    <button class="tab-btn" onclick="showTab(4)" id="tab4"><span class="tab-num">5</span><span class="check-icon">✓</span> Kollinearität</button>
+  </div>
+</div>
+
+<main>
+
+<!-- ========== KARTE 1: Punkte und Verbindungsvektoren ========== -->
+<div class="card active" id="card-0">
+  <div class="card-label">Abschnitt 1 · Grundlagen</div>
+  <h2>Von Punkten zu Vektoren</h2>
+
+  <p>Im dreidimensionalen Raum beschreiben wir Punkte mit drei Koordinaten: \(x_1\), \(x_2\) und \(x_3\).</p>
+
+  <div class="info-box">
+    <h3>🗺️ Koordinatenschreibweise</h3>
+    <p>Ein Punkt \(P\) mit den Koordinaten \(4\), \(2\) und \(7\) wird geschrieben als:</p>
+    <div class="formula-block">\(P(4\,|\,2\,|\,7)\)</div>
+    <p>Wir lesen: „Punkt P mit \(x_1\)-Koordinate 4, \(x_2\)-Koordinate 2, \(x_3\)-Koordinate 7."</p>
+  </div>
+
+  <hr class="divider">
+  <div class="step">
+    <div class="step-label">📐 Verbindungsvektor</div>
+    <p>Der <span class="term" onclick="this.classList.toggle('active')">Verbindungsvektor<span class="term-tooltip">Ein Vektor, der von einem Punkt zu einem anderen zeigt. Er gibt Richtung und Betrag der Verschiebung an.</span></span>
+    von Punkt \(A\) nach Punkt \(B\) wird geschrieben als \(\overrightarrow{AB}\).</p>
+
+    <div class="info-box green">
+      <h3>📌 Formel: Verbindungsvektor</h3>
+      <p>Für \(A(a_1\,|\,a_2\,|\,a_3)\) und \(B(b_1\,|\,b_2\,|\,b_3)\) gilt:</p>
+      <div class="formula-block">
+        \(\overrightarrow{AB} = \begin{pmatrix} b_1 - a_1 \\ b_2 - a_2 \\ b_3 - a_3 \end{pmatrix}\)
+      </div>
+      <p style="font-size:14px; color:var(--text-muted);">Merke: Immer <strong>Ziel minus Start</strong> – Koordinaten des Endpunkts minus Koordinaten des Anfangspunkts.</p>
+    </div>
+  </div>
+
+  <hr class="divider">
+  <div class="step">
+    <div class="step-label">✏️ Schritt 1 – Nachvollziehen</div>
+    <p>Gegeben sind die Punkte:</p>
+    <div class="coord-display">
+      <div class="point-card">
+        <div class="point-name">A</div>
+        <div class="point-coords">(1 | 3 | 2)</div>
+      </div>
+      <div class="arrow-display">→</div>
+      <div class="point-card">
+        <div class="point-name">B</div>
+        <div class="point-coords">(5 | 1 | 6)</div>
+      </div>
+    </div>
+    <p style="margin-top:12px;">Berechne Schritt für Schritt:</p>
+    <div class="formula-block" style="text-align:left; font-size:15px; line-height:2.2;">
+      \(\overrightarrow{AB}\) = Ziel − Start:<br>
+      \(x_1:\; 5 - 1 = \mathbf{4}\)<br>
+      \(x_2:\; 1 - 3 = \mathbf{-2}\)<br>
+      \(x_3:\; 6 - 2 = \mathbf{4}\)
+    </div>
+    <div class="info-box green">
+      <h3>✅ Ergebnis</h3>
+      <p>Also: \(\overrightarrow{AB} = \begin{pmatrix} 4 \\ -2 \\ 4 \end{pmatrix}\)</p>
+    </div>
+  </div>
+
+  <hr class="divider">
+  <div class="step">
+    <div class="step-label">🎯 Schritt 2 – Deine Aufgabe</div>
+    <p>Gegeben sind:</p>
+    <div class="coord-display">
+      <div class="point-card">
+        <div class="point-name">P</div>
+        <div class="point-coords">(3 | −1 | 4)</div>
+      </div>
+      <div class="arrow-display">→</div>
+      <div class="point-card">
+        <div class="point-name">Q</div>
+        <div class="point-coords">(7 | 2 | −1)</div>
+      </div>
+    </div>
+    <p style="margin-top:12px;">Berechne \(\overrightarrow{PQ}\). Trage die drei Komponenten ein:</p>
+
+    <div style="display:flex; flex-direction:column; gap:8px; margin:14px 0;">
+      <div class="input-row">
+        <span class="input-label">\(x_1\)-Komp.:</span>
+        <input class="num-input" type="number" id="v1x" inputmode="numeric" placeholder="?">
+      </div>
+      <div class="input-row">
+        <span class="input-label">\(x_2\)-Komp.:</span>
+        <input class="num-input" type="number" id="v1y" inputmode="numeric" placeholder="?">
+      </div>
+      <div class="input-row">
+        <span class="input-label">\(x_3\)-Komp.:</span>
+        <input class="num-input" type="number" id="v1z" inputmode="numeric" placeholder="?">
+      </div>
+    </div>
+
+    <button class="tipp-toggle" onclick="toggleTipp('tipp1')">💡 Tipp anzeigen</button>
+    <div class="tipp-content" id="tipp1">
+      Denk an die Formel: <strong>Ziel − Start</strong>.<br>
+      Ziel ist Q, Start ist P.<br>
+      Für \(x_1\): \(7 - 3 = ?\)
+    </div>
+
+    <br>
+    <button class="check-btn" onclick="checkCard1()">Überprüfen ✓</button>
+    <div class="feedback" id="fb1"></div>
+  </div>
+
+  <hr class="divider">
+  <div class="step">
+    <div class="step-label">🎯 Schritt 3 – Gegenvektor</div>
+    <p>Was passiert, wenn man den <span class="term" onclick="this.classList.toggle('active')">Gegenvektor<span class="term-tooltip">Der Gegenvektor zeigt in die entgegengesetzte Richtung. Er hat dieselbe Länge, aber alle Vorzeichen sind umgekehrt.</span></span> bildet?</p>
+    <p>Gegeben: \(\overrightarrow{AB} = \begin{pmatrix} 4 \\ -2 \\ 4 \end{pmatrix}\). Der Gegenvektor ist \(\overrightarrow{BA}\).</p>
+    <p>Was gilt: Ist \(\overrightarrow{BA}\) dasselbe wie \(\overrightarrow{AB}\)? Oder das Negative?</p>
+
+    <div class="mc-options" id="mc1">
+      <button class="mc-btn" onclick="checkMC1(this, false)">\(\overrightarrow{BA}\) hat dieselben Komponenten wie \(\overrightarrow{AB}\)</button>
+      <button class="mc-btn" onclick="checkMC1(this, true)">\(\overrightarrow{BA} = -\overrightarrow{AB}\) – alle Vorzeichen kehren sich um</button>
+      <button class="mc-btn" onclick="checkMC1(this, false)">Man kann \(\overrightarrow{BA}\) aus \(\overrightarrow{AB}\) nicht berechnen</button>
+    </div>
+    <div class="feedback" id="fb-mc1"></div>
+  </div>
+</div>
+
+<!-- ========== KARTE 2: Länge von Vektoren ========== -->
+<div class="card" id="card-1">
+  <div class="card-label">Abschnitt 2 · Betrag</div>
+  <h2>Länge (Betrag) eines Vektors</h2>
+
+  <p>Der <span class="term" onclick="this.classList.toggle('active')">Betrag<span class="term-tooltip">Der Betrag eines Vektors gibt seine Länge an – eine nicht-negative Zahl. Geometrisch ist es die Länge des Pfeils.</span></span> eines Vektors ist seine geometrische Länge. Er wird mit Betragsstrichen geschrieben: \(|\vec{v}|\).</p>
+
+  <div class="info-box green">
+    <h3>📌 Formel: Betrag im 3D-Raum</h3>
+    <p>Für \(\vec{v} = \begin{pmatrix} v_1 \\ v_2 \\ v_3 \end{pmatrix}\) gilt:</p>
+    <div class="formula-block">\(|\vec{v}| = \sqrt{v_1^2 + v_2^2 + v_3^2}\)</div>
+    <p style="font-size:14px; color:var(--text-muted);">Das ist die dreidimensionale Erweiterung des Satzes des Pythagoras.</p>
+  </div>
+
+  <hr class="divider">
+  <div class="step">
+    <div class="step-label">✏️ Schritt 1 – Durchgerechnetes Beispiel</div>
+    <p>Gegeben: \(\vec{u} = \begin{pmatrix} 2 \\ -3 \\ 6 \end{pmatrix}\)</p>
+    <div class="formula-block" style="text-align:left; line-height:2.5; font-size:15px;">
+      \(|\vec{u}| = \sqrt{2^2 + (-3)^2 + 6^2}\)<br>
+      \(\phantom{|\vec{u}|} = \sqrt{4 + 9 + 36}\)<br>
+      \(\phantom{|\vec{u}|} = \sqrt{49}\)<br>
+      \(\phantom{|\vec{u}|} = 7\)
+    </div>
+    <div class="info-box">
+      <h3>💡 Hinweis: Negative Zahlen</h3>
+      Beim Quadrieren verschwinden die Vorzeichen: \((-3)^2 = 9\) ✓
+    </div>
+  </div>
+
+  <hr class="divider">
+  <div class="step">
+    <div class="step-label">🎯 Schritt 2 – Deine Aufgabe</div>
+    <p>Berechne den Betrag von \(\vec{w} = \begin{pmatrix} 1 \\ 4 \\ 8 \end{pmatrix}\).</p>
+    <p style="color:var(--text-muted); font-size:14px;">Tipp: Erst die Quadrate ausrechnen, dann addieren, dann Wurzel ziehen.</p>
+
+    <div class="input-row" style="margin-top:14px;">
+      <span class="input-label">\(|\vec{w}| =\)</span>
+      <input class="num-input" type="number" id="len1" inputmode="numeric" placeholder="?">
+    </div>
+
+    <button class="tipp-toggle" onclick="toggleTipp('tipp2')" style="margin-top:10px;">💡 Tipp anzeigen</button>
+    <div class="tipp-content" id="tipp2">
+      Rechne: \(1^2 + 4^2 + 8^2\)<br>
+      = \(1 + 16 + 64\) = ?<br>
+      Dann: \(\sqrt{?}\) – was kommt heraus?
+    </div>
+
+    <br>
+    <button class="check-btn" onclick="checkLen1()">Überprüfen ✓</button>
+    <div class="feedback" id="fb-len1"></div>
+  </div>
+
+  <hr class="divider">
+  <div class="step">
+    <div class="step-label">🎯 Schritt 3 – Zwischenfrage</div>
+    <p>Was beschreibt der Betrag \(|\overrightarrow{AB}|\) geometrisch?</p>
+
+    <div class="mc-options" id="mc2">
+      <button class="mc-btn" onclick="checkMC2(this,false)">Die Richtung der Verschiebung von A nach B</button>
+      <button class="mc-btn" onclick="checkMC2(this,true)">Den Abstand (die Entfernung) zwischen den Punkten A und B</button>
+      <button class="mc-btn" onclick="checkMC2(this,false)">Den Mittelpunkt der Strecke AB</button>
+      <button class="mc-btn" onclick="checkMC2(this,false)">Die Anzahl der Koordinatenachsen, die überquert werden</button>
+    </div>
+    <div class="feedback" id="fb-mc2"></div>
+  </div>
+</div>
+
+<!-- ========== KARTE 3: Vektoraddition ========== -->
+<div class="card" id="card-2">
+  <div class="card-label">Abschnitt 3 · Rechnen mit Vektoren</div>
+  <h2>Vektoraddition</h2>
+
+  <p>Vektoren lassen sich addieren und subtrahieren, indem man die Komponenten einzeln verrechnet.</p>
+
+  <div class="info-box green">
+    <h3>📌 Formel: Addition und Subtraktion</h3>
+    <div class="formula-block" style="font-size:15px; line-height:2.5;">
+      \(\begin{pmatrix} a_1 \\ a_2 \\ a_3 \end{pmatrix} + \begin{pmatrix} b_1 \\ b_2 \\ b_3 \end{pmatrix} = \begin{pmatrix} a_1 + b_1 \\ a_2 + b_2 \\ a_3 + b_3 \end{pmatrix}\)
+    </div>
+  </div>
+
+  <div class="info-box">
+    <h3>🗺️ Geometrische Bedeutung</h3>
+    <p>Die Addition zweier Vektoren entspricht dem Hintereinanderausführen zweier Verschiebungen. Man legt den zweiten Pfeil an das Ende des ersten – der Summenvektor zeigt vom Start zum Endpunkt.</p>
+  </div>
+
+  <hr class="divider">
+  <div class="step">
+    <div class="step-label">✏️ Schritt 1 – Durchgerechnetes Beispiel</div>
+    <p>Gegeben: \(\vec{a} = \begin{pmatrix} 3 \\ -1 \\ 4 \end{pmatrix}\) und \(\vec{b} = \begin{pmatrix} 2 \\ 5 \\ -2 \end{pmatrix}\)</p>
+    <div class="formula-block" style="text-align:left; line-height:2.2; font-size:15px;">
+      \(\vec{a} + \vec{b} = \begin{pmatrix} 3+2 \\ -1+5 \\ 4+(-2) \end{pmatrix} = \begin{pmatrix} 5 \\ 4 \\ 2 \end{pmatrix}\)
+    </div>
+  </div>
+
+  <hr class="divider">
+  <div class="step">
+    <div class="step-label">🎯 Schritt 2 – Addition üben</div>
+    <p>Berechne: \(\vec{p} + \vec{q}\) für</p>
+    <div class="formula-block" style="font-size:15px;">
+      \(\vec{p} = \begin{pmatrix} -2 \\ 4 \\ 1 \end{pmatrix}, \quad \vec{q} = \begin{pmatrix} 5 \\ -3 \\ 6 \end{pmatrix}\)
+    </div>
+
+    <div style="display:flex; flex-direction:column; gap:8px; margin:14px 0;">
+      <div class="input-row">
+        <span class="input-label">\(x_1\)-Komp.:</span>
+        <input class="num-input" type="number" id="add1x" inputmode="numeric" placeholder="?">
+      </div>
+      <div class="input-row">
+        <span class="input-label">\(x_2\)-Komp.:</span>
+        <input class="num-input" type="number" id="add1y" inputmode="numeric" placeholder="?">
+      </div>
+      <div class="input-row">
+        <span class="input-label">\(x_3\)-Komp.:</span>
+        <input class="num-input" type="number" id="add1z" inputmode="numeric" placeholder="?">
+      </div>
+    </div>
+    <button class="check-btn" onclick="checkAdd1()">Überprüfen ✓</button>
+    <div class="feedback" id="fb-add1"></div>
+  </div>
+
+  <hr class="divider">
+  <div class="step">
+    <div class="step-label">🎯 Schritt 3 – Subtraktion</div>
+    <p>Berechne: \(\vec{s} - \vec{t}\) für</p>
+    <div class="formula-block" style="font-size:15px;">
+      \(\vec{s} = \begin{pmatrix} 6 \\ -2 \\ 8 \end{pmatrix}, \quad \vec{t} = \begin{pmatrix} 3 \\ 4 \\ -1 \end{pmatrix}\)
+    </div>
+
+    <div style="display:flex; flex-direction:column; gap:8px; margin:14px 0;">
+      <div class="input-row">
+        <span class="input-label">\(x_1\)-Komp.:</span>
+        <input class="num-input" type="number" id="sub1x" inputmode="numeric" placeholder="?">
+      </div>
+      <div class="input-row">
+        <span class="input-label">\(x_2\)-Komp.:</span>
+        <input class="num-input" type="number" id="sub1y" inputmode="numeric" placeholder="?">
+      </div>
+      <div class="input-row">
+        <span class="input-label">\(x_3\)-Komp.:</span>
+        <input class="num-input" type="number" id="sub1z" inputmode="numeric" placeholder="?">
+      </div>
+    </div>
+    <button class="tipp-toggle" onclick="toggleTipp('tipp3')">💡 Tipp anzeigen</button>
+    <div class="tipp-content" id="tipp3">
+      Subtraktion: Komponenten des zweiten Vektors von den Komponenten des ersten abziehen.<br>
+      \(x_1\): \(6 - 3 = ?\)
+    </div>
+    <br>
+    <button class="check-btn" onclick="checkSub1()">Überprüfen ✓</button>
+    <div class="feedback" id="fb-sub1"></div>
+  </div>
+</div>
+
+<!-- ========== KARTE 4: Skalare Multiplikation ========== -->
+<div class="card" id="card-3">
+  <div class="card-label">Abschnitt 4 · Rechnen mit Vektoren</div>
+  <h2>Skalare Multiplikation</h2>
+
+  <p>Ein Vektor kann mit einer Zahl (einem <span class="term" onclick="this.classList.toggle('active')">Skalar<span class="term-tooltip">Ein Skalar ist eine einfache Zahl – im Gegensatz zu einem Vektor hat er keine Richtung.</span></span>) multipliziert werden.</p>
+
+  <div class="info-box green">
+    <h3>📌 Formel: Skalare Multiplikation</h3>
+    <div class="formula-block" style="font-size:15px; line-height:2.5;">
+      \(r \cdot \begin{pmatrix} v_1 \\ v_2 \\ v_3 \end{pmatrix} = \begin{pmatrix} r \cdot v_1 \\ r \cdot v_2 \\ r \cdot v_3 \end{pmatrix}\)
+    </div>
+    <p style="font-size:14px; color:var(--text-muted);">Jede Komponente wird einzeln mit dem Skalar multipliziert.</p>
+  </div>
+
+  <div class="info-box">
+    <h3>🗺️ Was passiert geometrisch?</h3>
+    <p><strong>r &gt; 1:</strong> Vektor wird gestreckt, Richtung bleibt gleich.</p>
+    <p><strong>0 &lt; r &lt; 1:</strong> Vektor wird gestaucht.</p>
+    <p><strong>r &lt; 0:</strong> Richtung kehrt sich um (Vektor wird gespiegelt).</p>
+    <p><strong>r = −1:</strong> Gegenvektor – gleiche Länge, entgegengesetzte Richtung.</p>
+  </div>
+
+  <hr class="divider">
+  <div class="step">
+    <div class="step-label">✏️ Schritt 1 – Beispiel</div>
+    <div class="formula-block" style="text-align:left; line-height:2.2; font-size:15px;">
+      \(3 \cdot \begin{pmatrix} 2 \\ -1 \\ 4 \end{pmatrix} = \begin{pmatrix} 3 \cdot 2 \\ 3 \cdot (-1) \\ 3 \cdot 4 \end{pmatrix} = \begin{pmatrix} 6 \\ -3 \\ 12 \end{pmatrix}\)
+    </div>
+  </div>
+
+  <hr class="divider">
+  <div class="step">
+    <div class="step-label">🎯 Schritt 2 – Deine Aufgabe</div>
+    <p>Berechne: \(-2 \cdot \vec{v}\) für \(\vec{v} = \begin{pmatrix} 3 \\ -4 \\ 1 \end{pmatrix}\)</p>
+
+    <div style="display:flex; flex-direction:column; gap:8px; margin:14px 0;">
+      <div class="input-row">
+        <span class="input-label">\(x_1\)-Komp.:</span>
+        <input class="num-input" type="number" id="sk1x" inputmode="numeric" placeholder="?">
+      </div>
+      <div class="input-row">
+        <span class="input-label">\(x_2\)-Komp.:</span>
+        <input class="num-input" type="number" id="sk1y" inputmode="numeric" placeholder="?">
+      </div>
+      <div class="input-row">
+        <span class="input-label">\(x_3\)-Komp.:</span>
+        <input class="num-input" type="number" id="sk1z" inputmode="numeric" placeholder="?">
+      </div>
+    </div>
+    <button class="tipp-toggle" onclick="toggleTipp('tipp4')">💡 Tipp anzeigen</button>
+    <div class="tipp-content" id="tipp4">
+      Multipliziere jede Komponente mit \(-2\).<br>
+      \(x_1\): \(-2 \cdot 3 = ?\)<br>
+      Denk an das Vorzeichen!
+    </div>
+    <br>
+    <button class="check-btn" onclick="checkSk1()">Überprüfen ✓</button>
+    <div class="feedback" id="fb-sk1"></div>
+  </div>
+
+  <hr class="divider">
+  <div class="step">
+    <div class="step-label">🎯 Schritt 3 – Kombiniert</div>
+    <p>Berechne: \(2 \cdot \vec{a} + 3 \cdot \vec{b}\) für</p>
+    <div class="formula-block" style="font-size:15px;">
+      \(\vec{a} = \begin{pmatrix} 1 \\ 2 \\ -1 \end{pmatrix}, \quad \vec{b} = \begin{pmatrix} -1 \\ 1 \\ 3 \end{pmatrix}\)
+    </div>
+
+    <div style="display:flex; flex-direction:column; gap:8px; margin:14px 0;">
+      <div class="input-row">
+        <span class="input-label">\(x_1\)-Komp.:</span>
+        <input class="num-input" type="number" id="sk2x" inputmode="numeric" placeholder="?">
+      </div>
+      <div class="input-row">
+        <span class="input-label">\(x_2\)-Komp.:</span>
+        <input class="num-input" type="number" id="sk2y" inputmode="numeric" placeholder="?">
+      </div>
+      <div class="input-row">
+        <span class="input-label">\(x_3\)-Komp.:</span>
+        <input class="num-input" type="number" id="sk2z" inputmode="numeric" placeholder="?">
+      </div>
+    </div>
+    <button class="tipp-toggle" onclick="toggleTipp('tipp5')">💡 Tipp anzeigen</button>
+    <div class="tipp-content" id="tipp5">
+      Erst skalieren, dann addieren:<br>
+      \(2 \cdot \vec{a} = \begin{pmatrix} 2 \\ 4 \\ -2 \end{pmatrix}\), \quad \(3 \cdot \vec{b} = \begin{pmatrix} -3 \\ 3 \\ 9 \end{pmatrix}\)<br>
+      Jetzt addieren ...
+    </div>
+    <br>
+    <button class="check-btn" onclick="checkSk2()">Überprüfen ✓</button>
+    <div class="feedback" id="fb-sk2"></div>
+  </div>
+</div>
+
+<!-- ========== KARTE 5: Kollinearität ========== -->
+<div class="card" id="card-4">
+  <div class="card-label">Abschnitt 5 · Lagebeziehungen</div>
+  <h2>Kollinearität von Vektoren</h2>
+
+  <p>Zwei Vektoren heißen <span class="term" onclick="this.classList.toggle('active')">kollinear<span class="term-tooltip">Kollinear = in dieselbe oder entgegengesetzte Richtung zeigend. Einer ist ein Vielfaches des anderen.</span></span>, wenn sie dieselbe oder die entgegengesetzte Richtung haben – also wenn einer ein Vielfaches des anderen ist.</p>
+
+  <div class="info-box green">
+    <h3>📌 Bedingung: Kollinearität</h3>
+    <p>\(\vec{a}\) und \(\vec{b}\) sind kollinear genau dann, wenn es eine Zahl \(r\) gibt mit:</p>
+    <div class="formula-block">\(\vec{a} = r \cdot \vec{b}\)</div>
+    <p style="font-size:14px; color:var(--text-muted);">Das heißt: Jede Komponente von \(\vec{a}\) ist das \(r\)-fache der entsprechenden Komponente von \(\vec{b}\).</p>
+  </div>
+
+  <div class="info-box gold">
+    <h3>🔍 Vorgehen – Schritt für Schritt</h3>
+    <p>1. Teile eine Komponente von \(\vec{a}\) durch die entsprechende Komponente von \(\vec{b}\), um einen Kandidaten für \(r\) zu berechnen.</p>
+    <p>2. Prüfe, ob \(r\) für <em>alle drei</em> Komponenten (\(x_1, x_2, x_3\)) gleich ist.</p>
+    <p>3. Wenn ja: kollinear. Wenn nein: nicht kollinear.</p>
+    <p style="font-size:13px; color:var(--text-muted); margin-top:6px;">⚠️ Vorsicht bei Komponente = 0: Wenn eine Komponente von \(\vec{b}\) null ist, muss auch die entsprechende Komponente von \(\vec{a}\) null sein!</p>
+  </div>
+
+  <hr class="divider">
+  <div class="step">
+    <div class="step-label">✏️ Schritt 1 – Durchgerechnetes Beispiel</div>
+    <p>Sind \(\vec{a} = \begin{pmatrix} 2 \\ -4 \\ 6 \end{pmatrix}\) und \(\vec{b} = \begin{pmatrix} 1 \\ -2 \\ 3 \end{pmatrix}\) kollinear?</p>
+
+    <div class="formula-block" style="text-align:left; line-height:2.5; font-size:15px;">
+      Kandidat: \(r = \dfrac{2}{1} = 2\)<br>
+      Probe \(x_2\): \(r = \dfrac{-4}{-2} = 2\) ✓<br>
+      Probe \(x_3\): \(r = \dfrac{6}{3} = 2\) ✓
+    </div>
+    <div class="info-box green">
+      <h3>✅ Ergebnis</h3>
+      Da \(r = 2\) für alle Komponenten gilt: \(\vec{a} = 2 \cdot \vec{b}\) → die Vektoren sind <strong>kollinear</strong>.
+    </div>
+  </div>
+
+  <hr class="divider">
+  <div class="step">
+    <div class="step-label">🎯 Schritt 2 – Entscheide selbst</div>
+    <p>Sind \(\vec{u} = \begin{pmatrix} 3 \\ 6 \\ -9 \end{pmatrix}\) und \(\vec{v} = \begin{pmatrix} -1 \\ -2 \\ 3 \end{pmatrix}\) kollinear?</p>
+
+    <div class="mc-options" id="mc3">
+      <button class="mc-btn" onclick="checkMC3(this, true)">Ja, sie sind kollinear – mit dem Faktor \(r = -3\)</button>
+      <button class="mc-btn" onclick="checkMC3(this, false)">Nein, die Faktoren sind nicht gleich</button>
+      <button class="mc-btn" onclick="checkMC3(this, false)">Ja, aber nur weil beide negative Komponenten haben</button>
+    </div>
+    <div class="feedback" id="fb-mc3"></div>
+  </div>
+
+  <hr class="divider">
+  <div class="step">
+    <div class="step-label">🎯 Schritt 3 – weiteres Beispiel</div>
+    <p>Sind \(\vec{c} = \begin{pmatrix} 4 \\ 2 \\ 6 \end{pmatrix}\) und \(\vec{d} = \begin{pmatrix} 2 \\ 1 \\ 4 \end{pmatrix}\) kollinear?</p>
+    <p>Berechne selbst den Faktor für jede Komponente und entscheide dann:</p>
+
+    <div class="mc-options" id="mc4">
+      <button class="mc-btn" onclick="checkMC4(this, false)">Ja, sie sind kollinear</button>
+      <button class="mc-btn" onclick="checkMC4(this, true)">Nein, sie sind nicht kollinear</button>
+    </div>
+    <div class="feedback" id="fb-mc4"></div>
+  </div>
+
+  <div id="abschluss" style="display:none;">
+    <div class="complete-banner">
+      <h3>🎉 Alle Abschnitte abgeschlossen!</h3>
+      <p style="color:var(--text-muted); margin-top:8px;">Du hast alle fünf Themen der Vektorrechnung im Raum erarbeitet. Gut gemacht!</p>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<!-- Weiter Button -->
+<button id="weiter-btn" href="#">
+  Weiter →
+</button>
+
+<!-- Dino -->
+<div id="dino" onclick="toggleDino()" onmouseover="showDino()" onmouseout="hideDino()">🦖</div>
+<div id="dino-tooltip">Made by Mathedino</div>
+
+<script>
+  // ==================== State ====================
+  const tabDone = [false, false, false, false, false];
+  // Per-card completion tracking
+  // Card 0: need checkCard1 (v1 input) + mc1
+  // Card 1: need len1 + mc2
+  // Card 2: need add1 + sub1
+  // Card 3: need sk1 + sk2
+  // Card 4: need mc3 + mc4
+  const cardProgress = [
+    { done: [false, false] }, // card 0: v1 input, mc1
+    { done: [false, false] }, // card 1: len1, mc2
+    { done: [false, false] }, // card 2: add1, sub1
+    { done: [false, false] }, // card 3: sk1, sk2
+    { done: [false, false] }, // card 4: mc3, mc4
+  ];
+
+  let currentTab = 0;
+
+  function showTab(n) {
+    document.querySelectorAll('.card').forEach((c,i) => c.classList.toggle('active', i===n));
+    document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', i===n));
+    currentTab = n;
+    updateProgress();
+    MathJax.typesetPromise && MathJax.typesetPromise();
+  }
+
+  function updateProgress() {
+    const done = tabDone.filter(Boolean).length;
+    const pct = Math.round((done / 5) * 100);
+    document.getElementById('main-progress').style.width = pct + '%';
+    document.getElementById('progress-text').textContent = `Abschnitt ${currentTab+1} von 5 · ${done} von 5 abgeschlossen`;
+    // Show weiter if all done
+    const wb = document.getElementById('weiter-btn');
+    if (done === 5) {
+      wb.classList.add('visible');
+      document.getElementById('abschluss').style.display = 'block';
+    }
+  }
+
+  function markCardProgress(cardIdx, taskIdx) {
+    cardProgress[cardIdx].done[taskIdx] = true;
+    if (cardProgress[cardIdx].done.every(Boolean)) {
+      tabDone[cardIdx] = true;
+      document.getElementById('tab'+cardIdx).classList.add('done');
+    }
+    updateProgress();
+  }
+
+  // ==================== Tipps ====================
+  function toggleTipp(id) {
+    const el = document.getElementById(id);
+    el.classList.toggle('open');
+  }
+
+  // ==================== Card 1 ====================
+  function checkCard1() {
+    const x = parseInt(document.getElementById('v1x').value);
+    const y = parseInt(document.getElementById('v1y').value);
+    const z = parseInt(document.getElementById('v1z').value);
+    const fb = document.getElementById('fb1');
+
+    const correctX = 4, correctY = 3, correctZ = -5;
+    const allCorrect = x === correctX && y === correctY && z === correctZ;
+
+    setInputState('v1x', x === correctX);
+    setInputState('v1y', y === correctY);
+    setInputState('v1z', z === correctZ);
+
+    fb.className = 'feedback show ' + (allCorrect ? 'correct' : 'wrong');
+    if (allCorrect) {
+      fb.innerHTML = '✅ Richtig! \\(\\overrightarrow{PQ} = \\begin{pmatrix} 4 \\\\ 3 \\\\ -5 \\end{pmatrix}\\) – Ziel Q minus Start P: \\((7-3, 2-(-1), -1-4)\\)';
+      markCardProgress(0, 0);
+    } else {
+      let hints = [];
+      if (x !== correctX) hints.push('\\(x_1: 7 - 3 = 4\\)');
+      if (y !== correctY) hints.push('\\(x_2: 2 - (-1) = 3\\)');
+      if (z !== correctZ) hints.push('\\(x_3: -1 - 4 = -5\\)');
+      fb.innerHTML = '❌ Noch nicht ganz. Korrekt: ' + hints.join(', ');
+    }
+    MathJax.typesetPromise && MathJax.typesetPromise([fb]);
+  }
+
+  function checkMC1(btn, correct) {
+    const parent = document.getElementById('mc1');
+    const fb = document.getElementById('fb-mc1');
+    disableMC(parent);
+    btn.classList.add(correct ? 'correct-ans' : 'wrong-ans');
+    fb.className = 'feedback show ' + (correct ? 'correct' : 'wrong');
+    if (correct) {
+      fb.innerHTML = '✅ Genau! Der Gegenvektor \\(\\overrightarrow{BA}\\) hat alle Vorzeichen umgekehrt: \\(\\overrightarrow{BA} = \\begin{pmatrix} -4 \\\\ 2 \\\\ -4 \\end{pmatrix}\\). Du gehst einfach den Weg rückwärts.';
+      markCardProgress(0, 1);
+    } else {
+      fb.innerHTML = '❌ Nicht ganz. Der Gegenvektor ergibt sich durch Vorzeichenwechsel aller Komponenten: \\(\\overrightarrow{BA} = -\\overrightarrow{AB}\\).';
+      highlightCorrectMC(parent, 1);
+    }
+    MathJax.typesetPromise && MathJax.typesetPromise([fb]);
+  }
+
+  // ==================== Card 2 ====================
+  function checkLen1() {
+    const val = parseFloat(document.getElementById('len1').value);
+    const fb = document.getElementById('fb-len1');
+    const correct = 9;
+    setInputState('len1', val === correct);
+    fb.className = 'feedback show ' + (val === correct ? 'correct' : 'wrong');
+    if (val === correct) {
+      fb.innerHTML = '✅ Richtig! \\(|\\vec{w}| = \\sqrt{1 + 16 + 64} = \\sqrt{81} = 9\\)';
+      markCardProgress(1, 0);
+    } else {
+      fb.innerHTML = '❌ Nicht ganz. \\(1^2 + 4^2 + 8^2 = 1 + 16 + 64 = 81\\), also \\(|\\vec{w}| = \\sqrt{81} = 9\\)';
+    }
+    MathJax.typesetPromise && MathJax.typesetPromise([fb]);
+  }
+
+  function checkMC2(btn, correct) {
+    const parent = document.getElementById('mc2');
+    const fb = document.getElementById('fb-mc2');
+    disableMC(parent);
+    btn.classList.add(correct ? 'correct-ans' : 'wrong-ans');
+    fb.className = 'feedback show ' + (correct ? 'correct' : 'wrong');
+    if (correct) {
+      fb.innerHTML = '✅ Genau! \\(|\\overrightarrow{AB}|\\) ist der Abstand zwischen Punkt \\(A\\) und Punkt \\(B\\) – also die Länge der Strecke \\(AB\\).';
+      markCardProgress(1, 1);
+    } else {
+      fb.innerHTML = '❌ Der Betrag des Verbindungsvektors gibt den Abstand zwischen den beiden Punkten an.';
+      highlightCorrectMC(parent, 1);
+    }
+    MathJax.typesetPromise && MathJax.typesetPromise([fb]);
+  }
+
+  // ==================== Card 3 ====================
+  function checkAdd1() {
+    const x = parseInt(document.getElementById('add1x').value);
+    const y = parseInt(document.getElementById('add1y').value);
+    const z = parseInt(document.getElementById('add1z').value);
+    const fb = document.getElementById('fb-add1');
+    const [cx, cy, cz] = [3, 1, 7];
+    const ok = x===cx && y===cy && z===cz;
+    setInputState('add1x', x===cx); setInputState('add1y', y===cy); setInputState('add1z', z===cz);
+    fb.className = 'feedback show ' + (ok ? 'correct' : 'wrong');
+    if (ok) {
+      fb.innerHTML = '✅ Richtig! \\(\\vec{p} + \\vec{q} = \\begin{pmatrix} 3 \\\\ 1 \\\\ 7 \\end{pmatrix}\\)';
+      markCardProgress(2, 0);
+    } else {
+      fb.innerHTML = '❌ Nicht ganz. \\((-2+5, 4+(-3), 1+6) = (3, 1, 7)\\) – komponentenweise addieren.';
+    }
+    MathJax.typesetPromise && MathJax.typesetPromise([fb]);
+  }
+
+  function checkSub1() {
+    const x = parseInt(document.getElementById('sub1x').value);
+    const y = parseInt(document.getElementById('sub1y').value);
+    const z = parseInt(document.getElementById('sub1z').value);
+    const fb = document.getElementById('fb-sub1');
+    const [cx, cy, cz] = [3, -6, 9];
+    const ok = x===cx && y===cy && z===cz;
+    setInputState('sub1x', x===cx); setInputState('sub1y', y===cy); setInputState('sub1z', z===cz);
+    fb.className = 'feedback show ' + (ok ? 'correct' : 'wrong');
+    if (ok) {
+      fb.innerHTML = '✅ Richtig! \\(\\vec{s} - \\vec{t} = \\begin{pmatrix} 3 \\\\ -6 \\\\ 9 \\end{pmatrix}\\)';
+      markCardProgress(2, 1);
+    } else {
+      fb.innerHTML = '❌ Nicht ganz. \\((6{-}3,\\; {-2}{-}4,\\; 8{-}({-1})) = (3, -6, 9)\\)';
+    }
+    MathJax.typesetPromise && MathJax.typesetPromise([fb]);
+  }
+
+  // ==================== Card 4 ====================
+  function checkSk1() {
+    const x = parseInt(document.getElementById('sk1x').value);
+    const y = parseInt(document.getElementById('sk1y').value);
+    const z = parseInt(document.getElementById('sk1z').value);
+    const fb = document.getElementById('fb-sk1');
+    const [cx, cy, cz] = [-6, 8, -2];
+    const ok = x===cx && y===cy && z===cz;
+    setInputState('sk1x', x===cx); setInputState('sk1y', y===cy); setInputState('sk1z', z===cz);
+    fb.className = 'feedback show ' + (ok ? 'correct' : 'wrong');
+    if (ok) {
+      fb.innerHTML = '✅ Richtig! \\(-2 \\cdot \\begin{pmatrix} 3 \\\\ -4 \\\\ 1 \\end{pmatrix} = \\begin{pmatrix} -6 \\\\ 8 \\\\ -2 \\end{pmatrix}\\)';
+      markCardProgress(3, 0);
+    } else {
+      fb.innerHTML = '❌ Nicht ganz. \\(-2 \\cdot 3 = -6, \\quad -2 \\cdot (-4) = 8, \\quad -2 \\cdot 1 = -2\\)';
+    }
+    MathJax.typesetPromise && MathJax.typesetPromise([fb]);
+  }
+
+  function checkSk2() {
+    const x = parseInt(document.getElementById('sk2x').value);
+    const y = parseInt(document.getElementById('sk2y').value);
+    const z = parseInt(document.getElementById('sk2z').value);
+    const fb = document.getElementById('fb-sk2');
+    const [cx, cy, cz] = [-1, 7, 7];
+    const ok = x===cx && y===cy && z===cz;
+    setInputState('sk2x', x===cx); setInputState('sk2y', y===cy); setInputState('sk2z', z===cz);
+    fb.className = 'feedback show ' + (ok ? 'correct' : 'wrong');
+    if (ok) {
+      fb.innerHTML = '✅ Richtig! \\(2\\vec{a} + 3\\vec{b} = \\begin{pmatrix} 2 \\\\ 4 \\\\ -2 \\end{pmatrix} + \\begin{pmatrix} -3 \\\\ 3 \\\\ 9 \\end{pmatrix} = \\begin{pmatrix} -1 \\\\ 7 \\\\ 7 \\end{pmatrix}\\)';
+      markCardProgress(3, 1);
+    } else {
+      fb.innerHTML = '❌ Nicht ganz. \\(2\\vec{a} = (2,4,-2)\\), \\(3\\vec{b} = (-3,3,9)\\), Summe: \\((-1, 7, 7)\\)';
+    }
+    MathJax.typesetPromise && MathJax.typesetPromise([fb]);
+  }
+
+  // ==================== Card 5 ====================
+  function checkMC3(btn, correct) {
+    const parent = document.getElementById('mc3');
+    const fb = document.getElementById('fb-mc3');
+    disableMC(parent);
+    btn.classList.add(correct ? 'correct-ans' : 'wrong-ans');
+    fb.className = 'feedback show ' + (correct ? 'correct' : 'wrong');
+    if (correct) {
+      fb.innerHTML = '✅ Richtig! \\(\\vec{u} = -3 \\cdot \\vec{v}\\): \\(3 / (-1) = -3\\), \\(6 / (-2) = -3\\), \\((-9)/3 = -3\\) – überall gleich.';
+      markCardProgress(4, 0);
+    } else {
+      fb.innerHTML = '❌ Nicht ganz. Prüfe: \\(3 / (-1) = -3\\), \\(6/(-2) = -3\\), \\(-9/3 = -3\\) – alle Faktoren gleich.';
+      highlightCorrectMC(parent, 0);
+    }
+    MathJax.typesetPromise && MathJax.typesetPromise([fb]);
+  }
+
+  function checkMC4(btn, correct) {
+    const parent = document.getElementById('mc4');
+    const fb = document.getElementById('fb-mc4');
+    disableMC(parent);
+    btn.classList.add(correct ? 'correct-ans' : 'wrong-ans');
+    fb.className = 'feedback show ' + (correct ? 'correct' : 'wrong');
+    if (correct) {
+      fb.innerHTML = '✅ Richtig! \\(x_1\\text{-Faktor}: 4/2 = 2\\), \\(x_2\\text{-Faktor}: 2/1 = 2\\), \\(x_3\\text{-Faktor}: 6/4 = 1{,}5\\) – der Faktor ist nicht gleich, also <strong>nicht kollinear</strong>.';
+      markCardProgress(4, 1);
+    } else {
+      fb.innerHTML = '❌ Nicht ganz. Berechne die Faktoren: \\(x_1\\text{-Faktor} = 2\\), \\(x_2\\text{-Faktor} = 2\\), \\(x_3\\text{-Faktor} = 1{,}5\\) – unterschiedlich!';
+      highlightCorrectMC(parent, 1);
+    }
+    MathJax.typesetPromise && MathJax.typesetPromise([fb]);
+  }
+
+  // ==================== Helpers ====================
+  function setInputState(id, correct) {
+    const el = document.getElementById(id);
+    el.classList.remove('correct', 'wrong');
+    el.classList.add(correct ? 'correct' : 'wrong');
+  }
+
+  function disableMC(parent) {
+    parent.querySelectorAll('.mc-btn').forEach(b => b.disabled = true);
+  }
+
+  function highlightCorrectMC(parent, correctIdx) {
+    const btns = parent.querySelectorAll('.mc-btn');
+    if (btns[correctIdx]) btns[correctIdx].classList.add('correct-ans');
+  }
+
+  // ==================== Dino ====================
+  let dinoTimer;
+  function showDino() {
+    document.getElementById('dino-tooltip').classList.add('show');
+  }
+  function hideDino() {
+    document.getElementById('dino-tooltip').classList.remove('show');
+  }
+  function toggleDino() {
+    const tip = document.getElementById('dino-tooltip');
+    tip.classList.toggle('show');
+    clearTimeout(dinoTimer);
+    if (tip.classList.contains('show')) {
+      dinoTimer = setTimeout(() => tip.classList.remove('show'), 2500);
+    }
+  }
+
+  // Init
+  updateProgress();
+</script>
+</body>
+</html>

@@ -1,0 +1,1396 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Wendepunkte entdecken</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d2e;
+    --card: #222538;
+    --accent1: #7c6af7;
+    --accent2: #f76a6a;
+    --accent3: #6af7c8;
+    --accent4: #f7c96a;
+    --text: #e8eaf6;
+    --muted: #8892b0;
+    --border: #2d3150;
+    --success: #4caf82;
+    --error: #f76a6a;
+    --radius: 16px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── Progress Bar ── */
+  #progress-bar {
+    position: fixed;
+    top: 0; left: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--accent1), var(--accent3));
+    transition: width 0.5s cubic-bezier(.4,0,.2,1);
+    z-index: 100;
+    border-radius: 0 2px 2px 0;
+  }
+
+  /* ── Header ── */
+  header {
+    padding: 28px 24px 0;
+    text-align: center;
+  }
+  .chapter-tag {
+    display: inline-block;
+    background: rgba(124,106,247,0.18);
+    color: var(--accent1);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 6px 16px;
+    border-radius: 99px;
+    border: 1px solid rgba(124,106,247,0.3);
+    margin-bottom: 12px;
+  }
+  h1 {
+    font-size: clamp(26px, 5vw, 38px);
+    font-weight: 900;
+    line-height: 1.15;
+    background: linear-gradient(135deg, var(--accent1), var(--accent3));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .subtitle {
+    color: var(--muted);
+    font-size: 16px;
+    margin-top: 8px;
+  }
+
+  /* ── Step navigation ── */
+  .step-nav {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    padding: 20px 16px 0;
+    flex-wrap: wrap;
+  }
+  .step-dot {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    background: var(--surface);
+    color: var(--muted);
+    font-size: 14px;
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: all 0.25s;
+    touch-action: manipulation;
+  }
+  .step-dot.active {
+    border-color: var(--accent1);
+    background: var(--accent1);
+    color: white;
+    transform: scale(1.1);
+  }
+  .step-dot.done {
+    border-color: var(--success);
+    background: rgba(76,175,130,0.15);
+    color: var(--success);
+  }
+
+  /* ── Main container ── */
+  main {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 24px 16px 80px;
+  }
+
+  /* ── Step cards ── */
+  .step {
+    display: none;
+    animation: fadeUp 0.4s ease;
+  }
+  .step.active { display: block; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+
+  .card-title {
+    font-size: 20px;
+    font-weight: 900;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .card-title .icon {
+    width: 36px; height: 36px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  p, .body-text { font-size: 17px; line-height: 1.65; color: var(--text); }
+
+  .highlight-box {
+    background: rgba(124,106,247,0.1);
+    border-left: 4px solid var(--accent1);
+    border-radius: 0 12px 12px 0;
+    padding: 16px 18px;
+    margin: 16px 0;
+    font-size: 16px;
+    line-height: 1.6;
+  }
+  .highlight-box.green {
+    background: rgba(76,175,130,0.1);
+    border-color: var(--success);
+  }
+  .highlight-box.orange {
+    background: rgba(247,201,106,0.1);
+    border-color: var(--accent4);
+  }
+  .highlight-box.red {
+    background: rgba(247,106,106,0.1);
+    border-color: var(--accent2);
+  }
+
+  /* ── SVG Canvas ── */
+  .canvas-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    margin: 16px 0;
+  }
+  svg { display: block; width: 100%; }
+
+  /* ── Touch tap choices ── */
+  .tap-choices {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 16px 0;
+  }
+  .tap-btn {
+    flex: 1;
+    min-width: 140px;
+    min-height: 56px;
+    border-radius: 14px;
+    border: 2px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    font-family: 'Nunito', sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 12px 16px;
+    transition: all 0.2s;
+    touch-action: manipulation;
+    text-align: center;
+  }
+  .tap-btn:active { transform: scale(0.96); }
+  .tap-btn.selected {
+    border-color: var(--accent1);
+    background: rgba(124,106,247,0.15);
+    color: var(--accent1);
+  }
+  .tap-btn.correct {
+    border-color: var(--success);
+    background: rgba(76,175,130,0.15);
+    color: var(--success);
+  }
+  .tap-btn.wrong {
+    border-color: var(--accent2);
+    background: rgba(247,106,106,0.15);
+    color: var(--accent2);
+  }
+
+  /* ── Sort/label tap interaction ── */
+  .label-pool {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 12px 0;
+  }
+  .label-chip {
+    background: var(--surface);
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 18px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    touch-action: manipulation;
+    min-height: 44px;
+    display: flex; align-items: center;
+  }
+  .label-chip.selected {
+    border-color: var(--accent1);
+    background: rgba(124,106,247,0.2);
+    color: var(--accent1);
+  }
+  .label-chip.placed { opacity: 0.35; pointer-events: none; }
+
+  .drop-zone {
+    border: 2px dashed var(--border);
+    border-radius: 10px;
+    min-height: 50px;
+    padding: 10px 14px;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--muted);
+    transition: all 0.2s;
+    cursor: pointer;
+    touch-action: manipulation;
+    display: flex; align-items: center;
+    margin: 6px 0;
+    min-width: 120px;
+  }
+  .drop-zone.ready {
+    border-color: var(--accent1);
+    border-style: solid;
+    background: rgba(124,106,247,0.08);
+  }
+  .drop-zone.filled {
+    border-color: var(--accent3);
+    border-style: solid;
+    background: rgba(106,247,200,0.08);
+    color: var(--accent3);
+  }
+
+  /* ── Input fields ── */
+  .calc-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin: 10px 0;
+  }
+  .calc-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 16px;
+    color: var(--muted);
+  }
+  .calc-input {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 18px;
+    font-weight: 700;
+    background: var(--surface);
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    padding: 10px 14px;
+    width: 110px;
+    text-align: center;
+    outline: none;
+    transition: border-color 0.2s;
+    -webkit-appearance: none;
+  }
+  .calc-input:focus { border-color: var(--accent1); }
+  .calc-input.correct { border-color: var(--success); background: rgba(76,175,130,0.1); }
+  .calc-input.wrong   { border-color: var(--accent2); background: rgba(247,106,106,0.1); }
+
+  /* ── Math display ── */
+  .math-block {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 17px;
+    background: var(--surface);
+    border-radius: 10px;
+    padding: 14px 18px;
+    margin: 12px 0;
+    color: var(--accent3);
+    line-height: 1.8;
+    border: 1px solid var(--border);
+  }
+
+  /* ── Feedback ── */
+  .feedback {
+    border-radius: 12px;
+    padding: 14px 18px;
+    font-size: 16px;
+    font-weight: 600;
+    margin-top: 14px;
+    display: none;
+    line-height: 1.5;
+  }
+  .feedback.show { display: block; }
+  .feedback.ok   { background: rgba(76,175,130,0.15); color: var(--success); border: 1px solid rgba(76,175,130,0.3); }
+  .feedback.err  { background: rgba(247,106,106,0.15); color: var(--accent2); border: 1px solid rgba(247,106,106,0.3); }
+
+  /* ── Buttons ── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px 28px;
+    border-radius: 14px;
+    border: none;
+    font-family: 'Nunito', sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    touch-action: manipulation;
+    min-height: 52px;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent1), #9c7df7);
+    color: white;
+  }
+  .btn-check {
+    background: var(--surface);
+    border: 2px solid var(--accent1);
+    color: var(--accent1);
+  }
+  .btn-next {
+    background: linear-gradient(135deg, var(--accent3), #4af7a8);
+    color: #0f1117;
+    margin-top: 16px;
+    display: none;
+  }
+  .btn-next.show { display: inline-flex; }
+
+  .btn-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 16px;
+    align-items: center;
+  }
+
+  /* ── Sign change diagram ── */
+  .sign-row {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin: 16px 0;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .sign-cell {
+    flex: 1;
+    text-align: center;
+    padding: 10px 4px;
+    font-size: 22px;
+    font-weight: 900;
+    border-radius: 8px;
+  }
+  .sign-cell.plus  { color: var(--accent3); background: rgba(106,247,200,0.1); }
+  .sign-cell.minus { color: var(--accent2); background: rgba(247,106,106,0.1); }
+  .sign-cell.zero  { color: var(--accent4); background: rgba(247,201,106,0.1); }
+  .sign-sep { width: 2px; background: var(--border); height: 44px; }
+  .sign-label { font-family: 'Nunito', sans-serif; font-size: 13px; color: var(--muted); margin-top: 4px; }
+
+  /* ── Curvature illustration ── */
+  .curv-row {
+    display: flex;
+    gap: 12px;
+    margin: 14px 0;
+    flex-wrap: wrap;
+  }
+  .curv-card {
+    flex: 1;
+    min-width: 130px;
+    background: var(--surface);
+    border: 2px solid var(--border);
+    border-radius: 14px;
+    padding: 16px 12px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.25s;
+    touch-action: manipulation;
+  }
+  .curv-card:active { transform: scale(0.96); }
+  .curv-card.selected {
+    border-color: var(--accent1);
+    background: rgba(124,106,247,0.1);
+  }
+  .curv-card svg { margin: 0 auto 8px; display: block; }
+  .curv-card .cv-label { font-size: 15px; font-weight: 700; }
+
+  /* ── Step title ── */
+  .step-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+  .step-number {
+    width: 48px; height: 48px;
+    background: linear-gradient(135deg, var(--accent1), #9c7df7);
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    font-weight: 900;
+    color: white;
+    flex-shrink: 0;
+  }
+  .step-title { font-size: 22px; font-weight: 900; line-height: 1.2; }
+  .step-subtitle { font-size: 14px; color: var(--muted); margin-top: 3px; }
+
+  /* ── Final summary ── */
+  .summary-box {
+    background: linear-gradient(135deg, rgba(124,106,247,0.15), rgba(106,247,200,0.1));
+    border: 1px solid rgba(124,106,247,0.3);
+    border-radius: 18px;
+    padding: 28px;
+    text-align: center;
+  }
+  .summary-box h2 { font-size: 28px; font-weight: 900; margin-bottom: 8px; }
+  .summary-box p { color: var(--muted); font-size: 17px; }
+
+  .rule-card {
+    background: var(--surface);
+    border-radius: 14px;
+    padding: 20px;
+    margin: 12px 0;
+    border-left: 4px solid var(--accent1);
+    text-align: left;
+  }
+  .rule-card h3 { font-size: 16px; font-weight: 900; color: var(--accent1); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+  .rule-card p  { font-size: 16px; line-height: 1.6; }
+
+  .inline-math {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 15px;
+    color: var(--accent3);
+    background: rgba(106,247,200,0.08);
+    padding: 2px 8px;
+    border-radius: 6px;
+  }
+
+  /* Table */
+  table { width: 100%; border-collapse: collapse; margin: 14px 0; }
+  th, td { padding: 12px 10px; text-align: center; border: 1px solid var(--border); font-size: 16px; }
+  th { background: var(--surface); font-weight: 700; color: var(--muted); font-size: 14px; }
+  td { background: var(--card); }
+  td.highlight { color: var(--accent4); font-weight: 700; }
+</style>
+</head>
+<body>
+
+<div id="progress-bar" style="width:0%"></div>
+
+<header>
+  <div class="chapter-tag">Differential&shy;rechnung</div>
+  <h1>Wendepunkte entdecken</h1>
+  <p class="subtitle">Schritt für Schritt – warum und wie</p>
+</header>
+
+<div class="step-nav" id="stepNav"></div>
+
+<main>
+
+<!-- ═══════════════════════════════════════════════
+     SCHRITT 1 – Was ist Krümmung?
+═══════════════════════════════════════════════ -->
+<div class="step active" id="step1">
+  <div class="step-header">
+    <div class="step-number">1</div>
+    <div>
+      <div class="step-title">Was ist Krümmung?</div>
+      <div class="step-subtitle">Linkskurve oder Rechtskurve</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <p>Du kennst das vom Fahren: Eine Kurve kann sich nach <strong>links</strong> oder nach <strong>rechts</strong> wölben. Bei Funktionen nennt man das <strong>Linkskurve</strong> (konkav nach oben) und <strong>Rechtskurve</strong> (konkav nach unten).</p>
+
+    <div class="curv-row" id="curvCards">
+      <div class="curv-card" data-val="links" onclick="selectCurv(this)">
+        <div style="font-size:14px;font-weight:900;color:var(--accent3);font-family:'JetBrains Mono';margin-bottom:6px">f'' &gt; 0</div>
+        <svg width="90" height="55" viewBox="0 0 90 55">
+          <path d="M5,15 C25,60 65,60 85,15" fill="none" stroke="#7c6af7" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+        <div class="cv-label" style="color:var(--accent1)">Linkskurve</div>
+        <div style="font-size:13px;color:var(--muted);margin-top:4px">wie eine Schüssel</div>
+      </div>
+      <div class="curv-card" data-val="rechts" onclick="selectCurv(this)">
+        <div style="font-size:14px;font-weight:900;color:var(--accent2);font-family:'JetBrains Mono';margin-bottom:6px">f'' &lt; 0</div>
+        <svg width="90" height="55" viewBox="0 0 90 55">
+          <path d="M5,45 C25,0 65,0 85,45" fill="none" stroke="#f76a6a" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+        <div class="cv-label" style="color:var(--accent2)">Rechtskurve</div>
+        <div style="font-size:13px;color:var(--muted);margin-top:4px">wie ein Hügel</div>
+      </div>
+    </div>
+
+    <p style="margin-top:16px">Welche Krümmungsform hat die Kurve an dem markierten Punkt <strong>P</strong>?</p>
+
+    <div class="canvas-wrap">
+      <svg viewBox="0 0 420 200">
+        <!-- x-axis -->
+        <line x1="30" y1="165" x2="405" y2="165" stroke="#4a5180" stroke-width="1.5"/>
+        <polygon points="405,161 413,165 405,169" fill="#4a5180"/>
+        <text x="415" y="169" fill="#4a5180" font-size="13" font-family="Nunito" font-weight="700">x</text>
+        <!-- y-axis -->
+        <line x1="60" y1="190" x2="60" y2="8" stroke="#4a5180" stroke-width="1.5"/>
+        <polygon points="56,8 60,0 64,8" fill="#4a5180"/>
+        <text x="65" y="12" fill="#4a5180" font-size="13" font-family="Nunito" font-weight="700">y</text>
+        <!-- Origin -->
+        <text x="44" y="178" fill="#4a5180" font-size="12" font-family="Nunito">0</text>
+        <!-- Curve -->
+        <path d="M20,175 C60,170 90,60 160,40 C220,25 290,30 370,110"
+              fill="none" stroke="#6af7c8" stroke-width="3" stroke-linecap="round"/>
+        <!-- Marked point P at roughly x=310, y=55 on curve -->
+        <circle cx="310" cy="58" r="7" fill="none" stroke="#f7c96a" stroke-width="2.5"/>
+        <circle cx="310" cy="58" r="3" fill="#f7c96a"/>
+        <text x="322" y="52" fill="#f7c96a" font-size="14" font-family="Nunito" font-weight="700">P</text>
+      </svg>
+    </div>
+
+    <div class="tap-choices" id="curvChoices">
+      <button class="tap-btn" onclick="checkCurv(this,'rechts')">Rechtskurve – wie ein Hügel</button>
+      <button class="tap-btn" onclick="checkCurv(this,'links')">Linkskurve – wie eine Schüssel</button>
+    </div>
+
+    <div class="feedback" id="fb1"></div>
+    <div class="btn-row">
+      <button class="btn btn-next" id="next1" onclick="goStep(2)">Weiter →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     SCHRITT 2 – Was ist ein Wendepunkt?
+═══════════════════════════════════════════════ -->
+<div class="step" id="step2">
+  <div class="step-header">
+    <div class="step-number">2</div>
+    <div>
+      <div class="step-title">Der Wendepunkt</div>
+      <div class="step-subtitle">Wo die Krümmung ihre Richtung wechselt</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <p>Ein <strong>Wendepunkt</strong> liegt dort, wo die Kurve die Krümmungsrichtung wechselt – von Links- auf Rechtskurve oder umgekehrt.</p>
+
+    <div class="canvas-wrap" style="margin:16px 0">
+      <svg viewBox="0 0 420 200" id="wpSvg">
+        <!-- x-axis -->
+        <line x1="20" y1="160" x2="400" y2="160" stroke="#2d3150" stroke-width="1"/>
+        <!-- main curve: cubic -->
+        <path d="M30,150 C80,150 100,30 200,100 C300,170 330,40 390,40"
+              fill="none" stroke="#7c6af7" stroke-width="3" stroke-linecap="round"/>
+        <!-- Schüssel marker left: U-Form = öffnet nach oben = Scheitelpunkt unten -->
+        <path d="M40,145 Q75,175 110,145" fill="none" stroke="#6af7c8" stroke-width="2" stroke-dasharray="4,3"/>
+        <!-- Hügel marker right: n-Form = öffnet nach unten = Scheitelpunkt oben -->
+        <path d="M250,80 Q300,40 350,80" fill="none" stroke="#f76a6a" stroke-width="2" stroke-dasharray="4,3"/>
+
+        <!-- WP marker -->
+        <circle cx="200" cy="100" r="8" fill="none" stroke="#f7c96a" stroke-width="2.5"/>
+        <circle cx="200" cy="100" r="3" fill="#f7c96a"/>
+        <text x="212" y="92" fill="#f7c96a" font-size="14" font-weight="bold" font-family="Nunito">W</text>
+
+        <!-- Labels -->
+        <text x="75" y="185" text-anchor="middle" fill="#6af7c8" font-size="12" font-family="Nunito">Linkskurve</text>
+        <text x="300" y="185" text-anchor="middle" fill="#f76a6a" font-size="12" font-family="Nunito">Rechtskurve?</text>
+        <text x="200" y="195" text-anchor="middle" fill="#f7c96a" font-size="11" font-family="Nunito">Wendepunkt W</text>
+      </svg>
+    </div>
+
+    <div class="highlight-box">
+      🔄 <strong>Merkregel:</strong> Am Wendepunkt wechselt die Krümmung. Links davon ist die Kurve anders gewölbt als rechts davon.
+    </div>
+
+    <p style="margin-top:14px">Was passiert <em>an</em> dem Punkt W im Bild?</p>
+    <div class="tap-choices">
+      <button class="tap-btn" onclick="checkWP(this,'a')">Die Funktion hat dort ein Maximum</button>
+      <button class="tap-btn" onclick="checkWP(this,'b')">Die Krümmungsrichtung wechselt</button>
+      <button class="tap-btn" onclick="checkWP(this,'c')">Die Funktion ist dort gleich null</button>
+    </div>
+    <div class="feedback" id="fb2"></div>
+    <div class="btn-row">
+      <button class="btn btn-next" id="next2" onclick="goStep(3)">Weiter →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     SCHRITT 3 – Die zweite Ableitung und Krümmung
+═══════════════════════════════════════════════ -->
+<div class="step" id="step3">
+  <div class="step-header">
+    <div class="step-number">3</div>
+    <div>
+      <div class="step-title">f'' und die Krümmung</div>
+      <div class="step-subtitle">Was das Vorzeichen verrät</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <p>Die <strong>zweite Ableitung f''(x)</strong> misst die Krümmung einer Funktion. Das Vorzeichen sagt dir die Richtung:</p>
+
+    <div class="curv-row" style="margin-top:16px">
+      <div style="flex:1; min-width:130px; background:rgba(106,247,200,0.08); border:2px solid var(--accent3); border-radius:14px; padding:16px; text-align:center">
+        <div style="font-size:28px; font-weight:900; color:var(--accent3); font-family:'JetBrains Mono'">f'' &gt; 0</div>
+        <svg width="80" height="50" viewBox="0 0 80 50" style="margin:8px auto;display:block">
+          <path d="M5,10 C20,50 60,50 75,10" fill="none" stroke="#6af7c8" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+        <div style="font-size:15px;font-weight:700;color:var(--accent3)">Linkskurve</div>
+        <div style="font-size:13px;color:var(--muted);margin-top:4px">Schüssel / konkav nach oben</div>
+      </div>
+      <div style="flex:1; min-width:130px; background:rgba(247,106,106,0.08); border:2px solid var(--accent2); border-radius:14px; padding:16px; text-align:center">
+        <div style="font-size:28px; font-weight:900; color:var(--accent2); font-family:'JetBrains Mono'">f'' &lt; 0</div>
+        <svg width="80" height="50" viewBox="0 0 80 50" style="margin:8px auto;display:block">
+          <path d="M5,40 C20,0 60,0 75,40" fill="none" stroke="#f76a6a" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+        <div style="font-size:15px;font-weight:700;color:var(--accent2)">Rechtskurve</div>
+        <div style="font-size:13px;color:var(--muted);margin-top:4px">Hügel / konkav nach unten</div>
+      </div>
+    </div>
+
+    <div class="highlight-box" style="margin-top:18px">
+      💡 <strong>Idee:</strong> Wenn f'' das Vorzeichen wechselt, wechselt die Krümmung – also liegt dort ein <strong>Wendepunkt</strong>!
+    </div>
+
+    <p style="margin-top:16px">Ordne zu! Tippe erst auf ein Vorzeichen, dann auf das Feld dahinter:</p>
+
+    <div class="label-pool" id="signPool">
+      <div class="label-chip" data-val="pos" onclick="selectChip(this)" style="color:var(--accent3)">f'' &gt; 0</div>
+      <div class="label-chip" data-val="neg" onclick="selectChip(this)" style="color:var(--accent2)">f'' &lt; 0</div>
+    </div>
+
+    <table>
+      <tr><th>Situation</th><th>Vorzeichen</th></tr>
+      <tr>
+        <td style="text-align:left">☕ Schüssel-Form</td>
+        <td><div class="drop-zone" id="dz1" data-ans="pos" onclick="placeChip(this)">Tippe hier</div></td>
+      </tr>
+      <tr>
+        <td style="text-align:left">⛰️ Hügel-Form</td>
+        <td><div class="drop-zone" id="dz2" data-ans="neg" onclick="placeChip(this)">Tippe hier</div></td>
+      </tr>
+    </table>
+
+    <div class="feedback" id="fb3"></div>
+    <div class="btn-row">
+      <button class="btn btn-check" onclick="checkAssign()">Prüfen ✓</button>
+      <button class="btn btn-next" id="next3" onclick="goStep(4)">Weiter →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     SCHRITT 4 – Notwendiges Kriterium
+═══════════════════════════════════════════════ -->
+<div class="step" id="step4">
+  <div class="step-header">
+    <div class="step-number">4</div>
+    <div>
+      <div class="step-title">Notwendiges Kriterium</div>
+      <div class="step-subtitle">Erste Bedingung für einen Wendepunkt</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <p>Wenn f'' das Vorzeichen wechselt, muss sie irgendwo durch <strong>Null</strong> gehen (oder nicht definiert sein). Deshalb:</p>
+
+    <div class="highlight-box">
+      🔍 <strong>Notwendiges Kriterium:</strong><br>
+      Für einen Wendepunkt muss gelten: <span class="inline-math">f''(x₀) = 0</span>
+    </div>
+
+    <p style="margin-top:14px">Das ist notwendig – aber <em>nicht hinreichend</em>! Auch ein Terrassenpunkt erfüllt f''(x₀) = 0, ist aber <strong>kein</strong> Wendepunkt.</p>
+
+    <div class="canvas-wrap">
+      <svg viewBox="0 0 420 180">
+        <!-- x-axis -->
+        <line x1="20" y1="130" x2="400" y2="130" stroke="#2d3150"/>
+        <!-- Terrassenpunkt: x^4 skaliert -->
+        <path d="M30,10 C80,10 150,120 210,130 C270,140 340,120 390,10"
+              fill="none" stroke="#f7c96a" stroke-width="3" stroke-linecap="round"/>
+        <!-- Markierung Terrassenpunkt -->
+        <circle cx="210" cy="130" r="6" fill="none" stroke="#f7c96a" stroke-width="2"/>
+        <circle cx="210" cy="130" r="3" fill="#f7c96a"/>
+        <text x="215" y="122" fill="#f7c96a" font-size="13" font-family="Nunito" font-weight="bold">T (Terrasse)</text>
+        <text x="210" y="160" text-anchor="middle" fill="#8892b0" font-size="12" font-family="Nunito">f''(T) = 0, aber kein Vorzeichen­wechsel!</text>
+
+        <!-- Wendepunkt: echte Kurve -->
+        <!-- rechte kurve daneben -->
+        <text x="380" y="20" text-anchor="end" fill="#8892b0" font-size="11" font-family="Nunito">f(x) ≈ x⁴</text>
+      </svg>
+    </div>
+
+    <p style="margin-top:10px">Was ist der Unterschied zwischen einem Terrassenpunkt und einem Wendepunkt?</p>
+
+    <div class="tap-choices">
+      <button class="tap-btn" onclick="checkNot(this,'a')">Beim Terrassenpunkt wechselt f'' das Vorzeichen nicht</button>
+      <button class="tap-btn" onclick="checkNot(this,'b')">Beim Terrassenpunkt ist f'' nie null</button>
+      <button class="tap-btn" onclick="checkNot(this,'c')">Beim Terrassenpunkt ist die Funktion null</button>
+    </div>
+
+    <div class="feedback" id="fb4"></div>
+    <div class="btn-row">
+      <button class="btn btn-next" id="next4" onclick="goStep(5)">Weiter →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     SCHRITT 5 – Hinreichendes Kriterium
+═══════════════════════════════════════════════ -->
+<div class="step" id="step5">
+  <div class="step-header">
+    <div class="step-number">5</div>
+    <div>
+      <div class="step-title">Hinreichendes Kriterium</div>
+      <div class="step-subtitle">Beweis durch Vorzeichenwechsel</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <p>Um sicher zu sein, müssen wir den <strong>Vorzeichenwechsel von f''</strong> nachweisen. Dafür prüfen wir Testpunkte links und rechts von x₀:</p>
+
+    <div style="margin:16px 0">
+      <div style="font-size:15px; color:var(--muted); margin-bottom:8px; font-weight:700; text-transform:uppercase; letter-spacing:1px">Vorzeichentabelle</div>
+      <div class="sign-row">
+        <div style="flex:1;text-align:center">
+          <div class="sign-cell minus">−</div>
+          <div class="sign-label">f''(x &lt; x₀)</div>
+        </div>
+        <div class="sign-sep"></div>
+        <div style="flex:1;text-align:center">
+          <div class="sign-cell zero">0</div>
+          <div class="sign-label">f''(x₀)</div>
+        </div>
+        <div class="sign-sep"></div>
+        <div style="flex:1;text-align:center">
+          <div class="sign-cell plus">+</div>
+          <div class="sign-label">f''(x &gt; x₀)</div>
+        </div>
+      </div>
+      <p style="text-align:center; font-size:15px; color:var(--success); margin-top:6px">→ Vorzeichen­wechsel → ✅ Wendepunkt!</p>
+    </div>
+
+    <div class="highlight-box green">
+      ✅ <strong>Hinreichendes Kriterium – Methode 1:</strong><br>
+      Wenn f''(x₀) = 0 <strong>und</strong> f'' an der Stelle x₀ das Vorzeichen wechselt, dann ist x₀ eine Wendestelle.
+    </div>
+
+    <div class="highlight-box orange" style="margin-top:12px">
+      ✅ <strong>Hinreichendes Kriterium – Methode 2 (Kurztest):</strong><br>
+      Wenn f''(x₀) = 0 <strong>und</strong> f'''(x₀) ≠ 0, dann ist x₀ eine Wendestelle.<br>
+      <span style="font-size:14px;color:var(--muted)">Vorteil: kein Vorzeichenwechsel nötig – eine Rechnung reicht!</span>
+    </div>
+
+    <p style="margin-top:16px">Welche Tabelle zeigt einen <strong>echten Wendepunkt</strong>? Tippe auf die richtige.<br>
+    <span style="font-size:14px;color:var(--muted)">Beachte auch das notwendige Kriterium: f''(x₀) muss 0 sein!</span></p>
+
+    <div class="tap-choices" style="flex-direction:column">
+      <button class="tap-btn" style="width:100%;text-align:left" onclick="checkHin(this,'a')">
+        <span style="font-family:'JetBrains Mono';font-size:14px">x &lt; x₀: f''&gt;0 &nbsp;|&nbsp; f''(x₀)=0 &nbsp;|&nbsp; x &gt; x₀: f''&gt;0</span>
+        <div style="font-size:13px;color:var(--muted);margin-top:4px">→ kein Vorzeichenwechsel</div>
+      </button>
+      <button class="tap-btn" style="width:100%;text-align:left" onclick="checkHin(this,'b')">
+        <span style="font-family:'JetBrains Mono';font-size:14px">x &lt; x₀: f''&lt;0 &nbsp;|&nbsp; f''(x₀)=0 &nbsp;|&nbsp; x &gt; x₀: f''&gt;0</span>
+        <div style="font-size:13px;color:var(--muted);margin-top:4px">→ Vorzeichen wechselt von − zu +</div>
+      </button>
+      <button class="tap-btn" style="width:100%;text-align:left" onclick="checkHin(this,'c')">
+        <span style="font-family:'JetBrains Mono';font-size:14px">x &lt; x₀: f''&gt;0 &nbsp;|&nbsp; f''(x₀)≠0 &nbsp;|&nbsp; x &gt; x₀: f''&lt;0</span>
+        <div style="font-size:13px;color:var(--muted);margin-top:4px">→ kein Nullpunkt von f''</div>
+      </button>
+    </div>
+
+    <div class="feedback" id="fb5"></div>
+    <div class="btn-row">
+      <button class="btn btn-next" id="next5" onclick="goStep(6)">Weiter →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     SCHRITT 6 – Rechenübung
+═══════════════════════════════════════════════ -->
+<div class="step" id="step6">
+  <div class="step-header">
+    <div class="step-number">6</div>
+    <div>
+      <div class="step-title">Jetzt rechnen!</div>
+      <div class="step-subtitle">Schritt für Schritt an einem Beispiel</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <p>Gegeben ist die Funktion:</p>
+    <div class="math-block">f(x) = x³ − 3x² + 2</div>
+
+    <p style="margin-bottom:8px">Berechne die Ableitungen und fülle die Felder aus:</p>
+
+    <div class="highlight-box orange">⚡ Tipp: Potenzregel – (xⁿ)' = n · xⁿ⁻¹</div>
+
+    <!-- f'(x) -->
+    <div style="margin-top:18px">
+      <div style="font-size:16px;font-weight:700;margin-bottom:8px;color:var(--accent1)">Schritt 1: Erste Ableitung</div>
+      <div class="calc-row">
+        <span class="calc-label">f'(x) =</span>
+        <input class="calc-input" id="in_a" inputmode="text" placeholder="ax²" style="width:80px" oninput="checkDerivs()">
+        <span class="calc-label">x² −</span>
+        <input class="calc-input" id="in_b" inputmode="numeric" placeholder="?" style="width:70px" oninput="checkDerivs()">
+        <span class="calc-label">x</span>
+      </div>
+      <div class="feedback" id="fb6a"></div>
+    </div>
+
+    <!-- f''(x) -->
+    <div style="margin-top:18px">
+      <div style="font-size:16px;font-weight:700;margin-bottom:8px;color:var(--accent1)">Schritt 2: Zweite Ableitung</div>
+      <div class="calc-row">
+        <span class="calc-label">f''(x) =</span>
+        <input class="calc-input" id="in_c" inputmode="numeric" placeholder="?" style="width:70px" oninput="checkDerivs()">
+        <span class="calc-label">x −</span>
+        <input class="calc-input" id="in_d" inputmode="numeric" placeholder="?" style="width:70px" oninput="checkDerivs()">
+      </div>
+      <div class="feedback" id="fb6b"></div>
+    </div>
+
+    <!-- x0 -->
+    <div style="margin-top:18px" id="x0block">
+      <div style="font-size:16px;font-weight:700;margin-bottom:8px;color:var(--accent1)">Schritt 3: f''(x) = 0 l&ouml;sen</div>
+      <div class="calc-row">
+        <span class="calc-label">0 = 6x &minus; 6 &nbsp;&rarr;&nbsp; x&#8320; =</span>
+        <input class="calc-input" id="in_x0" inputmode="numeric" placeholder="?" oninput="checkX0()">
+      </div>
+      <div class="feedback" id="fb6c"></div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-next" id="next6" onclick="goStep(7)">Weiter &rarr;</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     SCHRITT 7 – Vorzeichenwechsel prüfen
+═══════════════════════════════════════════════ -->
+<div class="step" id="step7">
+  <div class="step-header">
+    <div class="step-number">7</div>
+    <div>
+      <div class="step-title">Vorzeichenwechsel prüfen</div>
+      <div class="step-subtitle">Hinreichendes Kriterium anwenden</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <p>Wir haben: <span class="inline-math">f''(x) = 6x − 6</span> und die Kandidatenstelle <span class="inline-math">x₀ = 1</span></p>
+    <p style="margin-top:10px">Jetzt prüfen wir Testpunkte links und rechts von x₀ = 1:</p>
+
+    <div class="math-block">
+      f''(0) = 6·0 − 6 = −6 &nbsp;&nbsp;→ <span style="color:var(--accent2)">negativ</span><br>
+      f''(1) = 6·1 − 6 = &nbsp;0<br>
+      f''(2) = 6·2 − 6 = +6 &nbsp;&nbsp;→ <span style="color:var(--accent3)">positiv</span>
+    </div>
+
+    <p>Was bedeuten diese Ergebnisse? Tippe auf die richtige Antwort:</p>
+
+    <div class="tap-choices" style="flex-direction:column">
+      <button class="tap-btn" style="width:100%" onclick="checkVZW(this,'a')">f'' wechselt von − zu +: Das ist ein Vorzeichenwechsel → Wendepunkt ✅</button>
+      <button class="tap-btn" style="width:100%" onclick="checkVZW(this,'b')">f'' ist einmal null → also kein Wendepunkt</button>
+      <button class="tap-btn" style="width:100%" onclick="checkVZW(this,'c')">f'' ist negativ, also liegt ein Maximum vor</button>
+    </div>
+
+    <div class="feedback" id="fb7"></div>
+
+    <div id="vzwResult" style="display:none">
+      <div class="highlight-box green" style="margin-top:16px">
+        &#x1F389; <strong>Vorzeichenwechsel best&auml;tigt &rarr; Wendestelle bei x&#8320; = 1!</strong><br>
+        Jetzt noch die y-Koordinate berechnen.
+      </div>
+
+      <div class="sign-row" style="margin-top:16px">
+        <div style="flex:1;text-align:center">
+          <div class="sign-cell minus">&minus;</div>
+          <div class="sign-label">x &lt; 1</div>
+        </div>
+        <div class="sign-sep"></div>
+        <div style="flex:1;text-align:center">
+          <div class="sign-cell zero">0</div>
+          <div class="sign-label">x = 1</div>
+        </div>
+        <div class="sign-sep"></div>
+        <div style="flex:1;text-align:center">
+          <div class="sign-cell plus">+</div>
+          <div class="sign-label">x &gt; 1</div>
+        </div>
+      </div>
+      <p style="text-align:center;font-size:14px;color:var(--success);margin-top:6px">Vorzeichenwechsel von f'' &rarr; Wendestelle bei x&#8320; = 1 &#x2713;</p>
+
+      <!-- Alternativ: f''' -->
+      <div class="highlight-box orange" style="margin-top:18px">
+        &#x26A1; <strong>Alternativ &ndash; Methode mit f''':</strong><br>
+        f'''(x) = 6 &nbsp;&rarr;&nbsp; f'''(1) = 6 &ne; 0 &nbsp;&#x2713;<br>
+        <span style="font-size:14px;color:var(--muted)">Da f''(1) = 0 und f'''(1) &ne; 0, ist x&#8320; = 1 eine Wendestelle &ndash; ohne Vorzeichentabelle!</span>
+      </div>
+
+      <!-- y-Koordinate -->
+      <div style="margin-top:20px">
+        <div style="font-size:16px;font-weight:700;margin-bottom:8px;color:var(--accent1)">Schritt 4: y-Koordinate bestimmen</div>
+        <div class="math-block" style="margin-bottom:12px">
+          f(x) = x&#179; &minus; 3x&#178; + 2<br>
+          f'(x) = 3x&#178; &minus; 6x<br>
+          f''(x) = 6x &minus; 6<br>
+          <span style="color:var(--accent4)">x&#8320; = 1 &nbsp;&rarr;&nbsp; f(1) = ?</span>
+        </div>
+        <p style="margin-bottom:10px">Setze x&#8320; = 1 in f(x) ein:</p>
+        <div class="calc-row">
+          <span class="calc-label">f(1) =</span>
+          <input class="calc-input" id="in_y0" inputmode="numeric" placeholder="?" oninput="checkY0()">
+        </div>
+        <div class="feedback" id="fb6d"></div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-next" id="next7" onclick="goStep(8)">Weiter &rarr;</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     SCHRITT 8 – Wendestelle = Extrempunkt von f'
+═══════════════════════════════════════════════ -->
+<div class="step" id="step8">
+  <div class="step-header">
+    <div class="step-number">8</div>
+    <div>
+      <div class="step-title">Ein cleverer Trick</div>
+      <div class="step-subtitle">Wendestelle = Extrempunkt der Ableitungsfunktion</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <p>Du kennst das schon: Ein <strong>Extrempunkt</strong> von f liegt dort, wo f' das Vorzeichen wechselt. Jetzt drehen wir das eine Stufe weiter:</p>
+
+    <div class="highlight-box" style="margin-top:14px">
+      💡 <strong>Die Idee:</strong> f'' ist die Ableitung von f'. Wenn f'' das Vorzeichen wechselt, hat <em>f'</em> dort ein Extremum!
+    </div>
+
+    <div class="canvas-wrap" style="margin:18px 0">
+      <svg viewBox="0 0 420 240">
+        <!-- Axes -->
+        <line x1="20" y1="200" x2="400" y2="200" stroke="#2d3150" stroke-width="1.5"/>
+        <line x1="20" y1="10"  x2="20"  y2="210" stroke="#2d3150" stroke-width="1.5"/>
+        <text x="405" y="204" fill="#8892b0" font-size="12" font-family="Nunito">x</text>
+
+        <!-- f(x) = x³−3x²+2 scaled: highlight curve -->
+        <path d="M30,30 C70,28 120,170 210,190 C290,208 360,130 395,50"
+              fill="none" stroke="#7c6af7" stroke-width="2.5" stroke-linecap="round"/>
+        <text x="300" y="45" fill="#7c6af7" font-size="13" font-family="Nunito" font-weight="bold">f(x)</text>
+
+        <!-- f'(x) = 3x²−6x: parabola, min at x=1 -->
+        <!-- scaled so minimum near x=210, y=200 -->
+        <path d="M30,15 C80,180 140,210 210,200 C280,190 340,140 395,90"
+              fill="none" stroke="#f7c96a" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="6,3"/>
+        <text x="355" y="88" fill="#f7c96a" font-size="13" font-family="Nunito" font-weight="bold">f'(x)</text>
+
+        <!-- Minimum of f' at x=1 (x=210 in svg) -->
+        <circle cx="210" cy="200" r="7" fill="none" stroke="#f7c96a" stroke-width="2.5"/>
+        <circle cx="210" cy="200" r="3" fill="#f7c96a"/>
+
+        <!-- WP on f -->
+        <circle cx="210" cy="190" r="7" fill="none" stroke="#f76a6a" stroke-width="2.5"/>
+        <circle cx="210" cy="190" r="3" fill="#f76a6a"/>
+
+        <!-- Vertical dashed line at x0=1 -->
+        <line x1="210" y1="10" x2="210" y2="210" stroke="#8892b0" stroke-width="1" stroke-dasharray="4,3"/>
+        <text x="213" y="18" fill="#8892b0" font-size="11" font-family="Nunito">x₀ = 1</text>
+
+        <!-- Labels -->
+        <text x="220" y="185" fill="#f76a6a" font-size="12" font-family="Nunito">WP von f</text>
+        <text x="220" y="215" fill="#f7c96a" font-size="12" font-family="Nunito">Min. von f'</text>
+      </svg>
+    </div>
+
+    <p>An <strong>x₀ = 1</strong> hat f' ein Minimum (Tiefpunkt). Genau dort liegt der Wendepunkt von f. Das ist kein Zufall!</p>
+
+    <div class="highlight-box green" style="margin-top:14px">
+      ✅ <strong>Merksatz:</strong><br>
+      Eine Wendestelle von <em>f</em> ist gleichzeitig ein <strong>Extrempunkt der Ableitungsfunktion f'</strong>.<br>
+      <span style="font-size:14px;color:var(--muted)">Linkskurve → Rechtskurve: f hat Min. → f' hat Tiefpunkt<br>
+      Rechtskurve → Linkskurve: f hat Max. → f' hat Hochpunkt</span>
+    </div>
+
+    <p style="margin-top:18px">Was kannst du daraus als Rechenstrategie ableiten?</p>
+
+    <div class="tap-choices" style="flex-direction:column">
+      <button class="tap-btn" style="width:100%;text-align:left" onclick="checkTrick(this,'a')">
+        Man kann Wendepunkte von f finden, indem man die Extrempunkte von f' berechnet – also f'' = 0 setzt und auf Vorzeichenwechsel von f'' prüft.
+      </button>
+      <button class="tap-btn" style="width:100%;text-align:left" onclick="checkTrick(this,'b')">
+        Man braucht gar keine zweite Ableitung mehr – es reicht, die Nullstellen von f' zu suchen.
+      </button>
+      <button class="tap-btn" style="width:100%;text-align:left" onclick="checkTrick(this,'c')">
+        Das funktioniert nur bei kubischen Funktionen, nicht allgemein.
+      </button>
+    </div>
+
+    <div class="feedback" id="fb8"></div>
+
+    <div id="trickResult" style="display:none">
+      <div class="highlight-box orange" style="margin-top:16px">
+        🔗 <strong>Zusammenhang der Kriterien:</strong><br>
+        Wendestelle von f &nbsp;⟺&nbsp; Extremstelle von f'<br>
+        Das notwendige Kriterium <span class="inline-math">f''(x₀) = 0</span> ist dasselbe wie das notwendige Kriterium für ein Extremum von f' (nämlich (f')' = f'' = 0).<br>
+        Und der Vorzeichenwechsel von f'' entspricht dem Vorzeichenwechsel von (f')' – also liegt tatsächlich ein Extremum von f' vor!
+      </div>
+
+      <!-- Mini-Rechnung: f'(x)=3x²-6x, Extremum bei x=1 -->
+      <div style="margin-top:16px; font-size:16px; font-weight:700; color:var(--accent4)">Nachrechnen mit f(x) = x³ − 3x² + 2:</div>
+      <div class="math-block" style="margin-top:8px">
+        f'(x) = 3x² − 6x<br>
+        <span style="color:var(--muted)">Extremum von f' wo?</span><br>
+        f''(x) = 6x − 6 = 0 &nbsp;→&nbsp; x₀ = 1<br>
+        <span style="color:var(--accent3)">→ Tiefpunkt von f' bei x₀ = 1 &nbsp;=&nbsp; Wendepunkt von f ✓</span>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-next" id="next8" onclick="goStep(9)">Zur Zusammenfassung →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     SCHRITT 9 – Zusammenfassung
+═══════════════════════════════════════════════ -->
+<div class="step" id="step9">
+  <div class="step-header">
+    <div class="step-number">🏆</div>
+    <div>
+      <div class="step-title">Alles auf einen Blick</div>
+      <div class="step-subtitle">Das vollständige Verfahren</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="summary-box">
+      <div style="font-size:40px;margin-bottom:8px">🔄</div>
+      <h2 style="background:linear-gradient(135deg,var(--accent1),var(--accent3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">Wendepunkte berechnen</div>
+      <p>Das vollständige Verfahren + Bonustrick</p>
+    </div>
+
+    <div class="rule-card" style="margin-top:20px; border-color:var(--accent1)">
+      <h3>Schritt 1 – Ableitungen bilden</h3>
+      <p>Berechne f'(x) und f''(x).</p>
+    </div>
+
+    <div class="rule-card" style="border-color:var(--accent4)">
+      <h3>Schritt 2 – Notwendiges Kriterium</h3>
+      <p>Setze <span class="inline-math">f''(x) = 0</span> und löse nach x. Die Lösungen heißen <em>Kandidaten</em>.</p>
+    </div>
+
+    <div class="rule-card" style="border-color:var(--accent3)">
+      <h3>Schritt 3 – Hinreichendes Kriterium</h3>
+      <p><strong>Methode 1:</strong> Vorzeichenwechsel von f'' an x₀ prüfen (Testpunkte links und rechts). Wechselt das Vorzeichen: Wendestelle ✅<br>
+      <strong>Methode 2:</strong> f'''(x₀) ≠ 0 prüfen. Wenn f''(x₀) = 0 und f'''(x₀) ≠ 0: Wendestelle ✅ (kein VZW nötig!)</p>
+    </div>
+
+    <div class="rule-card" style="border-color:var(--accent2)">
+      <h3>Schritt 4 – Koordinaten bestimmen</h3>
+      <p>Berechne den y-Wert: <span class="inline-math">y₀ = f(x₀)</span>. Wendepunkt: <span class="inline-math">W(x₀ | y₀)</span></p>
+    </div>
+
+    <div class="rule-card" style="border-color:var(--accent4); background: rgba(247,201,106,0.06)">
+      <h3 style="color:var(--accent4)">💡 Bonustrick – Wendestelle = Extremstelle von f'</h3>
+      <p>Wendepunkte von f liegen genau dort, wo f' ein Extremum hat. Das Verfahren ist identisch: f'' = 0 setzen, Vorzeichenwechsel von f'' prüfen – denn (f')' = f''.</p>
+    </div>
+
+    <div class="highlight-box" style="margin-top:18px">
+      📝 <strong>Für unser Beispiel f(x) = x³ − 3x² + 2:</strong><br>
+      f'(x) = 3x² − 6x &nbsp;|&nbsp; f''(x) = 6x − 6 &nbsp;|&nbsp; f'''(x) = 6<br>
+      f''(x) = 0 → x₀ = 1<br>
+      Methode 1: f'' wechselt von − zu + ✅<br>
+      Methode 2: f'''(1) = 6 ≠ 0 ✅<br>
+      <strong>Wendepunkt: W(1 | 0)</strong>
+    </div>
+
+    <div style="margin-top:24px; text-align:center">
+      <button class="btn btn-primary" onclick="restart()" style="min-width:200px">
+        🔄 Nochmal von vorne
+      </button>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<script>
+  const TOTAL = 9;
+  let currentStep = 1;
+  const stepsDone = new Set();
+
+  const nav = document.getElementById("stepNav");
+  for (let i = 1; i <= TOTAL; i++) {
+    const d = document.createElement("div");
+    d.className = "step-dot" + (i === 1 ? " active" : "");
+    d.id = "dot" + i;
+    d.textContent = i < TOTAL ? i : "\uD83C\uDFC6";
+    d.onclick = () => { if (stepsDone.has(i) || i === currentStep) goStep(i); };
+    nav.appendChild(d);
+  }
+
+  function updateProgress() {
+    const pct = ((currentStep - 1) / (TOTAL - 1)) * 100;
+    document.getElementById("progress-bar").style.width = pct + "%";
+    for (let i = 1; i <= TOTAL; i++) {
+      const d = document.getElementById("dot" + i);
+      d.className = "step-dot";
+      if (i === currentStep) d.classList.add("active");
+      else if (stepsDone.has(i)) d.classList.add("done");
+    }
+  }
+
+  function goStep(n) {
+    stepsDone.add(currentStep);
+    document.getElementById("step" + currentStep).classList.remove("active");
+    currentStep = n;
+    document.getElementById("step" + n).classList.add("active");
+    updateProgress();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function showFeedback(id, ok, msg) {
+    const el = document.getElementById(id);
+    el.className = "feedback show " + (ok ? "ok" : "err");
+    el.textContent = (ok ? "\u2705 " : "\u274C ") + msg;
+  }
+
+  function showNext(id) {
+    const btn = document.getElementById(id);
+    if (btn) btn.classList.add("show");
+  }
+
+  // Step 1
+  function selectCurv(el) {
+    document.querySelectorAll("#curvCards .curv-card").forEach(c => c.classList.remove("selected"));
+    el.classList.add("selected");
+  }
+
+  function checkCurv(btn, val) {
+    document.querySelectorAll("#curvChoices .tap-btn").forEach(b => b.classList.remove("selected","correct","wrong"));
+    if (val === "rechts") {
+      btn.classList.add("correct");
+      showFeedback("fb1", true, "Genau! Der rechte Teil woelbt sich nach unten \u2013 das ist eine Rechtskurve (f'' < 0).");
+      showNext("next1");
+    } else {
+      btn.classList.add("wrong");
+      showFeedback("fb1", false, "Schau genauer hin: Der rechte Teil ist wie ein Huegel \u2013 das ist eine Rechtskurve.");
+    }
+  }
+
+  // Step 2
+  function checkWP(btn, val) {
+    document.querySelectorAll("#step2 .tap-btn").forEach(b => b.classList.remove("correct","wrong"));
+    if (val === "b") {
+      btn.classList.add("correct");
+      showFeedback("fb2", true, "Richtig! Am Wendepunkt wechselt die Kruemmungsrichtung der Kurve.");
+      showNext("next2");
+    } else {
+      btn.classList.add("wrong");
+      showFeedback("fb2", false, "Das passt nicht. Ein Wendepunkt ist kein Extrem- oder Nullpunkt \u2013 es geht um die Kruemmungsrichtung.");
+    }
+  }
+
+  // Step 3
+  let selectedChip = null;
+
+  function selectChip(el) {
+    document.querySelectorAll(".label-chip").forEach(c => c.classList.remove("selected"));
+    el.classList.add("selected");
+    selectedChip = el;
+  }
+
+  function placeChip(dz) {
+    if (!selectedChip) {
+      dz.style.borderStyle = "solid";
+      dz.style.borderColor = "var(--accent4)";
+      setTimeout(() => { dz.style.borderStyle = "dashed"; dz.style.borderColor = "var(--border)"; }, 600);
+      return;
+    }
+    if (dz.classList.contains("filled")) {
+      const oldVal = dz.dataset.placed;
+      document.querySelectorAll(".label-chip").forEach(c => {
+        if (c.dataset.val === oldVal) c.classList.remove("placed");
+      });
+      dz.classList.remove("filled","ready");
+      dz.textContent = "Tippe hier";
+      dz.dataset.placed = "";
+    }
+    dz.textContent = selectedChip.textContent;
+    dz.dataset.placed = selectedChip.dataset.val;
+    dz.classList.add("filled");
+    selectedChip.classList.add("placed");
+    selectedChip.classList.remove("selected");
+    selectedChip = null;
+  }
+
+  function checkAssign() {
+    const dz1 = document.getElementById("dz1");
+    const dz2 = document.getElementById("dz2");
+    if (!dz1.dataset.placed || !dz2.dataset.placed) {
+      showFeedback("fb3", false, "Bitte beide Felder ausf\u00fcllen!");
+      return;
+    }
+    const ok1 = dz1.dataset.placed === dz1.dataset.ans;
+    const ok2 = dz2.dataset.placed === dz2.dataset.ans;
+    if (ok1 && ok2) {
+      showFeedback("fb3", true, "Super! f'' > 0 \u2192 Sch\u00fcssel (Linkskurve), f'' < 0 \u2192 H\u00fcgel (Rechtskurve).");
+      showNext("next3");
+    } else {
+      showFeedback("fb3", false, "Noch nicht ganz. Denk daran: Sch\u00fcssel = konkav nach oben = f'' > 0.");
+    }
+  }
+
+  // Step 4
+  function checkNot(btn, val) {
+    document.querySelectorAll("#step4 .tap-btn").forEach(b => b.classList.remove("correct","wrong"));
+    if (val === "a") {
+      btn.classList.add("correct");
+      showFeedback("fb4", true, "Genau! Beim Terrassenpunkt ist f'' zwar null, aber das Vorzeichen wechselt nicht \u2013 also kein Wendepunkt.");
+      showNext("next4");
+    } else {
+      btn.classList.add("wrong");
+      showFeedback("fb4", false, "Nicht ganz. Beim Terrassenpunkt ist f'' schon mal null \u2013 aber es fehlt der Vorzeichenwechsel.");
+    }
+  }
+
+  // Step 5
+  function checkHin(btn, val) {
+    document.querySelectorAll("#step5 .tap-btn").forEach(b => b.classList.remove("correct","wrong"));
+    if (val === "b") {
+      btn.classList.add("correct");
+      showFeedback("fb5", true, "Richtig! Der Vorzeichenwechsel von \u2212 zu + best\u00e4tigt den Wendepunkt.");
+      showNext("next5");
+    } else {
+      btn.classList.add("wrong");
+      showFeedback("fb5", false, "Schau auf das Vorzeichen: Es muss wechseln UND f'' muss null sein.");
+    }
+  }
+
+  // Step 6
+  let derivsOk = false;
+
+  function checkDerivs() {
+    const a = document.getElementById("in_a").value.trim();
+    const b = document.getElementById("in_b").value.trim();
+    const c = document.getElementById("in_c").value.trim();
+    const d = document.getElementById("in_d").value.trim();
+    const f1ok = (a === "3" && b === "6");
+    const f2ok = (c === "6" && d === "6");
+    if (a !== "") document.getElementById("in_a").className = "calc-input " + (a === "3" ? "correct" : "wrong");
+    if (b !== "") document.getElementById("in_b").className = "calc-input " + (b === "6" ? "correct" : "wrong");
+    if (f1ok) {
+      showFeedback("fb6a", true, "f(x) = 3x\u00b2 \u2212 6x \u2713");
+      if (c !== "") document.getElementById("in_c").className = "calc-input " + (c === "6" ? "correct" : "wrong");
+      if (d !== "") document.getElementById("in_d").className = "calc-input " + (d === "6" ? "correct" : "wrong");
+    }
+    if (f1ok && f2ok) {
+      showFeedback("fb6b", true, "f''(x) = 6x \u2212 6 \u2713");
+      derivsOk = true;
+    }
+  }
+
+  function checkX0() {
+    const v = document.getElementById("in_x0").value.trim();
+    if (v === "1") {
+      document.getElementById("in_x0").className = "calc-input correct";
+      showFeedback("fb6c", true, "x\u2080 = 1 \u2713 Jetzt den Vorzeichenwechsel pr\u00fcfen!");
+      showNext("next6");
+    } else if (v.length > 0) {
+      document.getElementById("in_x0").className = "calc-input wrong";
+      showFeedback("fb6c", false, "L\u00f6se: 6x = 6 \u2192 x = ?");
+    }
+  }
+
+  function checkY0() {
+    const v = document.getElementById("in_y0").value.trim();
+    if (v === "0") {
+      document.getElementById("in_y0").className = "calc-input correct";
+      showFeedback("fb6d", true, "f(1) = 1 \u2212 3 + 2 = 0 \u2713 Wendepunkt: W(1 | 0)!");
+      showNext("next7");
+    } else if (v.length > 0) {
+      document.getElementById("in_y0").className = "calc-input wrong";
+      showFeedback("fb6d", false, "1\u00b3 \u2212 3\u00b71\u00b2 + 2 = ?");
+    }
+  }
+
+  // Step 7
+  function checkVZW(btn, val) {
+    document.querySelectorAll("#step7 .tap-btn").forEach(b => b.classList.remove("correct","wrong"));
+    if (val === "a") {
+      btn.classList.add("correct");
+      showFeedback("fb7", true, "Perfekt! Der Vorzeichenwechsel von \u2212 zu + beweist den Wendepunkt.");
+      document.getElementById("vzwResult").style.display = "block";
+      showNext("next7");
+    } else {
+      btn.classList.add("wrong");
+      showFeedback("fb7", false, "Nein \u2013 schau auf das Vorzeichen von f'': Es wechselt von \u2212 (bei x=0) zu + (bei x=2).");
+    }
+  }
+
+  // Step 8
+  function checkTrick(btn, val) {
+    document.querySelectorAll("#step8 .tap-btn").forEach(b => b.classList.remove("correct","wrong"));
+    if (val === "a") {
+      btn.classList.add("correct");
+      showFeedback("fb8", true, "Genau! Die Rechenvorschrift ist dieselbe \u2013 f'' = 0 und Vorzeichenwechsel \u2013 aber jetzt verstehen wir warum: Wir suchen den Extrempunkt von f'.");
+      document.getElementById("trickResult").style.display = "block";
+      showNext("next8");
+    } else if (val === "b") {
+      btn.classList.add("wrong");
+      showFeedback("fb8", false, "Nicht ganz \u2013 Nullstellen von f' liefern Extrempunkte von f, nicht Wendepunkte. Wir brauchen f''.");
+    } else {
+      btn.classList.add("wrong");
+      showFeedback("fb8", false, "Das stimmt nicht \u2013 der Zusammenhang gilt allgemein f\u00fcr jede differenzierbare Funktion.");
+    }
+  }
+
+  function restart() {
+    stepsDone.clear();
+    document.querySelectorAll(".calc-input").forEach(i => { i.value = ""; i.className = "calc-input"; });
+    document.querySelectorAll(".feedback").forEach(f => f.className = "feedback");
+    document.querySelectorAll(".tap-btn").forEach(b => b.classList.remove("correct","wrong","selected"));
+    document.querySelectorAll(".btn-next").forEach(b => b.classList.remove("show"));
+    document.querySelectorAll(".label-chip").forEach(c => c.classList.remove("placed","selected"));
+    document.querySelectorAll(".drop-zone").forEach(d => {
+      d.classList.remove("filled","ready");
+      d.textContent = "Tippe hier";
+      d.dataset.placed = "";
+    });
+    document.getElementById("vzwResult").style.display = "none";
+    document.getElementById("trickResult").style.display = "none";
+    selectedChip = null;
+    goStep(1);
+    stepsDone.clear();
+  }
+
+  updateProgress();
+</script>
+</body>
+</html>

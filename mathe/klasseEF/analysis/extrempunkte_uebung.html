@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Extrempunkte – Interaktive Übung</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,500;1,8..60,300&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #f0ebe0;
+  min-height: 100vh;
+  font-family: 'Source Serif 4', Georgia, serif;
+  color: #2c1f0a;
+  padding: 1.2rem 0.8rem 3rem;
+}
+
+/* ── Page header ── */
+.page-header { text-align: center; margin-bottom: 0.9rem; }
+h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(1.1rem, 3vw, 1.6rem);
+  color: #1a1209;
+  margin-bottom: 0.15rem;
+}
+.subtitle { font-style: italic; font-size: 0.80rem; color: #7a6a50; }
+
+/* ── Phase indicator ── */
+.phase-bar {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin: 0.7rem auto 0.9rem;
+  max-width: 460px;
+}
+.phase-dot {
+  flex: 1;
+  padding: 0.38rem 0.4rem;
+  border-radius: 4px;
+  text-align: center;
+  font-size: 0.74rem;
+  font-weight: 600;
+  background: #e8dfc8;
+  color: #9a8060;
+  transition: background .3s, color .3s;
+  font-family: 'Playfair Display', serif;
+}
+.phase-dot.active { background: #c47a30; color: #fff; }
+.phase-dot.done   { background: #4a7c3f; color: #fff; }
+
+/* ── Instruction ── */
+.instruction {
+  text-align: center;
+  font-size: 0.82rem;
+  color: #5a4a30;
+  background: #fdf5e0;
+  border: 1px solid #e8dfc8;
+  border-radius: 5px;
+  padding: 0.4rem 0.8rem;
+  margin: 0 auto 1.1rem;
+  max-width: 700px;
+  line-height: 1.6;
+}
+.instruction strong { color: #c47a30; }
+
+/* ── Outer container ── */
+.outer { max-width: 1000px; margin: 0 auto; }
+
+/* ── Pool panel (top) ── */
+.pool-panel {
+  background: #fffdf8;
+  border-radius: 6px;
+  box-shadow: 0 2px 14px rgba(60,40,10,.09);
+  padding: 0.85rem;
+  margin-bottom: 1rem;
+}
+.pool-panel .panel-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 0.75rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: #7a6a50;
+  margin-bottom: 0.65rem;
+  padding-bottom: 0.3rem;
+  border-bottom: 1px solid #e8dfc8;
+}
+/* Pool cards flow horizontally, wrap */
+#card-pool {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+#card-pool .card {
+  flex: 1 1 220px;
+  max-width: 100%;
+}
+
+/* ── Assignment panel (bottom) ── */
+.assign-panel {
+  background: #fffdf8;
+  border-radius: 6px;
+  box-shadow: 0 2px 14px rgba(60,40,10,.09);
+  overflow: hidden;
+}
+
+/* Table header */
+.assign-header {
+  display: grid;
+  gap: 0;
+  background: #1a1209;
+  padding: 0.6rem 0.9rem;
+}
+.assign-header.two-col  { grid-template-columns: 1fr 1fr; gap: 1rem; }
+.assign-header.three-col{ grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+.assign-header.one-col  { grid-template-columns: 1fr; }
+.assign-header .col-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 0.74rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: #e8dfc8;
+}
+
+/* Section header row (spans full width) */
+.section-head-row {
+  display: block;
+  background: #3b2a0f;
+  padding: 0.28rem 0.9rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  color: #e8dfc8;
+}
+.section-head-row.alt2 { background: #5c3d15; }
+
+/* Data rows */
+.assign-row {
+  display: grid;
+  border-bottom: 1px solid #ede5d0;
+  align-items: stretch;
+}
+.assign-row:last-child { border-bottom: none; }
+.assign-row.two-col   { grid-template-columns: 1fr 1fr; }
+.assign-row.three-col { grid-template-columns: 1fr 1fr 1fr; }
+.assign-row.one-col   { grid-template-columns: 1fr; }
+
+/* Vorgehen cell in phase 3 – matches anchor style but white background */
+.vorgehen-cell {
+  background: #fffdf8 !important;
+  border-right: 1px solid #ede5d0 !important;
+  font-size: 0.80rem;
+  color: #2c1f0a;
+  font-style: normal;
+  line-height: 1.55;
+  padding: 0.55rem 0.9rem;
+  display: block !important;
+}
+.vorgehen-cell .math {
+  font-style: italic;
+  color: #6b3a10;
+}
+
+/* Anchor cell (left) */
+.anchor-cell {
+  padding: 0.55rem 0.9rem;
+  border-right: 1px solid #ede5d0;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #faf7f0;
+}
+.anchor-cell .badge {
+  display: inline-block;
+  background: #7a6a50;
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  border-radius: 3px;
+  padding: 0.05em 0.38em;
+  font-family: 'Playfair Display', serif;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Drop cell (right for two-col; full row for one-col) */
+.drop-cell {
+  padding: 0.4rem 0.6rem;
+  display: flex;
+  align-items: center;
+}
+
+/* ── Drop zone ── */
+.drop-zone {
+  width: 100%;
+  min-height: 48px;
+  border: 2px dashed #d0c5ae;
+  border-radius: 5px;
+  padding: 0.3rem;
+  cursor: pointer;
+  transition: background .15s, border-color .15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.drop-zone .slot-hint {
+  font-size: 0.70rem;
+  color: #c0b09a;
+  font-style: italic;
+  padding: 0.45rem 0.35rem;
+  pointer-events: none;
+}
+.drop-zone.ready  { border-color: #c47a30; background: #fff8ed; border-style: solid; }
+.drop-zone.filled { border-style: solid; border-color: #ddd5be; }
+.drop-zone.correct { border-color: #4a7c3f !important; background: #eef8ec !important; }
+.drop-zone.wrong   { border-color: #b03030 !important; background: #fff2f2 !important; }
+
+/* Phase 1: full-width drop zone rows (no anchor) */
+.drop-only-cell {
+  padding: 0.4rem 0.6rem;
+}
+
+/* ── Cards ── */
+.card {
+  background: #faf5ea;
+  border: 2.5px solid #e8dfc8;
+  border-radius: 5px;
+  padding: 0.52rem 0.7rem 0.52rem 1.5rem;
+  font-size: 0.81rem;
+  line-height: 1.5;
+  cursor: pointer;
+  transition: border-color .15s, background .15s, transform .1s, box-shadow .15s;
+  position: relative;
+  -webkit-tap-highlight-color: transparent;
+}
+.card::before {
+  content: '☰';
+  position: absolute;
+  left: 0.45rem;
+  top: 0.6rem;
+  color: #c0b09a;
+  font-size: 0.78rem;
+  pointer-events: none;
+}
+.card:hover   { border-color: #c47a30; background: #fff8ed; }
+.card.selected {
+  border-color: #c47a30;
+  background: #fff3e0;
+  box-shadow: 0 0 0 3px rgba(196,122,48,.25);
+  transform: scale(1.01);
+}
+.card .math  { font-style: italic; color: #6b3a10; }
+.card .badge {
+  display: inline-block;
+  background: #c47a30; color: #fff;
+  font-size: 0.65rem; font-weight: 700;
+  border-radius: 3px; padding: 0.05em 0.38em;
+  margin-right: 0.28rem; vertical-align: middle;
+  font-family: 'Playfair Display', serif;
+}
+.card .tag {
+  display: block;
+  font-size: 0.65rem;
+  color: #b0a090;
+  font-style: italic;
+  margin-top: 0.18rem;
+}
+
+/* ── Controls ── */
+.controls {
+  display: flex; gap: 0.6rem;
+  justify-content: center;
+  margin: 1.1rem auto 0;
+  max-width: 1000px;
+  flex-wrap: wrap;
+}
+button {
+  font-family: 'Source Serif 4', serif;
+  font-size: 0.84rem; border: none;
+  border-radius: 4px; padding: 0.52rem 1.2rem;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform .1s;
+}
+button:active { transform: scale(.96); }
+#btn-check { background: #c47a30; color: #fff; font-weight: 600; }
+#btn-show  { background: #4a7c3f; color: #fff; }
+#btn-next  { background: #3a7ab0; color: #fff; font-weight: 600; display: none; }
+#btn-reset { background: #1a1209; color: #e8dfc8; }
+
+/* ── Banner ── */
+#result-banner {
+  max-width: 1000px; margin: 0.85rem auto 0;
+  border-radius: 6px; padding: 0.6rem 1rem;
+  font-size: 0.87rem; font-weight: 600;
+  display: none; text-align: center; line-height: 1.5;
+}
+#result-banner.success { background: #e6f5e2; color: #2f6b25; border: 1.5px solid #4a7c3f; }
+#result-banner.partial { background: #fff6e0; color: #7a4a10; border: 1.5px solid #c47a30; }
+.score-line { text-align: center; font-size: 0.78rem; color: #9a8060; margin-top: 0.4rem; }
+
+.fade-in { animation: fadeIn .35s ease; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:none; } }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>Extrempunkte rechnerisch bestimmen</h1>
+  <p class="subtitle">Interaktive Übung in 3 Phasen · Differentialrechnung</p>
+</div>
+
+<div class="phase-bar">
+  <div class="phase-dot active" id="pd1">① Reihenfolge</div>
+  <div class="phase-dot"        id="pd2">② Vorgehen</div>
+  <div class="phase-dot"        id="pd3">③ Bedeutung</div>
+</div>
+
+<p class="instruction" id="instr"></p>
+
+<div class="outer fade-in" id="game-area"></div>
+
+<div class="controls">
+  <button id="btn-check">✓ Überprüfen</button>
+  <button id="btn-show">★ Lösung zeigen</button>
+  <button id="btn-next">Weiter →</button>
+  <button id="btn-reset">↺ Neu starten</button>
+</div>
+<div id="result-banner"></div>
+<div class="score-line" id="score-line"></div>
+
+<script>
+// ═══════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════
+const STEPS = [
+  {
+    id: 'step1', badge: '1', group: 'fixed',
+    short: 'Ableitungen bilden',
+    stepHtml: `<span class="badge">1</span><strong>Ableitungen bilden</strong><br>
+      <span class="math">f'(x)</span> und <span class="math">f''(x)</span> berechnen
+      <span class="tag">Vorbereitung für beide Wege</span>`,
+    vorgehenHtml: `Die erste und zweite Ableitung von <span class="math">f(x)</span> nach den Ableitungsregeln berechnen.`,
+    bedeutungHtml: `<span class="math">f'(x)</span> beschreibt die Steigung – Extrempunkte liegen dort, wo sie null wird. <span class="math">f''(x)</span> wird für Alternative II benötigt.`,
+  },
+  {
+    id: 'step2', badge: '2', group: 'fixed',
+    short: 'Notwendige Bedingung lösen',
+    stepHtml: `<span class="badge">2</span><strong>Notwendige Bedingung lösen</strong><br>
+      <span class="math">f'(x) = 0</span> → Kandidaten <span class="math">x₁, x₂, …</span>
+      <span class="tag">Für beide Alternativen</span>`,
+    vorgehenHtml: `<span class="math">f'(x) = 0</span> setzen und nach <span class="math">x</span> auflösen. Jede Lösung ist ein Kandidat für eine Extremstelle.`,
+    bedeutungHtml: `An einem Extrempunkt ist die Steigung genau null. <strong>Achtung:</strong> Nicht jede Nullstelle von <span class="math">f'</span> ist ein Extrempunkt (notwendig ≠ hinreichend).`,
+  },
+  {
+    id: 'step3a', badge: '3a', group: 'altA', pairOrder: 0,
+    short: 'Vorzeichenwechsel prüfen',
+    stepHtml: `<span class="badge">3a</span><strong>Vorzeichenwechsel prüfen</strong><br>
+      <span class="math">f'(x)</span> links &amp; rechts von <span class="math">xᵢ</span> auswerten
+      <span class="tag">Alternative I</span>`,
+    vorgehenHtml: `Testwerte links und rechts von <span class="math">xᵢ</span> in <span class="math">f'(x)</span> einsetzen:<br>
+      <strong>+ → −</strong>: Hochpunkt &nbsp;|&nbsp; <strong>− → +</strong>: Tiefpunkt &nbsp;|&nbsp; kein Wechsel: kein Extrempunkt`,
+    bedeutungHtml: `Der Vorzeichenwechsel zeigt, ob die Funktion vor <span class="math">xᵢ</span> steigt und danach fällt (Hochpunkt) oder umgekehrt (Tiefpunkt). Funktioniert auch wenn <span class="math">f''(xᵢ) = 0</span> ist.`,
+  },
+  {
+    id: 'step4a', badge: '4a', group: 'altA', pairOrder: 1,
+    short: 'y-Koordinate berechnen',
+    stepHtml: `<span class="badge">4a</span><strong>y-Koordinate berechnen</strong><br>
+      <span class="math">xᵢ</span> in <span class="math">f(x)</span> → <span class="math">E(xᵢ | f(xᵢ))</span>
+      <span class="tag">Alternative I – Abschluss</span>`,
+    vorgehenHtml: `Die Extremstelle <span class="math">xᵢ</span> in die Originalfunktion <span class="math">f(x)</span> einsetzen und den y-Wert berechnen.`,
+    bedeutungHtml: `Ein Extrempunkt braucht beide Koordinaten: <span class="math">E(xᵢ | f(xᵢ))</span>. Ohne y-Wert ist die Aufgabe unvollständig.`,
+  },
+  {
+    id: 'step3b', badge: '3b', group: 'altB', pairOrder: 0,
+    short: 'Kandidaten in 2. Ableitung einsetzen',
+    stepHtml: `<span class="badge">3b</span><strong>Kandidaten in 2. Ableitung einsetzen</strong><br>
+      <span class="math">f''(xᵢ)</span> berechnen und Vorzeichen ablesen
+      <span class="tag">Alternative II</span>`,
+    vorgehenHtml: `<span class="math">xᵢ</span> in <span class="math">f''(x)</span> einsetzen:<br>
+      <strong><span class="math">f''(xᵢ) &lt; 0</span></strong>: Hochpunkt &nbsp;|&nbsp;
+      <strong><span class="math">f''(xᵢ) &gt; 0</span></strong>: Tiefpunkt &nbsp;|&nbsp;
+      <strong><span class="math">f''(xᵢ) = 0</span></strong>: → Alt. I verwenden`,
+    bedeutungHtml: `<span class="math">f''(x)</span> gibt die Krümmung an. Negative Krümmung = Hochpunkt; positive Krümmung = Tiefpunkt. Schneller als Alt. I, aber versagt bei <span class="math">f''(xᵢ) = 0</span>.`,
+  },
+  {
+    id: 'step4b', badge: '4b', group: 'altB', pairOrder: 1,
+    short: 'y-Werte ausrechnen',
+    stepHtml: `<span class="badge">4b</span><strong>y-Werte mit der Funktion ausrechnen</strong><br>
+      <span class="math">xᵢ</span> in <span class="math">f(x)</span> → <span class="math">E(xᵢ | f(xᵢ))</span>
+      <span class="tag">Alternative II – Abschluss</span>`,
+    vorgehenHtml: `Die Extremstelle <span class="math">xᵢ</span> in die Originalfunktion <span class="math">f(x)</span> einsetzen und <span class="math">yᵢ</span> ausrechnen.`,
+    bedeutungHtml: `Identisch wie 4a: Der vollständige Extrempunkt lautet <span class="math">E(xᵢ | f(xᵢ))</span>. Erst damit kann der Punkt eingetragen oder verglichen werden.`,
+  },
+];
+
+// ═══════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════
+let phase = 1;
+let selected = null;
+let solvedOrder = [];    // step ids after phase 1
+let solvedVorgehen = {}; // stepId -> vorgehenHtml after phase 2
+
+// ═══════════════════════════════════════════
+// PHASE 1 – Reihenfolge
+// Slots: s0,s1 fixed; s2,s3 first alt; s4,s5 second alt
+// ═══════════════════════════════════════════
+const P1_SLOTS = [
+  { id:'s0', label:'Schritt 1 hier ablegen …' },
+  { id:'s1', label:'Schritt 2 hier ablegen …' },
+  { id:'s2', label:'1. Schritt der ersten Alternative …' },
+  { id:'s3', label:'2. Schritt der ersten Alternative …' },
+  { id:'s4', label:'1. Schritt der zweiten Alternative …' },
+  { id:'s5', label:'2. Schritt der zweiten Alternative …' },
+];
+
+function buildPhase1() {
+  document.getElementById('instr').innerHTML =
+    '<strong>① Karte antippen</strong> (wird orange) → <strong>② Zielfeld antippen</strong> zum Platzieren. ' +
+    'Platzierte Karte antippen = zurück.<br>' +
+    '<em>Tipp: Alternative I und II dürfen vertauscht werden!</em>';
+
+  const area = document.getElementById('game-area');
+  area.innerHTML = '';
+
+  // ── Pool panel ──
+  const poolPanel = makePoolPanel();
+  [...STEPS].sort(() => Math.random() - 0.5).forEach(step => {
+    poolPanel.querySelector('#card-pool').appendChild(makeCard(step.id, step.stepHtml, onCardClick1));
+  });
+
+  // ── Assignment panel ──
+  const assignPanel = document.createElement('div');
+  assignPanel.className = 'assign-panel';
+
+  // Header (single column)
+  const hdr = document.createElement('div');
+  hdr.className = 'assign-header one-col';
+  hdr.innerHTML = '<div class="col-title">Richtige Reihenfolge</div>';
+  assignPanel.appendChild(hdr);
+
+  // Rows
+  P1_SLOTS.forEach((slot, i) => {
+    if (i === 2) assignPanel.appendChild(makeSectionHeadRow('Erste Alternative (I oder II)', false));
+    if (i === 4) assignPanel.appendChild(makeSectionHeadRow('Zweite Alternative (I oder II)', true));
+
+    const row = document.createElement('div');
+    row.className = 'assign-row one-col';
+
+    const dropCell = document.createElement('div');
+    dropCell.className = 'drop-only-cell';
+    const dz = makeDropZone(slot.id, slot.label);
+    dz.addEventListener('click', () => onZoneClick1(dz));
+    dropCell.appendChild(dz);
+    row.appendChild(dropCell);
+    assignPanel.appendChild(row);
+  });
+
+  area.appendChild(poolPanel);
+  area.appendChild(assignPanel);
+}
+
+function onCardClick1(card) {
+  clearFeedback();
+  if (card.parentElement.classList.contains('drop-zone')) { returnToPool(card); deselectAll(); return; }
+  if (card.classList.contains('selected')) { deselectAll(); return; }
+  deselectAll();
+  card.classList.add('selected');
+  selected = card;
+  document.querySelectorAll('.drop-zone').forEach(dz => { if (!dz.querySelector('.card')) dz.classList.add('ready'); });
+}
+
+function onZoneClick1(dz) {
+  clearFeedback();
+  if (selected) {
+    const ex = dz.querySelector('.card');
+    if (ex) returnToPool(ex);
+    placeCard(dz, selected);
+  } else {
+    const ex = dz.querySelector('.card');
+    if (ex) { returnToPool(ex); deselectAll(); }
+  }
+}
+
+function checkPhase1() {
+  deselectAll();
+  const gc = id => { const dz = document.querySelector(`.drop-zone[data-slot="${id}"]`); return dz ? dz.querySelector('.card') : null; };
+  const c = { s0:gc('s0'), s1:gc('s1'), s2:gc('s2'), s3:gc('s3'), s4:gc('s4'), s5:gc('s5') };
+  const r = { s0: c.s0?.dataset.id==='step1', s1: c.s1?.dataset.id==='step2', s2:false, s3:false, s4:false, s5:false };
+
+  if (c.s2 && c.s3 && c.s4 && c.s5) {
+    const f = [c.s2.dataset.id, c.s3.dataset.id];
+    const s = [c.s4.dataset.id, c.s5.dataset.id];
+    const is3 = id => id==='step3a'||id==='step3b';
+    const is4 = id => id==='step4a'||id==='step4b';
+    const validBlock = (a,b) => is3(a) && is4(b);
+    const diffGroup = (a,b) => !((a==='step3a'&&b==='step3a')||(a==='step3b'&&b==='step3b'));
+    if (validBlock(f[0],f[1]) && validBlock(s[0],s[1]) && diffGroup(f[0],s[0])) {
+      r.s2=r.s3=r.s4=r.s5=true;
+    } else {
+      r.s2 = is3(f[0]);
+      r.s3 = c.s2 && is3(c.s2.dataset.id) && is4(f[1]);
+      r.s4 = is3(s[0]) && s[0]!==f[0];
+      r.s5 = c.s4 && is3(c.s4.dataset.id) && is4(s[1]);
+    }
+  }
+
+  let correct=0;
+  ['s0','s1','s2','s3','s4','s5'].forEach(k=>{
+    const dz=document.querySelector(`.drop-zone[data-slot="${k}"]`);
+    if(!dz) return;
+    dz.classList.remove('correct','wrong');
+    if(dz.querySelector('.card')){ dz.classList.add(r[k]?'correct':'wrong'); if(r[k]) correct++; }
+  });
+
+  const allFilled=['s0','s1','s2','s3','s4','s5'].every(k=>gc(k));
+  const allCorrect=Object.values(r).every(v=>v);
+  showBanner(correct,6,allFilled&&allCorrect,allFilled);
+  if(allFilled&&allCorrect){
+    solvedOrder=['s0','s1','s2','s3','s4','s5'].map(k=>gc(k).dataset.id);
+    document.getElementById('btn-next').style.display='inline-block';
+  }
+}
+
+function showPhase1Solution() {
+  deselectAll(); clearFeedback();
+  const placement={s0:'step1',s1:'step2',s2:'step3a',s3:'step4a',s4:'step3b',s5:'step4b'};
+  Object.entries(placement).forEach(([slot,cardId])=>{
+    const card=document.querySelector(`[data-id="${cardId}"]`);
+    const dz=document.querySelector(`.drop-zone[data-slot="${slot}"]`);
+    if(!card||!dz) return;
+    hideHint(dz); dz.classList.remove('ready','wrong'); dz.classList.add('filled','correct');
+    dz.appendChild(card); card.classList.remove('selected');
+  });
+  solvedOrder=['step1','step2','step3a','step4a','step3b','step4b'];
+  showSuccessBanner('✅ Eine mögliche Lösung – Alternative I und II dürfen auch vertauscht werden.');
+  document.getElementById('btn-next').style.display='inline-block';
+}
+
+// ═══════════════════════════════════════════
+// PHASE 2 & 3 – Match phases
+// ═══════════════════════════════════════════
+function buildPhase2() {
+  document.getElementById('instr').innerHTML =
+    '<strong>① Karte antippen</strong> → <strong>② passendes Feld antippen</strong>.<br>' +
+    'Ordne jeder Zeile das richtige Vorgehen zu.';
+  buildMatchPhase('vorgehen', s=>s.vorgehenHtml, 'Vorgehen (Wie?)');
+}
+
+function buildPhase3() {
+  document.getElementById('instr').innerHTML =
+    '<strong>① Karte antippen</strong> → <strong>② passendes Feld antippen</strong>.<br>' +
+    'Das Vorgehen (Phase 2) steht bereits in der Tabelle – ordne jetzt die Bedeutung zu.';
+
+  const area = document.getElementById('game-area');
+  area.innerHTML = '';
+
+  // Build bedeutung cards (shuffled)
+  const cards = [...solvedOrder]
+    .sort(()=>Math.random()-0.5)
+    .map(stepId => {
+      const step = STEPS.find(s=>s.id===stepId);
+      const card = makeCard(stepId+'-bedeutung', step.bedeutungHtml, onCardClickMatch);
+      card.dataset.stepId = stepId;
+      return card;
+    });
+
+  // ── Pool panel ──
+  const poolPanel = makePoolPanel();
+  cards.forEach(c => poolPanel.querySelector('#card-pool').appendChild(c));
+
+  // ── Assignment panel (3 columns) ──
+  const assignPanel = document.createElement('div');
+  assignPanel.className = 'assign-panel';
+
+  const hdr = document.createElement('div');
+  hdr.className = 'assign-header three-col';
+  hdr.innerHTML = `
+    <div class="col-title">Schritt</div>
+    <div class="col-title">Vorgehen (Wie?)</div>
+    <div class="col-title">Bedeutung (Warum?)</div>`;
+  assignPanel.appendChild(hdr);
+
+  solvedOrder.forEach((stepId, i) => {
+    const step = STEPS.find(s=>s.id===stepId);
+    if(i===2) assignPanel.appendChild(makeSectionHeadRow('Erste Alternative', false));
+    if(i===4) assignPanel.appendChild(makeSectionHeadRow('Zweite Alternative', true));
+
+    const row = document.createElement('div');
+    row.className = 'assign-row three-col';
+
+    // Col 1: step anchor
+    const anchor = document.createElement('div');
+    anchor.className = 'anchor-cell';
+    anchor.innerHTML = `<span class="badge">${step.badge}</span>${step.short}`;
+
+    // Col 2: vorgehen (already solved) – find the saved html
+    const is4 = id => id==='step4a'||id==='step4b';
+    const vorgehenHtml = solvedVorgehen[stepId]
+      || (is4(stepId) && (solvedVorgehen['step4a']||solvedVorgehen['step4b']))
+      || step.vorgehenHtml;
+    const vorgehenCell = document.createElement('div');
+    vorgehenCell.className = 'anchor-cell vorgehen-cell';
+    // strip card chrome (badge, tag) – use raw text from step data
+    vorgehenCell.innerHTML = step.vorgehenHtml;
+
+    // Col 3: drop zone for bedeutung
+    const dropCell = document.createElement('div');
+    dropCell.className = 'drop-cell';
+    const dz = makeDropZone('dz-'+stepId, 'Hier ablegen …');
+    dz.dataset.accepts = stepId;
+    dz.addEventListener('click', ()=>onZoneClickMatch(dz));
+    dropCell.appendChild(dz);
+
+    row.appendChild(anchor);
+    row.appendChild(vorgehenCell);
+    row.appendChild(dropCell);
+    assignPanel.appendChild(row);
+  });
+
+  area.appendChild(poolPanel);
+  area.appendChild(assignPanel);
+}
+
+function buildMatchPhase(phaseKey, contentFn, colTitle) {
+  const area = document.getElementById('game-area');
+  area.innerHTML = '';
+
+  // Build cards first (shuffled)
+  const cards = [...solvedOrder]
+    .sort(()=>Math.random()-0.5)
+    .map(stepId => {
+      const step = STEPS.find(s=>s.id===stepId);
+      const card = makeCard(stepId+'-'+phaseKey, contentFn(step), onCardClickMatch);
+      card.dataset.stepId = stepId;
+      return card;
+    });
+
+  // ── Pool panel ──
+  const poolPanel = makePoolPanel();
+  const pool = poolPanel.querySelector('#card-pool');
+  cards.forEach(c => pool.appendChild(c));
+
+  // ── Assignment panel ──
+  const assignPanel = document.createElement('div');
+  assignPanel.className = 'assign-panel';
+
+  const hdr = document.createElement('div');
+  hdr.className = 'assign-header two-col';
+  hdr.innerHTML = `<div class="col-title">Schritte (sortiert)</div><div class="col-title">${colTitle}</div>`;
+  assignPanel.appendChild(hdr);
+
+  solvedOrder.forEach((stepId,i) => {
+    const step = STEPS.find(s=>s.id===stepId);
+    if(i===2) assignPanel.appendChild(makeSectionHeadRow('Erste Alternative',false));
+    if(i===4) assignPanel.appendChild(makeSectionHeadRow('Zweite Alternative',true));
+
+    const row = document.createElement('div');
+    row.className = 'assign-row two-col';
+
+    const anchor = document.createElement('div');
+    anchor.className = 'anchor-cell';
+    anchor.innerHTML = `<span class="badge">${step.badge}</span>${step.short}`;
+
+    const dropCell = document.createElement('div');
+    dropCell.className = 'drop-cell';
+    const dz = makeDropZone('dz-'+stepId, 'Hier ablegen …');
+    dz.dataset.accepts = stepId;
+    dz.addEventListener('click', ()=>onZoneClickMatch(dz));
+    dropCell.appendChild(dz);
+
+    row.appendChild(anchor);
+    row.appendChild(dropCell);
+    assignPanel.appendChild(row);
+  });
+
+  area.appendChild(poolPanel);
+  area.appendChild(assignPanel);
+}
+
+function onCardClickMatch(card) {
+  clearFeedback();
+  if(card.parentElement.classList.contains('drop-zone')){ returnToPool(card); deselectAll(); return; }
+  if(card.classList.contains('selected')){ deselectAll(); return; }
+  deselectAll();
+  card.classList.add('selected');
+  selected = card;
+  document.querySelectorAll('.drop-zone').forEach(dz=>{ if(!dz.querySelector('.card')) dz.classList.add('ready'); });
+}
+
+function onZoneClickMatch(dz) {
+  clearFeedback();
+  if(selected){
+    const ex=dz.querySelector('.card');
+    if(ex) returnToPool(ex);
+    placeCard(dz,selected);
+  } else {
+    const ex=dz.querySelector('.card');
+    if(ex){ returnToPool(ex); deselectAll(); }
+  }
+}
+
+function checkMatchPhase() {
+  deselectAll();
+  const zones=document.querySelectorAll('.drop-zone[data-accepts]');
+  let correct=0, filled=0;
+  const is4=id=>id==='step4a'||id==='step4b';
+  zones.forEach(dz=>{
+    dz.classList.remove('correct','wrong');
+    const card=dz.querySelector('.card');
+    if(!card) return;
+    filled++;
+    const ok=card.dataset.stepId===dz.dataset.accepts||(is4(card.dataset.stepId)&&is4(dz.dataset.accepts));
+    dz.classList.add(ok?'correct':'wrong');
+    if(ok) correct++;
+  });
+  const allFilled=filled===zones.length, allCorrect=correct===zones.length;
+  showBanner(correct,zones.length,allFilled&&allCorrect,allFilled);
+  if(allFilled&&allCorrect){
+    if(phase===2) saveVorgehen();
+    document.getElementById('btn-next').style.display = phase<3 ? 'inline-block' : 'none';
+  }
+}
+
+function saveVorgehen() {
+  solvedVorgehen = {};
+  document.querySelectorAll('.drop-zone[data-accepts]').forEach(dz => {
+    const card = dz.querySelector('.card');
+    if (card) solvedVorgehen[dz.dataset.accepts] = card.innerHTML;
+  });
+}
+
+function showMatchSolution() {
+  deselectAll(); clearFeedback();
+  const is4=id=>id==='step4a'||id==='step4b';
+  const usedCardIds=new Set();
+  document.querySelectorAll('.drop-zone[data-accepts]').forEach(dz=>{
+    const accepts=dz.dataset.accepts;
+    const allCards=[...document.querySelectorAll('.card')];
+    const card=allCards.find(c=>{
+      if(usedCardIds.has(c.dataset.id)) return false;
+      return c.dataset.stepId===accepts||(is4(c.dataset.stepId)&&is4(accepts));
+    });
+    if(!card) return;
+    usedCardIds.add(card.dataset.id);
+    hideHint(dz); dz.classList.remove('ready','wrong'); dz.classList.add('filled','correct');
+    dz.appendChild(card); card.classList.remove('selected');
+  });
+  showSuccessBanner('✅ Lösung eingeblendet.');
+  if(phase===2){ saveVorgehen(); document.getElementById('btn-next').style.display='inline-block'; }
+}
+
+// ═══════════════════════════════════════════
+// SHARED HELPERS
+// ═══════════════════════════════════════════
+function makePoolPanel() {
+  const panel = document.createElement('div');
+  panel.className = 'pool-panel';
+  panel.innerHTML = '<div class="panel-title">Karten – antippen zum Auswählen</div>';
+  const pool = document.createElement('div');
+  pool.id = 'card-pool';
+  panel.appendChild(pool);
+  return panel;
+}
+
+function makeCard(id, html, handler) {
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.dataset.id = id;
+  card.innerHTML = html;
+  card.addEventListener('click', ()=>handler(card));
+  return card;
+}
+
+function makeDropZone(slotId, label) {
+  const dz = document.createElement('div');
+  dz.className = 'drop-zone';
+  dz.dataset.slot = slotId;
+  const hint = document.createElement('div');
+  hint.className = 'slot-hint';
+  hint.textContent = label;
+  dz.appendChild(hint);
+  return dz;
+}
+
+function makeSectionHeadRow(text, isAlt2) {
+  const row = document.createElement('div');
+  row.className = 'section-head-row' + (isAlt2?' alt2':'');
+  row.textContent = text;
+  return row;
+}
+
+function placeCard(dz, card) {
+  hideHint(dz);
+  dz.classList.remove('ready');
+  dz.classList.add('filled');
+  dz.appendChild(card);
+  card.classList.remove('selected');
+  selected = null;
+  document.querySelectorAll('.drop-zone.ready').forEach(z=>z.classList.remove('ready'));
+}
+
+function returnToPool(card) {
+  const dz=card.parentElement;
+  if(dz?.classList.contains('drop-zone')){
+    dz.classList.remove('filled','correct','wrong');
+    const hint=dz.querySelector('.slot-hint');
+    if(hint) hint.style.display='';
+  }
+  const pool=document.getElementById('card-pool');
+  if(pool) pool.appendChild(card);
+  card.classList.remove('selected');
+}
+
+function hideHint(dz) {
+  const h=dz.querySelector('.slot-hint'); if(h) h.style.display='none';
+}
+
+function deselectAll() {
+  document.querySelectorAll('.card.selected').forEach(c=>c.classList.remove('selected'));
+  document.querySelectorAll('.drop-zone.ready').forEach(z=>z.classList.remove('ready'));
+  selected=null;
+}
+
+function clearFeedback() {
+  document.querySelectorAll('.drop-zone').forEach(dz=>dz.classList.remove('correct','wrong'));
+  document.getElementById('result-banner').style.display='none';
+  document.getElementById('score-line').textContent='';
+}
+
+function showBanner(correct,total,allCorrect,allFilled) {
+  const b=document.getElementById('result-banner');
+  b.style.display='block';
+  if(allCorrect){
+    b.className='success';
+    b.textContent=phase<3?'🎉 Perfekt! Weiter zur nächsten Phase →':'🏆 Alle drei Phasen geschafft – du beherrschst das Verfahren!';
+  } else if(!allFilled){
+    b.className='partial';
+    b.textContent=`Noch nicht alle Felder belegt. Bisher ${correct} von ${total} richtig.`;
+  } else {
+    b.className='partial';
+    b.textContent=`${correct} von ${total} richtig. Überprüfe die rot markierten Felder!`;
+  }
+  document.getElementById('score-line').textContent=`Punkte: ${correct} / ${total}`;
+}
+
+function showSuccessBanner(text) {
+  const b=document.getElementById('result-banner');
+  b.style.display='block'; b.className='success'; b.textContent=text;
+}
+
+function updatePhaseDots() {
+  [1,2,3].forEach(p=>{
+    document.getElementById('pd'+p).className='phase-dot'+(p<phase?' done':p===phase?' active':'');
+  });
+}
+
+// ═══════════════════════════════════════════
+// BUTTON WIRING
+// ═══════════════════════════════════════════
+document.getElementById('btn-check').addEventListener('click',()=>{
+  if(phase===1) checkPhase1(); else checkMatchPhase();
+});
+document.getElementById('btn-show').addEventListener('click',()=>{
+  if(phase===1) showPhase1Solution(); else showMatchSolution();
+});
+document.getElementById('btn-next').addEventListener('click',()=>{
+  phase++;
+  updatePhaseDots();
+  clearFeedback();
+  document.getElementById('btn-next').style.display='none';
+  if(phase===2) buildPhase2();
+  if(phase===3) buildPhase3();
+});
+document.getElementById('btn-reset').addEventListener('click',()=>{
+  phase=1; solvedOrder=[]; selected=null;
+  updatePhaseDots(); clearFeedback();
+  document.getElementById('btn-next').style.display='none';
+  buildPhase1();
+});
+
+// ═══════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════
+buildPhase1();
+</script>
+</body>
+</html>

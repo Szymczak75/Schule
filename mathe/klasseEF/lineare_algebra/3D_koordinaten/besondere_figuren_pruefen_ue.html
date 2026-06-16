@@ -1,0 +1,1409 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Besondere Figuren im Raum – EF</title>
+<script>
+  MathJax = {
+    tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+    svg: { fontCache: 'global' },
+    startup: { ready() { MathJax.startup.defaultReady(); } }
+  };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #22263a;
+    --accent: #6c8cff;
+    --accent2: #ff9f43;
+    --accent3: #48dbaf;
+    --text: #e8eaf0;
+    --text-muted: #8b90a8;
+    --correct: #1a7a4a;
+    --correct-border: #2ecc71;
+    --wrong: #7a1a1a;
+    --wrong-border: #e74c3c;
+    --card-radius: 16px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); font-size: 17px; min-height: 100vh; padding-bottom: 130px; }
+
+  header { background: linear-gradient(135deg,#1a1d27,#0f1117); border-bottom: 1px solid #2a2d3e; padding: 18px 20px 14px; position: sticky; top: 0; z-index: 100; }
+  header h1 { font-family: 'DM Serif Display', serif; font-size: 1.35rem; color: var(--accent); letter-spacing:.02em; }
+  header p { font-size: .82rem; color: var(--text-muted); margin-top: 2px; }
+
+  .level-bar { display: flex; gap: 8px; padding: 14px 20px 0; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .level-btn { flex-shrink:0; padding: 8px 18px; border-radius: 30px; border: 2px solid #2a2d3e; background: var(--surface); color: var(--text-muted); font-family:'DM Sans',sans-serif; font-size:.88rem; font-weight:600; cursor:pointer; transition:all .2s; min-height:44px; }
+  .level-btn.active { border-color: var(--accent); background: #1e2340; color: var(--accent); }
+  .level-label { text-align:center; font-size:.78rem; color:var(--text-muted); padding:6px 20px 0; font-style:italic; }
+
+  .tab-bar { display:flex; padding:14px 20px 0; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; border-bottom:2px solid #2a2d3e; }
+  .tab-bar::-webkit-scrollbar { display:none; }
+  .tab { flex-shrink:0; padding:10px 16px; border-bottom:3px solid transparent; margin-bottom:-2px; color:var(--text-muted); font-size:.85rem; font-weight:600; cursor:pointer; transition:all .2s; white-space:nowrap; min-height:44px; display:flex; align-items:center; }
+  .tab.active { color:var(--accent2); border-bottom-color:var(--accent2); }
+  .tab.done { color:var(--accent3); }
+  .tab.done.active { border-bottom-color:var(--accent3); }
+
+  .card-area { padding: 20px; }
+  .card { background:var(--surface); border-radius:var(--card-radius); border:1px solid #2a2d3e; padding:22px 20px; margin-bottom:16px; }
+  .card-title { font-family:'DM Serif Display',serif; font-size:1.15rem; color:var(--accent2); margin-bottom:10px; }
+  .card-intro { color:var(--text-muted); font-size:.9rem; line-height:1.6; margin-bottom:16px; }
+
+  .theory-box { background:#13162b; border-left:4px solid var(--accent); border-radius:0 10px 10px 0; padding:14px 16px; margin-bottom:16px; font-size:.9rem; line-height:1.7; }
+  .theory-box strong { color:var(--accent); }
+
+  /* ── AUFKLAPPBARE SCHRITTE ── */
+  .accordion { border: 1px solid #2a2d3e; border-radius: 12px; margin-bottom: 10px; overflow: hidden; }
+  .accordion-head {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 16px; cursor: pointer;
+    background: #161929;
+    transition: background .2s;
+    min-height: 54px;
+    user-select: none;
+  }
+  .accordion-head:active { background: #1e2340; }
+  .accordion-head.open { background: #1a2050; border-bottom: 1px solid #2a2d3e; }
+  .acc-num {
+    display:inline-flex; align-items:center; justify-content:center;
+    width:28px; height:28px; border-radius:50%; flex-shrink:0;
+    background:var(--accent); color:#fff; font-size:.82rem; font-weight:700;
+  }
+  .acc-num.done-num { background: var(--correct-border); }
+  .acc-title { font-weight:600; color:var(--accent); font-size:.95rem; flex:1; }
+  .acc-arrow { color:var(--text-muted); font-size:1rem; transition:transform .25s; flex-shrink:0; }
+  .accordion-head.open .acc-arrow { transform:rotate(180deg); }
+  .accordion-body { display:none; padding:16px; background:#0f1220; font-size:.9rem; line-height:1.7; }
+  .accordion-body.open { display:block; }
+
+  /* inside accordion: example calc */
+  .calc-row { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin:8px 0; font-size:.88rem; }
+  .calc-label { color:var(--text-muted); min-width:100px; }
+
+  .check-list { list-style:none; }
+  .check-list li { padding:10px 0; border-bottom:1px solid #2a2d3e; font-size:.9rem; line-height:1.6; display:flex; gap:10px; align-items:flex-start; }
+  .check-list li:last-child { border-bottom:none; }
+  .check-list li::before { content:"▸"; color:var(--accent2); flex-shrink:0; margin-top:1px; }
+
+  .formula-box { background:#0d1020; border:1px solid #2a2d3e; border-radius:10px; padding:12px 16px; text-align:center; margin:12px 0; font-size:.95rem; }
+
+  .input-row { display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin:10px 0; }
+  .input-label { font-size:.88rem; color:var(--text-muted); min-width:120px; }
+  .num-input { background:#0d1020; border:2px solid #2a2d3e; border-radius:8px; color:var(--text); font-size:.95rem; font-family:'DM Sans',sans-serif; padding:8px 12px; width:80px; outline:none; transition:border-color .2s; min-height:44px; text-align:center; }
+  .num-input:focus { border-color:var(--accent); }
+
+  .btn { display:inline-flex; align-items:center; justify-content:center; padding:11px 22px; border-radius:10px; border:none; font-family:'DM Sans',sans-serif; font-size:.9rem; font-weight:600; cursor:pointer; transition:all .18s; min-height:44px; min-width:44px; }
+  .btn-primary { background:var(--accent); color:#fff; }
+  .btn-primary:active { background:#5070cc; }
+  .btn-secondary { background:var(--surface2); color:var(--text); border:1px solid #3a3d50; }
+  .btn-secondary:active { background:#2a2d3e; }
+  .btn-full { width:100%; }
+
+  .mc-options { display:flex; flex-direction:column; gap:10px; margin-top:12px; }
+  .mc-btn { padding:14px 18px; border-radius:12px; border:2px solid #2a2d3e; background:var(--surface2); color:var(--text); font-family:'DM Sans',sans-serif; font-size:.92rem; text-align:left; cursor:pointer; transition:all .18s; min-height:54px; line-height:1.4; }
+  .mc-btn:active { background:#2a2d3e; }
+  .mc-btn.selected { border-color:var(--accent); background:#1e2340; color:var(--accent); }
+  .mc-btn.correct { border-color:var(--correct-border); background:var(--correct); color:#fff; }
+  .mc-btn.wrong { border-color:var(--wrong-border); background:var(--wrong); color:#fff; }
+
+  .feedback { margin-top:12px; padding:12px 16px; border-radius:10px; font-size:.9rem; line-height:1.6; display:none; }
+  .feedback.show { display:block; }
+  .feedback.ok { background:var(--correct); border:2px solid var(--correct-border); color:#fff; }
+  .feedback.err { background:var(--wrong); border:2px solid var(--wrong-border); color:#fff; }
+
+  .hint-toggle { background:#161929; border:1px dashed #3a3d50; border-radius:10px; padding:12px 16px; margin:10px 0; cursor:pointer; font-size:.88rem; color:var(--text-muted); transition:all .2s; }
+  .hint-toggle.open { border-color:var(--accent); color:var(--text); }
+  .hint-content { display:none; padding-top:10px; line-height:1.65; }
+  .hint-toggle.open .hint-content { display:block; }
+
+  .solution-reveal { background:#0d1020; border:1px solid #2a2d3e; border-radius:12px; padding:16px; margin-top:14px; display:none; font-size:.88rem; line-height:1.7; }
+  .solution-reveal.show { display:block; }
+  .sol-step { padding:8px 0; border-bottom:1px solid #2a2d3e; }
+  .sol-step:last-child { border-bottom:none; }
+  .sol-label { color:var(--accent2); font-weight:600; font-size:.82rem; text-transform:uppercase; letter-spacing:.05em; margin-bottom:4px; }
+
+  .result-big { text-align:center; padding:30px 20px; }
+  .result-score { font-family:'DM Serif Display',serif; font-size:3.5rem; color:var(--accent); line-height:1; }
+  .result-label { color:var(--text-muted); font-size:.95rem; margin-top:6px; }
+  .result-bar { height:12px; background:#2a2d3e; border-radius:6px; margin:18px 0; overflow:hidden; }
+  .result-fill { height:100%; background:linear-gradient(90deg,var(--accent),var(--accent3)); border-radius:6px; transition:width 1s ease; }
+  .result-list { text-align:left; margin-top:16px; }
+  .result-item { padding:10px 14px; border-radius:10px; margin-bottom:8px; font-size:.88rem; display:flex; gap:10px; align-items:center; }
+  .result-item.ok { background:var(--correct); border:1px solid var(--correct-border); }
+  .result-item.err { background:var(--wrong); border:1px solid var(--wrong-border); }
+
+  .weiter-wrap { position:fixed; bottom:0; left:0; right:0; padding:14px 20px; background:linear-gradient(0deg,var(--bg) 70%,transparent); display:none; z-index:200; }
+  .weiter-wrap.show { display:block; }
+  .btn-weiter { width:100%; padding:16px; background:linear-gradient(135deg,var(--accent2),#e67e22); color:#fff; font-family:'DM Serif Display',serif; font-size:1.1rem; border:none; border-radius:14px; cursor:pointer; min-height:54px; letter-spacing:.03em; box-shadow:0 4px 20px rgba(255,159,67,.3); }
+
+  #dino { position:fixed; bottom:70px; right:16px; font-size:1.5rem; cursor:pointer; z-index:300; user-select:none; transition:transform .2s; }
+  #dino:active { transform:scale(1.3); }
+  #dino-tip { position:fixed; bottom:110px; right:10px; background:var(--surface2); border:1px solid var(--accent); border-radius:10px; padding:6px 12px; font-size:.78rem; color:var(--accent); white-space:nowrap; display:none; z-index:301; }
+
+  .frac { display:inline-flex; flex-direction:column; align-items:center; vertical-align:middle; font-size:.95em; line-height:1.2; margin:0 3px; }
+  .frac > span:first-child { border-bottom:1.5px solid currentColor; padding:0 2px 1px; }
+  .frac > span:last-child { padding:1px 2px 0; }
+
+  .tab-page { display:none; }
+  .tab-page.active { display:block; }
+
+  .tag { display:inline-block; padding:3px 10px; border-radius:20px; font-size:.75rem; font-weight:600; margin-bottom:10px; }
+  .tag-blue { background:#1a2050; color:var(--accent); border:1px solid var(--accent); }
+  .tag-orange { background:#2a1800; color:var(--accent2); border:1px solid var(--accent2); }
+  .tag-green { background:#0a2018; color:var(--accent3); border:1px solid var(--accent3); }
+  .divider { height:1px; background:#2a2d3e; margin:16px 0; }
+
+  /* locked steps */
+  .step-locked { opacity:.35; pointer-events:none; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Besondere Figuren im Raum</h1>
+  <p>EF · Analytische Geometrie · Vektoren</p>
+</header>
+
+<div class="level-bar">
+  <button class="level-btn active" data-level="grund" onclick="setLevel('grund')">⭐ Grundlagen</button>
+  <button class="level-btn" data-level="fort" onclick="setLevel('fort')">⭐⭐ Fortgeschritten</button>
+  <button class="level-btn" data-level="profi" onclick="setLevel('profi')">⭐⭐⭐ Profi</button>
+</div>
+<div class="level-label" id="level-desc">Schritt-für-Schritt Anleitung</div>
+
+<div class="tab-bar">
+  <div class="tab active" onclick="switchTab(0)" id="tab0">△ Dreiecke</div>
+  <div class="tab" onclick="switchTab(1)" id="tab1">▭ Vierecke I</div>
+  <div class="tab" onclick="switchTab(2)" id="tab2">◇ Vierecke II</div>
+  <div class="tab" onclick="switchTab(3)" id="tab3">↺ Wiederholung</div>
+  <div class="tab" onclick="switchTab(4)" id="tab4">📊 Auswertung</div>
+</div>
+
+<div class="card-area">
+
+<!-- ══════════════════════════════════════════
+     TAB 0 – DREIECKE
+══════════════════════════════════════════ -->
+<div class="tab-page active" id="page-0">
+
+  <!-- GRUNDLAGEN -->
+  <div class="level-content" data-lv="grund">
+    <div class="card">
+      <div class="tag tag-blue">⭐ Grundlagen</div>
+      <div class="card-title">Besondere Dreiecke – Schritt für Schritt</div>
+      <div class="card-intro">Gegeben sind drei Punkte. Klappe jeden Schritt auf, führe die Rechnung durch und prüfe dein Ergebnis.</div>
+
+      <div class="theory-box">
+        <strong>Aufgabe:</strong> \(A(2\mid 1\mid 3)\), \(B(6\mid 1\mid 3)\), \(C(4\mid 5\mid 3)\)<br>
+        Ist das Dreieck gleichschenklig, gleichseitig oder rechtwinklig?
+      </div>
+
+      <!-- Schritt 1 -->
+      <div class="accordion" id="acc-d-1">
+        <div class="accordion-head" onclick="toggleAcc('acc-d-1')">
+          <span class="acc-num" id="accnum-d-1">1</span>
+          <span class="acc-title">Verbindungsvektoren berechnen</span>
+          <span class="acc-arrow">▼</span>
+        </div>
+        <div class="accordion-body">
+          <p style="margin-bottom:10px;">Berechne die drei Seitenvektoren. Denke daran: \(\overrightarrow{AB} = B - A\)</p>
+          <div class="input-row">
+            <span class="input-label">\(\overrightarrow{AB}\)</span>
+            <input class="num-input" id="d1-ab-x" type="text" inputmode="numeric" placeholder="x">
+            <input class="num-input" id="d1-ab-y" type="text" inputmode="numeric" placeholder="y">
+            <input class="num-input" id="d1-ab-z" type="text" inputmode="numeric" placeholder="z">
+          </div>
+          <div class="input-row">
+            <span class="input-label">\(\overrightarrow{AC}\)</span>
+            <input class="num-input" id="d1-ac-x" type="text" inputmode="numeric" placeholder="x">
+            <input class="num-input" id="d1-ac-y" type="text" inputmode="numeric" placeholder="y">
+            <input class="num-input" id="d1-ac-z" type="text" inputmode="numeric" placeholder="z">
+          </div>
+          <div class="input-row">
+            <span class="input-label">\(\overrightarrow{BC}\)</span>
+            <input class="num-input" id="d1-bc-x" type="text" inputmode="numeric" placeholder="x">
+            <input class="num-input" id="d1-bc-y" type="text" inputmode="numeric" placeholder="y">
+            <input class="num-input" id="d1-bc-z" type="text" inputmode="numeric" placeholder="z">
+          </div>
+          <button class="btn btn-secondary" style="margin-top:8px;" onclick="checkD1Step(1)">Prüfen</button>
+          <div class="feedback" id="fb-d1-1"></div>
+        </div>
+      </div>
+
+      <!-- Schritt 2 -->
+      <div class="accordion step-locked" id="acc-d-2">
+        <div class="accordion-head" onclick="toggleAcc('acc-d-2')">
+          <span class="acc-num" id="accnum-d-2">2</span>
+          <span class="acc-title">Längenquadrate berechnen</span>
+          <span class="acc-arrow">▼</span>
+        </div>
+        <div class="accordion-body">
+          <p style="margin-bottom:10px;">Berechne \(|\vec{v}|^2 = v_1^2 + v_2^2 + v_3^2\) für jeden Vektor. Keine Wurzel nötig – Quadrate reichen zum Vergleich!</p>
+          <div class="input-row">
+            <span class="input-label">\(|\overrightarrow{AB}|^2\)</span>
+            <input class="num-input" id="d1-ab2" type="text" inputmode="numeric" placeholder="?">
+          </div>
+          <div class="input-row">
+            <span class="input-label">\(|\overrightarrow{AC}|^2\)</span>
+            <input class="num-input" id="d1-ac2" type="text" inputmode="numeric" placeholder="?">
+          </div>
+          <div class="input-row">
+            <span class="input-label">\(|\overrightarrow{BC}|^2\)</span>
+            <input class="num-input" id="d1-bc2" type="text" inputmode="numeric" placeholder="?">
+          </div>
+          <button class="btn btn-secondary" style="margin-top:8px;" onclick="checkD1Step(2)">Prüfen</button>
+          <div class="feedback" id="fb-d1-2"></div>
+        </div>
+      </div>
+
+      <!-- Schritt 3 -->
+      <div class="accordion step-locked" id="acc-d-3">
+        <div class="accordion-head" onclick="toggleAcc('acc-d-3')">
+          <span class="acc-num" id="accnum-d-3">3</span>
+          <span class="acc-title">Seitenlängen vergleichen</span>
+          <span class="acc-arrow">▼</span>
+        </div>
+        <div class="accordion-body">
+          <p style="margin-bottom:12px;">Du hast berechnet: \(|AB|^2 = 16\), \(|AC|^2 = 20\), \(|BC|^2 = 20\)</p>
+          <p>Welche Aussage trifft zu?</p>
+          <div class="mc-options" id="mc-d1-3">
+            <button class="mc-btn" onclick="mcAnswer('d1-3', 0, false, this)">Alle drei Seiten gleich lang → gleichseitig</button>
+            <button class="mc-btn" onclick="mcAnswer('d1-3', 1, true, this)">Zwei Seiten gleich lang (\(|AC|=|BC|\)) → gleichschenklig</button>
+            <button class="mc-btn" onclick="mcAnswer('d1-3', 2, false, this)">Alle Seiten unterschiedlich lang → kein besonderes Dreieck</button>
+          </div>
+          <div class="feedback" id="fb-d1-3"></div>
+        </div>
+      </div>
+
+      <!-- Schritt 4 -->
+      <div class="accordion step-locked" id="acc-d-4">
+        <div class="accordion-head" onclick="toggleAcc('acc-d-4')">
+          <span class="acc-num" id="accnum-d-4">4</span>
+          <span class="acc-title">Rechter Winkel? → Pythagoras prüfen</span>
+          <span class="acc-arrow">▼</span>
+        </div>
+        <div class="accordion-body">
+          <p style="margin-bottom:10px;">Die längste Seite ist die mögliche Hypotenuse \(c\). Hier: \(|AC|^2 = |BC|^2 = 20\) sind am größten.<br><br>
+          Prüfe: \(a^2 + b^2 \stackrel{?}{=} c^2\)</p>
+          <div class="input-row">
+            <span class="input-label">\(|AB|^2 + |BC|^2\)</span>
+            <input class="num-input" id="d1-pyth" type="text" inputmode="numeric" placeholder="?">
+          </div>
+          <p style="margin-top:6px; font-size:.88rem; color:var(--text-muted)">Zum Vergleich: \(|AC|^2 = 20\)</p>
+          <button class="btn btn-secondary" style="margin-top:8px;" onclick="checkD1Step(4)">Prüfen</button>
+          <div class="feedback" id="fb-d1-4"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Aufgabe selbst lösen -->
+    <div class="card">
+      <div class="card-title">Jetzt selbst: Dreieck 2</div>
+      <div class="card-intro">Gegeben: \(P(0\mid 0\mid 4)\), \(Q(3\mid 0\mid 0)\), \(R(0\mid 4\mid 0)\)<br>Untersuche vollständig – wende die vier Schritte an!</div>
+
+      <!-- Schritt 1 -->
+      <div class="accordion" id="acc-d2-1">
+        <div class="accordion-head" onclick="toggleAcc('acc-d2-1')">
+          <span class="acc-num" id="accnum-d2-1">1</span>
+          <span class="acc-title">Verbindungsvektoren berechnen</span>
+          <span class="acc-arrow">▼</span>
+        </div>
+        <div class="accordion-body">
+          <div class="input-row"><span class="input-label">\(\overrightarrow{PQ}\)</span>
+            <input class="num-input" id="d2-pq-x" type="text" inputmode="numeric" placeholder="x">
+            <input class="num-input" id="d2-pq-y" type="text" inputmode="numeric" placeholder="y">
+            <input class="num-input" id="d2-pq-z" type="text" inputmode="numeric" placeholder="z">
+          </div>
+          <div class="input-row"><span class="input-label">\(\overrightarrow{PR}\)</span>
+            <input class="num-input" id="d2-pr-x" type="text" inputmode="numeric" placeholder="x">
+            <input class="num-input" id="d2-pr-y" type="text" inputmode="numeric" placeholder="y">
+            <input class="num-input" id="d2-pr-z" type="text" inputmode="numeric" placeholder="z">
+          </div>
+          <div class="input-row"><span class="input-label">\(\overrightarrow{QR}\)</span>
+            <input class="num-input" id="d2-qr-x" type="text" inputmode="numeric" placeholder="x">
+            <input class="num-input" id="d2-qr-y" type="text" inputmode="numeric" placeholder="y">
+            <input class="num-input" id="d2-qr-z" type="text" inputmode="numeric" placeholder="z">
+          </div>
+          <button class="btn btn-secondary" style="margin-top:8px;" onclick="checkD2Step(1)">Prüfen</button>
+          <div class="feedback" id="fb-d2-1"></div>
+        </div>
+      </div>
+
+      <!-- Schritt 2 -->
+      <div class="accordion step-locked" id="acc-d2-2">
+        <div class="accordion-head" onclick="toggleAcc('acc-d2-2')">
+          <span class="acc-num" id="accnum-d2-2">2</span>
+          <span class="acc-title">Längenquadrate berechnen</span>
+          <span class="acc-arrow">▼</span>
+        </div>
+        <div class="accordion-body">
+          <div class="input-row"><span class="input-label">\(|\overrightarrow{PQ}|^2\)</span><input class="num-input" id="d2-pq2" type="text" inputmode="numeric" placeholder="?"></div>
+          <div class="input-row"><span class="input-label">\(|\overrightarrow{PR}|^2\)</span><input class="num-input" id="d2-pr2" type="text" inputmode="numeric" placeholder="?"></div>
+          <div class="input-row"><span class="input-label">\(|\overrightarrow{QR}|^2\)</span><input class="num-input" id="d2-qr2" type="text" inputmode="numeric" placeholder="?"></div>
+          <button class="btn btn-secondary" style="margin-top:8px;" onclick="checkD2Step(2)">Prüfen</button>
+          <div class="feedback" id="fb-d2-2"></div>
+        </div>
+      </div>
+
+      <!-- Schritt 3 -->
+      <div class="accordion step-locked" id="acc-d2-3">
+        <div class="accordion-head" onclick="toggleAcc('acc-d2-3')">
+          <span class="acc-num" id="accnum-d2-3">3</span>
+          <span class="acc-title">Seitenlängen vergleichen</span>
+          <span class="acc-arrow">▼</span>
+        </div>
+        <div class="accordion-body">
+          <div class="mc-options" id="mc-d2-3">
+            <button class="mc-btn" onclick="mcAnswer('d2-3', 0, false, this)">Alle gleich lang → gleichseitig</button>
+            <button class="mc-btn" onclick="mcAnswer('d2-3', 1, true, this)">Zwei gleich lang (\(|PQ|^2=|QR|^2=25\)) → gleichschenklig</button>
+            <button class="mc-btn" onclick="mcAnswer('d2-3', 2, false, this)">Alle unterschiedlich → kein besonderes</button>
+          </div>
+          <div class="feedback" id="fb-d2-3"></div>
+        </div>
+      </div>
+
+      <!-- Schritt 4 -->
+      <div class="accordion step-locked" id="acc-d2-4">
+        <div class="accordion-head" onclick="toggleAcc('acc-d2-4')">
+          <span class="acc-num" id="accnum-d2-4">4</span>
+          <span class="acc-title">Rechter Winkel? → Pythagoras</span>
+          <span class="acc-arrow">▼</span>
+        </div>
+        <div class="accordion-body">
+          <p style="margin-bottom:10px;">Die längste Seite: \(|PR|^2 = 32\) ist die mögliche Hypotenuse.<br>Prüfe: \(|PQ|^2 + |QR|^2 \stackrel{?}{=} |PR|^2\)</p>
+          <div class="input-row">
+            <span class="input-label">\(25 + 25 =\)</span>
+            <input class="num-input" id="d2-pyth" type="text" inputmode="numeric" placeholder="?">
+          </div>
+          <button class="btn btn-secondary" style="margin-top:8px;" onclick="checkD2Step(4)">Prüfen</button>
+          <div class="feedback" id="fb-d2-4"></div>
+        </div>
+      </div>
+    </div>
+  </div><!-- /grund -->
+
+  <!-- FORTGESCHRITTEN -->
+  <div class="level-content" data-lv="fort" style="display:none;">
+    <div class="card">
+      <div class="tag tag-orange">⭐⭐ Fortgeschritten</div>
+      <div class="card-title">Dreiecke – Was ist zu prüfen?</div>
+      <ul class="check-list">
+        <li><strong>Gleichseitig:</strong> Alle drei Längenquadrate \(|AB|^2,\,|AC|^2,\,|BC|^2\) sind gleich.</li>
+        <li><strong>Gleichschenklig:</strong> Genau zwei der drei Längenquadrate stimmen überein (aber nicht alle drei).</li>
+        <li><strong>Rechtwinklig:</strong> Längste Seite = Hypotenuse \(c\). Prüfe \(a^2+b^2 = c^2\) mit den Längenquadraten.</li>
+        <li><strong>Kombinationen möglich:</strong> Gleichschenklig und rechtwinklig schließen sich nicht aus – immer beide prüfen!</li>
+      </ul>
+      <div class="formula-box">\(|\vec{v}|^2 = v_1^2+v_2^2+v_3^2\) – Quadrate reichen zum Vergleich!</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Aufgabe 1</div>
+      <div class="card-intro">Gegeben: \(A(1\mid 1\mid 1)\), \(B(4\mid 1\mid 1)\), \(C(4\mid 4\mid 1)\)</div>
+      <div class="hint-toggle" onclick="this.classList.toggle('open')">💡 Tipp<div class="hint-content">Berechne die drei Seitenvektoren, dann die Längenquadrate. Vergleiche, dann Pythagoras.</div></div>
+      <div class="mc-options" id="mc-fd1">
+        <button class="mc-btn" onclick="mcAnswer('fd1',0,false,this)">Gleichseitiges Dreieck</button>
+        <button class="mc-btn" onclick="mcAnswer('fd1',1,false,this)">Nur gleichschenkliges Dreieck</button>
+        <button class="mc-btn" onclick="mcAnswer('fd1',2,true,this)">Rechtwinkliges gleichschenkliges Dreieck</button>
+        <button class="mc-btn" onclick="mcAnswer('fd1',3,false,this)">Kein besonderes Dreieck</button>
+      </div>
+      <div class="feedback" id="fb-fd1"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Aufgabe 2</div>
+      <div class="card-intro">Gegeben: \(A(0\mid 3\mid 4)\), \(B(3\mid 0\mid 4)\), \(C(3\mid 3\mid 0)\)</div>
+      <div class="hint-toggle" onclick="this.classList.toggle('open')">💡 Tipp<div class="hint-content">Berechne alle drei Längenquadrate. Prüfe dann Gleichheit und Pythagoras.</div></div>
+      <div class="mc-options" id="mc-fd2">
+        <button class="mc-btn" onclick="mcAnswer('fd2',0,false,this)">Gleichseitiges Dreieck</button>
+        <button class="mc-btn" onclick="mcAnswer('fd2',1,true,this)">Gleichschenkliges Dreieck (kein rechter Winkel)</button>
+        <button class="mc-btn" onclick="mcAnswer('fd2',2,false,this)">Rechtwinkliges Dreieck (nicht gleichschenklig)</button>
+        <button class="mc-btn" onclick="mcAnswer('fd2',3,false,this)">Kein besonderes Dreieck</button>
+      </div>
+      <div class="feedback" id="fb-fd2"></div>
+    </div>
+  </div>
+
+  <!-- PROFI -->
+  <div class="level-content" data-lv="profi" style="display:none;">
+    <div class="card">
+      <div class="tag tag-green">⭐⭐⭐ Profi</div>
+      <div class="card-title">Dreiecke – selbstständig untersuchen</div>
+      <div class="card-intro">Untersuche vollständig. Entscheide selbst, welche Eigenschaften du prüfst.</div>
+      <div class="theory-box"><strong>Mögliche Eigenschaften:</strong> gleichseitig · gleichschenklig · rechtwinklig · Kombinationen</div>
+
+      <div style="margin-bottom:6px;font-weight:600;color:var(--accent2);">Aufgabe 1</div>
+      <div style="margin-bottom:10px;font-size:.9rem;">\(E(2\mid 0\mid 0)\), \(F(2\mid 3\mid 0)\), \(G(2\mid 0\mid 3)\)</div>
+      <div class="mc-options" id="mc-pd1">
+        <button class="mc-btn" onclick="mcAnswer('pd1',0,false,this)">Gleichseitiges Dreieck</button>
+        <button class="mc-btn" onclick="mcAnswer('pd1',1,false,this)">Nur rechtwinkliges Dreieck</button>
+        <button class="mc-btn" onclick="mcAnswer('pd1',2,true,this)">Rechtwinkliges gleichschenkliges Dreieck</button>
+        <button class="mc-btn" onclick="mcAnswer('pd1',3,false,this)">Kein besonderes Dreieck</button>
+      </div>
+      <div class="feedback" id="fb-pd1"></div>
+      <button class="btn btn-secondary" style="margin-top:10px;font-size:.82rem;" onclick="toggleSol('sol-pd1')">Lösungsweg anzeigen</button>
+      <div class="solution-reveal" id="sol-pd1">
+        <div class="sol-step"><div class="sol-label">Vektoren</div>\(\overrightarrow{EF}=\begin{pmatrix}0\\3\\0\end{pmatrix},\;\overrightarrow{EG}=\begin{pmatrix}0\\0\\3\end{pmatrix},\;\overrightarrow{FG}=\begin{pmatrix}0\\-3\\3\end{pmatrix}\)</div>
+        <div class="sol-step"><div class="sol-label">Längenquadrate</div>\(|EF|^2=9,\;|EG|^2=9,\;|FG|^2=18\)</div>
+        <div class="sol-step"><div class="sol-label">Ergebnis</div>\(|EF|=|EG|\) → gleichschenklig.<br>Pythagoras: \(9+9=18=|FG|^2\) ✓ → rechtwinklig bei E.</div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div style="margin-bottom:6px;font-weight:600;color:var(--accent2);">Aufgabe 2</div>
+      <div style="margin-bottom:10px;font-size:.9rem;">\(A(0\mid 3\mid 4)\), \(B(3\mid 0\mid 4)\), \(C(3\mid 3\mid 0)\)</div>
+      <div class="mc-options" id="mc-pd2">
+        <button class="mc-btn" onclick="mcAnswer('pd2',0,false,this)">Gleichseitiges Dreieck</button>
+        <button class="mc-btn" onclick="mcAnswer('pd2',1,true,this)">Gleichschenkliges Dreieck (kein rechter Winkel)</button>
+        <button class="mc-btn" onclick="mcAnswer('pd2',2,false,this)">Rechtwinkliges Dreieck (nicht gleichschenklig)</button>
+        <button class="mc-btn" onclick="mcAnswer('pd2',3,false,this)">Kein besonderes Dreieck</button>
+      </div>
+      <div class="feedback" id="fb-pd2"></div>
+      <button class="btn btn-secondary" style="margin-top:10px;font-size:.82rem;" onclick="toggleSol('sol-pd2')">Lösungsweg anzeigen</button>
+      <div class="solution-reveal" id="sol-pd2">
+        <div class="sol-step"><div class="sol-label">Längenquadrate</div>\(|AB|^2=18,\;|AC|^2=25,\;|BC|^2=25\)</div>
+        <div class="sol-step"><div class="sol-label">Ergebnis</div>\(|AC|=|BC|\) → gleichschenklig.<br>Pythagoras: \(18+25\neq25;\;18+18\neq25\) → kein rechter Winkel.</div>
+      </div>
+    </div>
+  </div>
+</div><!-- /page-0 -->
+
+
+<!-- ══════════════════════════════════════════
+     TAB 1 – VIERECKE I (Parallelogramm / Rechteck)
+══════════════════════════════════════════ -->
+<div class="tab-page" id="page-1">
+
+  <!-- GRUNDLAGEN -->
+  <div class="level-content" data-lv="grund">
+    <div class="card">
+      <div class="tag tag-blue">⭐ Grundlagen</div>
+      <div class="card-title">Parallelogramm & Rechteck – Schritt für Schritt</div>
+      <div class="card-intro">Gegeben: \(A(1\mid 0\mid 2)\), \(B(4\mid 0\mid 2)\), \(C(4\mid 5\mid 2)\), \(D(1\mid 5\mid 2)\)<br>Klappe jeden Schritt auf, rechne und prüfe.</div>
+      <div class="theory-box">
+        <strong>Parallelogramm:</strong> \(\overrightarrow{AB}=\overrightarrow{DC}\) und \(\overrightarrow{AD}=\overrightarrow{BC}\)<br>
+        <strong>Rechteck:</strong> Parallelogramm + Pythagoras: \(|AB|^2+|BC|^2=|AC|^2\)
+      </div>
+
+      <!-- Schritt 1 -->
+      <div class="accordion" id="acc-v1-1">
+        <div class="accordion-head" onclick="toggleAcc('acc-v1-1')">
+          <span class="acc-num" id="accnum-v1-1">1</span>
+          <span class="acc-title">Berechne \(\overrightarrow{AB}\) und \(\overrightarrow{DC}\)</span>
+          <span class="acc-arrow">▼</span>
+        </div>
+        <div class="accordion-body">
+          <p style="margin-bottom:10px;">Wenn \(\overrightarrow{AB}=\overrightarrow{DC}\), sind die ersten beiden Gegenseiten gleich.</p>
+          <div class="input-row"><span class="input-label">\(\overrightarrow{AB}\)</span>
+            <input class="num-input" id="v1-ab-x" type="text" inputmode="numeric" placeholder="x">
+            <input class="num-input" id="v1-ab-y" type="text" inputmode="numeric" placeholder="y">
+            <input class="num-input" id="v1-ab-z" type="text" inputmode="numeric" placeholder="z">
+          </div>
+          <div class="input-row"><span class="input-label">\(\overrightarrow{DC}\)</span>
+            <input class="num-input" id="v1-dc-x" type="text" inputmode="numeric" placeholder="x">
+            <input class="num-input" id="v1-dc-y" type="text" inputmode="numeric" placeholder="y">
+            <input class="num-input" id="v1-dc-z" type="text" inputmode="numeric" placeholder="z">
+          </div>
+          <button class="btn btn-secondary" style="margin-top:8px;" onclick="checkV1Step(1)">Prüfen</button>
+          <div class="feedback" id="fb-v1-1"></div>
+        </div>
+      </div>
+
+      <!-- Schritt 2 -->
+      <div class="accordion step-locked" id="acc-v1-2">
+        <div class="accordion-head" onclick="toggleAcc('acc-v1-2')">
+          <span class="acc-num" id="accnum-v1-2">2</span>
+          <span class="acc-title">Berechne \(\overrightarrow{AD}\) und \(\overrightarrow{BC}\)</span>
+          <span class="acc-arrow">▼</span>
+        </div>
+        <div class="accordion-body">
+          <p style="margin-bottom:10px;">Prüfe das zweite Gegenseitenpaar.</p>
+          <div class="input-row"><span class="input-label">\(\overrightarrow{AD}\)</span>
+            <input class="num-input" id="v1-ad-x" type="text" inputmode="numeric" placeholder="x">
+            <input class="num-input" id="v1-ad-y" type="text" inputmode="numeric" placeholder="y">
+            <input class="num-input" id="v1-ad-z" type="text" inputmode="numeric" placeholder="z">
+          </div>
+          <div class="input-row"><span class="input-label">\(\overrightarrow{BC}\)</span>
+            <input class="num-input" id="v1-bc-x" type="text" inputmode="numeric" placeholder="x">
+            <input class="num-input" id="v1-bc-y" type="text" inputmode="numeric" placeholder="y">
+            <input class="num-input" id="v1-bc-z" type="text" inputmode="numeric" placeholder="z">
+          </div>
+          <button class="btn btn-secondary" style="margin-top:8px;" onclick="checkV1Step(2)">Prüfen</button>
+          <div class="feedback" id="fb-v1-2"></div>
+        </div>
+      </div>
+
+      <!-- Schritt 3 -->
+      <div class="accordion step-locked" id="acc-v1-3">
+        <div class="accordion-head" onclick="toggleAcc('acc-v1-3')">
+          <span class="acc-num" id="accnum-v1-3">3</span>
+          <span class="acc-title">Rechteck? → Pythagoras an Diagonale AC</span>
+          <span class="acc-arrow">▼</span>
+        </div>
+        <div class="accordion-body">
+          <p style="margin-bottom:10px;">Berechne \(|AB|^2\), \(|BC|^2\) und \(|AC|^2\) (Diagonale \(A\to C\)).</p>
+          <div class="input-row"><span class="input-label">\(|AB|^2\)</span><input class="num-input" id="v1-ab2" type="text" inputmode="numeric" placeholder="?"></div>
+          <div class="input-row"><span class="input-label">\(|BC|^2\)</span><input class="num-input" id="v1-bc2" type="text" inputmode="numeric" placeholder="?"></div>
+          <div class="input-row"><span class="input-label">\(|AC|^2\)</span><input class="num-input" id="v1-ac2" type="text" inputmode="numeric" placeholder="?"></div>
+          <button class="btn btn-secondary" style="margin-top:8px;" onclick="checkV1Step(3)">Prüfen</button>
+          <div class="feedback" id="fb-v1-3"></div>
+        </div>
+      </div>
+
+      <!-- Schritt 4 -->
+      <div class="accordion step-locked" id="acc-v1-4">
+        <div class="accordion-head" onclick="toggleAcc('acc-v1-4')">
+          <span class="acc-num" id="accnum-v1-4">4</span>
+          <span class="acc-title">Welches Viereck liegt vor?</span>
+          <span class="acc-arrow">▼</span>
+        </div>
+        <div class="accordion-body">
+          <div class="mc-options" id="mc-v1-4">
+            <button class="mc-btn" onclick="mcAnswer('v1-4',0,false,this)">Nur ein Parallelogramm</button>
+            <button class="mc-btn" onclick="mcAnswer('v1-4',1,true,this)">Ein Rechteck (und damit auch ein Parallelogramm)</button>
+            <button class="mc-btn" onclick="mcAnswer('v1-4',2,false,this)">Kein Parallelogramm</button>
+          </div>
+          <div class="feedback" id="fb-v1-4"></div>
+        </div>
+      </div>
+    </div>
+  </div><!-- /grund -->
+
+  <!-- FORTGESCHRITTEN -->
+  <div class="level-content" data-lv="fort" style="display:none;">
+    <div class="card">
+      <div class="tag tag-orange">⭐⭐ Fortgeschritten</div>
+      <div class="card-title">Parallelogramm & Rechteck – Was ist zu prüfen?</div>
+      <ul class="check-list">
+        <li><strong>Parallelogramm:</strong> Prüfe \(\overrightarrow{AB}=\overrightarrow{DC}\) und \(\overrightarrow{AD}=\overrightarrow{BC}\). Beide Bedingungen müssen erfüllt sein. Reihenfolge der Punkte beachten!</li>
+        <li><strong>Rechteck:</strong> Erst Parallelogramm nachweisen. Dann: \(|AB|^2+|BC|^2=|AC|^2\) (Pythagoras an Diagonale \(AC\)) → rechter Winkel bei \(B\).</li>
+        <li><strong>Tipp:</strong> In einem Parallelogramm reicht es, einen Winkel zu prüfen – ist einer 90°, sind alle 90°.</li>
+      </ul>
+      <div class="formula-box">\(\overrightarrow{AB}=\overrightarrow{DC}\) bedeutet: \(B-A = C-D\)</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Aufgabe 1</div>
+      <div class="card-intro">Gegeben: \(A(0\mid 0\mid 1)\), \(B(3\mid 0\mid 1)\), \(C(5\mid 4\mid 1)\), \(D(2\mid 4\mid 1)\)</div>
+      <div class="hint-toggle" onclick="this.classList.toggle('open')">💡 Tipp<div class="hint-content">Berechne \(\overrightarrow{AB}\) und \(\overrightarrow{DC}\). Dann Pythagoras: \(|AB|^2+|BC|^2\stackrel{?}{=}|AC|^2\).</div></div>
+      <div class="mc-options" id="mc-fv1a">
+        <button class="mc-btn" onclick="mcAnswer('fv1a',0,true,this)">Parallelogramm (kein Rechteck)</button>
+        <button class="mc-btn" onclick="mcAnswer('fv1a',1,false,this)">Rechteck</button>
+        <button class="mc-btn" onclick="mcAnswer('fv1a',2,false,this)">Kein Parallelogramm</button>
+      </div>
+      <div class="feedback" id="fb-fv1a"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Aufgabe 2</div>
+      <div class="card-intro">Gegeben: \(A(0\mid 0\mid 0)\), \(B(3\mid 0\mid 0)\), \(C(3\mid 0\mid 4)\), \(D(0\mid 0\mid 4)\)</div>
+      <div class="hint-toggle" onclick="this.classList.toggle('open')">💡 Tipp<div class="hint-content">Alle Punkte liegen in der xz-Ebene. Prüfe Parallelogramm, dann Pythagoras.</div></div>
+      <div class="mc-options" id="mc-fv1b">
+        <button class="mc-btn" onclick="mcAnswer('fv1b',0,false,this)">Parallelogramm (kein Rechteck)</button>
+        <button class="mc-btn" onclick="mcAnswer('fv1b',1,true,this)">Rechteck</button>
+        <button class="mc-btn" onclick="mcAnswer('fv1b',2,false,this)">Kein Parallelogramm</button>
+      </div>
+      <div class="feedback" id="fb-fv1b"></div>
+    </div>
+  </div>
+
+  <!-- PROFI -->
+  <div class="level-content" data-lv="profi" style="display:none;">
+    <div class="card">
+      <div class="tag tag-green">⭐⭐⭐ Profi</div>
+      <div class="card-title">Vierecke I – selbstständig klassifizieren</div>
+
+      <div style="margin-bottom:6px;font-weight:600;color:var(--accent2);">Aufgabe 1</div>
+      <div style="margin-bottom:10px;font-size:.9rem;">\(A(1\mid 2\mid 3)\), \(B(4\mid 2\mid 3)\), \(C(6\mid 5\mid 3)\), \(D(3\mid 5\mid 3)\)</div>
+      <div class="mc-options" id="mc-pv1a">
+        <button class="mc-btn" onclick="mcAnswer('pv1a',0,true,this)">Parallelogramm (kein Rechteck)</button>
+        <button class="mc-btn" onclick="mcAnswer('pv1a',1,false,this)">Rechteck</button>
+        <button class="mc-btn" onclick="mcAnswer('pv1a',2,false,this)">Kein Parallelogramm</button>
+      </div>
+      <div class="feedback" id="fb-pv1a"></div>
+      <button class="btn btn-secondary" style="margin-top:10px;font-size:.82rem;" onclick="toggleSol('sol-pv1a')">Lösungsweg anzeigen</button>
+      <div class="solution-reveal" id="sol-pv1a">
+        <div class="sol-step"><div class="sol-label">Seitenvektoren</div>\(\overrightarrow{AB}=\begin{pmatrix}3\\0\\0\end{pmatrix}=\overrightarrow{DC}\) ✓,\;\(\overrightarrow{AD}=\begin{pmatrix}2\\3\\0\end{pmatrix}=\overrightarrow{BC}\) ✓ → Parallelogramm</div>
+        <div class="sol-step"><div class="sol-label">Rechter Winkel?</div>\(|AB|^2=9,\;|BC|^2=13,\;|AC|^2=25+9=34\)<br>\(9+13=22\neq34\) → kein rechter Winkel</div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div style="margin-bottom:6px;font-weight:600;color:var(--accent2);">Aufgabe 2</div>
+      <div style="margin-bottom:10px;font-size:.9rem;">\(A(0\mid 1\mid 0)\), \(B(4\mid 1\mid 0)\), \(C(4\mid 1\mid 3)\), \(D(0\mid 1\mid 3)\)</div>
+      <div class="mc-options" id="mc-pv1b">
+        <button class="mc-btn" onclick="mcAnswer('pv1b',0,false,this)">Parallelogramm (kein Rechteck)</button>
+        <button class="mc-btn" onclick="mcAnswer('pv1b',1,true,this)">Rechteck</button>
+        <button class="mc-btn" onclick="mcAnswer('pv1b',2,false,this)">Kein Parallelogramm</button>
+      </div>
+      <div class="feedback" id="fb-pv1b"></div>
+      <button class="btn btn-secondary" style="margin-top:10px;font-size:.82rem;" onclick="toggleSol('sol-pv1b')">Lösungsweg anzeigen</button>
+      <div class="solution-reveal" id="sol-pv1b">
+        <div class="sol-step"><div class="sol-label">Seitenvektoren</div>\(\overrightarrow{AB}=\begin{pmatrix}4\\0\\0\end{pmatrix}=\overrightarrow{DC}\) ✓,\;\(\overrightarrow{AD}=\begin{pmatrix}0\\0\\3\end{pmatrix}=\overrightarrow{BC}\) ✓ → Parallelogramm</div>
+        <div class="sol-step"><div class="sol-label">Rechter Winkel bei B</div>\(|AB|^2=16,\;|BC|^2=9,\;|AC|^2=25\)<br>\(16+9=25=|AC|^2\) ✓ → Rechteck</div>
+      </div>
+    </div>
+  </div>
+</div><!-- /page-1 -->
+
+
+<!-- ══════════════════════════════════════════
+     TAB 2 – VIERECKE II (Raute / Quadrat)
+══════════════════════════════════════════ -->
+<div class="tab-page" id="page-2">
+
+  <!-- GRUNDLAGEN -->
+  <div class="level-content" data-lv="grund">
+    <div class="card">
+      <div class="tag tag-blue">⭐ Grundlagen</div>
+      <div class="card-title">Raute & Quadrat – Schritt für Schritt</div>
+      <div class="card-intro">Gegeben: \(A(0\mid 3\mid 1)\), \(B(3\mid 3\mid 1)\), \(C(3\mid 6\mid 1)\), \(D(0\mid 6\mid 1)\)<br>Klappe jeden Schritt auf und rechne.</div>
+      <div class="theory-box">
+        <strong>Raute:</strong> Parallelogramm + alle vier Seiten gleich lang (\(|AB|^2=|AD|^2\))<br>
+        <strong>Quadrat:</strong> Raute + rechter Winkel (Pythagoras)
+      </div>
+
+      <!-- Schritt 1 -->
+      <div class="accordion" id="acc-v2-1">
+        <div class="accordion-head" onclick="toggleAcc('acc-v2-1')">
+          <span class="acc-num" id="accnum-v2-1">1</span>
+          <span class="acc-title">Parallelogramm nachweisen</span>
+          <span class="acc-arrow">▼</span>
+        </div>
+        <div class="accordion-body">
+          <p style="margin-bottom:10px;">Berechne \(\overrightarrow{AB}\), \(\overrightarrow{DC}\) und \(\overrightarrow{AD}\). Prüfe: \(\overrightarrow{AB}=\overrightarrow{DC}\) und \(\overrightarrow{AD}=\overrightarrow{BC}\).</p>
+          <div class="input-row"><span class="input-label">\(\overrightarrow{AB}\)</span>
+            <input class="num-input" id="v2-ab-x" type="text" inputmode="numeric" placeholder="x">
+            <input class="num-input" id="v2-ab-y" type="text" inputmode="numeric" placeholder="y">
+            <input class="num-input" id="v2-ab-z" type="text" inputmode="numeric" placeholder="z">
+          </div>
+          <div class="input-row"><span class="input-label">\(\overrightarrow{DC}\)</span>
+            <input class="num-input" id="v2-dc-x" type="text" inputmode="numeric" placeholder="x">
+            <input class="num-input" id="v2-dc-y" type="text" inputmode="numeric" placeholder="y">
+            <input class="num-input" id="v2-dc-z" type="text" inputmode="numeric" placeholder="z">
+          </div>
+          <div class="input-row"><span class="input-label">\(\overrightarrow{AD}\)</span>
+            <input class="num-input" id="v2-ad-x" type="text" inputmode="numeric" placeholder="x">
+            <input class="num-input" id="v2-ad-y" type="text" inputmode="numeric" placeholder="y">
+            <input class="num-input" id="v2-ad-z" type="text" inputmode="numeric" placeholder="z">
+          </div>
+          <button class="btn btn-secondary" style="margin-top:8px;" onclick="checkV2Step(1)">Prüfen</button>
+          <div class="feedback" id="fb-v2-1"></div>
+        </div>
+      </div>
+
+      <!-- Schritt 2 -->
+      <div class="accordion step-locked" id="acc-v2-2">
+        <div class="accordion-head" onclick="toggleAcc('acc-v2-2')">
+          <span class="acc-num" id="accnum-v2-2">2</span>
+          <span class="acc-title">Alle Seiten gleich lang? → Raute</span>
+          <span class="acc-arrow">▼</span>
+        </div>
+        <div class="accordion-body">
+          <p style="margin-bottom:10px;">Berechne die Längenquadrate zweier benachbarter Seiten. Sind sie gleich → Raute.</p>
+          <div class="input-row"><span class="input-label">\(|AB|^2\)</span><input class="num-input" id="v2-ab2" type="text" inputmode="numeric" placeholder="?"></div>
+          <div class="input-row"><span class="input-label">\(|AD|^2\)</span><input class="num-input" id="v2-ad2" type="text" inputmode="numeric" placeholder="?"></div>
+          <button class="btn btn-secondary" style="margin-top:8px;" onclick="checkV2Step(2)">Prüfen</button>
+          <div class="feedback" id="fb-v2-2"></div>
+        </div>
+      </div>
+
+      <!-- Schritt 3 -->
+      <div class="accordion step-locked" id="acc-v2-3">
+        <div class="accordion-head" onclick="toggleAcc('acc-v2-3')">
+          <span class="acc-num" id="accnum-v2-3">3</span>
+          <span class="acc-title">Quadrat? → Pythagoras an Diagonale AC</span>
+          <span class="acc-arrow">▼</span>
+        </div>
+        <div class="accordion-body">
+          <p style="margin-bottom:10px;">\(\overrightarrow{AC}=C-A=\begin{pmatrix}3\\3\\0\end{pmatrix}\), also \(|AC|^2=18\)</p>
+          <div class="input-row"><span class="input-label">\(|AB|^2+|BC|^2\)</span><input class="num-input" id="v2-sum" type="text" inputmode="numeric" placeholder="?"></div>
+          <p style="margin-top:6px;font-size:.88rem;color:var(--text-muted)">Stimmt das mit \(|AC|^2=18\) überein?</p>
+          <div class="mc-options" id="mc-v2-3" style="margin-top:10px;">
+            <button class="mc-btn" onclick="mcAnswer('v2-3',0,true,this)">Ja – es ist ein Quadrat</button>
+            <button class="mc-btn" onclick="mcAnswer('v2-3',1,false,this)">Nein – nur eine Raute</button>
+          </div>
+          <div class="feedback" id="fb-v2-3"></div>
+        </div>
+      </div>
+    </div>
+  </div><!-- /grund -->
+
+  <!-- FORTGESCHRITTEN -->
+  <div class="level-content" data-lv="fort" style="display:none;">
+    <div class="card">
+      <div class="tag tag-orange">⭐⭐ Fortgeschritten</div>
+      <div class="card-title">Raute & Quadrat – Was ist zu prüfen?</div>
+      <ul class="check-list">
+        <li><strong>Raute:</strong> Erst Parallelogramm (\(\overrightarrow{AB}=\overrightarrow{DC}\) und \(\overrightarrow{AD}=\overrightarrow{BC}\)). Dann: \(|AB|^2=|AD|^2\) (benachbarte Seiten gleich lang).</li>
+        <li><strong>Quadrat:</strong> Raute + Pythagoras: \(|AB|^2+|BC|^2=|AC|^2\).</li>
+        <li><strong>Tipp:</strong> Beim Parallelogramm sind Gegenseiten schon gleich – ein Vergleich benachbarter Seiten reicht zur Raute.</li>
+      </ul>
+      <div class="formula-box">Raute: Parallelogramm mit \(|AB|^2=|AD|^2\)<br>Quadrat: Raute mit \(|AB|^2+|BC|^2=|AC|^2\)</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Aufgabe 1</div>
+      <div class="card-intro">Gegeben: \(A(0\mid 0\mid 0)\), \(B(2\mid 1\mid 0)\), \(C(4\mid 0\mid 0)\), \(D(2\mid -1\mid 0)\)</div>
+      <div class="hint-toggle" onclick="this.classList.toggle('open')">💡 Tipp<div class="hint-content">Erst Parallelogramm prüfen, dann \(|AB|^2\) und \(|AD|^2\) vergleichen, dann Pythagoras.</div></div>
+      <div class="mc-options" id="mc-fv2a">
+        <button class="mc-btn" onclick="mcAnswer('fv2a',0,false,this)">Nur Parallelogramm</button>
+        <button class="mc-btn" onclick="mcAnswer('fv2a',1,true,this)">Raute (kein Quadrat)</button>
+        <button class="mc-btn" onclick="mcAnswer('fv2a',2,false,this)">Quadrat</button>
+        <button class="mc-btn" onclick="mcAnswer('fv2a',3,false,this)">Kein Parallelogramm</button>
+      </div>
+      <div class="feedback" id="fb-fv2a"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Aufgabe 2</div>
+      <div class="card-intro">Gegeben: \(A(0\mid 0\mid 0)\), \(B(2\mid 0\mid 0)\), \(C(2\mid 2\mid 0)\), \(D(0\mid 2\mid 0)\)</div>
+      <div class="hint-toggle" onclick="this.classList.toggle('open')">💡 Tipp<div class="hint-content">Alle Seiten haben \(|...|^2=4\). Prüfe Pythagoras: \(|AC|^2=8\).</div></div>
+      <div class="mc-options" id="mc-fv2b">
+        <button class="mc-btn" onclick="mcAnswer('fv2b',0,false,this)">Nur Parallelogramm</button>
+        <button class="mc-btn" onclick="mcAnswer('fv2b',1,false,this)">Raute (kein Quadrat)</button>
+        <button class="mc-btn" onclick="mcAnswer('fv2b',2,true,this)">Quadrat</button>
+        <button class="mc-btn" onclick="mcAnswer('fv2b',3,false,this)">Kein Parallelogramm</button>
+      </div>
+      <div class="feedback" id="fb-fv2b"></div>
+    </div>
+  </div>
+
+  <!-- PROFI -->
+  <div class="level-content" data-lv="profi" style="display:none;">
+    <div class="card">
+      <div class="tag tag-green">⭐⭐⭐ Profi</div>
+      <div class="card-title">Vierecke II – vollständig klassifizieren</div>
+
+      <div style="margin-bottom:6px;font-weight:600;color:var(--accent2);">Aufgabe 1</div>
+      <div style="margin-bottom:10px;font-size:.9rem;">\(A(1\mid 0\mid 0)\), \(B(0\mid 1\mid 0)\), \(C(1\mid 2\mid 0)\), \(D(2\mid 1\mid 0)\)</div>
+      <div class="mc-options" id="mc-pv2a">
+        <button class="mc-btn" onclick="mcAnswer('pv2a',0,false,this)">Nur Parallelogramm</button>
+        <button class="mc-btn" onclick="mcAnswer('pv2a',1,false,this)">Raute (kein Quadrat)</button>
+        <button class="mc-btn" onclick="mcAnswer('pv2a',2,true,this)">Quadrat</button>
+        <button class="mc-btn" onclick="mcAnswer('pv2a',3,false,this)">Kein Parallelogramm</button>
+      </div>
+      <div class="feedback" id="fb-pv2a"></div>
+      <button class="btn btn-secondary" style="margin-top:10px;font-size:.82rem;" onclick="toggleSol('sol-pv2a')">Lösungsweg anzeigen</button>
+      <div class="solution-reveal" id="sol-pv2a">
+        <div class="sol-step"><div class="sol-label">Parallelogramm</div>\(\overrightarrow{AB}=\begin{pmatrix}-1\\1\\0\end{pmatrix}=\overrightarrow{DC}\) ✓,\;\(\overrightarrow{AD}=\begin{pmatrix}1\\1\\0\end{pmatrix}=\overrightarrow{BC}\) ✓</div>
+        <div class="sol-step"><div class="sol-label">Raute?</div>\(|AB|^2=2=|AD|^2\) → alle Seiten gleich → Raute</div>
+        <div class="sol-step"><div class="sol-label">Quadrat?</div>\(|AC|^2=4\), \(|AB|^2+|BC|^2=2+2=4\) ✓ → Quadrat</div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div style="margin-bottom:6px;font-weight:600;color:var(--accent2);">Aufgabe 2</div>
+      <div style="margin-bottom:10px;font-size:.9rem;">\(A(0\mid 0\mid 2)\), \(B(3\mid 0\mid 2)\), \(C(4\mid 2\mid 2)\), \(D(1\mid 2\mid 2)\)</div>
+      <div class="mc-options" id="mc-pv2b">
+        <button class="mc-btn" onclick="mcAnswer('pv2b',0,false,this)">Nur Parallelogramm</button>
+        <button class="mc-btn" onclick="mcAnswer('pv2b',1,true,this)">Raute (kein Quadrat)</button>
+        <button class="mc-btn" onclick="mcAnswer('pv2b',2,false,this)">Quadrat</button>
+        <button class="mc-btn" onclick="mcAnswer('pv2b',3,false,this)">Kein Parallelogramm</button>
+      </div>
+      <div class="feedback" id="fb-pv2b"></div>
+      <button class="btn btn-secondary" style="margin-top:10px;font-size:.82rem;" onclick="toggleSol('sol-pv2b')">Lösungsweg anzeigen</button>
+      <div class="solution-reveal" id="sol-pv2b">
+        <div class="sol-step"><div class="sol-label">Parallelogramm</div>\(\overrightarrow{AB}=\begin{pmatrix}3\\0\\0\end{pmatrix}=\overrightarrow{DC}\) ✓,\;\(\overrightarrow{AD}=\begin{pmatrix}1\\2\\0\end{pmatrix}=\overrightarrow{BC}\) ✓</div>
+        <div class="sol-step"><div class="sol-label">Raute?</div>\(|AB|^2=9,\;|AD|^2=5\) → \(9\neq5\) → keine Raute → nur Parallelogramm!<br><em>Achtung: Die Antwortoptionen zeigen, dass genaues Prüfen wichtig ist.</em></div>
+      </div>
+    </div>
+  </div>
+</div><!-- /page-2 -->
+
+
+<!-- ══════════════════════════════════════════
+     TAB 3 – WIEDERHOLUNG
+══════════════════════════════════════════ -->
+<div class="tab-page" id="page-3">
+
+  <!-- GRUNDLAGEN -->
+  <div class="level-content" data-lv="grund">
+    <div class="card">
+      <div class="tag tag-blue">⭐ Grundlagen</div>
+      <div class="card-title">Wiederholung: Vektoren im Raum</div>
+      <div class="theory-box">
+        <strong>Addition:</strong> komponentenweise addieren<br>
+        <strong>Skalarmultiplikation:</strong> jede Komponente mit Skalar multiplizieren<br>
+        <strong>Längenquadrat:</strong> \(|\vec{v}|^2=v_1^2+v_2^2+v_3^2\)<br>
+        <strong>Kollinearität:</strong> \(\vec{u}=k\cdot\vec{v}\) für ein reelles \(k\)
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Aufgabe 1 – Vektoraddition</div>
+      <div class="card-intro">Berechne \(\vec{a}+\vec{b}\) für \(\vec{a}=\begin{pmatrix}3\\-1\\2\end{pmatrix}\) und \(\vec{b}=\begin{pmatrix}1\\4\\-2\end{pmatrix}\)</div>
+      <div class="input-row"><span class="input-label">Ergebnis (x,y,z):</span>
+        <input class="num-input" id="wg-add-x" type="text" inputmode="numeric" placeholder="x">
+        <input class="num-input" id="wg-add-y" type="text" inputmode="numeric" placeholder="y">
+        <input class="num-input" id="wg-add-z" type="text" inputmode="numeric" placeholder="z">
+      </div>
+      <button class="btn btn-secondary" style="margin-top:8px;" onclick="checkWGrund('add')">Prüfen</button>
+      <div class="feedback" id="fb-wg-add"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Aufgabe 2 – Skalarmultiplikation</div>
+      <div class="card-intro">Berechne \(3\cdot\vec{c}\) für \(\vec{c}=\begin{pmatrix}2\\0\\-1\end{pmatrix}\)</div>
+      <div class="input-row"><span class="input-label">Ergebnis (x,y,z):</span>
+        <input class="num-input" id="wg-skal-x" type="text" inputmode="numeric" placeholder="x">
+        <input class="num-input" id="wg-skal-y" type="text" inputmode="numeric" placeholder="y">
+        <input class="num-input" id="wg-skal-z" type="text" inputmode="numeric" placeholder="z">
+      </div>
+      <button class="btn btn-secondary" style="margin-top:8px;" onclick="checkWGrund('skal')">Prüfen</button>
+      <div class="feedback" id="fb-wg-skal"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Aufgabe 3 – Längenquadrat</div>
+      <div class="card-intro">Berechne \(|\vec{d}|^2\) für \(\vec{d}=\begin{pmatrix}2\\3\\6\end{pmatrix}\)</div>
+      <div class="input-row"><span class="input-label">\(|\vec{d}|^2=\)</span><input class="num-input" id="wg-len" type="text" inputmode="numeric" placeholder="?"></div>
+      <button class="btn btn-secondary" style="margin-top:8px;" onclick="checkWGrund('len')">Prüfen</button>
+      <div class="feedback" id="fb-wg-len"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Aufgabe 4 – Kollinearität</div>
+      <div class="card-intro">Sind \(\vec{u}=\begin{pmatrix}2\\4\\-6\end{pmatrix}\) und \(\vec{v}=\begin{pmatrix}-1\\-2\\3\end{pmatrix}\) kollinear?</div>
+      <div class="mc-options" id="mc-wg-koll">
+        <button class="mc-btn" onclick="mcAnswer('wg-koll',0,true,this)">Ja – es gilt \(\vec{u}=-2\cdot\vec{v}\)</button>
+        <button class="mc-btn" onclick="mcAnswer('wg-koll',1,false,this)">Nein – kein einheitliches \(k\) vorhanden</button>
+        <button class="mc-btn" onclick="mcAnswer('wg-koll',2,false,this)">Ja – es gilt \(\vec{u}=2\cdot\vec{v}\)</button>
+      </div>
+      <div class="feedback" id="fb-wg-koll"></div>
+    </div>
+  </div>
+
+  <!-- FORTGESCHRITTEN -->
+  <div class="level-content" data-lv="fort" style="display:none;">
+    <div class="card">
+      <div class="tag tag-orange">⭐⭐ Fortgeschritten</div>
+      <div class="card-title">Wiederholung: Verbindungsvektoren &amp; Kollinearität</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Aufgabe 1 – Verbindungsvektor</div>
+      <div class="card-intro">Gegeben: \(P(2\mid 3\mid 5)\) und \(Q(7\mid 1\mid 2)\). Berechne \(\overrightarrow{PQ}\) und \(|\overrightarrow{PQ}|^2\).</div>
+      <div class="input-row"><span class="input-label">\(\overrightarrow{PQ}\) (x,y,z):</span>
+        <input class="num-input" id="wf-pq-x" type="text" inputmode="numeric">
+        <input class="num-input" id="wf-pq-y" type="text" inputmode="numeric">
+        <input class="num-input" id="wf-pq-z" type="text" inputmode="numeric">
+      </div>
+      <div class="input-row"><span class="input-label">\(|\overrightarrow{PQ}|^2=\)</span><input class="num-input" id="wf-pq2" type="text" inputmode="numeric"></div>
+      <button class="btn btn-secondary" style="margin-top:8px;" onclick="checkWFort('pq')">Prüfen</button>
+      <div class="feedback" id="fb-wf-pq"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Aufgabe 2 – Kollinearität</div>
+      <div class="card-intro">Sind \(\vec{a}=\begin{pmatrix}4\\-2\\6\end{pmatrix}\) und \(\vec{b}=\begin{pmatrix}6\\-3\\9\end{pmatrix}\) kollinear?</div>
+      <div class="hint-toggle" onclick="this.classList.toggle('open')">💡 Tipp<div class="hint-content">Prüfe komponentenweise: \(4k=6\), \(-2k=-3\), \(6k=9\) – alle drei müssen dasselbe \(k\) ergeben.</div></div>
+      <div class="mc-options" id="mc-wf-koll">
+        <button class="mc-btn" onclick="mcAnswer('wf-koll',0,true,this)">Ja, \(k=\frac{3}{2}\) passt für alle Komponenten</button>
+        <button class="mc-btn" onclick="mcAnswer('wf-koll',1,false,this)">Nein, kein einheitliches \(k\)</button>
+        <button class="mc-btn" onclick="mcAnswer('wf-koll',2,false,this)">Ja, \(k=2\)</button>
+      </div>
+      <div class="feedback" id="fb-wf-koll"></div>
+    </div>
+  </div>
+
+  <!-- PROFI -->
+  <div class="level-content" data-lv="profi" style="display:none;">
+    <div class="card">
+      <div class="tag tag-green">⭐⭐⭐ Profi</div>
+      <div class="card-title">Wiederholung: Profi-Aufgaben</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Aufgabe 1 – Mittelpunkt</div>
+      <div class="card-intro">Gegeben: \(A(2\mid 4\mid 6)\) und \(B(8\mid 0\mid 2)\). Berechne \(M\) (Mittelpunkt von \(AB\)).<br><em style="font-size:.85rem;">Tipp: \(\overrightarrow{OM}=\overrightarrow{OA}+\frac{1}{2}\overrightarrow{AB}\)</em></div>
+      <div class="input-row"><span class="input-label">M (x,y,z):</span>
+        <input class="num-input" id="wp-m-x" type="text" inputmode="numeric">
+        <input class="num-input" id="wp-m-y" type="text" inputmode="numeric">
+        <input class="num-input" id="wp-m-z" type="text" inputmode="numeric">
+      </div>
+      <button class="btn btn-secondary" style="margin-top:8px;" onclick="checkWProfi('m')">Prüfen</button>
+      <div class="feedback" id="fb-wp-m"></div>
+      <button class="btn btn-secondary" style="margin-top:10px;font-size:.82rem;" onclick="toggleSol('sol-wp-m')">Lösungsweg anzeigen</button>
+      <div class="solution-reveal" id="sol-wp-m">
+        <div class="sol-step"><div class="sol-label">Verbindungsvektor</div>\(\overrightarrow{AB}=\begin{pmatrix}6\\-4\\-4\end{pmatrix}\)</div>
+        <div class="sol-step"><div class="sol-label">Mittelpunkt</div>\(\overrightarrow{OM}=\begin{pmatrix}2\\4\\6\end{pmatrix}+\frac{1}{2}\begin{pmatrix}6\\-4\\-4\end{pmatrix}=\begin{pmatrix}5\\2\\4\end{pmatrix}\) → \(M(5\mid 2\mid 4)\)</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Aufgabe 2 – Kollineare Punkte</div>
+      <div class="card-intro">Liegen \(A(1\mid 2\mid 3)\), \(B(3\mid 5\mid 7)\), \(C(5\mid 8\mid 11)\) auf einer Geraden?</div>
+      <div class="mc-options" id="mc-wp-koll">
+        <button class="mc-btn" onclick="mcAnswer('wp-koll',0,true,this)">Ja – \(\overrightarrow{AB}\) und \(\overrightarrow{AC}\) sind kollinear</button>
+        <button class="mc-btn" onclick="mcAnswer('wp-koll',1,false,this)">Nein – die Vektoren sind nicht kollinear</button>
+      </div>
+      <div class="feedback" id="fb-wp-koll"></div>
+      <button class="btn btn-secondary" style="margin-top:10px;font-size:.82rem;" onclick="toggleSol('sol-wp-koll')">Lösungsweg anzeigen</button>
+      <div class="solution-reveal" id="sol-wp-koll">
+        <div class="sol-step"><div class="sol-label">Vektoren</div>\(\overrightarrow{AB}=\begin{pmatrix}2\\3\\4\end{pmatrix},\;\overrightarrow{AC}=\begin{pmatrix}4\\6\\8\end{pmatrix}\)</div>
+        <div class="sol-step"><div class="sol-label">Kollinear?</div>\(\overrightarrow{AC}=2\cdot\overrightarrow{AB}\) → kollinear → A, B, C liegen auf einer Geraden.</div>
+      </div>
+    </div>
+  </div>
+</div><!-- /page-3 -->
+
+
+<!-- ══════════════════════════════════════════
+     TAB 4 – AUSWERTUNG
+══════════════════════════════════════════ -->
+<div class="tab-page" id="page-4">
+  <div class="card">
+    <div class="card-title">Auswertung</div>
+    <div id="auswertung-inhalt">
+      <div style="text-align:center;color:var(--text-muted);padding:30px 0;">
+        Bearbeite zuerst die Aufgaben auf den anderen Karten.
+      </div>
+    </div>
+    <button class="btn btn-primary btn-full" style="margin-top:16px;" onclick="berechneAuswertung()">Ergebnis berechnen</button>
+  </div>
+</div>
+
+</div><!-- /card-area -->
+
+<div class="weiter-wrap" id="weiter-wrap">
+  <button class="btn-weiter" onclick="location.href='#'">Weiter →</button>
+</div>
+
+<div id="dino" onclick="toggleDinoTip()" onmouseover="showDinoTip()" onmouseout="hideDinoTip()">🦖</div>
+<div id="dino-tip">Made by Mathedino</div>
+
+<script>
+// ══════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════
+let currentLevel = 'grund';
+const answered = {};
+
+// ══════════════════════════════════════════
+// LEVEL SWITCH – kein MathJax direkt aufrufen
+// ══════════════════════════════════════════
+const levelDesc = { grund:'Schritt-für-Schritt Anleitung', fort:'Was muss geprüft werden?', profi:'Selbstständiges Arbeiten' };
+
+function setLevel(lv) {
+  currentLevel = lv;
+  document.querySelectorAll('.level-btn').forEach(b => b.classList.toggle('active', b.dataset.level === lv));
+  document.getElementById('level-desc').textContent = levelDesc[lv];
+  document.querySelectorAll('.level-content').forEach(el => {
+    el.style.display = el.dataset.lv === lv ? 'block' : 'none';
+  });
+  safeMathJax();
+}
+
+// ══════════════════════════════════════════
+// TABS
+// ══════════════════════════════════════════
+function switchTab(idx) {
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', i===idx));
+  document.querySelectorAll('.tab-page').forEach((p,i) => p.classList.toggle('active', i===idx));
+  safeMathJax();
+  checkWeiter();
+}
+
+// ══════════════════════════════════════════
+// SAFE MATHJAX – only call when ready
+// ══════════════════════════════════════════
+function safeMathJax() {
+  if (window.MathJax && MathJax.typesetPromise) {
+    MathJax.typesetPromise().catch(e => console.warn('MathJax:', e));
+  }
+}
+
+// ══════════════════════════════════════════
+// ACCORDION
+// ══════════════════════════════════════════
+function toggleAcc(id) {
+  const acc = document.getElementById(id);
+  if (!acc || acc.classList.contains('step-locked')) return;
+  const head = acc.querySelector('.accordion-head');
+  const body = acc.querySelector('.accordion-body');
+  const isOpen = head.classList.contains('open');
+  head.classList.toggle('open', !isOpen);
+  body.classList.toggle('open', !isOpen);
+  safeMathJax();
+}
+
+function unlockAcc(id, autoOpen) {
+  const acc = document.getElementById(id);
+  if (!acc) return;
+  acc.classList.remove('step-locked');
+  if (autoOpen) {
+    const head = acc.querySelector('.accordion-head');
+    const body = acc.querySelector('.accordion-body');
+    head.classList.add('open');
+    body.classList.add('open');
+    // scroll into view
+    setTimeout(() => acc.scrollIntoView({behavior:'smooth', block:'nearest'}), 100);
+  }
+  safeMathJax();
+}
+
+function markAccDone(numId) {
+  const num = document.getElementById(numId);
+  if (num) num.classList.add('done-num');
+}
+
+// ══════════════════════════════════════════
+// FEEDBACK
+// ══════════════════════════════════════════
+function showFb(id, ok, msg) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.className = 'feedback show ' + (ok ? 'ok' : 'err');
+  el.innerHTML = (ok ? '✅ ' : '❌ ') + msg;
+  safeMathJax();
+}
+
+// ══════════════════════════════════════════
+// MC
+// ══════════════════════════════════════════
+function mcAnswer(key, idx, correct, btn) {
+  const group = document.getElementById('mc-' + key);
+  if (!group || group.dataset.done) return;
+  group.dataset.done = '1';
+  group.querySelectorAll('.mc-btn').forEach(b => b.style.pointerEvents = 'none');
+  const fbEl = document.getElementById('fb-' + key);
+  if (correct) {
+    btn.classList.add('correct');
+    answered[key] = true;
+    if (fbEl) { fbEl.className='feedback show ok'; fbEl.innerHTML='✅ Richtig!'; }
+  } else {
+    btn.classList.add('wrong');
+    answered[key] = false;
+    group.querySelectorAll('.mc-btn').forEach(b => {
+      if (b.getAttribute('onclick') && b.getAttribute('onclick').includes(',true,')) b.classList.add('correct');
+    });
+    if (fbEl) { fbEl.className='feedback show err'; fbEl.innerHTML='❌ Leider falsch. Die richtige Antwort ist grün markiert.'; }
+  }
+  checkWeiter();
+  safeMathJax();
+}
+
+// ══════════════════════════════════════════
+// DREIECK 1 (Beispiel – geführt)
+// ══════════════════════════════════════════
+let d1done = [false,false,false,false];
+
+function checkD1Step(step) {
+  if (step===1) {
+    const abx=v('d1-ab-x'),aby=v('d1-ab-y'),abz=v('d1-ab-z');
+    const acx=v('d1-ac-x'),acy=v('d1-ac-y'),acz=v('d1-ac-z');
+    const bcx=v('d1-bc-x'),bcy=v('d1-bc-y'),bcz=v('d1-bc-z');
+    const ok = abx==='4'&&aby==='0'&&abz==='0' && acx==='2'&&acy==='4'&&acz==='0' && bcx==='-2'&&bcy==='4'&&bcz==='0';
+    showFb('fb-d1-1', ok,
+      ok ? 'Alle drei Vektoren stimmen!' :
+      '\\(\\overrightarrow{AB}=B-A=(6-2,1-1,3-3)=(4,0,0)\\), \\(\\overrightarrow{AC}=(4-2,5-1,0)=(2,4,0)\\), \\(\\overrightarrow{BC}=(4-6,5-1,0)=(-2,4,0)\\)');
+    if (ok) { d1done[0]=true; markAccDone('accnum-d-1'); unlockAcc('acc-d-2', true); }
+  }
+  if (step===2 && d1done[0]) {
+    const ab2=v('d1-ab2'), ac2=v('d1-ac2'), bc2=v('d1-bc2');
+    const ok = ab2==='16'&&ac2==='20'&&bc2==='20';
+    showFb('fb-d1-2', ok,
+      ok ? '\\(|AB|^2=16,\\;|AC|^2=4+16=20,\\;|BC|^2=4+16=20\\)' :
+      '\\(|AB|^2=4^2+0+0=16\\), \\(|AC|^2=4+16=20\\), \\(|BC|^2=4+16=20\\)');
+    if (ok) { d1done[1]=true; markAccDone('accnum-d-2'); unlockAcc('acc-d-3', true); }
+  }
+  if (step===4 && d1done[2]) {
+    const p=v('d1-pyth');
+    const ok = p==='36';
+    showFb('fb-d1-4', ok,
+      ok ? '\\(16+20=36\\neq 20\\) → kein rechter Winkel. Das Dreieck ist nur gleichschenklig.' :
+      '\\(|AB|^2+|BC|^2=16+20=36\\). Vergleich mit \\(|AC|^2=20\\): \\(36\\neq20\\) – kein rechter Winkel.');
+    if (ok) { d1done[3]=true; markAccDone('accnum-d-4'); answered['d1-pyth']=true; checkWeiter(); }
+  }
+}
+
+// MC Schritt 3 für d1-3 setzt d1done[2]
+const _origMC = mcAnswer;
+// patch: after mc-d1-3 is answered correctly, unlock step 4
+document.addEventListener('click', function(e) {
+  if (e.target && e.target.classList.contains('mc-btn')) {
+    // handled by mcAnswer inline
+  }
+}, true);
+
+// Override for d1-3 unlock
+function mcAnswerD1_3(key, idx, correct, btn) {
+  mcAnswer(key, idx, correct, btn);
+  if (key==='d1-3' && correct) { d1done[2]=true; markAccDone('accnum-d-3'); unlockAcc('acc-d-4', true); }
+}
+
+// ══════════════════════════════════════════
+// DREIECK 2 (Aufgabe selbst)
+// ══════════════════════════════════════════
+let d2done = [false,false,false,false];
+
+function checkD2Step(step) {
+  if (step===1) {
+    const pqx=v('d2-pq-x'),pqy=v('d2-pq-y'),pqz=v('d2-pq-z');
+    const prx=v('d2-pr-x'),pry=v('d2-pr-y'),prz=v('d2-pr-z');
+    const qrx=v('d2-qr-x'),qry=v('d2-qr-y'),qrz=v('d2-qr-z');
+    const ok = pqx==='3'&&pqy==='0'&&pqz==='-4' && prx==='0'&&pry==='4'&&prz==='-4' && qrx==='-3'&&qry==='4'&&qrz==='0';
+    showFb('fb-d2-1', ok,
+      ok ? 'Alle Vektoren korrekt!' :
+      '\\(\\overrightarrow{PQ}=Q-P=(3,0,-4)\\), \\(\\overrightarrow{PR}=R-P=(0,4,-4)\\), \\(\\overrightarrow{QR}=R-Q=(-3,4,0)\\)');
+    if (ok) { d2done[0]=true; markAccDone('accnum-d2-1'); unlockAcc('acc-d2-2', true); }
+  }
+  if (step===2 && d2done[0]) {
+    const pq2=v('d2-pq2'),pr2=v('d2-pr2'),qr2=v('d2-qr2');
+    const ok = pq2==='25'&&pr2==='32'&&qr2==='25';
+    showFb('fb-d2-2', ok,
+      ok ? '\\(|PQ|^2=9+0+16=25\\), \\(|PR|^2=0+16+16=32\\), \\(|QR|^2=9+16+0=25\\)' :
+      '\\(|PQ|^2=3^2+0^2+4^2=25\\), \\(|PR|^2=0+16+16=32\\), \\(|QR|^2=9+16=25\\)');
+    if (ok) { d2done[1]=true; markAccDone('accnum-d2-2'); unlockAcc('acc-d2-3', true); }
+  }
+  if (step===4 && d2done[2]) {
+    const p=v('d2-pyth');
+    const ok = p==='50';
+    showFb('fb-d2-4', ok,
+      ok ? '\\(25+25=50\\neq32\\) → kein rechter Winkel. Das Dreieck ist gleichschenklig, aber nicht rechtwinklig.' :
+      '\\(|PQ|^2+|QR|^2=25+25=50\\). Vergleich mit \\(|PR|^2=32\\): \\(50\\neq32\\) – kein rechter Winkel.');
+    if (ok) { d2done[3]=true; markAccDone('accnum-d2-4'); answered['d2-pyth']=true; checkWeiter(); }
+  }
+}
+
+// ══════════════════════════════════════════
+// VIERECK 1 – GRUNDLAGEN
+// ══════════════════════════════════════════
+let v1done = [false,false,false,false];
+
+function checkV1Step(step) {
+  if (step===1) {
+    const abx=v('v1-ab-x'),aby=v('v1-ab-y'),abz=v('v1-ab-z');
+    const dcx=v('v1-dc-x'),dcy=v('v1-dc-y'),dcz=v('v1-dc-z');
+    const ok = abx==='3'&&aby==='0'&&abz==='0' && dcx==='3'&&dcy==='0'&&dcz==='0';
+    showFb('fb-v1-1', ok,
+      ok ? '\\(\\overrightarrow{AB}=\\overrightarrow{DC}=(3,0,0)\\) – erstes Gegenseitenpaar stimmt!' :
+      '\\(\\overrightarrow{AB}=B-A=(4-1,0-0,2-2)=(3,0,0)\\), \\(\\overrightarrow{DC}=C-D=(4-1,5-5,2-2)=(3,0,0)\\)');
+    if (ok) { v1done[0]=true; markAccDone('accnum-v1-1'); unlockAcc('acc-v1-2', true); }
+  }
+  if (step===2 && v1done[0]) {
+    const adx=v('v1-ad-x'),ady=v('v1-ad-y'),adz=v('v1-ad-z');
+    const bcx=v('v1-bc-x'),bcy=v('v1-bc-y'),bcz=v('v1-bc-z');
+    const ok = adx==='0'&&ady==='5'&&adz==='0' && bcx==='0'&&bcy==='5'&&bcz==='0';
+    showFb('fb-v1-2', ok,
+      ok ? 'Beide Gegenpaare stimmen → Parallelogramm nachgewiesen!' :
+      '\\(\\overrightarrow{AD}=D-A=(0,5,0)\\), \\(\\overrightarrow{BC}=C-B=(0,5,0)\\)');
+    if (ok) { v1done[1]=true; markAccDone('accnum-v1-2'); unlockAcc('acc-v1-3', true); }
+  }
+  if (step===3 && v1done[1]) {
+    const ab2=v('v1-ab2'),bc2=v('v1-bc2'),ac2=v('v1-ac2');
+    const ok = ab2==='9'&&bc2==='25'&&ac2==='34';
+    showFb('fb-v1-3', ok,
+      ok ? '\\(9+25=34=|AC|^2\\) – Pythagoras erfüllt! Rechter Winkel bei B.' :
+      '\\(|AB|^2=3^2=9\\), \\(|BC|^2=5^2=25\\), \\(|AC|^2=(3^2+5^2)=34\\). Dann: \\(9+25=34\\) ✓');
+    if (ok) { v1done[2]=true; markAccDone('accnum-v1-3'); unlockAcc('acc-v1-4', true); answered['v1-pyth']=true; }
+  }
+}
+
+// ══════════════════════════════════════════
+// VIERECK 2 – GRUNDLAGEN
+// ══════════════════════════════════════════
+let v2done = [false,false];
+
+function checkV2Step(step) {
+  if (step===1) {
+    const abx=v('v2-ab-x'),aby=v('v2-ab-y'),abz=v('v2-ab-z');
+    const dcx=v('v2-dc-x'),dcy=v('v2-dc-y'),dcz=v('v2-dc-z');
+    const adx=v('v2-ad-x'),ady=v('v2-ad-y'),adz=v('v2-ad-z');
+    const ok = abx==='3'&&aby==='0'&&abz==='0' && dcx==='3'&&dcy==='0'&&dcz==='0' && adx==='0'&&ady==='3'&&adz==='0';
+    showFb('fb-v2-1', ok,
+      ok ? 'Parallelogramm nachgewiesen!' :
+      '\\(\\overrightarrow{AB}=(3,0,0)\\), \\(\\overrightarrow{DC}=(3,0,0)\\), \\(\\overrightarrow{AD}=(0,3,0)\\)');
+    if (ok) { v2done[0]=true; markAccDone('accnum-v2-1'); unlockAcc('acc-v2-2', true); }
+  }
+  if (step===2 && v2done[0]) {
+    const ab2=v('v2-ab2'),ad2=v('v2-ad2');
+    const ok = ab2==='9'&&ad2==='9';
+    showFb('fb-v2-2', ok,
+      ok ? '\\(|AB|^2=|AD|^2=9\\) – alle vier Seiten gleich → Raute!' :
+      '\\(|AB|^2=3^2=9\\) und \\(|AD|^2=3^2=9\\)');
+    if (ok) { v2done[1]=true; markAccDone('accnum-v2-2'); unlockAcc('acc-v2-3', true); answered['v2-raute']=true; }
+  }
+}
+
+// ══════════════════════════════════════════
+// WIEDERHOLUNG GRUNDLAGEN
+// ══════════════════════════════════════════
+function checkWGrund(step) {
+  if (step==='add') {
+    const ok = v('wg-add-x')==='4' && v('wg-add-y')==='3' && v('wg-add-z')==='0';
+    showFb('fb-wg-add', ok,
+      ok ? '\\(\\begin{pmatrix}4\\\\3\\\\0\\end{pmatrix}\\) – richtig!' :
+      'Addiere komponentenweise: \\(3+1=4\\), \\(-1+4=3\\), \\(2+(-2)=0\\)');
+    if (ok) { answered['wg-add']=true; checkWeiter(); }
+  }
+  if (step==='skal') {
+    const ok = v('wg-skal-x')==='6' && v('wg-skal-y')==='0' && v('wg-skal-z')==='-3';
+    showFb('fb-wg-skal', ok,
+      ok ? '\\(3\\cdot\\begin{pmatrix}2\\\\0\\\\-1\\end{pmatrix}=\\begin{pmatrix}6\\\\0\\\\-3\\end{pmatrix}\\)' :
+      '\\(3\\cdot2=6\\), \\(3\\cdot0=0\\), \\(3\\cdot(-1)=-3\\)');
+    if (ok) { answered['wg-skal']=true; checkWeiter(); }
+  }
+  if (step==='len') {
+    const ok = v('wg-len')==='49';
+    showFb('fb-wg-len', ok,
+      ok ? '\\(4+9+36=49\\)' :
+      '\\(2^2+3^2+6^2=4+9+36=49\\)');
+    if (ok) { answered['wg-len']=true; checkWeiter(); }
+  }
+}
+
+function checkWFort(step) {
+  if (step==='pq') {
+    const ok = v('wf-pq-x')==='5' && v('wf-pq-y')==='-2' && v('wf-pq-z')==='-3' && v('wf-pq2')==='38';
+    showFb('fb-wf-pq', ok,
+      ok ? '\\(\\overrightarrow{PQ}=(5,-2,-3)\\), \\(|PQ|^2=25+4+9=38\\)' :
+      '\\(\\overrightarrow{PQ}=Q-P=(5,-2,-3)\\), dann \\(25+4+9=38\\)');
+    if (ok) { answered['wf-pq']=true; checkWeiter(); }
+  }
+}
+
+function checkWProfi(step) {
+  if (step==='m') {
+    const ok = v('wp-m-x')==='5' && v('wp-m-y')==='2' && v('wp-m-z')==='4';
+    showFb('fb-wp-m', ok,
+      ok ? '\\(M(5\\mid 2\\mid 4)\\) – korrekt!' :
+      '\\(\\overrightarrow{AB}=(6,-4,-4)\\), dann \\(\\overrightarrow{OA}+\\frac{1}{2}\\overrightarrow{AB}=(2,4,6)+(3,-2,-2)=(5,2,4)\\)');
+    if (ok) { answered['wp-m']=true; checkWeiter(); }
+  }
+}
+
+// ══════════════════════════════════════════
+// HELPER
+// ══════════════════════════════════════════
+function v(id) {
+  const el = document.getElementById(id);
+  return el ? el.value.trim() : '';
+}
+
+// ══════════════════════════════════════════
+// WEITER-BUTTON
+// ══════════════════════════════════════════
+function getRequiredKeys() {
+  const keys = {
+    grund: ['d1-3','d2-3','v1-4','v2-3','wg-koll','wg-add','wg-skal','wg-len'],
+    fort:  ['fd1','fd2','fv1a','fv1b','fv2a','fv2b','wf-koll','wf-pq'],
+    profi: ['pd1','pd2','pv1a','pv1b','pv2a','pv2b','wp-koll','wp-m']
+  };
+  return keys[currentLevel] || [];
+}
+
+function checkWeiter() {
+  const keys = getRequiredKeys();
+  const allDone = keys.length > 0 && keys.every(k => answered[k] !== undefined);
+  document.getElementById('weiter-wrap').classList.toggle('show', allDone);
+
+  // mark tabs done
+  const tabKeys = {
+    grund: { 0:['d1-3','d2-3'], 1:['v1-4'], 2:['v2-3'], 3:['wg-koll','wg-add','wg-skal','wg-len'] },
+    fort:  { 0:['fd1','fd2'], 1:['fv1a','fv1b'], 2:['fv2a','fv2b'], 3:['wf-koll','wf-pq'] },
+    profi: { 0:['pd1','pd2'], 1:['pv1a','pv1b'], 2:['pv2a','pv2b'], 3:['wp-koll','wp-m'] }
+  };
+  const tMap = (tabKeys[currentLevel] || {});
+  for (let t=0; t<4; t++) {
+    const tk = tMap[t] || [];
+    const done = tk.length>0 && tk.every(k => answered[k]!==undefined);
+    document.getElementById('tab'+t).classList.toggle('done', done);
+  }
+}
+
+// patch MC for step-unlock
+function mcAnswer(key, idx, correct, btn) {
+  const group = document.getElementById('mc-' + key);
+  if (!group || group.dataset.done) return;
+  group.dataset.done = '1';
+  group.querySelectorAll('.mc-btn').forEach(b => b.style.pointerEvents = 'none');
+  const fbEl = document.getElementById('fb-' + key);
+  if (correct) {
+    btn.classList.add('correct');
+    answered[key] = true;
+    if (fbEl) { fbEl.className='feedback show ok'; fbEl.innerHTML='✅ Richtig!'; }
+    // unlock next step in guided sequence
+    if (key==='d1-3') { d1done[2]=true; markAccDone('accnum-d-3'); unlockAcc('acc-d-4', true); }
+    if (key==='d2-3') { d2done[2]=true; markAccDone('accnum-d2-3'); unlockAcc('acc-d2-4', true); }
+  } else {
+    btn.classList.add('wrong');
+    answered[key] = false;
+    group.querySelectorAll('.mc-btn').forEach(b => {
+      if (b.getAttribute('onclick') && b.getAttribute('onclick').includes(',true,')) b.classList.add('correct');
+    });
+    if (fbEl) {
+      fbEl.className='feedback show err';
+      fbEl.innerHTML='❌ Leider falsch. Die richtige Antwort ist grün markiert. '
+        + '<button onclick="resetMC(\'' + key + '\')" style="margin-left:10px;padding:6px 14px;border-radius:8px;border:none;background:#ff9f43;color:#000;font-weight:600;font-size:.85rem;cursor:pointer;min-height:36px;">Neu versuchen</button>';
+    }
+  }
+  checkWeiter();
+  safeMathJax();
+}
+
+// ══════════════════════════════════════════
+// RESET MC – allows retry after wrong answer
+// ══════════════════════════════════════════
+function resetMC(key) {
+  const group = document.getElementById('mc-' + key);
+  if (!group) return;
+  delete group.dataset.done;
+  delete answered[key];
+  group.querySelectorAll('.mc-btn').forEach(b => {
+    b.classList.remove('correct', 'wrong', 'selected');
+    b.style.pointerEvents = '';
+  });
+  const fbEl = document.getElementById('fb-' + key);
+  if (fbEl) { fbEl.className='feedback'; fbEl.innerHTML=''; }
+  checkWeiter();
+}
+function berechneAuswertung() {
+  const keys = getRequiredKeys();
+  const labels = {
+    'd1-3':'Dreieck 1 – Schritt 3 (Vergleich)','d1-pyth':'Dreieck 1 – Schritt 4 (Pythagoras)',
+    'd2-3':'Dreieck 2 – Schritt 3 (Vergleich)','d2-pyth':'Dreieck 2 – Schritt 4 (Pythagoras)',
+    'v1-4':'Parallelogramm/Rechteck – Schritt 4','v1-pyth':'Viereck I – Pythagoras-Schritt',
+    'v2-3':'Raute/Quadrat – Schritt 3','v2-raute':'Viereck II – Rauten-Nachweis',
+    'wg-koll':'Wdh: Kollinearität','wg-add':'Wdh: Vektoraddition','wg-skal':'Wdh: Skalarmultiplikation','wg-len':'Wdh: Längenquadrat',
+    'fd1':'Dreieck 1 (Fort.)','fd2':'Dreieck 2 (Fort.)',
+    'fv1a':'Viereck I, A1 (Fort.)','fv1b':'Viereck I, A2 (Fort.)',
+    'fv2a':'Viereck II, A1 (Fort.)','fv2b':'Viereck II, A2 (Fort.)',
+    'wf-koll':'Wdh: Kollinearität (Fort.)','wf-pq':'Wdh: Verbindungsvektor (Fort.)',
+    'pd1':'Dreieck 1 (Profi)','pd2':'Dreieck 2 (Profi)',
+    'pv1a':'Viereck I, A1 (Profi)','pv1b':'Viereck I, A2 (Profi)',
+    'pv2a':'Viereck II, A1 (Profi)','pv2b':'Viereck II, A2 (Profi)',
+    'wp-koll':'Wdh: Kollineare Punkte (Profi)','wp-m':'Wdh: Mittelpunkt (Profi)'
+  };
+  const answered_keys = keys.filter(k => answered[k]!==undefined);
+  const correct = answered_keys.filter(k => answered[k]===true).length;
+  const total = answered_keys.length;
+  const pct = total>0 ? Math.round(correct/total*100) : 0;
+  let html = `<div class="result-big"><div class="result-score">${pct}%</div><div class="result-label">${correct} von ${total} – ${levelDesc[currentLevel]}</div><div class="result-bar"><div class="result-fill" style="width:${pct}%"></div></div></div><div class="result-list">`;
+  answered_keys.forEach(k => {
+    html += `<div class="result-item ${answered[k]?'ok':'err'}"><span>${answered[k]?'✅':'❌'}</span><span>${labels[k]||k}</span></div>`;
+  });
+  html += '</div>';
+  document.getElementById('auswertung-inhalt').innerHTML = html;
+  safeMathJax();
+  switchTab(4);
+}
+
+// ══════════════════════════════════════════
+// SOL TOGGLE
+// ══════════════════════════════════════════
+function toggleSol(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.classList.toggle('show');
+  safeMathJax();
+}
+
+// ══════════════════════════════════════════
+// DINO
+// ══════════════════════════════════════════
+function toggleDinoTip() { const t=document.getElementById('dino-tip'); t.style.display=t.style.display==='block'?'none':'block'; }
+function showDinoTip() { document.getElementById('dino-tip').style.display='block'; }
+function hideDinoTip() { document.getElementById('dino-tip').style.display='none'; }
+
+// ══════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════
+window.addEventListener('load', function() {
+  setLevel('grund');
+});
+</script>
+</body>
+</html>
