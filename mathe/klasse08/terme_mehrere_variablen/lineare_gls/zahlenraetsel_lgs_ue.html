@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zahlenrätsel mit LGS – Übung Klasse 8</title>
+<script>
+  MathJax = { tex: { inlineMath: [['$','$'],['\\(','\\)']] }, svg: { fontCache:'global' } };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eef3fa;--surface:#ffffff;--card:#ffffff;--card2:#f1f5fb;--accent:#1f6fd6;--accent2:#0d8bbf;--accent3:#7c3aed;--green:#15803d;--red:#dc2626;--text:#1c2733;--muted:#5a6b7d;--border:#cdd9e8;--radius:16px;}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:0 0 100px;font-size:17px;line-height:1.6;}
+.page-header{background:linear-gradient(135deg,#2b7fe0,#0d8bbf);border-bottom:3px solid #0a5fa3;padding:14px 18px;position:sticky;top:0;z-index:100;display:flex;align-items:center;gap:10px;color:#fff;}
+.page-header .tag{background:#fff;color:#0a5fa3;font-weight:800;font-size:11px;padding:3px 9px;border-radius:20px;letter-spacing:.5px;text-transform:uppercase;white-space:nowrap;}
+.page-header h1{font-size:17px;font-weight:800;flex:1;color:#fff;}
+.page-header .sub{color:rgba(255,255,255,.85);font-size:13px;font-weight:600;white-space:nowrap;}
+.progress-bar{height:4px;background:#d4e2f2;}
+.progress-fill{height:100%;background:var(--accent);transition:width .4s ease;}
+.tab-nav{display:flex;overflow-x:auto;background:var(--surface);border-bottom:1px solid var(--border);scrollbar-width:none;}
+.tab-nav::-webkit-scrollbar{display:none;}
+.tab-btn{flex-shrink:0;padding:11px 14px;font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;color:var(--muted);background:none;border:none;border-bottom:3px solid transparent;cursor:pointer;white-space:nowrap;min-height:44px;transition:all .2s;}
+.tab-btn.active{color:var(--accent);border-bottom-color:var(--accent);}
+.tab-btn.done{color:var(--green);}
+.tab-btn.done::after{content:' ✓';font-size:11px;}
+.tab-btn.not-yet{opacity:.4;}
+.panel{display:none;padding:18px;max-width:720px;margin:0 auto;}
+.panel.active{display:block;}
+.level-bar{display:flex;gap:8px;margin-bottom:16px;background:var(--surface);border-radius:12px;padding:6px;}
+.lvl-btn{flex:1;padding:9px 8px;font-family:'Nunito',sans-serif;font-size:13px;font-weight:800;border:none;border-radius:8px;cursor:pointer;min-height:44px;background:transparent;color:var(--muted);transition:all .2s;}
+.lvl-btn.on{background:var(--accent);color:#fff;}
+.level-content{display:none;}
+.level-content.on{display:block;}
+.card{background:var(--card);border-radius:var(--radius);padding:20px;margin-bottom:14px;border:1px solid var(--border);box-shadow:0 1px 3px rgba(20,50,90,.06);}
+.card.hl{border-color:var(--accent);border-left:5px solid var(--accent);background:#f3f8ff;}
+.card.bl{border-color:var(--accent2);border-left:5px solid var(--accent2);background:#eef9fd;}
+.card.pu{border-color:var(--accent3);border-left:5px solid var(--accent3);background:#f6f1ff;}
+.card.gn{border-color:var(--green);border-left:5px solid var(--green);background:#eefaf0;}
+.card.bonus{border:2px dashed var(--accent3);background:#f6f1ff;}
+h2{font-size:19px;font-weight:800;margin-bottom:12px;display:flex;align-items:center;gap:10px;color:#16314a;}
+h2 .num{background:var(--accent);color:#fff;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;flex-shrink:0;}
+h3{font-size:15px;font-weight:700;margin-bottom:8px;color:var(--accent2);}
+p{margin-bottom:8px;}
+.puzzle-box{background:#fff8e8;border:2px solid #e8a93a;border-radius:12px;padding:16px;margin:12px 0;text-align:center;}
+.puzzle-box .ptext{font-size:16px;font-weight:600;line-height:1.7;color:#3a3320;}
+.puzzle-box .ptext em{color:#b06a00;font-style:normal;font-weight:800;}
+.step-box{background:var(--card2);border-radius:10px;padding:13px;margin:10px 0;border-left:4px solid var(--accent2);}
+.step-box.yellow{border-left-color:#e8a93a;background:#fff8e8;}
+.step-box.green{border-left-color:var(--green);background:#eefaf0;}
+.math-block{background:#eef3fa;border:1px solid var(--border);border-radius:8px;padding:12px 16px;margin:8px 0;font-family:'Space Mono',monospace;font-size:14px;line-height:2;text-align:center;}
+.math-row{display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;margin:2px 0;}
+.eq-label{color:var(--muted);font-size:12px;}
+.input-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:8px 0;}
+.input-row label{font-weight:700;font-size:15px;}
+.math-input{background:#fff;border:2px solid var(--border);border-radius:8px;color:var(--text);font-family:'Space Mono',monospace;font-size:16px;padding:7px 10px;width:90px;text-align:center;min-height:44px;transition:border-color .2s;}
+.math-input:focus{outline:none;border-color:var(--accent2);}
+.math-input.ok{border-color:var(--green);background:#e3f6e8;}
+.math-input.err{border-color:var(--red);background:#fce4e4;}
+.qblock{background:#f7fafd;border-radius:12px;padding:16px;margin:12px 0;border:1px solid var(--border);}
+.qblock .qt{font-weight:700;margin-bottom:10px;font-size:15px;}
+.mc-opts{display:flex;flex-direction:column;gap:8px;}
+.mc-btn{background:#fff;border:2px solid var(--border);border-radius:9px;padding:12px 14px;text-align:left;font-family:'Nunito',sans-serif;font-size:15px;font-weight:600;color:var(--text);cursor:pointer;min-height:44px;transition:all .15s;}
+.mc-btn:active{transform:scale(.98);}
+.mc-btn.mc-ok{background:#15803d;border-color:#15803d;color:#fff;pointer-events:none;}
+.mc-btn.mc-err{background:#dc2626;border-color:#dc2626;color:#fff;}
+.mc-btn.mc-locked{pointer-events:none;opacity:.45;}
+.btn{background:var(--accent);color:#fff;border:none;border-radius:9px;padding:11px 20px;font-family:'Nunito',sans-serif;font-size:15px;font-weight:800;cursor:pointer;min-height:44px;transition:all .15s;}
+.btn:active{transform:scale(.97);opacity:.9;}
+.btn.sm{font-size:13px;padding:8px 14px;}
+.btn.leer{background:#fff;color:var(--red);border:2px solid var(--red);font-size:13px;padding:8px 14px;}
+.fb{border-radius:9px;padding:11px 14px;margin-top:8px;font-weight:700;font-size:14px;display:none;}
+.fb.ok{background:#15803d;border:2px solid #0f6b30;color:#fff;display:block;}
+.fb.err{background:#dc2626;border:2px solid #b91c1c;color:#fff;display:block;}
+.tipp-toggle{background:none;border:2px solid var(--accent3);color:var(--accent3);border-radius:8px;padding:7px 12px;font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;cursor:pointer;min-height:44px;margin:8px 0 0;display:inline-flex;align-items:center;gap:5px;}
+.tipp-box{background:#f6f1ff;border:1px solid var(--accent3);border-radius:9px;padding:12px;margin-top:8px;font-size:14px;display:none;}
+.tipp-box.open{display:block;}
+.tipp-box .tl{font-size:11px;font-weight:800;color:var(--accent3);letter-spacing:.5px;text-transform:uppercase;margin-bottom:4px;}
+.next-btn{display:none;width:100%;background:linear-gradient(135deg,var(--accent),#0d8bbf);color:#fff;border:none;border-radius:var(--radius);padding:17px;font-family:'Nunito',sans-serif;font-size:17px;font-weight:900;cursor:pointer;min-height:54px;margin-top:18px;text-align:center;box-shadow:0 4px 16px rgba(31,111,214,.25);}
+.next-btn.visible{display:block;}
+.next-btn:active{transform:scale(.99);}
+.result-bar{background:var(--card2);border-radius:10px;padding:13px 15px;margin:7px 0;display:flex;align-items:center;gap:10px;font-weight:700;font-size:14px;border:1px solid var(--border);}
+.result-bar .dot{width:11px;height:11px;border-radius:50%;flex-shrink:0;}
+.dot.ok{background:var(--green);}
+.dot.err{background:var(--red);}
+.score-circle{width:96px;height:96px;border-radius:50%;border:4px solid var(--accent);display:flex;align-items:center;justify-content:center;flex-direction:column;margin:0 auto 16px;}
+.score-circle .sn{font-size:26px;font-weight:900;color:var(--accent);}
+.score-circle .sd{font-size:12px;color:var(--muted);font-weight:600;}
+.digit-vis{display:flex;align-items:center;justify-content:center;gap:5px;margin:10px 0;}
+.digit-box{width:46px;height:56px;background:#f1f5fb;border:2px solid var(--border);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;font-family:'Space Mono',monospace;}
+.dz{border-color:var(--accent)!important;color:var(--accent)!important;font-size:17px!important;}
+.de{border-color:var(--accent2)!important;color:var(--accent2)!important;font-size:17px!important;}
+.df{border-color:var(--muted)!important;color:var(--muted)!important;}
+.dino{position:fixed;bottom:12px;right:14px;font-size:22px;cursor:pointer;z-index:200;user-select:none;}
+.dino-tip{display:none;position:absolute;bottom:130%;right:0;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:5px 9px;font-size:12px;font-weight:700;white-space:nowrap;color:var(--muted);box-shadow:0 2px 8px rgba(20,50,90,.12);}
+.dino:hover .dino-tip,.dino.show .dino-tip{display:block;}
+/* Aufgaben-Zähler-Badge */
+.aufg-badge{display:inline-block;background:var(--card2);border:1px solid var(--border);border-radius:20px;padding:2px 10px;font-size:12px;font-weight:700;color:var(--muted);margin-bottom:12px;}
+/* Bruchdarstellung – div-basiert (Pflicht laut Vorgaben) */
+.frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;margin:0 .12em;line-height:1.05;}
+.frac>span{display:block;padding:0 .35em;}
+.frac>span:first-child{border-bottom:1.6px solid currentColor;}
+.eqline{display:inline-flex;align-items:center;flex-wrap:wrap;gap:.18em;font-size:16px;font-weight:600;}
+@media(max-width:520px){.panel{padding:12px;}.card{padding:14px;}.math-block{font-size:12px;}}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="tag">Mathe Kl. 8</div>
+  <h1>Zahlenrätsel mit LGS</h1>
+  <span class="sub">Übung</span>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="pgFill" style="width:4%"></div></div>
+
+
+<nav class="tab-nav">
+  <button class="tab-btn active"  id="tab0" onclick="goTab(0)">① Beziehungen</button>
+  <button class="tab-btn not-yet" id="tab1" onclick="goTab(1)">② Ziffern 2-stellig</button>
+  <button class="tab-btn not-yet" id="tab2" onclick="goTab(2)">③ Ziffern 3–4-stellig</button>
+  <button class="tab-btn not-yet" id="tab3" onclick="goTab(3)">④ Alles tauschen</button>
+  <button class="tab-btn not-yet" id="tab4" onclick="goTab(4)">↩ Rückblick</button>
+  <button class="tab-btn not-yet" id="tab5" onclick="goTab(5)">📊 Auswertung</button>
+  <button class="tab-btn not-yet" id="tab6" onclick="goTab(6)">★ Bonus</button>
+</nav>
+
+<!-- ══════════════════════════════════════
+     PANEL 0 – BEZIEHUNGEN
+     ══════════════════════════════════════ -->
+<div class="panel active" id="panel0">
+  <div class="card hl">
+    <h2><span class="num">1</span> Zahlenrätsel: Beziehungen</h2>
+    <p>Keine Ziffern tauschen – Beziehungen zwischen den Zahlen selbst.</p>
+  </div>
+  <div class="level-bar">
+    <button class="lvl-btn on" id="k2G_btn" onclick="setLvl('k2','G')">Grundlagen</button>
+    <button class="lvl-btn"    id="k2F_btn" onclick="setLvl('k2','F')">Fortgeschritten</button>
+    <button class="lvl-btn"    id="k2P_btn" onclick="setLvl('k2','P')">Profi</button>
+  </div>
+  <!-- G -->
+  <div class="level-content on" id="k2_G">
+    <div class="puzzle-box"><p class="ptext">Die Summe zweier Zahlen ist <em>30</em>.<br>Die größere Zahl ist doppelt so groß wie die kleinere.<br><strong>Wie heißen die Zahlen?</strong></p></div>
+    <div class="card">
+      <div class="qblock" id="k2G_q1">
+        <div class="qt">Welches LGS stimmt? (\(a\) = kleinere, \(b\) = größere)</div>
+        <div class="mc-opts">
+          <button class="mc-btn" onclick="mcA('k2Gmc1',this,false)">\(a + b = 30\) und \(b = a + 2\)</button>
+          <button class="mc-btn" onclick="mcA('k2Gmc1',this,true)">\(a + b = 30\) und \(b = 2 \cdot a\)</button>
+          <button class="mc-btn" onclick="mcA('k2Gmc1',this,false)">\(a \cdot b = 30\) und \(b = 2 \cdot a\)</button>
+          <button class="mc-btn" onclick="mcA('k2Gmc1',this,false)">\(a - b = 30\) und \(b = 2 \cdot a\)</button>
+        </div>
+        <div class="fb" id="k2Gmc1_fb"></div>
+      </div>
+      <div class="qblock" id="k2G_q2" style="display:none">
+        <div class="qt">Löse das LGS:</div>
+        <div class="input-row"><label>\(a =\)</label><input class="math-input" id="k2G_a" type="number" inputmode="numeric" placeholder="?"></div>
+        <div class="input-row"><label>\(b =\)</label><input class="math-input" id="k2G_b" type="number" inputmode="numeric" placeholder="?"><button class="btn sm" onclick="chkTwo('k2G_a','k2G_b','k2G_sol',10,20,'k2G_q2')">Prüfen</button><button class="btn leer" id="leer_k2G_sol" style="display:none" onclick="clrTwo('k2G_a','k2G_b','k2G_sol','leer_k2G_sol')">Leeren</button></div>
+        <div class="fb" id="k2G_sol"></div>
+        <button class="tipp-toggle" onclick="toggleT('k2G_t1')">💡 Tipp</button>
+        <div class="tipp-box" id="k2G_t1"><div class="tl">Tipp</div>Setze \(b=2a\) in (I): \(3a=30 \Rightarrow a=10\).</div>
+      </div>
+    </div>
+  </div>
+  <!-- F -->
+  <div class="level-content" id="k2_F">
+    <div class="puzzle-box"><p class="ptext">Zwei Zahlen haben Summe <em>48</em>.<br>Die kleinere verdreifacht und von der größeren subtrahiert ergibt <em>8</em>.<br><strong>Wie heißen die Zahlen?</strong></p></div>
+    <div class="card">
+      <div class="qblock" id="k2F_q1">
+        <div class="qt">Welche Gleichung (II) stimmt?</div>
+        <div class="mc-opts">
+          <button class="mc-btn" onclick="mcA('k2Fmc1',this,false)">\(b + 3a = 8\)</button>
+          <button class="mc-btn" onclick="mcA('k2Fmc1',this,true)">\(b - 3a = 8\)</button>
+          <button class="mc-btn" onclick="mcA('k2Fmc1',this,false)">\(3a - b = 8\)</button>
+          <button class="mc-btn" onclick="mcA('k2Fmc1',this,false)">\(3b - a = 8\)</button>
+        </div>
+        <div class="fb" id="k2Fmc1_fb"></div>
+      </div>
+      <div class="qblock" id="k2F_q2" style="display:none">
+        <div class="qt">Löse:</div>
+        <div class="step-box"><div class="math-row"><span class="eq-label">(I)</span>\(a+b=48\)</div><div class="math-row"><span class="eq-label">(II)</span>\(b-3a=8\)</div></div>
+        <div class="input-row"><label>\(a=\)</label><input class="math-input" id="k2F_a" type="number" inputmode="numeric" placeholder="?"></div>
+        <div class="input-row"><label>\(b=\)</label><input class="math-input" id="k2F_b" type="number" inputmode="numeric" placeholder="?"><button class="btn sm" onclick="chkTwo('k2F_a','k2F_b','k2F_sol',10,38,'k2F_q2')">Prüfen</button><button class="btn leer" id="leer_k2F_sol" style="display:none" onclick="clrTwo('k2F_a','k2F_b','k2F_sol','leer_k2F_sol')">Leeren</button></div>
+        <div class="fb" id="k2F_sol"></div>
+        <button class="tipp-toggle" onclick="toggleT('k2F_t1')">💡 Tipp</button>
+        <div class="tipp-box" id="k2F_t1"><div class="tl">Tipp</div>Aus (I): \(b=48-a\). In (II): \(48-4a=8 \Rightarrow a=10\).</div>
+      </div>
+    </div>
+  </div>
+  <!-- P -->
+  <div class="level-content" id="k2_P">
+    <div class="puzzle-box"><p class="ptext">Das Dreifache einer Zahl minus die andere ergibt <em>7</em>.<br>Die erste plus das Vierfache der zweiten ergibt <em>24</em>.<br><strong>Bestimme beide Zahlen.</strong></p></div>
+    <div class="card">
+      <div class="step-box yellow"><strong>LGS</strong> (\(x\) = erste, \(y\) = zweite):<div class="math-block"><div class="math-row"><span class="eq-label">(I)</span>\(3x-y=7\)</div><div class="math-row"><span class="eq-label">(II)</span>\(x+4y=24\)</div></div></div>
+      <div class="qblock" id="k2P_q1">
+        <div class="qt">Löse das LGS:</div>
+        <div class="input-row"><label>\(x=\)</label><input class="math-input" id="k2P_x" type="number" inputmode="numeric" placeholder="?"></div>
+        <div class="input-row"><label>\(y=\)</label><input class="math-input" id="k2P_y" type="number" inputmode="numeric" placeholder="?"><button class="btn sm" onclick="chkTwo('k2P_x','k2P_y','k2P_sol',4,5,'k2P_q1')">Prüfen</button><button class="btn leer" id="leer_k2P_sol" style="display:none" onclick="clrTwo('k2P_x','k2P_y','k2P_sol','leer_k2P_sol')">Leeren</button></div>
+        <div class="fb" id="k2P_sol"></div>
+        <button class="tipp-toggle" onclick="toggleT('k2P_t1')">💡 Tipp</button>
+        <div class="tipp-box" id="k2P_t1"><div class="tl">Tipp</div>Aus (I): \(y=3x-7\). In (II): \(13x=52 \Rightarrow x=4\).</div>
+      </div>
+    </div>
+  </div>
+  <button class="next-btn" id="next0" onclick="goTab(1)">Weiter zu Karte 2 →</button>
+</div>
+
+<!-- ══════════════════════════════════════
+     PANEL 1 – ZIFFERN 2-STELLIG
+     ══════════════════════════════════════ -->
+<div class="panel" id="panel1">
+  <div class="card hl">
+    <h2><span class="num">2</span> Ziffern tauschen: zweistellig</h2>
+    <p>Klassisch: die beiden Ziffern einer zweistelligen Zahl werden vertauscht.</p>
+  </div>
+  <div class="level-bar">
+    <button class="lvl-btn on" id="p1G_btn" onclick="setLvl('p1','G')">Grundlagen</button>
+    <button class="lvl-btn"    id="p1F_btn" onclick="setLvl('p1','F')">Fortgeschritten</button>
+    <button class="lvl-btn"    id="p1P_btn" onclick="setLvl('p1','P')">Profi</button>
+  </div>
+
+  <!-- G -->
+  <div class="level-content on" id="p1_G">
+    <div class="card bl">
+      <h3>Stellenwerte erinnern</h3>
+      <div class="digit-vis"><div class="digit-box dz">z</div><div class="digit-box de">e</div></div>
+      <p style="text-align:center;font-size:14px;color:var(--muted)">Wert: \(10z+e\) &nbsp;|&nbsp; Vertauscht: \(10e+z\)</p>
+    </div>
+    <div class="puzzle-box"><p class="ptext">Die Ziffernsumme einer zweistelligen Zahl ist <em>13</em>.<br>Die Zahl mit vertauschten Ziffern ist um <em>27</em> kleiner.<br><strong>Wie heißt die Zahl?</strong></p></div>
+    <div class="card">
+      <div class="qblock" id="p1G_q1">
+        <div class="qt">Welches LGS stimmt?</div>
+        <div class="mc-opts">
+          <button class="mc-btn" onclick="mcA('p1Gmc1',this,false)">\(z+e=13\) und \(10e+z=(10z+e)+27\)</button>
+          <button class="mc-btn" onclick="mcA('p1Gmc1',this,true)">\(z+e=13\) und \(10z+e=(10e+z)+27\)</button>
+          <button class="mc-btn" onclick="mcA('p1Gmc1',this,false)">\(z \cdot e=13\) und \(10z+e=(10e+z)+27\)</button>
+        </div>
+        <div class="fb" id="p1Gmc1_fb"></div>
+      </div>
+      <div class="qblock" id="p1G_q2" style="display:none">
+        <div class="qt">Gleichung (II) vereinfacht: \(z-e=3\). Nenne die gesuchte Zahl:</div>
+        <div class="step-box green" style="font-size:14px">(I)+(II): \(2z=16 \Rightarrow z=8, e=5\)</div>
+        <div class="input-row"><label>Zahl =</label><input class="math-input" id="p1G_ans" type="number" inputmode="numeric" placeholder="??"><button class="btn sm" onclick="chkN('p1G_ans','p1G_fb2',85,'p1G_q2')">Prüfen</button><button class="btn leer" id="leer_p1G_fb2" style="display:none" onclick="clrI('p1G_ans','p1G_fb2','leer_p1G_fb2')">Leeren</button></div>
+        <div class="fb" id="p1G_fb2"></div>
+        <button class="tipp-toggle" onclick="toggleT('p1G_t1')">💡 Tipp</button>
+        <div class="tipp-box" id="p1G_t1"><div class="tl">Tipp</div>\(z=8, e=5\) → Zahl = \(10\cdot8+5=85\). Probe: \(85-58=27\) ✓</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- F -->
+  <div class="level-content" id="p1_F">
+    <div class="puzzle-box"><p class="ptext">Die Ziffernsumme einer zweistelligen Zahl ist <em>10</em>.<br>Die ursprüngliche Zahl ist um <em>54</em> größer als die Zahl mit vertauschten Ziffern.<br><strong>Wie heißt die Zahl?</strong></p></div>
+    <div class="card">
+      <div class="qblock" id="p1F_q1">
+        <div class="qt">Stelle das LGS auf und löse es:</div>
+        <div class="step-box yellow" style="font-size:14px">
+          (I) \(z+e=10\) &nbsp;|&nbsp; (II) \((10z+e)-(10e+z)=54 \Rightarrow 9(z-e)=54 \Rightarrow z-e=6\)
+        </div>
+        <div class="input-row"><label>Zahl =</label><input class="math-input" id="p1F_ans" type="number" inputmode="numeric" placeholder="??"><button class="btn sm" onclick="chkN('p1F_ans','p1F_fb',82,'p1F_q1')">Prüfen</button><button class="btn leer" id="leer_p1F_fb" style="display:none" onclick="clrI('p1F_ans','p1F_fb','leer_p1F_fb')">Leeren</button></div>
+        <div class="fb" id="p1F_fb"></div>
+        <button class="tipp-toggle" onclick="toggleT('p1F_t1')">💡 Tipp</button>
+        <div class="tipp-box" id="p1F_t1"><div class="tl">Tipp – Addition</div>(I)+(II): \(2z=16 \Rightarrow z=8, e=2\). Zahl: \(82\). Probe: \(82-28=54\) ✓</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- P -->
+  <div class="level-content" id="p1_P">
+    <div class="puzzle-box"><p class="ptext">Eine zweistellige Zahl ist um <em>36</em> größer als die Zahl mit vertauschten Ziffern.<br>Die Zehnerziffer ist das Dreifache der Einerziffer.<br><strong>Wie heißt die Zahl?</strong></p></div>
+    <div class="card">
+      <div class="qblock" id="p1P_q1">
+        <div class="qt">Stelle das LGS auf und löse es:</div>
+        <div class="step-box yellow" style="font-size:14px">
+          (I) \(z = 3e\) &nbsp;|&nbsp; (II) \(10z+e-(10e+z)=36 \Rightarrow 9(z-e)=36 \Rightarrow z-e=4\)
+        </div>
+        <div class="input-row"><label>Zahl =</label><input class="math-input" id="p1P_ans" type="number" inputmode="numeric" placeholder="??"><button class="btn sm" onclick="chkN('p1P_ans','p1P_fb',62,'p1P_q1')">Prüfen</button><button class="btn leer" id="leer_p1P_fb" style="display:none" onclick="clrI('p1P_ans','p1P_fb','leer_p1P_fb')">Leeren</button></div>
+        <div class="fb" id="p1P_fb"></div>
+        <button class="tipp-toggle" onclick="toggleT('p1P_t1')">💡 Tipp</button>
+        <div class="tipp-box" id="p1P_t1"><div class="tl">Tipp</div>Setze \(z=3e\) in (II): \(3e-e=4 \Rightarrow e=2, z=6\). Zahl: \(62\). Probe: \(62-26=36\) ✓, \(6=3\cdot2\) ✓</div>
+      </div>
+    </div>
+  </div>
+
+  <button class="next-btn" id="next1" onclick="goTab(2)">Weiter zu Karte 3 →</button>
+</div>
+
+<!-- ══════════════════════════════════════
+     PANEL 2 – ZIFFERN 3–4-STELLIG
+     ══════════════════════════════════════ -->
+<div class="panel" id="panel2">
+  <div class="card hl">
+    <h2><span class="num">3</span> Ziffern tauschen: 3– und 4-stellig</h2>
+    <p>Jetzt können auch fest stehende Ziffern beim Tauschen ihre Position wechseln.</p>
+  </div>
+  <div class="level-bar">
+    <button class="lvl-btn on" id="p2G_btn" onclick="setLvl('p2','G')">Grundlagen</button>
+    <button class="lvl-btn"    id="p2F_btn" onclick="setLvl('p2','F')">Fortgeschritten</button>
+    <button class="lvl-btn"    id="p2P_btn" onclick="setLvl('p2','P')">Profi</button>
+  </div>
+
+  <!-- G: dreistellig, erste↔zweite tauschen, dritte fest -->
+  <div class="level-content on" id="p2_G">
+    <div class="card bl">
+      <h3>Dreistellige Zahl – erste und zweite Ziffer tauschen</h3>
+      <div class="digit-vis">
+        <div class="digit-box dz">z</div><div class="digit-box de">e</div><div class="digit-box df">5</div>
+        <span style="font-size:20px;margin:0 8px;color:var(--muted)">→</span>
+        <div class="digit-box de">e</div><div class="digit-box dz">z</div><div class="digit-box df">5</div>
+      </div>
+      <p style="text-align:center;font-size:14px;color:var(--muted)">Original: \(100z+10e+5\) &nbsp;|&nbsp; Getauscht: \(100e+10z+5\)</p>
+    </div>
+    <div class="puzzle-box"><p class="ptext">Eine dreistellige Zahl endet auf <em>5</em>.<br>Die Summe der ersten beiden Ziffern ist <em>8</em>.<br>Tauscht man die ersten beiden Ziffern, wird die Zahl um <em>180</em> größer.<br><strong>Wie heißt die ursprüngliche Zahl?</strong></p></div>
+    <div class="card">
+      <div class="qblock" id="p2G_q1">
+        <div class="qt">Gleichung (II): Differenz der getauschten und ursprünglichen Zahl:<br>\((100e+10z+5)-(100z+10e+5)=180\), vereinfacht:</div>
+        <div class="mc-opts">
+          <button class="mc-btn" onclick="mcA('p2Gmc1',this,false)">\(e - z = 18\)</button>
+          <button class="mc-btn" onclick="mcA('p2Gmc1',this,true)">\(e - z = 2\)</button>
+          <button class="mc-btn" onclick="mcA('p2Gmc1',this,false)">\(z - e = 2\)</button>
+          <button class="mc-btn" onclick="mcA('p2Gmc1',this,false)">\(90(e-z) = 18\)</button>
+        </div>
+        <div class="fb" id="p2Gmc1_fb"></div>
+      </div>
+      <div class="qblock" id="p2G_q2" style="display:none">
+        <div class="qt">Löse das LGS (\(z+e=8\) und \(e-z=2\)) und nenne die ursprüngliche Zahl:</div>
+        <div class="input-row"><label>Zahl =</label><input class="math-input" id="p2G_ans" type="number" inputmode="numeric" placeholder="???"><button class="btn sm" onclick="chkN('p2G_ans','p2G_fb2',355,'p2G_q2')">Prüfen</button><button class="btn leer" id="leer_p2G_fb2" style="display:none" onclick="clrI('p2G_ans','p2G_fb2','leer_p2G_fb2')">Leeren</button></div>
+        <div class="fb" id="p2G_fb2"></div>
+        <button class="tipp-toggle" onclick="toggleT('p2G_t1')">💡 Tipp</button>
+        <div class="tipp-box" id="p2G_t1"><div class="tl">Tipp</div>Addition: \(2e=10 \Rightarrow e=5, z=3\). Zahl: \(100\cdot3+10\cdot5+5=355\). Probe: \(535-355=180\) ✓</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- F: vierstellig, erste↔letzte tauschen, mittlere fest -->
+  <div class="level-content" id="p2_F">
+    <div class="card bl">
+      <h3>Vierstellige Zahl – erste und letzte Ziffer tauschen</h3>
+      <div class="digit-vis">
+        <div class="digit-box dz">z</div><div class="digit-box df">4</div><div class="digit-box df">4</div><div class="digit-box de">e</div>
+        <span style="font-size:20px;margin:0 8px;color:var(--muted)">→</span>
+        <div class="digit-box de">e</div><div class="digit-box df">4</div><div class="digit-box df">4</div><div class="digit-box dz">z</div>
+      </div>
+      <p style="text-align:center;font-size:14px;color:var(--muted)">Original: \(1000z+440+e\) &nbsp;|&nbsp; Getauscht: \(1000e+440+z\)</p>
+    </div>
+    <div class="puzzle-box"><p class="ptext">Eine vierstellige Zahl hat die Form <em>z44e</em>.<br>Die Summe der Randstellen ist <em>11</em> (also \(z+e=11\)).<br>Tauscht man die erste und letzte Ziffer, wird die Zahl um <em>2997</em> größer.<br><strong>Wie heißt die ursprüngliche Zahl?</strong></p></div>
+    <div class="card">
+      <div class="qblock" id="p2F_q1">
+        <div class="qt">Gleichung (II): \((1000e+440+z)-(1000z+440+e)=2997\), vereinfacht:</div>
+        <div class="mc-opts">
+          <button class="mc-btn" onclick="mcA('p2Fmc1',this,false)">\(e - z = 3\)</button>
+          <button class="mc-btn" onclick="mcA('p2Fmc1',this,true)">\(999(e-z) = 2997 \Rightarrow e-z=3\)</button>
+          <button class="mc-btn" onclick="mcA('p2Fmc1',this,false)">\(e - z = 2997\)</button>
+          <button class="mc-btn" onclick="mcA('p2Fmc1',this,false)">\(1000(e-z)=2997\)</button>
+        </div>
+        <div class="fb" id="p2Fmc1_fb"></div>
+      </div>
+      <div class="qblock" id="p2F_q2" style="display:none">
+        <div class="qt">Löse \(z+e=11\) und \(e-z=3\). Wie heißt die ursprüngliche Zahl?</div>
+        <div class="input-row"><label>Zahl =</label><input class="math-input" id="p2F_ans" type="number" inputmode="numeric" placeholder="????"><button class="btn sm" onclick="chkN('p2F_ans','p2F_fb2',4447,'p2F_q2')">Prüfen</button><button class="btn leer" id="leer_p2F_fb2" style="display:none" onclick="clrI('p2F_ans','p2F_fb2','leer_p2F_fb2')">Leeren</button></div>
+        <div class="fb" id="p2F_fb2"></div>
+        <button class="tipp-toggle" onclick="toggleT('p2F_t1')">💡 Tipp</button>
+        <div class="tipp-box" id="p2F_t1"><div class="tl">Tipp</div>Addition: \(2e=14 \Rightarrow e=7, z=4\). Zahl: \(4447\). Probe: \(7444-4447=2997\) ✓</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- P: dreistellig, zyklische Verschiebung -->
+  <div class="level-content" id="p2_P">
+    <div class="card bl">
+      <h3>Dreistellige Zahl – zyklische Verschiebung</h3>
+      <div class="digit-vis">
+        <div class="digit-box dz">z</div><div class="digit-box de">e</div><div class="digit-box df">3</div>
+        <span style="font-size:20px;margin:0 8px;color:var(--muted)">→</span>
+        <div class="digit-box de">e</div><div class="digit-box df">3</div><div class="digit-box dz">z</div>
+      </div>
+      <p style="text-align:center;font-size:14px;color:var(--muted)">Original: \(100z+10e+3\) &nbsp;|&nbsp; Zyklisch (erste nach hinten): \(100e+30+z\)</p>
+    </div>
+    <div class="puzzle-box"><p class="ptext">Eine dreistellige Zahl endet auf <em>3</em>.<br>Die Summe der ersten beiden Ziffern ist <em>9</em>.<br>Schiebt man die erste Ziffer ans Ende (<em>zyklisch</em>), wird die Zahl um <em>81</em> größer.<br><strong>Wie heißt die ursprüngliche Zahl?</strong></p></div>
+    <div class="card">
+      <div class="qblock" id="p2P_q1">
+        <div class="qt">Gleichung (II): \((100e+30+z)-(100z+10e+3)=81\), vereinfacht zu \(90e-99z+27=81\), also \(90e-99z=54\).<br>Mit \(z+e=9\) ergibt Einsetzung:</div>
+        <div class="mc-opts">
+          <button class="mc-btn" onclick="mcA('p2Pmc1',this,false)">\(z=4, e=5\)</button>
+          <button class="mc-btn" onclick="mcA('p2Pmc1',this,true)">\(z=4, e=5\) – Zahl: 453</button>
+          <button class="mc-btn" onclick="mcA('p2Pmc1',this,false)">\(z=5, e=4\) – Zahl: 543</button>
+          <button class="mc-btn" onclick="mcA('p2Pmc1',this,false)">\(z=3, e=6\) – Zahl: 363</button>
+        </div>
+        <div class="fb" id="p2Pmc1_fb"></div>
+      </div>
+      <div class="qblock" id="p2P_q2" style="display:none">
+        <div class="qt">Wie heißt die gesuchte Zahl?</div>
+        <div class="input-row"><label>Zahl =</label><input class="math-input" id="p2P_ans" type="number" inputmode="numeric" placeholder="???"><button class="btn sm" onclick="chkN('p2P_ans','p2P_fb2',453,'p2P_q2')">Prüfen</button><button class="btn leer" id="leer_p2P_fb2" style="display:none" onclick="clrI('p2P_ans','p2P_fb2','leer_p2P_fb2')">Leeren</button></div>
+        <div class="fb" id="p2P_fb2"></div>
+        <button class="tipp-toggle" onclick="toggleT('p2P_t1')">💡 Tipp</button>
+        <div class="tipp-box" id="p2P_t1"><div class="tl">Probe</div>Zahl: \(453\). Zyklisch: \(534\). \(534-453=81\) ✓ &nbsp; \(4+5=9\) ✓</div>
+      </div>
+    </div>
+  </div>
+
+  <button class="next-btn" id="next2" onclick="goTab(3)">Weiter zu Karte 4 →</button>
+</div>
+
+<!-- ══════════════════════════════════════
+     PANEL 3 – ALLES TAUSCHEN
+     ══════════════════════════════════════ -->
+<div class="panel" id="panel3">
+  <div class="card hl">
+    <h2><span class="num">4</span> Alles tauschen: Spiegelung</h2>
+    <p>Alle Ziffern werden in umgekehrter Reihenfolge geschrieben – keine ist mehr „fest".</p>
+  </div>
+  <div class="level-bar">
+    <button class="lvl-btn on" id="p3G_btn" onclick="setLvl('p3','G')">Grundlagen</button>
+    <button class="lvl-btn"    id="p3F_btn" onclick="setLvl('p3','F')">Fortgeschritten</button>
+    <button class="lvl-btn"    id="p3P_btn" onclick="setLvl('p3','P')">Profi</button>
+  </div>
+
+  <!-- G: zweistellig gespiegelt – anderes Rätsel als Karte 2 -->
+  <div class="level-content on" id="p3_G">
+    <div class="card bl">
+      <h3>Zweistellige Zahl komplett spiegeln</h3>
+      <div class="digit-vis">
+        <div class="digit-box dz">z</div><div class="digit-box de">e</div>
+        <span style="font-size:20px;margin:0 8px;color:var(--muted)">→</span>
+        <div class="digit-box de">e</div><div class="digit-box dz">z</div>
+      </div>
+    </div>
+    <div class="puzzle-box"><p class="ptext">Die Ziffernsumme einer zweistelligen Zahl ist <em>12</em>.<br>Die ursprüngliche Zahl ist um <em>18</em> größer als die gespiegelte.<br><strong>Wie heißt die Zahl?</strong></p></div>
+    <div class="card">
+      <div class="qblock" id="p3G_q1">
+        <div class="qt">Stelle das LGS auf und löse es:</div>
+        <div class="step-box yellow" style="font-size:14px">
+          (I) \(z+e=12\) &nbsp;|&nbsp; (II) \((10z+e)-(10e+z)=18 \Rightarrow 9(z-e)=18 \Rightarrow z-e=2\)
+        </div>
+        <div class="input-row"><label>Zahl =</label><input class="math-input" id="p3G_ans" type="number" inputmode="numeric" placeholder="??"><button class="btn sm" onclick="chkN('p3G_ans','p3G_fb',75,'p3G_q1')">Prüfen</button><button class="btn leer" id="leer_p3G_fb" style="display:none" onclick="clrI('p3G_ans','p3G_fb','leer_p3G_fb')">Leeren</button></div>
+        <div class="fb" id="p3G_fb"></div>
+        <button class="tipp-toggle" onclick="toggleT('p3G_t1')">💡 Tipp</button>
+        <div class="tipp-box" id="p3G_t1"><div class="tl">Tipp</div>Addition: \(2z=14 \Rightarrow z=7, e=5\). Zahl: 75. Probe: \(75-57=18\) ✓</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- F: dreistellig gespiegelt, mittlere Ziffer unbekannt -->
+  <div class="level-content" id="p3_F">
+    <div class="card bl">
+      <h3>Dreistellige Zahl komplett spiegeln</h3>
+      <div class="digit-vis">
+        <div class="digit-box dz">z</div><div class="digit-box" style="border-color:#f472b6;color:#f472b6;font-size:17px">m</div><div class="digit-box de">e</div>
+        <span style="font-size:20px;margin:0 8px;color:var(--muted)">→</span>
+        <div class="digit-box de">e</div><div class="digit-box" style="border-color:#f472b6;color:#f472b6;font-size:17px">m</div><div class="digit-box dz">z</div>
+      </div>
+      <p style="text-align:center;font-size:14px;color:var(--muted)">Original: \(100z+10m+e\) &nbsp;|&nbsp; Gespiegelt: \(100e+10m+z\)<br>Die Mittelziffer \(m\) bleibt an ihrer Stelle!</p>
+    </div>
+    <div class="puzzle-box"><p class="ptext">Eine dreistellige Zahl hat Ziffernsumme <em>15</em> und Mittelziffer <em>5</em>.<br>Die gespiegelte Zahl ist um <em>396</em> größer.<br><strong>Wie heißt die ursprüngliche Zahl?</strong></p></div>
+    <div class="card">
+      <div class="qblock" id="p3F_q1">
+        <div class="qt">Mit \(m=5\) gilt \(z+e=10\). Gleichung (II): gespiegelt minus original = 396.<br>\((100e+50+z)-(100z+50+e)=396 \Rightarrow 99(e-z)=396\), vereinfacht:</div>
+        <div class="mc-opts">
+          <button class="mc-btn" onclick="mcA('p3Fmc1',this,false)">\(e-z=39{,}6\)</button>
+          <button class="mc-btn" onclick="mcA('p3Fmc1',this,true)">\(e-z=4\)</button>
+          <button class="mc-btn" onclick="mcA('p3Fmc1',this,false)">\(z-e=4\)</button>
+          <button class="mc-btn" onclick="mcA('p3Fmc1',this,false)">\(e-z=396\)</button>
+        </div>
+        <div class="fb" id="p3Fmc1_fb"></div>
+      </div>
+      <div class="qblock" id="p3F_q2" style="display:none">
+        <div class="qt">Löse \(z+e=10\) und \(e-z=4\). Wie heißt die ursprüngliche Zahl?</div>
+        <div class="input-row"><label>Zahl =</label><input class="math-input" id="p3F_ans" type="number" inputmode="numeric" placeholder="???"><button class="btn sm" onclick="chkN('p3F_ans','p3F_fb2',357,'p3F_q2')">Prüfen</button><button class="btn leer" id="leer_p3F_fb2" style="display:none" onclick="clrI('p3F_ans','p3F_fb2','leer_p3F_fb2')">Leeren</button></div>
+        <div class="fb" id="p3F_fb2"></div>
+        <button class="tipp-toggle" onclick="toggleT('p3F_t1')">💡 Tipp</button>
+        <div class="tipp-box" id="p3F_t1"><div class="tl">Tipp</div>Addition: \(2e=14 \Rightarrow e=7, z=3\). Zahl: \(357\). Gespiegelt: \(753\). \(753-357=396\) ✓</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- P: vierstellig z|3|3|e gespiegelt e|3|3|z -->
+  <div class="level-content" id="p3_P">
+    <div class="card bl">
+      <h3>Vierstellige Zahl komplett spiegeln</h3>
+      <div class="digit-vis">
+        <div class="digit-box dz">z</div><div class="digit-box df">3</div><div class="digit-box df">3</div><div class="digit-box de">e</div>
+        <span style="font-size:20px;margin:0 8px;color:var(--muted)">→</span>
+        <div class="digit-box de">e</div><div class="digit-box df">3</div><div class="digit-box df">3</div><div class="digit-box dz">z</div>
+      </div>
+      <p style="text-align:center;font-size:14px;color:var(--muted)">Original: \(1000z+330+e\) &nbsp;|&nbsp; Gespiegelt: \(1000e+330+z\)</p>
+    </div>
+    <div class="puzzle-box"><p class="ptext">Eine Zahl hat die Form <em>z33e</em>.<br>Die Summe der Randziffern ist <em>9</em>.<br>Die gespiegelte Zahl (<em>e33z</em>) ist um <em>2997</em> größer.<br><strong>Wie heißt die ursprüngliche Zahl?</strong></p></div>
+    <div class="card">
+      <div class="qblock" id="p3P_q1">
+        <div class="qt">Gleichung (II): \((1000e+330+z)-(1000z+330+e)=2997 \Rightarrow 999(e-z)=2997\).<br>Löse das LGS (\(z+e=9\), \(e-z=3\)) und nenne die ursprüngliche Zahl:</div>
+        <div class="input-row"><label>Zahl =</label><input class="math-input" id="p3P_ans" type="number" inputmode="numeric" placeholder="????"><button class="btn sm" onclick="chkN('p3P_ans','p3P_fb',3336,'p3P_q1')">Prüfen</button><button class="btn leer" id="leer_p3P_fb" style="display:none" onclick="clrI('p3P_ans','p3P_fb','leer_p3P_fb')">Leeren</button></div>
+        <div class="fb" id="p3P_fb"></div>
+        <button class="tipp-toggle" onclick="toggleT('p3P_t1')">💡 Tipp</button>
+        <div class="tipp-box" id="p3P_t1"><div class="tl">Tipp</div>Addition: \(2e=12 \Rightarrow e=6, z=3\). Zahl: \(3336\). Gespiegelt: \(6333\). \(6333-3336=2997\) ✓</div>
+      </div>
+    </div>
+  </div>
+
+  <button class="next-btn" id="next3" onclick="goTab(4)">Weiter zum Rückblick →</button>
+</div>
+
+<!-- ══════════════════════════════════════
+     PANEL 4 – RÜCKBLICK
+     ══════════════════════════════════════ -->
+<div class="panel" id="panel4">
+  <div class="card hl">
+    <h2><span class="num">↩</span> Rückblick: Gleichungen mit Brüchen</h2>
+    <p>Löse die Gleichungen nach \(x\). Wähle dein Niveau – <strong>4 Aufgaben</strong> pro Stufe.</p>
+  </div>
+  <div class="level-bar">
+    <button class="lvl-btn on" id="rbG_btn" onclick="setLvl('rb','G')">Grundlagen</button>
+    <button class="lvl-btn"    id="rbF_btn" onclick="setLvl('rb','F')">Fortgeschritten</button>
+    <button class="lvl-btn"    id="rbP_btn" onclick="setLvl('rb','P')">Profi</button>
+  </div>
+
+  <!-- G -->
+  <div class="level-content on" id="rb_G">
+    <div class="aufg-badge">4 Aufgaben · Grundlagen</div>
+    <div class="card">
+      <div class="qblock" id="rbG1"><div class="qt">Aufgabe 1: <span class="eqline"><span class="frac"><span>x</span><span>3</span></span> + 2 = 5</span></div><div class="input-row"><label>\(x=\)</label><input class="math-input" id="rbG1_i" type="number" inputmode="numeric" placeholder="?"><button class="btn sm" onclick="chkN('rbG1_i','rbG1_fb',9,'rbG1')">Prüfen</button><button class="btn leer" id="leer_rbG1_fb" style="display:none" onclick="clrI('rbG1_i','rbG1_fb','leer_rbG1_fb')">Leeren</button></div><div class="fb" id="rbG1_fb"></div><button class="tipp-toggle" onclick="toggleT('rbG1_t')">💡 Tipp</button><div class="tipp-box" id="rbG1_t"><div class="tl">Tipp</div><span class="eqline"><span class="frac"><span>x</span><span>3</span></span> = 3 ⟹ x = 9</span></div></div>
+      <div class="qblock" id="rbG2"><div class="qt">Aufgabe 2: <span class="eqline"><span class="frac"><span>x</span><span>5</span></span> − 1 = 3</span></div><div class="input-row"><label>\(x=\)</label><input class="math-input" id="rbG2_i" type="number" inputmode="numeric" placeholder="?"><button class="btn sm" onclick="chkN('rbG2_i','rbG2_fb',20,'rbG2')">Prüfen</button><button class="btn leer" id="leer_rbG2_fb" style="display:none" onclick="clrI('rbG2_i','rbG2_fb','leer_rbG2_fb')">Leeren</button></div><div class="fb" id="rbG2_fb"></div></div>
+      <div class="qblock" id="rbG3"><div class="qt">Aufgabe 3: <span class="eqline">2x + <span class="frac"><span>x</span><span>3</span></span> = 21</span></div><div class="input-row"><label>\(x=\)</label><input class="math-input" id="rbG3_i" type="number" inputmode="numeric" placeholder="?"><button class="btn sm" onclick="chkN('rbG3_i','rbG3_fb',9,'rbG3')">Prüfen</button><button class="btn leer" id="leer_rbG3_fb" style="display:none" onclick="clrI('rbG3_i','rbG3_fb','leer_rbG3_fb')">Leeren</button></div><div class="fb" id="rbG3_fb"></div><button class="tipp-toggle" onclick="toggleT('rbG3_t')">💡 Tipp</button><div class="tipp-box" id="rbG3_t"><div class="tl">Tipp – HN 3</div>Multipliziere mit 3: 6x + x = 63 ⟹ x = 9</div></div>
+      <div class="qblock" id="rbG4"><div class="qt">Aufgabe 4: <span class="eqline"><span class="frac"><span>x</span><span>2</span></span> + <span class="frac"><span>x</span><span>4</span></span> = 6</span></div><div class="input-row"><label>\(x=\)</label><input class="math-input" id="rbG4_i" type="number" inputmode="numeric" placeholder="?"><button class="btn sm" onclick="chkN('rbG4_i','rbG4_fb',8,'rbG4')">Prüfen</button><button class="btn leer" id="leer_rbG4_fb" style="display:none" onclick="clrI('rbG4_i','rbG4_fb','leer_rbG4_fb')">Leeren</button></div><div class="fb" id="rbG4_fb"></div><button class="tipp-toggle" onclick="toggleT('rbG4_t')">💡 Tipp</button><div class="tipp-box" id="rbG4_t"><div class="tl">Tipp – HN 4</div>\(2x+x=24 \Rightarrow 3x=24 \Rightarrow x=8\)</div></div>
+    </div>
+  </div>
+
+  <!-- F -->
+  <div class="level-content" id="rb_F">
+    <div class="aufg-badge">4 Aufgaben · Fortgeschritten</div>
+    <div class="card">
+      <div class="qblock" id="rbF1"><div class="qt">Aufgabe 1: <span class="eqline"><span class="frac"><span>x + 4</span><span>3</span></span> = 6</span></div><div class="input-row"><label>\(x=\)</label><input class="math-input" id="rbF1_i" type="number" inputmode="numeric" placeholder="?"><button class="btn sm" onclick="chkN('rbF1_i','rbF1_fb',14,'rbF1')">Prüfen</button><button class="btn leer" id="leer_rbF1_fb" style="display:none" onclick="clrI('rbF1_i','rbF1_fb','leer_rbF1_fb')">Leeren</button></div><div class="fb" id="rbF1_fb"></div><button class="tipp-toggle" onclick="toggleT('rbF1_t')">💡 Tipp</button><div class="tipp-box" id="rbF1_t"><div class="tl">Tipp</div>\(x+4=18 \Rightarrow x=14\)</div></div>
+      <div class="qblock" id="rbF2"><div class="qt">Aufgabe 2: <span class="eqline">3x − <span class="frac"><span>x</span><span>2</span></span> = 10</span></div><div class="input-row"><label>\(x=\)</label><input class="math-input" id="rbF2_i" type="number" inputmode="numeric" placeholder="?"><button class="btn sm" onclick="chkN('rbF2_i','rbF2_fb',4,'rbF2')">Prüfen</button><button class="btn leer" id="leer_rbF2_fb" style="display:none" onclick="clrI('rbF2_i','rbF2_fb','leer_rbF2_fb')">Leeren</button></div><div class="fb" id="rbF2_fb"></div><button class="tipp-toggle" onclick="toggleT('rbF2_t')">💡 Tipp</button><div class="tipp-box" id="rbF2_t"><div class="tl">Tipp</div><span class="eqline"><span class="frac"><span>5x</span><span>2</span></span> = 10 ⟹ x = 4</span></div></div>
+      <div class="qblock" id="rbF3"><div class="qt">Aufgabe 3: <span class="eqline"><span class="frac"><span>2x − 3</span><span>4</span></span> = 5</span> <span style="font-size:13px;color:var(--muted)">(Dezimalzahl)</span></div><div class="input-row"><label>\(x=\)</label><input class="math-input" id="rbF3_i" type="number" inputmode="decimal" step="0.1" placeholder="?"><button class="btn sm" onclick="chkN('rbF3_i','rbF3_fb',11.5,'rbF3',true)">Prüfen</button><button class="btn leer" id="leer_rbF3_fb" style="display:none" onclick="clrI('rbF3_i','rbF3_fb','leer_rbF3_fb')">Leeren</button></div><div class="fb" id="rbF3_fb"></div><button class="tipp-toggle" onclick="toggleT('rbF3_t')">💡 Tipp</button><div class="tipp-box" id="rbF3_t"><div class="tl">Tipp</div>\(2x-3=20 \Rightarrow 2x=23 \Rightarrow x=11{,}5\)</div></div>
+      <div class="qblock" id="rbF4"><div class="qt">Aufgabe 4: <span class="eqline"><span class="frac"><span>5x − 2</span><span>3</span></span> = <span class="frac"><span>2x + 4</span><span>2</span></span></span></div><div class="input-row"><label>\(x=\)</label><input class="math-input" id="rbF4_i" type="number" inputmode="numeric" placeholder="?"><button class="btn sm" onclick="chkN('rbF4_i','rbF4_fb',4,'rbF4')">Prüfen</button><button class="btn leer" id="leer_rbF4_fb" style="display:none" onclick="clrI('rbF4_i','rbF4_fb','leer_rbF4_fb')">Leeren</button></div><div class="fb" id="rbF4_fb"></div><button class="tipp-toggle" onclick="toggleT('rbF4_t')">💡 Tipp</button><div class="tipp-box" id="rbF4_t"><div class="tl">Tipp – HN 6</div>\(2(5x-2)=3(2x+4) \Rightarrow 4x=16 \Rightarrow x=4\)</div></div>
+    </div>
+  </div>
+
+  <!-- P -->
+  <div class="level-content" id="rb_P">
+    <div class="aufg-badge">4 Aufgaben · Profi</div>
+    <div class="card">
+      <div class="qblock" id="rbP1"><div class="qt">Aufgabe 1: <span class="eqline"><span class="frac"><span>x</span><span>2</span></span> + <span class="frac"><span>x</span><span>3</span></span> = 10</span></div><div class="input-row"><label>\(x=\)</label><input class="math-input" id="rbP1_i" type="number" inputmode="numeric" placeholder="?"><button class="btn sm" onclick="chkN('rbP1_i','rbP1_fb',12,'rbP1')">Prüfen</button><button class="btn leer" id="leer_rbP1_fb" style="display:none" onclick="clrI('rbP1_i','rbP1_fb','leer_rbP1_fb')">Leeren</button></div><div class="fb" id="rbP1_fb"></div><button class="tipp-toggle" onclick="toggleT('rbP1_t')">💡 Tipp</button><div class="tipp-box" id="rbP1_t"><div class="tl">Tipp – HN 6</div>\(3x+2x=60 \Rightarrow x=12\)</div></div>
+      <div class="qblock" id="rbP2"><div class="qt">Aufgabe 2: <span class="eqline"><span class="frac"><span>x</span><span>6</span></span> + <span class="frac"><span>x</span><span>4</span></span> = 5</span></div><div class="input-row"><label>\(x=\)</label><input class="math-input" id="rbP2_i" type="number" inputmode="numeric" placeholder="?"><button class="btn sm" onclick="chkN('rbP2_i','rbP2_fb',12,'rbP2')">Prüfen</button><button class="btn leer" id="leer_rbP2_fb" style="display:none" onclick="clrI('rbP2_i','rbP2_fb','leer_rbP2_fb')">Leeren</button></div><div class="fb" id="rbP2_fb"></div><button class="tipp-toggle" onclick="toggleT('rbP2_t')">💡 Tipp</button><div class="tipp-box" id="rbP2_t"><div class="tl">Tipp – HN 12</div>\(2x+3x=60 \Rightarrow x=12\)</div></div>
+      <div class="qblock" id="rbP3"><div class="qt">Aufgabe 3: <span class="eqline"><span class="frac"><span>3x + 1</span><span>2</span></span> − <span class="frac"><span>x − 3</span><span>4</span></span> = 7</span> <span style="font-size:13px;color:var(--muted)">(Dezimalzahl)</span></div><div class="input-row"><label>\(x=\)</label><input class="math-input" id="rbP3_i" type="number" inputmode="decimal" step="0.1" placeholder="?"><button class="btn sm" onclick="chkN('rbP3_i','rbP3_fb',4.6,'rbP3',true)">Prüfen</button><button class="btn leer" id="leer_rbP3_fb" style="display:none" onclick="clrI('rbP3_i','rbP3_fb','leer_rbP3_fb')">Leeren</button></div><div class="fb" id="rbP3_fb"></div><button class="tipp-toggle" onclick="toggleT('rbP3_t')">💡 Tipp</button><div class="tipp-box" id="rbP3_t"><div class="tl">Tipp – HN 4</div><span class="eqline">5x + 5 = 28 ⟹ x = <span class="frac"><span>23</span><span>5</span></span> = 4,6</span></div></div>
+      <div class="qblock" id="rbP4"><div class="qt">Aufgabe 4: <span class="eqline"><span class="frac"><span>x + 1</span><span>3</span></span> − <span class="frac"><span>x − 2</span><span>6</span></span> = <span class="frac"><span>x + 5</span><span>4</span></span></span></div><div class="input-row"><label>\(x=\)</label><input class="math-input" id="rbP4_i" type="number" inputmode="numeric" placeholder="?"><button class="btn sm" onclick="chkN('rbP4_i','rbP4_fb',-7,'rbP4')">Prüfen</button><button class="btn leer" id="leer_rbP4_fb" style="display:none" onclick="clrI('rbP4_i','rbP4_fb','leer_rbP4_fb')">Leeren</button></div><div class="fb" id="rbP4_fb"></div><button class="tipp-toggle" onclick="toggleT('rbP4_t')">💡 Tipp</button><div class="tipp-box" id="rbP4_t"><div class="tl">Tipp – HN 12</div>\(4(x+1)-2(x-2)=3(x+5) \Rightarrow 2x+8=3x+15 \Rightarrow x=-7\)</div></div>
+    </div>
+  </div>
+
+  <button class="next-btn" id="next4" onclick="goTab(5)">Zur Auswertung →</button>
+</div>
+
+<!-- ══════════════════════════════════════
+     PANEL 5 – AUSWERTUNG
+     ══════════════════════════════════════ -->
+<div class="panel" id="panel5">
+  <div class="card hl"><h2><span class="num">📊</span> Auswertung</h2><p>Deine Ergebnisse auf einen Blick.</p></div>
+  <div class="card"><div class="score-circle"><span class="sn" id="score-num">–</span><span class="sd" id="score-denom">von –</span></div><div id="score-bars"></div></div>
+  <div class="card gn" id="bonus-hint" style="display:none;text-align:center"><p style="font-size:17px;font-weight:800;color:var(--green)">🌟 Stark! Schau dir den Bonus an!</p><p>Karte ★ wartet – ein Rätsel mit drei Unbekannten.</p></div>
+  <button class="next-btn visible" id="next5" onclick="goTab(6)">Weiter zum Bonus →</button>
+</div>
+
+<!-- ══════════════════════════════════════
+     PANEL 6 – BONUS
+     ══════════════════════════════════════ -->
+<div class="panel" id="panel6">
+  <div class="card bonus"><h2><span style="color:var(--accent3)">★</span> Bonus: Drei Unbekannte</h2><p>Ein LGS mit <strong>drei</strong> Gleichungen – für echte Profis!</p></div>
+  <div class="puzzle-box" style="border-color:var(--accent3)"><p class="ptext">Eine dreistellige Zahl hat drei Ziffern \(a\), \(b\), \(c\).<br>Die Ziffernsumme ist <em>15</em>.<br>Die Hunderterstelle ist doppelt so groß wie die Einerstelle.<br>Die Zehnerstelle ist um <em>1</em> kleiner als die Einerstelle.<br><strong>Wie heißt die Zahl?</strong></p></div>
+  <div class="card pu"><h3>Das LGS</h3>
+    <div class="step-box" style="border-left-color:var(--accent3)">
+      <div class="math-block"><div class="math-row"><span class="eq-label">(I)</span>\(a+b+c=15\)</div><div class="math-row"><span class="eq-label">(II)</span>\(a=2c\)</div><div class="math-row"><span class="eq-label">(III)</span>\(b=c-1\)</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="qblock" id="bonQ1">
+      <div class="qt">Setze (II) und (III) in (I) ein:</div>
+      <div class="mc-opts">
+        <button class="mc-btn" onclick="mcA('bon1',this,true)">\(2c+(c-1)+c=15 \Rightarrow 4c-1=15 \Rightarrow 4c=16\)</button>
+        <button class="mc-btn" onclick="mcA('bon1',this,false)">\(2c+c+c=15 \Rightarrow 4c=15\)</button>
+        <button class="mc-btn" onclick="mcA('bon1',this,false)">\(c+(c-1)+c=15 \Rightarrow 3c=16\)</button>
+      </div>
+      <div class="fb" id="bon1_fb"></div>
+    </div>
+    <div class="qblock" id="bonQ2" style="display:none">
+      <div class="qt">Was ist \(c\)?</div>
+      <div class="input-row"><label>\(c=\)</label><input class="math-input" id="bon_c" type="number" inputmode="numeric" min="0" max="9" placeholder="?"><button class="btn sm" onclick="chkN('bon_c','bon_fb2',4,'bonQ2')">Prüfen</button><button class="btn leer" id="leer_bon_fb2" style="display:none" onclick="clrI('bon_c','bon_fb2','leer_bon_fb2')">Leeren</button></div>
+      <div class="fb" id="bon_fb2"></div>
+    </div>
+    <div class="qblock" id="bonQ3" style="display:none">
+      <div class="qt">Berechne \(a=2c\) und \(b=c-1\), dann die Zahl \(\overline{abc}\):</div>
+      <div class="input-row"><label>Zahl =</label><input class="math-input" id="bon_ans" type="number" inputmode="numeric" placeholder="???"><button class="btn sm" onclick="chkN('bon_ans','bon_fb3',834,'bonQ3')">Prüfen</button><button class="btn leer" id="leer_bon_fb3" style="display:none" onclick="clrI('bon_ans','bon_fb3','leer_bon_fb3')">Leeren</button></div>
+      <div class="fb" id="bon_fb3"></div>
+      <button class="tipp-toggle" onclick="toggleT('bon_t1')">💡 Tipp</button>
+      <div class="tipp-box" id="bon_t1"><div class="tl">Tipp</div>\(c=4 \Rightarrow a=8, b=3\). Zahl: \(834\).</div>
+    </div>
+    <div class="card gn" id="bon-done" style="display:none;text-align:center;margin-top:12px">
+      <div style="font-size:44px;margin-bottom:8px">🏆</div>
+      <div style="font-size:20px;font-weight:900;color:var(--accent)">Exzellent!</div>
+      <p style="margin-top:8px">Die gesuchte Zahl ist <strong style="color:var(--accent);font-size:22px">834</strong>.<br>Probe: \(8+3+4=15\) ✅ &nbsp; \(8=2\cdot4\) ✅ &nbsp; \(3=4-1\) ✅</p>
+    </div>
+  </div>
+</div>
+
+<div class="dino" id="dino" ontouchstart="toggleDino()" onclick="toggleDino()">🦖<div class="dino-tip">Made by Mathedino</div></div>
+
+<script>
+const scores={}, mcDone={};
+const tabDone=[false,false,false,false,false,false,false];
+
+function goTab(n){
+  document.querySelectorAll('.panel').forEach((p,i)=>p.classList.toggle('active',i===n));
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',i===n));
+  if(n===5) buildAuswertung();
+  window.scrollTo(0,0); mjax();
+}
+function unlockTab(n){document.getElementById('tab'+n).classList.remove('not-yet');}
+function doneTab(n){
+  if(tabDone[n])return; tabDone[n]=true;
+  const b=document.getElementById('tab'+n);
+  b.classList.remove('not-yet'); b.classList.add('done'); updatePg();
+}
+function updatePg(){document.getElementById('pgFill').style.width=(4+tabDone.filter(Boolean).length*13)+'%';}
+function showNext(id,unlock){
+  const b=document.getElementById(id); if(b) b.classList.add('visible');
+  if(unlock!==undefined) unlockTab(unlock);
+}
+function setLvl(grp,lvl){
+  ['G','F','P'].forEach(l=>{
+    document.getElementById(grp+'_'+l).classList.toggle('on',l===lvl);
+    document.getElementById(grp+l+'_btn').classList.toggle('on',l===lvl);
+  }); mjax();
+}
+function setFb(id,type,html){
+  const el=document.getElementById(id);
+  el.className='fb '+(type==='ok'?'ok':'err'); el.innerHTML=html;
+  if(typeof MathJax!=='undefined') MathJax.typesetPromise([el]);
+}
+function clrFb(id){const el=document.getElementById(id);el.className='fb';el.innerHTML='';}
+function toggleT(id){document.getElementById(id).classList.toggle('open');mjax();}
+function clrI(iId,fbId,leerId){
+  const inp=document.getElementById(iId);
+  inp.value=''; inp.classList.remove('ok','err'); clrFb(fbId);
+  document.getElementById(leerId).style.display='none';
+}
+function chkN(iId,fbId,correct,scoreKey,isFloat){
+  const inp=document.getElementById(iId);
+  const val=isFloat?parseFloat(inp.value):parseInt(inp.value);
+  const leerId='leer_'+fbId; const tol=isFloat?0.06:0;
+  if(!isNaN(val)&&Math.abs(val-correct)<=tol){
+    inp.classList.remove('err'); inp.classList.add('ok');
+    setFb(fbId,'ok','✅ Richtig!');
+    if(document.getElementById(leerId)) document.getElementById(leerId).style.display='none';
+    scores[scoreKey]={ok:true}; onCorrect(scoreKey);
+  } else {
+    inp.classList.remove('ok'); inp.classList.add('err');
+    const shown=isFloat?String(correct).replace('.',','):correct;
+    setFb(fbId,'err','❌ Nicht richtig. Richtige Antwort: '+shown);
+    if(document.getElementById(leerId)) document.getElementById(leerId).style.display='inline-flex';
+    scores[scoreKey]={ok:false};
+  }
+}
+function chkTwo(id1,id2,fbId,c1,c2,scoreKey){
+  const v1=parseInt(document.getElementById(id1).value);
+  const v2=parseInt(document.getElementById(id2).value);
+  const i1=document.getElementById(id1); const i2=document.getElementById(id2);
+  const leerId='leer_'+fbId;
+  if(v1===c1&&v2===c2){
+    i1.classList.remove('err'); i2.classList.remove('err');
+    i1.classList.add('ok'); i2.classList.add('ok');
+    setFb(fbId,'ok','✅ Korrekt!');
+    if(document.getElementById(leerId)) document.getElementById(leerId).style.display='none';
+    scores[scoreKey]={ok:true}; onCorrect(scoreKey);
+  } else {
+    if(v1!==c1){i1.classList.add('err');}
+    if(v2!==c2){i2.classList.add('err');}
+    setFb(fbId,'err','❌ Noch nicht richtig. Erster Wert: '+c1+', zweiter: '+c2+'.');
+    if(document.getElementById(leerId)) document.getElementById(leerId).style.display='inline-flex';
+    scores[scoreKey]={ok:false};
+  }
+}
+function clrTwo(id1,id2,fbId,leerId){
+  [id1,id2].forEach(id=>{const e=document.getElementById(id);e.value='';e.classList.remove('ok','err');});
+  clrFb(fbId);
+  document.getElementById(leerId).style.display='none';
+}
+
+const mcOkMsg={
+  'k2Gmc1':'✅ Genau!','k2Fmc1':'✅ Richtig! b − 3a = 8.',
+  'p1Gmc1':'✅ Korrekt! Die ursprüngliche Zahl ist größer.',
+  'p2Gmc1':'✅ Richtig! 90(e−z) = 180 → e−z = 2.',
+  'p2Fmc1':'✅ Korrekt! 999(e−z) = 2997 → e−z = 3.',
+  'p2Pmc1':'✅ Richtig! z=4, e=5 → Zahl: 453.',
+  'p3Fmc1':'✅ Genau! 99(e−z) = 396 → e−z = 4.',
+  'bon1':'✅ Richtig! 4c−1=15.'
+};
+const mcErrMsg={
+  'k2Gmc1':'❌ „Doppelt so groß": b = 2a.','k2Fmc1':'❌ Von der größeren subtrahiert: b − 3a.',
+  'p1Gmc1':'❌ Die ursprüngliche Zahl ist 27 größer als die vertauschte.',
+  'p2Gmc1':'❌ Diff = 90(e−z). 90(e−z)=180 → e−z=2.',
+  'p2Fmc1':'❌ Diff = 999(e−z). Teile 2997 durch 999.',
+  'p2Pmc1':'❌ Setze e=9−z in 90e−99z=54 ein und löse.',
+  'p3Fmc1':'❌ 99(e−z) = 396. Teile durch 99.',
+  'bon1':'❌ a=2c und b=c−1 einsetzen.'
+};
+const mcReveal={
+  'k2Gmc1':()=>{show('k2G_q2');mjax();},
+  'k2Fmc1':()=>{show('k2F_q2');mjax();},
+  'p1Gmc1':()=>{show('p1G_q2');mjax();},
+  'p2Gmc1':()=>{show('p2G_q2');mjax();},
+  'p2Fmc1':()=>{show('p2F_q2');mjax();},
+  'p2Pmc1':()=>{show('p2P_q2');mjax();},
+  'p3Fmc1':()=>{show('p3F_q2');mjax();},
+  'bon1':()=>{show('bonQ2');mjax();}
+};
+function mcA(key,btn,correct){
+  if(mcDone[key])return;
+  const fbId=key+'_fb';
+  if(correct){
+    mcDone[key]=true; btn.classList.add('mc-ok');
+    btn.closest('.qblock').querySelectorAll('.mc-btn').forEach(b=>b.classList.add('mc-locked'));
+    setFb(fbId,'ok',mcOkMsg[key]||'✅ Richtig!');
+    scores[key]={ok:true};
+    if(mcReveal[key]) mcReveal[key]();
+    onCorrect(key);
+  } else {
+    btn.classList.add('mc-err');
+    setFb(fbId,'err',mcErrMsg[key]||'❌ Nicht richtig.');
+    setTimeout(()=>{btn.classList.remove('mc-err');clrFb(fbId);},1800);
+  }
+}
+
+function onCorrect(key){
+  if(!key)return;
+  if(key.startsWith('k2')){doneTab(0);showNext('next0',1);}
+  if(key.startsWith('p1')){doneTab(1);showNext('next1',2);}
+  if(key.startsWith('p2')){doneTab(2);showNext('next2',3);}
+  if(key.startsWith('p3')){doneTab(3);showNext('next3',4);}
+  if(key.startsWith('rb')){doneTab(4);showNext('next4',5);unlockTab(5);}
+  if(key==='bonQ2'){show('bonQ3');mjax();}
+  if(key==='bonQ3'){show('bon-done');doneTab(6);mjax();}
+  unlockTab(6);
+}
+
+function buildAuswertung(){
+  const labels={
+    'k2Gmc1':'Beziehungen – LGS (G)','k2G_q2':'Beziehungen – lösen (G)',
+    'k2Fmc1':'Beziehungen – Gl. II (F)','k2F_q2':'Beziehungen – lösen (F)',
+    'k2P_q1':'Beziehungen – Profi',
+    'p1Gmc1':'2-stellig – LGS (G)','p1G_q2':'2-stellig – Zahl (G)',
+    'p1F_q1':'2-stellig – Fortgeschritten','p1P_q1':'2-stellig – Profi',
+    'p2Gmc1':'3-4-stellig – Gl. II (G)','p2G_q2':'3-4-stellig – Zahl (G)',
+    'p2Fmc1':'3-4-stellig – Gl. II (F)','p2F_q2':'3-4-stellig – Zahl (F)',
+    'p2Pmc1':'3-4-stellig – Lösung (P)','p2P_q2':'3-4-stellig – Zahl (P)',
+    'p3G_q1':'Spiegeln – Zahl (G)',
+    'p3Fmc1':'Spiegeln – Gl. II (F)','p3F_q2':'Spiegeln – Zahl (F)',
+    'p3P_q1':'Spiegeln – Zahl (P)',
+    'rbG1':'Rückblick G1','rbG2':'Rückblick G2','rbG3':'Rückblick G3','rbG4':'Rückblick G4',
+    'rbF1':'Rückblick F1','rbF2':'Rückblick F2','rbF3':'Rückblick F3','rbF4':'Rückblick F4',
+    'rbP1':'Rückblick P1','rbP2':'Rückblick P2','rbP3':'Rückblick P3','rbP4':'Rückblick P4'
+  };
+  const done=Object.keys(scores).filter(k=>scores[k]!==undefined);
+  const ok=done.filter(k=>scores[k].ok);
+  document.getElementById('score-num').textContent=ok.length;
+  document.getElementById('score-denom').textContent='von '+done.length;
+  const cont=document.getElementById('score-bars'); cont.innerHTML='';
+  if(!done.length){cont.innerHTML='<p style="color:var(--muted);text-align:center">Noch keine Aufgaben bearbeitet.</p>';return;}
+  done.forEach(k=>{
+    const good=scores[k].ok;
+    const bar=document.createElement('div'); bar.className='result-bar';
+    bar.innerHTML=`<div class="dot ${good?'ok':'err'}"></div><span>${labels[k]||k}</span><span style="margin-left:auto">${good?'✅':'❌'}</span>`;
+    cont.appendChild(bar);
+  });
+  if(ok.length>=5) document.getElementById('bonus-hint').style.display='block';
+}
+
+function show(id){const el=document.getElementById(id);if(el)el.style.display='block';}
+function mjax(){if(typeof MathJax!=='undefined')MathJax.typeset();}
+let dinoTimer;
+function toggleDino(){
+  const d=document.getElementById('dino'); d.classList.add('show');
+  clearTimeout(dinoTimer); dinoTimer=setTimeout(()=>d.classList.remove('show'),2500);
+}
+document.addEventListener('DOMContentLoaded',mjax);
+</script>
+</body>
+</html>
