@@ -594,6 +594,16 @@ const WDH_DATA=[
 ];
 function s4(){return state.k4.perStufe[state.k4.stufe];}
 function normZahl(s){return s.replace(/\s/g,'').replace(/\./g,',').toLowerCase();}
+/* Wandelt eine Eingabe (Dezimal mit , oder . / Bruch a/b) in eine Zahl um; null wenn nicht deutbar */
+function zahlWert(s){
+  s=String(s).replace(/\s/g,'');
+  if(s==='')return null;
+  const bruch=s.match(/^(-?\d+)\/(-?\d+)$/);
+  if(bruch){const n=parseInt(bruch[2],10);if(n===0)return null;return parseInt(bruch[1],10)/n;}
+  const dez=s.replace(',','.');
+  if(/^-?\d*\.?\d+$/.test(dez))return parseFloat(dez);
+  return null;
+}
 function ladeWdh(){
   const d=WDH_DATA[state.k4.stufe], s=s4(), a=d.aufg[s.idx];
   document.getElementById('k4info').textContent=d.info;
@@ -608,9 +618,15 @@ function ladeWdh(){
 function pruefeWdh(){
   const d=WDH_DATA[state.k4.stufe], s=s4(), a=d.aufg[s.idx];
   const v=document.getElementById('k4wert').value.trim(); if(v==='')return;
-  const norm=normZahl(v); s.gepr=true;
+  s.gepr=true;
   const fb=document.getElementById('fb4');
-  const ok=a.loes.some(l=>normZahl(l)===norm);
+  // 1) numerischer Vergleich (0,2 = 0,20 = 1/5 = 2/10); 2) Fallback String-Vergleich
+  const vw=zahlWert(v), norm=normZahl(v);
+  const ok=a.loes.some(l=>{
+    const lw=zahlWert(l);
+    if(vw!==null&&lw!==null)return Math.abs(vw-lw)<1e-9;
+    return normZahl(l)===norm;
+  });
   if(ok){
     fb.className='feedback zeig ok'; fb.textContent='✅ Richtig!';
     if(!s.done.includes(s.idx))s.done.push(s.idx);
