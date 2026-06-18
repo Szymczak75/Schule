@@ -62,6 +62,16 @@
   .wahl button.richtig{background:var(--gruen);color:#fff;border-color:var(--gruen);}
   .wahl button.falsch{background:var(--rot);color:#fff;border-color:var(--rot);}
   .wahl button.fast{background:#F4B740;color:#3a2e10;border-color:#D99A1C;}
+  .quadliste{display:flex;flex-direction:column;gap:.5rem;margin:.8rem 0;}
+  .quad-item{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem;border:2px solid var(--rand);border-radius:.6rem;padding:.5rem .7rem;background:#fff;}
+  .quad-item .pkt{font-weight:800;color:var(--kopf-dunkel);min-width:6.5rem;font-size:1.05rem;}
+  .quad-item select{font-family:inherit;font-size:1rem;min-height:44px;border:2px solid var(--rand);border-radius:.5rem;padding:.3rem .5rem;background:#fff;color:var(--text);flex:1 1 9rem;}
+  .quad-item input[type=number]{flex:0 0 auto;}
+  .quad-item select:focus,.quad-item input:focus{outline:none;border-color:var(--kopf);}
+  .quad-item .erg{font-size:.95rem;color:#5a6b78;}
+  .quad-item.richtig{border-color:var(--gruen);background:#EAF7EE;}
+  .quad-item.falsch{border-color:var(--rot);background:#FBEAEA;}
+  .quad-item .marke{margin-left:auto;font-weight:800;}
   .linkkarte{display:block;border:2px solid var(--akzent);background:#FDF4E8;border-radius:.7rem;padding:.9rem 1rem;margin:1rem 0;text-decoration:none;color:var(--text);min-height:44px;}
   .linkkarte:active{transform:scale(.99);}
   .linkkarte .lk-titel{font-weight:800;color:var(--kopf-dunkel);font-size:1.05rem;}
@@ -85,11 +95,12 @@
 
 <nav class="tabs" id="tabs">
   <button class="tab aktiv" data-ziel="k1">1 · Ablesen <span class="done" id="d1"></span></button>
-  <button class="tab" data-ziel="k2">2 · Eintragen <span class="done" id="d2"></span></button>
-  <button class="tab" data-ziel="k3">3 · Figur erkennen <span class="done" id="d3"></span></button>
-  <button class="tab" data-ziel="k4">4 · Ergänzen <span class="done" id="d4"></span></button>
-  <button class="tab" data-ziel="k5">5 · Wiederholung <span class="done" id="d5"></span></button>
-  <button class="tab" data-ziel="k6">6 · Auswertung <span class="done" id="d6"></span></button>
+  <button class="tab" data-ziel="k2">2 · Quadranten <span class="done" id="d2"></span></button>
+  <button class="tab" data-ziel="k3">3 · Eintragen <span class="done" id="d3"></span></button>
+  <button class="tab" data-ziel="k4">4 · Figur erkennen <span class="done" id="d4"></span></button>
+  <button class="tab" data-ziel="k5">5 · Ergänzen <span class="done" id="d5"></span></button>
+  <button class="tab" data-ziel="k6">6 · Wiederholung <span class="done" id="d6"></span></button>
+  <button class="tab" data-ziel="k7">7 · Auswertung <span class="done" id="d7"></span></button>
 </nav>
 
 <main>
@@ -115,67 +126,84 @@
     <div style="text-align:center;margin-top:1rem;"><button class="btn btn-sek" id="k1next" style="display:none" onclick="naechsteK1()">Nächste Aufgabe →</button></div>
   </section>
 
-  <!-- KARTE 2: Eintragen -->
+  <!-- KARTE 2: Quadranten -->
   <section class="karte" id="k2">
-    <h2>Punkte eintragen</h2>
+    <h2>In welchem Quadranten liegt der Punkt?</h2>
     <div class="stufen" data-stufen="k2">
       <button class="stufe-btn aktiv" data-stufe="0">Grundlagen</button>
       <button class="stufe-btn" data-stufe="1">Fortgeschritten</button>
       <button class="stufe-btn" data-stufe="2">Profi</button>
     </div>
     <p class="stufe-info" id="k2info"></p>
-    <p class="teil-anzeige" id="k2teil"></p>
-    <p class="frage">Tippe den Punkt <b id="k2name">A(2|3)</b> an.</p>
-    <div class="kswrap"><svg id="svgK2" class="ks-tap" width="320" height="320" viewBox="0 0 320 320"></svg></div>
+    <p class="frage" id="k2frage"></p>
+    <div class="kswrap" id="k2svgwrap"><svg id="svgK2" width="320" height="320" viewBox="0 0 320 320"></svg></div>
+    <div class="quadliste" id="k2liste"></div>
     <button class="btn btn-pruefen" onclick="pruefeK2()">Prüfen</button>
     <button class="btn btn-leeren" id="k2leeren" style="display:none" onclick="leereK2()">Leeren</button>
     <div class="feedback" id="fb2"></div>
-    <div style="text-align:center;margin-top:1rem;"><button class="btn btn-sek" id="k2next" style="display:none" onclick="naechsteK2()">Nächste Aufgabe →</button></div>
   </section>
 
-  <!-- KARTE 3: Figur erkennen -->
+  <!-- KARTE 3: Eintragen -->
   <section class="karte" id="k3">
-    <h2>Welche Figur ist das?</h2>
-    <p>Die Eckpunkte sind eingezeichnet und verbunden. Erkenne die besondere Figur.</p>
-    <p class="teil-anzeige" id="k3teil"></p>
-    <div class="kswrap"><svg id="svgK3" width="320" height="320" viewBox="0 0 320 320"></svg></div>
-    <p class="frage" id="k3frage">Wähle die <b>genaueste</b> Bezeichnung für die Figur.</p>
-    <div class="wahl" id="k3wahl"></div>
-    <button class="btn btn-pruefen" onclick="pruefeK3()">Prüfen</button>
-    <button class="btn btn-leeren" id="k3leeren" style="display:none" onclick="leereK3()">Leeren</button>
-    <div class="feedback" id="fb3"></div>
-    <div style="text-align:center;margin-top:1rem;"><button class="btn btn-sek" id="k3next" style="display:none" onclick="naechsteK3()">Nächste Figur →</button></div>
-  </section>
-
-  <!-- KARTE 4: Figur ergänzen -->
-  <section class="karte" id="k4">
-    <h2>Figur ergänzen</h2>
-    <p>Drei Eckpunkte sind schon da. Tippe den <b>vierten Punkt</b> so, dass die genannte Figur entsteht.</p>
-    <p class="teil-anzeige" id="k4teil"></p>
-    <p class="frage" id="k4frage"></p>
-    <div class="kswrap"><svg id="svgK4" class="ks-tap" width="320" height="320" viewBox="0 0 320 320"></svg></div>
-    <button class="btn btn-pruefen" onclick="pruefeK4()">Prüfen</button>
-    <button class="btn btn-leeren" id="k4leeren" style="display:none" onclick="leereK4()">Leeren</button>
-    <div class="feedback" id="fb4"></div>
-    <div style="text-align:center;margin-top:1rem;"><button class="btn btn-sek" id="k4next" style="display:none" onclick="naechsteK4()">Nächste Aufgabe →</button></div>
-  </section>
-
-  <!-- KARTE 5: Wiederholung Grundbegriffe -->
-  <section class="karte" id="k5">
-    <h2>Wiederholung: Grundbegriffe der Geometrie</h2>
-    <div class="stufen" data-stufen="k5">
+    <h2>Punkte eintragen</h2>
+    <div class="stufen" data-stufen="k3">
       <button class="stufe-btn aktiv" data-stufe="0">Grundlagen</button>
       <button class="stufe-btn" data-stufe="1">Fortgeschritten</button>
       <button class="stufe-btn" data-stufe="2">Profi</button>
     </div>
-    <p class="stufe-info" id="k5info"></p>
+    <p class="stufe-info" id="k3info"></p>
+    <p class="teil-anzeige" id="k3teil"></p>
+    <p class="frage">Tippe den Punkt <b id="k3name">A(2|3)</b> an.</p>
+    <div class="kswrap"><svg id="svgK3" class="ks-tap" width="320" height="320" viewBox="0 0 320 320"></svg></div>
+    <button class="btn btn-pruefen" onclick="pruefeK3()">Prüfen</button>
+    <button class="btn btn-leeren" id="k3leeren" style="display:none" onclick="leereK3()">Leeren</button>
+    <div class="feedback" id="fb3"></div>
+    <div style="text-align:center;margin-top:1rem;"><button class="btn btn-sek" id="k3next" style="display:none" onclick="naechsteK3()">Nächste Aufgabe →</button></div>
+  </section>
+
+  <!-- KARTE 4: Figur erkennen -->
+  <section class="karte" id="k4">
+    <h2>Welche Figur ist das?</h2>
+    <p>Die Eckpunkte sind eingezeichnet und verbunden. Erkenne die besondere Figur.</p>
+    <p class="teil-anzeige" id="k4teil"></p>
+    <div class="kswrap"><svg id="svgK4" width="320" height="320" viewBox="0 0 320 320"></svg></div>
+    <p class="frage" id="k4frage">Wähle die <b>genaueste</b> Bezeichnung für die Figur.</p>
+    <div class="wahl" id="k4wahl"></div>
+    <button class="btn btn-pruefen" onclick="pruefeK4()">Prüfen</button>
+    <button class="btn btn-leeren" id="k4leeren" style="display:none" onclick="leereK4()">Leeren</button>
+    <div class="feedback" id="fb4"></div>
+    <div style="text-align:center;margin-top:1rem;"><button class="btn btn-sek" id="k4next" style="display:none" onclick="naechsteK4()">Nächste Figur →</button></div>
+  </section>
+
+  <!-- KARTE 5: Figur ergänzen -->
+  <section class="karte" id="k5">
+    <h2>Figur ergänzen</h2>
+    <p>Drei Eckpunkte sind schon da. Tippe den <b>vierten Punkt</b> so, dass die genannte Figur entsteht.</p>
     <p class="teil-anzeige" id="k5teil"></p>
     <p class="frage" id="k5frage"></p>
-    <div class="wahl" id="k5wahl"></div>
+    <div class="kswrap"><svg id="svgK5" class="ks-tap" width="320" height="320" viewBox="0 0 320 320"></svg></div>
     <button class="btn btn-pruefen" onclick="pruefeK5()">Prüfen</button>
     <button class="btn btn-leeren" id="k5leeren" style="display:none" onclick="leereK5()">Leeren</button>
     <div class="feedback" id="fb5"></div>
     <div style="text-align:center;margin-top:1rem;"><button class="btn btn-sek" id="k5next" style="display:none" onclick="naechsteK5()">Nächste Aufgabe →</button></div>
+  </section>
+
+  <!-- KARTE 6: Wiederholung Grundbegriffe -->
+  <section class="karte" id="k6">
+    <h2>Wiederholung: Grundbegriffe der Geometrie</h2>
+    <div class="stufen" data-stufen="k6">
+      <button class="stufe-btn aktiv" data-stufe="0">Grundlagen</button>
+      <button class="stufe-btn" data-stufe="1">Fortgeschritten</button>
+      <button class="stufe-btn" data-stufe="2">Profi</button>
+    </div>
+    <p class="stufe-info" id="k6info"></p>
+    <p class="teil-anzeige" id="k6teil"></p>
+    <p class="frage" id="k6frage"></p>
+    <div class="wahl" id="k6wahl"></div>
+    <button class="btn btn-pruefen" onclick="pruefeK6()">Prüfen</button>
+    <button class="btn btn-leeren" id="k6leeren" style="display:none" onclick="leereK6()">Leeren</button>
+    <div class="feedback" id="fb6"></div>
+    <div style="text-align:center;margin-top:1rem;"><button class="btn btn-sek" id="k6next" style="display:none" onclick="naechsteK6()">Nächste Aufgabe →</button></div>
 
     <div class="hinweis">Mehr zu den besonderen Vierecken und wie sie zusammenhängen findest du hier:</div>
     <a class="linkkarte" href="https://szymczak75.github.io/Schule/mathe/klasse05/geometrie/grundlagen/haus_der_vierecke_ls.html" target="_blank" rel="noopener">
@@ -184,8 +212,8 @@
     </a>
   </section>
 
-  <!-- KARTE 6: Auswertung -->
-  <section class="karte" id="k6">
+  <!-- KARTE 7: Auswertung -->
+  <section class="karte" id="k7">
     <h2>Auswertung</h2>
     <div class="gesamt" id="gesamtPunkte">—</div>
     <div id="auswertung"></div>
@@ -241,9 +269,10 @@ const TEIL=['a','b','c'];
 const state={
   k1:{stufe:0,perStufe:[mkP(),mkP(),mkP()]},
   k2:{stufe:0,perStufe:[mkP(),mkP(),mkP()]},
-  k3:{idx:0,sel:null,gepr:false,done:[],erl:false},
-  k4:{idx:0,gesetzt:null,gepr:false,done:[],erl:false},
-  k5:{stufe:0,perStufe:[mkP(),mkP(),mkP()]}
+  k3:{stufe:0,perStufe:[mkP(),mkP(),mkP()]},
+  k4:{idx:0,sel:null,gepr:false,done:[],erl:false},
+  k5:{idx:0,gesetzt:null,gepr:false,done:[],erl:false},
+  k6:{stufe:0,perStufe:[mkP(),mkP(),mkP()]}
 };
 function mkP(){return {idx:0,sel:null,gesetzt:null,gepr:false,done:[],erl:false};}
 
@@ -283,41 +312,206 @@ function pruefeK1(){
 function leereK1(){const s=s1();s.gepr=false;s.valX='';s.valY='';document.getElementById('k1x').value='';document.getElementById('k1y').value='';ladeK1();}
 function naechsteK1(){const s=s1();s.idx=Math.min(s.idx+1,K1[state.k1.stufe].pts.length-1);s.gepr=false;s.valX='';s.valY='';ladeK1();}
 
-/* ---------- KARTE 2: Eintragen (Niveaustufen) ---------- */
+/* ---------- KARTE 2: Quadranten bestimmen (Niveaustufen, mehrere Items je Karte) ---------- */
+const Q_OPT=['I','II','III','IV','auf einer Achse'];
+function quadrantVon(x,y){
+  if(x===0||y===0)return 'auf einer Achse';
+  if(x>0&&y>0)return 'I';
+  if(x<0&&y>0)return 'II';
+  if(x<0&&y<0)return 'III';
+  return 'IV';
+}
+function quadName(q){return q==='auf einer Achse'?'auf einer Achse':(q+'. Quadrant');}
+/* Stufen:
+   0 Grundlagen  – Punkte im KS eingezeichnet, Quadrant per Dropdown
+   1 Fortgeschr. – nur Koordinaten, keine Zeichnung, Quadrant per Dropdown
+   2 Profi       – gemischt: Koordinate ergänzen (typ 'koord') oder Vorzeichen wählen (typ 'vz') */
 const K2=[
+  { info:'Die Punkte sind eingezeichnet. Wähle für jeden Punkt den richtigen Quadranten aus dem Menü.',
+    zeichnung:true, typ:'quad',
+    items:[{n:'A',x:3,y:2},{n:'B',x:-3,y:2},{n:'C',x:-2,y:-3},{n:'D',x:4,y:-2},{n:'E',x:-4,y:-1}] },
+  { info:'Nur die Koordinaten sind gegeben – ganz ohne Zeichnung. Schau auf die Vorzeichen von x und y.',
+    zeichnung:false, typ:'quad',
+    items:[{n:'A',x:2,y:5},{n:'B',x:-5,y:1},{n:'C',x:3,y:-4},{n:'D',x:-2,y:-2},{n:'E',x:0,y:-3}] },
+  { info:'Gemischte Profi-Aufgaben: Mal ist eine Koordinate samt Quadrant gegeben und du ergänzt die fehlende Koordinate, mal gibst du beide Vorzeichen per Menü an.',
+    zeichnung:false, typ:'mix',
+    items:[
+      {typ:'koord', n:'A', q:'II',  geg:'y', gegWert:3,  fehlt:'x'},  // II -> x negativ
+      {typ:'koord', n:'B', q:'IV',  geg:'y', gegWert:-2, fehlt:'x'},  // IV -> x positiv
+      {typ:'vz',    n:'C', q:'III'},                                   // III -> x−, y−
+      {typ:'vz',    n:'D', q:'I'},                                     // I   -> x+, y+
+      {typ:'koord', n:'E', q:'III', geg:'x', gegWert:-4, fehlt:'y'}    // III -> y negativ
+    ] }
+];
+/* Hinweis zur Prüfung:
+   typ 'koord': eine Koordinate + Quadrant gegeben, die ANDERE wird eingetragen.
+                Geprüft wird das Vorzeichen der fehlenden Koordinate (und ≠ 0),
+                nicht ein fester Zahlenwert – jede passende Zahl gilt.
+   typ 'vz'   : Quadrant gegeben, beide Vorzeichen (+/−) per Dropdown wählen. */
+function vzErwartet(q){ // erwartete Vorzeichen je Quadrant
+  return {I:['+','+'],II:['-','+'],III:['-','-'],IV:['+','-']}[q];
+}
+function s2(){return state.k2.perStufe[state.k2.stufe];}
+
+function ladeK2(){
+  const d=K2[state.k2.stufe], s=s2();
+  if(!s.ant)s.ant={}; // Antworten je Itemschlüssel
+  document.getElementById('k2info').textContent=d.info;
+  document.getElementById('k2frage').textContent = d.typ==='mix'
+    ? 'Profi: Löse jede Teilaufgabe und prüfe dann alles auf einmal.'
+    : 'Ordne jeden Punkt seinem Quadranten zu.';
+  // Zeichnung nur in Grundlagen
+  const wrap=document.getElementById('k2svgwrap');
+  if(d.zeichnung){
+    wrap.style.display='';
+    const svg=document.getElementById('svgK2');achsen(svg);
+    [['I',3.4,3.4],['II',-3.4,3.4],['III',-3.4,-3.4],['IV',3.4,-3.4]].forEach(q=>{
+      E(svg,'text',{x:sx(q[1]),y:sy(q[2])+6,'font-size':18,'font-weight':800,fill:'#C3D4E0','text-anchor':'middle'}).textContent=q[0];
+    });
+    d.items.forEach(it=>kreuz(svg,it.x,it.y,'#3A7CA5',it.n,9,-7));
+  } else {
+    wrap.style.display='none';
+  }
+  // Itemliste bauen
+  const liste=document.getElementById('k2liste'); liste.innerHTML='';
+  d.items.forEach((it,i)=>{
+    const row=document.createElement('div'); row.className='quad-item';
+    if(d.typ==='mix' && it.typ==='koord'){
+      const gegText = it.geg==='x' ? ('x = '+it.gegWert) : ('y = '+it.gegWert);
+      const fehlt = it.fehlt;
+      const lab=document.createElement('span'); lab.className='pkt';
+      lab.textContent=it.n+': '+quadName(it.q); row.appendChild(lab);
+      const erg=document.createElement('span'); erg.className='erg';
+      erg.textContent=gegText+', dann '+fehlt+' = '; row.appendChild(erg);
+      const inp=document.createElement('input'); inp.type='number'; inp.inputMode='numeric';
+      inp.style.width='4.5rem'; inp.placeholder=fehlt;
+      inp.value=(s.ant['v'+i]!==undefined?s.ant['v'+i]:'');
+      inp.disabled=s.gepr;
+      inp.addEventListener('input',()=>{s.ant['v'+i]=inp.value;});
+      row.appendChild(inp);
+    } else if(d.typ==='mix' && it.typ==='vz'){
+      const lab=document.createElement('span'); lab.className='pkt';
+      lab.textContent=it.n+': '+quadName(it.q); row.appendChild(lab);
+      const erg=document.createElement('span'); erg.className='erg'; erg.textContent='x:'; row.appendChild(erg);
+      row.appendChild(mkVZSelect(s,'x'+i));
+      const erg2=document.createElement('span'); erg2.className='erg'; erg2.textContent='y:'; row.appendChild(erg2);
+      row.appendChild(mkVZSelect(s,'y'+i));
+    } else {
+      // typ 'quad' – Punkt -> Quadrant per Dropdown
+      const lab=document.createElement('span'); lab.className='pkt';
+      lab.textContent=it.n+'('+it.x+'|'+it.y+')'; row.appendChild(lab);
+      const sel=document.createElement('select'); sel.dataset.k='q'+i;
+      const ph=document.createElement('option'); ph.value=''; ph.textContent='– Quadrant wählen –'; sel.appendChild(ph);
+      Q_OPT.forEach(o=>{const op=document.createElement('option'); op.value=o; op.textContent=quadName(o); sel.appendChild(op);});
+      sel.value=(s.ant['q'+i]!==undefined?s.ant['q'+i]:'');
+      sel.disabled=s.gepr;
+      sel.addEventListener('change',()=>{s.ant['q'+i]=sel.value;});
+      row.appendChild(sel);
+    }
+    // Markierung nach Prüfen
+    if(s.gepr){
+      const ok=itemKorrekt(d,it,i,s);
+      row.classList.add(ok?'richtig':'falsch');
+      const mk=document.createElement('span'); mk.className='marke'; mk.textContent=ok?'✅':'❌';
+      row.appendChild(mk);
+    }
+    liste.appendChild(row);
+  });
+  const fb=document.getElementById('fb2');
+  document.getElementById('k2leeren').style.display='none';
+  if(s.gepr){
+    const alle=d.items.every((it,i)=>itemKorrekt(d,it,i,s));
+    if(alle){
+      fb.className='feedback zeig ok';
+      fb.textContent='✅ Alles richtig! Du erkennst die Quadranten sicher an den Vorzeichen von x und y.';
+    }else{
+      const falschN=d.items.filter((it,i)=>!itemKorrekt(d,it,i,s)).map(it=>it.n);
+      fb.className='feedback zeig nok';
+      fb.textContent='❌ Noch nicht alles stimmt (Punkt '+falschN.join(', ')+'). Merke: rechts = x positiv, links = x negativ, oben = y positiv, unten = y negativ. Tippe „Leeren" und korrigiere.';
+      document.getElementById('k2leeren').style.display='inline-block';
+    }
+  } else fb.className='feedback';
+}
+function mkVZSelect(s,key){
+  const sel=document.createElement('select'); sel.dataset.k=key;
+  [['','– +/− –'],['+','+'],['-','−']].forEach(o=>{const op=document.createElement('option');op.value=o[0];op.textContent=o[1];sel.appendChild(op);});
+  sel.value=(s.ant[key]!==undefined?s.ant[key]:'');
+  sel.disabled=s.gepr;
+  sel.addEventListener('change',()=>{s.ant[key]=sel.value;});
+  return sel;
+}
+function itemKorrekt(d,it,i,s){
+  if(d.typ==='mix' && it.typ==='koord'){
+    const v=s.ant['v'+i]; if(v===undefined||v==='')return false;
+    const n=parseInt(v,10); if(isNaN(n))return false;
+    const erw=vzErwartet(it.q); // [vzX,vzY]
+    if(it.fehlt==='x') return (erw[0]==='+'? n>0 : n<0);
+    return (erw[1]==='+'? n>0 : n<0);
+  }
+  if(d.typ==='mix' && it.typ==='vz'){
+    const erw=vzErwartet(it.q);
+    return s.ant['x'+i]===erw[0] && s.ant['y'+i]===erw[1];
+  }
+  // typ 'quad'
+  return s.ant['q'+i]===quadrantVon(it.x,it.y);
+}
+function k2Vollstaendig(d,s){
+  return d.items.every((it,i)=>{
+    if(d.typ==='mix' && it.typ==='koord') return s.ant['v'+i]!==undefined && s.ant['v'+i]!=='';
+    if(d.typ==='mix' && it.typ==='vz')    return s.ant['x'+i] && s.ant['y'+i];
+    return s.ant['q'+i]!==undefined && s.ant['q'+i]!=='';
+  });
+}
+function pruefeK2(){
+  const d=K2[state.k2.stufe], s=s2();
+  if(s.gepr) return;
+  if(!k2Vollstaendig(d,s)){
+    const fb=document.getElementById('fb2');
+    fb.className='feedback zeig nok';
+    fb.textContent='❌ Bitte zuerst bei allen Punkten eine Auswahl treffen.';
+    return;
+  }
+  s.gepr=true;
+  s.erl = d.items.every((it,i)=>itemKorrekt(d,it,i,s));
+  ladeK2();pruefeFortschritt();
+}
+function leereK2(){const s=s2();s.gepr=false;s.ant={};ladeK2();}
+
+/* ---------- KARTE 3: Eintragen (Niveaustufen) ---------- */
+const K3=[
   {info:'Trage Punkte im 1. Quadranten ein.', pts:[{n:'A',x:3,y:2},{n:'B',x:1,y:4},{n:'C',x:5,y:3}]},
   {info:'Trage Punkte in allen Quadranten ein (auch negativ).', pts:[{n:'A',x:-2,y:3},{n:'B',x:-4,y:-2},{n:'C',x:2,y:-3}]},
   {info:'Auch Punkte auf den Achsen.', pts:[{n:'A',x:0,y:4},{n:'B',x:-3,y:0},{n:'C',x:-4,y:-4}]}
 ];
-function s2(){return state.k2.perStufe[state.k2.stufe];}
-function ladeK2(){
-  const d=K2[state.k2.stufe],s=s2(),p=d.pts[s.idx];
-  document.getElementById('k2info').textContent=d.info;
-  document.getElementById('k2teil').textContent='Aufgabe '+(s.idx+1)+' von 3';
-  document.getElementById('k2name').textContent=p.n+'('+p.x+'|'+p.y+')';
-  const svg=document.getElementById('svgK2');achsen(svg);
+function s2(){return state.k3.perStufe[state.k3.stufe];}
+function ladeK3(){
+  const d=K3[state.k3.stufe],s=s2(),p=d.pts[s.idx];
+  document.getElementById('k3info').textContent=d.info;
+  document.getElementById('k3teil').textContent='Aufgabe '+(s.idx+1)+' von 3';
+  document.getElementById('k3name').textContent=p.n+'('+p.x+'|'+p.y+')';
+  const svg=document.getElementById('svgK3');achsen(svg);
   if(s.gesetzt)kreuz(svg,s.gesetzt.x,s.gesetzt.y, s.gepr&&s.okFlag?'#1E8E3E':'#3A7CA5',p.n,9,-7);
-  const fb=document.getElementById('fb2');
-  document.getElementById('k2leeren').style.display='none';document.getElementById('k2next').style.display='none';
+  const fb=document.getElementById('fb3');
+  document.getElementById('k3leeren').style.display='none';document.getElementById('k3next').style.display='none';
   if(s.gepr){
     fb.className='feedback zeig '+(s.okFlag?'ok':'nok');
     fb.textContent=s.okFlag?('✅ Richtig gesetzt: '+p.n+'('+p.x+'|'+p.y+').'):('❌ Das war ('+s.gesetzt.x+'|'+s.gesetzt.y+'). Gesucht ist '+p.n+'('+p.x+'|'+p.y+'). Erst x, dann y.');
-    if(s.okFlag&&s.idx<d.pts.length-1)document.getElementById('k2next').style.display='inline-block';
-    if(!s.okFlag)document.getElementById('k2leeren').style.display='inline-block';
+    if(s.okFlag&&s.idx<d.pts.length-1)document.getElementById('k3next').style.display='inline-block';
+    if(!s.okFlag)document.getElementById('k3leeren').style.display='inline-block';
   } else fb.className='feedback';
 }
-document.getElementById('svgK2').addEventListener('pointerdown',function(evt){const s=s2();if(s.gepr)return;evt.preventDefault();s.gesetzt=svgKoord(this,evt);ladeK2();});
-function pruefeK2(){
-  const d=K2[state.k2.stufe],s=s2(),p=d.pts[s.idx];if(!s.gesetzt)return;
+document.getElementById('svgK3').addEventListener('pointerdown',function(evt){const s=s2();if(s.gepr)return;evt.preventDefault();s.gesetzt=svgKoord(this,evt);ladeK3();});
+function pruefeK3(){
+  const d=K3[state.k3.stufe],s=s2(),p=d.pts[s.idx];if(!s.gesetzt)return;
   s.gepr=true;s.okFlag=(s.gesetzt.x===p.x&&s.gesetzt.y===p.y);
   if(s.okFlag){if(!s.done.includes(s.idx))s.done.push(s.idx);if(s.done.length===d.pts.length)s.erl=true;}
-  ladeK2();pruefeFortschritt();
+  ladeK3();pruefeFortschritt();
 }
-function leereK2(){const s=s2();s.gepr=false;s.gesetzt=null;ladeK2();}
-function naechsteK2(){const s=s2();s.idx=Math.min(s.idx+1,K2[state.k2.stufe].pts.length-1);s.gepr=false;s.gesetzt=null;ladeK2();}
+function leereK3(){const s=s2();s.gepr=false;s.gesetzt=null;ladeK3();}
+function naechsteK3(){const s=s2();s.idx=Math.min(s.idx+1,K3[state.k3.stufe].pts.length-1);s.gepr=false;s.gesetzt=null;ladeK3();}
 
 /* ---------- KARTE 3: Figur erkennen ---------- */
-const K3=[
+const K4=[
   {pts:[[-3,-1],[2,-1],[2,2],[-3,2]], loes:'Rechteck', opt:['Quadrat','Rechteck','Parallelogramm','Trapez'],
    auchWahr:{'Parallelogramm':'Stimmt – ein Rechteck ist auch ein Parallelogramm. Aber es geht genauer: alle Winkel sind 90°.','Trapez':'Stimmt – es hat parallele Seiten. Aber es geht genauer: gegenüberliegende Seiten sind parallel und alle Winkel 90°.'}},
   {pts:[[-2,-2],[2,-2],[2,2],[-2,2]], loes:'Quadrat', opt:['Quadrat','Rechteck','Raute','Trapez'],
@@ -329,100 +523,100 @@ const K3=[
   {pts:[[-3,-2],[3,-2],[1,2],[-1,2]], loes:'Trapez', opt:['Trapez','Parallelogramm','Rechteck','Quadrat']},
   {pts:[[-3,-2],[3,-2],[0,3]], loes:'gleichschenkliges Dreieck', opt:['gleichschenkliges Dreieck','rechtwinkliges Dreieck','gleichseitiges Dreieck','Trapez'], dreieck:true}
 ];
-function zeichneK3(){
-  const f=K3[state.k3.idx],svg=document.getElementById('svgK3');achsen(svg);
+function zeichneK4(){
+  const f=K4[state.k4.idx],svg=document.getElementById('svgK4');achsen(svg);
   const poly=f.pts.map(p=>sx(p[0])+','+sy(p[1])).join(' ');
   E(svg,'polygon',{points:poly,fill:'rgba(58,124,165,0.15)',stroke:'#3A7CA5','stroke-width':2.5});
   const namen=['A','B','C','D'];
   f.pts.forEach((p,i)=>kreuz(svg,p[0],p[1],'#244e86',namen[i],8,-6));
 }
-function ladeK3(){
-  const f=K3[state.k3.idx];
-  document.getElementById('k3teil').textContent='Figur '+(state.k3.idx+1)+' von '+K3.length;
-  zeichneK3();
-  const wahl=document.getElementById('k3wahl');wahl.innerHTML='';
-  const istAuchWahr = state.k3.gepr && f.auchWahr && f.auchWahr[state.k3.sel] && state.k3.sel!==f.loes;
+function ladeK4(){
+  const f=K4[state.k4.idx];
+  document.getElementById('k4teil').textContent='Figur '+(state.k4.idx+1)+' von '+K4.length;
+  zeichneK4();
+  const wahl=document.getElementById('k4wahl');wahl.innerHTML='';
+  const istAuchWahr = state.k4.gepr && f.auchWahr && f.auchWahr[state.k4.sel] && state.k4.sel!==f.loes;
   f.opt.forEach(o=>{const b=document.createElement('button');b.textContent=o;b.dataset.o=o;
-    if(state.k3.gepr){
+    if(state.k4.gepr){
       if(o===f.loes)b.classList.add('richtig');
-      else if(o===state.k3.sel){ b.classList.add(istAuchWahr?'fast':'falsch'); }
+      else if(o===state.k4.sel){ b.classList.add(istAuchWahr?'fast':'falsch'); }
     }
-    else if(state.k3.sel===o)b.classList.add('gewaehlt');
-    b.addEventListener('click',()=>{if(state.k3.gepr)return;state.k3.sel=o;document.querySelectorAll('#k3wahl button').forEach(x=>x.classList.remove('gewaehlt'));b.classList.add('gewaehlt');});
+    else if(state.k4.sel===o)b.classList.add('gewaehlt');
+    b.addEventListener('click',()=>{if(state.k4.gepr)return;state.k4.sel=o;document.querySelectorAll('#k4wahl button').forEach(x=>x.classList.remove('gewaehlt'));b.classList.add('gewaehlt');});
     wahl.appendChild(b);});
-  const fb=document.getElementById('fb3');
-  document.getElementById('k3leeren').style.display='none';document.getElementById('k3next').style.display='none';
-  if(state.k3.gepr){
-    const ok=state.k3.sel===f.loes;
+  const fb=document.getElementById('fb4');
+  document.getElementById('k4leeren').style.display='none';document.getElementById('k4next').style.display='none';
+  if(state.k4.gepr){
+    const ok=state.k4.sel===f.loes;
     if(ok){
       fb.className='feedback zeig ok';
       fb.textContent='✅ Richtig, das ist ein '+f.loes+'.';
-      if(state.k3.idx<K3.length-1)document.getElementById('k3next').style.display='inline-block';
+      if(state.k4.idx<K4.length-1)document.getElementById('k4next').style.display='inline-block';
     } else if(istAuchWahr){
       fb.className='feedback zeig fast';
-      fb.innerHTML='🟡 Fast! '+f.auchWahr[state.k3.sel]+' Wähle die <b>genaueste</b> Bezeichnung und prüfe erneut.';
-      document.getElementById('k3leeren').style.display='inline-block';
+      fb.innerHTML='🟡 Fast! '+f.auchWahr[state.k4.sel]+' Wähle die <b>genaueste</b> Bezeichnung und prüfe erneut.';
+      document.getElementById('k4leeren').style.display='inline-block';
     } else {
       fb.className='feedback zeig nok';
       fb.textContent='❌ Das ist ein '+f.loes+'. Schau dir Seitenlängen und rechte Winkel genau an.';
-      document.getElementById('k3leeren').style.display='inline-block';
+      document.getElementById('k4leeren').style.display='inline-block';
     }
   } else fb.className='feedback';
 }
-function pruefeK3(){
-  const f=K3[state.k3.idx];if(state.k3.sel===null||state.k3.gepr)return;state.k3.gepr=true;
-  if(state.k3.sel===f.loes){if(!state.k3.done.includes(state.k3.idx))state.k3.done.push(state.k3.idx);if(state.k3.done.length===K3.length)state.k3.erl=true;}
-  ladeK3();pruefeFortschritt();
+function pruefeK4(){
+  const f=K4[state.k4.idx];if(state.k4.sel===null||state.k4.gepr)return;state.k4.gepr=true;
+  if(state.k4.sel===f.loes){if(!state.k4.done.includes(state.k4.idx))state.k4.done.push(state.k4.idx);if(state.k4.done.length===K4.length)state.k4.erl=true;}
+  ladeK4();pruefeFortschritt();
 }
-function leereK3(){state.k3.gepr=false;state.k3.sel=null;ladeK3();}
-function naechsteK3(){state.k3.idx=Math.min(state.k3.idx+1,K3.length-1);state.k3.gepr=false;state.k3.sel=null;ladeK3();}
+function leereK4(){state.k4.gepr=false;state.k4.sel=null;ladeK4();}
+function naechsteK4(){state.k4.idx=Math.min(state.k4.idx+1,K4.length-1);state.k4.gepr=false;state.k4.sel=null;ladeK4();}
 
 /* ---------- KARTE 4: Figur ergänzen ---------- */
-const K4=[
+const K5=[
   {frage:'Die Ecken A(−2|−2), B(2|−2) und C(2|2) sind gegeben. Setze D so, dass A→B→C→D ein Quadrat bilden.', geg:[[-2,-2],[2,-2],[2,2]], loes:[-2,2], namen:['A','B','C']},
   {frage:'Die Ecken A(−3|−1), B(3|−1) und C(3|2) sind gegeben. Setze D so, dass A→B→C→D ein Rechteck bilden.', geg:[[-3,-1],[3,-1],[3,2]], loes:[-3,2], namen:['A','B','C']},
   {frage:'Die Ecken A(−3|−2), B(1|−2) und C(3|1) sind gegeben. Setze D so, dass A→B→C→D ein Parallelogramm bilden.', geg:[[-3,-2],[1,-2],[3,1]], loes:[-1,1], namen:['A','B','C']}
 ];
-function zeichneK4(){
-  const f=K4[state.k4.idx],svg=document.getElementById('svgK4');achsen(svg);
+function zeichneK5(){
+  const f=K5[state.k5.idx],svg=document.getElementById('svgK5');achsen(svg);
   // vorhandene Kanten (A-B-C) durchgezogen
   for(let i=0;i<f.geg.length-1;i++)E(svg,'line',{x1:sx(f.geg[i][0]),y1:sy(f.geg[i][1]),x2:sx(f.geg[i+1][0]),y2:sy(f.geg[i+1][1]),stroke:'#3A7CA5','stroke-width':2.5});
   const A=f.geg[0], C=f.geg[2], D=f.loes;
-  if(state.k4.gesetzt){
-    const p=state.k4.gesetzt;
+  if(state.k5.gesetzt){
+    const p=state.k5.gesetzt;
     // gesetzten Punkt mit den offenen Enden A und C verbinden (Vorschau der geschlossenen Figur)
     E(svg,'line',{x1:sx(C[0]),y1:sy(C[1]),x2:sx(p.x),y2:sy(p.y),stroke:'#3A7CA5','stroke-width':2.5});
     E(svg,'line',{x1:sx(p.x),y1:sy(p.y),x2:sx(A[0]),y2:sy(A[1]),stroke:'#3A7CA5','stroke-width':2.5});
   }
   f.geg.forEach((p,i)=>kreuz(svg,p[0],p[1],'#244e86',f.namen[i],8,-6));
-  if(state.k4.gesetzt){const ok=state.k4.gepr&&state.k4.okFlag;kreuz(svg,state.k4.gesetzt.x,state.k4.gesetzt.y,ok?'#1E8E3E':'#D32F2F','D',8,-6);}
+  if(state.k5.gesetzt){const ok=state.k5.gepr&&state.k5.okFlag;kreuz(svg,state.k5.gesetzt.x,state.k5.gesetzt.y,ok?'#1E8E3E':'#D32F2F','D',8,-6);}
 }
-function ladeK4(){
-  const f=K4[state.k4.idx];
-  document.getElementById('k4teil').textContent='Aufgabe '+(state.k4.idx+1)+' von 3';
-  document.getElementById('k4frage').textContent=f.frage;
-  zeichneK4();
-  const fb=document.getElementById('fb4');
-  document.getElementById('k4leeren').style.display='none';document.getElementById('k4next').style.display='none';
-  if(state.k4.gepr){
-    fb.className='feedback zeig '+(state.k4.okFlag?'ok':'nok');
-    fb.textContent=state.k4.okFlag?('✅ Richtig! D('+f.loes[0]+'|'+f.loes[1]+') vollendet die Figur.'):('❌ Noch nicht. Der vierte Punkt ist D('+f.loes[0]+'|'+f.loes[1]+'). Achte auf parallele, gleich lange Seiten.');
-    if(state.k4.okFlag&&state.k4.idx<K4.length-1)document.getElementById('k4next').style.display='inline-block';
-    if(!state.k4.okFlag)document.getElementById('k4leeren').style.display='inline-block';
+function ladeK5(){
+  const f=K5[state.k5.idx];
+  document.getElementById('k5teil').textContent='Aufgabe '+(state.k5.idx+1)+' von 3';
+  document.getElementById('k5frage').textContent=f.frage;
+  zeichneK5();
+  const fb=document.getElementById('fb5');
+  document.getElementById('k5leeren').style.display='none';document.getElementById('k5next').style.display='none';
+  if(state.k5.gepr){
+    fb.className='feedback zeig '+(state.k5.okFlag?'ok':'nok');
+    fb.textContent=state.k5.okFlag?('✅ Richtig! D('+f.loes[0]+'|'+f.loes[1]+') vollendet die Figur.'):('❌ Noch nicht. Der vierte Punkt ist D('+f.loes[0]+'|'+f.loes[1]+'). Achte auf parallele, gleich lange Seiten.');
+    if(state.k5.okFlag&&state.k5.idx<K5.length-1)document.getElementById('k5next').style.display='inline-block';
+    if(!state.k5.okFlag)document.getElementById('k5leeren').style.display='inline-block';
   } else fb.className='feedback';
 }
-document.getElementById('svgK4').addEventListener('pointerdown',function(evt){if(state.k4.gepr)return;evt.preventDefault();state.k4.gesetzt=svgKoord(this,evt);ladeK4();});
-function pruefeK4(){
-  const f=K4[state.k4.idx];if(!state.k4.gesetzt)return;state.k4.gepr=true;
-  state.k4.okFlag=(state.k4.gesetzt.x===f.loes[0]&&state.k4.gesetzt.y===f.loes[1]);
-  if(state.k4.okFlag){if(!state.k4.done.includes(state.k4.idx))state.k4.done.push(state.k4.idx);if(state.k4.done.length===K4.length)state.k4.erl=true;}
-  ladeK4();pruefeFortschritt();
+document.getElementById('svgK5').addEventListener('pointerdown',function(evt){if(state.k5.gepr)return;evt.preventDefault();state.k5.gesetzt=svgKoord(this,evt);ladeK5();});
+function pruefeK5(){
+  const f=K5[state.k5.idx];if(!state.k5.gesetzt)return;state.k5.gepr=true;
+  state.k5.okFlag=(state.k5.gesetzt.x===f.loes[0]&&state.k5.gesetzt.y===f.loes[1]);
+  if(state.k5.okFlag){if(!state.k5.done.includes(state.k5.idx))state.k5.done.push(state.k5.idx);if(state.k5.done.length===K5.length)state.k5.erl=true;}
+  ladeK5();pruefeFortschritt();
 }
-function leereK4(){state.k4.gepr=false;state.k4.gesetzt=null;ladeK4();}
-function naechsteK4(){state.k4.idx=Math.min(state.k4.idx+1,K4.length-1);state.k4.gepr=false;state.k4.gesetzt=null;ladeK4();}
+function leereK5(){state.k5.gepr=false;state.k5.gesetzt=null;ladeK5();}
+function naechsteK5(){state.k5.idx=Math.min(state.k5.idx+1,K5.length-1);state.k5.gepr=false;state.k5.gesetzt=null;ladeK5();}
 
 /* ---------- KARTE 5: Wiederholung Grundbegriffe ---------- */
-const K5=[
+const K6=[
   {info:'Grundbegriffe: Linien und Punkte.', aufg:[
     {f:'Wie nennt man eine gerade Linie, die an beiden Enden unbegrenzt weitergeht?',o:['Gerade','Strecke','Strahl'],l:'Gerade'},
     {f:'Wie heißt die Verbindung zwischen zwei Punkten mit festem Anfang und Ende?',o:['Strecke','Gerade','Strahl'],l:'Strecke'},
@@ -439,35 +633,35 @@ const K5=[
     {f:'Ein Viereck, bei dem nur ein Paar gegenüberliegender Seiten parallel ist, heißt …',o:['Trapez','Parallelogramm','Raute'],l:'Trapez'}
   ]}
 ];
-function s5(){return state.k5.perStufe[state.k5.stufe];}
-function ladeK5(){
-  const d=K5[state.k5.stufe],s=s5(),a=d.aufg[s.idx];
-  document.getElementById('k5info').textContent=d.info;
-  document.getElementById('k5teil').textContent='Aufgabe '+(s.idx+1)+' von 3';
-  document.getElementById('k5frage').textContent=a.f;
-  const wahl=document.getElementById('k5wahl');wahl.innerHTML='';
+function s5(){return state.k6.perStufe[state.k6.stufe];}
+function ladeK6(){
+  const d=K6[state.k6.stufe],s=s5(),a=d.aufg[s.idx];
+  document.getElementById('k6info').textContent=d.info;
+  document.getElementById('k6teil').textContent='Aufgabe '+(s.idx+1)+' von 3';
+  document.getElementById('k6frage').textContent=a.f;
+  const wahl=document.getElementById('k6wahl');wahl.innerHTML='';
   a.o.forEach(o=>{const b=document.createElement('button');b.textContent=o;b.dataset.o=o;
     if(s.gepr){if(o===a.l)b.classList.add('richtig');else if(o===s.sel)b.classList.add('falsch');}
     else if(s.sel===o)b.classList.add('gewaehlt');
-    b.addEventListener('click',()=>{if(s.gepr)return;s.sel=o;document.querySelectorAll('#k5wahl button').forEach(x=>x.classList.remove('gewaehlt'));b.classList.add('gewaehlt');});
+    b.addEventListener('click',()=>{if(s.gepr)return;s.sel=o;document.querySelectorAll('#k6wahl button').forEach(x=>x.classList.remove('gewaehlt'));b.classList.add('gewaehlt');});
     wahl.appendChild(b);});
-  const fb=document.getElementById('fb5');
-  document.getElementById('k5leeren').style.display='none';document.getElementById('k5next').style.display='none';
+  const fb=document.getElementById('fb6');
+  document.getElementById('k6leeren').style.display='none';document.getElementById('k6next').style.display='none';
   if(s.gepr){
     const ok=s.sel===a.l;
     fb.className='feedback zeig '+(ok?'ok':'nok');
     fb.textContent=ok?'✅ Richtig!':('❌ Richtig ist: '+a.l+'.');
-    if(ok&&s.idx<d.aufg.length-1)document.getElementById('k5next').style.display='inline-block';
-    if(!ok)document.getElementById('k5leeren').style.display='inline-block';
+    if(ok&&s.idx<d.aufg.length-1)document.getElementById('k6next').style.display='inline-block';
+    if(!ok)document.getElementById('k6leeren').style.display='inline-block';
   } else fb.className='feedback';
 }
-function pruefeK5(){
-  const d=K5[state.k5.stufe],s=s5(),a=d.aufg[s.idx];if(s.sel===null||s.gepr)return;s.gepr=true;
+function pruefeK6(){
+  const d=K6[state.k6.stufe],s=s5(),a=d.aufg[s.idx];if(s.sel===null||s.gepr)return;s.gepr=true;
   if(s.sel===a.l){if(!s.done.includes(s.idx))s.done.push(s.idx);if(s.done.length===d.aufg.length)s.erl=true;}
-  ladeK5();pruefeFortschritt();
+  ladeK6();pruefeFortschritt();
 }
-function leereK5(){const s=s5();s.gepr=false;s.sel=null;ladeK5();}
-function naechsteK5(){const s=s5();s.idx=Math.min(s.idx+1,K5[state.k5.stufe].aufg.length-1);s.gepr=false;s.sel=null;ladeK5();}
+function leereK6(){const s=s5();s.gepr=false;s.sel=null;ladeK6();}
+function naechsteK6(){const s=s5();s.idx=Math.min(s.idx+1,K6[state.k6.stufe].aufg.length-1);s.gepr=false;s.sel=null;ladeK6();}
 
 /* ---------- Niveaustufen, Tabs, Fortschritt ---------- */
 document.querySelectorAll('[data-stufen]').forEach(box=>{
@@ -475,16 +669,16 @@ document.querySelectorAll('[data-stufen]').forEach(box=>{
   box.querySelectorAll('.stufe-btn').forEach(btn=>btn.addEventListener('click',()=>{
     box.querySelectorAll('.stufe-btn').forEach(b=>b.classList.remove('aktiv'));btn.classList.add('aktiv');
     state[karte].stufe=parseInt(btn.dataset.stufe,10);
-    if(karte==='k1')ladeK1();if(karte==='k2')ladeK2();if(karte==='k5')ladeK5();
+    if(karte==='k1')ladeK1();if(karte==='k2')ladeK2();if(karte==='k3')ladeK3();if(karte==='k6')ladeK6();
   }));
 });
 document.querySelectorAll('.tab').forEach(tab=>tab.addEventListener('click',()=>{
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('aktiv'));document.querySelectorAll('.karte').forEach(k=>k.classList.remove('aktiv'));
   tab.classList.add('aktiv');document.getElementById(tab.dataset.ziel).classList.add('aktiv');
-  if(tab.dataset.ziel==='k6')baueAuswertung();
+  if(tab.dataset.ziel==='k7')baueAuswertung();
 }));
 function karteErl(k){
-  if(k==='k3')return state.k3.erl;if(k==='k4')return state.k4.erl;
+  if(k==='k4')return state.k4.erl;if(k==='k5')return state.k5.erl;
   return state[k].perStufe.some(s=>s.erl);
 }
 function pruefeFortschritt(){
@@ -493,23 +687,24 @@ function pruefeFortschritt(){
   document.getElementById('d3').textContent=karteErl('k3')?'✅':'';
   document.getElementById('d4').textContent=karteErl('k4')?'✅':'';
   document.getElementById('d5').textContent=karteErl('k5')?'✅':'';
-  const fertig=karteErl('k1')&&karteErl('k2')&&karteErl('k3')&&karteErl('k4')&&karteErl('k5');
-  if(fertig)document.getElementById('d6').textContent='✅';
+  document.getElementById('d6').textContent=karteErl('k6')?'✅':'';
+  const fertig=karteErl('k1')&&karteErl('k2')&&karteErl('k3')&&karteErl('k4')&&karteErl('k5')&&karteErl('k6');
+  document.getElementById('d7').textContent=fertig?'✅':'';
   document.getElementById('weiter').classList.toggle('zeig',fertig);
 }
 function baueAuswertung(){
   const wrap=document.getElementById('auswertung');wrap.innerHTML='';
-  const zeilen=[['Punkte ablesen',karteErl('k1')],['Punkte eintragen',karteErl('k2')],['Figur erkennen',karteErl('k3')],['Figur ergänzen',karteErl('k4')],['Wiederholung Grundbegriffe',karteErl('k5')]];
+  const zeilen=[['Punkte ablesen',karteErl('k1')],['Quadranten zuordnen',karteErl('k2')],['Punkte eintragen',karteErl('k3')],['Figur erkennen',karteErl('k4')],['Figur ergänzen',karteErl('k5')],['Wiederholung Grundbegriffe',karteErl('k6')]];
   let n=0;zeilen.forEach(([t,ok])=>{if(ok)n++;const div=document.createElement('div');div.className='auswertung-zeile';div.innerHTML='<span>'+t+'</span><span>'+(ok?'✅ erledigt':'⬜ offen')+'</span>';wrap.appendChild(div);});
-  document.getElementById('gesamtPunkte').textContent=n+' von 5 Karten erledigt';
+  document.getElementById('gesamtPunkte').textContent=n+' von 6 Karten erledigt';
   const txt=document.getElementById('auswertText');
-  if(n===5)txt.innerHTML='<b>Klasse!</b> Du kannst Punkte ablesen und eintragen, besondere Figuren erkennen und ergänzen und kennst die geometrischen Grundbegriffe.';
-  else txt.innerHTML='Es sind noch <b>'+(5-n)+'</b> Karte(n) offen. Pro Karte reicht eine vollständig gelöste Niveaustufe.';
+  if(n===6)txt.innerHTML='<b>Klasse!</b> Du kannst Punkte ablesen und eintragen, Quadranten bestimmen, besondere Figuren erkennen und ergänzen und kennst die geometrischen Grundbegriffe.';
+  else txt.innerHTML='Es sind noch <b>'+(6-n)+'</b> Karte(n) offen. Pro Karte reicht eine vollständig gelöste Niveaustufe.';
 }
 const trex=document.getElementById('trex');trex.addEventListener('click',()=>{trex.classList.add('zeig');setTimeout(()=>trex.classList.remove('zeig'),1800);});
 
 /* Init */
-ladeK1();ladeK2();ladeK3();ladeK4();ladeK5();pruefeFortschritt();
+ladeK1();ladeK2();ladeK3();ladeK4();ladeK5();ladeK6();pruefeFortschritt();
 </script>
 </body>
 </html>
