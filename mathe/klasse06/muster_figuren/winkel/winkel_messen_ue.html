@@ -206,7 +206,7 @@
       <div class="kswrap"><svg id="svgHeft" width="300" height="300" viewBox="0 0 300 300"></svg></div>
       <div class="hinweis">
         <b>Lösung:</b> Die gemessenen Innenwinkel sind ungefähr<br>
-        bei A ≈ 35°, bei B ≈ 35°, bei C ≈ 110°.<br>
+        bei A ≈ 59°, bei B ≈ 51°, bei C ≈ 70°.<br>
         <b>Summe ≈ 180°.</b> Das ist kein Zufall: Die Innenwinkelsumme im Dreieck beträgt <b>immer 180°</b>.
         <span style="font-size:.9rem;color:#5a6b78;">(Kleine Abweichungen beim Messen sind normal.)</span>
       </div>
@@ -533,15 +533,60 @@ function zeichneHeft(){
   E(svg,'line',{x1:hx(0),y1:hy(HMIN),x2:hx(0),y2:hy(HMAX)-6,stroke:'#33414f','stroke-width':2,'marker-end':'url(#pf)'});
   E(svg,'text',{x:hx(HMAX)+2,y:hy(0)+16,'font-size':12,'font-style':'italic',fill:'#33414f'}).textContent='x';
   E(svg,'text',{x:hx(0)+6,y:hy(HMAX)-4,'font-size':12,'font-style':'italic',fill:'#33414f'}).textContent='y';
+  // Achsen-Bezifferung (Einheiten an den Achsen)
+  for(let i=HMIN;i<=HMAX;i++){
+    if(i===0)continue;
+    E(svg,'line',{x1:hx(i),y1:hy(0)-3,x2:hx(i),y2:hy(0)+3,stroke:'#33414f','stroke-width':1.5});
+    E(svg,'line',{x1:hx(0)-3,y1:hy(i),x2:hx(0)+3,y2:hy(i),stroke:'#33414f','stroke-width':1.5});
+    if(i%2!==0)continue; // nur jede 2. Zahl beschriften (Übersicht)
+    const tx=E(svg,'text',{x:hx(i),y:hy(0)+15,'font-size':10,fill:'#5a6b78','text-anchor':'middle'});tx.textContent=i;
+    const ty=E(svg,'text',{x:hx(0)-8,y:hy(i)+4,'font-size':10,fill:'#5a6b78','text-anchor':'end'});ty.textContent=i;
+  }
+  E(svg,'text',{x:hx(0)-8,y:hy(0)+15,'font-size':10,fill:'#5a6b78','text-anchor':'end'}).textContent='0';
   const P={A:{x:-3,y:-2},B:{x:4,y:-2},C:{x:0,y:3}};
   // Dreieck
   E(svg,'polygon',{points:`${hx(P.A.x)},${hy(P.A.y)} ${hx(P.B.x)},${hy(P.B.y)} ${hx(P.C.x)},${hy(P.C.y)}`,fill:'rgba(58,124,165,0.15)',stroke:'#3A7CA5','stroke-width':2.5});
-  // Eckpunkte als × + Beschriftung + Winkel
-  const winkel={A:'≈35°',B:'≈35°',C:'≈110°'};
+  // Innenwinkel aus den Punkten berechnen (Pixelkoordinaten, da hy() die y-Achse spiegelt)
+  function winkelGrad(P0,P1,P2){
+    const v1={x:hx(P1.x)-hx(P0.x),y:hy(P1.y)-hy(P0.y)};
+    const v2={x:hx(P2.x)-hx(P0.x),y:hy(P2.y)-hy(P0.y)};
+    const d=v1.x*v2.x+v1.y*v2.y;
+    const m=Math.hypot(v1.x,v1.y)*Math.hypot(v2.x,v2.y);
+    return Math.acos(Math.max(-1,Math.min(1,d/m)))*180/Math.PI;
+  }
+  // Winkelbogen (Winkelzeichen) an einer Ecke zeichnen
+  function bogen(P0,P1,P2){
+    const c={x:hx(P0.x),y:hy(P0.y)};
+    let a1=Math.atan2(hy(P1.y)-c.y,hx(P1.x)-c.x);
+    let a2=Math.atan2(hy(P2.y)-c.y,hx(P2.x)-c.x);
+    // kleineren (inneren) Winkel wählen
+    let diff=a2-a1;
+    while(diff<=-Math.PI)diff+=2*Math.PI;
+    while(diff>Math.PI)diff-=2*Math.PI;
+    const r=20, end=a1+diff;
+    const sweep=diff>0?1:0;
+    const x1=c.x+Math.cos(a1)*r, y1=c.y+Math.sin(a1)*r;
+    const x2=c.x+Math.cos(end)*r, y2=c.y+Math.sin(end)*r;
+    E(svg,'path',{d:`M ${x1} ${y1} A ${r} ${r} 0 0 ${sweep} ${x2} ${y2}`,fill:'none',stroke:'#C9721A','stroke-width':2.2});
+    return a1+diff/2; // Mittelwinkel für die Beschriftungsposition
+  }
+  const winkel={
+    A:Math.round(winkelGrad(P.A,P.B,P.C)),
+    B:Math.round(winkelGrad(P.B,P.A,P.C)),
+    C:Math.round(winkelGrad(P.C,P.A,P.B))
+  };
+  const nachbarn={A:['B','C'],B:['A','C'],C:['A','B']};
+  // Eckpunkte als × + Winkelbogen + Beschriftung
   for(const k in P){const p=P[k];
+    const mitte=bogen(p,P[nachbarn[k][0]],P[nachbarn[k][1]]);
     E(svg,'line',{x1:hx(p.x)-6,y1:hy(p.y)-6,x2:hx(p.x)+6,y2:hy(p.y)+6,stroke:'#C9721A','stroke-width':2.5});
     E(svg,'line',{x1:hx(p.x)-6,y1:hy(p.y)+6,x2:hx(p.x)+6,y2:hy(p.y)-6,stroke:'#C9721A','stroke-width':2.5});
-    const t=E(svg,'text',{x:hx(p.x)+8,y:hy(p.y)-8,'font-size':13,'font-weight':'bold',fill:'#C9721A'});t.textContent=k+' '+winkel[k];
+    // Gradzahl in den Winkel hinein (entlang der Winkelhalbierenden)
+    const lx=hx(p.x)+Math.cos(mitte)*34, ly=hy(p.y)+Math.sin(mitte)*34;
+    const tg=E(svg,'text',{x:lx,y:ly+4,'font-size':12,'font-weight':'bold',fill:'#C9721A','text-anchor':'middle'});tg.textContent='≈'+winkel[k]+'°';
+    // Eckname etwas abgesetzt nach außen
+    const nx=hx(p.x)-Math.cos(mitte)*16, ny=hy(p.y)-Math.sin(mitte)*16;
+    const tn=E(svg,'text',{x:nx,y:ny+4,'font-size':13,'font-weight':'bold',fill:'#2C5F80','text-anchor':'middle'});tn.textContent=k;
   }
 }
 function zeigeLoesung(){
