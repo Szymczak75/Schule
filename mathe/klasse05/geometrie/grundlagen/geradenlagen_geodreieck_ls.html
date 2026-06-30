@@ -107,22 +107,19 @@ header.page-head .sub{font-weight:700;opacity:.95;font-size:1.02rem;}
 
 /* Geodreieck-Werkstatt */
 .werkstatt{display:flex;flex-direction:column;align-items:center;gap:14px;margin-top:10px;}
-#geoStage{width:100%;max-width:520px;touch-action:none;border-radius:16px;
+#geoStage{width:100%;max-width:520px;touch-action:none;overscroll-behavior:contain;border-radius:16px;
   background:repeating-linear-gradient(0deg,#f4f8fd,#f4f8fd 27px,#e7eef7 28px),
             repeating-linear-gradient(90deg,transparent,transparent 27px,#e7eef7 28px);
   border:2px solid #cdd8e6;display:block;cursor:grab;
   -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;}
 #geoStage:active{cursor:grabbing;}
 #geoStage text{-webkit-user-select:none;user-select:none;pointer-events:none;}
-#geoTri{pointer-events:none;}
-#geoTri .geoGrip{pointer-events:auto;}
+#geoTri{pointer-events:none;will-change:transform;}
 .controls{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;align-items:center;width:100%;}
 .ctrl-group{display:flex;flex-direction:column;align-items:center;gap:6px;flex:1 1 200px;min-width:180px;}
 .ctrl-group label{font-weight:800;font-size:.95rem;}
 .ctrl-rot{flex:1 1 100%;background:#eef4fb;border:2px solid #cdd8e6;border-radius:14px;padding:10px 12px;}
 .ctrl-rot label{font-size:1.05rem;color:#2f5fa6;}
-.geoGrip{cursor:grab;}
-.geoGrip:active{cursor:grabbing;}
 .rot-presets{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;}
 .rot-set{min-height:44px;padding:6px 14px;font-size:.98rem;}
 .example-nav{display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;width:100%;}
@@ -313,7 +310,7 @@ input.txt:focus{outline:none;border-color:var(--blau);}
   <!-- KARTE 2: Werkstatt mit Geodreieck -->
   <section class="card" id="c2">
     <h2>2 · Die Geodreieck-Werkstatt</h2>
-    <p>Wähle ein Beispiel. <b>Drehe</b> das Geodreieck am orangen Griff und <b>verschiebe</b> es mit dem Finger.
+    <p>Wähle ein Beispiel. Ziehe <b>innerhalb</b> der Gradskala, um das Geodreieck zu <b>verschieben</b>, und <b>außerhalb</b> der Skala, um es zu <b>drehen</b>.
        Lege es an die Geraden an und untersuche, wie sie zueinander liegen. Erst dann die Lösung aufdecken!</p>
 
     <div class="legende">
@@ -330,12 +327,12 @@ input.txt:focus{outline:none;border-color:var(--blau);}
 
       <svg id="geoStage" viewBox="0 0 400 400" aria-label="Zeichenfläche mit zwei Geraden und Geodreieck"></svg>
       <p style="font-size:.92rem;color:#5a6b7d;margin:2px 0 0;text-align:center;">
-        👆 Auf der Fläche ziehen = <b>verschieben</b> · am <b style="color:#e8862e">orangen Griff</b> ziehen = <b>drehen</b>.
+        👆 <b>Innerhalb</b> der Gradskala ziehen = <b>verschieben</b> · <b>außerhalb</b> ziehen = <b>drehen</b>.
       </p>
 
       <div class="controls">
         <div class="ctrl-group ctrl-rot">
-          <label>🔄 Drehung: <span id="rotVal">0°</span> <span style="font-weight:600;color:#5a6b7d;font-size:.85em;">(am orangen Griff ziehen oder Winkel tippen)</span></label>
+          <label>🔄 Drehung: <span id="rotVal">0°</span> <span style="font-weight:600;color:#5a6b7d;font-size:.85em;">(außerhalb der Skala ziehen oder Winkel tippen)</span></label>
           <div class="rot-presets">
             <button class="btn btn-grau rot-set" data-deg="0">0°</button>
             <button class="btn btn-grau rot-set" data-deg="45">45°</button>
@@ -353,8 +350,8 @@ input.txt:focus{outline:none;border-color:var(--blau);}
     <details class="tipps" style="margin-top:16px;">
       <summary>Tipp: Ich bin mir unsicher, wie ich anlegen soll</summary>
       <div class="tinhalt">
-        Drehe das Geodreieck mit dem <b>Regler</b> so, dass seine <b>Mittellinie</b> oder die langen <b>Parallellinien</b>
-        genau auf Gerade&nbsp;1 liegen. Schiebe es dann mit dem Finger Richtung Gerade&nbsp;2. Achte darauf, ob die
+        Drehe das Geodreieck, indem du <b>außerhalb der Gradskala</b> ziehst (oder einen Preset-Winkel antippst), so dass seine <b>Mittellinie</b> oder die langen <b>Parallellinien</b>
+        genau auf Gerade&nbsp;1 liegen. Schiebe es dann mit dem Finger <b>innerhalb der Gradskala</b> Richtung Gerade&nbsp;2. Achte darauf, ob die
         Linien weiterhin passen (→ parallel) oder ob die <b>kurze, rechtwinklige Seite</b> auf Gerade&nbsp;2 zeigt (→ senkrecht).
       </div>
     </details>
@@ -550,26 +547,27 @@ function buildGeo(){
   t90.textContent='90°';
   g.appendChild(t90);
 
-  // --- Dreh-Griff (orange) – anfassen und im Kreis ziehen ---
-  const gy=-H-2;
-  g.appendChild(el('line',{x1:0,y1:-H+8,x2:0,y2:gy,stroke:'#e8862e','stroke-width':3}));
-  g.appendChild(el('circle',{cx:0,cy:gy,r:26,fill:'transparent',class:'geoGrip'})); // großer Trefferbereich
-  g.appendChild(el('circle',{cx:0,cy:gy,r:16,fill:'#e8862e',stroke:'#fff','stroke-width':3,class:'geoGrip'}));
-  g.appendChild(el('path',{d:`M -6,${gy} A 6 6 0 1 1 6,${gy}`,fill:'none',stroke:'#fff','stroke-width':2}));
-  g.appendChild(el('path',{d:`M 6,${gy-4} L 6,${gy+3} L 11,${gy}`,fill:'#fff'}));
-
   return g;
 }
 
-/* Drehen: per Griff ziehen ODER Presets (kein Slider mehr) */
+/* Drehen: per Ziehen außerhalb der Gradskala ODER Presets (kein Slider mehr) */
 const rotVal=document.getElementById('rotVal');
+// rAF-gedrosseltes Rendern: bei schnellen Fingerbewegungen wird pro Frame
+// nur EINMAL ins DOM geschrieben → kein Ruckeln am iPad.
+let rafPending=false;
+function scheduleTransform(){
+  if(rafPending)return;
+  rafPending=true;
+  requestAnimationFrame(()=>{rafPending=false;updateGeoTransform();});
+}
 function setRot(deg){
   deg=((Math.round(deg)%360)+360)%360;     // voller Kreis 0..359
-  geo.rot=deg;rotVal.textContent=deg+'°';updateGeoTransform();
+  geo.rot=deg;rotVal.textContent=deg+'°';scheduleTransform();
 }
 document.querySelectorAll('.rot-set').forEach(b=>b.addEventListener('click',()=>setRot(+b.dataset.deg)));
 
-/* Finger-Interaktion: Griff => drehen (Winkel-Delta), Fläche => verschieben */
+/* Finger-Interaktion: innerhalb der Gradskala (Radius Rs um den Nullpunkt) => verschieben,
+   außerhalb => drehen um den Nullpunkt. Rs = W*0.66 mit W=180 (wie in buildGeo). */
 let mode=null, activePointer=null, dragStart=null, rotStart=null;
 function svgPoint(evt){
   const r=stage.getBoundingClientRect();
@@ -581,10 +579,12 @@ function startDrag(e){
   activePointer=e.pointerId;
   try{stage.setPointerCapture(e.pointerId);}catch(_){}
   const p=svgPoint(e);
-  if(e.target&&e.target.classList&&e.target.classList.contains('geoGrip')){
-    mode='rotate'; rotStart={pw:winkelZuMitte(p),r0:geo.rot};
-  }else{
+  const Rs=180*0.66;
+  const distMitte=Math.hypot(p.x-geo.x, p.y-geo.y);
+  if(distMitte<=Rs){
     mode='move'; dragStart={px:p.x,py:p.y,gx:geo.x,gy:geo.y};
+  }else{
+    mode='rotate'; rotStart={pw:winkelZuMitte(p),r0:geo.rot};
   }
   e.preventDefault();
 }
@@ -596,7 +596,7 @@ function moveDrag(e){
   }else{
     geo.x=Math.max(-60,Math.min(460,dragStart.gx+(p.x-dragStart.px)));
     geo.y=Math.max(-60,Math.min(460,dragStart.gy+(p.y-dragStart.py)));
-    updateGeoTransform();
+    scheduleTransform();
   }
   e.preventDefault();
 }
@@ -612,6 +612,8 @@ stage.addEventListener('pointerdown',startDrag);
 stage.addEventListener('pointermove',moveDrag);
 stage.addEventListener('pointerup',endDrag);
 stage.addEventListener('pointercancel',endDrag);
+// ---- Scroll-Sperre während der Interaktion (stabil & sprungfrei gegen iPad-Scrollen) ----
+stage.addEventListener('touchmove', ev=>{ if(mode!==null) ev.preventDefault(); }, {passive:false});
 
 /* Beispiel wechseln */
 function ladeBeispiel(i){
