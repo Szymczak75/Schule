@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Winkel an sich schneidenden Geraden</title>
+<meta name="description" content="Interaktive Erarbeitung zu Scheitel- und Nebenwinkeln beim Schneiden zweier Geraden, mit interaktivem Geodreieck zum Messen und Entdecken.">
+<meta name="keywords" content="Winkel, Scheitelwinkel, Nebenwinkel, Geraden, Schnittpunkt, Geometrie, Klasse 7">
+<meta name="typ" content="Lernseite">
+<meta name="klasse" content="7">
+<meta name="fach" content="mathe">
+<meta name="oberthema" content="Geometrie">
+<meta name="thema" content="Winkel an sich schneidenden Geraden">
+<script>
+  MathJax = {
+    tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+    svg: { fontCache: 'global' }
+  };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+  :root{
+    --orange:#c9762f; --orange-dark:#a85f22; --orange-light:#f5e3ce;
+    --ink:#243447; --muted:#5a6b7d; --line:#dfe6ee;
+    --green:#1e7d32; --green-bg:#d9f2dd;
+    --red:#c62828; --red-bg:#fbdede;
+    --blue:#2f5fa6;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{font-family:'Segoe UI',system-ui,sans-serif;background:#fbf9f5;color:var(--ink);
+       font-size:16px;line-height:1.55;padding-bottom:100px;}
+  .wrap{max-width:760px;margin:0 auto;padding:0 16px;}
+  header{background:linear-gradient(135deg,var(--orange),var(--orange-dark));color:#fff;
+         padding:22px 18px 18px;border-radius:0 0 20px 20px;}
+  header h1{margin:0 0 6px;font-size:1.35rem;}
+  header p{margin:0;opacity:.95;font-size:.95rem;}
+
+  nav.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:16px 0;padding:6px;background:#fff;
+           border-radius:14px;border:2px solid var(--line);position:sticky;top:8px;z-index:5;}
+  nav.tabs button{flex:1 1 auto;min-height:44px;border:none;background:transparent;color:var(--muted);
+                   font-weight:700;border-radius:10px;padding:8px 6px;font-size:.82rem;cursor:pointer;}
+  nav.tabs button.active{background:var(--orange-light);color:var(--orange-dark);}
+
+  .card{display:none;background:#fff;border:2px solid var(--line);border-radius:16px;
+        padding:18px 16px;margin-bottom:18px;}
+  .card.active{display:block;}
+  .card h2{margin:0 0 10px;color:var(--orange-dark);font-size:1.15rem;}
+  .card h3{color:var(--blue);font-size:1rem;margin:1.4em 0 .5em;}
+
+  .merksatz{background:var(--orange-light);border:2px solid #e8c397;border-radius:12px;
+            padding:12px 14px;margin:12px 0;}
+  .merksatz b{color:var(--orange-dark);}
+
+  .example-row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:12px 0;}
+  .example-row .btn.active{background:var(--blue);color:#fff;}
+
+  .heftbox{background:#fdf6e3;border:2px dashed #d8b35a;border-radius:12px;
+           padding:12px 14px;margin:16px 0 4px;}
+  .heftbox b{color:#8a6a1f;}
+
+  .winkel-svg{width:100%;max-width:400px;display:block;margin:10px auto;background:#f6f8fb;
+              border:2px solid var(--line);border-radius:14px;}
+
+  .tip{text-decoration:underline dotted;text-decoration-color:var(--blue);cursor:pointer;color:var(--blue);
+       font-weight:600;position:relative;}
+  .tip-bubble{display:none;position:absolute;left:0;top:100%;background:var(--ink);color:#fff;
+              padding:8px 10px;border-radius:8px;font-size:.82rem;font-weight:400;width:230px;
+              z-index:20;line-height:1.4;box-shadow:0 4px 12px rgba(0,0,0,.2);}
+  .tip.open .tip-bubble{display:block;}
+
+  .frage{margin:14px 0;padding:12px;background:#f8f9fb;border-radius:12px;border:2px solid var(--line);}
+  .frage p{margin:0 0 8px;font-weight:600;}
+  .wf-row{display:flex;gap:10px;flex-wrap:wrap;}
+  .wf-btn{min-height:44px;min-width:100px;padding:8px 16px;border:2px solid var(--line);
+          background:#fff;border-radius:11px;font-weight:700;cursor:pointer;color:var(--ink);}
+  .wf-btn.selected{border-color:var(--blue);background:#e8f0fb;}
+  .wf-btn:disabled{cursor:default;}
+  .fb-correct{background:var(--green-bg)!important;border-color:var(--green)!important;color:var(--green)!important;}
+  .fb-wrong{background:var(--red-bg)!important;border-color:var(--red)!important;color:var(--red)!important;}
+  .fb-note{margin-top:8px;font-weight:700;font-size:.92rem;}
+  .fb-note.ok{color:var(--green);}
+  .fb-note.bad{color:var(--red);}
+
+  .inputrow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:10px 0;}
+  input[type=text]{min-height:44px;width:110px;font-size:1rem;padding:6px 10px;border:2px solid var(--line);
+                    border-radius:10px;background:#fff;color:var(--ink);}
+  input[type=text].fb-correct{border-color:var(--green);background:var(--green-bg);}
+  input[type=text].fb-wrong{border-color:var(--red);background:var(--red-bg);}
+  .unit{font-weight:700;color:var(--muted);}
+
+  .btn{min-height:44px;padding:9px 18px;border:none;border-radius:11px;font-weight:700;cursor:pointer;
+       background:var(--blue);color:#fff;font-size:.95rem;}
+  .btn:active{transform:scale(.97);}
+  .btn-clear{background:#fff;color:var(--red);border:2px solid var(--red);}
+  .btn-tip{background:#fff;color:var(--blue);border:2px solid var(--blue);}
+
+  table.tabelle{width:100%;border-collapse:collapse;margin:12px 0;}
+  table.tabelle th,table.tabelle td{border:2px solid var(--line);padding:8px;text-align:center;}
+  table.tabelle th{background:#f2f4f7;color:var(--muted);font-size:.85rem;}
+  table.tabelle input[type=text]{width:90px;}
+
+  .flip-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;}
+  @media (max-width:520px){.flip-grid{grid-template-columns:1fr;}}
+  .flip-card{min-height:140px;border-radius:14px;cursor:pointer;perspective:800px;}
+  .flip-inner{position:relative;width:100%;height:100%;min-height:140px;transition:transform .5s;
+              transform-style:preserve-3d;}
+  .flip-card.flipped .flip-inner{transform:rotateY(180deg);}
+  .flip-face{position:absolute;inset:0;backface-visibility:hidden;border-radius:14px;
+             display:flex;align-items:center;justify-content:center;padding:16px;
+             font-weight:700;border:2px solid var(--line);}
+  .flip-text{display:block;width:100%;}
+  .flip-front{background:#eef4fb;color:var(--blue);text-align:center;}
+  .flip-back{background:var(--orange-light);color:var(--orange-dark);transform:rotateY(180deg);
+             font-weight:500;font-size:.95rem;line-height:1.5;text-align:left;}
+
+  /* MathJax-Ausgabe ist standardmäßig inline-table, das sprengt Fließtext in Flexboxen /
+     schmalen Containern (z. B. Flip-Cards) und reißt Sätze auseinander. Deshalb: */
+  mjx-container{display:inline !important;}
+
+  /* Geodreieck-Baustein Styles (übernommen) */
+  .geo-stage{width:100%;max-width:360px;touch-action:none;overscroll-behavior:contain;border-radius:14px;
+    display:block;margin:10px auto 0;
+    background:repeating-linear-gradient(0deg,#f4f8fd,#f4f8fd 27px,#e7eef7 28px),
+              repeating-linear-gradient(90deg,transparent,transparent 27px,#e7eef7 28px);
+    border:2px solid #cdd8e6;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;cursor:grab;}
+  .geo-stage:active{cursor:grabbing;}
+  .geo-stage text{-webkit-user-select:none;user-select:none;pointer-events:none;}
+  .geoTri{pointer-events:none;will-change:transform;}
+  .geo-controls{max-width:360px;margin:10px auto 0;display:flex;flex-direction:column;gap:10px;}
+  .geo-rot{background:#eef4fb;border:2px solid #cdd8e6;border-radius:14px;padding:10px 12px;}
+  .geo-rot label{font-weight:700;color:var(--blue);display:block;text-align:center;margin-bottom:6px;}
+  .geo-rot-hint{font-weight:600;color:var(--muted);font-size:.8em;}
+  .geo-presets{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;}
+  .geo-btn{min-height:44px;padding:6px 14px;border:2px solid #cdd8e6;background:#fff;border-radius:11px;
+    font-weight:700;cursor:pointer;color:var(--ink);}
+  .geo-btn:active{transform:scale(.96);}
+  .geo-hint{font-size:.85rem;color:var(--muted);text-align:center;margin:4px 0 0;}
+
+  #weiterWrap{position:fixed;left:0;right:0;bottom:0;padding:10px 16px 14px;background:linear-gradient(180deg,rgba(251,249,245,0),#fbf9f5 30%);
+              display:none;justify-content:center;z-index:30;}
+  #weiterBtn{width:100%;max-width:600px;min-height:50px;background:var(--orange-dark);color:#fff;
+             border:none;border-radius:14px;font-size:1.05rem;font-weight:700;cursor:pointer;text-decoration:none;
+             display:flex;align-items:center;justify-content:center;}
+
+  .rex{position:fixed;bottom:8px;right:10px;font-size:1.5rem;cursor:pointer;z-index:40;user-select:none;}
+  .rex-note{position:fixed;bottom:44px;right:10px;background:var(--ink);color:#fff;padding:6px 10px;
+            border-radius:8px;font-size:.8rem;display:none;z-index:40;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <h1>📐 Winkel an sich schneidenden Geraden</h1>
+    <p>Erarbeitung · Klasse 7 · Geometrie</p>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <nav class="tabs" id="tabBar">
+    <button class="active" data-card="c0">1 · Erkunden</button>
+    <button data-card="c1">2 · Start</button>
+    <button data-card="c2">3 · Scheitelwinkel</button>
+    <button data-card="c3">4 · Nebenwinkel</button>
+    <button data-card="c4">5 · Alle vier Winkel</button>
+    <button data-card="c5">6 · Zusammenfassung</button>
+  </nav>
+
+  <!-- ============ KARTE 0 – ERKUNDEN ============ -->
+  <section class="card active" id="c0">
+    <h2>1 · Erkunden: Miss die Winkel selbst</h2>
+    <p>An jeder Kreuzung zweier Geraden entstehen vier Winkel. Schau dir <b>drei Beispiele</b> an
+       und miss dort mit dem virtuellen Geodreieck genau hin.</p>
+
+    <div class="example-row" id="exampleRow">
+      <button class="btn btn-tip active" data-idx="0">Beispiel 1</button>
+      <button class="btn btn-tip" data-idx="1">Beispiel 2</button>
+      <button class="btn btn-tip" data-idx="2">Beispiel 3</button>
+    </div>
+
+    <div id="geoExplore"></div>
+    <p style="text-align:center;color:var(--muted);font-size:.85rem;">
+      Lege die Nullkante des Geodreiecks an einen Winkel an und lies den Wert auf der Gradskala ab.</p>
+
+    <p style="text-align:center;"><b>Stelle eine Vermutung auf:</b> Was fällt dir bei Winkeln
+      auf, die <b>nebeneinander</b> liegen? Was fällt dir bei Winkeln auf, die sich
+      <b>gegenüberliegen</b>?</p>
+
+    <div style="text-align:center;">
+      <button class="btn btn-tip" id="tipBtnExplore">💡 Tipp anzeigen</button>
+    </div>
+    <div class="merksatz" id="tipBoxExplore" style="background:#eef4fb;border-color:#c7d7ec;display:none;">
+      <p>🔗 <b>Winkel, die nebeneinander liegen</b> (sie haben eine gemeinsame Seite): Miss zwei
+      davon. Was fällt dir auf, wenn du ihre beiden Werte addierst?</p>
+      <p>↔ <b>Winkel, die sich gegenüberliegen</b> (sie sind nicht benachbart): Miss auch diese
+      zwei. Was fällt dir an ihrer Größe im Vergleich auf?</p>
+    </div>
+
+    <div class="heftbox">
+      <p><b>✏️ Für dein Heft:</b> Notiere für jedes der drei Beispiele deine gemessenen Werte:
+      zwei nebeneinanderliegende Winkel und zwei gegenüberliegende Winkel. Zeichne anschließend
+      selbst <b>zwei weitere Kreuzungen zweier Geraden</b> ins Heft, miss dort ebenfalls nach und
+      prüfe, ob sich deine Vermutung bestätigt oder widerlegt wird.</p>
+    </div>
+  </section>
+
+  <!-- ============ KARTE 1 – START ============ -->
+  <section class="card" id="c1">
+    <h2>2 · Vier Winkel entdecken</h2>
+    <p>Wenn sich zwei Geraden in einem Punkt schneiden, entstehen genau <b>vier Winkel</b>.
+       Sie sind hier mit den griechischen Buchstaben \(\alpha\), \(\beta\), \(\gamma\) und \(\delta\) benannt.</p>
+    <div id="svg1"></div>
+    <p style="text-align:center;color:var(--muted);font-size:.85rem;">Tippe auf einen Winkel, um ihn hervorzuheben.</p>
+
+    <div class="merksatz">
+      <p><b><span class="tip" data-tip="tt-scheitel">Scheitelwinkel<span class="tip-bubble">Winkel, die sich am Schnittpunkt genau gegenüberliegen.</span></span>:</b>
+      Winkel, die sich am Kreuzungspunkt direkt gegenüberliegen. Sie sind immer <b>gleich groß</b>.</p>
+      <p><b><span class="tip" data-tip="tt-neben">Nebenwinkel<span class="tip-bubble">Winkel, die nebeneinander liegen und zusammen einen gestreckten Winkel bilden.</span></span>:</b>
+      Winkel, die nebeneinander liegen (eine gemeinsame Seite haben) und zusammen einen
+      <span class="tip" data-tip="tt-gestreckt">gestreckten Winkel<span class="tip-bubble">Ein Winkel von 180° – die beiden Schenkel bilden eine Gerade.</span></span>
+      bilden. Ihre Größen ergeben zusammen \(180^\circ\).</p>
+    </div>
+
+    <div class="frage" id="q1a">
+      <p>1. \(\alpha\) und \(\gamma\) sind Scheitelwinkel.</p>
+      <div class="wf-row">
+        <button class="wf-btn" data-val="true">Wahr</button>
+        <button class="wf-btn" data-val="false">Falsch</button>
+      </div>
+      <div class="fb-note"></div>
+    </div>
+    <div class="frage" id="q1b">
+      <p>2. \(\alpha\) und \(\beta\) sind Scheitelwinkel.</p>
+      <div class="wf-row">
+        <button class="wf-btn" data-val="true">Wahr</button>
+        <button class="wf-btn" data-val="false">Falsch</button>
+      </div>
+      <div class="fb-note"></div>
+    </div>
+    <button class="btn" id="check1">Prüfen</button>
+  </section>
+
+  <!-- ============ KARTE 2 – SCHEITELWINKEL ============ -->
+  <section class="card" id="c2">
+    <h2>3 · Scheitelwinkel berechnen</h2>
+    <p>Scheitelwinkel entstehen, wenn man einen Winkel um \(180^\circ\) um den Schnittpunkt dreht –
+       deshalb sind sie <b>immer gleich groß</b>.</p>
+    <div id="svg2"></div>
+    <p style="text-align:center;">Gegeben: \(\alpha = 55^\circ\). Gesucht: \(\gamma\) (Scheitelwinkel zu \(\alpha\)).</p>
+
+    <div class="inputrow">
+      <label for="a2">\(\gamma =\)</label>
+      <input type="text" id="a2" inputmode="numeric" placeholder="?">
+      <span class="unit">°</span>
+      <button class="btn" id="check2">Prüfen</button>
+    </div>
+    <div class="fb-note" id="fb2"></div>
+    <div id="tipRow2" style="display:none;">
+      <button class="btn btn-tip" id="tipBtn2">💡 Tipp anzeigen</button>
+      <p id="tipText2" style="color:var(--blue);font-weight:600;"></p>
+    </div>
+    <button class="btn btn-clear" id="clear2" style="display:none;">Leeren</button>
+  </section>
+
+  <!-- ============ KARTE 3 – NEBENWINKEL ============ -->
+  <section class="card" id="c3">
+    <h2>4 · Nebenwinkel berechnen</h2>
+    <p>Nebenwinkel liegen auf einer Geraden nebeneinander. Zusammen bilden sie einen gestreckten
+       Winkel: \(\alpha + \beta = 180^\circ\).</p>
+    <div id="svg3"></div>
+    <p style="text-align:center;">Gegeben: \(\alpha = 48^\circ\). Gesucht: \(\beta\) (Nebenwinkel zu \(\alpha\)).</p>
+
+    <div class="inputrow">
+      <label for="a3">\(\beta =\)</label>
+      <input type="text" id="a3" inputmode="numeric" placeholder="?">
+      <span class="unit">°</span>
+      <button class="btn" id="check3">Prüfen</button>
+    </div>
+    <div class="fb-note" id="fb3"></div>
+    <div id="tipRow3" style="display:none;">
+      <button class="btn btn-tip" id="tipBtn3">💡 Tipp anzeigen</button>
+      <p id="tipText3" style="color:var(--blue);font-weight:600;"></p>
+    </div>
+    <button class="btn btn-clear" id="clear3" style="display:none;">Leeren</button>
+  </section>
+
+  <!-- ============ KARTE 4 – ALLE VIER WINKEL ============ -->
+  <section class="card" id="c4">
+    <h2>5 · Alle vier Winkel bestimmen</h2>
+    <p>Nutze beide Regeln zusammen: Scheitelwinkel sind gleich groß, Nebenwinkel ergänzen sich zu
+       \(180^\circ\).</p>
+    <div id="svg4"></div>
+    <p style="text-align:center;">Gegeben: \(\alpha = 38^\circ\).</p>
+
+    <table class="tabelle">
+      <tr><th>\(\beta\)</th><th>\(\gamma\)</th><th>\(\delta\)</th></tr>
+      <tr>
+        <td><input type="text" id="w2" inputmode="numeric"> °</td>
+        <td><input type="text" id="w3" inputmode="numeric"> °</td>
+        <td><input type="text" id="w4" inputmode="numeric"> °</td>
+      </tr>
+    </table>
+    <button class="btn" id="check4">Prüfen</button>
+    <div class="fb-note" id="fb4"></div>
+    <button class="btn btn-clear" id="clear4" style="display:none;">Falsche leeren</button>
+  </section>
+
+  <!-- ============ KARTE 5 – ZUSAMMENFASSUNG ============ -->
+  <section class="card" id="c5">
+    <h2>6 · Zusammenfassung</h2>
+    <p>Tippe auf eine Karte, um die Antwort zu sehen.</p>
+    <div class="flip-grid">
+      <div class="flip-card">
+        <div class="flip-inner">
+          <div class="flip-face flip-front"><span class="flip-text">Scheitelwinkel</span></div>
+          <div class="flip-face flip-back"><span class="flip-text">Liegen sich am Schnittpunkt gegenüber. Sie sind immer gleich groß.</span></div>
+        </div>
+      </div>
+      <div class="flip-card">
+        <div class="flip-inner">
+          <div class="flip-face flip-front"><span class="flip-text">Nebenwinkel</span></div>
+          <div class="flip-face flip-back"><span class="flip-text">Liegen nebeneinander. Zusammen ergeben sie \(180^\circ\).</span></div>
+        </div>
+      </div>
+      <div class="flip-card">
+        <div class="flip-inner">
+          <div class="flip-face flip-front"><span class="flip-text">Wie viele Winkel entstehen beim Schneiden zweier Geraden?</span></div>
+          <div class="flip-face flip-back"><span class="flip-text">Es entstehen 4 Winkel. Ihre Summe beträgt \(360^\circ\).</span></div>
+        </div>
+      </div>
+      <div class="flip-card">
+        <div class="flip-inner">
+          <div class="flip-face flip-front"><span class="flip-text">Gestreckter Winkel</span></div>
+          <div class="flip-face flip-back"><span class="flip-text">Ein Winkel von \(180^\circ\) – die Schenkel bilden eine Gerade.</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<div id="weiterWrap"><a id="weiterBtn" href="#">Weiter →</a></div>
+<div class="rex" id="rex">🦖</div>
+<div class="rex-note" id="rexNote">Made by Mathedino</div>
+
+<!-- ================= Geodreieck-Baustein (übernommen aus geodreieck_baustein.html) ================= -->
+<script>
+function mountGeodreieck(container, geraden, optionen){
+  const SVGNS='http://www.w3.org/2000/svg';
+  const root = (typeof container==='string') ? document.getElementById(container) : container;
+  const opt = Object.assign({start:{x:200,y:200,rot:0}, hint:true, presets:[0,45,90,135]}, optionen||{});
+  let geraden_ = geraden.slice();
+  const geo = { x:opt.start.x, y:opt.start.y, rot:opt.start.rot };
+
+  root.innerHTML='';
+  const stage = document.createElementNS(SVGNS,'svg');
+  stage.setAttribute('viewBox','0 0 400 400');
+  stage.setAttribute('class','geo-stage');
+  root.appendChild(stage);
+
+  const controls=document.createElement('div'); controls.className='geo-controls';
+  controls.innerHTML =
+    `<div class="geo-rot">
+       <label>🔄 Drehung: <span class="geo-rotval">0°</span> <span class="geo-rot-hint">(außerhalb der Skala ziehen)</span></label>
+       <div class="geo-presets">`+
+         opt.presets.map(d=>`<button class="geo-btn geo-set" data-deg="${d}">${d}°</button>`).join('')+
+       `</div>
+     </div>
+     <button class="geo-btn geo-reset">📐 Geodreieck zurücklegen</button>`;
+  root.appendChild(controls);
+  if(opt.hint){
+    const h=document.createElement('p'); h.className='geo-hint';
+    h.innerHTML='👆 <b>Innerhalb</b> der Gradskala ziehen = <b>verschieben</b> · <b>außerhalb</b> ziehen = <b>drehen</b>.';
+    root.appendChild(h);
+  }
+
+  const rotval = controls.querySelector('.geo-rotval');
+  function el(tag,attrs){const e=document.createElementNS(SVGNS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);return e;}
+
+  function buildGeo(){
+    const W=180, H=180, COL='#2f5fa6', EDGE='#244e86';
+    const g=el('g',{transform:`translate(${geo.x} ${geo.y}) rotate(${geo.rot})`,class:'geoTri'});
+    g.appendChild(el('path',{d:`M ${-W+8},0 Q ${-W},0 ${-W+6},-4 L -4,${-H+6} Q 0,${-H} 4,${-H+6} L ${W-6},-4 Q ${W},0 ${W-8},0 Z`,
+      fill:'rgba(150,200,235,0.22)',stroke:EDGE,'stroke-width':2.5,'stroke-linejoin':'round'}));
+    for(let y=16;y<H-10;y+=16){const half=W*(1-y/H)-4;
+      g.appendChild(el('line',{x1:-half,y1:-y,x2:half,y2:-y,stroke:COL,'stroke-width':0.8,opacity:.38}));}
+    g.appendChild(el('line',{x1:0,y1:4,x2:0,y2:-H+8,stroke:EDGE,'stroke-width':1.6,'stroke-dasharray':'7 5',opacity:.85}));
+    g.appendChild(el('path',{d:`M -4,${-H+16} L 0,${-H+8} L 4,${-H+16}`,fill:'none',stroke:EDGE,'stroke-width':1.6,opacity:.85}));
+    g.appendChild(el('line',{x1:-W+6,y1:0,x2:W-6,y2:0,stroke:EDGE,'stroke-width':2.4}));
+    const cm=20;
+    for(let n=1;n*cm<=W-12;n++){[-1,1].forEach(sgn=>{const x=sgn*n*cm,lang=(n%5===0);
+      g.appendChild(el('line',{x1:x,y1:0,x2:x,y2:lang?9:5,stroke:COL,'stroke-width':lang?1.4:0.9,opacity:.7}));
+      if(lang){const t=el('text',{x:x,y:19,'text-anchor':'middle','font-size':9,fill:COL,opacity:.8});t.textContent=n;g.appendChild(t);}});}
+    g.appendChild(el('line',{x1:0,y1:0,x2:0,y2:10,stroke:EDGE,'stroke-width':1.6}));
+    const Rs=W*0.66,cx=0,cy=0,Ri=Rs*0.86;
+    g.appendChild(el('path',{d:`M ${cx-Rs} ${cy} A ${Rs} ${Rs} 0 0 1 ${cx+Rs} ${cy}`,fill:'none',stroke:COL,'stroke-width':1,opacity:.7}));
+    g.appendChild(el('path',{d:`M ${cx-Ri} ${cy} A ${Ri} ${Ri} 0 0 1 ${cx+Ri} ${cy}`,fill:'none',stroke:COL,'stroke-width':0.8,opacity:.5}));
+    for(let a=0;a<=180;a+=1){const rad=Math.PI*a/180;
+      const zehn=(a%10===0), fuenf=(a%5===0);
+      const len=zehn?13:(fuenf?9:5);
+      const r2=Rs-len;
+      g.appendChild(el('line',{x1:cx-Math.cos(rad)*Rs,y1:cy-Math.sin(rad)*Rs,x2:cx-Math.cos(rad)*r2,y2:cy-Math.sin(rad)*r2,
+        stroke:COL,'stroke-width':zehn?1.5:(fuenf?1:0.6),opacity:zehn?0.9:(fuenf?0.8:0.6)}));
+      if(zehn){const tr=r2-8,tx=cx-Math.cos(rad)*tr,ty=cy-Math.sin(rad)*tr+3;
+        const t=el('text',{x:tx,y:ty,'text-anchor':'middle','font-size':8,fill:COL,opacity:.85});t.textContent=a;g.appendChild(t);}}
+    g.appendChild(el('rect',{x:-9,y:-H+8,width:9,height:9,fill:'none',stroke:EDGE,'stroke-width':1.8}));
+    const t90=el('text',{x:0,y:-H-22,'text-anchor':'middle','font-size':14,fill:EDGE,'font-weight':'bold'});t90.textContent='90°';g.appendChild(t90);
+    return g;
+  }
+
+  function draw(){
+    stage.innerHTML='';
+    geraden_.forEach(L=>stage.appendChild(el('line',
+      {x1:L.x1,y1:L.y1,x2:L.x2,y2:L.y2,stroke:L.color||'#d6336c','stroke-width':6,'stroke-linecap':'round'})));
+    stage.appendChild(buildGeo());
+  }
+  function applyTransform(){
+    const g=stage.querySelector('.geoTri');
+    if(g)g.setAttribute('transform',`translate(${geo.x} ${geo.y}) rotate(${geo.rot})`);
+  }
+  let rafPending=false;
+  function scheduleTransform(){
+    if(rafPending)return;
+    rafPending=true;
+    requestAnimationFrame(()=>{rafPending=false;applyTransform();});
+  }
+  function setRot(deg){
+    deg=((Math.round(deg)%360)+360)%360;
+    geo.rot=deg; rotval.textContent=deg+'°'; scheduleTransform();
+  }
+  controls.querySelectorAll('.geo-set').forEach(b=>b.addEventListener('click',()=>setRot(+b.dataset.deg)));
+  controls.querySelector('.geo-reset').addEventListener('click',()=>{
+    geo.x=opt.start.x; geo.y=opt.start.y; setRot(opt.start.rot); applyTransform();
+  });
+
+  let mode=null, activePointer=null, dragStart=null, rotStart=null;
+  function pt(evt){const r=stage.getBoundingClientRect();
+    return {x:(evt.clientX-r.left)/r.width*400, y:(evt.clientY-r.top)/r.height*400};}
+  function winkelZuMitte(p){ return Math.atan2(p.y-geo.y, p.x-geo.x)*180/Math.PI; }
+  stage.addEventListener('pointerdown',e=>{
+    if(activePointer!==null)return;
+    activePointer=e.pointerId;
+    try{stage.setPointerCapture(e.pointerId);}catch(_){}
+    const p=pt(e);
+    const Rs=180*0.66;
+    const distMitte=Math.hypot(p.x-geo.x, p.y-geo.y);
+    if(distMitte<=Rs){
+      mode='move';
+      dragStart={px:p.x,py:p.y,gx:geo.x,gy:geo.y};
+    }else{
+      mode='rotate';
+      rotStart={ pointerWinkel:winkelZuMitte(p), rotAnfang:geo.rot };
+    }
+    e.preventDefault();
+  });
+  stage.addEventListener('pointermove',e=>{
+    if(mode===null||e.pointerId!==activePointer)return;
+    const p=pt(e);
+    if(mode==='rotate'){
+      const delta=winkelZuMitte(p)-rotStart.pointerWinkel;
+      setRot(rotStart.rotAnfang+delta);
+    }else{
+      geo.x=Math.max(-60,Math.min(460,dragStart.gx+(p.x-dragStart.px)));
+      geo.y=Math.max(-60,Math.min(460,dragStart.gy+(p.y-dragStart.py)));
+      scheduleTransform();
+    }
+    e.preventDefault();
+  });
+  function blockTouch(ev){ if(mode!==null) ev.preventDefault(); }
+  stage.addEventListener('touchmove', blockTouch, {passive:false});
+  function endDrag(e){if(e&&e.pointerId!==activePointer)return;mode=null;activePointer=null;}
+  stage.addEventListener('pointerup',endDrag);
+  stage.addEventListener('pointercancel',endDrag);
+
+  setRot(geo.rot); draw();
+
+  return {
+    setRot,
+    reset(){geo.x=opt.start.x;geo.y=opt.start.y;setRot(opt.start.rot);applyTransform();},
+    getState(){return {x:geo.x,y:geo.y,rot:geo.rot};},
+    setGeraden(arr){geraden_=arr.slice();draw();}
+  };
+}
+</script>
+
+<!-- ================= Seiten-Logik ================= -->
+<script>
+/* ---------- Kreuzungs-Diagramm zeichnen ---------- */
+function polar(cx,cy,r,deg){const t=deg*Math.PI/180; return [cx+r*Math.cos(t), cy+r*Math.sin(t)];}
+function wedgeD(cx,cy,r,a1,a2){
+  const [x1,y1]=polar(cx,cy,r,a1), [x2,y2]=polar(cx,cy,r,a2);
+  const large=(a2-a1)>180?1:0;
+  return `M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${large} 1 ${x2} ${y2} Z`;
+}
+function drawKreuzung(containerId, acute, letters, values, colors, wedgeIds){
+  const cx=200, cy=170, R=150, rArc=46, rLab=72;
+  const svgns='http://www.w3.org/2000/svg';
+  const svg=document.createElementNS(svgns,'svg');
+  svg.setAttribute('viewBox','0 0 400 320');
+  svg.setAttribute('class','winkel-svg');
+  const sectors=[[0,acute],[acute,180],[180,180+acute],[180+acute,360]];
+  sectors.forEach((s,i)=>{
+    const path=document.createElementNS(svgns,'path');
+    path.setAttribute('d', wedgeD(cx,cy,rArc,s[0],s[1]));
+    path.setAttribute('fill', colors[i]);
+    path.setAttribute('opacity','0.8');
+    path.setAttribute('stroke','#243447');
+    path.setAttribute('stroke-width','1');
+    if(wedgeIds){ path.setAttribute('data-w', wedgeIds[i]); path.style.cursor='pointer'; }
+    svg.appendChild(path);
+    const mid=(s[0]+s[1])/2;
+    const [lx,ly]=polar(cx,cy,rLab,mid);
+    const hasVal = values && values[i];
+    const t1=document.createElementNS(svgns,'text');
+    t1.setAttribute('x',lx); t1.setAttribute('y', hasVal ? ly-9 : ly);
+    t1.setAttribute('text-anchor','middle'); t1.setAttribute('dominant-baseline','middle');
+    t1.setAttribute('font-size','18'); t1.setAttribute('font-weight','700'); t1.setAttribute('fill','#243447');
+    t1.setAttribute('font-style','italic');
+    t1.textContent=letters[i];
+    svg.appendChild(t1);
+    if(hasVal){
+      const t2=document.createElementNS(svgns,'text');
+      t2.setAttribute('x',lx); t2.setAttribute('y', ly+12);
+      t2.setAttribute('text-anchor','middle'); t2.setAttribute('dominant-baseline','middle');
+      t2.setAttribute('font-size','14'); t2.setAttribute('font-weight','600'); t2.setAttribute('fill','#3a4a5c');
+      t2.textContent=values[i];
+      svg.appendChild(t2);
+    }
+  });
+  [[0,180],[acute,180+acute]].forEach(pair=>{
+    const [x1,y1]=polar(cx,cy,R,pair[0]), [x2,y2]=polar(cx,cy,R,pair[1]);
+    const line=document.createElementNS(svgns,'line');
+    line.setAttribute('x1',x1);line.setAttribute('y1',y1);line.setAttribute('x2',x2);line.setAttribute('y2',y2);
+    line.setAttribute('stroke','#243447'); line.setAttribute('stroke-width','3'); line.setAttribute('stroke-linecap','round');
+    svg.appendChild(line);
+  });
+  const mp=document.createElementNS(svgns,'circle');
+  mp.setAttribute('cx',cx);mp.setAttribute('cy',cy);mp.setAttribute('r',3);mp.setAttribute('fill','#243447');
+  svg.appendChild(mp);
+  document.getElementById(containerId).innerHTML=''; document.getElementById(containerId).appendChild(svg);
+  return {cx,cy,R,acute};
+}
+
+const PAL = ['#ffe08a','#9fd8ef','#c9b3e6','#a8e6b8'];
+const GIVEN='#ffe08a', ASKED='#cfe0f5', NEUTRAL='#eef1f5';
+const LETTERS=['α','β','γ','δ'];
+
+drawKreuzung('svg1', 70, LETTERS, ['','','',''], PAL, LETTERS);
+document.querySelectorAll('#svg1 path[data-w]').forEach(p=>{
+  p.addEventListener('click', ()=>{
+    document.querySelectorAll('#svg1 path[data-w]').forEach(x=>x.style.opacity='0.8');
+    p.style.opacity='1'; p.style.stroke='#c9762f'; p.setAttribute('stroke-width','3');
+    document.querySelectorAll('#svg1 path[data-w]').forEach(x=>{ if(x!==p){x.setAttribute('stroke-width','1'); x.style.stroke='#243447';} });
+  });
+});
+
+const geo2 = drawKreuzung('svg2', 55, LETTERS, ['55°','','?',''], [GIVEN,NEUTRAL,ASKED,NEUTRAL]);
+drawKreuzung('svg3', 48, LETTERS, ['48°','?','',''], [GIVEN,ASKED,NEUTRAL,NEUTRAL]);
+drawKreuzung('svg4', 38, LETTERS, ['38°','?','?','?'], [GIVEN,ASKED,ASKED,ASKED]);
+
+/* ---------- Erkunden-Karte: Geodreieck an mehreren Beispielen ---------- */
+function linesForAngle(acute, cx, cy, R){
+  const [ax1,ay1]=polar(cx,cy,R,0), [ax2,ay2]=polar(cx,cy,R,180);
+  const [bx1,by1]=polar(cx,cy,R,acute), [bx2,by2]=polar(cx,cy,R,180+acute);
+  return [
+    {x1:ax1,y1:ay1,x2:ax2,y2:ay2,color:'#d6336c'},
+    {x1:bx1,y1:by1,x2:bx2,y2:by2,color:'#1f9d55'}
+  ];
+}
+(function(){
+  const EX_CX=200, EX_CY=200, EX_R=150;
+  const EXPLORE_ANGLES = [25, 90, 60];
+  const steuer = mountGeodreieck('geoExplore', linesForAngle(EXPLORE_ANGLES[0],EX_CX,EX_CY,EX_R),
+    {start:{x:EX_CX, y:EX_CY-90, rot:0}, hint:true});
+  document.getElementById('exampleRow').addEventListener('click', (e)=>{
+    const b=e.target.closest('button'); if(!b) return;
+    document.querySelectorAll('#exampleRow .btn').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    const idx=+b.dataset.idx;
+    steuer.setGeraden(linesForAngle(EXPLORE_ANGLES[idx],EX_CX,EX_CY,EX_R));
+    steuer.reset();
+  });
+})();
+
+/* ---------- Aufklappbarer Tipp Erkunden-Karte ---------- */
+document.getElementById('tipBtnExplore').addEventListener('click', ()=>{
+  const box=document.getElementById('tipBoxExplore'), btn=document.getElementById('tipBtnExplore');
+  const show = box.style.display === 'none';
+  box.style.display = show ? 'block' : 'none';
+  btn.textContent = show ? '💡 Tipp verbergen' : '💡 Tipp anzeigen';
+});
+
+/* ---------- Tooltips ---------- */
+document.querySelectorAll('.tip').forEach(t=>{
+  t.addEventListener('click', (e)=>{
+    e.stopPropagation();
+    const wasOpen = t.classList.contains('open');
+    document.querySelectorAll('.tip.open').forEach(o=>o.classList.remove('open'));
+    if(!wasOpen) t.classList.add('open');
+  });
+});
+document.body.addEventListener('click', ()=>document.querySelectorAll('.tip.open').forEach(o=>o.classList.remove('open')));
+
+/* ---------- Tabs ---------- */
+const tabBar = document.getElementById('tabBar');
+tabBar.addEventListener('click', (e)=>{
+  const btn = e.target.closest('button'); if(!btn) return;
+  document.querySelectorAll('nav.tabs button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.card').forEach(c=>c.classList.remove('active'));
+  document.getElementById(btn.dataset.card).classList.add('active');
+});
+
+/* ---------- Fortschritt & Weiter-Button ---------- */
+const done = {c1:false, c2:false, c3:false, c4:false};
+function updateWeiter(){
+  if(done.c1 && done.c2 && done.c3 && done.c4){
+    document.getElementById('weiterWrap').style.display='flex';
+  }
+}
+
+/* ---------- Karte 1: Wahr/Falsch ---------- */
+function setupWF(id, correctVal){
+  const box = document.getElementById(id);
+  const btns = box.querySelectorAll('.wf-btn');
+  btns.forEach(b=>b.addEventListener('click', ()=>{
+    btns.forEach(x=>x.classList.remove('selected'));
+    b.classList.add('selected');
+  }));
+  return ()=>{
+    const sel = box.querySelector('.wf-btn.selected');
+    const note = box.querySelector('.fb-note');
+    if(!sel){ note.textContent='Bitte Wahr oder Falsch wählen.'; note.className='fb-note bad'; return false; }
+    const val = sel.dataset.val === 'true';
+    btns.forEach(x=>x.classList.remove('fb-correct','fb-wrong'));
+    if(val === correctVal){
+      sel.classList.add('fb-correct'); note.textContent='Richtig!'; note.className='fb-note ok';
+      btns.forEach(x=>x.disabled=true);
+      return true;
+    } else {
+      sel.classList.add('fb-wrong');
+      note.textContent='Leider falsch. Richtig wäre: ' + (correctVal ? 'Wahr' : 'Falsch') + '.';
+      note.className='fb-note bad';
+      return false;
+    }
+  };
+}
+const check1a = setupWF('q1a', true);
+const check1b = setupWF('q1b', false);
+document.getElementById('check1').addEventListener('click', ()=>{
+  const okA = check1a(), okB = check1b();
+  if(okA && okB){ done.c1 = true; updateWeiter(); }
+});
+
+/* ---------- Karte 2: Scheitelwinkel ---------- */
+function parseNum(str){
+  const n = parseFloat(String(str).replace(',', '.').replace('°','').trim());
+  return isNaN(n) ? null : n;
+}
+(function(){
+  const input=document.getElementById('a2'), fb=document.getElementById('fb2');
+  const tipRow=document.getElementById('tipRow2'), tipBtn=document.getElementById('tipBtn2'), tipText=document.getElementById('tipText2');
+  const clearBtn=document.getElementById('clear2');
+  const tips=['Scheitelwinkel liegen sich am Kreuzungspunkt direkt gegenüber.','Sie sind immer gleich groß.','Lösung: γ = 55°'];
+  let tipIdx=-1;
+  tipBtn.addEventListener('click', ()=>{
+    tipIdx = Math.min(tipIdx+1, tips.length-1);
+    tipText.textContent = tips[tipIdx];
+    if(tipIdx>=tips.length-1) tipBtn.style.display='none';
+  });
+  document.getElementById('check2').addEventListener('click', ()=>{
+    const v = parseNum(input.value);
+    if(v===null){ fb.textContent='Bitte eine Zahl eingeben.'; fb.className='fb-note bad'; return; }
+    if(v===55){
+      input.classList.remove('fb-wrong'); input.classList.add('fb-correct');
+      fb.textContent='Richtig! γ = 55°, denn Scheitelwinkel sind gleich groß.'; fb.className='fb-note ok';
+      input.disabled=true; document.getElementById('check2').disabled=true;
+      tipRow.style.display='none'; clearBtn.style.display='none';
+      done.c2=true; updateWeiter();
+    } else {
+      input.classList.remove('fb-correct'); input.classList.add('fb-wrong');
+      fb.textContent='Noch nicht richtig. Schau dir die Regel und das Geodreieck nochmal an.'; fb.className='fb-note bad';
+      tipRow.style.display='block'; clearBtn.style.display='inline-block';
+    }
+  });
+  clearBtn.addEventListener('click', ()=>{
+    input.value=''; input.classList.remove('fb-wrong','fb-correct'); fb.textContent='';
+    clearBtn.style.display='none';
+  });
+})();
+
+/* ---------- Karte 3: Nebenwinkel ---------- */
+(function(){
+  const input=document.getElementById('a3'), fb=document.getElementById('fb3');
+  const tipRow=document.getElementById('tipRow3'), tipBtn=document.getElementById('tipBtn3'), tipText=document.getElementById('tipText3');
+  const clearBtn=document.getElementById('clear3');
+  const tips=['Nebenwinkel liegen nebeneinander auf einer Geraden.','Zusammen ergeben sie einen gestreckten Winkel: 180°.','Lösung: β = 180° − 48° = 132°'];
+  let tipIdx=-1;
+  tipBtn.addEventListener('click', ()=>{
+    tipIdx = Math.min(tipIdx+1, tips.length-1);
+    tipText.textContent = tips[tipIdx];
+    if(tipIdx>=tips.length-1) tipBtn.style.display='none';
+  });
+  document.getElementById('check3').addEventListener('click', ()=>{
+    const v = parseNum(input.value);
+    if(v===null){ fb.textContent='Bitte eine Zahl eingeben.'; fb.className='fb-note bad'; return; }
+    if(v===132){
+      input.classList.remove('fb-wrong'); input.classList.add('fb-correct');
+      fb.textContent='Richtig! β = 132°, denn 48° + 132° = 180°.'; fb.className='fb-note ok';
+      input.disabled=true; document.getElementById('check3').disabled=true;
+      tipRow.style.display='none'; clearBtn.style.display='none';
+      done.c3=true; updateWeiter();
+    } else {
+      input.classList.remove('fb-correct'); input.classList.add('fb-wrong');
+      fb.textContent='Noch nicht richtig. Denk an die Regel für Nebenwinkel.'; fb.className='fb-note bad';
+      tipRow.style.display='block'; clearBtn.style.display='inline-block';
+    }
+  });
+  clearBtn.addEventListener('click', ()=>{
+    input.value=''; input.classList.remove('fb-wrong','fb-correct'); fb.textContent='';
+    clearBtn.style.display='none';
+  });
+})();
+
+/* ---------- Karte 4: alle vier Winkel ---------- */
+(function(){
+  const fields = {w2:142, w3:38, w4:142};
+  const fb=document.getElementById('fb4'), clearBtn=document.getElementById('clear4');
+  document.getElementById('check4').addEventListener('click', ()=>{
+    let allOk=true, anyWrong=false;
+    Object.keys(fields).forEach(id=>{
+      const el=document.getElementById(id);
+      const v=parseNum(el.value);
+      el.classList.remove('fb-correct','fb-wrong');
+      if(v===fields[id]){ el.classList.add('fb-correct'); }
+      else{ el.classList.add('fb-wrong'); allOk=false; anyWrong=true; }
+    });
+    if(allOk){
+      fb.textContent='Alle vier Winkel richtig bestimmt!'; fb.className='fb-note ok';
+      Object.keys(fields).forEach(id=>document.getElementById(id).disabled=true);
+      document.getElementById('check4').disabled=true;
+      clearBtn.style.display='none';
+      done.c4=true; updateWeiter();
+    } else {
+      fb.textContent='Noch nicht alles richtig – die roten Felder bitte korrigieren.'; fb.className='fb-note bad';
+      clearBtn.style.display = anyWrong ? 'inline-block' : 'none';
+    }
+  });
+  clearBtn.addEventListener('click', ()=>{
+    Object.keys(fields).forEach(id=>{
+      const el=document.getElementById(id);
+      if(el.classList.contains('fb-wrong')){ el.value=''; el.classList.remove('fb-wrong'); }
+    });
+    clearBtn.style.display='none';
+  });
+})();
+
+/* ---------- Karte 5: Flip-Cards ---------- */
+document.querySelectorAll('.flip-card').forEach(c=>{
+  c.addEventListener('click', ()=>c.classList.toggle('flipped'));
+});
+
+/* ---------- T-Rex ---------- */
+const rex=document.getElementById('rex'), rexNote=document.getElementById('rexNote');
+rex.addEventListener('click', ()=>{
+  rexNote.style.display = rexNote.style.display==='block' ? 'none' : 'block';
+});
+</script>
+</body>
+</html>
