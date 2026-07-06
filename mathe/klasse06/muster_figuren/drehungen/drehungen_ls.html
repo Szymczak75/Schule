@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Drehungen – Lernseite</title>
+<meta name="description" content="Interaktive Erarbeitung zum Thema Drehungen: Drehzentrum, Drehwinkel und Drehsinn kennenlernen und anwenden.">
+<meta name="keywords" content="Drehungen, Drehzentrum, Drehwinkel, Drehsinn, Geometrie, Muster und Figuren, Koordinatensystem">
+<meta name="typ" content="Lernseite">
+<meta name="klasse" content="6">
+<meta name="fach" content="mathe">
+<meta name="oberthema" content="Geometrie">
+<meta name="thema" content="Drehungen">
+<script>
+  MathJax = {
+    tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+    svg: { fontCache: 'global' }
+  };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+  :root {
+    --ink: #22303f;
+    --card: #ffffff;
+    --green: #1e7d32;
+    --red: #c1272d;
+    --amber: #b8860b;
+    --amber-light: #fdf3d9;
+    --amber-dark: #96690a;
+    --orange: #c97a2e;
+    --orange-dark: #a5611e;
+    --orange-light: #fbeee0;
+    --bg: #faf7f2;
+    --line: #e4dcd0;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    margin: 0; padding: 0; background: var(--bg); color: var(--ink);
+    font-family: 'Segoe UI', Verdana, Arial, sans-serif; font-size: 16px;
+    overscroll-behavior: contain;
+  }
+  header {
+    background: var(--orange-light); border-bottom: 3px solid var(--orange);
+    padding: 0.9rem 1rem; text-align: center;
+  }
+  header h1 { margin: 0; font-size: 1.4rem; color: var(--orange-dark); }
+  header p { margin: 0.3rem 0 0; font-size: 0.95rem; color: var(--ink); }
+
+  .tabs {
+    display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center;
+    padding: 0.8rem 0.6rem; background: #fff; border-bottom: 1px solid var(--line);
+    position: sticky; top: 0; z-index: 10;
+  }
+  .tab-btn {
+    min-height: 44px; padding: 0.5rem 0.9rem; border-radius: 10px;
+    border: 2px solid var(--orange); background: #fff; color: var(--orange-dark);
+    font-size: 0.9rem; font-weight: 600; cursor: pointer;
+  }
+  .tab-btn.active { background: var(--orange); color: #fff; }
+
+  main { max-width: 900px; margin: 0 auto; padding: 1rem; padding-bottom: 6rem; }
+  .card { display: none; background: var(--card); border: 1px solid var(--line);
+    border-radius: 14px; padding: 1.2rem; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+  .card.active { display: block; }
+  .card h2 { color: var(--orange-dark); margin-top: 0; font-size: 1.2rem; }
+
+  .info-box { background: var(--orange-light); border-left: 5px solid var(--orange);
+    border-radius: 8px; padding: 0.8rem 1rem; margin: 0.8rem 0; }
+
+  .amber-box {
+    background: var(--amber-light); border: 2px solid var(--amber);
+    border-radius: 10px; padding: 0.8rem 1rem; margin-top: 0.8rem;
+  }
+  .amber-toggle {
+    background: var(--amber-light); border: 2px solid var(--amber); color: var(--amber-dark);
+    border-radius: 8px; padding: 0.6rem 0.9rem; font-weight: 600; cursor: pointer;
+    min-height: 44px; width: 100%; text-align: left; font-size: 0.95rem;
+  }
+  .amber-content { display: none; margin-top: 0.6rem; }
+  .amber-content.show { display: block; }
+
+  button { font-family: inherit; }
+  .btn {
+    min-height: 44px; min-width: 44px; padding: 0.55rem 1rem; border-radius: 10px;
+    border: 2px solid var(--orange); background: #fff; color: var(--orange-dark);
+    font-weight: 600; font-size: 0.95rem; cursor: pointer; margin: 0.25rem;
+  }
+  .btn.solid { background: var(--orange); color: #fff; }
+  .btn:active { transform: scale(0.97); }
+
+  input[type="text"], input[type="number"] {
+    min-height: 44px; border: 2px solid var(--line); border-radius: 8px;
+    padding: 0.4rem 0.6rem; font-size: 1rem; width: 6.5rem; color: var(--ink);
+  }
+  input.wrong { border-color: var(--red); }
+  input.correct { border-color: var(--green); }
+
+  .feedback { margin-top: 0.7rem; padding: 0.7rem 0.9rem; border-radius: 8px;
+    font-weight: 600; display: none; }
+  .feedback.ok { display: block; background: var(--green); color: #fff; }
+  .feedback.bad { display: block; background: var(--red); color: #fff; }
+
+  .clear-btn { background: #fff; border: 2px solid var(--red); color: var(--red);
+    min-height: 44px; border-radius: 8px; padding: 0.4rem 0.8rem; font-weight: 600;
+    cursor: pointer; margin-left: 0.4rem; }
+
+  svg { touch-action: none; }
+  .demo-wrap { display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-start; }
+  .controls { display: flex; flex-direction: column; gap: 0.6rem; min-width: 220px; }
+  .controls label { font-weight: 600; font-size: 0.9rem; }
+  input[type="range"] { width: 100%; }
+
+  .pair-row { display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 0.8rem; }
+  .pair-col { flex: 1; min-width: 220px; display: flex; flex-direction: column; gap: 0.5rem; }
+  .pair-item {
+    min-height: 44px; border: 2px solid var(--orange); border-radius: 8px;
+    padding: 0.5rem 0.7rem; background: #fff; cursor: pointer; font-size: 0.92rem;
+  }
+  .pair-item.selected { background: var(--orange-light); border-color: var(--orange-dark); }
+  .pair-item.matched { background: var(--green); color: #fff; border-color: var(--green); }
+
+  .term { position: relative; }
+  .term .tooltip {
+    display: none; position: absolute; left: 0; top: 110%; z-index: 5;
+    background: var(--ink); color: #fff; padding: 0.5rem 0.7rem; border-radius: 8px;
+    font-size: 0.85rem; width: max-content; max-width: 250px;
+  }
+  .term.show .tooltip { display: block; }
+  .term-btn { text-decoration: underline dotted; cursor: pointer; font-weight: 700; color: var(--orange-dark); }
+
+  footer.nav {
+    position: fixed; bottom: 0; left: 0; right: 0; background: #fff;
+    border-top: 1px solid var(--line); padding: 0.7rem 1rem; text-align: center;
+  }
+  #weiter-btn {
+    display: none; min-height: 44px; width: 100%; max-width: 420px;
+    background: var(--orange); color: #fff; border: none; border-radius: 10px;
+    font-size: 1.05rem; font-weight: 700; padding: 0.8rem; cursor: pointer;
+    text-decoration: none; display: none;
+  }
+  #weiter-btn.show { display: inline-block; }
+
+  .trex { position: fixed; bottom: 4.2rem; right: 0.8rem; font-size: 1.6rem;
+    cursor: pointer; z-index: 20; user-select: none; }
+  .trex-msg { display: none; position: fixed; bottom: 6.4rem; right: 0.8rem;
+    background: var(--ink); color: #fff; padding: 0.4rem 0.7rem; border-radius: 8px;
+    font-size: 0.8rem; z-index: 20; }
+  .trex-msg.show { display: block; }
+
+  .task-block { margin-top: 1rem; padding-top: 0.8rem; border-top: 1px dashed var(--line); }
+  .row-flex { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Drehungen</h1>
+  <p>Muster und Figuren – Klasse 6</p>
+</header>
+
+<div class="tabs">
+  <button class="tab-btn active" data-card="c1">1 · Einführung</button>
+  <button class="tab-btn" data-card="c2">2 · Begriffe</button>
+  <button class="tab-btn" data-card="c3">3 · Drehwinkel bestimmen</button>
+  <button class="tab-btn" data-card="c4">4 · Viereck drehen</button>
+  <button class="tab-btn" data-card="c5">5 · Merksatz</button>
+</div>
+
+<main>
+
+  <!-- CARD 1: Einführung / interaktive Demo -->
+  <section class="card active" id="c1">
+    <h2>Eine Drehung entdecken</h2>
+    <p>Ein Dreieck kann um einen festen Punkt <strong>gedreht</strong> werden. Verändere unten
+      den <span class="term-btn" data-term="t-drehsinn">Drehsinn</span> und den
+      <span class="term-btn" data-term="t-drehwinkel">Drehwinkel</span> \(\alpha\) und beobachte,
+      wie sich das Dreieck bewegt.</p>
+
+    <div class="demo-wrap">
+      <svg id="rotSvg" width="320" height="320" viewBox="0 0 320 320" style="background:#fff;border:1px solid var(--line);border-radius:10px;"></svg>
+      <div class="controls">
+        <label for="angleRange">Drehwinkel \(\alpha\): <span id="angleVal">0</span>°</label>
+        <input type="range" id="angleRange" min="0" max="360" step="5" value="0">
+        <div class="row-flex">
+          <button class="btn" id="dirBtn">Drehsinn: gegen den Uhrzeigersinn ↺</button>
+        </div>
+        <div class="info-box" style="margin-top:0.4rem;">
+          Das rote Kreuz <strong>Z</strong> ist das <span class="term-btn" data-term="t-drehzentrum">Drehzentrum</span>.
+          Das gelbe Dreieck ist das Bild des grünen Dreiecks nach der Drehung.
+        </div>
+      </div>
+    </div>
+
+    <div class="info-box">
+      Wichtig: Bei einer Drehung haben jeder Punkt <em>P</em> und sein Bildpunkt <em>P'</em>
+      denselben Abstand vom Drehzentrum <em>Z</em>. Nur die Lage um <em>Z</em> herum ändert sich.
+    </div>
+
+    <div class="term" id="t-drehzentrum"><div class="tooltip">Der feste Punkt, um den gedreht wird.</div></div>
+    <div class="term" id="t-drehwinkel"><div class="tooltip">Der Winkel, um den die Figur gedreht wird (griechisch: \(\alpha\)).</div></div>
+    <div class="term" id="t-drehsinn"><div class="tooltip">Die Richtung der Drehung: gegen den Uhrzeigersinn (linksherum) oder im Uhrzeigersinn (rechtsherum).</div></div>
+  </section>
+
+  <!-- CARD 2: Begriffe zuordnen -->
+  <section class="card" id="c2">
+    <h2>Fachbegriffe zuordnen</h2>
+    <p>Tippe zuerst einen Begriff links an, dann die passende Erklärung rechts.</p>
+    <div class="pair-row">
+      <div class="pair-col" id="pairLeft">
+        <div class="pair-item" data-key="a">Drehzentrum</div>
+        <div class="pair-item" data-key="b">Drehwinkel \(\alpha\)</div>
+        <div class="pair-item" data-key="c">Drehsinn</div>
+        <div class="pair-item" data-key="d">Abstand von Z</div>
+      </div>
+      <div class="pair-col" id="pairRight">
+        <div class="pair-item" data-key="c">Gibt an, ob linksherum oder rechtsherum gedreht wird.</div>
+        <div class="pair-item" data-key="d">Ist bei P und dem Bildpunkt P' immer gleich groß.</div>
+        <div class="pair-item" data-key="a">Der feste Punkt, um den die Figur gedreht wird.</div>
+        <div class="pair-item" data-key="b">Gibt an, wie weit die Figur gedreht wird.</div>
+      </div>
+    </div>
+    <button class="btn solid" id="check2">Prüfen</button>
+    <div class="feedback" id="fb2"></div>
+  </section>
+
+  <!-- CARD 3: Drehwinkel bestimmen -->
+  <section class="card" id="c3">
+    <h2>Beispiel: Drehwinkel bestimmen</h2>
+    <p>Das gelbe Dreieck A'B'C' ist durch Drehung des grünen Dreiecks ABC um Z entstanden.
+      Schätze den Drehwinkel \(\alpha\).</p>
+
+    <div class="info-box">
+      <strong>So geht das im Heft mit dem Geodreieck:</strong><br>
+      1. Verbinde Z mit einem Eckpunkt der Ursprungsfigur, z. B. mit A, und zeichne die Strecke bis zum Rand.<br>
+      2. Verbinde Z ebenso mit dem zugehörigen Bildpunkt A'.<br>
+      3. Lege den Nullpunkt (Mittelpunkt) des Geodreiecks genau auf Z und die 0°-Linie auf den Schenkel ZA.<br>
+      4. Lies an der Gradskala ab, bei welchem Wert der zweite Schenkel ZA' liegt – das ist der Drehwinkel \(\alpha\).
+    </div>
+
+    <svg id="angleSvg" width="300" height="300" viewBox="0 0 300 300" style="background:#fff;border:1px solid var(--line);border-radius:10px;"></svg>
+
+    <div class="task-block">
+      <div class="row-flex">
+        <label for="winkelInput">Drehwinkel \(\alpha\) =</label>
+        <input type="number" id="winkelInput" inputmode="numeric">
+        <span>°</span>
+        <button class="btn solid" id="check3">Prüfen</button>
+        <button class="clear-btn" id="clear3" style="display:none;">Leeren</button>
+      </div>
+      <div class="feedback" id="fb3"></div>
+
+      <button class="amber-toggle" id="tipp3btn" style="display:none;">💡 Tipp anzeigen</button>
+      <div class="amber-content" id="tipp3">
+        Verlängere in der Zeichnung die beiden gestrichelten Schenkel von Z aus durch A und A',
+        falls sie noch zu kurz sind. Der eingeschlossene Winkel mit Scheitelpunkt Z ist der gesuchte Drehwinkel \(\alpha\).
+      </div>
+
+      <button class="amber-toggle" id="loesung3btn" style="display:none;">📖 Musterlösung anzeigen</button>
+      <div class="amber-content" id="loesung3">
+        <strong>Lösungsweg:</strong><br>
+        1. Trage die Schenkel von Z durch A und durch A' ein.<br>
+        2. Der Winkel zwischen den beiden Schenkeln mit Scheitelpunkt Z ist der Drehwinkel \(\alpha\).<br>
+        3. Miss diesen Winkel mit dem Geodreieck ab.<br>
+        Der Drehwinkel beträgt hier \(\alpha = 60°\).
+      </div>
+    </div>
+  </section>
+
+  <!-- CARD 4: Viereck drehen im Heft -->
+  <section class="card" id="c4">
+    <h2>Aufgabe: Ein Viereck drehen</h2>
+    <p>Zeichne das Viereck ABCD in dein Heft und konstruiere das Bildviereck A'B'C'D'
+      mit Geodreieck und Zirkel. Vergleiche danach dein Ergebnis mit der Musterlösung.</p>
+
+    <div class="info-box">
+      <strong>Gegeben:</strong> \(A(6|3)\), \(B(9|3)\), \(C(9|5)\), \(D(7|6)\),
+      Drehzentrum \(Z(3|3)\), Drehwinkel \(\alpha = 40°\) gegen den Uhrzeigersinn.
+    </div>
+
+    <div class="amber-box">
+      <strong>So geht das im Heft mit Geodreieck und Zirkel:</strong><br>
+      1. Übertrage Z, A, B, C und D ins Koordinatensystem in deinem Heft.<br>
+      2. Verbinde Z mit A und zeichne diesen Schenkel.<br>
+      3. Lege den Nullpunkt des Geodreiecks auf Z, die 0°-Linie auf den Schenkel ZA,
+      und trage \(\alpha = 40°\) gegen den Uhrzeigersinn ab.<br>
+      4. Miss mit dem Zirkel die Strecke ZA ab und trage diese Länge auf dem neuen Schenkel ab –
+      das ergibt A'.<br>
+      5. Wiederhole die Schritte 2–4 für B, C und D.<br>
+      6. Verbinde A', B', C' und D' zum Bildviereck.
+    </div>
+
+    <svg id="gridSvg" width="340" height="340" viewBox="0 0 340 340" style="background:#fff;border:1px solid var(--line);border-radius:10px;"></svg>
+
+    <div class="task-block">
+      <button class="amber-toggle" id="loesung4btn">📖 Musterlösung anzeigen</button>
+      <div class="amber-content" id="loesung4">
+        <strong>Lösungsweg (für jeden Eckpunkt gleich):</strong><br>
+        Der Vektor von Z nach A ist \((3|0)\). Wird dieser Vektor um \(\alpha = 40°\)
+        gegen den Uhrzeigersinn gedreht, ergibt sich rechnerisch (gerundet):<br><br>
+        \(A'(5{,}3|4{,}9)\)<br>
+        \(B'(7{,}6|6{,}9)\)<br>
+        \(C'(6{,}3|8{,}4)\)<br>
+        \(D'(4{,}1|7{,}9)\)<br><br>
+        Da \(\alpha = 40°\) kein Vielfaches von 90° ist, liegen die Bildpunkte nicht mehr
+        genau auf Gitterpunkten – deshalb braucht es hier wirklich Geodreieck und Zirkel
+        statt einfachem Abzählen der Kästchen.
+      </div>
+    </div>
+  </section>
+
+  <!-- CARD 5: Merksatz -->
+  <section class="card" id="c5">
+    <h2>Merksatz</h2>
+    <div class="amber-box">
+      <strong>Drehungen</strong><br><br>
+      Bei einer Drehung um ein <strong>Drehzentrum Z</strong> mit einem <strong>Drehwinkel</strong>
+      \(\alpha\) erhält man zu jedem Punkt P einen Bildpunkt P'.<br><br>
+      • P und P' haben denselben Abstand von Z.<br>
+      • Der <strong>Drehsinn</strong> gibt an, ob gegen den Uhrzeigersinn (linksherum) oder
+      im Uhrzeigersinn (rechtsherum) gedreht wird.<br>
+      • Eine Drehung um 180° entspricht einer Punktspiegelung an Z.
+    </div>
+  </section>
+
+</main>
+
+<footer class="nav">
+  <a href="#" id="weiter-btn">Weiter →</a>
+</footer>
+
+<div class="trex" id="trex">🦖</div>
+<div class="trex-msg" id="trexMsg">Made by Mathedino</div>
+
+<script>
+// ---------- Navigation ----------
+const tabs = document.querySelectorAll('.tab-btn');
+const cards = document.querySelectorAll('.card');
+tabs.forEach(t => t.addEventListener('click', () => {
+  tabs.forEach(x => x.classList.remove('active'));
+  cards.forEach(x => x.classList.remove('active'));
+  t.classList.add('active');
+  document.getElementById(t.dataset.card).classList.add('active');
+}));
+
+// ---------- T-Rex ----------
+const trex = document.getElementById('trex');
+const trexMsg = document.getElementById('trexMsg');
+let trexShown = false;
+trex.addEventListener('click', () => {
+  trexShown = !trexShown;
+  trexMsg.classList.toggle('show', trexShown);
+});
+
+// ---------- Terminologie-Tooltips ----------
+document.querySelectorAll('.term-btn').forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const term = document.getElementById(btn.dataset.term);
+    const isShown = term.classList.contains('show');
+    document.querySelectorAll('.term').forEach(t => t.classList.remove('show'));
+    if (!isShown) term.classList.add('show');
+  });
+});
+document.addEventListener('click', () => {
+  document.querySelectorAll('.term').forEach(t => t.classList.remove('show'));
+});
+
+// ---------- Fortschritt / Weiter-Button ----------
+const progress = { c2: false, c3: false, c4: false };
+function updateWeiter() {
+  const allDone = Object.values(progress).every(v => v);
+  document.getElementById('weiter-btn').classList.toggle('show', allDone);
+}
+
+// ================= CARD 1: Rotations-Demo =================
+const rotSvg = document.getElementById('rotSvg');
+const cx = 160, cy = 200;
+const greenPts = [[cx-70, cy+60], [cx-10, cy+60], [cx-40, cy]];
+let dirCCW = true;
+
+function rotatePoint(px, py, angleDeg, ox, oy, ccw) {
+  const rad = angleDeg * Math.PI / 180 * (ccw ? -1 : 1);
+  const dx = px - ox, dy = py - oy;
+  const rx = dx * Math.cos(rad) - dy * Math.sin(rad);
+  const ry = dx * Math.sin(rad) + dy * Math.cos(rad);
+  return [ox + rx, oy + ry];
+}
+
+function drawRotSvg(angle) {
+  let svgns = "http://www.w3.org/2000/svg";
+  rotSvg.innerHTML = '';
+  // grid axes
+  const axisG = document.createElementNS(svgns, 'line');
+  // green triangle
+  const gp = greenPts.map(p => p.join(',')).join(' ');
+  const greenPoly = document.createElementNS(svgns, 'polygon');
+  greenPoly.setAttribute('points', gp);
+  greenPoly.setAttribute('fill', '#cfe8c9');
+  greenPoly.setAttribute('stroke', '#1e7d32');
+  greenPoly.setAttribute('stroke-width', '2');
+  rotSvg.appendChild(greenPoly);
+
+  // yellow (rotated) triangle
+  const yellowPts = greenPts.map(p => rotatePoint(p[0], p[1], angle, cx, cy, dirCCW));
+  const yp = yellowPts.map(p => p.join(',')).join(' ');
+  const yellowPoly = document.createElementNS(svgns, 'polygon');
+  yellowPoly.setAttribute('points', yp);
+  yellowPoly.setAttribute('fill', '#fbe6a2');
+  yellowPoly.setAttribute('stroke', 'var(--amber-dark)');
+  yellowPoly.setAttribute('stroke-width', '2');
+  rotSvg.appendChild(yellowPoly);
+
+  // Z point
+  const zCross1 = document.createElementNS(svgns, 'line');
+  zCross1.setAttribute('x1', cx-6); zCross1.setAttribute('y1', cy-6);
+  zCross1.setAttribute('x2', cx+6); zCross1.setAttribute('y2', cy+6);
+  zCross1.setAttribute('stroke', '#c1272d'); zCross1.setAttribute('stroke-width', '2.5');
+  rotSvg.appendChild(zCross1);
+  const zCross2 = document.createElementNS(svgns, 'line');
+  zCross2.setAttribute('x1', cx-6); zCross2.setAttribute('y1', cy+6);
+  zCross2.setAttribute('x2', cx+6); zCross2.setAttribute('y2', cy-6);
+  zCross2.setAttribute('stroke', '#c1272d'); zCross2.setAttribute('stroke-width', '2.5');
+  rotSvg.appendChild(zCross2);
+  const zLabel = document.createElementNS(svgns, 'text');
+  zLabel.setAttribute('x', cx+10); zLabel.setAttribute('y', cy+18);
+  zLabel.setAttribute('fill', '#c1272d'); zLabel.setAttribute('font-weight', 'bold');
+  zLabel.textContent = 'Z';
+  rotSvg.appendChild(zLabel);
+}
+drawRotSvg(0);
+
+const angleRange = document.getElementById('angleRange');
+const angleVal = document.getElementById('angleVal');
+angleRange.addEventListener('input', () => {
+  angleVal.textContent = angleRange.value;
+  drawRotSvg(parseInt(angleRange.value));
+});
+document.getElementById('dirBtn').addEventListener('click', function() {
+  dirCCW = !dirCCW;
+  this.textContent = dirCCW ? 'Drehsinn: gegen den Uhrzeigersinn ↺' : 'Drehsinn: im Uhrzeigersinn ↻';
+  drawRotSvg(parseInt(angleRange.value));
+});
+
+// ================= CARD 2: Begriffe zuordnen =================
+let selLeft = null, selRight = null;
+const matched2 = {};
+function pairClick(el, side) {
+  if (el.classList.contains('matched')) return;
+  if (side === 'left') {
+    document.querySelectorAll('#pairLeft .pair-item').forEach(x => x.classList.remove('selected'));
+    if (selLeft === el) { selLeft = null; return; }
+    selLeft = el; el.classList.add('selected');
+  } else {
+    document.querySelectorAll('#pairRight .pair-item').forEach(x => x.classList.remove('selected'));
+    if (selRight === el) { selRight = null; return; }
+    selRight = el; el.classList.add('selected');
+  }
+  if (selLeft && selRight) {
+    matched2[selLeft.dataset.key + '-' + selRight.dataset.key] = true;
+    selLeft.classList.remove('selected'); selRight.classList.remove('selected');
+    selLeft.dataset.matchedTo = selRight.dataset.key;
+    selRight.dataset.matchedTo = selLeft.dataset.key;
+    selLeft = null; selRight = null;
+  }
+}
+document.querySelectorAll('#pairLeft .pair-item').forEach(el => el.addEventListener('click', () => pairClick(el, 'left')));
+document.querySelectorAll('#pairRight .pair-item').forEach(el => el.addEventListener('click', () => pairClick(el, 'right')));
+
+document.getElementById('check2').addEventListener('click', () => {
+  const leftItems = document.querySelectorAll('#pairLeft .pair-item');
+  const rightItems = document.querySelectorAll('#pairRight .pair-item');
+  let allCorrect = true;
+  leftItems.forEach(l => {
+    const key = l.dataset.key;
+    const rightMatch = document.querySelector('#pairRight .pair-item[data-key="' + key + '"]');
+    if (l.dataset.matchedTo === key) {
+      l.classList.add('matched'); rightMatch.classList.add('matched');
+    } else {
+      allCorrect = false;
+    }
+  });
+  const fb = document.getElementById('fb2');
+  if (allCorrect) {
+    fb.textContent = '✅ Richtig! Alle Begriffe passen zusammen.';
+    fb.className = 'feedback ok';
+    progress.c2 = true; updateWeiter();
+  } else {
+    fb.textContent = '❌ Noch nicht alle Paare stimmen. Prüfe die nicht grün markierten Begriffe erneut.';
+    fb.className = 'feedback bad';
+  }
+});
+
+// ================= CARD 3: Drehwinkel bestimmen =================
+(function() {
+  const svg = document.getElementById('angleSvg');
+  const svgns = "http://www.w3.org/2000/svg";
+  const Z = [95, 215];
+  const angleDeg = 60;
+
+  // Dreieck ABC relativ zu Z (A liegt am nächsten zu Z, wird für den Winkel genutzt)
+  const A = [Z[0], Z[1] - 65];
+  const B = [Z[0] + 70, Z[1] - 15];
+  const C = [Z[0] + 35, Z[1] - 100];
+
+  function rotP(p, deg) {
+    const rad = deg * Math.PI/180;
+    const dx = p[0]-Z[0], dy = p[1]-Z[1];
+    return [Z[0] + dx*Math.cos(rad) - dy*Math.sin(rad), Z[1] + dx*Math.sin(rad) + dy*Math.cos(rad)];
+  }
+  const Aprime = rotP(A, angleDeg);
+  const Bprime = rotP(B, angleDeg);
+  const Cprime = rotP(C, angleDeg);
+
+  function line(x1,y1,x2,y2,color,w,dash) {
+    const l = document.createElementNS(svgns,'line');
+    l.setAttribute('x1',x1); l.setAttribute('y1',y1);
+    l.setAttribute('x2',x2); l.setAttribute('y2',y2);
+    l.setAttribute('stroke',color); l.setAttribute('stroke-width',w || 2);
+    if (dash) l.setAttribute('stroke-dasharray', '5,4');
+    svg.appendChild(l);
+  }
+  function poly(pts, fill, stroke) {
+    const p = document.createElementNS(svgns,'polygon');
+    p.setAttribute('points', pts.map(pt => pt.join(',')).join(' '));
+    p.setAttribute('fill', fill); p.setAttribute('stroke', stroke); p.setAttribute('stroke-width','2.5');
+    svg.appendChild(p);
+  }
+  function label(x,y,txt,color) {
+    const t = document.createElementNS(svgns,'text');
+    t.setAttribute('x',x); t.setAttribute('y',y);
+    t.setAttribute('fill',color); t.setAttribute('font-weight','bold');
+    t.textContent = txt;
+    svg.appendChild(t);
+  }
+
+  // gestrichelte Schenkel von Z durch A und A' (verlängert)
+  const extA = [Z[0] + (A[0]-Z[0])*1.15, Z[1] + (A[1]-Z[1])*1.15];
+  const extAprime = [Z[0] + (Aprime[0]-Z[0])*1.15, Z[1] + (Aprime[1]-Z[1])*1.15];
+  line(Z[0],Z[1], extA[0],extA[1], '#9aa5b1', 1.5, true);
+  line(Z[0],Z[1], extAprime[0],extAprime[1], '#9aa5b1', 1.5, true);
+
+  poly([A,B,C], '#cfe8c9', '#1e7d32');
+  poly([Aprime,Bprime,Cprime], '#fbe6a2', 'var(--amber-dark)');
+
+  label(A[0]-16, A[1]-4, 'A', '#1e7d32');
+  label(B[0]+6, B[1]-2, 'B', '#1e7d32');
+  label(C[0]-4, C[1]-8, 'C', '#1e7d32');
+  label(Aprime[0]+6, Aprime[1]-4, "A'", 'var(--amber-dark)');
+  label(Bprime[0]+6, Bprime[1]-2, "B'", 'var(--amber-dark)');
+  label(Cprime[0]-4, Cprime[1]-10, "C'", 'var(--amber-dark)');
+  label(Z[0]-18, Z[1]+18, 'Z', '#c1272d');
+  const zCross1 = document.createElementNS(svgns,'line');
+  zCross1.setAttribute('x1', Z[0]-6); zCross1.setAttribute('y1', Z[1]-6);
+  zCross1.setAttribute('x2', Z[0]+6); zCross1.setAttribute('y2', Z[1]+6);
+  zCross1.setAttribute('stroke', '#c1272d'); zCross1.setAttribute('stroke-width', '2.5');
+  svg.appendChild(zCross1);
+  const zCross2 = document.createElementNS(svgns,'line');
+  zCross2.setAttribute('x1', Z[0]-6); zCross2.setAttribute('y1', Z[1]+6);
+  zCross2.setAttribute('x2', Z[0]+6); zCross2.setAttribute('y2', Z[1]-6);
+  zCross2.setAttribute('stroke', '#c1272d'); zCross2.setAttribute('stroke-width', '2.5');
+  svg.appendChild(zCross2);
+
+  let attempts3 = 0;
+  document.getElementById('check3').addEventListener('click', () => {
+    const input = document.getElementById('winkelInput');
+    const val = parseFloat(input.value);
+    const fb = document.getElementById('fb3');
+    if (isNaN(val)) {
+      fb.textContent = 'Bitte gib einen Winkel in Grad ein.';
+      fb.className = 'feedback bad';
+      return;
+    }
+    attempts3++;
+    if (Math.abs(val - angleDeg) <= 8) {
+      fb.textContent = '✅ Richtig! Der Drehwinkel beträgt \\(\\alpha = 60°\\).';
+      fb.className = 'feedback ok';
+      input.classList.remove('wrong'); input.classList.add('correct');
+      progress.c3 = true; updateWeiter();
+      document.getElementById('clear3').style.display = 'none';
+      MathJax.typesetPromise([fb]);
+    } else {
+      fb.textContent = '❌ Das passt noch nicht ganz.';
+      fb.className = 'feedback bad';
+      input.classList.add('wrong');
+      document.getElementById('clear3').style.display = 'inline-block';
+      document.getElementById('tipp3btn').style.display = 'block';
+      if (attempts3 >= 2) {
+        document.getElementById('loesung3btn').style.display = 'block';
+      }
+    }
+  });
+  document.getElementById('clear3').addEventListener('click', () => {
+    const input = document.getElementById('winkelInput');
+    input.value = '';
+    input.classList.remove('wrong','correct');
+    document.getElementById('fb3').className = 'feedback';
+    document.getElementById('clear3').style.display = 'none';
+  });
+  document.getElementById('tipp3btn').addEventListener('click', function() {
+    const box = document.getElementById('tipp3');
+    box.classList.toggle('show');
+  });
+  document.getElementById('loesung3btn').addEventListener('click', function() {
+    const box = document.getElementById('loesung3');
+    box.classList.toggle('show');
+    MathJax.typesetPromise([box]);
+  });
+})();
+
+// ================= CARD 4: Viereck drehen (Aufgabe fürs Heft) =================
+(function() {
+  const svg = document.getElementById('gridSvg');
+  const svgns = "http://www.w3.org/2000/svg";
+  const size = 340, margin = 30, units = 10, cell = (size - 2*margin) / units;
+
+  function toSvg(x, y) { return [margin + x*cell, size - margin - y*cell]; }
+
+  function label(x,y,txt) {
+    const t = document.createElementNS(svgns,'text');
+    t.setAttribute('x',x); t.setAttribute('y',y);
+    t.setAttribute('fill', '#22303f'); t.setAttribute('font-size','11');
+    t.textContent = txt;
+    svg.appendChild(t);
+  }
+
+  function drawGrid() {
+    svg.innerHTML = '';
+    for (let i = 0; i <= units; i++) {
+      const [gx1, gy1] = toSvg(i, 0);
+      const [gx2, gy2] = toSvg(i, units);
+      const vline = document.createElementNS(svgns,'line');
+      vline.setAttribute('x1',gx1); vline.setAttribute('y1',gy1);
+      vline.setAttribute('x2',gx2); vline.setAttribute('y2',gy2);
+      vline.setAttribute('stroke', '#e4dcd0'); vline.setAttribute('stroke-width','1');
+      svg.appendChild(vline);
+      const [hx1, hy1] = toSvg(0, i);
+      const [hx2, hy2] = toSvg(units, i);
+      const hline = document.createElementNS(svgns,'line');
+      hline.setAttribute('x1',hx1); hline.setAttribute('y1',hy1);
+      hline.setAttribute('x2',hx2); hline.setAttribute('y2',hy2);
+      hline.setAttribute('stroke', '#e4dcd0'); hline.setAttribute('stroke-width','1');
+      svg.appendChild(hline);
+    }
+    const [ox, oy] = toSvg(0,0);
+    const [xEnd] = toSvg(units, 0);
+    const [, yEnd] = toSvg(0, units);
+    function arrowLine(x1,y1,x2,y2) {
+      const l = document.createElementNS(svgns,'line');
+      l.setAttribute('x1',x1); l.setAttribute('y1',y1);
+      l.setAttribute('x2',x2); l.setAttribute('y2',y2);
+      l.setAttribute('stroke', '#22303f'); l.setAttribute('stroke-width','2');
+      l.setAttribute('marker-end','url(#arrow4)');
+      svg.appendChild(l);
+    }
+    const defs = document.createElementNS(svgns,'defs');
+    defs.innerHTML = '<marker id="arrow4" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#22303f"/></marker>';
+    svg.appendChild(defs);
+    arrowLine(ox, oy, xEnd+10, oy);
+    arrowLine(ox, oy, ox, yEnd-10);
+    label(xEnd+14, oy+4, 'x [LE]');
+    label(ox-8, yEnd-16, 'y [LE]');
+
+    // Z und Viereck ABCD
+    const Z = [3,3], A = [6,3], B = [9,3], C = [9,5], D = [7,6];
+    function drawPoint(coord, txt, color) {
+      const [sx, sy] = toSvg(coord[0], coord[1]);
+      const c = document.createElementNS(svgns,'circle');
+      c.setAttribute('cx', sx); c.setAttribute('cy', sy); c.setAttribute('r', 5);
+      c.setAttribute('fill', color);
+      svg.appendChild(c);
+      label(sx+8, sy-8, txt);
+    }
+    const poly = document.createElementNS(svgns,'polygon');
+    poly.setAttribute('points', [A,B,C,D].map(p => toSvg(p[0],p[1]).join(',')).join(' '));
+    poly.setAttribute('fill', '#cfe8c9');
+    poly.setAttribute('stroke', '#1e7d32');
+    poly.setAttribute('stroke-width', '2.5');
+    svg.appendChild(poly);
+
+    drawPoint(Z, 'Z(3|3)', '#c1272d');
+    drawPoint(A, 'A(6|3)', '#1e7d32');
+    drawPoint(B, 'B(9|3)', '#1e7d32');
+    drawPoint(C, 'C(9|5)', '#1e7d32');
+    drawPoint(D, 'D(7|6)', '#1e7d32');
+  }
+  drawGrid();
+
+  document.getElementById('loesung4btn').addEventListener('click', function() {
+    const box = document.getElementById('loesung4');
+    const willShow = !box.classList.contains('show');
+    box.classList.toggle('show');
+    if (willShow) {
+      MathJax.typesetPromise([box]);
+      progress.c4 = true; updateWeiter();
+    }
+  });
+})();
+</script>
+</body>
+</html>
