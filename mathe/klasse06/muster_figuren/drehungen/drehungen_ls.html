@@ -149,6 +149,26 @@
 
   .task-block { margin-top: 1rem; padding-top: 0.8rem; border-top: 1px dashed var(--line); }
   .row-flex { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
+
+  /* ---- Geodreieck-Baustein (übernommen aus geodreieck_baustein.html) ---- */
+  .geo-stage{width:100%;max-width:420px;touch-action:none;overscroll-behavior:contain;border-radius:16px;display:block;margin:0 auto;
+    background:repeating-linear-gradient(0deg,#f4f8fd,#f4f8fd 27px,#e7eef7 28px),
+              repeating-linear-gradient(90deg,transparent,transparent 27px,#e7eef7 28px);
+    border:2px solid #cdd8e6;
+    -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;}
+  .geo-stage text{-webkit-user-select:none;user-select:none;pointer-events:none;}
+  .geoTri{pointer-events:none;will-change:transform;}
+  .geo-stage{cursor:grab;}
+  .geo-controls{max-width:420px;margin:10px auto 0;display:flex;flex-direction:column;gap:10px;}
+  .geo-rot{background:#eef4fb;border:2px solid #cdd8e6;border-radius:14px;padding:10px 12px;}
+  .geo-rot label{font-weight:700;color:#2f5fa6;display:block;text-align:center;margin-bottom:6px;}
+  .geo-rot-hint{font-weight:600;color:#5a6b7d;font-size:.85em;}
+  .geo-stage:active{cursor:grabbing;}
+  .geo-presets{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;}
+  .geo-btn{min-height:44px;padding:6px 14px;border:2px solid #cdd8e6;background:#fff;border-radius:11px;
+    font-weight:700;cursor:pointer;color:#243447;}
+  .geo-btn:active{transform:scale(.96);}
+  .geo-hint{font-size:.9rem;color:#5a6b7d;text-align:center;margin:4px 0 0;}
 </style>
 </head>
 <body>
@@ -239,6 +259,10 @@
 
     <svg id="angleSvg" width="300" height="300" viewBox="0 0 300 300" style="background:#fff;border:1px solid var(--line);border-radius:10px;"></svg>
 
+    <p style="margin-top:0.8rem;">Probiere es gleich selbst: Lege das Geodreieck unten an Z an, drehe es passend
+      an den zweiten Schenkel und lies den Winkel ab.</p>
+    <div id="geo-c3"></div>
+
     <div class="task-block">
       <div class="row-flex">
         <label for="winkelInput">Drehwinkel \(\alpha\) =</label>
@@ -290,6 +314,10 @@
     </div>
 
     <svg id="gridSvg" width="340" height="340" viewBox="0 0 340 340" style="background:#fff;border:1px solid var(--line);border-radius:10px;"></svg>
+
+    <p style="margin-top:0.8rem;">Übe hier erst, wie du das Geodreieck an Z anlegst und den 40°-Winkel
+      abträgst (am Beispiel des Schenkels ZA) – dann übertrage die Konstruktion für alle vier Eckpunkte in dein Heft.</p>
+    <div id="geo-c4"></div>
 
     <div class="task-block">
       <button class="amber-toggle" id="loesung4btn">📖 Musterlösung anzeigen</button>
@@ -490,6 +518,148 @@ document.getElementById('check2').addEventListener('click', () => {
   }
 });
 
+// ================= GEODREIECK-BAUSTEIN (übernommen aus geodreieck_baustein.html) =================
+function mountGeodreieck(container, geraden, optionen){
+  const SVGNS='http://www.w3.org/2000/svg';
+  const root = (typeof container==='string') ? document.getElementById(container) : container;
+  const opt = Object.assign({start:{x:200,y:200,rot:0}, hint:true, presets:[0,45,90,135]}, optionen||{});
+  let geraden_ = geraden.slice();
+  const geo = { x:opt.start.x, y:opt.start.y, rot:opt.start.rot };
+
+  root.innerHTML='';
+  const stage = document.createElementNS(SVGNS,'svg');
+  stage.setAttribute('viewBox','0 0 400 400');
+  stage.setAttribute('class','geo-stage');
+  root.appendChild(stage);
+
+  const controls=document.createElement('div'); controls.className='geo-controls';
+  controls.innerHTML =
+    `<div class="geo-rot">
+       <label>🔄 Drehung: <span class="geo-rotval">0°</span> <span class="geo-rot-hint">(außerhalb der Skala ziehen)</span></label>
+       <div class="geo-presets">`+
+         opt.presets.map(d=>`<button class="geo-btn geo-set" data-deg="${d}">${d}°</button>`).join('')+
+       `</div>
+     </div>
+     <button class="geo-btn geo-reset">📐 Geodreieck zurücklegen</button>`;
+  root.appendChild(controls);
+  if(opt.hint){
+    const h=document.createElement('p'); h.className='geo-hint';
+    h.innerHTML='👆 <b>Innerhalb</b> der Gradskala ziehen = <b>verschieben</b> · <b>außerhalb</b> ziehen = <b>drehen</b>.';
+    root.appendChild(h);
+  }
+
+  const rotval = controls.querySelector('.geo-rotval');
+  function el(tag,attrs){const e=document.createElementNS(SVGNS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);return e;}
+
+  function buildGeo(){
+    const W=180, H=180, COL='#2f5fa6', EDGE='#244e86';
+    const g=el('g',{transform:`translate(${geo.x} ${geo.y}) rotate(${geo.rot})`,class:'geoTri'});
+    g.appendChild(el('path',{d:`M ${-W+8},0 Q ${-W},0 ${-W+6},-4 L -4,${-H+6} Q 0,${-H} 4,${-H+6} L ${W-6},-4 Q ${W},0 ${W-8},0 Z`,
+      fill:'rgba(150,200,235,0.22)',stroke:EDGE,'stroke-width':2.5,'stroke-linejoin':'round'}));
+    for(let y=16;y<H-10;y+=16){const half=W*(1-y/H)-4;
+      g.appendChild(el('line',{x1:-half,y1:-y,x2:half,y2:-y,stroke:COL,'stroke-width':0.8,opacity:.38}));}
+    g.appendChild(el('line',{x1:0,y1:4,x2:0,y2:-H+8,stroke:EDGE,'stroke-width':1.6,'stroke-dasharray':'7 5',opacity:.85}));
+    g.appendChild(el('path',{d:`M -4,${-H+16} L 0,${-H+8} L 4,${-H+16}`,fill:'none',stroke:EDGE,'stroke-width':1.6,opacity:.85}));
+    g.appendChild(el('line',{x1:-W+6,y1:0,x2:W-6,y2:0,stroke:EDGE,'stroke-width':2.4}));
+    const cm=20;
+    for(let n=1;n*cm<=W-12;n++){[-1,1].forEach(sgn=>{const x=sgn*n*cm,lang=(n%5===0);
+      g.appendChild(el('line',{x1:x,y1:0,x2:x,y2:lang?9:5,stroke:COL,'stroke-width':lang?1.4:0.9,opacity:.7}));
+      if(lang){const t=el('text',{x:x,y:19,'text-anchor':'middle','font-size':9,fill:COL,opacity:.8});t.textContent=n;g.appendChild(t);}});}
+    g.appendChild(el('line',{x1:0,y1:0,x2:0,y2:10,stroke:EDGE,'stroke-width':1.6}));
+    const Rs=W*0.66,cx=0,cy=0,Ri=Rs*0.86;
+    g.appendChild(el('path',{d:`M ${cx-Rs} ${cy} A ${Rs} ${Rs} 0 0 1 ${cx+Rs} ${cy}`,fill:'none',stroke:COL,'stroke-width':1,opacity:.7}));
+    g.appendChild(el('path',{d:`M ${cx-Ri} ${cy} A ${Ri} ${Ri} 0 0 1 ${cx+Ri} ${cy}`,fill:'none',stroke:COL,'stroke-width':0.8,opacity:.5}));
+    for(let a=0;a<=180;a+=1){const rad=Math.PI*a/180;
+      const zehn=(a%10===0), fuenf=(a%5===0);
+      const len=zehn?13:(fuenf?9:5);
+      const r2=Rs-len;
+      g.appendChild(el('line',{x1:cx-Math.cos(rad)*Rs,y1:cy-Math.sin(rad)*Rs,x2:cx-Math.cos(rad)*r2,y2:cy-Math.sin(rad)*r2,
+        stroke:COL,'stroke-width':zehn?1.5:(fuenf?1:0.6),opacity:zehn?0.9:(fuenf?0.8:0.6)}));
+      if(zehn){const tr=r2-8,tx=cx-Math.cos(rad)*tr,ty=cy-Math.sin(rad)*tr+3;
+        const t=el('text',{x:tx,y:ty,'text-anchor':'middle','font-size':8,fill:COL,opacity:.85});t.textContent=a;g.appendChild(t);}}
+    g.appendChild(el('rect',{x:-9,y:-H+8,width:9,height:9,fill:'none',stroke:EDGE,'stroke-width':1.8}));
+    const t90=el('text',{x:0,y:-H-22,'text-anchor':'middle','font-size':14,fill:EDGE,'font-weight':'bold'});t90.textContent='90°';g.appendChild(t90);
+    return g;
+  }
+
+  function draw(){
+    stage.innerHTML='';
+    geraden_.forEach(L=>stage.appendChild(el('line',
+      {x1:L.x1,y1:L.y1,x2:L.x2,y2:L.y2,stroke:L.color||'#d6336c','stroke-width':6,'stroke-linecap':'round'})));
+    stage.appendChild(buildGeo());
+  }
+  function applyTransform(){
+    const g=stage.querySelector('.geoTri');
+    if(g)g.setAttribute('transform',`translate(${geo.x} ${geo.y}) rotate(${geo.rot})`);
+  }
+  let rafPending=false;
+  function scheduleTransform(){
+    if(rafPending)return;
+    rafPending=true;
+    requestAnimationFrame(()=>{rafPending=false;applyTransform();});
+  }
+  function setRot(deg){
+    deg=((Math.round(deg)%360)+360)%360;
+    geo.rot=deg; rotval.textContent=deg+'°'; scheduleTransform();
+  }
+  controls.querySelectorAll('.geo-set').forEach(b=>b.addEventListener('click',()=>setRot(+b.dataset.deg)));
+  controls.querySelector('.geo-reset').addEventListener('click',()=>{
+    geo.x=opt.start.x; geo.y=opt.start.y; setRot(opt.start.rot); applyTransform();
+  });
+
+  let mode=null, activePointer=null, dragStart=null, rotStart=null;
+  function pt(evt){const r=stage.getBoundingClientRect();
+    return {x:(evt.clientX-r.left)/r.width*400, y:(evt.clientY-r.top)/r.height*400};}
+  function winkelZuMitte(p){ return Math.atan2(p.y-geo.y, p.x-geo.x)*180/Math.PI; }
+  stage.addEventListener('pointerdown',e=>{
+    if(activePointer!==null)return;
+    activePointer=e.pointerId;
+    try{stage.setPointerCapture(e.pointerId);}catch(_){}
+    const p=pt(e);
+    const Rs=180*0.66;
+    const distMitte=Math.hypot(p.x-geo.x, p.y-geo.y);
+    if(distMitte<=Rs){ mode='move'; dragStart={px:p.x,py:p.y,gx:geo.x,gy:geo.y}; }
+    else{ mode='rotate'; rotStart={ pointerWinkel:winkelZuMitte(p), rotAnfang:geo.rot }; }
+    e.preventDefault();
+  });
+  stage.addEventListener('pointermove',e=>{
+    if(mode===null||e.pointerId!==activePointer)return;
+    const p=pt(e);
+    if(mode==='rotate'){
+      const delta=winkelZuMitte(p)-rotStart.pointerWinkel;
+      setRot(rotStart.rotAnfang+delta);
+    }else{
+      geo.x=Math.max(-60,Math.min(460,dragStart.gx+(p.x-dragStart.px)));
+      geo.y=Math.max(-60,Math.min(460,dragStart.gy+(p.y-dragStart.py)));
+      scheduleTransform();
+    }
+    e.preventDefault();
+  });
+  function blockTouch(ev){ if(mode!==null) ev.preventDefault(); }
+  stage.addEventListener('touchmove', blockTouch, {passive:false});
+  function endDrag(e){if(e&&e.pointerId!==activePointer)return;mode=null;activePointer=null;}
+  stage.addEventListener('pointerup',endDrag);
+  stage.addEventListener('pointercancel',endDrag);
+
+  setRot(geo.rot); draw();
+
+  return {
+    setRot,
+    reset(){geo.x=opt.start.x;geo.y=opt.start.y;setRot(opt.start.rot);applyTransform();},
+    getState(){return {x:geo.x,y:geo.y,rot:geo.rot};},
+    setGeraden(arr){geraden_=arr.slice();draw();}
+  };
+}
+function makeSchenkel(angleDeg) {
+  const Z = [200, 250], len = 150;
+  const rad = angleDeg * Math.PI/180;
+  const vx = -len * Math.sin(rad), vy = -len * Math.cos(rad);
+  return [
+    { x1: Z[0], y1: Z[1], x2: Z[0], y2: Z[1]-len, color: '#1e7d32' },
+    { x1: Z[0], y1: Z[1], x2: Z[0]+vx, y2: Z[1]+vy, color: '#96690a' }
+  ];
+}
+
 // ================= CARD 3: Drehwinkel bestimmen =================
 (function() {
   const svg = document.getElementById('angleSvg');
@@ -560,6 +730,8 @@ document.getElementById('check2').addEventListener('click', () => {
   zCross2.setAttribute('stroke', '#c1272d'); zCross2.setAttribute('stroke-width', '2.5');
   svg.appendChild(zCross2);
 
+  mountGeodreieck('geo-c3', makeSchenkel(60), { start:{x:200,y:250,rot:0}, hint:true, presets:[0,45,90,135] });
+
   let attempts3 = 0;
   document.getElementById('check3').addEventListener('click', () => {
     const input = document.getElementById('winkelInput');
@@ -608,6 +780,9 @@ document.getElementById('check2').addEventListener('click', () => {
 })();
 
 // ================= CARD 4: Viereck drehen (Aufgabe fürs Heft) =================
+(function() {
+  mountGeodreieck('geo-c4', makeSchenkel(40), { start:{x:200,y:250,rot:0}, hint:true, presets:[0,40,90,135] });
+})();
 (function() {
   const svg = document.getElementById('gridSvg');
   const svgns = "http://www.w3.org/2000/svg";
