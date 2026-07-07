@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Winkelsumme im Dreieck</title>
+<meta name="description" content="Interaktive Erarbeitung zur Winkelsumme im Dreieck: messen, live-interaktives Dreieck, Beweis über die Parallele zur Grundseite und Ausdehnung auf n-Ecke.">
+<meta name="keywords" content="Winkelsumme, Dreieck, Innenwinkel, Wechselwinkel, Parallele, n-Eck, Geometrie, Klasse 7">
+<meta name="typ" content="Lernseite">
+<meta name="klasse" content="7">
+<meta name="fach" content="mathe">
+<meta name="oberthema" content="Geometrie">
+<meta name="thema" content="Winkelsumme im Dreieck">
+<script>
+  MathJax = {
+    tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+    svg: { fontCache: 'global' }
+  };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+  :root{
+    --orange:#c97a2e; --orange-dark:#a5611e; --orange-light:#fbeee0;
+    --ink:#22303f; --muted:#5a6b7d; --line:#e4dcd0;
+    --green:#1e7d32; --green-bg:#d9f2dd;
+    --red:#c1272d; --red-bg:#fbdede;
+    --blue:#2f5fa6;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{font-family:'Segoe UI',system-ui,sans-serif;background:#faf7f2;color:var(--ink);
+       font-size:16px;line-height:1.55;padding-bottom:100px;}
+  .wrap{max-width:780px;margin:0 auto;padding:0 16px;}
+  header{background:linear-gradient(135deg,var(--orange),var(--orange-dark));color:#fff;
+         padding:22px 18px 18px;border-radius:0 0 20px 20px;}
+  header h1{margin:0 0 6px;font-size:1.3rem;}
+  header p{margin:0;opacity:.95;font-size:.95rem;}
+
+  nav.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:16px 0;padding:6px;background:#fff;
+           border-radius:14px;border:2px solid var(--line);position:sticky;top:8px;z-index:5;}
+  nav.tabs button{flex:1 1 auto;min-height:44px;border:none;background:transparent;color:var(--muted);
+                   font-weight:700;border-radius:10px;padding:8px 6px;font-size:.78rem;cursor:pointer;}
+  nav.tabs button.active{background:var(--orange-light);color:var(--orange-dark);}
+
+  .card{display:none;background:#fff;border:2px solid var(--line);border-radius:16px;
+        padding:18px 16px;margin-bottom:18px;}
+  .card.active{display:block;}
+  .card h2{margin:0 0 10px;color:var(--orange-dark);font-size:1.15rem;}
+  .card h3{color:var(--blue);font-size:1rem;margin:1.4em 0 .5em;}
+
+  .merksatz{background:var(--orange-light);border:2px solid #e8c397;border-radius:12px;
+            padding:12px 14px;margin:12px 0;}
+  .merksatz b{color:var(--orange-dark);}
+
+  .winkel-svg{width:100%;max-width:400px;display:block;margin:10px auto;background:#f6f8fb;
+              border:2px solid var(--line);border-radius:14px;}
+  .tri-svg{width:100%;max-width:380px;display:block;margin:10px auto;background:#f6f8fb;
+           border:2px solid var(--line);border-radius:14px;touch-action:none;
+           overscroll-behavior:contain;-webkit-user-select:none;user-select:none;}
+  .tri-svg circle.handle-hit{cursor:grab;}
+  .tri-svg circle.handle-hit:active{cursor:grabbing;}
+
+  .sum-badge{text-align:center;font-size:1.15rem;font-weight:800;color:var(--green);
+             background:var(--green-bg);border:2px solid var(--green);border-radius:12px;
+             padding:8px 12px;margin:10px auto;max-width:340px;}
+  .drag-hint{text-align:center;color:var(--muted);font-size:.85rem;margin:4px 0 0;}
+
+  .tip{text-decoration:underline dotted;text-decoration-color:var(--blue);cursor:pointer;color:var(--blue);
+       font-weight:600;position:relative;}
+  .tip-bubble{display:none;position:absolute;left:0;top:100%;background:var(--ink);color:#fff;
+              padding:8px 10px;border-radius:8px;font-size:.82rem;font-weight:400;width:230px;
+              z-index:20;line-height:1.4;box-shadow:0 4px 12px rgba(0,0,0,.2);}
+  .tip.open .tip-bubble{display:block;}
+
+  .frage{margin:14px 0;padding:12px;background:#f8f9fb;border-radius:12px;border:2px solid var(--line);}
+  .frage p{margin:0 0 8px;font-weight:600;}
+  .wf-row{display:flex;gap:10px;flex-wrap:wrap;}
+  .wf-btn{min-height:44px;min-width:100px;padding:8px 16px;border:2px solid var(--line);
+          background:#fff;border-radius:11px;font-weight:700;cursor:pointer;color:var(--ink);}
+  .wf-btn.selected{border-color:var(--blue);background:#e8f0fb;}
+  .wf-btn:disabled{cursor:default;}
+  .fb-correct{background:var(--green-bg)!important;border-color:var(--green)!important;color:var(--green)!important;}
+  .fb-wrong{background:var(--red-bg)!important;border-color:var(--red)!important;color:var(--red)!important;}
+  .fb-note{margin-top:8px;font-weight:700;font-size:.92rem;min-height:1.2em;}
+  .fb-note.ok{color:var(--green);}
+  .fb-note.bad{color:var(--red);}
+
+  .inputrow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:10px 0;}
+  input[type=text]{min-height:44px;width:110px;font-size:1rem;padding:6px 10px;border:2px solid var(--line);
+                    border-radius:10px;background:#fff;color:var(--ink);}
+  input[type=text].fb-correct{border-color:var(--green);background:var(--green-bg);}
+  input[type=text].fb-wrong{border-color:var(--red);background:var(--red-bg);}
+  .unit{font-weight:700;color:var(--muted);}
+
+  .btn{min-height:44px;padding:9px 18px;border:none;border-radius:11px;font-weight:700;cursor:pointer;
+       background:var(--blue);color:#fff;font-size:.95rem;}
+  .btn:active{transform:scale(.97);}
+  .btn:disabled{opacity:.6;}
+  .btn-clear{background:#fff;color:var(--red);border:2px solid var(--red);}
+  .btn-tip{background:#fff;color:var(--blue);border:2px solid var(--blue);}
+
+  .example-row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:12px 0;}
+  .example-row .btn.active{background:var(--blue);color:#fff;}
+
+  .heftbox{background:#fdf6e3;border:2px dashed #d8b35a;border-radius:12px;
+           padding:12px 14px;margin:16px 0 4px;}
+  .heftbox b{color:#8a6a1f;}
+
+  .flip-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;}
+  @media (max-width:520px){.flip-grid{grid-template-columns:1fr;}}
+  .flip-card{min-height:140px;border-radius:14px;cursor:pointer;perspective:800px;}
+  .flip-inner{position:relative;width:100%;height:100%;min-height:140px;transition:transform .5s;
+              transform-style:preserve-3d;}
+  .flip-card.flipped .flip-inner{transform:rotateY(180deg);}
+  .flip-face{position:absolute;inset:0;backface-visibility:hidden;border-radius:14px;
+             display:flex;align-items:center;justify-content:center;padding:16px;
+             font-weight:700;border:2px solid var(--line);}
+  .flip-text{display:block;width:100%;}
+  .flip-front{background:#eef4fb;color:var(--blue);text-align:center;}
+  .flip-back{background:var(--orange-light);color:var(--orange-dark);transform:rotateY(180deg);
+             font-weight:500;font-size:.95rem;line-height:1.5;text-align:left;}
+
+  mjx-container{display:inline !important;}
+
+  /* Geodreieck-Baustein Styles (übernommen) */
+  .geo-stage{width:100%;max-width:360px;touch-action:none;overscroll-behavior:contain;border-radius:14px;
+    display:block;margin:10px auto 0;
+    background:repeating-linear-gradient(0deg,#f4f8fd,#f4f8fd 27px,#e7eef7 28px),
+              repeating-linear-gradient(90deg,transparent,transparent 27px,#e7eef7 28px);
+    border:2px solid #cdd8e6;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;cursor:grab;}
+  .geo-stage:active{cursor:grabbing;}
+  .geo-stage text{-webkit-user-select:none;user-select:none;pointer-events:none;}
+  .geoTri{pointer-events:none;will-change:transform;}
+  .geo-controls{max-width:360px;margin:10px auto 0;display:flex;flex-direction:column;gap:10px;}
+  .geo-rot{background:#eef4fb;border:2px solid #cdd8e6;border-radius:14px;padding:10px 12px;}
+  .geo-rot label{font-weight:700;color:var(--blue);display:block;text-align:center;margin-bottom:6px;}
+  .geo-rot-hint{font-weight:600;color:var(--muted);font-size:.8em;}
+  .geo-presets{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;}
+  .geo-btn{min-height:44px;padding:6px 14px;border:2px solid #cdd8e6;background:#fff;border-radius:11px;
+    font-weight:700;cursor:pointer;color:var(--ink);}
+  .geo-btn:active{transform:scale(.96);}
+  .geo-hint{font-size:.85rem;color:var(--muted);text-align:center;margin:4px 0 0;}
+
+  #weiterWrap{position:fixed;left:0;right:0;bottom:0;padding:10px 16px 14px;background:linear-gradient(180deg,rgba(250,247,242,0),#faf7f2 30%);
+              display:none;justify-content:center;z-index:30;}
+  #weiterBtn{width:100%;max-width:600px;min-height:50px;background:var(--orange-dark);color:#fff;
+             border:none;border-radius:14px;font-size:1.05rem;font-weight:700;cursor:pointer;text-decoration:none;
+             display:flex;align-items:center;justify-content:center;}
+
+  .rex{position:fixed;bottom:8px;right:10px;font-size:1.5rem;cursor:pointer;z-index:40;user-select:none;}
+  .rex-note{position:fixed;bottom:44px;right:10px;background:var(--ink);color:#fff;padding:6px 10px;
+            border-radius:8px;font-size:.8rem;display:none;z-index:40;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <h1>🔺 Winkelsumme im Dreieck</h1>
+    <p>Erarbeitung · Klasse 7 · Geometrie</p>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <nav class="tabs" id="tabBar">
+    <button class="active" data-card="c0">1 · Auffrischen</button>
+    <button data-card="c1">2 · Erkunden</button>
+    <button data-card="c2">3 · Live-Dreieck</button>
+    <button data-card="c3">4 · Beweis</button>
+    <button data-card="c4">5 · n-Eck</button>
+    <button data-card="c5">6 · Zusammenfassung</button>
+  </nav>
+
+  <!-- ============ KARTE 0 – AUFFRISCHEN ============ -->
+  <section class="card active" id="c0">
+    <h2>1 · Kurz aufgefrischt</h2>
+    <p>Für den Beweis in dieser Lernseite brauchst du zwei Dinge, die du schon kennst:</p>
+    <div class="merksatz">
+      <p><b>Wechselwinkelsatz:</b> Werden zwei parallele Geraden von einer dritten Geraden
+      geschnitten, sind Wechselwinkel gleich groß.</p>
+      <p><b>Gestreckter Winkel:</b> Ein Winkel von \(180^\circ\) – seine Schenkel bilden eine
+      Gerade.</p>
+    </div>
+    <div class="frage" id="q0a">
+      <p>Ein gestreckter Winkel ist genau \(180^\circ\) groß.</p>
+      <div class="wf-row">
+        <button class="wf-btn" data-val="true">Wahr</button>
+        <button class="wf-btn" data-val="false">Falsch</button>
+      </div>
+      <div class="fb-note"></div>
+    </div>
+    <button class="btn" id="check0">Prüfen</button>
+  </section>
+
+  <!-- ============ KARTE 1 – ERKUNDEN ============ -->
+  <section class="card" id="c1">
+    <h2>2 · Erkunden: Miss die Winkel im Dreieck</h2>
+    <p>Miss mit dem virtuellen Geodreieck alle drei Innenwinkel eines Dreiecks und addiere sie.</p>
+
+    <div class="example-row" id="exampleRow">
+      <button class="btn btn-tip active" data-idx="0">Dreieck 1</button>
+      <button class="btn btn-tip" data-idx="1">Dreieck 2</button>
+    </div>
+    <div id="geoExplore"></div>
+    <p style="text-align:center;color:var(--muted);font-size:.85rem;">
+      Lege die Nullkante des Geodreiecks an eine Seite des Dreiecks an und lies jeden der drei
+      Innenwinkel ab.</p>
+
+    <p style="text-align:center;"><b>Stelle eine Vermutung auf:</b> Addiere deine drei
+      gemessenen Winkel. Was fällt dir auf?</p>
+
+    <div style="text-align:center;">
+      <button class="btn btn-tip" id="tipBtnExplore">💡 Tipp anzeigen</button>
+    </div>
+    <div class="merksatz" id="tipBoxExplore" style="background:#eef4fb;border-color:#c7d7ec;display:none;">
+      <p>📐 Egal, wie das Dreieck aussieht: Addiere alle drei gemessenen Innenwinkel. Kommt bei
+      beiden Beispielen ungefähr derselbe Wert heraus?</p>
+    </div>
+
+    <div class="heftbox">
+      <p><b>✏️ Für dein Heft:</b> Notiere für beide Dreiecke deine drei gemessenen Winkel und
+      ihre Summe. Zeichne anschließend selbst <b>zwei weitere Dreiecke</b> ins Heft, miss auch
+      dort nach und prüfe, ob sich deine Vermutung bestätigt.</p>
+    </div>
+  </section>
+
+  <!-- ============ KARTE 2 – LIVE-DREIECK ============ -->
+  <section class="card" id="c2">
+    <h2>3 · Live-Dreieck: Zieh an den Ecken!</h2>
+    <p>Ziehe die drei Eckpunkte an eine beliebige Stelle. Die Winkel \(\alpha\), \(\beta\) und
+       \(\gamma\) werden live gemessen und addiert.</p>
+    <div id="triCard1"></div>
+    <p class="drag-hint">👆 Zieh an einem der drei blauen Punkte.</p>
+    <div class="sum-badge" id="sumBadge1">α + β + γ = 180°</div>
+    <p style="text-align:center;">Egal wie du das Dreieck verformst – die Summe bleibt immer
+       \(180^\circ\). Das ist der <b>Winkelsummensatz im Dreieck</b>.</p>
+  </section>
+
+  <!-- ============ KARTE 3 – BEWEIS ============ -->
+  <section class="card" id="c3">
+    <h2>4 · Beweis: Die Parallele zur Grundseite</h2>
+    <p>Ziehe durch die Spitze \(C\) eine Parallele zur Grundseite \(AB\) – das übernimmt die
+       Zeichnung automatisch für dich. Alle drei Punkte bleiben beweglich.</p>
+    <div id="triCard2"></div>
+    <p class="drag-hint">👆 Zieh an einem der drei Punkte – die Parallele passt sich an.</p>
+
+    <div class="merksatz">
+      <p>An der Spitze \(C\) entstehen durch die Parallele zwei neue Winkel neben \(\gamma\).
+      Nach dem <b>Wechselwinkelsatz</b> ist der linke davon genauso groß wie \(\alpha\), der
+      rechte genauso groß wie \(\beta\) (gleiche Farben in der Zeichnung).</p>
+      <p>Zusammen bilden diese drei Winkel an \(C\) einen <b>gestreckten Winkel</b>
+      (\(180^\circ\)), denn sie liegen alle auf der Parallelen. Also:
+      \(\alpha + \gamma + \beta = 180^\circ\).</p>
+    </div>
+    <div class="sum-badge" id="sumBadge2">an C: α + γ + β = 180°</div>
+
+    <div class="frage" id="q3a">
+      <p>Der linke der beiden neuen Winkel an \(C\) ist mit \(\alpha\) ein Wechselwinkel-Paar.</p>
+      <div class="wf-row">
+        <button class="wf-btn" data-val="true">Wahr</button>
+        <button class="wf-btn" data-val="false">Falsch</button>
+      </div>
+      <div class="fb-note"></div>
+    </div>
+    <button class="btn" id="check3">Prüfen</button>
+  </section>
+
+  <!-- ============ KARTE 4 – N-ECK ============ -->
+  <section class="card" id="c4">
+    <h2>5 · Ausdehnung auf n-Ecke</h2>
+    <p>Jedes Vieleck lässt sich von einer Ecke aus in Dreiecke zerlegen. Ein Vieleck mit
+       \(n\) Ecken zerfällt so in \(n-2\) Dreiecke.</p>
+
+    <div class="example-row" id="polyRow">
+      <button class="btn btn-tip active" data-n="4">n=4</button>
+      <button class="btn btn-tip" data-n="5">n=5</button>
+      <button class="btn btn-tip" data-n="6">n=6</button>
+      <button class="btn btn-tip" data-n="7">n=7</button>
+      <button class="btn btn-tip" data-n="8">n=8</button>
+    </div>
+    <div id="polySvg"></div>
+    <p style="text-align:center;" id="polyText"></p>
+
+    <div class="merksatz">
+      <p><b>Winkelsummensatz im n-Eck:</b> Winkelsumme \( = (n-2) \cdot 180^\circ\), weil jedes
+      der \(n-2\) Dreiecke \(180^\circ\) beiträgt.</p>
+    </div>
+
+    <div class="inputrow">
+      <label for="a4a">Winkelsumme im Sechseck \((n=6)\):</label>
+      <input type="text" id="a4a" inputmode="numeric" placeholder="?">
+      <span class="unit">°</span>
+      <button class="btn" id="check4a">Prüfen</button>
+    </div>
+    <div class="fb-note" id="fb4a"></div>
+    <div id="tipRow4a" style="display:none;">
+      <button class="btn btn-tip" id="tipBtn4a">💡 Tipp anzeigen</button>
+      <p id="tipText4a" style="color:var(--blue);font-weight:600;"></p>
+    </div>
+    <button class="btn btn-clear" id="clear4a" style="display:none;">Leeren</button>
+
+    <div class="inputrow" style="margin-top:20px;">
+      <label for="a4b">Winkelsumme \(900^\circ\) – wie viele Ecken \(n\) hat das Vieleck?</label>
+    </div>
+    <div class="inputrow">
+      <label for="a4b">\(n =\)</label>
+      <input type="text" id="a4b" inputmode="numeric" placeholder="?">
+      <button class="btn" id="check4b">Prüfen</button>
+    </div>
+    <div class="fb-note" id="fb4b"></div>
+    <div id="tipRow4b" style="display:none;">
+      <button class="btn btn-tip" id="tipBtn4b">💡 Tipp anzeigen</button>
+      <p id="tipText4b" style="color:var(--blue);font-weight:600;"></p>
+    </div>
+    <button class="btn btn-clear" id="clear4b" style="display:none;">Leeren</button>
+  </section>
+
+  <!-- ============ KARTE 5 – ZUSAMMENFASSUNG ============ -->
+  <section class="card" id="c5">
+    <h2>6 · Zusammenfassung</h2>
+    <p>Tippe auf eine Karte, um die Antwort zu sehen.</p>
+    <div class="flip-grid">
+      <div class="flip-card">
+        <div class="flip-inner">
+          <div class="flip-face flip-front"><span class="flip-text">Winkelsummensatz im Dreieck</span></div>
+          <div class="flip-face flip-back"><span class="flip-text">Die drei Innenwinkel eines Dreiecks ergeben immer zusammen \(180^\circ\).</span></div>
+        </div>
+      </div>
+      <div class="flip-card">
+        <div class="flip-inner">
+          <div class="flip-face flip-front"><span class="flip-text">Wie beweist man das?</span></div>
+          <div class="flip-face flip-back"><span class="flip-text">Mit einer Parallelen zur Grundseite durch die gegenüberliegende Ecke – und dem Wechselwinkelsatz.</span></div>
+        </div>
+      </div>
+      <div class="flip-card">
+        <div class="flip-inner">
+          <div class="flip-face flip-front"><span class="flip-text">Winkelsumme im Viereck?</span></div>
+          <div class="flip-face flip-back"><span class="flip-text">\(360^\circ\) – ein Viereck lässt sich in 2 Dreiecke zerlegen (\(2 \cdot 180^\circ\)).</span></div>
+        </div>
+      </div>
+      <div class="flip-card">
+        <div class="flip-inner">
+          <div class="flip-face flip-front"><span class="flip-text">Winkelsumme im n-Eck?</span></div>
+          <div class="flip-face flip-back"><span class="flip-text">\((n-2)\cdot 180^\circ\) – man zerlegt das n-Eck in \(n-2\) Dreiecke.</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<div id="weiterWrap"><a id="weiterBtn" href="#">Weiter →</a></div>
+<div class="rex" id="rex">🦖</div>
+<div class="rex-note" id="rexNote">Made by Mathedino</div>
+
+<!-- ================= Geodreieck-Baustein (übernommen) ================= -->
+<script>
+function mountGeodreieck(container, geraden, optionen){
+  const SVGNS='http://www.w3.org/2000/svg';
+  const root = (typeof container==='string') ? document.getElementById(container) : container;
+  const opt = Object.assign({start:{x:200,y:200,rot:0}, hint:true, presets:[0,45,90,135]}, optionen||{});
+  let geraden_ = geraden.slice();
+  const geo = { x:opt.start.x, y:opt.start.y, rot:opt.start.rot };
+
+  root.innerHTML='';
+  const stage = document.createElementNS(SVGNS,'svg');
+  stage.setAttribute('viewBox','0 0 400 400');
+  stage.setAttribute('class','geo-stage');
+  root.appendChild(stage);
+
+  const controls=document.createElement('div'); controls.className='geo-controls';
+  controls.innerHTML =
+    `<div class="geo-rot">
+       <label>🔄 Drehung: <span class="geo-rotval">0°</span> <span class="geo-rot-hint">(außerhalb der Skala ziehen)</span></label>
+       <div class="geo-presets">`+
+         opt.presets.map(d=>`<button class="geo-btn geo-set" data-deg="${d}">${d}°</button>`).join('')+
+       `</div>
+     </div>
+     <button class="geo-btn geo-reset">📐 Geodreieck zurücklegen</button>`;
+  root.appendChild(controls);
+  if(opt.hint){
+    const h=document.createElement('p'); h.className='geo-hint';
+    h.innerHTML='👆 <b>Innerhalb</b> der Gradskala ziehen = <b>verschieben</b> · <b>außerhalb</b> ziehen = <b>drehen</b>.';
+    root.appendChild(h);
+  }
+
+  const rotval = controls.querySelector('.geo-rotval');
+  function el(tag,attrs){const e=document.createElementNS(SVGNS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);return e;}
+
+  function buildGeo(){
+    const W=180, H=180, COL='#2f5fa6', EDGE='#244e86';
+    const g=el('g',{transform:`translate(${geo.x} ${geo.y}) rotate(${geo.rot})`,class:'geoTri'});
+    g.appendChild(el('path',{d:`M ${-W+8},0 Q ${-W},0 ${-W+6},-4 L -4,${-H+6} Q 0,${-H} 4,${-H+6} L ${W-6},-4 Q ${W},0 ${W-8},0 Z`,
+      fill:'rgba(150,200,235,0.22)',stroke:EDGE,'stroke-width':2.5,'stroke-linejoin':'round'}));
+    for(let y=16;y<H-10;y+=16){const half=W*(1-y/H)-4;
+      g.appendChild(el('line',{x1:-half,y1:-y,x2:half,y2:-y,stroke:COL,'stroke-width':0.8,opacity:.38}));}
+    g.appendChild(el('line',{x1:0,y1:4,x2:0,y2:-H+8,stroke:EDGE,'stroke-width':1.6,'stroke-dasharray':'7 5',opacity:.85}));
+    g.appendChild(el('path',{d:`M -4,${-H+16} L 0,${-H+8} L 4,${-H+16}`,fill:'none',stroke:EDGE,'stroke-width':1.6,opacity:.85}));
+    g.appendChild(el('line',{x1:-W+6,y1:0,x2:W-6,y2:0,stroke:EDGE,'stroke-width':2.4}));
+    const cm=20;
+    for(let n=1;n*cm<=W-12;n++){[-1,1].forEach(sgn=>{const x=sgn*n*cm,lang=(n%5===0);
+      g.appendChild(el('line',{x1:x,y1:0,x2:x,y2:lang?9:5,stroke:COL,'stroke-width':lang?1.4:0.9,opacity:.7}));
+      if(lang){const t=el('text',{x:x,y:19,'text-anchor':'middle','font-size':9,fill:COL,opacity:.8});t.textContent=n;g.appendChild(t);}});}
+    g.appendChild(el('line',{x1:0,y1:0,x2:0,y2:10,stroke:EDGE,'stroke-width':1.6}));
+    const Rs=W*0.66,cx=0,cy=0,Ri=Rs*0.86;
+    g.appendChild(el('path',{d:`M ${cx-Rs} ${cy} A ${Rs} ${Rs} 0 0 1 ${cx+Rs} ${cy}`,fill:'none',stroke:COL,'stroke-width':1,opacity:.7}));
+    g.appendChild(el('path',{d:`M ${cx-Ri} ${cy} A ${Ri} ${Ri} 0 0 1 ${cx+Ri} ${cy}`,fill:'none',stroke:COL,'stroke-width':0.8,opacity:.5}));
+    for(let a=0;a<=180;a+=1){const rad=Math.PI*a/180;
+      const zehn=(a%10===0), fuenf=(a%5===0);
+      const len=zehn?13:(fuenf?9:5);
+      const r2=Rs-len;
+      g.appendChild(el('line',{x1:cx-Math.cos(rad)*Rs,y1:cy-Math.sin(rad)*Rs,x2:cx-Math.cos(rad)*r2,y2:cy-Math.sin(rad)*r2,
+        stroke:COL,'stroke-width':zehn?1.5:(fuenf?1:0.6),opacity:zehn?0.9:(fuenf?0.8:0.6)}));
+      if(zehn){const tr=r2-8,tx=cx-Math.cos(rad)*tr,ty=cy-Math.sin(rad)*tr+3;
+        const t=el('text',{x:tx,y:ty,'text-anchor':'middle','font-size':8,fill:COL,opacity:.85});t.textContent=a;g.appendChild(t);}}
+    g.appendChild(el('rect',{x:-9,y:-H+8,width:9,height:9,fill:'none',stroke:EDGE,'stroke-width':1.8}));
+    const t90=el('text',{x:0,y:-H-22,'text-anchor':'middle','font-size':14,fill:EDGE,'font-weight':'bold'});t90.textContent='90°';g.appendChild(t90);
+    return g;
+  }
+
+  function draw(){
+    stage.innerHTML='';
+    geraden_.forEach(L=>stage.appendChild(el('line',
+      {x1:L.x1,y1:L.y1,x2:L.x2,y2:L.y2,stroke:L.color||'#d6336c','stroke-width':6,'stroke-linecap':'round'})));
+    stage.appendChild(buildGeo());
+  }
+  function applyTransform(){
+    const g=stage.querySelector('.geoTri');
+    if(g)g.setAttribute('transform',`translate(${geo.x} ${geo.y}) rotate(${geo.rot})`);
+  }
+  let rafPending=false;
+  function scheduleTransform(){
+    if(rafPending)return;
+    rafPending=true;
+    requestAnimationFrame(()=>{rafPending=false;applyTransform();});
+  }
+  function setRot(deg){
+    deg=((Math.round(deg)%360)+360)%360;
+    geo.rot=deg; rotval.textContent=deg+'°'; scheduleTransform();
+  }
+  controls.querySelectorAll('.geo-set').forEach(b=>b.addEventListener('click',()=>setRot(+b.dataset.deg)));
+  controls.querySelector('.geo-reset').addEventListener('click',()=>{
+    geo.x=opt.start.x; geo.y=opt.start.y; setRot(opt.start.rot); applyTransform();
+  });
+
+  let mode=null, activePointer=null, dragStart=null, rotStart=null;
+  function pt(evt){const r=stage.getBoundingClientRect();
+    return {x:(evt.clientX-r.left)/r.width*400, y:(evt.clientY-r.top)/r.height*400};}
+  function winkelZuMitte(p){ return Math.atan2(p.y-geo.y, p.x-geo.x)*180/Math.PI; }
+  stage.addEventListener('pointerdown',e=>{
+    if(activePointer!==null)return;
+    activePointer=e.pointerId;
+    try{stage.setPointerCapture(e.pointerId);}catch(_){}
+    const p=pt(e);
+    const Rs=180*0.66;
+    const distMitte=Math.hypot(p.x-geo.x, p.y-geo.y);
+    if(distMitte<=Rs){
+      mode='move';
+      dragStart={px:p.x,py:p.y,gx:geo.x,gy:geo.y};
+    }else{
+      mode='rotate';
+      rotStart={ pointerWinkel:winkelZuMitte(p), rotAnfang:geo.rot };
+    }
+    e.preventDefault();
+  });
+  stage.addEventListener('pointermove',e=>{
+    if(mode===null||e.pointerId!==activePointer)return;
+    const p=pt(e);
+    if(mode==='rotate'){
+      const delta=winkelZuMitte(p)-rotStart.pointerWinkel;
+      setRot(rotStart.rotAnfang+delta);
+    }else{
+      geo.x=Math.max(-60,Math.min(460,dragStart.gx+(p.x-dragStart.px)));
+      geo.y=Math.max(-60,Math.min(460,dragStart.gy+(p.y-dragStart.py)));
+      scheduleTransform();
+    }
+    e.preventDefault();
+  });
+  function blockTouch(ev){ if(mode!==null) ev.preventDefault(); }
+  stage.addEventListener('touchmove', blockTouch, {passive:false});
+  function endDrag(e){if(e&&e.pointerId!==activePointer)return;mode=null;activePointer=null;}
+  stage.addEventListener('pointerup',endDrag);
+  stage.addEventListener('pointercancel',endDrag);
+
+  setRot(geo.rot); draw();
+
+  return {
+    setRot,
+    reset(){geo.x=opt.start.x;geo.y=opt.start.y;setRot(opt.start.rot);applyTransform();},
+    getState(){return {x:geo.x,y:geo.y,rot:geo.rot};},
+    setGeraden(arr){geraden_=arr.slice();draw();}
+  };
+}
+</script>
+
+<!-- ================= Seiten-Logik ================= -->
+<script>
+const SVGNS='http://www.w3.org/2000/svg';
+function polar(cx,cy,r,deg){const t=deg*Math.PI/180; return [cx+r*Math.cos(t), cy+r*Math.sin(t)];}
+function el(tag,attrs){const e=document.createElementNS(SVGNS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);return e;}
+function minorWedgePath(cx,cy,r,angA,angB){
+  const [x1,y1]=polar(cx,cy,r,angA), [x2,y2]=polar(cx,cy,r,angB);
+  return `M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 0 1 ${x2} ${y2} Z`;
+}
+/* Winkel (unsigned, 0..180 Grad) zwischen den Strahlen V->P und V->Q, plus Winkelrichtung des Strahls für Beschriftung */
+function angleAt(V,P,Q){
+  const v1={x:P.x-V.x,y:P.y-V.y}, v2={x:Q.x-V.x,y:Q.y-V.y};
+  const len1=Math.hypot(v1.x,v1.y)||1, len2=Math.hypot(v2.x,v2.y)||1;
+  const dot=v1.x*v2.x+v1.y*v2.y, det=v1.x*v2.y-v1.y*v2.x;
+  const deg=Math.atan2(Math.abs(det),dot)*180/Math.PI;
+  const u1={x:v1.x/len1,y:v1.y/len1}, u2={x:v2.x/len2,y:v2.y/len2};
+  let bx=u1.x+u2.x, by=u1.y+u2.y;
+  const blen=Math.hypot(bx,by)||1;
+  return {deg, bis:{x:bx/blen,y:by/blen}};
+}
+function rayAngleDeg(V,P){ return Math.atan2(P.y-V.y,P.x-V.x)*180/Math.PI; }
+
+/* ---------- Live-Dreieck Modul (frei bewegliche Ecken) ---------- */
+function mountTriangle(containerId, initial, cfg){
+  cfg = cfg || {};
+  const root=document.getElementById(containerId);
+  root.innerHTML='';
+  const svg=document.createElementNS(SVGNS,'svg');
+  svg.setAttribute('viewBox','0 0 400 400');
+  svg.setAttribute('class','tri-svg');
+  root.appendChild(svg);
+
+  const V={A:{...initial.A}, B:{...initial.B}, C:{...initial.C}};
+  let dragging=null, activePointer=null;
+
+  function svgPoint(evt){
+    const r=svg.getBoundingClientRect();
+    return {x:(evt.clientX-r.left)/r.width*400, y:(evt.clientY-r.top)/r.height*400};
+  }
+
+  function render(){
+    svg.innerHTML='';
+    const a=angleAt(V.A,V.B,V.C), b=angleAt(V.B,V.A,V.C), c=angleAt(V.C,V.A,V.B);
+
+    if(cfg.showParallel){
+      const dirAB=rayAngleDeg(V.A,V.B);
+      const [px1,py1]=polar(V.C.x,V.C.y,150,dirAB+180);
+      const [px2,py2]=polar(V.C.x,V.C.y,150,dirAB);
+      svg.appendChild(el('line',{x1:px1,y1:py1,x2:px2,y2:py2,stroke:'#8a4fc9','stroke-width':2.5,
+        'stroke-dasharray':'2 7','stroke-linecap':'round'}));
+    }
+
+    // Dreiecksfläche + Kanten
+    svg.appendChild(el('path',{d:`M ${V.A.x} ${V.A.y} L ${V.B.x} ${V.B.y} L ${V.C.x} ${V.C.y} Z`,
+      fill:'#fdf3e4', stroke:'none'}));
+
+    if(cfg.showParallel){
+      const colA='#2f6fb0', colB='#1f9d55', colC='#c9762f';
+      const angAB_fromA=rayAngleDeg(V.A,V.B), angAC_fromA=rayAngleDeg(V.A,V.C);
+      const angBA_fromB=rayAngleDeg(V.B,V.A), angBC_fromB=rayAngleDeg(V.B,V.C);
+      const angCA_fromC=rayAngleDeg(V.C,V.A), angCB_fromC=rayAngleDeg(V.C,V.B);
+      const angLeftFromC=rayAngleDeg(V.B,V.A);   // Richtung B->A = linker Strahl der Parallelen bei C
+      const angRightFromC=rayAngleDeg(V.A,V.B);  // Richtung A->B = rechter Strahl der Parallelen bei C
+
+      svg.appendChild(el('path',{d:minorWedgePath(V.A.x,V.A.y,26,angAB_fromA,angAC_fromA),fill:colA,opacity:.55}));
+      svg.appendChild(el('path',{d:minorWedgePath(V.B.x,V.B.y,26,angBA_fromB,angBC_fromB),fill:colB,opacity:.55}));
+      svg.appendChild(el('path',{d:minorWedgePath(V.C.x,V.C.y,30,angCA_fromC,angCB_fromC),fill:colC,opacity:.55}));
+      svg.appendChild(el('path',{d:minorWedgePath(V.C.x,V.C.y,30,angLeftFromC,angCA_fromC),fill:colA,opacity:.35}));
+      svg.appendChild(el('path',{d:minorWedgePath(V.C.x,V.C.y,30,angCB_fromC,angRightFromC),fill:colB,opacity:.35}));
+    }
+
+    // Kanten
+    [[V.A,V.B],[V.B,V.C],[V.C,V.A]].forEach(([P,Q])=>{
+      svg.appendChild(el('line',{x1:P.x,y1:P.y,x2:Q.x,y2:Q.y,stroke:'#243447','stroke-width':3,'stroke-linecap':'round'}));
+    });
+
+    // Winkel-Labels
+    function label(V0,info,text,color){
+      const [lx,ly]=[V0.x+info.bis.x*34, V0.y+info.bis.y*34];
+      svg.appendChild(el('text',{x:lx,y:ly,'text-anchor':'middle','dominant-baseline':'middle',
+        'font-size':15,'font-weight':700,'font-style':'italic',fill:color||'#243447'})).textContent=text;
+    }
+    label(V.A,a,`α=${Math.round(a.deg)}°`, cfg.showParallel?'#2f6fb0':'#243447');
+    label(V.B,b,`β=${Math.round(b.deg)}°`, cfg.showParallel?'#1f9d55':'#243447');
+    label(V.C,c,`γ=${Math.round(c.deg)}°`, cfg.showParallel?'#c9762f':'#243447');
+
+    // Eckpunkt-Handles
+    [['A',V.A],['B',V.B],['C',V.C]].forEach(([key,P])=>{
+      svg.appendChild(el('circle',{cx:P.x,cy:P.y,r:24,fill:'#2f5fa6',opacity:0.001,class:'handle-hit','data-key':key}));
+      svg.appendChild(el('circle',{cx:P.x,cy:P.y,r:9,fill:'#2f5fa6',stroke:'#fff','stroke-width':2,'pointer-events':'none'}));
+    });
+
+    const sum=a.deg+b.deg+c.deg;
+    if(cfg.onUpdate) cfg.onUpdate({a:a.deg,b:b.deg,c:c.deg,sum});
+  }
+
+  let rafPending=false;
+  function scheduleRender(){
+    if(rafPending)return;
+    rafPending=true;
+    requestAnimationFrame(()=>{rafPending=false;render();});
+  }
+
+  function tooClose(P,Q1,Q2){
+    return Math.hypot(P.x-Q1.x,P.y-Q1.y)<36 || Math.hypot(P.x-Q2.x,P.y-Q2.y)<36;
+  }
+
+  svg.addEventListener('pointerdown', e=>{
+    if(activePointer!==null) return;
+    const target=e.target.closest('circle.handle-hit');
+    if(!target) return;
+    activePointer=e.pointerId;
+    try{svg.setPointerCapture(e.pointerId);}catch(_){}
+    dragging=target.getAttribute('data-key');
+    e.preventDefault();
+  });
+  svg.addEventListener('pointermove', e=>{
+    if(dragging===null||e.pointerId!==activePointer) return;
+    const p=svgPoint(e);
+    const nx=Math.max(20,Math.min(380,p.x)), ny=Math.max(20,Math.min(380,p.y));
+    const others = ['A','B','C'].filter(k=>k!==dragging).map(k=>V[k]);
+    if(!tooClose({x:nx,y:ny}, others[0], others[1])){
+      V[dragging].x=nx; V[dragging].y=ny;
+      scheduleRender();
+    }
+    e.preventDefault();
+  });
+  function blockTouch(ev){ if(dragging!==null) ev.preventDefault(); }
+  svg.addEventListener('touchmove', blockTouch, {passive:false});
+  function endDrag(e){ if(e&&e.pointerId!==activePointer) return; dragging=null; activePointer=null; }
+  svg.addEventListener('pointerup', endDrag);
+  svg.addEventListener('pointercancel', endDrag);
+
+  render();
+  return { getState(){return {A:{...V.A},B:{...V.B},C:{...V.C}};} };
+}
+
+mountTriangle('triCard1', {A:{x:80,y:320},B:{x:320,y:320},C:{x:200,y:80}}, {
+  onUpdate: (s)=>{ document.getElementById('sumBadge1').textContent =
+    `α + β + γ = ${Math.round(s.sum)}°`; }
+});
+mountTriangle('triCard2', {A:{x:70,y:300},B:{x:330,y:300},C:{x:230,y:90}}, {
+  showParallel:true,
+  onUpdate: (s)=>{ document.getElementById('sumBadge2').textContent =
+    `an C: α + γ + β = ${Math.round(s.a)}° + ${Math.round(s.c)}° + ${Math.round(s.b)}° = ${Math.round(s.sum)}°`; }
+});
+
+/* ---------- Erkunden-Karte: Geodreieck an zwei Dreiecken ---------- */
+const TRI_EXAMPLES=[
+  [ {x1:60,y1:330,x2:340,y2:330,color:'#d6336c'},
+    {x1:340,y1:330,x2:170,y2:70, color:'#1f9d55'},
+    {x1:170,y1:70, x2:60, y2:330,color:'#8a4fc9'} ],
+  [ {x1:50,y1:340,x2:300,y2:280,color:'#d6336c'},
+    {x1:300,y1:280,x2:230,y2:60, color:'#1f9d55'},
+    {x1:230,y1:60, x2:50, y2:340, color:'#8a4fc9'} ]
+];
+(function(){
+  const steuer = mountGeodreieck('geoExplore', TRI_EXAMPLES[0], {start:{x:200,y:40,rot:0}, hint:true});
+  document.getElementById('exampleRow').addEventListener('click', (e)=>{
+    const b=e.target.closest('button'); if(!b) return;
+    document.querySelectorAll('#exampleRow .btn').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    steuer.setGeraden(TRI_EXAMPLES[+b.dataset.idx]);
+    steuer.reset();
+  });
+})();
+
+document.getElementById('tipBtnExplore').addEventListener('click', ()=>{
+  const box=document.getElementById('tipBoxExplore'), btn=document.getElementById('tipBtnExplore');
+  const show = box.style.display === 'none';
+  box.style.display = show ? 'block' : 'none';
+  btn.textContent = show ? '💡 Tipp verbergen' : '💡 Tipp anzeigen';
+});
+
+/* ---------- n-Eck-Karte ---------- */
+function drawPolygon(n){
+  const svg=document.createElementNS(SVGNS,'svg');
+  svg.setAttribute('viewBox','0 0 320 320');
+  svg.setAttribute('class','winkel-svg');
+  const cx=160, cy=170, R=120;
+  const pts=[];
+  for(let i=0;i<n;i++){
+    const ang=-90 + i*360/n;
+    pts.push(polar(cx,cy,R,ang));
+  }
+  const colors=['#ffe08a','#cfe0f5','#c9b3e6','#a8e6b8','#f3b3c9','#b3d8f3'];
+  for(let i=1;i<n-1;i++){
+    const path=el('path',{d:`M ${pts[0][0]} ${pts[0][1]} L ${pts[i][0]} ${pts[i][1]} L ${pts[i+1][0]} ${pts[i+1][1]} Z`,
+      fill:colors[(i-1)%colors.length], opacity:0.75, stroke:'#243447','stroke-width':1});
+    svg.appendChild(path);
+  }
+  const outline=el('path',{d:`M ${pts.map(p=>p[0]+' '+p[1]).join(' L ')} Z`,
+    fill:'none', stroke:'#243447','stroke-width':3,'stroke-linecap':'round'});
+  svg.appendChild(outline);
+  pts.forEach(p=>svg.appendChild(el('circle',{cx:p[0],cy:p[1],r:4,fill:'#243447'})));
+  document.getElementById('polySvg').innerHTML=''; document.getElementById('polySvg').appendChild(svg);
+  document.getElementById('polyText').innerHTML =
+    `Dieses ${n}-Eck zerfällt in ${n-2} Dreiecke. Winkelsumme \\( = ${n-2}\\cdot 180^\\circ = ${(n-2)*180}^\\circ\\).`;
+  if(window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise([document.getElementById('polyText')]);
+}
+drawPolygon(4);
+document.getElementById('polyRow').addEventListener('click', (e)=>{
+  const b=e.target.closest('button'); if(!b) return;
+  document.querySelectorAll('#polyRow .btn').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');
+  drawPolygon(+b.dataset.n);
+});
+
+/* ---------- Fortschritt & Weiter-Button ---------- */
+const done = {c0:false, c3:false, c4a:false, c4b:false};
+function updateWeiter(){
+  if(done.c0 && done.c3 && done.c4a && done.c4b){
+    document.getElementById('weiterWrap').style.display='flex';
+  }
+}
+function parseNum(str){
+  const n = parseFloat(String(str).replace(',', '.').replace('°','').trim());
+  return isNaN(n) ? null : n;
+}
+
+/* ---------- Karte 0: Wahr/Falsch ---------- */
+function setupWF(id, correctVal){
+  const box = document.getElementById(id);
+  const btns = box.querySelectorAll('.wf-btn');
+  btns.forEach(b=>b.addEventListener('click', ()=>{
+    btns.forEach(x=>x.classList.remove('selected'));
+    b.classList.add('selected');
+  }));
+  return ()=>{
+    const sel = box.querySelector('.wf-btn.selected');
+    const note = box.querySelector('.fb-note');
+    if(!sel){ note.textContent='Bitte Wahr oder Falsch wählen.'; note.className='fb-note bad'; return false; }
+    const val = sel.dataset.val === 'true';
+    btns.forEach(x=>x.classList.remove('fb-correct','fb-wrong'));
+    if(val === correctVal){
+      sel.classList.add('fb-correct'); note.textContent='Richtig!'; note.className='fb-note ok';
+      btns.forEach(x=>x.disabled=true);
+      return true;
+    } else {
+      sel.classList.add('fb-wrong');
+      note.textContent='Leider falsch. Richtig wäre: ' + (correctVal ? 'Wahr' : 'Falsch') + '.';
+      note.className='fb-note bad';
+      return false;
+    }
+  };
+}
+const check0 = setupWF('q0a', true);
+document.getElementById('check0').addEventListener('click', ()=>{
+  if(check0()){ done.c0 = true; updateWeiter(); }
+});
+
+const check3 = setupWF('q3a', true);
+document.getElementById('check3').addEventListener('click', ()=>{
+  if(check3()){ done.c3 = true; updateWeiter(); }
+});
+
+/* ---------- Karte 4: n-Eck-Aufgaben ---------- */
+(function(){
+  const input=document.getElementById('a4a'), fb=document.getElementById('fb4a');
+  const tipRow=document.getElementById('tipRow4a'), tipBtn=document.getElementById('tipBtn4a'), tipText=document.getElementById('tipText4a');
+  const clearBtn=document.getElementById('clear4a');
+  const tips=['Ein Sechseck hat n = 6 Ecken.','Nutze die Formel (n − 2) · 180°.','Lösung: (6 − 2) · 180° = 720°'];
+  let tipIdx=-1;
+  tipBtn.addEventListener('click', ()=>{
+    tipIdx=Math.min(tipIdx+1, tips.length-1);
+    tipText.textContent=tips[tipIdx];
+    if(tipIdx>=tips.length-1) tipBtn.style.display='none';
+  });
+  document.getElementById('check4a').addEventListener('click', ()=>{
+    const v=parseNum(input.value);
+    if(v===null){ fb.textContent='Bitte eine Zahl eingeben.'; fb.className='fb-note bad'; return; }
+    if(v===720){
+      input.classList.remove('fb-wrong'); input.classList.add('fb-correct');
+      fb.textContent='Richtig! (6 − 2) · 180° = 720°.'; fb.className='fb-note ok';
+      input.disabled=true; document.getElementById('check4a').disabled=true;
+      tipRow.style.display='none'; clearBtn.style.display='none';
+      done.c4a=true; updateWeiter();
+    } else {
+      input.classList.remove('fb-correct'); input.classList.add('fb-wrong');
+      fb.textContent='Noch nicht richtig.'; fb.className='fb-note bad';
+      tipRow.style.display='block'; clearBtn.style.display='inline-block';
+    }
+  });
+  clearBtn.addEventListener('click', ()=>{
+    input.value=''; input.classList.remove('fb-wrong','fb-correct'); fb.textContent='';
+    clearBtn.style.display='none';
+  });
+})();
+
+(function(){
+  const input=document.getElementById('a4b'), fb=document.getElementById('fb4b');
+  const tipRow=document.getElementById('tipRow4b'), tipBtn=document.getElementById('tipBtn4b'), tipText=document.getElementById('tipText4b');
+  const clearBtn=document.getElementById('clear4b');
+  const tips=['Setze die Formel (n − 2) · 180° = 900° an.','Teile zuerst durch 180°: n − 2 = 5.','Lösung: n = 7'];
+  let tipIdx=-1;
+  tipBtn.addEventListener('click', ()=>{
+    tipIdx=Math.min(tipIdx+1, tips.length-1);
+    tipText.textContent=tips[tipIdx];
+    if(tipIdx>=tips.length-1) tipBtn.style.display='none';
+  });
+  document.getElementById('check4b').addEventListener('click', ()=>{
+    const v=parseNum(input.value);
+    if(v===null){ fb.textContent='Bitte eine Zahl eingeben.'; fb.className='fb-note bad'; return; }
+    if(v===7){
+      input.classList.remove('fb-wrong'); input.classList.add('fb-correct');
+      fb.textContent='Richtig! (7 − 2) · 180° = 900°.'; fb.className='fb-note ok';
+      input.disabled=true; document.getElementById('check4b').disabled=true;
+      tipRow.style.display='none'; clearBtn.style.display='none';
+      done.c4b=true; updateWeiter();
+    } else {
+      input.classList.remove('fb-correct'); input.classList.add('fb-wrong');
+      fb.textContent='Noch nicht richtig.'; fb.className='fb-note bad';
+      tipRow.style.display='block'; clearBtn.style.display='inline-block';
+    }
+  });
+  clearBtn.addEventListener('click', ()=>{
+    input.value=''; input.classList.remove('fb-wrong','fb-correct'); fb.textContent='';
+    clearBtn.style.display='none';
+  });
+})();
+
+/* ---------- Tabs ---------- */
+document.getElementById('tabBar').addEventListener('click', (e)=>{
+  const btn = e.target.closest('button'); if(!btn) return;
+  document.querySelectorAll('nav.tabs button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.card').forEach(c=>c.classList.remove('active'));
+  document.getElementById(btn.dataset.card).classList.add('active');
+});
+
+/* ---------- Karte 5: Flip-Cards ---------- */
+document.querySelectorAll('.flip-card').forEach(c=>{
+  c.addEventListener('click', ()=>c.classList.toggle('flipped'));
+});
+
+/* ---------- T-Rex ---------- */
+const rex=document.getElementById('rex'), rexNote=document.getElementById('rexNote');
+rex.addEventListener('click', ()=>{
+  rexNote.style.display = rexNote.style.display==='block' ? 'none' : 'block';
+});
+</script>
+</body>
+</html>
