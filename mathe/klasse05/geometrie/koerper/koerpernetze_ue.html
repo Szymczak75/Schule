@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Körpernetze – Übung</title>
+
+<meta name="description" content="Übung zu Körpernetzen: Netze den Körpern zuordnen, gültige von ungültigen Würfelnetzen unterscheiden und Netze selbst bauen. Mit Niveaustufen.">
+<meta name="keywords" content="Netz, Würfelnetz, Quadernetz, Übung, falten, zuordnen, Pyramide, Prisma, Flächen">
+<meta name="typ" content="Übung">
+<meta name="klasse" content="5">
+<meta name="fach" content="mathe">
+<meta name="oberthema" content="Körper">
+<meta name="thema" content="Körpernetze">
+
+<script>
+  MathJax = { tex:{inlineMath:[['$','$'],['\\(','\\)']]}, svg:{fontCache:'global'} };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+<style>
+:root{
+  --ink:#22303f;--card:#ffffff;--green:#1e7d32;--red:#c1272d;
+  --amber:#b8860b;--amber-light:#fdf3d9;--amber-dark:#96690a;
+  --blue:#2f5fa6;--blue-dark:#1f4680;--blue-light:#e6eefb;
+  --bg:#f6f8fb;--line:#dbe3ee;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);
+  color:var(--ink);line-height:1.55;font-size:17px;padding-bottom:90px;}
+.wrap{max-width:920px;margin:0 auto;padding:0 14px;}
+
+header{background:linear-gradient(135deg,var(--blue),var(--blue-dark));color:#fff;
+  padding:20px 18px;border-radius:0 0 20px 20px;box-shadow:0 3px 10px rgba(0,0,0,.12);}
+header h1{margin:0 0 4px;font-size:1.5rem;}
+header p{margin:0;opacity:.95;}
+
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0 10px;}
+.tab{min-height:44px;padding:8px 12px;border:2px solid var(--blue);border-radius:12px;
+  background:#fff;color:var(--blue-dark);font-weight:700;font-size:.9rem;cursor:pointer;flex:1 1 auto;text-align:center;}
+.tab.active{background:var(--blue);color:#fff;}
+.tab .num{display:inline-block;background:rgba(0,0,0,.12);border-radius:8px;padding:0 7px;margin-right:6px;font-size:.85em;}
+.tab.active .num{background:rgba(255,255,255,.3);}
+
+.card{display:none;background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px 16px 22px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,.05);}
+.card.active{display:block;animation:fade .25s ease;}
+@keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+.card h2{margin:0 0 6px;font-size:1.25rem;color:var(--blue-dark);border-bottom:3px solid var(--blue-light);padding-bottom:8px;}
+.card .sub{color:#5a6b7d;font-size:.95rem;margin:6px 0 12px;}
+p{margin:10px 0;}
+
+.levels{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 16px;}
+.lvl{min-height:44px;flex:1 1 100px;padding:8px 10px;border:2px solid var(--blue);border-radius:12px;
+  background:#fff;color:var(--blue-dark);font-weight:700;cursor:pointer;font-size:.92rem;text-align:center;}
+.lvl.active{background:var(--blue);color:#fff;}
+.lvlbody{display:none;}
+.lvlbody.active{display:block;}
+
+.auf{border:1px solid var(--line);border-radius:12px;padding:14px;margin:12px 0;background:#fbfcfe;}
+.auf .qtext{font-weight:600;margin-bottom:10px;}
+
+.opts{display:flex;flex-direction:column;gap:8px;}
+.opts.row{flex-direction:row;flex-wrap:wrap;}
+.opt{min-height:44px;padding:10px 14px;border:2px solid var(--blue);border-radius:12px;
+  background:#fff;color:var(--ink);font-size:1rem;cursor:pointer;text-align:left;font-weight:600;flex:1 1 auto;}
+.opt.sel{background:var(--blue-light);border-color:var(--blue-dark);}
+.opt.correct{background:var(--green);color:#fff;border-color:var(--green);}
+.opt.wrong{background:var(--red);color:#fff;border-color:var(--red);}
+.opt.locked{cursor:default;}
+
+/* Zuordnen */
+.pool{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0;}
+.chip{min-height:44px;padding:8px 12px;border:2px solid var(--blue);border-radius:12px;background:#fff;
+  color:var(--blue-dark);font-weight:700;cursor:pointer;text-align:center;}
+.chip.sel{background:var(--blue);color:#fff;transform:scale(1.04);}
+.chip.placed{opacity:.4;pointer-events:none;}
+.cats{display:flex;flex-direction:column;gap:10px;margin:10px 0;}
+.cat{border:2px dashed var(--blue);border-radius:12px;padding:10px;background:var(--blue-light);min-height:60px;cursor:pointer;}
+.cat .cat-title{font-weight:800;color:var(--blue-dark);margin-bottom:6px;}
+.cat .dropzone{display:flex;flex-wrap:wrap;gap:6px;min-height:34px;}
+.dz-item{padding:6px 12px;border-radius:12px;background:#fff;border:2px solid var(--blue);font-weight:700;cursor:pointer;min-height:34px;}
+.dz-item.ok{border-color:var(--green);background:#eaf7ec;}
+.dz-item.no{border-color:var(--red);background:#fdeceb;}
+
+/* Netz-Baukasten */
+.grid-net{display:grid;grid-template-columns:repeat(var(--cols),1fr);gap:3px;max-width:340px;margin:10px auto;
+  background:var(--line);padding:3px;border-radius:8px;}
+.gcell{aspect-ratio:1;background:#fdfdff;border-radius:4px;cursor:pointer;min-height:44px;min-width:36px;transition:background .1s;}
+.gcell.on{background:var(--blue);}
+.gcell.on:active{background:var(--blue-dark);}
+.count{text-align:center;font-weight:700;margin:6px 0;}
+
+/* Text-Input */
+.txtrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:6px 0;}
+.txtrow label{font-weight:600;min-width:90px;}
+input.num{min-height:44px;width:90px;font-size:1.1rem;text-align:center;border:2px solid var(--blue);border-radius:10px;padding:6px;}
+input.num.correct{border-color:var(--green);background:#eaf7ec;}
+input.num.wrong{border-color:var(--red);background:#fdeceb;}
+
+.btn{min-height:44px;padding:10px 20px;border:none;border-radius:12px;font-weight:700;font-size:1rem;
+  cursor:pointer;background:var(--blue);color:#fff;margin:8px 6px 0 0;}
+.btn:active{transform:scale(.97);}
+.btn.ghost{background:#fff;color:var(--blue-dark);border:2px solid var(--blue);}
+.btn.clear{background:#fff;color:var(--red);border:2px solid var(--red);display:none;}
+.btn.clear.show{display:inline-block;}
+
+.fb{margin-top:10px;font-weight:700;display:none;padding:10px 12px;border-radius:10px;}
+.fb.show{display:block;}
+.fb.ok{background:var(--green);color:#fff;}
+.fb.no{background:var(--red);color:#fff;}
+
+details.muster,details.hint{background:var(--amber-light);border:2px solid var(--amber);border-radius:12px;margin:10px 0 0;overflow:hidden;display:none;}
+details.muster.show,details.hint.show{display:block;}
+details.muster summary,details.hint summary{cursor:pointer;padding:12px 14px;font-weight:700;color:var(--amber-dark);
+  list-style:none;min-height:44px;display:flex;align-items:center;}
+details.muster summary::-webkit-details-marker,details.hint summary::-webkit-details-marker{display:none;}
+details.muster summary::before{content:"📝 ";margin-right:6px;}
+details.hint summary::before{content:"💡 ";margin-right:6px;}
+details.muster .mbody,details.hint .hint-body{padding:0 14px 14px;line-height:1.5;}
+
+.weiter-wrap{text-align:center;margin:10px 0 30px;}
+.weiter{display:none;min-height:52px;min-width:200px;padding:14px 28px;background:var(--green);color:#fff;
+  border:none;border-radius:14px;font-size:1.1rem;font-weight:800;cursor:pointer;box-shadow:0 3px 10px rgba(30,125,50,.3);}
+.weiter.show{display:inline-block;}
+
+.result-line{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line);}
+.st.ok{color:var(--green);font-weight:800;}
+.st.no{color:var(--red);font-weight:800;}
+.st.na{color:#9aa6b3;font-weight:800;}
+.scorebig{text-align:center;font-size:2rem;font-weight:800;color:var(--blue-dark);margin:14px 0 4px;}
+.donecheck{display:flex;align-items:flex-start;gap:10px;margin:14px 0 4px;font-weight:700;
+  color:var(--blue-dark);cursor:pointer;line-height:1.4;padding:10px;border:2px solid var(--blue);
+  border-radius:12px;background:#fff;min-height:44px;}
+.donecheck input{width:26px;height:26px;flex:none;margin-top:1px;accent-color:var(--green);cursor:pointer;}
+.donecheck.done{background:#eaf7ec;border-color:var(--green);color:var(--green);}
+
+.svgwrap{display:flex;justify-content:center;margin:8px 0;flex-wrap:wrap;gap:10px;}
+svg{display:block;}
+
+.trex{position:fixed;right:14px;bottom:14px;font-size:1.9rem;cursor:pointer;z-index:50;user-select:none;}
+.trex .bubble{display:none;position:absolute;right:0;bottom:120%;background:var(--ink);color:#fff;padding:6px 10px;border-radius:8px;font-size:.8rem;white-space:nowrap;}
+.trex.open .bubble{display:block;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap"><h1>Körpernetze</h1><p>Einheit 2 · Übung · Klasse 5</p></div>
+</header>
+
+<div class="wrap">
+  <div class="tabs" id="tabs"></div>
+
+  <!-- ===== KARTE 1: Netze zuordnen ===== -->
+  <div class="card active" data-card="0">
+    <h2>Netze den Körpern zuordnen</h2>
+    <div class="sub">Tippe ein Netz an, dann den passenden Körper. Zähle selbst die Flächen und achte auf ihre Form!</div>
+
+    <div class="levels" data-lv="a">
+      <button class="lvl active" data-l="0">Grundlagen</button>
+      <button class="lvl" data-l="1">Fortgeschritten</button>
+      <button class="lvl" data-l="2">Profi</button>
+    </div>
+
+    <div class="lvlbody active" data-l="0">
+      <div class="auf zuord" data-q="a0"
+        data-items='[{"t":"6 Quadrate","c":"wuerfel","v":0},{"t":"1 Quadrat + 4 Dreiecke","c":"pyramide","v":0}]'
+        data-cats='[{"k":"wuerfel","label":"Würfel"},{"k":"pyramide","label":"Pyramide"}]'>
+        <div class="pool"></div><div class="cats"></div>
+        <button class="btn check">Prüfen</button><button class="btn clear">Leeren</button>
+        <div class="fb"></div>
+        <details class="muster"><summary>Musterlösung</summary><div class="mbody">
+          6 Quadrate → <b>Würfel</b>. 1 Quadrat + 4 Dreiecke → <b>Pyramide</b> mit quadratischer Grundfläche.
+        </div></details>
+      </div>
+    </div>
+
+    <div class="lvlbody" data-l="1">
+      <div class="auf zuord" data-q="a1"
+        data-items='[{"t":"","c":"wuerfel","v":1},{"t":"","c":"quader","v":0},{"t":"","c":"pyramide","v":1}]'
+        data-cats='[{"k":"wuerfel","label":"Würfel"},{"k":"quader","label":"Quader"},{"k":"pyramide","label":"Pyramide"}]'>
+        <div class="pool"></div><div class="cats"></div>
+        <button class="btn check">Prüfen</button><button class="btn clear">Leeren</button>
+        <div class="fb"></div>
+        <details class="muster"><summary>Musterlösung</summary><div class="mbody">
+          6 Quadrate → <b>Würfel</b>; 6 Rechtecke → <b>Quader</b>; 1 Quadrat + 4 Dreiecke → <b>Pyramide</b>.<br>
+          Achtung: Würfel und Quader unterscheiden sich nur darin, ob die Flächen Quadrate (Würfel) oder Rechtecke (Quader) sind.
+        </div></details>
+      </div>
+    </div>
+
+    <div class="lvlbody" data-l="2">
+      <div class="auf zuord" data-q="a2"
+        data-items='[{"t":"","c":"wuerfel","v":2},{"t":"","c":"quader","v":2},{"t":"","c":"pyramide","v":2},{"t":"","c":"prisma","v":1},{"t":"","c":"tetraeder","v":0}]'
+        data-cats='[{"k":"wuerfel","label":"Würfel"},{"k":"quader","label":"Quader"},{"k":"pyramide","label":"Quadrat-Pyramide"},{"k":"prisma","label":"Dreieckiges Prisma"},{"k":"tetraeder","label":"Tetraeder (Dreieckspyramide)"}]'>
+        <div class="pool"></div><div class="cats"></div>
+        <button class="btn check">Prüfen</button><button class="btn clear">Leeren</button>
+        <div class="fb"></div>
+        <details class="muster"><summary>Musterlösung</summary><div class="mbody">
+          6 Quadrate → <b>Würfel</b>; 6 (verschieden große) Rechtecke → <b>Quader</b>;
+          1 Quadrat + 4 Dreiecke → <b>Quadrat-Pyramide</b>;
+          2 Dreiecke + 3 Rechtecke → <b>dreieckiges Prisma</b>;
+          4 Dreiecke → <b>Tetraeder</b> (Dreieckspyramide).<br>
+          Tipp: Zähle immer zuerst, wie viele Vierecke und wie viele Dreiecke das Netz hat.
+        </div></details>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== KARTE 2: Gültig oder nicht ===== -->
+  <div class="card" data-card="1">
+    <h2>Würfelnetz – gültig oder nicht?</h2>
+    <div class="sub">Entscheide bei jedem Bild: Lässt sich daraus ein Würfel falten?</div>
+
+    <div class="levels" data-lv="b">
+      <button class="lvl active" data-l="0">Grundlagen</button>
+      <button class="lvl" data-l="1">Fortgeschritten</button>
+      <button class="lvl" data-l="2">Profi</button>
+    </div>
+
+    <div class="lvlbody active" data-l="0"><div id="gueltig0"></div></div>
+    <div class="lvlbody" data-l="1"><div id="gueltig1"></div></div>
+    <div class="lvlbody" data-l="2"><div id="gueltig2"></div></div>
+  </div>
+
+  <!-- ===== KARTE 3: Netz bauen ===== -->
+  <div class="card" data-card="2">
+    <h2>Netz selbst bauen</h2>
+    <div class="sub">Tippe Felder an und baue ein faltbares Würfelnetz. Prüfe dann.</div>
+
+    <div class="levels" data-lv="c">
+      <button class="lvl active" data-l="0">Grundlagen</button>
+      <button class="lvl" data-l="1">Fortgeschritten</button>
+      <button class="lvl" data-l="2">Profi</button>
+    </div>
+
+    <div class="lvlbody active" data-l="0">
+      <div class="auf" data-q="c0">
+        <div class="qtext">Baue <b>irgendein</b> gültiges Würfelnetz (6 Quadrate, faltbar).</div>
+        <div class="grid-net builder-grid" data-target="any" style="--cols:4;"></div>
+        <div class="count">0 von 6 Quadraten</div>
+        <button class="btn check">Faltbar? Prüfen</button><button class="btn clear">Leeren</button>
+        <div class="fb"></div>
+        <details class="hint"><summary>Tipp</summary><div class="hint-body">
+          Das Kreuz geht immer: 4 Quadrate untereinander, dann links und rechts am zweiten je eins.
+        </div></details>
+      </div>
+    </div>
+
+    <div class="lvlbody" data-l="1">
+      <div class="auf" data-q="c1">
+        <div class="qtext">Baue ein <b>anderes</b> gültiges Würfelnetz, das <b>keine</b> gerade Vierer-Reihe als Grundform hat (z. B. eine Treppe).</div>
+        <div class="grid-net builder-grid" data-target="any" style="--cols:4;"></div>
+        <div class="count">0 von 6 Quadraten</div>
+        <button class="btn check">Faltbar? Prüfen</button><button class="btn clear">Leeren</button>
+        <div class="fb"></div>
+        <details class="hint"><summary>Tipp</summary><div class="hint-body">
+          Versuche eine „Treppe": zwei Quadrate, versetzt zwei weitere, dann wieder versetzt zwei.
+        </div></details>
+      </div>
+    </div>
+
+    <div class="lvlbody" data-l="2">
+      <div class="auf" data-q="c2">
+        <div class="qtext">Baue ein faltbares Würfelnetz und prüfe es. Danach bist <b>du</b> dran: Tippe zwei Felder an, die sich im gefalteten Würfel <b>gegenüberliegen</b>. Finde alle 3 Gegenpaare!</div>
+        <div class="grid-net builder-grid" data-target="any" style="--cols:4;"></div>
+        <div class="count">0 von 6 Quadraten</div>
+        <button class="btn check">Faltbar? Prüfen</button><button class="btn clear">Leeren</button>
+        <div class="fb"></div>
+        <details class="hint"><summary>Tipp</summary><div class="hint-body">
+          Beim Kreuz-Netz (4 Quadrate in einer Reihe + 2 außen): In der langen Reihe liegen sich
+          die 1. und 3. sowie die 2. und 4. Fläche gegenüber. Die beiden außen liegenden Felder
+          bilden das dritte Gegenpaar. Bau es und schau dir die Farben an!
+        </div></details>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== KARTE 4: WIEDERHOLUNG (Flächen/Kanten/Ecken – Einheit 1) ===== -->
+  <!-- ===== KARTE 4: Ins Heft zeichnen ===== -->
+  <div class="card" data-card="3">
+    <h2>Ins Heft zeichnen</h2>
+    <div class="sub">Jetzt zeichnest du selbst auf Karopapier. Wähle deine Stufe. Kontrolliere danach mit der Musterlösung und zeig dein Netz deiner Lehrerin oder deinem Lehrer.</div>
+
+    <div class="levels" data-lv="d">
+      <button class="lvl active" data-l="0">Grundlagen</button>
+      <button class="lvl" data-l="1">Fortgeschritten</button>
+      <button class="lvl" data-l="2">Profi</button>
+    </div>
+
+    <!-- Grundlagen: Würfelnetz 3 cm -->
+    <div class="lvlbody active" data-l="0">
+      <div class="auf draw" data-q="d0">
+        <div class="qtext">Zeichne das <b>Netz eines Würfels</b> mit der Kantenlänge <b>3&nbsp;cm</b> auf Karopapier.
+        Denk daran: 6 gleich große Quadrate, faltbar.</div>
+        <details class="muster show"><summary>Musterlösung ansehen</summary><div class="mbody">
+          Ein mögliches Würfelnetz (Kreuz-Form) – alle Quadrate 3&nbsp;cm × 3&nbsp;cm:
+          <div class="svgwrap" id="drawSol0"></div>
+          Es gibt insgesamt 11 verschiedene richtige Würfelnetze – deins darf anders aussehen,
+          solange es faltbar ist.
+        </div></details>
+        <label class="donecheck"><input type="checkbox"> Ich habe das Netz gezeichnet und meiner Lehrkraft gezeigt.</label>
+        <div class="fb"></div>
+      </div>
+    </div>
+
+    <!-- Fortgeschritten: Quadernetz 2·3·4 cm -->
+    <div class="lvlbody" data-l="1">
+      <div class="auf draw" data-q="d1">
+        <div class="qtext">Zeichne das <b>Netz eines Quaders</b> mit Länge <b>4&nbsp;cm</b>, Breite <b>3&nbsp;cm</b>
+        und Höhe <b>2&nbsp;cm</b> auf Karopapier. Achte darauf, dass gegenüberliegende Flächen
+        gleich groß sind und die Kanten zusammenpassen.</div>
+        <details class="muster show"><summary>Musterlösung ansehen</summary><div class="mbody">
+          Ein mögliches Quadernetz (Kreuz-Form). Es gibt drei verschieden große Rechtecke,
+          jeweils zweimal: 4&nbsp;cm×3&nbsp;cm (vorne/hinten), 4&nbsp;cm×2&nbsp;cm (oben/unten),
+          2&nbsp;cm×3&nbsp;cm (links/rechts):
+          <div class="svgwrap" id="drawSol1"></div>
+          Deins darf anders angeordnet sein – wichtig ist, dass alle 6 Rechtecke passen und
+          zusammenhängen.
+        </div></details>
+        <label class="donecheck"><input type="checkbox"> Ich habe das Netz gezeichnet und meiner Lehrkraft gezeigt.</label>
+        <div class="fb"></div>
+      </div>
+    </div>
+
+    <!-- Profi: quadratische Pyramide -->
+    <div class="lvlbody" data-l="2">
+      <div class="auf draw" data-q="d2">
+        <div class="qtext">Zeichne das <b>Netz einer Pyramide mit quadratischer Grundfläche</b>:
+        Grundquadrat mit <b>4&nbsp;cm</b> Seitenlänge, die vier Seitendreiecke mit einer Höhe
+        von <b>5&nbsp;cm</b> (gemessen von der Grundkante zur Spitze). Alle vier Dreiecke sind gleich groß.</div>
+        <details class="muster show"><summary>Musterlösung ansehen</summary><div class="mbody">
+          Ein mögliches Pyramidennetz: das Quadrat in der Mitte, an jeder Seite ein gleich großes
+          Dreieck (Stern-Form):
+          <div class="svgwrap" id="drawSol2"></div>
+          Du kannst die Dreiecke auch anders anordnen (z. B. gefächert) – solange alle vier gleich
+          groß sind und an je eine Quadratseite passen.
+        </div></details>
+        <label class="donecheck"><input type="checkbox"> Ich habe das Netz gezeichnet und meiner Lehrkraft gezeigt.</label>
+        <div class="fb"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== KARTE 5: Wiederholung ===== -->
+  <div class="card" data-card="4">
+    <h2>Wiederholung: Flächen, Kanten, Ecken</h2>
+    <div class="sub">Das kennst du aus Einheit 1 – es hilft beim Verstehen der Netze.</div>
+
+    <div class="levels" data-lv="w">
+      <button class="lvl active" data-l="0">Grundlagen</button>
+      <button class="lvl" data-l="1">Fortgeschritten</button>
+      <button class="lvl" data-l="2">Profi</button>
+    </div>
+
+    <div class="lvlbody active" data-l="0">
+      <div class="auf" data-q="w0">
+        <div class="qtext">Wie viele Flächen hat ein <b>Würfel</b>?</div>
+        <div class="opts row">
+          <button class="opt" data-ok="0">4</button>
+          <button class="opt" data-ok="1">6</button>
+          <button class="opt" data-ok="0">8</button>
+        </div>
+        <button class="btn check">Prüfen</button><button class="btn clear">Leeren</button>
+        <div class="fb"></div>
+      </div>
+    </div>
+
+    <div class="lvlbody" data-l="1">
+      <div class="auf" data-q="w1">
+        <div class="qtext">Trage für den <b>Quader</b> ein:</div>
+        <div class="txtrow"><label>Flächen:</label><input class="num" inputmode="numeric" data-ans="6"></div>
+        <div class="txtrow"><label>Kanten:</label><input class="num" inputmode="numeric" data-ans="12"></div>
+        <div class="txtrow"><label>Ecken:</label><input class="num" inputmode="numeric" data-ans="8"></div>
+        <button class="btn check">Prüfen</button><button class="btn clear">Leeren</button>
+        <div class="fb"></div>
+        <details class="muster"><summary>Musterlösung</summary><div class="mbody">
+          Quader: <b>6</b> Flächen, <b>12</b> Kanten, <b>8</b> Ecken – genau wie der Würfel,
+          nur mit Rechtecken statt Quadraten.
+        </div></details>
+      </div>
+    </div>
+
+    <div class="lvlbody" data-l="2">
+      <div class="auf" data-q="w2">
+        <div class="qtext">Trage für die <b>Pyramide mit quadratischer Grundfläche</b> ein:</div>
+        <div class="txtrow"><label>Flächen:</label><input class="num" inputmode="numeric" data-ans="5"></div>
+        <div class="txtrow"><label>Kanten:</label><input class="num" inputmode="numeric" data-ans="8"></div>
+        <div class="txtrow"><label>Ecken:</label><input class="num" inputmode="numeric" data-ans="5"></div>
+        <button class="btn check">Prüfen</button><button class="btn clear">Leeren</button>
+        <div class="fb"></div>
+        <details class="muster"><summary>Musterlösung</summary><div class="mbody">
+          Pyramide: <b>5</b> Flächen (1 Quadrat + 4 Dreiecke), <b>8</b> Kanten (4 unten + 4 zur Spitze),
+          <b>5</b> Ecken (4 unten + 1 Spitze).
+        </div></details>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== KARTE 6: Auswertung ===== -->
+  <div class="card" data-card="5">
+    <h2>Deine Auswertung</h2>
+    <div class="sub">So lief es in den einzelnen Karten.</div>
+    <div class="scorebig" id="scoreBig">–</div>
+    <div id="resultList"></div>
+  </div>
+
+  <div class="weiter-wrap">
+    <button class="weiter" id="weiter" onclick="alert('Das war Einheit 2. Weiter geht es in Einheit 3 mit Schrägbildern!');">
+      Einheit 2 abgeschlossen ✓
+    </button>
+  </div>
+</div>
+
+<div class="trex" id="trex">🦖<span class="bubble">Made by Mathedino</span></div>
+
+<script>
+/* ===== Tabs ===== */
+const titles=["Zuordnen","Gültig?","Netz bauen","Ins Heft","Wiederholung","Auswertung"];
+const cards=document.querySelectorAll('.card');
+const tabsEl=document.getElementById('tabs');
+titles.forEach((t,i)=>{const b=document.createElement('button');b.className='tab'+(i===0?' active':'');
+  b.innerHTML='<span class="num">'+(i+1)+'</span>'+t;b.onclick=()=>showCard(i);tabsEl.appendChild(b);});
+const tabs=document.querySelectorAll('.tab');
+function showCard(i){cards.forEach(c=>c.classList.remove('active'));tabs.forEach(t=>t.classList.remove('active'));
+  cards[i].classList.add('active');tabs[i].classList.add('active');if(i===5)renderResults();window.scrollTo({top:0,behavior:'smooth'});}
+
+/* ===== Niveaustufen ===== */
+document.querySelectorAll('.levels').forEach(lv=>{
+  const card=lv.closest('.card');const bodies=card.querySelectorAll('.lvlbody');
+  lv.querySelectorAll('.lvl').forEach(btn=>btn.onclick=()=>{
+    lv.querySelectorAll('.lvl').forEach(b=>b.classList.remove('active'));btn.classList.add('active');
+    const l=btn.dataset.l;bodies.forEach(b=>b.classList.toggle('active',b.dataset.l===l));
+  });
+});
+
+const state={};
+function mark(q,s){state[q]={status:s};maybeWeiter();}
+function setFb(auf,ok,msg){const fb=auf.querySelector('.fb');fb.innerHTML=msg;fb.className='fb show '+(ok?'ok':'no');}
+function showClear(auf,s){const c=auf.querySelector('.btn.clear');if(c)c.classList.toggle('show',s);}
+function showMuster(auf,s){const m=auf.querySelector('.muster');if(m)m.classList.toggle('show',s);}
+
+/* ===== Faltsimulation (identisch zur Lernseite) ===== */
+function foldsToCube(cells){
+  const set=new Set(cells.map(c=>c[0]+','+c[1]));
+  function roll(dir,st){const {U,D,N,S,E,W}=st;
+    if(dir==='E')return{U:W,D:E,N,S,E:U,W:D};if(dir==='W')return{U:E,D:W,N,S,E:D,W:U};
+    if(dir==='N')return{U:S,D:N,N:U,S:D,E,W};if(dir==='S')return{U:N,D:S,N:D,S:U,E,W};}
+  const start=cells[0];const ss={U:0,D:1,N:2,S:3,E:4,W:5};
+  const vis={};vis[start[0]+','+start[1]]=ss;const face={};face[start[0]+','+start[1]]=ss.U;
+  const used={};used[ss.U]=start[0]+','+start[1];const stack=[start];let ok=true;
+  while(stack.length){const [x,y]=stack.pop();const st=vis[x+','+y];
+    [['E',x+1,y],['W',x-1,y],['S',x,y+1],['N',x,y-1]].forEach(([dir,nx,ny])=>{
+      const kk=nx+','+ny;if(!set.has(kk))return;const nst=roll(dir,st);
+      if(vis[kk]){if(vis[kk].U!==nst.U)ok=false;return;}
+      vis[kk]=nst;if(used[nst.U]!==undefined&&used[nst.U]!==kk)ok=false;used[nst.U]=kk;face[kk]=nst.U;stack.push([nx,ny]);});
+  }
+  return ok&&new Set(Object.values(face)).size===6;
+}
+function connected(cells){
+  const set=new Set(cells.map(c=>c[0]+','+c[1]));const seen=new Set();const st=[cells[0]];seen.add(cells[0][0]+','+cells[0][1]);
+  while(st.length){const [x,y]=st.pop();[[x+1,y],[x-1,y],[x,y+1],[x,y-1]].forEach(([nx,ny])=>{const kk=nx+','+ny;if(set.has(kk)&&!seen.has(kk)){seen.add(kk);st.push([nx,ny]);}});}
+  return seen.size===cells.length;
+}
+/* Liefert für ein faltbares Netz die Würfelseite jeder Zelle: {"x,y":faceId 0..5} */
+function cubeFaceMap(cells){
+  const set=new Set(cells.map(c=>c[0]+','+c[1]));
+  function roll(dir,st){const {U,D,N,S,E,W}=st;
+    if(dir==='E')return{U:W,D:E,N,S,E:U,W:D};if(dir==='W')return{U:E,D:W,N,S,E:D,W:U};
+    if(dir==='N')return{U:S,D:N,N:U,S:D,E,W};if(dir==='S')return{U:N,D:S,N:D,S:U,E,W};}
+  const start=cells[0];const ss={U:0,D:1,N:2,S:3,E:4,W:5};
+  const vis={};vis[start[0]+','+start[1]]=ss;const face={};face[start[0]+','+start[1]]=ss.U;
+  const stack=[start];
+  while(stack.length){const [x,y]=stack.pop();const st=vis[x+','+y];
+    [['E',x+1,y],['W',x-1,y],['S',x,y+1],['N',x,y-1]].forEach(([dir,nx,ny])=>{
+      const kk=nx+','+ny;if(!set.has(kk))return;if(vis[kk])return;
+      const nst=roll(dir,st);vis[kk]=nst;face[kk]=nst.U;stack.push([nx,ny]);});
+  }
+  return face; // Gegenseiten: 0↔1, 2↔3, 4↔5
+}
+/* Gruppiert die 6 Zellen in 3 Gegenpaare (jeweils gleiche Paar-Nummer 0,1,2) */
+function oppositePairs(cells){
+  const face=cubeFaceMap(cells);
+  const pairId={0:0,1:0, 2:1,3:1, 4:2,5:2}; // Gegenseiten teilen sich eine Paar-Nummer
+  const out={};
+  Object.keys(face).forEach(k=>{ out[k]=pairId[face[k]]; });
+  return out; // {"x,y": 0|1|2}
+}
+
+/* ===== SVG-Netze ===== */
+function cubeNetSVG(cellsList,cols,rows,valid){
+  const cw=18;const W=cols*cw+4,H=rows*cw+4;
+  let r='';cellsList.forEach(([x,y])=>{r+=`<rect x="${x*cw+2}" y="${y*cw+2}" width="${cw}" height="${cw}" fill="#dbe7fa" stroke="#1f4680" stroke-width="1.5"/>`;});
+  return `<svg viewBox="0 0 ${W} ${H}" width="${Math.min(W*1.4,150)}" height="${Math.min(H*1.4,150)}">${r}</svg>`;
+}
+
+/* ===== Zuordnen (Antippen) ===== */
+function netMini(kind,variant){
+  variant=variant||0;
+  const B='#e6eefb',B2='#cfe0f7';
+  const wrap=(w,h,inner)=>`<svg viewBox="0 0 ${w} ${h}" width="${Math.min(w*1.05,82)}" height="${Math.min(h*1.05,82)}">${inner}</svg>`;
+  const tri=(p,f)=>`<polygon points="${p}" fill="${f}" stroke="#1f4680" stroke-width="1.3"/>`;
+
+  /* ---- WÜRFEL: gültige Netz-Layouts (Zellen = Quadrate), alle faltbar ---- */
+  if(kind==='wuerfel'){
+    const u=18;
+    const sq=(cx,cy)=>`<rect x="${cx*u+2}" y="${cy*u+2}" width="${u}" height="${u}" fill="${B}" stroke="#1f4680" stroke-width="1.3"/>`;
+    const layouts=[
+      [[0,0],[1,0],[1,1],[2,1],[2,2],[3,2]],   // Treppe
+      [[1,0],[0,1],[1,1],[2,1],[3,1],[3,2]],   // versetztes Kreuz
+      [[0,0],[0,1],[1,1],[1,2],[1,3],[2,1]],   // T/Kreuz
+    ];
+    const cells=layouts[variant%layouts.length];
+    const mx=Math.max(...cells.map(c=>c[0]))+1,my=Math.max(...cells.map(c=>c[1]))+1;
+    return wrap(mx*u+4,my*u+4,cells.map(c=>sq(c[0],c[1])).join(''));
+  }
+
+  /* ---- QUADER: geometrisch KORREKTE Netze eines a×b×c-Quaders (3:2:1).
+         Drei Rechteckgrößen (a×b vorne/hinten, a×c oben/unten, c×b links/rechts),
+         alle angrenzenden Kanten passen exakt aneinander. ---- */
+  if(kind==='quader'){
+    const a=33,b=22,c=11; // Länge, Breite/Höhe, Tiefe (3:2:1)
+    const R=(x,y,w,h,f)=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${f}" stroke="#1f4680" stroke-width="1.3"/>`;
+    const F=B, T=B2, S='#dbe7fa'; // Farben: vorne/hinten, oben/unten, Seiten
+    if(variant%3===0){
+      // v0: vertikales Kreuz  – Spalte: oben(a×c), vorne(a×b), unten(a×c), hinten(a×b);
+      //     links(c×b) und rechts(c×b) an "vorne"
+      const x0=2+c, yTop=2, yFront=2+c, yBot=yFront+b, yBack=yBot+c;
+      return wrap(c+a+c+4, c+b+c+b+4,
+        R(x0,yTop,a,c,T)+R(x0,yFront,a,b,F)+R(x0,yBot,a,c,T)+R(x0,yBack,a,b,F)+
+        R(x0-c,yFront,c,b,S)+R(x0+a,yFront,c,b,S));
+    }
+    if(variant%3===1){
+      // v1: horizontale Reihe – links(c×b), vorne(a×b), rechts(c×b), hinten(a×b);
+      //     oben(a×c) über "vorne", unten(a×c) unter "vorne"
+      const y0=2+c;
+      return wrap(c+a+c+a+4, c+b+c+4,
+        R(2,y0,c,b,S)+R(2+c,y0,a,b,F)+R(2+c+a,y0,c,b,S)+R(2+c+a+c,y0,a,b,F)+
+        R(2+c,2,a,c,T)+R(2+c,y0+b,a,c,T));
+    }
+    // v2: wie v1, aber oben(a×c) über "hinten" statt über "vorne" (versetzte Form)
+    const y0=2+c;
+    return wrap(c+a+c+a+4, c+b+c+4,
+      R(2,y0,c,b,S)+R(2+c,y0,a,b,F)+R(2+c+a,y0,c,b,S)+R(2+c+a+c,y0,a,b,F)+
+      R(2+c+a+c,2,a,c,T)+R(2+c,y0+b,a,c,T));
+  }
+
+  /* Auto-fit: berechnet die viewBox aus den tatsächlichen Koordinaten der Formen,
+     damit nie etwas abgeschnitten wird. */
+  const fitWrap=(inner,maxPx=82)=>{
+    let minX=1e9,minY=1e9,maxX=-1e9,maxY=-1e9;
+    [...inner.matchAll(/points="([^"]+)"/g)].forEach(m=>m[1].trim().split(/\s+/).forEach(pt=>{
+      const [x,y]=pt.split(',').map(Number);minX=Math.min(minX,x);minY=Math.min(minY,y);maxX=Math.max(maxX,x);maxY=Math.max(maxY,y);}));
+    [...inner.matchAll(/<rect x="([\d.-]+)" y="([\d.-]+)" width="([\d.-]+)" height="([\d.-]+)"/g)].forEach(m=>{
+      const x=+m[1],y=+m[2],w=+m[3],h=+m[4];minX=Math.min(minX,x);minY=Math.min(minY,y);maxX=Math.max(maxX,x+w);maxY=Math.max(maxY,y+h);});
+    const m=4;minX-=m;minY-=m;maxX+=m;maxY+=m;
+    const W=maxX-minX,H=maxY-minY;const scale=maxPx/Math.max(W,H);
+    return `<svg viewBox="${minX} ${minY} ${W} ${H}" width="${W*scale}" height="${H*scale}">${inner}</svg>`;
+  };
+
+  /* Spiegelung von Punkt P an der Geraden durch A,B – für korrektes Abwickeln:
+     ein angehängtes Dreieck ist die Spiegelung des Nachbarn an der gemeinsamen Kante. */
+  const reflect=(P,A,Bt)=>{
+    const dx=Bt[0]-A[0], dy=Bt[1]-A[1];
+    const t=((P[0]-A[0])*dx+(P[1]-A[1])*dy)/(dx*dx+dy*dy);
+    return [2*(A[0]+t*dx)-P[0], 2*(A[1]+t*dy)-P[1]];
+  };
+  const triP=(p1,p2,p3,f)=>tri(`${p1[0]},${p1[1]} ${p2[0]},${p2[1]} ${p3[0]},${p3[1]}`,f);
+
+  /* ---- QUADRAT-PYRAMIDE: 1 Quadrat + 4 kongruente gleichschenklige Dreiecke.
+     Verschiedene korrekte Abwicklungen; gefächerte Dreiecke entstehen durch
+     Spiegelung an der gemeinsamen (Schräg-)Kante. ---- */
+  if(kind==='pyramide'){
+    const a=26, hh=22;
+    const v=variant%4;
+    const x0=30,y0=30,x1=x0+a,y1=y0+a,cx=x0+a/2,cy=y0+a/2;
+    const TL=[x0,y0],TR=[x1,y0],BL=[x0,y1],BR=[x1,y1];
+    const SQ=`<rect x="${x0}" y="${y0}" width="${a}" height="${a}" fill="${B}" stroke="#1f4680" stroke-width="1.3"/>`;
+    const Pt=[cx,y0-hh], Pb=[cx,y1+hh], Pl=[x0-hh,cy], Pr=[x1+hh,cy];
+    if(v===0){
+      // Stern: alle 4 direkt an den Quadratseiten
+      return fitWrap(SQ+triP(TL,TR,Pt,B2)+triP(TR,BR,Pr,B2)+triP(BL,BR,Pb,B2)+triP(TL,BL,Pl,B2));
+    }
+    if(v===1){
+      // oben/links/unten direkt; 4. an das OBERE Dreieck geklappt (Spiegelung an TR–Pt)
+      const W=reflect(TL,TR,Pt);
+      return fitWrap(SQ+triP(TL,TR,Pt,B2)+triP(TL,BL,Pl,B2)+triP(BL,BR,Pb,B2)+triP(TR,Pt,W,B2));
+    }
+    if(v===2){
+      // oben/links/rechts direkt; 4. an das RECHTE Dreieck geklappt (Spiegelung an BR–Pr)
+      const X=reflect(TR,BR,Pr);
+      return fitWrap(SQ+triP(TL,TR,Pt,B2)+triP(TL,BL,Pl,B2)+triP(TR,BR,Pr,B2)+triP(BR,Pr,X,B2));
+    }
+    // v3: unten/links/rechts direkt; 4. an das LINKE Dreieck geklappt (Spiegelung an TL–Pl)
+    const Y=reflect(BL,TL,Pl);
+    return fitWrap(SQ+triP(BL,BR,Pb,B2)+triP(TL,BL,Pl,B2)+triP(TR,BR,Pr,B2)+triP(TL,Pl,Y,B2));
+  }
+
+  /* ---- TETRAEDER: 4 gleichseitige Dreiecke. Außendreiecke = Spiegelung der
+     jeweils gegenüberliegenden Ecke an der Kante (klassisches "großes Dreieck"). ---- */
+  if(kind==='tetraeder'){
+    const s=42, h=s*Math.sqrt(3)/2;
+    const A=[44,10], Bt=[44-s/2,10+h], C=[44+s/2,10+h];
+    const Aq=reflect(A,Bt,C), Bq=reflect(Bt,A,C), Cq=reflect(C,A,Bt);
+    return fitWrap(
+      triP(A,Bt,C,B)+triP(Bt,C,Aq,B2)+triP(A,C,Bq,B2)+triP(A,Bt,Cq,B2));
+  }
+
+  /* ---- PRISMA (dreieckig): 3 Rechtecke in Reihe + 2 Dreiecke an
+         GEGENÜBERLIEGENDEN Kanten desselben Rechtecks (immer gültig) ---- */
+  if(kind==='prisma'){
+    const w=24,h=30,y=32;
+    const rc=(i)=>`<rect x="${8+i*w}" y="${y}" width="${w}" height="${h}" fill="${B}" stroke="#1f4680" stroke-width="1.3"/>`;
+    // variant 0: Dreiecke am MITTLEREN Rechteck (oben & unten)
+    // variant 1: Dreiecke am LINKEN Rechteck (oben & unten)
+    const idx = (variant%2===0) ? 1 : 0;
+    const xL=8+idx*w, xR=8+idx*w+w;
+    return wrap(96,96, rc(0)+rc(1)+rc(2)
+      + tri(`${xL},${y} ${xR},${y} ${(xL+xR)/2},${y-22}`,B2)         // oben
+      + tri(`${xL},${y+h} ${xR},${y+h} ${(xL+xR)/2},${y+h+22}`,B2)); // unten
+  }
+  return '';
+}
+document.querySelectorAll('.auf.zuord').forEach(auf=>{
+  const items=JSON.parse(auf.dataset.items);const catsDef=JSON.parse(auf.dataset.cats);
+  const pool=auf.querySelector('.pool');const catsWrap=auf.querySelector('.cats');let sel=null;
+  function shuffle(arr){for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];}return arr;}
+  // Pool-Reihenfolge mischen (Netze erscheinen an zufälliger Position)
+  const shownItems = items.length>1 ? shuffle(items.slice()) : items.slice();
+  shownItems.forEach((it,pos)=>{
+    const c=document.createElement('button');c.className='chip';c.dataset.cat=it.c;
+    const label = it.t ? '<div style="font-size:.78rem;margin-top:2px;">'+it.t+'</div>'
+                       : '<div style="font-size:.78rem;margin-top:2px;color:#5a6b7d;">Netz '+(pos+1)+'</div>';
+    c.innerHTML=netMini(it.c,it.v)+label;
+    c.dataset.label = it.t ? it.t : ('Netz '+(pos+1));
+    c.onclick=()=>{if(c.classList.contains('placed'))return;if(sel===c){c.classList.remove('sel');sel=null;return;}
+      pool.querySelectorAll('.chip').forEach(x=>x.classList.remove('sel'));c.classList.add('sel');sel=c;};
+    pool.appendChild(c);
+  });
+  // Zielkörper so mischen, dass ihre Reihenfolge NICHT der Pool-Reihenfolge entspricht.
+  const poolOrder=shownItems.map(it=>it.c);
+  let shownCats=catsDef.slice();
+  if(catsDef.length>1){
+    let tries=0;
+    do{ shownCats=shuffle(catsDef.slice()); tries++; }
+    while(tries<50 && shownCats.some((cd,i)=>cd.k===poolOrder[i])); // keine Position gleich
+  }
+  shownCats.forEach(cd=>{
+    const box=document.createElement('div');box.className='cat';box.dataset.k=cd.k;
+    box.innerHTML='<div class="cat-title">'+cd.label+'</div><div class="dropzone"></div>';
+    box.onclick=()=>{if(!sel)return;const dz=box.querySelector('.dropzone');
+      const item=document.createElement('button');item.className='dz-item';
+      item.textContent = sel.dataset.label;
+      item.dataset.cat=sel.dataset.cat;item.dataset.here=cd.k;
+      const ref=sel;item.onclick=e=>{e.stopPropagation();ref.classList.remove('placed');item.remove();};
+      dz.appendChild(item);sel.classList.add('placed');sel.classList.remove('sel');sel=null;};
+    catsWrap.appendChild(box);
+  });
+  auf.querySelector('.btn.check').onclick=()=>{
+    const placed=auf.querySelectorAll('.dz-item');
+    if(placed.length<items.length){setFb(auf,false,'Ordne zuerst alle Netze zu.');showClear(auf,true);mark(auf.dataset.q,'no');return;}
+    let allOk=true;placed.forEach(p=>{const ok=p.dataset.cat===p.dataset.here;p.classList.toggle('ok',ok);p.classList.toggle('no',!ok);if(!ok)allOk=false;});
+    if(allOk){setFb(auf,true,'Alles richtig! ✓');showClear(auf,false);showMuster(auf,false);mark(auf.dataset.q,'ok');}
+    else{setFb(auf,false,'Einige sind falsch (rot). Schau in die Musterlösung, leere und ordne neu.');showClear(auf,true);showMuster(auf,true);mark(auf.dataset.q,'no');}
+  };
+  auf.querySelector('.btn.clear').onclick=()=>{
+    auf.querySelectorAll('.dz-item').forEach(i=>i.remove());
+    pool.querySelectorAll('.chip').forEach(c=>c.classList.remove('placed','sel'));sel=null;
+    auf.querySelector('.fb').className='fb';showClear(auf,false);showMuster(auf,false);delete state[auf.dataset.q];maybeWeiter();
+  };
+});
+
+/* ===== Gültig-oder-nicht (verschiedene Netze pro Stufe) ===== */
+const gueltigSets={
+  0:[
+    {cells:[[0,0],[0,1],[1,1],[1,2],[1,3],[2,2]],ok:true},
+    {cells:[[0,0],[0,1],[0,2],[1,0],[1,1],[2,1]],ok:false},
+  ],
+  1:[
+    {cells:[[0,0],[0,1],[1,1],[2,1],[2,2],[3,1]],ok:true},
+    {cells:[[0,0],[0,1],[1,0],[1,1],[1,2],[2,1]],ok:false},
+    {cells:[[0,0],[0,1],[0,2],[1,2],[1,3],[1,4]],ok:true},
+  ],
+  2:[
+    {cells:[[0,0],[0,1],[1,1],[1,2],[2,2],[2,3]],ok:true},
+    {cells:[[0,0],[0,1],[0,2],[1,1],[1,2],[1,3]],ok:false},
+    {cells:[[0,0],[0,1],[1,1],[2,1],[3,1],[3,2]],ok:true},
+    {cells:[[0,0],[0,1],[1,1],[1,2],[2,0],[2,1]],ok:false},
+  ],
+};
+Object.keys(gueltigSets).forEach(lvl=>{
+  const cont=document.getElementById('gueltig'+lvl);
+  gueltigSets[lvl].forEach((g,idx)=>{
+    const qid='g'+lvl+'-'+idx;
+    const auf=document.createElement('div');auf.className='auf';auf.dataset.q=qid;
+    // normalisieren für Anzeige
+    const minc=Math.min(...g.cells.map(c=>c[0])),minr=Math.min(...g.cells.map(c=>c[1]));
+    const norm=g.cells.map(c=>[c[0]-minc,c[1]-minr]);
+    const cols=Math.max(...norm.map(c=>c[0]))+1,rows=Math.max(...norm.map(c=>c[1]))+1;
+    auf.innerHTML=`
+      <div class="svgwrap">${cubeNetSVG(norm,cols,rows)}</div>
+      <div class="qtext">Lässt sich daraus ein Würfel falten?</div>
+      <div class="opts row">
+        <button class="opt" data-v="1">Ja, faltbar</button>
+        <button class="opt" data-v="0">Nein, nicht faltbar</button>
+      </div>
+      <div class="fb"></div>
+      <details class="muster"><summary>Erklärung</summary><div class="mbody"></div></details>`;
+    cont.appendChild(auf);
+    const opts=auf.querySelectorAll('.opt');const mbody=auf.querySelector('.mbody');
+    const erkl=g.ok?'Dieses Netz ist eines der 11 gültigen Würfelnetze – beim Falten trifft jede Fläche auf genau eine Würfelseite.'
+                   :'Beim Falten würden sich Flächen überlappen oder es bliebe eine Seite offen – daher nicht faltbar.';
+    mbody.innerHTML=erkl;
+    opts.forEach(o=>o.onclick=()=>{
+      if(auf.dataset.locked==='1')return;
+      const chose=o.dataset.v==='1';const correct=chose===g.ok;
+      opts.forEach(x=>x.classList.add('locked'));
+      if(correct){o.classList.add('correct');setFb(auf,true,'Richtig! ✓');auf.dataset.locked='1';mark(qid,'ok');showMuster(auf,false);}
+      else{o.classList.add('wrong');opts.forEach(x=>x.classList.remove('locked'));o.classList.add('locked');
+        setFb(auf,false,'Nicht ganz – schau in die Erklärung.');showMuster(auf,true);mark(qid,'no');}
+    });
+  });
+});
+
+/* ===== Netz-Baukasten (Übung) ===== */
+function hasStraightFour(cells){
+  const set=new Set(cells.map(c=>c[0]+','+c[1]));
+  for(const [x,y] of cells){
+    if(!set.has((x-1)+','+y)){let n=0,xx=x;while(set.has(xx+','+y)){n++;xx++;}if(n>=4)return true;}
+    if(!set.has(x+','+(y-1))){let n=0,yy=y;while(set.has(x+','+yy)){n++;yy++;}if(n>=4)return true;}
+  }
+  return false;
+}
+document.querySelectorAll('.builder-grid').forEach(grid=>{
+  const COLS=4,ROWS=5;grid.style.setProperty('--cols',COLS);
+  const auf=grid.closest('.auf');const st=[];const cellEls=[];const countEl=auf.querySelector('.count');
+  const mode=auf.dataset.q; // 'c0' | 'c1' | 'c2'
+  const isC1=mode==='c1', isC2=mode==='c2';
+  let phase='build';           // c2: 'build' -> 'pairs'
+  let foldedCells=null;        // c2: gespeichertes gültiges Netz
+  let markSel=null;            // c2: aktuell angetippte Zelle (Index) für Paarbildung
+  let pairsFound=0;            // c2: wie viele richtige Paare markiert
+  const claimed={};            // c2: index -> pairNumber (0..2) sobald korrekt
+
+  for(let i=0;i<COLS*ROWS;i++){
+    const cell=document.createElement('div');cell.className='gcell';
+    cell.onclick=()=>onCellClick(i,cell);
+    grid.appendChild(cell);st.push(false);cellEls.push(cell);
+  }
+
+  function onCellClick(i,cell){
+    if(isC2 && phase==='pairs'){ handlePairTap(i,cell); return; }
+    st[i]=!st[i];cell.classList.toggle('on',st[i]);
+    countEl.textContent=st.filter(Boolean).length+' von 6 Quadraten';
+  }
+
+  /* ---- c2: Schüler markiert selbst Gegenpaare ---- */
+  const PAIR_COLORS=['#c1272d','#1e7d32','#b8860b'];
+  let truePairs=null; // {"x,y":0|1|2} vom Solver
+  function handlePairTap(i,cell){
+    const x=i%COLS,y=Math.floor(i/COLS);const k=x+','+y;
+    if(!st[i]){ setFb(auf,false,'Bitte nur belegte (blaue) Felder antippen.'); return; }
+    if(claimed[i]!==undefined){ setFb(auf,false,'Dieses Feld ist schon einem Paar zugeordnet. Wähle zwei noch farblose Felder.'); return; }
+    if(markSel===null){                // erstes Feld wählen
+      markSel=i;cell.style.outline='4px solid #1f4680';cell.style.outlineOffset='-4px';
+      setFb(auf,true,'Erstes Feld gewählt. Tippe jetzt das Feld an, das im gefalteten Würfel <b>gegenüber</b> liegt. (Nochmal tippen hebt die Auswahl auf.)');
+      return;
+    }
+    if(markSel===i){                   // Auswahl aufheben
+      cell.style.outline='';markSel=null;
+      setFb(auf,true,'Auswahl aufgehoben. Tippe ein Feld an, um ein Gegenpaar zu bilden.');
+      return;
+    }
+    // zweites Feld -> prüfen, ob echtes Gegenpaar
+    const a=markSel, b=i;
+    const ka=(a%COLS)+','+Math.floor(a/COLS), kb=(b%COLS)+','+Math.floor(b/COLS);
+    cellEls[a].style.outline='';
+    if(truePairs[ka]===truePairs[kb]){
+      const col=PAIR_COLORS[pairsFound];
+      cellEls[a].style.background=col;cellEls[b].style.background=col;
+      claimed[a]=pairsFound;claimed[b]=pairsFound;pairsFound++;markSel=null;
+      if(pairsFound===3){
+        setFb(auf,true,'Alle 3 Gegenpaare richtig gefunden! ✓ Gleiche Farbe = liegt sich im Würfel gegenüber.');
+        mark(auf.dataset.q,'ok');
+      }else{
+        setFb(auf,true,'Richtig, ein Gegenpaar! ✓ Noch '+(3-pairsFound)+' Paar(e) finden – tippe wieder erst ein Feld, dann sein Gegenüber.');
+      }
+    }else{
+      // falsch: kurz rot blinken
+      cellEls[a].style.outline='';cellEls[b].style.outline='3px solid #c1272d';
+      setFb(auf,false,'Diese beiden liegen sich NICHT gegenüber. Tipp: In einer geraden Dreier-Reihe liegen sich das 1. und 3. Feld gegenüber. Tippe erneut ein Feld, dann sein Gegenüber.');
+      markSel=null;
+      setTimeout(()=>{cellEls[b].style.outline='';},700);
+    }
+  }
+
+  auf.querySelector('.btn.check').onclick=()=>{
+    // c2 Phase 'pairs': Button ist ausgeblendet, hier nichts zu tun
+    if(isC2 && phase==='pairs') return;
+    const cells=[];st.forEach((on,i)=>{if(on)cells.push([i%COLS,Math.floor(i/COLS)]);});
+    if(cells.length!==6){setFb(auf,false,'Du hast '+cells.length+' Quadrate. Es müssen genau 6 sein.');showClear(auf,true);mark(auf.dataset.q,'no');return;}
+    if(!connected(cells)){setFb(auf,false,'Die Quadrate hängen nicht zusammen. Ein Netz ist aus einem Stück.');showClear(auf,true);mark(auf.dataset.q,'no');return;}
+    if(!foldsToCube(cells)){setFb(auf,false,'6 Quadrate – aber nicht faltbar. Probier eine andere Form!');showClear(auf,true);mark(auf.dataset.q,'no');return;}
+    // ab hier: faltbar
+    if(isC1 && hasStraightFour(cells)){
+      setFb(auf,false,'Faltbar – aber dein Netz enthält eine gerade Vierer-Reihe. Gesucht ist eine andere Form (z. B. eine Treppe).');
+      showClear(auf,true);mark(auf.dataset.q,'no');return;
+    }
+    if(isC2){
+      // in Paar-Phase wechseln
+      foldedCells=cells;phase='pairs';
+      truePairs=oppositePairs(cells);
+      auf.querySelector('.btn.check').style.display='none';
+      grid.querySelectorAll('.gcell').forEach(c=>{c.style.cursor='pointer';});
+      setFb(auf,true,'Faltbar! ✓ <b>So findest du die Gegenpaare:</b> Tippe zuerst ein blaues Feld an – es wird umrandet. Tippe dann das Feld an, das im gefalteten Würfel gegenüberliegt. Stimmt das Paar, färben sich beide Felder gleich. Finde alle 3 Paare!');
+      showClear(auf,true);
+      return;
+    }
+    // c0 / c1 Erfolg
+    setFb(auf,true, isC1 ? 'Super, ein gültiges Netz ohne gerade Vierer-Reihe! ✓' : 'Super, dieses Netz lässt sich zu einem Würfel falten! ✓');
+    showClear(auf,false);mark(auf.dataset.q,'ok');
+  };
+
+  auf.querySelector('.btn.clear').onclick=()=>{
+    st.fill(false);cellEls.forEach(c=>{c.classList.remove('on');c.style.background='';c.style.outline='';c.style.cursor='';});
+    countEl.textContent='0 von 6 Quadraten';auf.querySelector('.fb').className='fb';showClear(auf,false);
+    // c2 zurücksetzen
+    phase='build';foldedCells=null;markSel=null;pairsFound=0;truePairs=null;
+    for(const k in claimed)delete claimed[k];
+    const chk=auf.querySelector('.btn.check');if(chk)chk.style.display='';
+    delete state[auf.dataset.q];maybeWeiter();
+  };
+});
+
+/* ===== MC / TF (Wiederholung Grundlagen + generisch) ===== */
+document.querySelectorAll('.auf').forEach(auf=>{
+  if(auf.classList.contains('zuord'))return;
+  if(auf.querySelector('.builder-grid'))return;
+  const opts=auf.querySelectorAll('.opt');const inputs=auf.querySelectorAll('input.num');
+  if(opts.length && !inputs.length && opts[0].dataset.ok!==undefined){
+    let picked=null;
+    opts.forEach(o=>o.onclick=()=>{if(auf.dataset.locked==='1')return;opts.forEach(x=>x.classList.remove('sel'));o.classList.add('sel');picked=o;});
+    const chk=auf.querySelector('.btn.check');
+    if(chk)chk.onclick=()=>{
+      if(!picked){setFb(auf,false,'Bitte zuerst antippen.');return;}
+      const ok=picked.dataset.ok==='1';opts.forEach(x=>x.classList.add('locked'));
+      if(ok){picked.classList.add('correct');auf.dataset.locked='1';setFb(auf,true,'Richtig! ✓');showClear(auf,false);mark(auf.dataset.q,'ok');}
+      else{picked.classList.add('wrong');setFb(auf,false,'Leider falsch. Leeren und erneut versuchen.');showClear(auf,true);mark(auf.dataset.q,'no');}
+    };
+    const clr=auf.querySelector('.btn.clear');
+    if(clr)clr.onclick=()=>{opts.forEach(x=>x.classList.remove('sel','correct','wrong','locked'));auf.dataset.locked='';picked=null;
+      auf.querySelector('.fb').className='fb';showClear(auf,false);delete state[auf.dataset.q];maybeWeiter();};
+  }
+});
+
+/* ===== Zahl-Eingaben (Wiederholung) ===== */
+document.querySelectorAll('.auf').forEach(auf=>{
+  const inputs=auf.querySelectorAll('input.num');if(!inputs.length)return;
+  const chk=auf.querySelector('.btn.check');
+  chk.onclick=()=>{
+    let all=true,filled=true;
+    inputs.forEach(inp=>{const v=inp.value.trim();if(v==='')filled=false;const ok=v!==''&&Number(v)===Number(inp.dataset.ans);
+      inp.classList.toggle('correct',ok&&v!=='');inp.classList.toggle('wrong',v!==''&&!ok);if(!ok)all=false;});
+    if(!filled){setFb(auf,false,'Bitte alle Felder ausfüllen.');showClear(auf,true);mark(auf.dataset.q,'no');return;}
+    if(all){setFb(auf,true,'Richtig! ✓');inputs.forEach(i=>i.disabled=true);showClear(auf,false);showMuster(auf,false);mark(auf.dataset.q,'ok');}
+    else{setFb(auf,false,'Noch nicht richtig – prüfe die rot markierten Zahlen.');showClear(auf,true);showMuster(auf,true);mark(auf.dataset.q,'no');}
+  };
+  auf.querySelector('.btn.clear').onclick=()=>{inputs.forEach(i=>{i.value='';i.disabled=false;i.classList.remove('correct','wrong');});
+    auf.querySelector('.fb').className='fb';showClear(auf,false);showMuster(auf,false);delete state[auf.dataset.q];maybeWeiter();};
+});
+
+/* ===== Weiter / Auswertung ===== */
+const cardQids={
+  0:["a0","a1","a2"],
+  1:["g0-0","g0-1","g1-0","g1-1","g1-2","g2-0","g2-1","g2-2","g2-3"],
+  2:["c0","c1","c2"],
+  3:["d0","d1","d2"],
+  4:["w0","w1","w2"],
+};
+function cardTouched(i){return cardQids[i].some(q=>state[q]!==undefined);}
+function maybeWeiter(){
+  const done=[0,1,2,3,4].every(cardTouched);
+  document.getElementById('weiter').classList.toggle('show',done);
+  if(cards[5].classList.contains('active'))renderResults();
+}
+function renderResults(){
+  const names=["Zuordnen","Gültig?","Netz bauen","Ins Heft","Wiederholung"];const list=document.getElementById('resultList');
+  list.innerHTML='';let okCount=0;
+  names.forEach((n,i)=>{
+    const qids=cardQids[i];const touched=qids.filter(q=>state[q]!==undefined);
+    const anyOk=touched.some(q=>state[q].status==='ok');
+    let txt,cls;if(touched.length===0){txt='noch offen';cls='na';}
+    else if(anyOk){txt='bearbeitet ✓';cls='ok';okCount++;}
+    else{txt='bearbeitet – nochmal ansehen';cls='no';}
+    const row=document.createElement('div');row.className='result-line';
+    row.innerHTML='<span>'+n+'</span><span class="st '+cls+'">'+txt+'</span>';list.appendChild(row);
+  });
+  document.getElementById('scoreBig').textContent=okCount+' / 5 Karten bearbeitet';
+}
+
+/* ===== Zeichen-Karte: Musterlösungs-SVGs + Häkchen ===== */
+(function(){
+  // Würfelnetz 3cm (Kreuz)
+  const sol0=document.getElementById('drawSol0');
+  if(sol0) sol0.innerHTML=netMini('wuerfel',1);
+  // Quadernetz 4·3·2 (Kreuz mit korrekten Rechtecken)
+  const sol1=document.getElementById('drawSol1');
+  if(sol1) sol1.innerHTML=netMini('quader',0);
+  // Pyramide (Stern)
+  const sol2=document.getElementById('drawSol2');
+  if(sol2) sol2.innerHTML=netMini('pyramide',0);
+  // Häkchen -> Karte als bearbeitet markieren
+  document.querySelectorAll('.auf.draw').forEach(auf=>{
+    const cb=auf.querySelector('.donecheck input');const lbl=auf.querySelector('.donecheck');
+    cb.addEventListener('change',()=>{
+      lbl.classList.toggle('done',cb.checked);
+      if(cb.checked) mark(auf.dataset.q,'ok'); else { delete state[auf.dataset.q]; maybeWeiter(); }
+    });
+  });
+})();
+
+/* ===== T-Rex ===== */
+const trex=document.getElementById('trex');
+trex.addEventListener('click',e=>{e.stopPropagation();trex.classList.toggle('open');});
+</script>
+</body>
+</html>
