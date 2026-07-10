@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Schrägbilder – Lernseite</title>
+
+<meta name="description" content="Erarbeitung von Schrägbildern: Schritt-für-Schritt-Demonstration, wie man das Schrägbild eines Quaders und Würfels zeichnet, mit Anleitung zum Übertragen ins Heft.">
+<meta name="keywords" content="Schrägbild, Quader, Würfel, zeichnen, Kästchendiagonale, verkürzt, parallel, räumlich">
+<meta name="typ" content="Lernseite">
+<meta name="klasse" content="5">
+<meta name="fach" content="mathe">
+<meta name="oberthema" content="Körper">
+<meta name="thema" content="Schrägbilder">
+
+<script>
+  MathJax = { tex:{inlineMath:[['$','$'],['\\(','\\)']]}, svg:{fontCache:'global'} };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+<style>
+:root{
+  --ink:#22303f;--card:#ffffff;--green:#1e7d32;--red:#c1272d;
+  --amber:#b8860b;--amber-light:#fdf3d9;--amber-dark:#96690a;
+  --orange:#c97a2e;--orange-dark:#a5611e;--orange-light:#fbeee0;
+  --bg:#faf7f2;--line:#e4dcd0;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);
+  color:var(--ink);line-height:1.55;font-size:17px;padding-bottom:90px;}
+.wrap{max-width:920px;margin:0 auto;padding:0 14px;}
+
+header{background:linear-gradient(135deg,var(--orange),var(--orange-dark));color:#fff;
+  padding:20px 18px;border-radius:0 0 20px 20px;box-shadow:0 3px 10px rgba(0,0,0,.12);}
+header h1{margin:0 0 4px;font-size:1.5rem;}
+header p{margin:0;opacity:.95;}
+
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0 10px;}
+.tab{min-height:44px;padding:8px 12px;border:2px solid var(--orange);border-radius:12px;
+  background:#fff;color:var(--orange-dark);font-weight:700;font-size:.9rem;cursor:pointer;flex:1 1 auto;text-align:center;}
+.tab.active{background:var(--orange);color:#fff;}
+.tab .num{display:inline-block;background:rgba(0,0,0,.12);border-radius:8px;padding:0 7px;margin-right:6px;font-size:.85em;}
+.tab.active .num{background:rgba(255,255,255,.3);}
+
+.card{display:none;background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px 16px 22px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,.05);}
+.card.active{display:block;animation:fade .25s ease;}
+@keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+.card h2{margin:0 0 12px;font-size:1.25rem;color:var(--orange-dark);border-bottom:3px solid var(--orange-light);padding-bottom:8px;}
+p{margin:10px 0;}
+.hl{background:var(--orange-light);border-radius:6px;padding:1px 5px;font-weight:600;}
+.info{background:#fff;border-left:5px solid var(--orange);padding:10px 14px;border-radius:8px;margin:12px 0;}
+
+/* 3D stage */
+.stage3d{width:100%;max-width:380px;height:230px;margin:6px auto;touch-action:none;
+  overscroll-behavior:contain;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;
+  border:2px solid var(--line);border-radius:16px;background:#fff;cursor:grab;}
+.stage3d:active{cursor:grabbing;}
+.hint3d{font-size:.85rem;color:#8a7355;text-align:center;margin:2px 0 8px;}
+
+/* Demo */
+.demo-stage{display:flex;justify-content:center;margin:10px 0;}
+.demo-stage svg{background:#fff;border:2px solid var(--line);border-radius:12px;max-width:100%;}
+.demo-caption{background:var(--orange-light);border-radius:12px;padding:12px 14px;margin:10px 0;
+  font-weight:600;min-height:60px;display:flex;align-items:center;}
+.demo-caption .stepnum{background:var(--orange);color:#fff;font-weight:800;border-radius:15px;
+  min-width:44px;height:30px;padding:0 8px;font-size:.85rem;display:flex;align-items:center;justify-content:center;margin-right:12px;}
+.demo-controls{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:12px 0;}
+
+/* Buttons */
+.btn{min-height:44px;min-width:44px;padding:10px 18px;border:none;border-radius:12px;
+  font-weight:700;font-size:1rem;cursor:pointer;background:var(--orange);color:#fff;}
+.btn:active{transform:scale(.97);}
+.btn.ghost{background:#fff;color:var(--orange-dark);border:2px solid var(--orange);}
+.btn[disabled]{background:#cdbfae;cursor:default;color:#fff;}
+
+/* Anleitung Schritte */
+.anleitung{counter-reset:step;margin:14px 0;}
+.astep{display:flex;gap:12px;border:2px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:10px;background:#fdfbf8;}
+.astep .n{background:var(--orange);color:#fff;font-weight:800;border-radius:50%;width:32px;height:32px;min-width:32px;
+  display:flex;align-items:center;justify-content:center;}
+.astep .txt{flex:1;}
+.astep .txt b{color:var(--orange-dark);}
+.astep.hidden-step{display:none;}
+
+/* Zwischenfrage */
+.frage{background:var(--orange-light);border:2px dashed var(--orange);border-radius:14px;padding:14px;margin:16px 0;}
+.frage .q{font-weight:700;margin-bottom:10px;}
+.opts{display:flex;flex-direction:column;gap:8px;}
+.opt{min-height:44px;padding:10px 14px;border:2px solid var(--orange);border-radius:12px;
+  background:#fff;color:var(--ink);font-size:1rem;cursor:pointer;text-align:left;font-weight:600;}
+.opt.correct{background:var(--green);color:#fff;border-color:var(--green);}
+.opt.wrong{background:var(--red);color:#fff;border-color:var(--red);}
+.opt.locked{cursor:default;}
+.fb{margin-top:10px;font-weight:700;display:none;padding:8px 12px;border-radius:10px;}
+.fb.show{display:block;}
+.fb.ok{background:var(--green);color:#fff;}
+.fb.no{background:var(--red);color:#fff;}
+
+/* amber hint */
+details.hint{background:var(--amber-light);border:2px solid var(--amber);border-radius:12px;margin:14px 0;overflow:hidden;}
+details.hint summary{cursor:pointer;padding:12px 14px;font-weight:700;color:var(--amber-dark);
+  list-style:none;min-height:44px;display:flex;align-items:center;}
+details.hint summary::-webkit-details-marker{display:none;}
+details.hint summary::before{content:"💡 ";margin-right:6px;}
+details.hint[open] summary::before{content:"📖 ";}
+details.hint .hint-body{padding:0 14px 14px;}
+
+/* tooltip */
+.tt{border-bottom:2px dotted var(--orange);cursor:pointer;position:relative;font-weight:600;color:var(--orange-dark);}
+.tt .tip{display:none;position:absolute;left:0;bottom:130%;background:var(--ink);color:#fff;
+  padding:8px 10px;border-radius:8px;font-size:.82rem;font-weight:400;width:220px;z-index:5;line-height:1.35;
+  box-shadow:0 4px 12px rgba(0,0,0,.25);}
+.tt.open .tip{display:block;}
+
+/* Weiter */
+.weiter-wrap{text-align:center;margin:10px 0 30px;}
+.weiter{display:none;min-height:52px;min-width:200px;padding:14px 28px;background:var(--green);
+  color:#fff;border:none;border-radius:14px;font-size:1.1rem;font-weight:800;cursor:pointer;box-shadow:0 3px 10px rgba(30,125,50,.3);}
+.weiter.show{display:inline-block;}
+
+.trex{position:fixed;right:14px;bottom:14px;font-size:1.9rem;cursor:pointer;z-index:50;user-select:none;}
+.trex .bubble{display:none;position:absolute;right:0;bottom:120%;background:var(--ink);color:#fff;
+  padding:6px 10px;border-radius:8px;font-size:.8rem;white-space:nowrap;}
+.trex.open .bubble{display:block;}
+svg{display:block;}
+.svgwrap{display:flex;justify-content:center;margin:8px 0;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap"><h1>Schrägbilder</h1><p>Einheit 3 · Erarbeitung · Klasse 5</p></div>
+</header>
+
+<div class="wrap">
+  <div class="tabs" id="tabs"></div>
+
+  <!-- ===== KARTE 1: Was ist ein Schrägbild ===== -->
+  <div class="card active" data-card="0">
+    <h2>Was ist ein Schrägbild?</h2>
+    <p>Ein Körper ist räumlich – ein Blatt Papier ist flach. Damit man einen Quader auf dem Papier
+    trotzdem <b>räumlich</b> darstellen kann, zeichnet man ein <span class="tt" data-tip="Ein Schrägbild ist eine räumliche Zeichnung eines Körpers auf ebenem Papier. Nach hinten verlaufende Kanten werden schräg und verkürzt gezeichnet.">Schrägbild</span>.</p>
+
+    <p>Dreh den Quader mit dem <b>Finger</b> – so sieht er räumlich aus. Genau diesen Eindruck
+    soll dein Schrägbild auf dem Papier vermitteln:</p>
+    <div class="stage3d" id="cubeStage"></div>
+    <div class="hint3d">↻ mit dem Finger drehen</div>
+
+    <div class="info">Beim Schrägbild gelten drei Regeln:
+    <br>• Die <b>vordere Fläche</b> wird in <b>wahrer Größe</b> gezeichnet – auf Karopapier gilt:
+    <b>1&nbsp;cm = 2 Kästchen</b>.
+    <br>• Die <b>nach hinten</b> verlaufenden Kanten zeichnet man <b>schräg</b> und <b>verkürzt</b>:
+    für <b>1&nbsp;cm Tiefe eine Kästchendiagonale</b> (1 Kästchen nach rechts + 1 nach oben).
+    Die Diagonale ist nur etwa 0,7&nbsp;cm lang – das ist die Verkürzung.
+    <br>• <b>Nicht sichtbare</b> Kanten werden <b>gestrichelt</b> gezeichnet.</div>
+
+    <div class="frage" id="f1">
+      <div class="q">Warum zeichnet man die nach hinten verlaufenden Kanten verkürzt?</div>
+      <div class="opts">
+        <button class="opt" data-ok="0">Damit man Platz auf dem Papier spart.</button>
+        <button class="opt" data-ok="1">Damit die Zeichnung räumlich wirkt – so als würde man den Körper schräg von der Seite sehen.</button>
+        <button class="opt" data-ok="0">Weil die hinteren Kanten in echt kürzer sind.</button>
+      </div>
+      <div class="fb" id="fb1"></div>
+    </div>
+  </div>
+
+  <!-- ===== KARTE 2: Klick-für-Klick-Demo ===== -->
+  <div class="card" data-card="1">
+    <h2>Schau zu: Schrägbild Schritt für Schritt</h2>
+    <p>Hier wird das Schrägbild eines Quaders vorgemacht: <b>Länge 4&nbsp;cm, Höhe 3&nbsp;cm,
+    Tiefe 2&nbsp;cm</b>. Tippe auf <b>„Nächster Schritt"</b> und beobachte genau, was gezeichnet
+    wird. Danach zeichnen wir denselben Quader noch einmal – <b>gekippt</b>, aus einer anderen
+    Perspektive.</p>
+
+    <div class="demo-stage" id="demoStage"></div>
+    <div class="demo-caption" id="demoCaption">
+      <span class="stepnum" id="demoNum">0</span>
+      <span id="demoText">Tippe auf „Nächster Schritt", um mit dem Zeichnen zu beginnen.</span>
+    </div>
+    <div class="demo-controls">
+      <button class="btn ghost" id="demoPrev" disabled>◀ Zurück</button>
+      <button class="btn" id="demoNext">Nächster Schritt ▶</button>
+      <button class="btn ghost" id="demoReset">↺ Von vorne</button>
+    </div>
+
+    <div class="info" id="demoDone" style="display:none;">
+      <b>Fertig!</b> Du hast gesehen: <b>Derselbe Quader</b> kann verschieden gezeichnet werden –
+      je nachdem, wie er steht oder liegt (welche Fläche vorne ist) und in welche Richtung die
+      Tiefe läuft. Alle Ansichten sind richtige Schrägbilder, solange die Regeln stimmen:
+      vordere Fläche in wahrer Größe, 1&nbsp;cm Tiefe = 1 Kästchendiagonale, verdeckte Kanten
+      gestrichelt. Auf der nächsten Karte darfst du selbst ins Heft zeichnen.
+    </div>
+  </div>
+
+  <!-- ===== KARTE 3: Anleitung zum Übertragen ins Heft ===== -->
+  <div class="card" data-card="2">
+    <h2>Jetzt du: ins Heft übertragen</h2>
+    <p>Nimm <b>Karopapier</b> und einen <b>Bleistift</b>. Folge den Schritten – decke immer erst den
+    nächsten Schritt auf, wenn du den vorigen gezeichnet hast.</p>
+
+    <div class="anleitung" id="anleitung">
+      <div class="astep">
+        <div class="n">1</div>
+        <div class="txt"><b>Vordere Fläche in wahrer Größe.</b> Auf Karopapier gilt: <b>1&nbsp;cm = 2 Kästchen</b>.
+        Zeichne für unseren Quader (Länge 4&nbsp;cm, Höhe 3&nbsp;cm) also ein Rechteck,
+        das <b>8 Kästchen breit</b> und <b>6 Kästchen hoch</b> ist.</div>
+      </div>
+      <div class="astep hidden-step">
+        <div class="n">2</div>
+        <div class="txt"><b>Schräge Kanten nach hinten – verkürzt.</b> Für <b>1&nbsp;cm Tiefe</b> zeichnest du
+        <b>eine <span class="tt" data-tip="Genau 1 Kästchen nach rechts und 1 Kästchen nach oben – die Linie geht also exakt durch die Ecken der Kästchen.">Kästchendiagonale</span></b>.
+        Unser Quader ist 2&nbsp;cm tief → jede schräge Kante ist <b>2 Diagonalen</b> lang.
+        Alle sind parallel. Die <b>verdeckte</b> schräge Kante unten links zeichnest du gleich
+        <b>gestrichelt</b>.</div>
+      </div>
+      <div class="astep hidden-step">
+        <div class="n">3</div>
+        <div class="txt"><b>Hintere Fläche verbinden.</b> Verbinde die Endpunkte: Die <b>sichtbaren</b>
+        Kanten (oben und rechts) werden <b>durchgezogen</b>, die <b>verdeckten</b> Kanten
+        (unten und links) <b>gestrichelt</b>.</div>
+      </div>
+      <div class="astep hidden-step">
+        <div class="n">4</div>
+        <div class="txt"><b>Kontrolle.</b> Prüfe dein Schrägbild: Ist die vordere Fläche 8 × 6 Kästchen?
+        Sind alle schrägen Kanten genau 2 Kästchendiagonalen lang und parallel? Sind genau
+        <b>drei</b> Kanten gestrichelt (schräg unten links, hinten unten, hinten links)?</div>
+      </div>
+    </div>
+    <button class="btn" id="anlReveal">Nächsten Schritt aufdecken</button>
+
+    <details class="hint">
+      <summary>Tipp: Was heißt „verkürzt zeichnen" genau?</summary>
+      <div class="hint-body">
+        Vorne gilt: <b>1&nbsp;cm = 2 Kästchen</b> (= 1&nbsp;cm auf dem Papier, wahre Größe).
+        Nach hinten gilt: <b>1&nbsp;cm = 1 Kästchendiagonale</b> – und eine Kästchendiagonale ist
+        nur etwa <b>0,7&nbsp;cm</b> lang. Die Tiefe wird also kürzer gezeichnet, als sie in echt
+        ist. Genau das meint „verkürzt" – und dadurch wirkt das Bild räumlich.
+      </div>
+    </details>
+
+    <div class="info" style="border-left-color:var(--amber);background:var(--amber-light);">
+      ✏️ <b>Zeichne ins Heft:</b> Übertrage das Schrägbild dieses Quaders
+      (Länge 4&nbsp;cm, Höhe 3&nbsp;cm, Tiefe 2&nbsp;cm) sauber auf Karopapier und zeig es
+      anschließend deiner Lehrerin oder deinem Lehrer.
+    </div>
+
+    <div class="frage" id="f3">
+      <div class="q">Wie zeichnest du eine nach hinten verlaufende Kante für <b>1&nbsp;cm Tiefe</b>?</div>
+      <div class="opts">
+        <button class="opt" data-ok="0">2 Kästchen geradeaus – wie bei der vorderen Fläche.</button>
+        <button class="opt" data-ok="1">Eine Kästchendiagonale schräg (1 Kästchen nach rechts + 1 nach oben).</button>
+        <button class="opt" data-ok="0">Eine ganze Kästchenkante senkrecht nach oben.</button>
+      </div>
+      <div class="fb" id="fb3"></div>
+    </div>
+  </div>
+
+  <!-- ===== KARTE 4: Würfel ===== -->
+  <div class="card" data-card="3">
+    <h2>Und der Würfel?</h2>
+    <p>Ein <b>Würfel</b> ist ein besonderer Quader: Länge, Breite und Höhe sind <b>gleich</b>.
+    Sein Schrägbild zeichnest du genauso – nur ist die vordere Fläche jetzt ein <b>Quadrat</b>.</p>
+
+    <div class="svgwrap">
+      <svg viewBox="0 0 180 170" width="180" height="170" aria-label="Schrägbild eines Würfels mit Kantenlänge 2 cm">
+        <!-- Karogitter (Kästchen = 20) -->
+        <g stroke="#efe7da" stroke-width="1">
+          <line x1="0" y1="10" x2="180" y2="10"/><line x1="0" y1="30" x2="180" y2="30"/>
+          <line x1="0" y1="50" x2="180" y2="50"/><line x1="0" y1="70" x2="180" y2="70"/>
+          <line x1="0" y1="90" x2="180" y2="90"/><line x1="0" y1="110" x2="180" y2="110"/>
+          <line x1="0" y1="130" x2="180" y2="130"/><line x1="0" y1="150" x2="180" y2="150"/>
+          <line x1="10" y1="0" x2="10" y2="170"/><line x1="30" y1="0" x2="30" y2="170"/>
+          <line x1="50" y1="0" x2="50" y2="170"/><line x1="70" y1="0" x2="70" y2="170"/>
+          <line x1="90" y1="0" x2="90" y2="170"/><line x1="110" y1="0" x2="110" y2="170"/>
+          <line x1="130" y1="0" x2="130" y2="170"/><line x1="150" y1="0" x2="150" y2="170"/>
+          <line x1="170" y1="0" x2="170" y2="170"/>
+        </g>
+        <!-- Würfel 2 cm: vorne 4x4 Kästchen (30,150)-(110,70); Tiefe 2 Diagonalen -> Versatz (40,-40) -->
+        <!-- verdeckte Kanten gestrichelt: schräg unten links, hinten unten, hinten links -->
+        <line x1="30" y1="150" x2="70" y2="110" stroke="#a5611e" stroke-width="2.5" stroke-dasharray="6 5"/>
+        <line x1="70" y1="110" x2="150" y2="110" stroke="#a5611e" stroke-width="2.5" stroke-dasharray="6 5"/>
+        <line x1="70" y1="110" x2="70" y2="30" stroke="#a5611e" stroke-width="2.5" stroke-dasharray="6 5"/>
+        <!-- vordere Fläche (Quadrat 4x4 K) -->
+        <rect x="30" y="70" width="80" height="80" fill="none" stroke="#a5611e" stroke-width="2.5"/>
+        <!-- sichtbare schräge Kanten -->
+        <line x1="110" y1="150" x2="150" y2="110" stroke="#a5611e" stroke-width="2.5"/>
+        <line x1="110" y1="70" x2="150" y2="30" stroke="#a5611e" stroke-width="2.5"/>
+        <line x1="30" y1="70" x2="70" y2="30" stroke="#a5611e" stroke-width="2.5"/>
+        <!-- sichtbare hintere Kanten (oben, rechts) -->
+        <line x1="70" y1="30" x2="150" y2="30" stroke="#a5611e" stroke-width="2.5"/>
+        <line x1="150" y1="30" x2="150" y2="110" stroke="#a5611e" stroke-width="2.5"/>
+      </svg>
+    </div>
+    <p style="text-align:center;font-size:.9rem;color:#8a7355;margin-top:2px;">
+      Würfel mit Kantenlänge 2&nbsp;cm: vorne 4 × 4 Kästchen, Tiefe 2 Kästchendiagonalen.</p>
+
+    <div class="info">Achte darauf: Die schrägen Kanten sind wieder <b>parallel</b> und <b>gleich lang</b>
+    (Kästchendiagonalen). Alle Kanten, die in Wirklichkeit parallel sind, bleiben auch im Schrägbild parallel.</div>
+
+    <div class="frage" id="f4">
+      <div class="q">Was ist beim Schrägbild eines Würfels die vordere Fläche?</div>
+      <div class="opts">
+        <button class="opt" data-ok="1">Ein Quadrat in wahrer Größe.</button>
+        <button class="opt" data-ok="0">Ein schräges Parallelogramm.</button>
+        <button class="opt" data-ok="0">Ein Kreis.</button>
+      </div>
+      <div class="fb" id="fb4"></div>
+    </div>
+  </div>
+
+  <div class="weiter-wrap">
+    <button class="weiter" id="weiter" onclick="window.location.href='schraegbilder_ue.html'">
+      Weiter zur Übung ➜
+    </button>
+  </div>
+</div>
+
+<div class="trex" id="trex">🦖<span class="bubble">Made by Mathedino</span></div>
+
+<script>
+/* ===== Tabs ===== */
+const titles=["Was ist ein Schrägbild?","Demo: Schritt für Schritt","Ins Heft übertragen","Der Würfel"];
+const cards=document.querySelectorAll('.card');
+const tabsEl=document.getElementById('tabs');
+titles.forEach((t,i)=>{const b=document.createElement('button');b.className='tab'+(i===0?' active':'');
+  b.innerHTML='<span class="num">'+(i+1)+'</span>'+t;b.onclick=()=>showCard(i);tabsEl.appendChild(b);});
+const tabs=document.querySelectorAll('.tab');
+function showCard(i){cards.forEach(c=>c.classList.remove('active'));tabs.forEach(t=>t.classList.remove('active'));
+  cards[i].classList.add('active');tabs[i].classList.add('active');window.scrollTo({top:0,behavior:'smooth'});}
+
+/* ===== 3D Quader (drehbar) ===== */
+const viewers=[];
+function makeViewer(stage, buildFn, dist=5){
+  const w=stage.clientWidth||360,h=stage.clientHeight||230;
+  const scene=new THREE.Scene();scene.background=new THREE.Color(0xffffff);
+  const cam=new THREE.PerspectiveCamera(40,w/h,0.1,100);cam.position.set(0,0,dist);
+  const renderer=new THREE.WebGLRenderer({antialias:true});
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));renderer.setSize(w,h);
+  stage.appendChild(renderer.domElement);
+  scene.add(new THREE.AmbientLight(0xffffff,0.75));
+  const d1=new THREE.DirectionalLight(0xffffff,0.6);d1.position.set(3,5,4);scene.add(d1);
+  const d2=new THREE.DirectionalLight(0xffffff,0.25);d2.position.set(-3,-2,-4);scene.add(d2);
+  const group=new THREE.Group();scene.add(group);buildFn(group);
+  group.rotation.x=-0.35;group.rotation.y=0.5;
+  const V={scene,cam,renderer,group,stage,w,h,needsRender:true};
+  let drag=false,lx=0,ly=0,pid=null;const el=renderer.domElement;el.style.touchAction='none';
+  el.addEventListener('pointerdown',e=>{drag=true;pid=e.pointerId;lx=e.clientX;ly=e.clientY;el.setPointerCapture(pid);e.preventDefault();});
+  el.addEventListener('pointermove',e=>{if(!drag)return;group.rotation.y+=(e.clientX-lx)*0.01;group.rotation.x+=(e.clientY-ly)*0.01;lx=e.clientX;ly=e.clientY;V.needsRender=true;e.preventDefault();});
+  const end=()=>{drag=false;if(pid!==null){try{el.releasePointerCapture(pid);}catch(_){}pid=null;}};
+  el.addEventListener('pointerup',end);el.addEventListener('pointercancel',end);
+  el.addEventListener('touchmove',e=>{if(drag)e.preventDefault();},{passive:false});
+  viewers.push(V);return V;
+}
+function renderLoop(){
+  viewers.forEach(V=>{const cw=V.stage.clientWidth,ch=V.stage.clientHeight;
+    if(cw>0&&ch>0&&(cw!==V.w||ch!==V.h)){V.w=cw;V.h=ch;V.cam.aspect=cw/ch;V.cam.updateProjectionMatrix();V.renderer.setSize(cw,ch);V.needsRender=true;}
+    if(V.needsRender){V.renderer.render(V.scene,V.cam);V.needsRender=false;}});
+  requestAnimationFrame(renderLoop);
+}
+requestAnimationFrame(renderLoop);
+makeViewer(document.getElementById('cubeStage'),g=>{
+  const geo=new THREE.BoxGeometry(2.6,1.9,1.3);
+  g.add(new THREE.Mesh(geo,new THREE.MeshLambertMaterial({color:0xf3dcc0,transparent:true,opacity:0.92,polygonOffset:true,polygonOffsetFactor:1,polygonOffsetUnits:1})));
+  g.add(new THREE.LineSegments(new THREE.EdgesGeometry(geo,15),new THREE.LineBasicMaterial({color:0xa5611e})));
+},5);
+
+/* ===== Klick-für-Klick-Demo (SVG-Aufbau) =====
+   Konvention (wie im Schulbuch):
+   - vordere Fläche in wahrer Größe, 1 cm = 2 Kästchen
+   - Tiefe: für 1 cm eine Kästchendiagonale (genau 1 Kästchen nach rechts + 1 nach oben)
+   Quader: Länge 4 cm, Höhe 3 cm, Tiefe 2 cm. */
+const GS=20;                        // 1 Kästchen = 20 px (entspricht 0,5 cm)
+const CM=2*GS;                      // 1 cm = 2 Kästchen
+const OX=2*GS, OY=10*GS;            // Ursprung liegt exakt auf einem Gitterpunkt
+const Wq=4*CM, Hq=3*CM;             // vordere Fläche 4 cm × 3 cm = 8 × 6 Kästchen
+const depthCM=2;
+const sx=depthCM*GS, sy=-depthCM*GS; // 1 cm Tiefe = 1 Kästchendiagonale = (1 K rechts, 1 K hoch)
+const vBL=[OX,OY], vBR=[OX+Wq,OY], vTR=[OX+Wq,OY-Hq], vTL=[OX,OY-Hq];
+const hBL=[OX+sx,OY+sy], hBR=[OX+Wq+sx,OY+sy], hTR=[OX+Wq+sx,OY-Hq+sy], hTL=[OX+sx,OY-Hq+sy];
+const L=(p,q,dash)=>`<line x1="${p[0]}" y1="${p[1]}" x2="${q[0]}" y2="${q[1]}" stroke="#a5611e" stroke-width="2.5"${dash?' stroke-dasharray="6 5"':''}/>`;
+
+// Karogitter als Hintergrund (Linien exakt im Kästchenraster)
+const VB_W=300, VB_H=240;
+function gitter(){
+  let g='';
+  for(let x=0;x<=VB_W;x+=GS){g+=`<line x1="${x}" y1="0" x2="${x}" y2="${VB_H}" stroke="#efe7da" stroke-width="1"/>`;}
+  for(let y=0;y<=VB_H;y+=GS){g+=`<line x1="0" y1="${y}" x2="${VB_W}" y2="${y}" stroke="#efe7da" stroke-width="1"/>`;}
+  return g;
+}
+// Bausteine – verdeckte Kanten NUR gestrichelt (3 Stück: schräg unten links, hinten unten, hinten links)
+const front=()=> L(vBL,vBR)+L(vBR,vTR)+L(vTR,vTL)+L(vTL,vBL);
+const slantsVis=()=> L(vBR,hBR)+L(vTR,hTR)+L(vTL,hTL);
+const slantHid=()=> L(vBL,hBL,true);
+const backVis=()=> L(hTL,hTR)+L(hTR,hBR);
+const backHid=()=> L(hBL,hBR,true)+L(hBL,hTL,true);
+
+/* Zweite Ansicht: derselbe Quader GEKIPPT – er liegt jetzt auf der 4 cm × 3 cm-Fläche.
+   Vorne sieht man die Fläche 4 cm × 2 cm, die Tiefe ist 3 cm (3 Kästchendiagonalen). */
+const OX3=2*GS, W3=4*CM, H3=2*CM, sx3=3*GS, sy3=-3*GS;
+const vBL3=[OX3,OY], vBR3=[OX3+W3,OY], vTR3=[OX3+W3,OY-H3], vTL3=[OX3,OY-H3];
+const hBL3=[OX3+sx3,OY+sy3], hBR3=[OX3+W3+sx3,OY+sy3], hTR3=[OX3+W3+sx3,OY-H3+sy3], hTL3=[OX3+sx3,OY-H3+sy3];
+const front3=()=> L(vBL3,vBR3)+L(vBR3,vTR3)+L(vTR3,vTL3)+L(vTL3,vBL3);
+const slantsVis3=()=> L(vBR3,hBR3)+L(vTR3,hTR3)+L(vTL3,hTL3);
+const slantHid3=()=> L(vBL3,hBL3,true);
+const backVis3=()=> L(hTL3,hTR3)+L(hTR3,hBR3);
+const backHid3=()=> L(hBL3,hBR3,true)+L(hBL3,hTL3,true);
+
+/* Dritte Ansicht (nur als Hinweis): Tiefe nach hinten LINKS – eher ungewöhnlich, aber richtig.
+   Vordere Fläche weiter rechts, Versatz (−1 K, −1 K) pro cm. Verdeckte Ecke hinten unten RECHTS. */
+const OX2=5*GS;
+const vBL2=[OX2,OY], vBR2=[OX2+Wq,OY], vTR2=[OX2+Wq,OY-Hq], vTL2=[OX2,OY-Hq];
+const hBL2=[OX2-sx,OY+sy], hBR2=[OX2+Wq-sx,OY+sy], hTR2=[OX2+Wq-sx,OY-Hq+sy], hTL2=[OX2-sx,OY-Hq+sy];
+const links2=()=> L(vBL2,vBR2)+L(vBR2,vTR2)+L(vTR2,vTL2)+L(vTL2,vBL2)
+  +L(vBL2,hBL2)+L(vTL2,hTL2)+L(vTR2,hTR2)+L(vBR2,hBR2,true)
+  +L(hTL2,hTR2)+L(hTL2,hBL2)+L(hBR2,hBL2,true)+L(hBR2,hTR2,true);
+
+const demoSteps=[
+  { text:"Start: Karopapier. Wir zeichnen den Quader: Länge 4 cm, Höhe 3 cm, Tiefe 2 cm.",
+    draw:()=>'' },
+  { text:"① Vordere Fläche in wahrer Größe: 1 cm = 2 Kästchen → Rechteck 8 Kästchen breit, 6 Kästchen hoch.",
+    draw:()=> front() },
+  { text:"② Schräge Kanten nach hinten: für 1 cm Tiefe eine Kästchendiagonale → hier je 2 Diagonalen. Die verdeckte Kante unten links wird gleich gestrichelt gezeichnet.",
+    draw:()=> front()+slantsVis()+slantHid() },
+  { text:"③ Hintere Fläche: die sichtbaren Kanten (oben und rechts) durchgezogen verbinden …",
+    draw:()=> front()+slantsVis()+slantHid()+backVis() },
+  { text:"④ … und die verdeckten hinteren Kanten (unten und links) gestrichelt. Fertig!",
+    draw:()=> front()+slantsVis()+slantHid()+backVis()+backHid() },
+  { text:"Derselbe Quader kann auch GEDREHT gezeichnet werden! Wir kippen ihn auf seine große 4 cm × 3 cm-Fläche. Von vorne sieht man jetzt die Fläche 4 cm × 2 cm – und die Tiefe ist 3 cm.",
+    draw:()=>'' },
+  { text:"① Vordere Fläche in wahrer Größe: jetzt 8 Kästchen breit und nur 4 Kästchen hoch (4 cm × 2 cm).",
+    draw:()=> front3() },
+  { text:"② Die Tiefe ist jetzt 3 cm → jede schräge Kante 3 Kästchendiagonalen. Verdeckte Kante unten links gestrichelt.",
+    draw:()=> front3()+slantsVis3()+slantHid3() },
+  { text:"③+④ Hintere Fläche verbinden: oben und rechts durchgezogen, unten und links gestrichelt. Gleicher Quader – ganz andere Ansicht!",
+    draw:()=> front3()+slantsVis3()+slantHid3()+backVis3()+backHid3() },
+  { text:"Noch ein Hinweis: Die schrägen Kanten dürfen auch nach hinten LINKS laufen – das sieht man seltener und ist eher ungewöhnlich, aber genauso richtig. Die verdeckte Ecke wechselt dann die Seite (unten rechts).",
+    draw:()=> links2() }
+];
+let demoIdx=0;
+const demoStage=document.getElementById('demoStage');
+function renderDemo(){
+  const content=gitter()+demoSteps[demoIdx].draw();
+  demoStage.innerHTML=`<svg viewBox="0 0 ${VB_W} ${VB_H}" width="${VB_W}" height="${VB_H}">${content}</svg>`;
+  document.getElementById('demoNum').textContent=demoIdx+'/'+(demoSteps.length-1);
+  document.getElementById('demoText').textContent=demoSteps[demoIdx].text;
+  document.getElementById('demoPrev').disabled = demoIdx===0;
+  document.getElementById('demoNext').disabled = demoIdx===demoSteps.length-1;
+  document.getElementById('demoDone').style.display = demoIdx===demoSteps.length-1 ? 'block':'none';
+  if(demoIdx===demoSteps.length-1){demoDoneFlag=true;checkWeiter();}
+}
+let demoDoneFlag=false;
+document.getElementById('demoNext').onclick=()=>{if(demoIdx<demoSteps.length-1){demoIdx++;renderDemo();}};
+document.getElementById('demoPrev').onclick=()=>{if(demoIdx>0){demoIdx--;renderDemo();}};
+document.getElementById('demoReset').onclick=()=>{demoIdx=0;renderDemo();};
+renderDemo();
+
+/* ===== Anleitung aufdecken ===== */
+const asteps=document.querySelectorAll('#anleitung .astep');
+let aShown=1;const aBtn=document.getElementById('anlReveal');
+aBtn.onclick=()=>{if(aShown<asteps.length){asteps[aShown].classList.remove('hidden-step');aShown++;}
+  if(aShown>=asteps.length){aBtn.disabled=true;aBtn.textContent='Alle Schritte aufgedeckt ✓';}checkWeiter();};
+
+/* ===== Zwischenfragen ===== */
+const done={f1:false,f3:false,f4:false};
+document.querySelectorAll('.frage').forEach(fr=>{
+  const fb=fr.querySelector('.fb');const opts=fr.querySelectorAll('.opt');
+  opts.forEach(o=>o.addEventListener('click',()=>{
+    if(fr.dataset.locked==='1'&&o.dataset.ok==='1')return;
+    const ok=o.dataset.ok==='1';
+    if(ok){o.classList.add('correct');opts.forEach(x=>x.classList.add('locked'));fr.dataset.locked='1';
+      fb.textContent='Richtig! ✓';fb.className='fb show ok';done[fr.id]=true;checkWeiter();}
+    else{o.classList.add('wrong','locked');fb.textContent='Noch nicht – tippe eine andere Antwort.';fb.className='fb show no';}
+  }));
+});
+
+/* ===== Weiter ===== */
+function checkWeiter(){
+  if(done.f1&&done.f3&&done.f4&&demoDoneFlag&&aShown>=asteps.length){
+    document.getElementById('weiter').classList.add('show');
+  }
+}
+
+/* ===== Tooltips ===== */
+document.querySelectorAll('.tt').forEach(t=>{
+  const tip=document.createElement('span');tip.className='tip';tip.textContent=t.dataset.tip;t.appendChild(tip);
+  t.addEventListener('click',e=>{e.stopPropagation();
+    document.querySelectorAll('.tt').forEach(o=>{if(o!==t)o.classList.remove('open');});t.classList.toggle('open');});
+});
+document.addEventListener('click',()=>document.querySelectorAll('.tt').forEach(o=>o.classList.remove('open')));
+
+/* ===== T-Rex ===== */
+const trex=document.getElementById('trex');
+trex.addEventListener('click',e=>{e.stopPropagation();trex.classList.toggle('open');});
+</script>
+</body>
+</html>

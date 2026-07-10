@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Schrägbilder – Übung</title>
+
+<meta name="description" content="Übung zu Schrägbildern von Quadern und Würfeln: Regeln anwenden, Fehler finden, Schritte ordnen und selbst zeichnen. Mit Niveaustufen.">
+<meta name="keywords" content="Schrägbild, Quader, Würfel, Übung, zeichnen, Kästchendiagonale, verkürzt, parallel, gestrichelt">
+<meta name="typ" content="Übung">
+<meta name="klasse" content="5">
+<meta name="fach" content="mathe">
+<meta name="oberthema" content="Körper">
+<meta name="thema" content="Schrägbilder">
+
+<script>
+  MathJax = { tex:{inlineMath:[['$','$'],['\\(','\\)']]}, svg:{fontCache:'global'} };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+<style>
+:root{
+  --ink:#22303f;--card:#ffffff;--green:#1e7d32;--red:#c1272d;
+  --amber:#b8860b;--amber-light:#fdf3d9;--amber-dark:#96690a;
+  --blue:#2f5fa6;--blue-dark:#1f4680;--blue-light:#e6eefb;
+  --bg:#f6f8fb;--line:#dbe3ee;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);
+  color:var(--ink);line-height:1.55;font-size:17px;padding-bottom:90px;}
+.wrap{max-width:920px;margin:0 auto;padding:0 14px;}
+
+header{background:linear-gradient(135deg,var(--blue),var(--blue-dark));color:#fff;
+  padding:20px 18px;border-radius:0 0 20px 20px;box-shadow:0 3px 10px rgba(0,0,0,.12);}
+header h1{margin:0 0 4px;font-size:1.5rem;}
+header p{margin:0;opacity:.95;}
+
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0 10px;}
+.tab{min-height:44px;padding:8px 12px;border:2px solid var(--blue);border-radius:12px;
+  background:#fff;color:var(--blue-dark);font-weight:700;font-size:.9rem;cursor:pointer;flex:1 1 auto;text-align:center;}
+.tab.active{background:var(--blue);color:#fff;}
+.tab .num{display:inline-block;background:rgba(0,0,0,.12);border-radius:8px;padding:0 7px;margin-right:6px;font-size:.85em;}
+.tab.active .num{background:rgba(255,255,255,.3);}
+
+.card{display:none;background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:18px 16px 22px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,.05);}
+.card.active{display:block;animation:fade .25s ease;}
+@keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+.card h2{margin:0 0 6px;font-size:1.25rem;color:var(--blue-dark);border-bottom:3px solid var(--blue-light);padding-bottom:8px;}
+.card .sub{color:#5a6b7d;font-size:.95rem;margin:6px 0 12px;}
+p{margin:10px 0;}
+
+.levels{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 16px;}
+.lvl{min-height:44px;flex:1 1 100px;padding:8px 10px;border:2px solid var(--blue);border-radius:12px;
+  background:#fff;color:var(--blue-dark);font-weight:700;cursor:pointer;font-size:.92rem;text-align:center;}
+.lvl.active{background:var(--blue);color:#fff;}
+.lvlbody{display:none;}
+.lvlbody.active{display:block;}
+
+.auf{border:1px solid var(--line);border-radius:12px;padding:14px;margin:12px 0;background:#fbfcfe;}
+.auf .qtext{font-weight:600;margin-bottom:10px;}
+
+.opts{display:flex;flex-direction:column;gap:8px;}
+.opts.row{flex-direction:row;flex-wrap:wrap;}
+.opt{min-height:44px;padding:10px 14px;border:2px solid var(--blue);border-radius:12px;
+  background:#fff;color:var(--ink);font-size:1rem;cursor:pointer;text-align:left;font-weight:600;flex:1 1 auto;}
+.opt.sel{background:var(--blue-light);border-color:var(--blue-dark);}
+.opt.correct{background:var(--green);color:#fff;border-color:var(--green);}
+.opt.wrong{background:var(--red);color:#fff;border-color:var(--red);}
+.opt.locked{cursor:default;}
+
+/* Reihenfolge sortieren (Antippen + Pfeile) */
+.sortlist{display:flex;flex-direction:column;gap:8px;margin:10px 0;}
+.sortitem{display:flex;align-items:center;gap:10px;border:2px solid var(--blue);border-radius:12px;
+  padding:10px 12px;background:#fff;}
+.sortitem.ok{border-color:var(--green);background:#eaf7ec;}
+.sortitem.no{border-color:var(--red);background:#fdeceb;}
+.sortitem .label{flex:1;font-weight:600;}
+.sortitem .arrows{display:flex;flex-direction:column;gap:4px;}
+.sortitem .arrows button{width:44px;height:32px;border:none;border-radius:8px;background:var(--blue-light);
+  color:var(--blue-dark);font-weight:800;cursor:pointer;font-size:1rem;}
+.sortitem .arrows button:active{background:var(--blue);color:#fff;}
+
+.btn{min-height:44px;padding:10px 20px;border:none;border-radius:12px;font-weight:700;font-size:1rem;
+  cursor:pointer;background:var(--blue);color:#fff;margin:8px 6px 0 0;}
+.btn:active{transform:scale(.97);}
+.btn.clear{background:#fff;color:var(--red);border:2px solid var(--red);display:none;}
+.btn.clear.show{display:inline-block;}
+
+.fb{margin-top:10px;font-weight:700;display:none;padding:10px 12px;border-radius:10px;}
+.fb.show{display:block;}
+.fb.ok{background:var(--green);color:#fff;}
+.fb.no{background:var(--red);color:#fff;}
+
+details.muster{background:var(--amber-light);border:2px solid var(--amber);border-radius:12px;margin:10px 0 0;overflow:hidden;display:none;}
+details.muster.show{display:block;}
+details.muster summary{cursor:pointer;padding:12px 14px;font-weight:700;color:var(--amber-dark);
+  list-style:none;min-height:44px;display:flex;align-items:center;}
+details.muster summary::-webkit-details-marker{display:none;}
+details.muster summary::before{content:"📝 ";margin-right:6px;}
+details.muster .mbody{padding:0 14px 14px;line-height:1.5;}
+
+.donecheck{display:flex;align-items:flex-start;gap:10px;margin:14px 0 4px;font-weight:700;
+  color:var(--blue-dark);cursor:pointer;line-height:1.4;padding:10px;border:2px solid var(--blue);
+  border-radius:12px;background:#fff;min-height:44px;}
+.donecheck input{width:26px;height:26px;flex:none;margin-top:1px;accent-color:var(--green);cursor:pointer;}
+.donecheck.done{background:#eaf7ec;border-color:var(--green);color:var(--green);}
+
+.weiter-wrap{text-align:center;margin:10px 0 30px;}
+.weiter{display:none;min-height:52px;min-width:200px;padding:14px 28px;background:var(--green);color:#fff;
+  border:none;border-radius:14px;font-size:1.1rem;font-weight:800;cursor:pointer;box-shadow:0 3px 10px rgba(30,125,50,.3);}
+.weiter.show{display:inline-block;}
+
+.result-line{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line);}
+.st.ok{color:var(--green);font-weight:800;}
+.st.no{color:var(--red);font-weight:800;}
+.st.na{color:#9aa6b3;font-weight:800;}
+.scorebig{text-align:center;font-size:2rem;font-weight:800;color:var(--blue-dark);margin:14px 0 4px;}
+
+.svgwrap{display:flex;justify-content:center;margin:8px 0;flex-wrap:wrap;gap:12px;}
+svg{display:block;}
+
+.trex{position:fixed;right:14px;bottom:14px;font-size:1.9rem;cursor:pointer;z-index:50;user-select:none;}
+.trex .bubble{display:none;position:absolute;right:0;bottom:120%;background:var(--ink);color:#fff;padding:6px 10px;border-radius:8px;font-size:.8rem;white-space:nowrap;}
+.trex.open .bubble{display:block;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap"><h1>Schrägbilder</h1><p>Einheit 3 · Übung · Klasse 5</p></div>
+</header>
+
+<div class="wrap">
+  <div class="tabs" id="tabs"></div>
+
+  <!-- ===== KARTE 1: Regeln erkennen ===== -->
+  <div class="card active" data-card="0">
+    <h2>Die Regeln erkennen</h2>
+    <div class="sub">Was gilt beim Zeichnen eines Schrägbilds?</div>
+
+    <div class="levels" data-lv="r">
+      <button class="lvl active" data-l="0">Grundlagen</button>
+      <button class="lvl" data-l="1">Fortgeschritten</button>
+      <button class="lvl" data-l="2">Profi</button>
+    </div>
+
+    <div class="lvlbody active" data-l="0">
+      <div class="auf" data-q="r0">
+        <div class="qtext">Wie werden die <b>nicht sichtbaren</b> Kanten gezeichnet?</div>
+        <div class="opts row">
+          <button class="opt" data-ok="0">Dick durchgezogen</button>
+          <button class="opt" data-ok="1">Gestrichelt</button>
+          <button class="opt" data-ok="0">Gar nicht</button>
+        </div>
+        <button class="btn check">Prüfen</button><button class="btn clear">Leeren</button>
+        <div class="fb"></div>
+      </div>
+    </div>
+
+    <div class="lvlbody" data-l="1">
+      <div class="auf multi" data-q="r1">
+        <div class="qtext">Welche Aussagen über ein Schrägbild sind <b>richtig</b>? (Mehrere möglich)</div>
+        <div class="opts">
+          <button class="opt" data-ok="1">Die vordere Fläche wird in wahrer Größe gezeichnet.</button>
+          <button class="opt" data-ok="1">Nach hinten laufende Kanten werden schräg und verkürzt gezeichnet.</button>
+          <button class="opt" data-ok="0">Alle Kanten werden gleich lang gezeichnet.</button>
+          <button class="opt" data-ok="1">Kanten, die in echt parallel sind, bleiben auch im Bild parallel.</button>
+          <button class="opt" data-ok="0">Verdeckte Kanten lässt man weg.</button>
+        </div>
+        <button class="btn check">Prüfen</button><button class="btn clear">Leeren</button>
+        <div class="fb"></div>
+        <details class="muster"><summary>Musterlösung</summary><div class="mbody">
+          Richtig: vordere Fläche in wahrer Größe; hintere Kanten schräg + verkürzt; parallele Kanten
+          bleiben parallel. Falsch: Kanten sind <b>nicht</b> alle gleich lang, und verdeckte Kanten
+          werden <b>gestrichelt</b> gezeichnet (nicht weggelassen).
+        </div></details>
+      </div>
+    </div>
+
+    <div class="lvlbody" data-l="2">
+      <div class="auf" data-q="r2">
+        <div class="qtext">Ein Quader ist <b>5&nbsp;cm breit</b>, <b>2&nbsp;cm hoch</b> und <b>3&nbsp;cm tief</b>.
+        Wie lang zeichnest du jede schräge Kante nach hinten?</div>
+        <div class="opts row">
+          <button class="opt" data-ok="0">5 Kästchendiagonalen</button>
+          <button class="opt" data-ok="1">3 Kästchendiagonalen</button>
+          <button class="opt" data-ok="0">2 Kästchendiagonalen</button>
+        </div>
+        <button class="btn check">Prüfen</button><button class="btn clear">Leeren</button>
+        <div class="fb"></div>
+        <details class="muster"><summary>Musterlösung</summary><div class="mbody">
+          Die schräge Kante steht für die <b>Tiefe</b>. Der Quader ist 3&nbsp;cm tief, also zeichnest
+          du jede schräge Kante <b>3 Kästchendiagonalen</b> lang (für 1&nbsp;cm eine Diagonale).
+          Breite (5&nbsp;cm) und Höhe (2&nbsp;cm) betreffen die vordere Fläche, nicht die Tiefe.
+        </div></details>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== KARTE 2: Finde den Fehler ===== -->
+  <div class="card" data-card="1">
+    <h2>Finde den Fehler</h2>
+    <div class="sub">Schau dir die Schrägbilder an und entscheide, ob sie richtig gezeichnet sind.</div>
+
+    <div class="levels" data-lv="f">
+      <button class="lvl active" data-l="0">Grundlagen</button>
+      <button class="lvl" data-l="1">Fortgeschritten</button>
+      <button class="lvl" data-l="2">Profi</button>
+    </div>
+
+    <div class="lvlbody active" data-l="0"><div id="fehler0"></div></div>
+    <div class="lvlbody" data-l="1"><div id="fehler1"></div></div>
+    <div class="lvlbody" data-l="2"><div id="fehler2"></div></div>
+  </div>
+
+  <!-- ===== KARTE 3: Schritte ordnen ===== -->
+  <div class="card" data-card="2">
+    <h2>Die Zeichen-Schritte ordnen</h2>
+    <div class="sub">Bring die Schritte in die richtige Reihenfolge. Nutze die Pfeile ▲▼.</div>
+
+    <div class="auf sortauf" data-q="s0"
+      data-steps='["Vordere Fläche in wahrer Größe zeichnen","Schräge, verkürzte Kanten nach hinten zeichnen","Hintere Fläche verbinden","Nicht sichtbare Kanten gestrichelt zeichnen"]'>
+      <div class="sortlist"></div>
+      <button class="btn check">Prüfen</button><button class="btn clear">Neu mischen</button>
+      <div class="fb"></div>
+      <details class="muster"><summary>Musterlösung</summary><div class="mbody">
+        1) Vordere Fläche in wahrer Größe · 2) Schräge, verkürzte Kanten nach hinten ·
+        3) Hintere Fläche verbinden · 4) Nicht sichtbare Kanten gestrichelt.
+      </div></details>
+    </div>
+  </div>
+
+  <!-- ===== KARTE 4: Ins Heft zeichnen ===== -->
+  <div class="card" data-card="3">
+    <h2>Ins Heft zeichnen</h2>
+    <div class="sub">Zeichne auf Karopapier. Kontrolliere mit der Musterlösung und zeig dein Schrägbild deiner Lehrkraft.</div>
+
+    <div class="levels" data-lv="d">
+      <button class="lvl active" data-l="0">Grundlagen</button>
+      <button class="lvl" data-l="1">Fortgeschritten</button>
+      <button class="lvl" data-l="2">Profi</button>
+    </div>
+
+    <div class="lvlbody active" data-l="0">
+      <div class="auf draw" data-q="d0">
+        <div class="qtext">Zeichne das <b>Schrägbild eines Würfels</b> mit der Kantenlänge <b>3&nbsp;cm</b>.</div>
+        <details class="muster show"><summary>Musterlösung ansehen</summary><div class="mbody">
+          Vordere Fläche = Quadrat in wahrer Größe: <b>6 × 6 Kästchen</b> (1&nbsp;cm = 2 Kästchen).
+          Schräge Kanten je <b>3 Kästchendiagonalen</b> (Tiefe 3&nbsp;cm). Hintere Fläche verbinden,
+          die drei verdeckten Kanten gestrichelt:
+          <div class="svgwrap" id="drawSol0"></div>
+        </div></details>
+        <label class="donecheck"><input type="checkbox"> Ich habe das Schrägbild gezeichnet und meiner Lehrkraft gezeigt.</label>
+        <div class="fb"></div>
+      </div>
+    </div>
+
+    <div class="lvlbody" data-l="1">
+      <div class="auf draw" data-q="d1">
+        <div class="qtext">Zeichne das <b>Schrägbild eines Quaders</b> mit Breite <b>4&nbsp;cm</b>, Höhe <b>3&nbsp;cm</b>
+        und Tiefe <b>2&nbsp;cm</b>.</div>
+        <details class="muster show"><summary>Musterlösung ansehen</summary><div class="mbody">
+          Vordere Fläche = Rechteck in wahrer Größe: <b>8 × 6 Kästchen</b> (1&nbsp;cm = 2 Kästchen).
+          Schräge Kanten je <b>2 Kästchendiagonalen</b> (Tiefe 2&nbsp;cm). Hintere Fläche verbinden,
+          verdeckte Kanten gestrichelt:
+          <div class="svgwrap" id="drawSol1"></div>
+        </div></details>
+        <label class="donecheck"><input type="checkbox"> Ich habe das Schrägbild gezeichnet und meiner Lehrkraft gezeigt.</label>
+        <div class="fb"></div>
+      </div>
+    </div>
+
+    <div class="lvlbody" data-l="2">
+      <div class="auf draw" data-q="d2">
+        <div class="qtext">Zeichne das <b>Schrägbild eines liegenden Quaders</b> mit Breite <b>5&nbsp;cm</b>,
+        Höhe <b>2&nbsp;cm</b> und Tiefe <b>3&nbsp;cm</b>. Achte besonders auf die Tiefe:
+        3&nbsp;cm = 3 Kästchendiagonalen.</div>
+        <details class="muster show"><summary>Musterlösung ansehen</summary><div class="mbody">
+          Vordere Fläche = Rechteck in wahrer Größe: <b>10 × 4 Kästchen</b> (1&nbsp;cm = 2 Kästchen).
+          Schräge Kanten je <b>3 Kästchendiagonalen</b> (Tiefe 3&nbsp;cm). Hintere Fläche verbinden,
+          verdeckte Kanten gestrichelt:
+          <div class="svgwrap" id="drawSol2"></div>
+        </div></details>
+        <label class="donecheck"><input type="checkbox"> Ich habe das Schrägbild gezeichnet und meiner Lehrkraft gezeigt.</label>
+        <div class="fb"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== KARTE 5: WIEDERHOLUNG (Netze – Einheit 2) ===== -->
+  <div class="card" data-card="4">
+    <h2>Wiederholung: Netze</h2>
+    <div class="sub">Aus Einheit 2 – welches Netz gehört zu welchem Körper?</div>
+
+    <div class="levels" data-lv="w">
+      <button class="lvl active" data-l="0">Grundlagen</button>
+      <button class="lvl" data-l="1">Fortgeschritten</button>
+      <button class="lvl" data-l="2">Profi</button>
+    </div>
+
+    <div class="lvlbody active" data-l="0">
+      <div class="auf" data-q="w0">
+        <div class="qtext">Aus wie vielen gleich großen Quadraten besteht ein <b>Würfelnetz</b>?</div>
+        <div class="opts row">
+          <button class="opt" data-ok="0">4</button>
+          <button class="opt" data-ok="1">6</button>
+          <button class="opt" data-ok="0">8</button>
+        </div>
+        <button class="btn check">Prüfen</button><button class="btn clear">Leeren</button>
+        <div class="fb"></div>
+      </div>
+    </div>
+
+    <div class="lvlbody" data-l="1">
+      <div class="auf" data-q="w1">
+        <div class="qtext">Welches Netz gehört zu einer <b>quadratischen Pyramide</b>?</div>
+        <div class="opts row">
+          <button class="opt" data-ok="0">6 Rechtecke</button>
+          <button class="opt" data-ok="1">1 Quadrat + 4 Dreiecke</button>
+          <button class="opt" data-ok="0">2 Dreiecke + 3 Rechtecke</button>
+        </div>
+        <button class="btn check">Prüfen</button><button class="btn clear">Leeren</button>
+        <div class="fb"></div>
+        <details class="muster"><summary>Musterlösung</summary><div class="mbody">
+          Eine quadratische Pyramide hat 1 Quadrat (Grundfläche) + 4 Dreiecke (Seiten).
+          6 Rechtecke → Quader; 2 Dreiecke + 3 Rechtecke → dreieckiges Prisma.
+        </div></details>
+      </div>
+    </div>
+
+    <div class="lvlbody" data-l="2">
+      <div class="auf" data-q="w2">
+        <div class="qtext">Wie viele verschiedene gültige Netze hat ein <b>Würfel</b>?</div>
+        <div class="opts row">
+          <button class="opt" data-ok="0">6</button>
+          <button class="opt" data-ok="1">11</button>
+          <button class="opt" data-ok="0">unendlich viele</button>
+        </div>
+        <button class="btn check">Prüfen</button><button class="btn clear">Leeren</button>
+        <div class="fb"></div>
+        <details class="muster"><summary>Musterlösung</summary><div class="mbody">
+          Es gibt genau <b>11</b> verschiedene Würfelnetze. Das hast du in Einheit 2 mit dem
+          Netz-Baukasten ausprobiert.
+        </div></details>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== KARTE 6: Auswertung ===== -->
+  <div class="card" data-card="5">
+    <h2>Deine Auswertung</h2>
+    <div class="sub">So lief es in den einzelnen Karten.</div>
+    <div class="scorebig" id="scoreBig">–</div>
+    <div id="resultList"></div>
+  </div>
+
+  <div class="weiter-wrap">
+    <button class="weiter" id="weiter" onclick="alert('Stark! Damit hast du alle drei Einheiten zu Körpern, Netzen und Schrägbildern geschafft. 🦖');">
+      Einheit 3 abgeschlossen ✓
+    </button>
+  </div>
+</div>
+
+<div class="trex" id="trex">🦖<span class="bubble">Made by Mathedino</span></div>
+
+<script>
+/* ===== Tabs ===== */
+const titles=["Regeln","Finde den Fehler","Schritte ordnen","Ins Heft","Wiederholung","Auswertung"];
+const cards=document.querySelectorAll('.card');
+const tabsEl=document.getElementById('tabs');
+titles.forEach((t,i)=>{const b=document.createElement('button');b.className='tab'+(i===0?' active':'');
+  b.innerHTML='<span class="num">'+(i+1)+'</span>'+t;b.onclick=()=>showCard(i);tabsEl.appendChild(b);});
+const tabs=document.querySelectorAll('.tab');
+function showCard(i){cards.forEach(c=>c.classList.remove('active'));tabs.forEach(t=>t.classList.remove('active'));
+  cards[i].classList.add('active');tabs[i].classList.add('active');if(i===5)renderResults();window.scrollTo({top:0,behavior:'smooth'});}
+
+/* ===== Niveaustufen ===== */
+document.querySelectorAll('.levels').forEach(lv=>{
+  const card=lv.closest('.card');const bodies=card.querySelectorAll('.lvlbody');
+  lv.querySelectorAll('.lvl').forEach(btn=>btn.onclick=()=>{
+    lv.querySelectorAll('.lvl').forEach(b=>b.classList.remove('active'));btn.classList.add('active');
+    const l=btn.dataset.l;bodies.forEach(b=>b.classList.toggle('active',b.dataset.l===l));
+  });
+});
+
+const state={};
+function mark(q,s){state[q]={status:s};maybeWeiter();}
+function setFb(auf,ok,msg){const fb=auf.querySelector('.fb');fb.innerHTML=msg;fb.className='fb show '+(ok?'ok':'no');}
+function showClear(auf,s){const c=auf.querySelector('.btn.clear');if(c)c.classList.toggle('show',s);}
+function showMuster(auf,s){const m=auf.querySelector('.muster');if(m)m.classList.toggle('show',s);}
+
+/* ===== Schrägbild-SVG-Generator =====
+   Konvention (Schulbuch): vordere Fläche in wahrer Größe (1 cm = 2 Kästchen),
+   Tiefe: 1 cm = 1 Kästchendiagonale (genau 1 Kästchen rechts + 1 hoch).
+   Verdeckte Kanten (3 Stück) gestrichelt: schräg unten links, hinten unten, hinten links. */
+function buildSchraeg(cmW,cmH,cmD,opts){
+  opts=opts||{};
+  const gs=14;                 // 1 Kästchen = 14 px
+  const CM=2*gs;               // 1 cm = 2 Kästchen
+  const W=cmW*CM, H=cmH*CM;
+  const sx=cmD*gs, sy=-cmD*gs; // 1 cm Tiefe = 1 Kästchendiagonale
+  const m=gs;                  // Rand = 1 Kästchen -> Ursprung liegt auf Gitterpunkt
+  const OX=m, OY=m+cmD*gs+H;
+  const vBL=[OX,OY],vBR=[OX+W,OY],vTR=[OX+W,OY-H],vTL=[OX,OY-H];
+  const hBL=[OX+sx,OY+sy],hBR=[OX+W+sx,OY+sy],hTL=[OX+sx,OY-H+sy];
+  let hTR=[OX+W+sx,OY-H+sy];
+  if(opts.shiftHTR) hTR=[hTR[0]+gs,hTR[1]];   // Fehler: hintere Ecke verschoben -> nicht parallel
+  const totalW=W+sx+2*m, totalH=H+cmD*gs+2*m;
+  const Ll=(p,q,d)=>`<line x1="${p[0]}" y1="${p[1]}" x2="${q[0]}" y2="${q[1]}" stroke="#1f4680" stroke-width="2.2"${d?' stroke-dasharray="6 5"':''}/>`;
+  // Karogitter
+  let grid='';
+  for(let x=0;x<=totalW;x+=gs){grid+=`<line x1="${x}" y1="0" x2="${x}" y2="${totalH}" stroke="#e3ebf7" stroke-width="1"/>`;}
+  for(let y=0;y<=totalH;y+=gs){grid+=`<line x1="0" y1="${y}" x2="${totalW}" y2="${y}" stroke="#e3ebf7" stroke-width="1"/>`;}
+  const hid=!opts.allSolid;    // allSolid=true -> Fehlerbild: verdeckte Kanten durchgezogen
+  const front=Ll(vBL,vBR)+Ll(vBR,vTR)+Ll(vTR,vTL)+Ll(vTL,vBL);
+  const slantsVis=Ll(vBR,hBR)+Ll(vTR,hTR)+Ll(vTL,hTL);
+  const slantHid=Ll(vBL,hBL,hid);
+  const backVis=Ll(hTL,hTR)+Ll(hTR,hBR);
+  const backHid=Ll(hBL,hBR,hid)+Ll(hBL,hTL,hid);
+  return `<svg viewBox="0 0 ${totalW} ${totalH}" width="${Math.min(totalW,240)}" height="${Math.min(totalH,190)}" style="background:#fff;border:2px solid var(--line);border-radius:10px;">${grid}${front}${slantsVis}${slantHid}${backVis}${backHid}</svg>`;
+}
+function schraegSVG(cmW,cmH,cmD){ return buildSchraeg(cmW,cmH,cmD); }
+function schraegFehler(kind){
+  if(kind==='fehler_solid')    return buildSchraeg(4,3,2,{allSolid:true});
+  if(kind==='fehler_parallel') return buildSchraeg(4,3,2,{shiftHTR:true});
+  return buildSchraeg(4,3,2);
+}
+
+/* ===== Finde-den-Fehler-Aufgaben ===== */
+const fehlerSets={
+  0:[
+    {svg:schraegSVG(4,3,2), ok:true,  erkl:'Richtig gezeichnet: vordere Fläche in wahrer Größe, schräge parallele Kanten, verdeckte Kanten gestrichelt.'},
+    {svg:schraegFehler('fehler_solid'), ok:false, erkl:'Fehler: Die verdeckten Kanten hinten sind durchgezogen statt gestrichelt.'},
+  ],
+  1:[
+    {svg:schraegFehler('fehler_parallel'), ok:false, erkl:'Fehler: Die hintere Fläche ist verschoben – die schrägen Kanten sind nicht mehr parallel und gleich lang.'},
+    {svg:schraegSVG(5,2,3), ok:true,  erkl:'Richtig: liegender Quader, schräge Kanten 3 Kästchendiagonalen (Tiefe 3 cm), verdeckte Kanten gestrichelt.'},
+  ],
+  2:[
+    {svg:schraegSVG(3,3,3), ok:true,  erkl:'Richtig: ein Würfel-Schrägbild (3×3×3), alles korrekt.'},
+    {svg:schraegFehler('fehler_solid'), ok:false, erkl:'Fehler: verdeckte Kanten durchgezogen statt gestrichelt.'},
+    {svg:schraegFehler('fehler_parallel'), ok:false, erkl:'Fehler: hintere Fläche verschoben – Kanten nicht parallel.'},
+  ],
+};
+Object.keys(fehlerSets).forEach(lvl=>{
+  const cont=document.getElementById('fehler'+lvl);
+  fehlerSets[lvl].forEach((f,idx)=>{
+    const qid='f'+lvl+'-'+idx;
+    const auf=document.createElement('div');auf.className='auf';auf.dataset.q=qid;
+    auf.innerHTML=`
+      <div class="svgwrap">${f.svg}</div>
+      <div class="qtext">Ist dieses Schrägbild richtig gezeichnet?</div>
+      <div class="opts row">
+        <button class="opt" data-v="1">Ja, richtig</button>
+        <button class="opt" data-v="0">Nein, da ist ein Fehler</button>
+      </div>
+      <div class="fb"></div>
+      <details class="muster"><summary>Erklärung</summary><div class="mbody">${f.erkl}</div></details>`;
+    cont.appendChild(auf);
+    const opts=auf.querySelectorAll('.opt');
+    opts.forEach(o=>o.onclick=()=>{
+      if(auf.dataset.locked==='1')return;
+      const chose=o.dataset.v==='1';const correct=chose===f.ok;
+      opts.forEach(x=>x.classList.add('locked'));
+      if(correct){o.classList.add('correct');setFb(auf,true,'Richtig! ✓');auf.dataset.locked='1';showMuster(auf,false);mark(qid,'ok');}
+      else{o.classList.add('wrong');opts.forEach(x=>x.classList.remove('locked'));o.classList.add('locked');
+        setFb(auf,false,'Nicht ganz – schau in die Erklärung.');showMuster(auf,true);mark(qid,'no');}
+    });
+  });
+});
+
+/* ===== Schritte ordnen (Antippen + Pfeile) ===== */
+document.querySelectorAll('.sortauf').forEach(auf=>{
+  const correct=JSON.parse(auf.dataset.steps);
+  const listEl=auf.querySelector('.sortlist');
+  let order=[];
+  function shuffle(arr){for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]];}return arr;}
+  function init(){
+    order=shuffle(correct.map((_,i)=>i));
+    // sicherstellen: nicht zufällig schon korrekt
+    if(order.every((v,i)=>v===i)) order.reverse();
+    render();
+    auf.querySelector('.fb').className='fb';
+  }
+  function render(){
+    listEl.innerHTML='';
+    order.forEach((stepIdx,pos)=>{
+      const row=document.createElement('div');row.className='sortitem';
+      row.innerHTML=`<div class="label">${correct[stepIdx]}</div>
+        <div class="arrows">
+          <button data-dir="-1" ${pos===0?'disabled':''}>▲</button>
+          <button data-dir="1" ${pos===order.length-1?'disabled':''}>▼</button>
+        </div>`;
+      row.querySelectorAll('button').forEach(b=>b.onclick=()=>{
+        const dir=+b.dataset.dir;const np=pos+dir;
+        if(np<0||np>=order.length)return;
+        [order[pos],order[np]]=[order[np],order[pos]];render();
+      });
+      listEl.appendChild(row);
+    });
+  }
+  auf.querySelector('.btn.check').onclick=()=>{
+    const items=listEl.querySelectorAll('.sortitem');
+    let allOk=true;
+    order.forEach((stepIdx,pos)=>{const ok=stepIdx===pos;items[pos].classList.toggle('ok',ok);items[pos].classList.toggle('no',!ok);if(!ok)allOk=false;});
+    if(allOk){setFb(auf,true,'Perfekt, richtige Reihenfolge! ✓');showMuster(auf,false);mark(auf.dataset.q,'ok');}
+    else{setFb(auf,false,'Noch nicht ganz – verschiebe die roten Schritte. Schau sonst in die Musterlösung.');showMuster(auf,true);mark(auf.dataset.q,'no');}
+  };
+  auf.querySelector('.btn.clear').onclick=()=>{init();};
+  auf.querySelector('.btn.clear').classList.add('show');
+  init();
+});
+
+/* ===== MC / TF single ===== */
+document.querySelectorAll('.auf').forEach(auf=>{
+  if(auf.classList.contains('multi')||auf.classList.contains('sortauf')||auf.classList.contains('draw'))return;
+  const opts=auf.querySelectorAll('.opt');if(!opts.length||opts[0].dataset.ok===undefined)return;
+  let picked=null;
+  opts.forEach(o=>o.onclick=()=>{if(auf.dataset.locked==='1')return;opts.forEach(x=>x.classList.remove('sel'));o.classList.add('sel');picked=o;});
+  const chk=auf.querySelector('.btn.check');
+  if(chk)chk.onclick=()=>{
+    if(!picked){setFb(auf,false,'Bitte zuerst antippen.');return;}
+    const ok=picked.dataset.ok==='1';opts.forEach(x=>x.classList.add('locked'));
+    if(ok){picked.classList.add('correct');auf.dataset.locked='1';setFb(auf,true,'Richtig! ✓');showClear(auf,false);showMuster(auf,false);mark(auf.dataset.q,'ok');}
+    else{picked.classList.add('wrong');setFb(auf,false,'Leider falsch. Leeren und erneut versuchen.');showClear(auf,true);showMuster(auf,true);mark(auf.dataset.q,'no');}
+  };
+  const clr=auf.querySelector('.btn.clear');
+  if(clr)clr.onclick=()=>{opts.forEach(x=>x.classList.remove('sel','correct','wrong','locked'));auf.dataset.locked='';picked=null;
+    auf.querySelector('.fb').className='fb';showClear(auf,false);showMuster(auf,false);delete state[auf.dataset.q];maybeWeiter();};
+});
+
+/* ===== Mehrfachauswahl ===== */
+document.querySelectorAll('.auf.multi').forEach(auf=>{
+  const opts=auf.querySelectorAll('.opt');
+  opts.forEach(o=>o.onclick=()=>{if(auf.dataset.locked!=='1')o.classList.toggle('sel');});
+  auf.querySelector('.btn.check').onclick=()=>{
+    let allOk=true;opts.forEach(o=>{const should=o.dataset.ok==='1',chosen=o.classList.contains('sel');if(should!==chosen)allOk=false;});
+    if(allOk){opts.forEach(o=>{o.classList.add('locked');if(o.dataset.ok==='1')o.classList.add('correct');});auf.dataset.locked='1';
+      setFb(auf,true,'Alles richtig! ✓');showClear(auf,false);showMuster(auf,false);mark(auf.dataset.q,'ok');}
+    else{opts.forEach(o=>{const should=o.dataset.ok==='1',chosen=o.classList.contains('sel');if(chosen&&!should)o.classList.add('wrong');});
+      setFb(auf,false,'Noch nicht alle richtig. Schau in die Musterlösung, leere und versuche es erneut.');showClear(auf,true);showMuster(auf,true);mark(auf.dataset.q,'no');}
+  };
+  auf.querySelector('.btn.clear').onclick=()=>{opts.forEach(o=>o.classList.remove('sel','correct','wrong','locked'));auf.dataset.locked='';
+    auf.querySelector('.fb').className='fb';showClear(auf,false);showMuster(auf,false);delete state[auf.dataset.q];maybeWeiter();};
+});
+
+/* ===== Zeichen-Karte: Musterlösungs-SVGs + Häkchen ===== */
+document.getElementById('drawSol0').innerHTML=schraegSVG(3,3,3);
+document.getElementById('drawSol1').innerHTML=schraegSVG(4,3,2);
+document.getElementById('drawSol2').innerHTML=schraegSVG(5,2,3);
+document.querySelectorAll('.auf.draw').forEach(auf=>{
+  const cb=auf.querySelector('.donecheck input');const lbl=auf.querySelector('.donecheck');
+  cb.addEventListener('change',()=>{lbl.classList.toggle('done',cb.checked);
+    if(cb.checked)mark(auf.dataset.q,'ok');else{delete state[auf.dataset.q];maybeWeiter();}});
+});
+
+/* ===== Weiter / Auswertung ===== */
+const cardQids={
+  0:["r0","r1","r2"],
+  1:["f0-0","f0-1","f1-0","f1-1","f2-0","f2-1","f2-2"],
+  2:["s0"],
+  3:["d0","d1","d2"],
+  4:["w0","w1","w2"],
+};
+function cardTouched(i){return cardQids[i].some(q=>state[q]!==undefined);}
+function maybeWeiter(){
+  const done=[0,1,2,3,4].every(cardTouched);
+  document.getElementById('weiter').classList.toggle('show',done);
+  if(cards[5].classList.contains('active'))renderResults();
+}
+function renderResults(){
+  const names=["Regeln","Finde den Fehler","Schritte ordnen","Ins Heft","Wiederholung"];
+  const list=document.getElementById('resultList');list.innerHTML='';let okCount=0;
+  names.forEach((n,i)=>{
+    const qids=cardQids[i];const touched=qids.filter(q=>state[q]!==undefined);
+    const anyOk=touched.some(q=>state[q].status==='ok');
+    let txt,cls;if(touched.length===0){txt='noch offen';cls='na';}
+    else if(anyOk){txt='bearbeitet ✓';cls='ok';okCount++;}
+    else{txt='bearbeitet – nochmal ansehen';cls='no';}
+    const row=document.createElement('div');row.className='result-line';
+    row.innerHTML='<span>'+n+'</span><span class="st '+cls+'">'+txt+'</span>';list.appendChild(row);
+  });
+  document.getElementById('scoreBig').textContent=okCount+' / 5 Karten bearbeitet';
+}
+
+/* ===== T-Rex ===== */
+const trex=document.getElementById('trex');
+trex.addEventListener('click',e=>{e.stopPropagation();trex.classList.toggle('open');});
+</script>
+</body>
+</html>
