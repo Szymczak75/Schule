@@ -166,6 +166,7 @@
   .plane{
     position:relative;margin:0 auto;
     transform-style:preserve-3d;-webkit-transform-style:preserve-3d;
+    will-change:transform;
   }
   .face{
     position:absolute;
@@ -175,6 +176,7 @@
     box-shadow:inset 0 0 0 1.5px var(--netlinie);
     -webkit-box-shadow:inset 0 0 0 1.5px var(--netlinie);
     transform-style:preserve-3d;-webkit-transform-style:preserve-3d;
+    will-change:transform;
   }
   .ez{
     position:absolute;width:44px;height:44px;
@@ -186,7 +188,7 @@
   .ez.e1::after{top:0;right:0;-webkit-clip-path:polygon(0 0,100% 0,100% 100%);clip-path:polygon(0 0,100% 0,100% 100%);}
   .ez.e2::after{bottom:0;right:0;-webkit-clip-path:polygon(100% 0,100% 100%,0 100%);clip-path:polygon(100% 0,100% 100%,0 100%);}
   .ez.e3::after{bottom:0;left:0;-webkit-clip-path:polygon(0 0,100% 100%,0 100%);clip-path:polygon(0 0,100% 100%,0 100%);}
-  .ez:active{background:rgba(47,95,166,.25);}
+  .ez:active,.ez.tipp{background:rgba(47,95,166,.25);}
   .ez.sel{background:var(--blau-mark);}
   .ez.sel::after,.ez.vorgabe::after{display:none;}
   .plane.gefaltet .ez::after{display:none;}
@@ -404,7 +406,7 @@ function baueNetzKarte(name){
     '<span class="lg" style="background:var(--blau-mark)"></span>deine Markierung (nochmal antippen löscht sie) &nbsp; '+
     '<span class="lg" style="background:rgba(51,88,107,.35)"></span>hier kannst du tippen</p>'+
     '<div class="viewport"><div class="stage"><div class="plane"></div></div></div>'+
-    '<p class="dreh-hinweis">👆 1 Finger: Ansicht drehen &nbsp;·&nbsp; ✌️ 2 Finger: verschieben</p>'+
+    '<p class="dreh-hinweis">👆 1 Finger oder Maus: Ansicht drehen &nbsp;·&nbsp; ✌️ 2 Finger, rechte Maustaste oder Shift+Ziehen: verschieben</p>'+
     '<div class="presets"><button class="btn btn-sek btn-ansicht">🔄 Ansicht zurücksetzen</button></div>'+
     '<button class="btn btn-pruefen">✔️ Prüfen</button>'+
     '<button class="btn btn-leeren">Leeren</button>'+
@@ -460,11 +462,19 @@ function baueNetzKarte(name){
       z.className='ez e'+k+(istVorgabe?' vorgabe':'');
       if(!istVorgabe){
         const id=fi+':'+k;
-        z.addEventListener('click',()=>{
+        // Direkt über Pointer-Events statt "click": reagiert auf dem iPad sofort
+        z.addEventListener('pointerdown',()=>{
+          if(st.geloest||st.t>0.02)return;
+          z.classList.add('tipp'); // sofortiges Berühr-Feedback
+        });
+        z.addEventListener('pointerup',()=>{
+          z.classList.remove('tipp');
           if(st.geloest||st.t>0.02||st.gezogen)return;
           if(st.sel.has(id)){st.sel.delete(id);z.classList.remove('sel');}
           else{st.sel.add(id);z.classList.add('sel');}
         });
+        z.addEventListener('pointercancel',()=>z.classList.remove('tipp'));
+        z.addEventListener('pointerleave',()=>z.classList.remove('tipp'));
       }
       els[fi].appendChild(z);
     }
@@ -581,27 +591,33 @@ function baueNetzKarte(name){
   st.passeAn=passeAn;
   passeAn();
 
-  // Ansicht drehen (1 Finger) und verschieben (2 Finger)
+  // Ansicht drehen (1 Finger / Maus) und verschieben (2 Finger / rechte Maustaste / Shift+Ziehen)
   const zeiger=new Map();
   let bewegt=false;
+  viewport.addEventListener('contextmenu',e=>e.preventDefault());
   viewport.addEventListener('pointerdown',e=>{
-    zeiger.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    const schieben=(e.pointerType==='mouse'&&(e.button===2||e.shiftKey));
+    zeiger.set(e.pointerId,{x:e.clientX,y:e.clientY,schieben:schieben});
     if(zeiger.size===1)bewegt=false;
   });
   viewport.addEventListener('pointermove',e=>{
     const p=zeiger.get(e.pointerId);
     if(!p)return;
     const dx=e.clientX-p.x, dy=e.clientY-p.y;
-    if(!bewegt&&Math.hypot(dx,dy)<6)return; // kurzes Tippen bleibt ein Tipp auf die Ecke
+    if(!bewegt&&Math.hypot(dx,dy)<10)return; // leicht wackelnder Tipp bleibt ein Tipp auf die Ecke
     if(!bewegt){
       bewegt=true;st.gezogen=true;
+      sec.querySelectorAll('.ez.tipp').forEach(x=>x.classList.remove('tipp'));
       try{viewport.setPointerCapture(e.pointerId);}catch(err){}
     }
     p.x=e.clientX;p.y=e.clientY;
     if(zeiger.size>=2){ // zwei Finger: verschieben
       st.tx=Math.max(-400,Math.min(400,st.tx+dx/2));
       st.ty=Math.max(-400,Math.min(400,st.ty+dy/2));
-    }else{ // ein Finger: drehen
+    }else if(p.schieben){ // Maus: rechte Taste oder Shift -> verschieben
+      st.tx=Math.max(-400,Math.min(400,st.tx+dx));
+      st.ty=Math.max(-400,Math.min(400,st.ty+dy));
+    }else{ // ein Finger / linke Maustaste: drehen
       st.ry+=dx*0.4;
       st.rx=Math.max(-40,Math.min(65,st.rx-dy*0.4));
     }
