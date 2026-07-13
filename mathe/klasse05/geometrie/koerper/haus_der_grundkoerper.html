@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="description" content="Erarbeitungsseite zum Haus der Grundkörper: Wähle einen Körper und entdecke, welcher andere Körper er automatisch auch ist und warum. Alle Körper sind drehbar dargestellt.">
+<meta name="keywords" content="Grundkörper, Körper, Würfel, Quader, Prisma, Pyramide, Tetraeder, Zylinder, Kegel, Kugel, Hierarchie">
+<meta name="typ" content="Lernseite">
+<meta name="klasse" content="5">
+<meta name="fach" content="mathe">
+<meta name="oberthema" content="Geometrie">
+<meta name="thema" content="Grundkörper">
+<title>Haus der Grundkörper – Erarbeitung</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --kopf:#c97a2e;          /* Erarbeitung = Orange */
+  --kopf2:#a5611e;
+  --bg:#faf7f2;
+  --karte:#ffffff;
+  --rand:#e4dcd0;
+  --rand2:#dbe3ee;
+  --text:#22303f;
+  --grau:#6b7686;
+  --blau:#2f5fa6;
+  --gruen:#1e7d32;
+  --gruen-bg:#1e7d32;
+  --rot:#c1272d;
+  --rot-bg:#c1272d;
+  --amber:#b8860b;
+  --amber-light:#fdf3d9;
+  --amber-dark:#96690a;
+  --schatten:0 4px 16px rgba(165,97,30,.12);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;}
+body{
+  font-family:'Nunito',sans-serif;background:var(--bg);
+  background-image:radial-gradient(circle at 10% 6%,#fbeee0 0,transparent 42%),radial-gradient(circle at 92% 96%,#fbeee0 0,transparent 44%);
+  color:var(--text);font-size:17px;line-height:1.5;padding:0 0 60px 0;min-height:100vh;
+}
+h1,h2,h3{font-family:'Fredoka',sans-serif;font-weight:600;}
+.kopf{background:linear-gradient(120deg,var(--kopf),var(--kopf2));color:#fff;padding:18px 20px 16px;box-shadow:0 2px 14px rgba(165,97,30,.25);}
+.kopf h1{margin:0;font-size:1.5rem;}
+.kopf p{margin:4px 0 0;font-size:.95rem;opacity:.95;font-weight:600;}
+.badge{display:inline-block;background:rgba(255,255,255,.24);border-radius:20px;padding:2px 12px;font-size:.8rem;font-weight:700;margin-top:8px;}
+
+.tabs{display:flex;flex-wrap:wrap;gap:6px;padding:12px 14px;position:sticky;top:0;z-index:30;background:var(--bg);box-shadow:0 4px 10px -8px rgba(0,0,0,.3);}
+.tab{flex:1 1 auto;min-width:44px;min-height:44px;border:2px solid var(--rand);background:var(--karte);border-radius:14px;font-family:'Fredoka',sans-serif;font-weight:500;font-size:.95rem;color:var(--grau);cursor:pointer;padding:6px 10px;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:5px;}
+.tab.aktiv{background:var(--kopf);color:#fff;border-color:var(--kopf);box-shadow:var(--schatten);}
+
+.wrap{max-width:960px;margin:0 auto;padding:6px 14px;}
+.karte{background:var(--karte);border:1px solid var(--rand);border-radius:20px;padding:20px 18px;margin:14px 0;box-shadow:var(--schatten);display:none;animation:fade .25s ease;}
+.karte.aktiv{display:block;}
+@keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+.karte h2{margin:0 0 4px;font-size:1.25rem;color:var(--kopf);}
+.karte .unter{color:var(--grau);font-weight:600;font-size:.92rem;margin-bottom:14px;}
+
+/* Haus-Diagramm */
+.haus{display:flex;flex-direction:column;align-items:center;gap:0;margin:6px 0 4px;}
+.etage{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;position:relative;z-index:2;margin:7px 0;}
+.etagenlabel{font-size:.78rem;font-weight:800;color:var(--grau);letter-spacing:.04em;text-transform:uppercase;margin-top:10px;}
+.kfig{
+  border:3px solid var(--rand2);background:#f6f8fb;border-radius:16px;
+  padding:6px 8px 6px;cursor:pointer;min-width:118px;min-height:118px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  transition:transform .12s,border-color .15s,background .15s;
+  font-family:inherit;
+}
+.kfig:active{transform:scale(.97);}
+.kfig .name{font-family:'Fredoka';font-weight:600;font-size:.98rem;color:var(--text);line-height:1.2;}
+.kfig.gewaehlt{border-color:var(--kopf);background:#fbeee0;box-shadow:0 0 0 4px rgba(201,122,46,.18);transform:scale(1.04);}
+.kfig.ist{border-color:var(--gruen);background:rgba(30,125,50,.10);}
+.kfig.istnicht{border-color:var(--rot);background:rgba(193,39,45,.08);}
+.kfig .marke{font-size:1.05rem;height:1.2em;font-weight:800;}
+.kfig.ist .marke{color:var(--gruen);}
+.kfig.istnicht .marke{color:var(--rot);}
+.kfig canvas{width:84px;height:84px;display:block;touch-action:none;}
+
+.hinweisleiste{font-size:.85rem;color:var(--grau);text-align:center;font-weight:600;margin:6px 0 12px;}
+
+/* Erklärbox */
+.erkl{margin-top:10px;border-radius:16px;border:2px solid var(--rand);background:#faf7f2;padding:14px;display:none;}
+.erkl.show{display:block;animation:fade .2s ease;}
+.erkl h3{margin:0 0 8px;font-size:1.1rem;color:var(--kopf);}
+.erkl .zeile{display:flex;gap:10px;align-items:flex-start;padding:9px 10px;border-radius:12px;margin:7px 0;font-weight:600;font-size:.96rem;}
+.erkl .zeile.ja{background:var(--gruen-bg);color:#fff;}
+.erkl .zeile.nein{background:var(--rot-bg);color:#fff;}
+.erkl .zeile .sym{font-size:1.2rem;font-weight:800;line-height:1.3;}
+.erkl .zeile b{font-family:'Fredoka';font-weight:600;}
+.erkl .merksatz{margin-top:12px;background:#fbeee0;border:1px dashed var(--kopf);border-radius:12px;padding:10px 12px;font-size:.95rem;color:#a5611e;font-weight:700;}
+
+/* Große Bühne (Karte 2) */
+.buehne{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start;}
+.buehne-links{flex:1 1 300px;display:flex;flex-direction:column;align-items:center;gap:8px;}
+.buehne-canvas{width:100%;max-width:340px;aspect-ratio:1/1;background:#f6f8fb;border:2px solid var(--rand2);border-radius:18px;touch-action:none;overscroll-behavior:contain;}
+.buehne-rechts{flex:1 1 260px;}
+.waehler{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;}
+.waehler button{min-height:44px;min-width:44px;padding:8px 12px;border-radius:12px;border:2px solid var(--rand2);background:#f6f8fb;font-family:'Fredoka';font-weight:500;font-size:.92rem;color:var(--text);cursor:pointer;}
+.waehler button.aktiv{background:var(--kopf);border-color:var(--kopf);color:#fff;}
+.steuer{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;}
+.steuer button{min-height:44px;min-width:44px;padding:8px 14px;border-radius:12px;border:2px solid var(--rand);background:var(--karte);font-family:'Fredoka';font-weight:500;font-size:.92rem;color:var(--text);cursor:pointer;}
+.steuer button:active{transform:scale(.97);}
+.steckbrief{background:var(--amber-light);border:2px solid var(--amber);border-radius:16px;padding:12px 14px;color:var(--amber-dark);}
+.steckbrief h3{margin:0 0 6px;font-size:1.05rem;color:var(--amber-dark);}
+.steckbrief ul{margin:0;padding-left:20px;font-weight:600;font-size:.95rem;}
+.steckbrief li{margin:4px 0;}
+
+/* Flip-Cards */
+.flip-grid{display:flex;flex-wrap:wrap;gap:12px;}
+.flip{flex:1 1 230px;min-height:140px;perspective:1000px;cursor:pointer;}
+.flip-inner{position:relative;width:100%;height:140px;transition:transform .5s;transform-style:preserve-3d;}
+.flip.flipped .flip-inner{transform:rotateY(180deg);}
+.flip-face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:16px;display:flex;align-items:center;justify-content:center;text-align:center;padding:14px;font-weight:700;}
+.flip-front{background:#fbeee0;border:2px solid var(--kopf);color:#a5611e;}
+.flip-back{background:var(--amber-light);border:2px solid var(--amber);color:var(--amber-dark);transform:rotateY(180deg);font-size:.93rem;}
+.flip-hint{font-size:.8rem;color:var(--grau);font-weight:600;margin-top:8px;}
+
+.trex{position:fixed;right:12px;bottom:14px;font-size:1.7rem;cursor:pointer;z-index:60;filter:drop-shadow(0 2px 3px rgba(0,0,0,.2));user-select:none;}
+.trex .made{position:absolute;right:0;bottom:120%;white-space:nowrap;background:#22303f;color:#fff;padding:5px 10px;border-radius:10px;font-size:.78rem;font-weight:700;font-family:'Fredoka';display:none;}
+.trex.show .made{display:block;}
+
+@media(max-width:520px){
+  .kfig{min-width:100px;min-height:100px;}
+  .kfig canvas{width:66px;height:66px;}
+}
+</style>
+</head>
+<body>
+
+<header class="kopf">
+  <h1>Das Haus der Grundkörper</h1>
+  <p>Entdecke, was ein Körper noch alles ist – und warum</p>
+  <span class="badge">Erarbeitung · Klasse 5</span>
+</header>
+
+<nav class="tabs" id="tabs"></nav>
+<div class="wrap" id="karten"></div>
+
+<div class="trex" id="trex" onclick="this.classList.toggle('show')">🦖<span class="made">Made by Mathedino</span></div>
+
+<script>
+/* ============================================================
+   MINI-3D-RENDERER  (Canvas 2D, keine Bibliothek)
+   - Körper als Kanten-/Flächenmodell in 3D
+   - Auto-Rotation + Drehen mit dem Finger (Pointer Events)
+   - Painter's Algorithm: Flächen nach Tiefe sortiert zeichnen
+   ============================================================ */
+const FARBE_FLAECHE='#e6eefb', FARBE_KANTE='#2f5fa6', FARBE_DUNKEL='#c3d3ee';
+
+function rotY(p,a){const c=Math.cos(a),s=Math.sin(a);return [p[0]*c+p[2]*s, p[1], -p[0]*s+p[2]*c];}
+function rotX(p,a){const c=Math.cos(a),s=Math.sin(a);return [p[0], p[1]*c-p[2]*s, p[1]*s+p[2]*c];}
+
+/* --- Körper-Definitionen: Ecken + Flächen (Indexlisten) --- */
+function bauQuader(bx,by,bz){
+  const v=[];
+  for(const sx of [-1,1]) for(const sy of [-1,1]) for(const sz of [-1,1]) v.push([sx*bx,sy*by,sz*bz]);
+  // Index: (sx,sy,sz) -> ((sx>0)*4 + (sy>0)*2 + (sz>0))
+  const i=(x,y,z)=>((x?4:0)+(y?2:0)+(z?1:0));
+  const f=[
+    [i(0,0,0),i(0,1,0),i(1,1,0),i(1,0,0)],
+    [i(0,0,1),i(1,0,1),i(1,1,1),i(0,1,1)],
+    [i(0,0,0),i(1,0,0),i(1,0,1),i(0,0,1)],
+    [i(0,1,0),i(0,1,1),i(1,1,1),i(1,1,0)],
+    [i(0,0,0),i(0,0,1),i(0,1,1),i(0,1,0)],
+    [i(1,0,0),i(1,1,0),i(1,1,1),i(1,0,1)]
+  ];
+  return {v,f};
+}
+function bauPrisma(n,r,h,dreh){
+  dreh=dreh||0;
+  const v=[],unten=[],oben=[];
+  for(let k=0;k<n;k++){
+    const a=dreh+2*Math.PI*k/n;
+    v.push([r*Math.cos(a),-h,r*Math.sin(a)]); unten.push(v.length-1);
+  }
+  for(let k=0;k<n;k++){
+    const a=dreh+2*Math.PI*k/n;
+    v.push([r*Math.cos(a), h,r*Math.sin(a)]); oben.push(v.length-1);
+  }
+  const f=[unten.slice().reverse(),oben.slice()];
+  for(let k=0;k<n;k++){
+    const k2=(k+1)%n;
+    f.push([unten[k],unten[k2],oben[k2],oben[k]]);
+  }
+  return {v,f};
+}
+function bauPyramide(n,r,h,dreh){
+  dreh=dreh||0;
+  const v=[],basis=[];
+  for(let k=0;k<n;k++){
+    const a=dreh+2*Math.PI*k/n;
+    v.push([r*Math.cos(a),-h*0.6,r*Math.sin(a)]); basis.push(v.length-1);
+  }
+  v.push([0,h,0]); const spitze=v.length-1;
+  const f=[basis.slice().reverse()];
+  for(let k=0;k<n;k++){ const k2=(k+1)%n; f.push([basis[k],basis[k2],spitze]); }
+  return {v,f};
+}
+function bauKegel(r,h,seg){
+  return bauPyramide(seg||28,r,h,0);
+}
+function bauZylinder(r,h,seg){
+  return bauPrisma(seg||28,r,h,0);
+}
+function bauKugel(r,teil){          // teil: 1 = ganze Kugel, 0.5 = Halbkugel (Kuppel oben, Kreis unten)
+  const nu=16,nv=24, v=[],f=[];
+  const phiMax = (teil<1)? Math.PI/2 : Math.PI;   // phi=0 oben, phi=pi/2 Äquator
+  const idx=[];
+  for(let i=0;i<=nu;i++){
+    const phi = phiMax*i/nu;
+    const reihe=[];
+    for(let j=0;j<nv;j++){
+      const th=2*Math.PI*j/nv;
+      v.push([r*Math.sin(phi)*Math.cos(th), r*Math.cos(phi), r*Math.sin(phi)*Math.sin(th)]);
+      reihe.push(v.length-1);
+    }
+    idx.push(reihe);
+  }
+  for(let i=0;i<nu;i++){
+    for(let j=0;j<nv;j++){
+      const j2=(j+1)%nv;
+      f.push([idx[i][j],idx[i][j2],idx[i+1][j2],idx[i+1][j]]);
+    }
+  }
+  if(teil<1){ f.push(idx[nu].slice().reverse()); } // ebene Kreisfläche unten
+  return {v,f,glatt:true, halb:(teil<1)};
+}
+
+const KOERPER={
+  wuerfel:   ()=>bauQuader(1,1,1),
+  quader:    ()=>bauQuader(1.35,.75,.85),
+  prisma:    ()=>bauPrisma(3,1.15,1.0,-Math.PI/2),
+  pyramideq: ()=>bauPyramide(4,1.15,1.2,Math.PI/4),
+  tetraeder: ()=>bauPyramide(3,1.2,1.15,-Math.PI/2),
+  pyramide:  ()=>bauPyramide(5,1.1,1.2,-Math.PI/2),
+  zylinder:  ()=>bauZylinder(.95,1.0,28),
+  kegel:     ()=>bauKegel(1.05,1.25,28),
+  halbkugel: ()=>bauKugel(1.15,0.5),
+  kugel:     ()=>bauKugel(1.15,1),
+  koerper:   ()=>bauQuader(1.0,.9,.9)   // Platzhalterform für "allgemeiner Körper"
+};
+
+/* --- Renderer --- */
+function machRenderer(canvas, koerperKey, opt){
+  opt=opt||{};
+  const ctx=canvas.getContext('2d');
+  const startX = (koerperKey==='halbkugel') ? 0.62 : 0.42;   // Halbkugel stärker kippen → Schnittfläche sichtbar
+  const st={rotY:0.6, rotX:startX, auto:true, key:koerperKey, ziehen:false, lx:0, ly:0, laufend:true};
+  let geo=KOERPER[koerperKey]();
+  let dpr=Math.min(window.devicePixelRatio||1,2);
+
+  function groesse(){
+    const w=canvas.clientWidth||120, h=canvas.clientHeight||120;
+    canvas.width=Math.round(w*dpr); canvas.height=Math.round(h*dpr);
+  }
+  groesse();
+  window.addEventListener('resize',()=>{groesse();});
+
+  function zeichne(){
+    const W=canvas.width, H=canvas.height;
+    const cx=W/2, cy=H/2, skala=Math.min(W,H)*(opt.skala||0.30);
+    ctx.clearRect(0,0,W,H);
+    // Punkte transformieren
+    const P=geo.v.map(p=>{
+      let q=rotY(p,st.rotY); q=rotX(q,st.rotX);
+      const d=4.5, f=d/(d - q[2]*0.55);        // leichte Perspektive
+      return {x:cx+q[0]*skala*f, y:cy-q[1]*skala*f, z:q[2]};
+    });
+    // Flächen nach Tiefe sortieren (hinten zuerst)
+    const flaechen=geo.f.map(fs=>{
+      const zm=fs.reduce((s,i)=>s+P[i].z,0)/fs.length;
+      return {fs,zm};
+    }).sort((a,b)=>a.zm-b.zm);
+
+    flaechen.forEach(({fs,zm})=>{
+      // Rückseiten-Erkennung über Umlaufsinn (Screen-Normale)
+      const a=P[fs[0]], b=P[fs[1]], c=P[fs[2]];
+      const kreuz=(b.x-a.x)*(c.y-a.y)-(b.y-a.y)*(c.x-a.x);
+      const vorne = kreuz<0;
+      if(geo.glatt && !vorne) return;              // Kugel: Rückseite nicht zeichnen
+      const t=(zm+1.6)/3.2;                        // 0..1 Tiefe → Helligkeit
+      const hell=Math.max(0,Math.min(1,t));
+      const füll = mische(FARBE_DUNKEL, FARBE_FLAECHE, hell);
+      ctx.beginPath();
+      ctx.moveTo(P[fs[0]].x,P[fs[0]].y);
+      for(let i=1;i<fs.length;i++) ctx.lineTo(P[fs[i]].x,P[fs[i]].y);
+      ctx.closePath();
+      ctx.fillStyle=füll;
+      ctx.globalAlpha = vorne?1:0.55;              // verdeckte Kanten schimmern durch
+      ctx.fill();
+      if(!geo.glatt){
+        ctx.globalAlpha = vorne?1:0.35;
+        ctx.lineWidth=Math.max(1.2, 2.0*dpr*(opt.strich||1));
+        ctx.strokeStyle=FARBE_KANTE;
+        ctx.lineJoin='round';
+        ctx.stroke();
+      }else{
+        // Kugelnetz: hauchdünne Kante in Füllfarbe → keine Lücken zwischen den Facetten
+        ctx.globalAlpha=1;
+        ctx.lineWidth=1;
+        ctx.strokeStyle=füll;
+        ctx.stroke();
+      }
+      ctx.globalAlpha=1;
+    });
+    if(geo.glatt){                                  // Umriss (und bei Halbkugel die Schnittkante) nachziehen
+      ctx.globalAlpha=1;
+      ctx.lineWidth=Math.max(1.4, 2.2*dpr*(opt.strich||1));
+      ctx.strokeStyle=FARBE_KANTE;
+      if(!geo.halb){
+        const r0=geo.v[geo.v.length-1];
+        const rad=Math.sqrt(r0[0]*r0[0]+r0[1]*r0[1]+r0[2]*r0[2]);
+        ctx.beginPath();
+        ctx.arc(cx,cy,rad*skala,0,2*Math.PI);
+        ctx.stroke();
+      }
+      if(geo.halb){
+        // Schnittkreis: die unterste Punktreihe als Ellipse nachfahren
+        const n=24, start=geo.v.length-n;
+        ctx.beginPath();
+        for(let j=0;j<n;j++){
+          const p=P[start+j];
+          if(j===0) ctx.moveTo(p.x,p.y); else ctx.lineTo(p.x,p.y);
+        }
+        ctx.closePath();
+        ctx.stroke();
+      }
+    }
+  }
+  function mische(c1,c2,t){
+    const p=h=>[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];
+    const A=p(c1),B=p(c2);
+    const r=Math.round(A[0]+(B[0]-A[0])*t),g=Math.round(A[1]+(B[1]-A[1])*t),b=Math.round(A[2]+(B[2]-A[2])*t);
+    return 'rgb('+r+','+g+','+b+')';
+  }
+
+  let letzte=performance.now();
+  function frame(t){
+    if(!st.laufend) return;
+    const dt=Math.min(60,t-letzte); letzte=t;
+    if(st.auto && !st.ziehen) st.rotY += 0.00055*dt;
+    zeichne();
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+
+  /* Finger-Drehen. Ein kurzer Tap (kaum Bewegung) bleibt ein Klick auf die Kachel,
+     erst echtes Ziehen dreht den Körper und unterdrückt den Klick. */
+  let weg=0;
+  canvas.addEventListener('pointerdown',e=>{
+    st.ziehen=true; weg=0; st.lx=e.clientX; st.ly=e.clientY;
+    try{canvas.setPointerCapture(e.pointerId);}catch(_){}
+  });
+  canvas.addEventListener('pointermove',e=>{
+    if(!st.ziehen) return;
+    const dx=e.clientX-st.lx, dy=e.clientY-st.ly;
+    weg += Math.abs(dx)+Math.abs(dy);
+    st.lx=e.clientX; st.ly=e.clientY;
+    st.rotY += dx*0.012;
+    st.rotX = Math.max(-1.35, Math.min(1.35, st.rotX + dy*0.012));
+    e.preventDefault();
+  },{passive:false});
+  const ende=e=>{ if(st.ziehen){ st.ziehen=false; try{canvas.releasePointerCapture(e.pointerId);}catch(_){} } };
+  canvas.addEventListener('pointerup',ende);
+  canvas.addEventListener('pointercancel',ende);
+  canvas.addEventListener('touchmove',e=>{ if(st.ziehen) e.preventDefault(); },{passive:false});
+  canvas.addEventListener('click',e=>{ if(weg>8){ e.stopPropagation(); e.preventDefault(); weg=0; } });
+
+  function startWinkel(k){ return (k==='halbkugel')?0.62:0.42; }
+  return {
+    st,
+    setKoerper(k){ st.key=k; geo=KOERPER[k](); st.rotY=0.6; st.rotX=startWinkel(k); },
+    toggleAuto(){ st.auto=!st.auto; return st.auto; },
+    reset(){ st.rotY=0.6; st.rotX=startWinkel(st.key); },
+    neuMessen(){ groesse(); }
+  };
+}
+</script>
+
+<script>
+/* ---------- Wissensbasis: Hierarchie + Begründungen ----------
+   "ist"      = dieser Körper ist IMMER auch jener Körper
+   "istnicht" = nicht garantiert / nie – mit Begründung, oft samt Verwandtschaft */
+const DATEN={
+  wuerfel:{
+    label:'Würfel',
+    ist:{
+      quader:'Ein Würfel hat sechs Rechtecke als Flächen – nur sind es hier sechs Quadrate. Quadrate sind besondere Rechtecke, also ist er ein Quader.',
+      prisma:'Unten und oben liegt die gleiche Fläche, die Seitenflächen stehen senkrecht dazu – genau das macht ein Prisma aus.',
+      koerper:'Er nimmt Raum ein und hat Ecken, Kanten und Flächen – also ein Körper.'
+    },
+    istnicht:{
+      pyramideq:'Eine Pyramide läuft in einer Spitze zusammen. Der Würfel hat oben eine ganze Deckfläche statt einer Spitze.',
+      pyramide:'Auch hier fehlt die Spitze: Der Würfel hat zwei gleiche Grundflächen, keine Spitze.',
+      tetraeder:'Ein Tetraeder besteht aus vier Dreiecken. Der Würfel hat sechs Quadrate.',
+      zylinder:'Ein Zylinder hat einen Kreis als Grundfläche und eine krumme Mantelfläche. Beim Würfel ist alles eben und eckig.',
+      kegel:'Dafür bräuchte er eine kreisförmige Grundfläche und eine Spitze.',
+      kugel:'Eine Kugel ist rundum krumm – der Würfel hat nur ebene Flächen.',
+      halbkugel:'Auch dafür bräuchte er eine krumme Fläche.'
+    },
+    merksatz:'Der Würfel ist der „besondere" Körper ganz oben im Haus: Er ist zugleich Quader und Prisma – ein Quader, bei dem alle Kanten gleich lang sind.'
+  },
+  quader:{
+    label:'Quader',
+    ist:{
+      prisma:'Grund- und Deckfläche sind gleich (zwei Rechtecke), die Seitenflächen stehen senkrecht darauf – das ist ein gerades Prisma mit rechteckiger Grundfläche.',
+      koerper:'Er hat Ecken, Kanten und Flächen und nimmt Raum ein – ein Körper.'
+    },
+    istnicht:{
+      wuerfel:'Ein Würfel braucht lauter gleich lange Kanten. Ein Quader darf lang und flach sein – wie ein Schuhkarton.',
+      pyramideq:'Beim Quader sitzt oben eine Deckfläche, keine Spitze.',
+      pyramide:'Auch hier gilt: zwei Grundflächen statt einer Spitze.',
+      tetraeder:'Ein Tetraeder hat vier Dreiecke – der Quader sechs Rechtecke.',
+      zylinder:'Die Grundfläche des Quaders ist ein Rechteck, keine Kreisfläche. Der Zylinder ist aber sein runder Verwandter: beide sind Säulen.',
+      kegel:'Dafür bräuchte er eine kreisförmige Grundfläche und eine Spitze.',
+      kugel:'Der Quader hat nur ebene Flächen, die Kugel ist rundum krumm.',
+      halbkugel:'Auch dafür bräuchte er eine krumme Fläche.'
+    },
+    merksatz:'Jeder Würfel ist ein Quader – aber nicht jeder Quader ist ein Würfel. Und jeder Quader ist ein Prisma: eine Säule mit rechteckiger Grundfläche.'
+  },
+  prisma:{
+    label:'Prisma',
+    ist:{
+      koerper:'Ein Prisma nimmt Raum ein und hat Ecken, Kanten und Flächen – ein Körper.'
+    },
+    istnicht:{
+      quader:'Ein Quader braucht Rechtecke als Grundfläche. Ein Prisma kann aber auch ein Dreieck oder ein Sechseck als Grundfläche haben.',
+      wuerfel:'Dafür müssten alle Kanten gleich lang und alle Flächen Quadrate sein.',
+      pyramideq:'Ein Prisma hat zwei gleiche Grundflächen – eine Pyramide läuft dagegen in einer Spitze zusammen.',
+      pyramide:'Prisma und Pyramide sind Gegenstücke: Säule mit Deckfläche gegen Spitzkörper.',
+      tetraeder:'Ein Tetraeder ist eine Pyramide aus vier Dreiecken – es hat eine Spitze statt einer Deckfläche.',
+      zylinder:'Der Zylinder ist der runde Verwandte des Prismas: Er ist ebenfalls eine Säule, seine Grundfläche ist aber ein Kreis und sein Mantel ist krumm. Ein Prisma hat nur ebene Flächen.',
+      kegel:'Dafür bräuchte es eine kreisförmige Grundfläche und eine Spitze.',
+      kugel:'Ein Prisma hat nur ebene Flächen.',
+      halbkugel:'Auch dafür bräuchte es eine krumme Fläche.'
+    },
+    merksatz:'Ein Prisma ist eine Säule: unten und oben die gleiche ebene Fläche, dazwischen gerade Seitenflächen. Quader und Würfel sind besondere Prismen.'
+  },
+  pyramideq:{
+    label:'quadr. Pyramide',
+    ist:{
+      pyramide:'Sie hat eine Grundfläche und eine Spitze – das macht jede Pyramide aus. Bei ihr ist die Grundfläche ein Quadrat.',
+      koerper:'Sie nimmt Raum ein und hat Ecken, Kanten und Flächen – ein Körper.'
+    },
+    istnicht:{
+      tetraeder:'Ein Tetraeder hat ein Dreieck als Grundfläche und insgesamt vier Dreiecksflächen. Hier ist die Grundfläche aber ein Quadrat.',
+      prisma:'Ein Prisma hat oben eine zweite Grundfläche. Die Pyramide läuft stattdessen in einer Spitze zusammen.',
+      quader:'Dafür bräuchte sie sechs Rechtecke statt einer Spitze.',
+      wuerfel:'Dafür bräuchte sie sechs gleiche Quadrate statt einer Spitze.',
+      kegel:'Der Kegel ist der runde Verwandte der Pyramide: auch er hat eine Spitze, aber eine kreisförmige Grundfläche und eine krumme Mantelfläche.',
+      zylinder:'Ein Zylinder ist eine Säule mit zwei Kreisflächen – keine Spitze.',
+      kugel:'Eine Kugel hat gar keine Ecken und Kanten.',
+      halbkugel:'Dafür bräuchte sie eine krumme Fläche.'
+    },
+    merksatz:'Die quadratische Pyramide ist die bekannteste Pyramide (wie in Ägypten): Grundfläche Quadrat, vier Dreiecke laufen in einer Spitze zusammen.'
+  },
+  tetraeder:{
+    label:'Tetraeder',
+    ist:{
+      pyramide:'Er hat eine Grundfläche (ein Dreieck) und eine Spitze – also eine Pyramide mit dreieckiger Grundfläche.',
+      koerper:'Er nimmt Raum ein und hat Ecken, Kanten und Flächen – ein Körper.'
+    },
+    istnicht:{
+      pyramideq:'Dafür müsste die Grundfläche ein Quadrat sein. Beim Tetraeder ist sie ein Dreieck.',
+      prisma:'Ein Prisma braucht zwei gleiche Grundflächen. Der Tetraeder hat stattdessen eine Spitze.',
+      quader:'Ein Quader besteht aus sechs Rechtecken – der Tetraeder aus vier Dreiecken.',
+      wuerfel:'Dafür bräuchte er sechs gleiche Quadrate.',
+      kegel:'Dafür bräuchte er eine kreisförmige Grundfläche und eine krumme Mantelfläche.',
+      zylinder:'Ein Zylinder ist eine Säule mit Kreisflächen – der Tetraeder hat eine Spitze und nur Dreiecke.',
+      kugel:'Eine Kugel hat keine Ecken und Kanten.',
+      halbkugel:'Auch dafür bräuchte er eine krumme Fläche.'
+    },
+    merksatz:'Der Tetraeder ist die einfachste Pyramide: vier Dreiecke, vier Ecken, sechs Kanten. Er steht bei den Spitzkörpern ganz oben – wie der Würfel bei den Säulen.'
+  },
+  pyramide:{
+    label:'Pyramide',
+    ist:{
+      koerper:'Sie nimmt Raum ein und hat Ecken, Kanten und Flächen – ein Körper.'
+    },
+    istnicht:{
+      pyramideq:'Die Grundfläche einer Pyramide kann auch ein Dreieck, Fünfeck oder Sechseck sein – nicht nur ein Quadrat.',
+      tetraeder:'Ein Tetraeder ist die besondere Pyramide mit dreieckiger Grundfläche.',
+      prisma:'Ein Prisma hat zwei gleiche Grundflächen, die Pyramide nur eine – dafür eine Spitze.',
+      quader:'Dafür bräuchte sie sechs Rechtecke statt einer Spitze.',
+      wuerfel:'Dafür bräuchte sie sechs gleiche Quadrate statt einer Spitze.',
+      kegel:'Der Kegel ist der runde Verwandte: Auch er hat eine Spitze, aber seine Grundfläche ist ein Kreis und sein Mantel ist krumm. Eine Pyramide hat nur ebene Flächen.',
+      zylinder:'Ein Zylinder hat keine Spitze, sondern zwei Kreisflächen.',
+      kugel:'Eine Kugel hat weder Ecken noch Kanten noch eine Spitze.',
+      halbkugel:'Auch dafür bräuchte sie eine krumme Fläche.'
+    },
+    merksatz:'Bei der Pyramide laufen von einer Grundfläche aus Dreiecke in einer Spitze zusammen. Tetraeder und quadratische Pyramide sind besondere Pyramiden.'
+  },
+  zylinder:{
+    label:'Zylinder',
+    ist:{
+      koerper:'Er nimmt Raum ein und hat Flächen – ein Körper.'
+    },
+    istnicht:{
+      prisma:'Der Zylinder ist zwar eine Säule wie ein Prisma – aber seine Grundfläche ist ein Kreis und seine Mantelfläche ist krumm. Ein Prisma hat nur ebene Flächen und ein Vieleck als Grundfläche. Deshalb ist der Zylinder kein Prisma, sondern sein runder Verwandter.',
+      quader:'Dafür bräuchte er sechs ebene Rechtecke.',
+      wuerfel:'Dafür bräuchte er sechs gleiche Quadrate.',
+      pyramide:'Dafür bräuchte er eine Spitze – er hat aber oben eine Kreisfläche.',
+      pyramideq:'Dafür bräuchte er eine quadratische Grundfläche und eine Spitze.',
+      tetraeder:'Dafür bräuchte er vier Dreiecke.',
+      kegel:'Der Kegel läuft in einer Spitze zusammen – der Zylinder hat oben eine zweite Kreisfläche.',
+      kugel:'Eine Kugel hat gar keine ebenen Flächen. Der Zylinder hat zwei Kreisflächen.',
+      halbkugel:'Auch die Halbkugel ist rundum gewölbt – der Zylinder hat eine gerade Mantelfläche, die man abrollen kann.'
+    },
+    merksatz:'Der Zylinder ist der runde Verwandte des Prismas: eine Säule mit Kreis als Grundfläche. Weil seine Mantelfläche krumm ist, gehört er nicht in die Prisma-Familie.'
+  },
+  kegel:{
+    label:'Kegel',
+    ist:{
+      koerper:'Er nimmt Raum ein und hat Flächen – ein Körper.'
+    },
+    istnicht:{
+      pyramide:'Der Kegel ist zwar ein Spitzkörper wie eine Pyramide – aber seine Grundfläche ist ein Kreis und seine Mantelfläche ist krumm statt aus Dreiecken zusammengesetzt. Deshalb ist er keine Pyramide, sondern ihr runder Verwandter.',
+      pyramideq:'Dafür bräuchte er ein Quadrat als Grundfläche und ebene Dreiecke.',
+      tetraeder:'Dafür bräuchte er vier ebene Dreiecke.',
+      prisma:'Ein Prisma hat zwei gleiche Grundflächen – der Kegel hat eine Spitze.',
+      zylinder:'Ein Zylinder hat oben eine zweite Kreisfläche – der Kegel läuft in einer Spitze zusammen.',
+      quader:'Dafür bräuchte er sechs ebene Rechtecke.',
+      wuerfel:'Dafür bräuchte er sechs gleiche Quadrate.',
+      kugel:'Eine Kugel hat keine Spitze und keine ebene Fläche.',
+      halbkugel:'Die Halbkugel ist oben gewölbt, der Kegel läuft spitz zu.'
+    },
+    merksatz:'Der Kegel ist der runde Verwandte der Pyramide: Kreis als Grundfläche, eine Spitze, krummer Mantel. Ein Eishörnchen ist ein Kegel.'
+  },
+  halbkugel:{
+    label:'Halbkugel',
+    ist:{
+      koerper:'Sie nimmt Raum ein und hat Flächen – ein Körper.'
+    },
+    istnicht:{
+      kugel:'Eine ganze Kugel ist rundum gewölbt. Die Halbkugel hat unten zusätzlich eine ebene Kreisfläche – sie ist die halbe Kugel, nicht die ganze.',
+      prisma:'Dafür bräuchte sie zwei gleiche Grundflächen und ebene Seitenflächen.',
+      zylinder:'Ein Zylinder ist gleich hoch überall – die Halbkugel wölbt sich zur Mitte hin.',
+      pyramide:'Dafür bräuchte sie eine Spitze aus ebenen Dreiecken.',
+      pyramideq:'Dafür bräuchte sie eine quadratische Grundfläche und eine Spitze.',
+      tetraeder:'Dafür bräuchte sie vier ebene Dreiecke.',
+      kegel:'Der Kegel läuft spitz zu – die Halbkugel ist oben rund gewölbt.',
+      quader:'Dafür bräuchte sie sechs ebene Rechtecke.',
+      wuerfel:'Dafür bräuchte sie sechs gleiche Quadrate.'
+    },
+    merksatz:'Die Halbkugel ist eine durchgeschnittene Kugel: oben die gewölbte Kugelfläche, unten ein ebener Kreis. Eine Iglu-Form ist eine Halbkugel.'
+  },
+  kugel:{
+    label:'Kugel',
+    ist:{
+      koerper:'Sie nimmt Raum ein und hat eine Oberfläche – ein Körper.'
+    },
+    istnicht:{
+      halbkugel:'Die Halbkugel ist nur die Hälfte davon und hat unten eine ebene Kreisfläche. Die ganze Kugel hat gar keine ebene Fläche.',
+      prisma:'Ein Prisma braucht ebene Grund- und Deckflächen – die Kugel hat keine einzige ebene Fläche.',
+      zylinder:'Ein Zylinder hat zwei Kreisflächen und rollt nur in eine Richtung. Die Kugel rollt in jede Richtung.',
+      pyramide:'Die Kugel hat keine Spitze und keine Ecken.',
+      pyramideq:'Auch dafür fehlen Grundfläche, Ecken und Spitze.',
+      tetraeder:'Dafür bräuchte sie vier ebene Dreiecke.',
+      kegel:'Ein Kegel hat eine Spitze und eine ebene Kreisfläche – beides fehlt der Kugel.',
+      quader:'Dafür bräuchte sie sechs ebene Rechtecke.',
+      wuerfel:'Dafür bräuchte sie sechs gleiche Quadrate.'
+    },
+    merksatz:'Die Kugel ist der besondere Körper unter den runden: keine Ecke, keine Kante, keine ebene Fläche. Jeder Punkt der Oberfläche ist gleich weit vom Mittelpunkt entfernt.'
+  },
+  koerper:{
+    label:'allg. Körper',
+    ist:{},
+    istnicht:{
+      prisma:'Ein Prisma braucht zwei gleiche Grundflächen und gerade Seitenflächen – das hat nicht jeder Körper.',
+      pyramide:'Eine Pyramide braucht eine Grundfläche und eine Spitze.',
+      quader:'Ein Quader braucht sechs Rechtecke.',
+      wuerfel:'Ein Würfel braucht sechs gleiche Quadrate.',
+      pyramideq:'Dafür fehlen quadratische Grundfläche und Spitze.',
+      tetraeder:'Dafür fehlen die vier Dreiecke.',
+      zylinder:'Dafür fehlen die beiden Kreisflächen.',
+      kegel:'Dafür fehlen Kreisfläche und Spitze.',
+      kugel:'Dafür müsste er rundum gleichmäßig gewölbt sein.',
+      halbkugel:'Dafür fehlt die gewölbte Kugelfläche.'
+    },
+    merksatz:'„Körper" ist der allgemeinste Begriff ganz unten im Haus: Jeder besondere Körper ist ein Körper – aber nicht umgekehrt.'
+  }
+};
+const REIHE=['wuerfel','tetraeder','quader','pyramideq','prisma','pyramide','zylinder','kegel','halbkugel','kugel','koerper'];
+
+const STECKBRIEF={
+  wuerfel:['6 Flächen – alle Quadrate','12 gleich lange Kanten, 8 Ecken','Ist immer auch Quader und Prisma','Beispiel: Spielwürfel, Zuckerwürfel'],
+  quader:['6 Flächen – alles Rechtecke','12 Kanten, 8 Ecken','Ist immer auch ein Prisma','Beispiel: Schuhkarton, Ziegelstein'],
+  prisma:['2 gleiche Grundflächen (Vieleck)','Seitenflächen sind Rechtecke','Säulenform, alle Flächen eben','Beispiel: Toblerone-Schachtel'],
+  pyramideq:['Grundfläche: Quadrat','4 Dreiecke laufen in einer Spitze zusammen','5 Ecken, 8 Kanten','Beispiel: Pyramiden von Gizeh'],
+  tetraeder:['4 Flächen – alles Dreiecke','4 Ecken, 6 Kanten','Ist die Pyramide mit dreieckiger Grundfläche','Beispiel: Tetraeder-Würfel im Spiel'],
+  pyramide:['1 Grundfläche (Vieleck) + 1 Spitze','Seitenflächen sind Dreiecke','Alle Flächen eben','Beispiel: Zeltdach, Kirchturmspitze'],
+  zylinder:['2 Kreisflächen (unten und oben)','1 krumme Mantelfläche','Keine Ecken – 2 krumme Kanten','Beispiel: Konservendose, Kerze'],
+  kegel:['1 Kreisfläche + 1 Spitze','1 krumme Mantelfläche','Beispiel: Eishörnchen, Verkehrshütchen'],
+  halbkugel:['1 ebene Kreisfläche unten','Oben gewölbte Kugelfläche','Genau die halbe Kugel','Beispiel: Iglu, halbe Melone'],
+  kugel:['Keine Ecke, keine Kante, keine ebene Fläche','Rundum gleichmäßig gewölbt','Rollt in jede Richtung','Beispiel: Fußball, Murmel'],
+  koerper:['Nimmt Raum ein','Hat eine Oberfläche','Der Oberbegriff für alle Körper im Haus','Beispiel: jeder Gegenstand um dich herum']
+};
+</script>
+
+<script>
+/* ---------- Tabs / Karten ---------- */
+const KARTEN=[
+  {id:'kh', tab:'🏠 Haus der Grundkörper'},
+  {id:'kb', tab:'🎯 Körper drehen'},
+  {id:'kf', tab:'🔄 Selbstkontrolle'}
+];
+let aktiv='kh';
+const tabsEl=document.getElementById('tabs'), kartenEl=document.getElementById('karten');
+KARTEN.forEach(k=>{
+  const t=document.createElement('button');t.className='tab'+(k.id===aktiv?' aktiv':'');t.id='tab_'+k.id;
+  t.textContent=k.tab;t.onclick=()=>zeige(k.id);tabsEl.appendChild(t);
+  const c=document.createElement('section');c.className='karte'+(k.id===aktiv?' aktiv':'');c.id='karte_'+k.id;
+  kartenEl.appendChild(c);
+});
+function zeige(id){
+  aktiv=id;
+  KARTEN.forEach(k=>{document.getElementById('karte_'+k.id).classList.toggle('aktiv',k.id===id);
+    document.getElementById('tab_'+k.id).classList.toggle('aktiv',k.id===id);});
+  if(id==='kb' && window.buehne){ window.buehne.neuMessen(); }
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+</script>
+
+<script>
+/* ============================================================
+   KARTE H — interaktives Haus der Grundkörper
+   ============================================================ */
+const rendererHaus={};
+(function(){
+  const etagen=[
+    {label:'', keys:['wuerfel','tetraeder']},
+    {label:'', keys:['quader','pyramideq']},
+    {label:'', keys:['prisma','pyramide']},
+    {label:'Körper mit krummen Flächen (die runden Verwandten)', keys:['zylinder','kegel','halbkugel','kugel']},
+    {label:'', keys:['koerper']}
+  ];
+  let html='<h2>Tippe einen Körper an</h2>';
+  html+='<div class="unter">Wähle einen Körper. Du siehst dann <b style="color:var(--gruen)">grün</b>, was dieser Körper <b>automatisch auch ist</b>, und <b style="color:var(--rot)">rot</b>, was er <b>nicht</b> ist – jeweils mit Begründung. Jeder Körper dreht sich; du kannst ihn auch mit dem Finger drehen.</div>';
+  html+='<div class="haus" id="haus">';
+  etagen.forEach(et=>{
+    if(et.label) html+='<div class="etagenlabel">'+et.label+'</div>';
+    html+='<div class="etage">';
+    et.keys.forEach(key=>{
+      html+='<button class="kfig" id="kf_'+key+'" onclick="kWaehle(\''+key+'\')">'
+        +'<span class="marke" id="mk_'+key+'"></span>'
+        +'<canvas id="cv_'+key+'"></canvas>'
+        +'<span class="name">'+DATEN[key].label+'</span></button>';
+    });
+    html+='</div>';
+  });
+  html+='</div>';
+  html+='<div class="hinweisleiste">Nochmal denselben Körper antippen blendet die Erklärung wieder aus.</div>';
+  html+='<div class="erkl" id="erkl"></div>';
+  document.getElementById('karte_kh').innerHTML=html;
+
+  // Renderer für jede Mini-Ansicht starten
+  REIHE.forEach(key=>{
+    const cv=document.getElementById('cv_'+key);
+    rendererHaus[key]=machRenderer(cv,key,{skala:0.30});
+  });
+})();
+
+let aktuellerKoerper=null;
+const gesehen=new Set(), geflippt=new Set();
+
+function kWaehle(key){
+  if(aktuellerKoerper===key){ kReset(); return; }
+  aktuellerKoerper=key;
+  gesehen.add(key);
+  const d=DATEN[key];
+  REIHE.forEach(k=>{
+    const el=document.getElementById('kf_'+k);
+    el.classList.remove('gewaehlt','ist','istnicht');
+    document.getElementById('mk_'+k).textContent='';
+  });
+  document.getElementById('kf_'+key).classList.add('gewaehlt');
+  document.getElementById('mk_'+key).textContent='★';
+  Object.keys(d.ist).forEach(k=>{
+    document.getElementById('kf_'+k).classList.add('ist');
+    document.getElementById('mk_'+k).textContent='✓';
+  });
+  Object.keys(d.istnicht).forEach(k=>{
+    document.getElementById('kf_'+k).classList.add('istnicht');
+    document.getElementById('mk_'+k).textContent='✗';
+  });
+  let h='<h3>Ein '+d.label+' …</h3>';
+  Object.entries(d.ist).forEach(([k,grund])=>{
+    h+='<div class="zeile ja"><span class="sym">✓</span><span>… ist auch ein <b>'+DATEN[k].label+'</b>. '+grund+'</span></div>';
+  });
+  Object.entries(d.istnicht).forEach(([k,grund])=>{
+    h+='<div class="zeile nein"><span class="sym">✗</span><span>… ist <b>kein</b> <b>'+DATEN[k].label+'</b>. '+grund+'</span></div>';
+  });
+  h+='<div class="merksatz">💡 '+d.merksatz+'</div>';
+  const box=document.getElementById('erkl');
+  box.innerHTML=h; box.classList.add('show');
+}
+function kReset(){
+  aktuellerKoerper=null;
+  REIHE.forEach(k=>{document.getElementById('kf_'+k).classList.remove('gewaehlt','ist','istnicht');document.getElementById('mk_'+k).textContent='';});
+  document.getElementById('erkl').classList.remove('show');
+}
+</script>
+
+<script>
+/* ============================================================
+   KARTE B — große Bühne: Körper drehen und Steckbrief lesen
+   ============================================================ */
+(function(){
+  let html='<h2>Körper von allen Seiten ansehen</h2>';
+  html+='<div class="unter">Wähle einen Körper und dreh ihn mit dem Finger. Zähle dabei: Wie viele Flächen, Kanten und Ecken hat er? Sind die Flächen eben oder krumm?</div>';
+  html+='<div class="buehne">';
+  html+='<div class="buehne-links">';
+  html+='<canvas class="buehne-canvas" id="cvBuehne"></canvas>';
+  html+='<div class="steuer">';
+  html+='<button id="btnAuto">⏸ Drehung anhalten</button>';
+  html+='<button id="btnReset">↺ Ansicht zurücksetzen</button>';
+  html+='</div></div>';
+  html+='<div class="buehne-rechts">';
+  html+='<div class="waehler" id="waehler"></div>';
+  html+='<div class="steckbrief" id="steckbrief"></div>';
+  html+='</div></div>';
+  document.getElementById('karte_kb').innerHTML=html;
+
+  const wEl=document.getElementById('waehler');
+  REIHE.filter(k=>k!=='koerper').forEach(k=>{
+    const b=document.createElement('button');
+    b.textContent=DATEN[k].label; b.id='wb_'+k;
+    b.onclick=()=>waehleBuehne(k);
+    wEl.appendChild(b);
+  });
+
+  const cv=document.getElementById('cvBuehne');
+  window.buehne=machRenderer(cv,'wuerfel',{skala:0.26,strich:1.15});
+
+  window.waehleBuehne=function(k){
+    window.buehne.setKoerper(k);
+    REIHE.filter(x=>x!=='koerper').forEach(x=>{
+      document.getElementById('wb_'+x).classList.toggle('aktiv',x===k);
+    });
+    let s='<h3>Steckbrief: '+DATEN[k].label+'</h3><ul>';
+    STECKBRIEF[k].forEach(z=>{ s+='<li>'+z+'</li>'; });
+    s+='</ul>';
+    document.getElementById('steckbrief').innerHTML=s;
+  };
+
+  document.getElementById('btnAuto').onclick=function(){
+    const an=window.buehne.toggleAuto();
+    this.textContent = an ? '⏸ Drehung anhalten' : '▶ Drehung starten';
+  };
+  document.getElementById('btnReset').onclick=()=>window.buehne.reset();
+
+  waehleBuehne('wuerfel');
+})();
+</script>
+
+<script>
+/* ============================================================
+   KARTE F — Selbstkontrolle (Flip-Cards)
+   ============================================================ */
+(function(){
+  const cards=[
+    {f:'Ist jeder Würfel auch ein Quader?', b:'Ja. Ein Würfel hat sechs Rechtecke als Flächen – nämlich sechs Quadrate. Quadrate sind besondere Rechtecke.'},
+    {f:'Ist jeder Quader auch ein Würfel?', b:'Nein. Ein Quader darf lang und flach sein wie ein Schuhkarton. Erst wenn alle Kanten gleich lang sind, wird er ein Würfel.'},
+    {f:'Warum ist jeder Quader auch ein Prisma?', b:'Weil er unten und oben die gleiche Fläche hat und die Seitenflächen senkrecht darauf stehen – eine Säule mit rechteckiger Grundfläche.'},
+    {f:'Ist ein Zylinder ein Prisma?', b:'Nein. Er ist zwar eine Säule wie ein Prisma, aber seine Grundfläche ist ein Kreis und sein Mantel ist krumm. Er ist der runde Verwandte des Prismas.'},
+    {f:'Ist ein Kegel eine Pyramide?', b:'Nein. Beide sind Spitzkörper, aber der Kegel hat eine kreisförmige Grundfläche und eine krumme Mantelfläche statt ebener Dreiecke. Er ist der runde Verwandte der Pyramide.'},
+    {f:'Was ist ein Tetraeder?', b:'Eine Pyramide mit dreieckiger Grundfläche: vier Dreiecke, vier Ecken, sechs Kanten. Er ist damit die einfachste Pyramide.'},
+    {f:'Ist jede Pyramide eine quadratische Pyramide?', b:'Nein. Die Grundfläche kann auch ein Dreieck, Fünfeck oder Sechseck sein. Nur wenn sie ein Quadrat ist, heißt sie quadratische Pyramide.'},
+    {f:'Kann ein Prisma auch eine Spitze haben?', b:'Nein. Ein Prisma hat oben eine zweite Grundfläche statt einer Spitze. Spitze bedeutet: Pyramide oder Kegel.'},
+    {f:'Wie unterscheiden sich Kugel und Halbkugel?', b:'Die Kugel ist rundum gewölbt und hat keine einzige ebene Fläche. Die Halbkugel ist die halbe Kugel und hat unten zusätzlich eine ebene Kreisfläche.'},
+    {f:'Welcher Begriff steht ganz unten im Haus?', b:'Der allgemeine Körper. Jeder besondere Körper ist auch ein Körper – aber nicht umgekehrt.'}
+  ];
+  let html='<h2>Prüfe dich selbst</h2>';
+  html+='<div class="unter">Tippe eine Karte an, um die Antwort aufzudecken. Überlege vorher selbst!</div>';
+  html+='<div class="flip-grid">';
+  cards.forEach((c,i)=>{
+    html+='<div class="flip" id="flip_'+i+'" onclick="flipKarte(this,'+i+')">'
+      +'<div class="flip-inner"><div class="flip-face flip-front">'+c.f+'</div>'
+      +'<div class="flip-face flip-back">'+c.b+'</div></div></div>';
+  });
+  html+='</div><div class="flip-hint">Diese Karten dienen der Selbstkontrolle – es gibt hier keine Auswertung.</div>';
+  window.flipKarte=function(el,i){el.classList.toggle('flipped');geflippt.add(i);};
+  document.getElementById('karte_kf').innerHTML=html;
+})();
+</script>
+
+</body>
+</html>
