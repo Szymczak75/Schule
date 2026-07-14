@@ -215,13 +215,29 @@ function bauKugel(r,teil){
   return {v,f,glatt:true,halb:(teil<1)};
 }
 
+function bauTetraeder(r){
+  // Regulärer (gleichseitiger) Tetraeder: alle 6 Kanten gleich lang,
+  // alle 4 Flächen sind gleichseitige Dreiecke.
+  // Höhe über der Grundfläche: h = r*sqrt(2)  (r = Umkreisradius der Grundfläche)
+  const h = r*Math.SQRT2;
+  const yB = -h*0.30, yS = h*0.70;      // um den Schwerpunkt herum zentriert
+  const v=[];
+  for(let k=0;k<3;k++){
+    const a = -Math.PI/2 + 2*Math.PI*k/3;
+    v.push([r*Math.cos(a), yB, r*Math.sin(a)]);
+  }
+  v.push([0,yS,0]);                      // Spitze
+  const f=[[2,1,0],[0,1,3],[1,2,3],[2,0,3]];
+  return {v,f};
+}
+
 const KOERPER={
   wuerfel:   ()=>bauQuader(1,1,1),
   quader:    ()=>bauQuader(1.35,.75,.85),
   prisma:    ()=>bauPrisma(3,1.15,1.0,-Math.PI/2),
   prisma6:   ()=>bauPrisma(6,1.05,1.0,0),
   pyramideq: ()=>bauPyramide(4,1.15,1.2,Math.PI/4),
-  tetraeder: ()=>bauPyramide(3,1.2,1.15,-Math.PI/2),
+  tetraeder: ()=>bauTetraeder(1.2),
   pyramide:  ()=>bauPyramide(5,1.1,1.2,-Math.PI/2),
   zylinder:  ()=>bauPrisma(28,.95,1.0,0),
   kegel:     ()=>bauPyramide(28,1.05,1.25,0),
@@ -377,7 +393,11 @@ const A1=[
   {id:'w5', text:'Ein Tetraeder ist eine Pyramide.', loesung:true,
    erkl:'Richtig. Er hat eine Grundfläche (ein Dreieck) und läuft in einer Spitze zusammen – das ist eine Pyramide mit dreieckiger Grundfläche.'},
   {id:'w6', text:'Ein Kegel ist eine Pyramide.', loesung:false,
-   erkl:'Falsch. Beide sind Spitzkörper, aber der Kegel hat eine kreisförmige Grundfläche und eine krumme Mantelfläche statt ebener Dreiecke. Er ist der runde Verwandte der Pyramide.'}
+   erkl:'Falsch. Beide sind Spitzkörper, aber der Kegel hat eine kreisförmige Grundfläche und eine krumme Mantelfläche statt ebener Dreiecke. Er ist der runde Verwandte der Pyramide.'},
+  {id:'w7', text:'Beim Tetraeder sind alle Kanten gleich lang.', loesung:true,
+   erkl:'Richtig. Alle sechs Kanten des Tetraeders sind gleich lang. Deshalb sind auch alle vier Dreiecke gleich groß und gleichseitig.'},
+  {id:'w8', text:'Jede Pyramide mit dreieckiger Grundfläche ist ein Tetraeder.', loesung:false,
+   erkl:'Falsch. Eine Pyramide mit dreieckiger Grundfläche darf eine hohe, schmale Spitze haben – dann sind ihre Seitendreiecke größer als die Grundfläche. Ein Tetraeder ist die besondere Dreieckspyramide, bei der alle sechs Kanten gleich lang und damit alle vier Dreiecke gleichseitig sind.'}
 ];
 (function(){
   let h='<h2>Aufgabe 1: Stimmt das?</h2>';
@@ -423,7 +443,7 @@ const A2=[
    erkl:'Der Körper hat unten und oben die gleiche ebene Fläche (ein Sechseck), dazwischen Rechtecke. Das ist eine Säule aus lauter ebenen Flächen – ein Prisma. Ein Zylinder hätte eine krumme Mantelfläche, eine Pyramide eine Spitze.'},
   {id:'e2', koerper:'tetraeder', loesung:'Tetraeder',
    optionen:['Tetraeder','quadratische Pyramide','Prisma','Kegel'],
-   erkl:'Der Körper besteht aus vier Dreiecken und läuft in einer Spitze zusammen. Die Grundfläche ist also ein Dreieck – das ist ein Tetraeder. Bei der quadratischen Pyramide wäre die Grundfläche ein Quadrat.'},
+   erkl:'Der Körper besteht aus vier gleichseitigen Dreiecken, die alle gleich groß sind, und läuft in einer Spitze zusammen. Alle sechs Kanten sind gleich lang. Die Grundfläche ist ein Dreieck – das ist ein Tetraeder. Bei der quadratischen Pyramide wäre die Grundfläche ein Quadrat.'},
   {id:'e3', koerper:'halbkugel', loesung:'Halbkugel',
    optionen:['Halbkugel','Kugel','Kegel','Zylinder'],
    erkl:'Oben ist der Körper gewölbt wie eine Kugel, unten hat er aber eine ebene Kreisfläche. Eine ganze Kugel hätte gar keine ebene Fläche – also ist es eine Halbkugel.'}
@@ -558,8 +578,8 @@ const A4=[
         'Jede der 6 Flächen hat 4 Kanten, aber jede Kante gehört zu 2 Flächen. Man kann sie auch direkt zählen: 4 Kanten unten, 4 oben, 4 senkrecht dazwischen → <b>12 Kanten</b>.',
         'Unten liegen 4 Ecken, oben liegen 4 Ecken → <b>8 Ecken</b>.']},
   {id:'t_tetraeder', name:'Tetraeder',       f:4, k:6,  e:4,
-   weg:['Der Tetraeder besteht aus 4 Dreiecken: 1 Grundfläche und 3 Seitenflächen → <b>4 Flächen</b>.',
-        'Die Grundfläche (ein Dreieck) hat 3 Kanten. Von jeder ihrer 3 Ecken führt eine Kante zur Spitze: 3 + 3 = <b>6 Kanten</b>.',
+   weg:['Der Tetraeder besteht aus 4 gleichseitigen Dreiecken: 1 Grundfläche und 3 Seitenflächen → <b>4 Flächen</b>. Alle 4 Dreiecke sind gleich groß.',
+        'Die Grundfläche (ein gleichseitiges Dreieck) hat 3 Kanten. Von jeder ihrer 3 Ecken führt eine Kante zur Spitze: 3 + 3 = <b>6 Kanten</b>. Alle 6 Kanten sind gleich lang.',
         'Die Grundfläche hat 3 Ecken, dazu kommt die Spitze: 3 + 1 = <b>4 Ecken</b>.']},
   {id:'t_pyramideq', name:'quadr. Pyramide', f:5, k:8,  e:5,
    weg:['Die Grundfläche ist 1 Quadrat, dazu kommen 4 Dreiecke als Seitenflächen: 1 + 4 = <b>5 Flächen</b>.',
