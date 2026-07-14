@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Körper abrollen – Grundkörper und ihre Netze</title>
+<meta name="description" content="Erarbeitungsseite zu Körpern und Netzen in Klasse 5: Würfel, Quader, Prismen, Pyramiden, Kegel und Zylinder rollen sich zu je zwei verschiedenen Netzen ab – drehbar, verschiebbar und von Hand steuerbar.">
+<meta name="keywords" content="Körper, Netz, Würfel, Quader, Prisma, Pyramide, Kegel, Zylinder, Abwicklung, Klasse 5">
+<meta name="typ" content="Lernseite">
+<meta name="klasse" content="5">
+<meta name="fach" content="mathe">
+<meta name="oberthema" content="Geometrie">
+<meta name="thema" content="Körper und Netze">
+<style>
+  :root{
+    --ink:#22303f;
+    --card:#ffffff;
+    --green:#1e7d32;
+    --red:#c1272d;
+    --amber:#b8860b;
+    --amber-light:#fdf3d9;
+    --amber-dark:#96690a;
+    --orange:#c97a2e;
+    --orange-dark:#a5611e;
+    --orange-light:#fbeee0;
+    --bg:#faf7f2;
+    --line:#e4dcd0;
+    --netlinie:#33586b;
+    --grundflaeche:#cfe3ee;
+    --seitenflaeche:#f9ecd2;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);color:var(--ink);
+    font-family:'Segoe UI',Verdana,'Helvetica Neue',sans-serif;
+    font-size:1.05rem;line-height:1.5;padding-bottom:5rem;
+  }
+  header{
+    background:linear-gradient(135deg,var(--orange),var(--orange-dark));
+    color:#fff;padding:1.3rem 1.2rem;box-shadow:0 3px 10px rgba(0,0,0,.12);
+  }
+  header .typ{
+    display:inline-block;background:rgba(255,255,255,.25);
+    padding:.2rem .7rem;border-radius:1rem;font-size:.85rem;font-weight:700;
+    letter-spacing:.04em;margin-bottom:.5rem;
+  }
+  header h1{margin:0;font-size:1.55rem;line-height:1.2;}
+  header p{margin:.4rem 0 0;font-size:1rem;opacity:.95;}
+
+  .intro{max-width:1024px;margin:0 auto;padding:1rem 1rem 0;}
+  .hinweis{
+    background:var(--orange-light);border-left:5px solid var(--orange);
+    padding:.7rem .9rem;border-radius:.4rem;margin:.6rem 0;
+  }
+
+  .tabs{display:flex;flex-wrap:wrap;gap:.5rem;padding:1rem 1rem 0;max-width:1024px;margin:0 auto;}
+  .tab{
+    flex:1 1 auto;min-width:7rem;min-height:44px;
+    border:2px solid var(--line);background:#fff;color:var(--ink);
+    font-size:1rem;font-weight:600;border-radius:.7rem .7rem 0 0;
+    padding:.55rem .5rem;cursor:pointer;
+    transition:background .15s,border-color .15s,transform .05s;
+  }
+  .tab:active{transform:scale(.97);}
+  .tab.aktiv{background:var(--orange);color:#fff;border-color:var(--orange-dark);}
+
+  main{max-width:1024px;margin:0 auto;padding:0 1rem;}
+  .karte{
+    display:none;background:var(--card);border:2px solid var(--line);
+    border-radius:0 .9rem .9rem .9rem;padding:1.3rem 1.2rem;margin-top:-2px;
+    box-shadow:0 2px 8px rgba(0,0,0,.05);animation:einblenden .25s ease;
+  }
+  .karte.aktiv{display:block;}
+  @keyframes einblenden{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .karte h2{margin-top:0;font-size:1.35rem;color:var(--orange-dark);}
+  .steck{
+    display:inline-block;background:var(--orange-light);border-radius:.5rem;
+    padding:.3rem .8rem;font-size:.95rem;font-weight:600;margin:.2rem 0 .8rem;
+  }
+  .legende{font-size:.95rem;color:#5b6472;margin:.3rem 0 .6rem;}
+  .legende .lg{
+    display:inline-block;width:1em;height:1em;vertical-align:-.15em;
+    border:1px solid var(--netlinie);border-radius:.15em;margin-right:.25rem;
+  }
+
+  button{font-family:inherit;}
+  .btn{
+    min-height:44px;border:none;border-radius:.6rem;padding:.6rem 1.1rem;
+    font-size:1rem;font-weight:700;cursor:pointer;transition:transform .05s,filter .15s;
+  }
+  .btn:active{transform:scale(.97);}
+  .btn-play{background:var(--orange);color:#fff;}
+  .btn-sek{background:#efe6d2;color:var(--ink);}
+
+  /* Netz-Umschalter: dauerhaft sichtbare Buttons nebeneinander */
+  .netzwahl{display:flex;flex-wrap:wrap;gap:.5rem;margin:.4rem 0 .8rem;}
+  .netzwahl button{
+    flex:1 1 10rem;min-height:44px;border:2px solid var(--line);
+    background:#fff;color:var(--ink);border-radius:.6rem;
+    font-size:1rem;font-weight:700;cursor:pointer;
+    transition:background .12s,border-color .12s,transform .05s;
+  }
+  .netzwahl button:active{transform:scale(.97);}
+  .netzwahl button.aktiv{background:var(--orange);color:#fff;border-color:var(--orange-dark);}
+
+  .variante{display:none;}
+  .variante.aktiv{display:block;}
+
+  .viewport{
+    margin:.6rem auto 0;padding:1.2rem .5rem 1rem;
+    background:#fdfbf7;border:2px solid var(--line);border-radius:.8rem;
+    perspective:1150px;-webkit-perspective:1150px;
+    perspective-origin:50% 22%;-webkit-perspective-origin:50% 22%;
+    overflow:hidden;
+    touch-action:none;overscroll-behavior:contain;
+    cursor:grab;user-select:none;-webkit-user-select:none;
+  }
+  .viewport:active{cursor:grabbing;}
+  .stage{
+    margin:0 auto;
+    transform-style:preserve-3d;-webkit-transform-style:preserve-3d;
+  }
+  .plane{
+    position:relative;margin:0 auto;
+    transform-style:preserve-3d;-webkit-transform-style:preserve-3d;
+    will-change:transform;
+  }
+  .node{
+    position:absolute;left:0;top:0;width:0;height:0;
+    transform-style:preserve-3d;-webkit-transform-style:preserve-3d;
+  }
+  .node svg{position:absolute;overflow:visible;}
+  .dreh-hinweis{text-align:center;font-size:.95rem;color:#5b6472;margin:.3rem 0 .5rem;}
+
+  .anim-bereich{
+    border:2px dashed var(--line);border-radius:.7rem;padding:.7rem 1rem;margin:.3rem 0 .8rem;
+  }
+  .anim-steuer{display:flex;align-items:center;flex-wrap:wrap;gap:.8rem;}
+  .slider-wrap{flex:1 1 12rem;display:flex;align-items:center;gap:.5rem;min-height:44px;}
+  .slider-wrap span{font-size:.9rem;color:#5b6472;white-space:nowrap;}
+  input[type=range]{
+    flex:1;min-height:44px;-webkit-appearance:none;appearance:none;background:transparent;
+  }
+  input[type=range]::-webkit-slider-runnable-track{height:10px;background:var(--orange-light);border:1px solid var(--line);border-radius:5px;}
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;appearance:none;width:30px;height:30px;margin-top:-11px;
+    border-radius:50%;background:var(--orange);border:2px solid var(--orange-dark);
+  }
+  input[type=range]::-moz-range-track{height:10px;background:var(--orange-light);border:1px solid var(--line);border-radius:5px;}
+  input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;background:var(--orange);border:2px solid var(--orange-dark);}
+
+  .trex{position:fixed;right:.7rem;bottom:.7rem;font-size:1.8rem;cursor:pointer;z-index:50;user-select:none;-webkit-user-select:none;}
+  .trex .bubble{
+    position:absolute;right:2.2rem;bottom:.2rem;white-space:nowrap;
+    background:var(--ink);color:#fff;padding:.3rem .6rem;border-radius:.5rem;
+    font-size:.85rem;opacity:0;pointer-events:none;transition:opacity .2s;
+  }
+  .trex.zeig .bubble,.trex:hover .bubble{opacity:1;}
+</style>
+</head>
+<body>
+
+<header>
+  <span class="typ">📘 Lernseite · Erarbeitung · Mathematik · Klasse 5</span>
+  <h1>Körper abrollen</h1>
+  <p>Jeder Grundkörper rollt sich Kante für Kante zu seinem Netz ab – und wieder auf. Zu jedem Körper gibt es zwei verschiedene Netze zum Umschalten.</p>
+</header>
+
+<div class="intro">
+  <p>Wähle unten einen Körper. Mit dem Schieberegler oder dem Abroll-Knopf kannst du zusehen, wie sich der Körper in sein flaches Netz ausbreitet. Drehe die Ansicht mit dem Finger, um von allen Seiten zuzuschauen.</p>
+  <div class="hinweis">🌍 Übrigens: Die <strong>Kugel</strong> ist der einzige Grundkörper <strong>ohne Netz</strong> – ihre gewölbte Oberfläche lässt sich nicht ohne Verzerrung flach ausbreiten. Deshalb bestehen Landkarten der Erde immer aus verzerrten oder zerschnittenen Stücken!</div>
+</div>
+
+<nav class="tabs" id="tabs"></nav>
+<main id="main"></main>
+
+<span class="trex" id="trex" role="img" aria-label="T-Rex" title="Made by Mathedino">🦖<span class="bubble">Made by Mathedino</span></span>
+
+<script>
+/* =================== Abwicklungs-Engine =================== */
+const V3={
+  sub:(a,b)=>[a[0]-b[0],a[1]-b[1],a[2]-b[2]],
+  mul:(a,s)=>[a[0]*s,a[1]*s,a[2]*s],
+  dot:(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2],
+  cross:(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]],
+  len:a=>Math.hypot(a[0],a[1],a[2]),
+  norm:a=>{const l=Math.hypot(a[0],a[1],a[2]);return[a[0]/l,a[1]/l,a[2]/l];}
+};
+function rotP(p,a,d,ang){
+  const v=V3.sub(p,a);
+  const c=Math.cos(ang),s=Math.sin(ang);
+  const dot=V3.dot(v,d),cr=V3.cross(d,v);
+  return [
+    a[0]+v[0]*c+cr[0]*s+d[0]*dot*(1-c),
+    a[1]+v[1]*c+cr[1]*s+d[1]*dot*(1-c),
+    a[2]+v[2]*c+cr[2]*s+d[2]*dot*(1-c)
+  ];
+}
+function rotV(v,d,ang){return rotP(v,[0,0,0],d,ang);}
+function regPoly(n,R){const p=[];for(let i=0;i<n;i++){const a=Math.PI*2*i/n-Math.PI/2;p.push([R*Math.cos(a),R*Math.sin(a)]);}return p;}
+function rectPoly(w,d){return[[-w/2,-d/2],[w/2,-d/2],[w/2,d/2],[-w/2,d/2]];}
+function makePrism(base2,h){
+  const n=base2.length,V=[];
+  base2.forEach(p=>V.push([p[0],p[1],0]));
+  base2.forEach(p=>V.push([p[0],p[1],h]));
+  const faces=[];
+  faces.push(Array.from({length:n},(_,i)=>i));
+  faces.push(Array.from({length:n},(_,i)=>2*n-1-i));
+  for(let i=0;i<n;i++){const j=(i+1)%n;faces.push([i,j,n+j,n+i]);}
+  return {V:V,faces:faces,basen:[0,1]};
+}
+function makePyramid(base2,h){
+  const n=base2.length;
+  const V=base2.map(p=>[p[0],p[1],0]);
+  let cx=0,cy=0;base2.forEach(p=>{cx+=p[0]/n;cy+=p[1]/n;});
+  V.push([cx,cy,h]);
+  const faces=[Array.from({length:n},(_,i)=>i)];
+  for(let i=0;i<n;i++){const j=(i+1)%n;faces.push([i,j,n]);}
+  return {V:V,faces:faces,basen:[0]};
+}
+function prismStar(n){
+  const t=[];t[0]=null;
+  t[1]={p:2,e:[n,n+1]};
+  for(let i=0;i<n;i++)t[2+i]={p:0,e:[i,(i+1)%n]};
+  return t;
+}
+function prismStrip(n,botAt,topAt){
+  const t=[];t[2]=null;
+  for(let i=1;i<n;i++)t[2+i]={p:2+i-1,e:[i,n+i]};
+  t[0]={p:2+botAt,e:[botAt,(botAt+1)%n]};
+  t[1]={p:2+topAt,e:[n+topAt,n+(topAt+1)%n]};
+  return t;
+}
+function pyrStar(n){
+  const t=[];t[0]=null;
+  for(let i=0;i<n;i++)t[1+i]={p:0,e:[i,(i+1)%n]};
+  return t;
+}
+function pyrFan(n,at,beidseitig){
+  const t=[];t[0]=null;
+  t[1+at]={p:0,e:[at,(at+1)%n]};
+  const steps=n-1;
+  const rechts=beidseitig?Math.ceil(steps/2):steps;
+  const links=steps-rechts;
+  for(let s=1;s<=rechts;s++){
+    const i=(at+s)%n,prev=(at+s-1+n)%n;
+    t[1+i]={p:1+prev,e:[i,n]};
+  }
+  for(let s=1;s<=links;s++){
+    const i=(at-s+n)%n,prev=(at-s+1+n)%n;
+    t[1+i]={p:1+prev,e:[(i+1)%n,n]};
+  }
+  return t;
+}
+function centroid3(solid,fi){
+  const f=solid.faces[fi];let c=[0,0,0];
+  f.forEach(vi=>{c[0]+=solid.V[vi][0]/f.length;c[1]+=solid.V[vi][1]/f.length;c[2]+=solid.V[vi][2]/f.length;});
+  return c;
+}
+function foldMagnitude(solid,fi,tree){
+  const pe=tree[fi];
+  const A=solid.V[pe.e[0]],B=solid.V[pe.e[1]];
+  const eu=V3.norm(V3.sub(B,A));
+  const w=f=>{
+    const c=centroid3(solid,f);
+    const d=V3.sub(c,A);
+    const per=V3.sub(d,V3.mul(eu,V3.dot(d,eu)));
+    return V3.norm(per);
+  };
+  const cosD=Math.max(-1,Math.min(1,V3.dot(w(fi),w(pe.p))));
+  return Math.PI-Math.acos(cosD);
+}
+function unfold(solid,tree){
+  const faces=solid.faces,n=faces.length;
+  const children=Array.from({length:n},()=>[]);
+  let root=-1;
+  tree.forEach((t,i)=>{if(t===null)root=i;else if(t)children[t.p].push(i);});
+  const pos2=Array.from({length:n},()=>({}));
+  const order=[];
+  const cent2=fi=>{let c=[0,0],m=0;for(const vi in pos2[fi]){c[0]+=pos2[fi][vi][0];c[1]+=pos2[fi][vi][1];m++;}return[c[0]/m,c[1]/m];};
+  (function place(fi){
+    order.push(fi);
+    const f=faces[fi];
+    if(fi===root){
+      const O=solid.V[f[0]];
+      const u=V3.norm(V3.sub(solid.V[f[1]],O));
+      const nf=V3.norm(V3.cross(u,V3.sub(solid.V[f[2]],O)));
+      const v=V3.cross(nf,u);
+      f.forEach(vi=>{const d=V3.sub(solid.V[vi],O);pos2[fi][vi]=[V3.dot(d,u),V3.dot(d,v)];});
+    }else{
+      const pe=tree[fi];
+      const A=solid.V[pe.e[0]],B=solid.V[pe.e[1]];
+      const A2=pos2[pe.p][pe.e[0]],B2=pos2[pe.p][pe.e[1]];
+      const AB=V3.sub(B,A),L2=V3.dot(AB,AB);
+      const ab2=[B2[0]-A2[0],B2[1]-A2[1]];
+      let nx=-ab2[1],ny=ab2[0];
+      const cp=cent2(pe.p);
+      if((cp[0]-A2[0])*nx+(cp[1]-A2[1])*ny>0){nx=-nx;ny=-ny;}
+      const nl=Math.hypot(nx,ny);nx/=nl;ny/=nl;
+      f.forEach(vi=>{
+        if(vi===pe.e[0]){pos2[fi][vi]=A2;return;}
+        if(vi===pe.e[1]){pos2[fi][vi]=B2;return;}
+        const Q=solid.V[vi];
+        const t=V3.dot(V3.sub(Q,A),AB)/L2;
+        const per=V3.sub(V3.sub(Q,A),V3.mul(AB,t));
+        const d=V3.len(per);
+        pos2[fi][vi]=[A2[0]+t*ab2[0]+d*nx,A2[1]+t*ab2[1]+d*ny];
+      });
+    }
+    children[fi].forEach(place);
+  })(root);
+  return {root:root,children:children,order:order,pos2:pos2};
+}
+// Vorzeichen der Faltwinkel per kleiner Simulation bestimmen
+function foldSigns(solid,tree,uf){
+  const pts={},nrm={};
+  uf.order.forEach(fi=>{
+    pts[fi]={};
+    solid.faces[fi].forEach(vi=>{const q=uf.pos2[fi][vi];pts[fi][vi]=[q[0],q[1],0];});
+    nrm[fi]=[0,0,1];
+  });
+  const mag={},sign={};
+  const sub=fi=>{const out=[fi];uf.children[fi].forEach(c=>out.push.apply(out,sub(c)));return out;};
+  (function proc(fi){
+    uf.children[fi].forEach(c=>{
+      const e=tree[c].e;
+      const a1=pts[fi][e[0]],a2=pts[fi][e[1]];
+      const d=V3.norm(V3.sub(a2,a1));
+      const m=foldMagnitude(solid,c,tree);
+      mag[c]=m;
+      let cen=[0,0,0],cnt=0;
+      for(const vi in pts[c]){cen[0]+=pts[c][vi][0];cen[1]+=pts[c][vi][1];cen[2]+=pts[c][vi][2];cnt++;}
+      cen=V3.mul(cen,1/cnt);
+      let s=1;
+      const c2=rotP(cen,a1,d,m);
+      if(V3.dot(V3.sub(c2,cen),nrm[fi])<0)s=-1;
+      sign[c]=s;
+      sub(c).forEach(k=>{
+        for(const vi in pts[k])pts[k][vi]=rotP(pts[k][vi],a1,d,s*m);
+        nrm[k]=rotV(nrm[k],d,s*m);
+      });
+      proc(c);
+    });
+  })(uf.root);
+  return {mag:mag,sign:sign};
+}
+
+/* =================== Körper-Konfiguration =================== */
+const KOERPER=[
+  {id:'wuerfel',name:'Würfel',kurz:'Würfel',
+   solid:makePrism(rectPoly(90,90),90),
+   netze:[{label:'Netz 1 – Kreuz',tree:prismStar(4)},{label:'Netz 2 – Streifen',tree:prismStrip(4,0,2)}],
+   info:'Der Würfel hat 6 gleich große quadratische Flächen. Er hat sogar 11 verschiedene Netze – hier siehst du zwei davon.',
+   steck:'Flächen: 6 · Kanten: 12 · Ecken: 8'},
+  {id:'quader',name:'Quader',kurz:'Quader',
+   solid:makePrism(rectPoly(120,70),50),
+   netze:[{label:'Netz 1 – Kreuz',tree:prismStar(4)},{label:'Netz 2 – Streifen',tree:prismStrip(4,0,2)}],
+   info:'Beim Quader sind gegenüberliegende Flächen gleich groß – im Netz findest du deshalb 3 verschiedene Rechteck-Größen, jede doppelt.',
+   steck:'Flächen: 6 · Kanten: 12 · Ecken: 8'},
+  {id:'prisma3',name:'Prisma mit dreieckiger Grundfläche',kurz:'Prisma △',
+   solid:makePrism(regPoly(3,58),90),
+   netze:[{label:'Netz 1 – Stern',tree:prismStar(3)},{label:'Netz 2 – Streifen',tree:prismStrip(3,0,1)}],
+   info:'Grund- und Deckfläche sind gleiche Dreiecke, dazwischen liegen 3 Rechtecke. Beim Streifen-Netz bilden die Rechtecke den abgerollten Mantel.',
+   steck:'Flächen: 5 · Kanten: 9 · Ecken: 6'},
+  {id:'prisma6',name:'Prisma mit sechseckiger Grundfläche',kurz:'Prisma ⬡',
+   solid:makePrism(regPoly(6,55),90),
+   netze:[{label:'Netz 1 – Stern',tree:prismStar(6)},{label:'Netz 2 – Streifen',tree:prismStrip(6,0,3)}],
+   info:'Wie beim Dreiecksprisma – nur mit Sechsecken und 6 Rechtecken. Beobachte, wie sich die Rechtecke wie ein Teppich abrollen.',
+   steck:'Flächen: 8 · Kanten: 18 · Ecken: 12'},
+  {id:'tetraeder',name:'Tetraeder',kurz:'Tetraeder',
+   solid:makePyramid(regPoly(3,63.5),89.8),
+   netze:[{label:'Netz 1 – großes Dreieck',tree:pyrStar(3)},{label:'Netz 2 – Streifen',tree:pyrFan(3,0,false)}],
+   info:'Der Tetraeder besteht aus 4 gleichen Dreiecken. Achtung: Hier sind die Faltwinkel keine rechten Winkel – schau genau hin!',
+   steck:'Flächen: 4 · Kanten: 6 · Ecken: 4'},
+  {id:'pyramide',name:'Quadratische Pyramide',kurz:'Pyramide',
+   solid:makePyramid(rectPoly(100,100),80),
+   netze:[{label:'Netz 1 – Stern',tree:pyrStar(4)},{label:'Netz 2 – Fächer',tree:pyrFan(4,0,false)}],
+   info:'Eine quadratische Grundfläche und 4 gleiche Dreiecke, die sich in der Spitze treffen. Beim Fächer-Netz hängen die Dreiecke aneinander.',
+   steck:'Flächen: 5 · Kanten: 8 · Ecken: 5'},
+  {id:'kegel',name:'Kegel',kurz:'Kegel',
+   solid:makePyramid(regPoly(24,55),95),
+   netze:[{label:'Netz 1 – Kreis am Rand',tree:pyrFan(24,0,false)},{label:'Netz 2 – Kreis in der Mitte',tree:pyrFan(24,12,true)}],
+   info:'Das Netz des Kegels besteht aus einem Kreis und einem Kreisausschnitt (dem Mantel). Hier ist der Kegel aus vielen schmalen Dreiecken angenähert, damit du das Abrollen beobachten kannst.',
+   steck:'Flächen: 2 (Grundkreis + Mantel) · Kanten: 1 · Ecken: 1 Spitze'},
+  {id:'zylinder',name:'Zylinder',kurz:'Zylinder',
+   solid:makePrism(regPoly(24,50),110),
+   netze:[{label:'Netz 1 – Kreise in der Mitte',tree:prismStrip(24,12,12)},{label:'Netz 2 – Kreise an den Enden',tree:prismStrip(24,0,23)}],
+   info:'Das Netz des Zylinders: zwei Kreise und ein Rechteck (der abgerollte Mantel). Auch hier ist die runde Form aus vielen schmalen Streifen angenähert.',
+   steck:'Flächen: 3 (2 Kreise + Mantel) · Kanten: 2 · Ecken: keine'}
+];
+
+/* =================== Aufbau einer Netz-Variante =================== */
+const SVGNS='http://www.w3.org/2000/svg';
+const AKTIV={}; // je Körper: aktive Variante
+
+function baueVariante(container,k,netz){
+  const uf=unfold(k.solid,netz.tree);
+  const fs=foldSigns(k.solid,netz.tree,uf);
+
+  // 2D-Koordinaten in positiven Bereich verschieben
+  let minx=1e9,miny=1e9,maxx=-1e9,maxy=-1e9;
+  uf.order.forEach(fi=>{for(const vi in uf.pos2[fi]){const p=uf.pos2[fi][vi];
+    minx=Math.min(minx,p[0]);maxx=Math.max(maxx,p[0]);
+    miny=Math.min(miny,p[1]);maxy=Math.max(maxy,p[1]);}});
+  const PAD=6;
+  uf.order.forEach(fi=>{for(const vi in uf.pos2[fi]){
+    uf.pos2[fi][vi]=[uf.pos2[fi][vi][0]-minx+PAD,uf.pos2[fi][vi][1]-miny+PAD];}});
+  const W=maxx-minx+2*PAD,H=maxy-miny+2*PAD;
+
+  // Tiefe je Fläche (für die Abroll-Reihenfolge)
+  const tiefe={};tiefe[uf.root]=0;
+  uf.order.forEach(fi=>{if(fi!==uf.root)tiefe[fi]=tiefe[netz.tree[fi].p]+1;});
+  const scharniere=uf.order.filter(fi=>fi!==uf.root)
+    .sort((a,b)=>tiefe[b]-tiefe[a]||uf.order.indexOf(b)-uf.order.indexOf(a));
+  const nH=scharniere.length;
+
+  // DOM
+  const box=document.createElement('div');
+  box.className='variante';
+  box.innerHTML=
+    '<div class="viewport"><div class="stage"><div class="plane"></div></div></div>'+
+    '<p class="dreh-hinweis">👆 1 Finger oder Maus: Ansicht drehen &nbsp;·&nbsp; ✌️ 2 Finger, rechte Maustaste oder Shift+Ziehen: verschieben</p>'+
+    '<div class="anim-bereich"><div class="anim-steuer">'+
+    '<button class="btn btn-play">🎬 Abrollen</button>'+
+    '<div class="slider-wrap"><span>Netz</span><input type="range" min="0" max="100" value="100" aria-label="Abrollen von Hand steuern"><span>Körper</span></div>'+
+    '<button class="btn btn-sek btn-ansicht">🔄 Ansicht</button>'+
+    '</div></div>';
+  container.appendChild(box);
+  const viewport=box.querySelector('.viewport');
+  const stage=box.querySelector('.stage');
+  const plane=box.querySelector('.plane');
+  const slider=box.querySelector('input[type=range]');
+  const playBtn=box.querySelector('.btn-play');
+  plane.style.width=W+'px';plane.style.height=H+'px';
+  plane.style.transformOrigin='50% 50%';
+  plane.style.webkitTransformOrigin='50% 50%';
+
+  // Knoten (verschachtelt, alle im selben Koordinatensystem) + SVG-Flächen
+  const nodes={};
+  (function bauNode(fi,parentEl){
+    const nd=document.createElement('div');
+    nd.className='node';
+    nodes[fi]=nd;
+    parentEl.appendChild(nd);
+    // Fläche als SVG
+    const f=k.solid.faces[fi];
+    let bx0=1e9,by0=1e9,bx1=-1e9,by1=-1e9;
+    f.forEach(vi=>{const p=uf.pos2[fi][vi];
+      bx0=Math.min(bx0,p[0]);bx1=Math.max(bx1,p[0]);
+      by0=Math.min(by0,p[1]);by1=Math.max(by1,p[1]);});
+    const sw=bx1-bx0+8,sh=by1-by0+8;
+    const svg=document.createElementNS(SVGNS,'svg');
+    svg.setAttribute('width',sw);svg.setAttribute('height',sh);
+    svg.setAttribute('viewBox','0 0 '+sw+' '+sh);
+    svg.style.left=(bx0-4)+'px';svg.style.top=(by0-4)+'px';
+    const poly=document.createElementNS(SVGNS,'polygon');
+    poly.setAttribute('points',f.map(vi=>{const p=uf.pos2[fi][vi];return (p[0]-bx0+4)+','+(p[1]-by0+4);}).join(' '));
+    poly.setAttribute('fill',k.solid.basen.indexOf(fi)>=0?'var(--grundflaeche)':'var(--seitenflaeche)');
+    poly.setAttribute('fill-opacity','0.96');
+    poly.setAttribute('stroke','var(--netlinie)');
+    poly.setAttribute('stroke-width','2');
+    poly.setAttribute('stroke-linejoin','round');
+    svg.appendChild(poly);
+    nd.appendChild(svg);
+    uf.children[fi].forEach(c=>bauNode(c,nd));
+  })(uf.root,plane);
+
+  // Zustand
+  const st={p:1,k:1,rx:0,ry:0,tx:0,ty:0,playing:null};
+  const easeK=x=>0.5-0.5*Math.cos(Math.PI*x);
+
+  function anwendenView(){
+    const sk=st.k||1;
+    const kipp=34*Math.min(1,st.p*nH)+st.rx;
+    const bx=W*(sk-1)/2+st.tx,by=H*(sk-1)/2+st.ty;
+    const tr='translate3d('+bx+'px,'+by+'px,0) rotateX('+kipp+'deg) rotateY('+st.ry+'deg) scale3d('+sk+','+sk+','+sk+')';
+    plane.style.transform=tr;
+    plane.style.webkitTransform=tr;
+  }
+  function setzeFaltung(p){
+    st.p=p;
+    scharniere.forEach((fi,pos)=>{
+      const f=easeK(Math.max(0,Math.min(1,p*nH-pos)));
+      const ang=fs.sign[fi]*fs.mag[fi]*f*180/Math.PI;
+      const e=netz.tree[fi].e,pf=netz.tree[fi].p;
+      const h0=uf.pos2[pf][e[0]],h1=uf.pos2[pf][e[1]];
+      let ex=h1[0]-h0[0],ey=h1[1]-h0[1];
+      const el=Math.hypot(ex,ey);ex/=el;ey/=el;
+      const tr='translate3d('+h0[0]+'px,'+h0[1]+'px,0) rotate3d('+ex+','+ey+',0,'+ang+'deg) translate3d('+(-h0[0])+'px,'+(-h0[1])+'px,0)';
+      nodes[fi].style.transform=tr;
+      nodes[fi].style.webkitTransform=tr;
+    });
+    playBtn.textContent=p>0.5?'🎬 Abrollen':'🎬 Aufrollen';
+    slider.value=Math.round(p*100);
+    anwendenView();
+  }
+  slider.addEventListener('input',()=>{
+    if(st.playing){cancelAnimationFrame(st.playing);st.playing=null;}
+    setzeFaltung(slider.value/100);
+  });
+  playBtn.addEventListener('click',()=>{
+    if(st.playing){cancelAnimationFrame(st.playing);st.playing=null;}
+    const ziel=st.p>0.5?0:1;
+    const start=performance.now(),p0=st.p;
+    const D=Math.min(5200,Math.max(1800,420*nH))*Math.abs(ziel-p0);
+    if(D<=0)return;
+    function schritt(now){
+      const f=Math.min(1,(now-start)/D);
+      setzeFaltung(p0+(ziel-p0)*f);
+      if(f<1)st.playing=requestAnimationFrame(schritt);
+      else st.playing=null;
+    }
+    st.playing=requestAnimationFrame(schritt);
+  });
+
+  // Größe anpassen
+  function passeAn(){
+    let avail=viewport.clientWidth;
+    if(!avail){
+      const m=document.getElementById('main');
+      avail=(m?m.clientWidth:400)-76;
+    }
+    avail-=18;
+    st.k=Math.min(1,Math.max(0.35,avail/W));
+    stage.style.width=Math.round(W*st.k)+'px';
+    stage.style.height=Math.round(H*st.k)+'px';
+    viewport.style.height=Math.round(H*st.k+180)+'px';
+    setzeFaltung(st.p);
+  }
+  box.passeAn=passeAn;
+  passeAn();
+
+  // Ansicht drehen/verschieben
+  const zeiger=new Map();
+  let bewegt=false;
+  viewport.addEventListener('contextmenu',e=>e.preventDefault());
+  viewport.addEventListener('pointerdown',e=>{
+    const schieben=(e.pointerType==='mouse'&&(e.button===2||e.shiftKey));
+    zeiger.set(e.pointerId,{x:e.clientX,y:e.clientY,schieben:schieben});
+    if(zeiger.size===1)bewegt=false;
+  });
+  viewport.addEventListener('pointermove',e=>{
+    const p=zeiger.get(e.pointerId);
+    if(!p)return;
+    const dx=e.clientX-p.x,dy=e.clientY-p.y;
+    if(!bewegt&&Math.hypot(dx,dy)<8)return;
+    if(!bewegt){bewegt=true;try{viewport.setPointerCapture(e.pointerId);}catch(err){}}
+    p.x=e.clientX;p.y=e.clientY;
+    if(zeiger.size>=2){
+      st.tx=Math.max(-450,Math.min(450,st.tx+dx/2));
+      st.ty=Math.max(-450,Math.min(450,st.ty+dy/2));
+    }else if(p.schieben){
+      st.tx=Math.max(-450,Math.min(450,st.tx+dx));
+      st.ty=Math.max(-450,Math.min(450,st.ty+dy));
+    }else{
+      st.ry+=dx*0.4;
+      st.rx=Math.max(-45,Math.min(65,st.rx-dy*0.4));
+    }
+    anwendenView();
+  });
+  ['pointerup','pointercancel'].forEach(ev=>viewport.addEventListener(ev,e=>{zeiger.delete(e.pointerId);}));
+  box.querySelector('.btn-ansicht').addEventListener('click',()=>{
+    st.rx=0;st.ry=0;st.tx=0;st.ty=0;anwendenView();
+  });
+
+  return box;
+}
+
+/* =================== Karten & Tabs aufbauen =================== */
+const tabsEl=document.getElementById('tabs');
+const mainEl=document.getElementById('main');
+KOERPER.forEach((k,ki)=>{
+  const tab=document.createElement('button');
+  tab.className='tab'+(ki===0?' aktiv':'');
+  tab.textContent=k.kurz;
+  tab.dataset.ziel='k-'+k.id;
+  tabsEl.appendChild(tab);
+
+  const sec=document.createElement('section');
+  sec.className='karte'+(ki===0?' aktiv':'');
+  sec.id='k-'+k.id;
+  sec.innerHTML=
+    '<h2>'+k.name+'</h2>'+
+    '<p>'+k.info+'</p>'+
+    '<span class="steck">📋 '+k.steck+'</span>'+
+    '<p class="legende"><span class="lg" style="background:var(--grundflaeche)"></span>Grund-/Deckfläche &nbsp; '+
+    '<span class="lg" style="background:var(--seitenflaeche)"></span>Seitenflächen / Mantel</p>'+
+    '<div class="netzwahl"></div>';
+  mainEl.appendChild(sec);
+
+  const wahl=sec.querySelector('.netzwahl');
+  const varianten=[];
+  AKTIV[k.id]=0;
+  k.netze.forEach((nz,vi)=>{
+    const b=document.createElement('button');
+    b.textContent=nz.label;
+    b.className=vi===0?'aktiv':'';
+    wahl.appendChild(b);
+    const box=baueVariante(sec,k,nz);
+    if(vi===0)box.classList.add('aktiv');
+    varianten.push({btn:b,box:box});
+    b.addEventListener('click',()=>{
+      AKTIV[k.id]=vi;
+      varianten.forEach((v,j)=>{
+        v.btn.classList.toggle('aktiv',j===vi);
+        v.box.classList.toggle('aktiv',j===vi);
+      });
+      box.passeAn();
+    });
+  });
+  sec._varianten=varianten;
+
+  tab.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('aktiv'));
+    document.querySelectorAll('.karte').forEach(x=>x.classList.remove('aktiv'));
+    tab.classList.add('aktiv');
+    sec.classList.add('aktiv');
+    varianten[AKTIV[k.id]].box.passeAn();
+  });
+});
+window.addEventListener('resize',()=>{
+  document.querySelectorAll('.karte.aktiv').forEach(sec=>{
+    if(sec._varianten)sec._varianten.forEach(v=>{if(v.box.classList.contains('aktiv'))v.box.passeAn();});
+  });
+});
+
+/* T-Rex */
+const trex=document.getElementById('trex');
+trex.addEventListener('click',()=>{
+  trex.classList.add('zeig');
+  setTimeout(()=>trex.classList.remove('zeig'),1800);
+});
+</script>
+</body>
+</html>
