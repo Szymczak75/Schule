@@ -110,12 +110,14 @@ h1,h2,h3{font-family:'Fredoka',sans-serif;font-weight:600;}
 
 /* Flip-Cards */
 .flip-grid{display:flex;flex-wrap:wrap;gap:12px;}
-.flip{flex:1 1 230px;min-height:140px;perspective:1000px;cursor:pointer;}
-.flip-inner{position:relative;width:100%;height:140px;transition:transform .5s;transform-style:preserve-3d;}
+.flip{flex:1 1 250px;perspective:1000px;cursor:pointer;}
+/* Beide Seiten liegen im selben Grid-Feld übereinander. Die höhere Seite
+   bestimmt die Höhe der Karte – so passt der Text immer vollständig hinein. */
+.flip-inner{display:grid;width:100%;min-height:150px;transition:transform .5s;transform-style:preserve-3d;}
 .flip.flipped .flip-inner{transform:rotateY(180deg);}
-.flip-face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:16px;display:flex;align-items:center;justify-content:center;text-align:center;padding:14px;font-weight:700;}
-.flip-front{background:#fbeee0;border:2px solid var(--kopf);color:#a5611e;}
-.flip-back{background:var(--amber-light);border:2px solid var(--amber);color:var(--amber-dark);transform:rotateY(180deg);font-size:.93rem;}
+.flip-face{grid-area:1/1;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:16px;display:flex;align-items:center;justify-content:center;text-align:center;padding:14px 16px;font-weight:700;line-height:1.4;-webkit-hyphens:auto;hyphens:auto;overflow-wrap:break-word;}
+.flip-front{background:#fbeee0;border:2px solid var(--kopf);color:#a5611e;font-size:1rem;}
+.flip-back{background:var(--amber-light);border:2px solid var(--amber);color:var(--amber-dark);transform:rotateY(180deg);font-size:.92rem;}
 .flip-hint{font-size:.8rem;color:var(--grau);font-weight:600;margin-top:8px;}
 
 .trex{position:fixed;right:12px;bottom:14px;font-size:1.7rem;cursor:pointer;z-index:60;filter:drop-shadow(0 2px 3px rgba(0,0,0,.2));user-select:none;}
@@ -229,12 +231,28 @@ function bauKugel(r,teil){          // teil: 1 = ganze Kugel, 0.5 = Halbkugel (K
   return {v,f,glatt:true, halb:(teil<1)};
 }
 
+function bauTetraeder(r){
+  // Regulärer (gleichseitiger) Tetraeder: alle 6 Kanten gleich lang,
+  // alle 4 Flächen sind gleichseitige Dreiecke.
+  // Höhe über der Grundfläche: h = r*sqrt(2)  (r = Umkreisradius der Grundfläche)
+  const h = r*Math.SQRT2;
+  const yB = -h*0.30, yS = h*0.70;      // um den Schwerpunkt herum zentriert
+  const v=[];
+  for(let k=0;k<3;k++){
+    const a = -Math.PI/2 + 2*Math.PI*k/3;
+    v.push([r*Math.cos(a), yB, r*Math.sin(a)]);
+  }
+  v.push([0,yS,0]);                      // Spitze
+  const f=[[2,1,0],[0,1,3],[1,2,3],[2,0,3]];
+  return {v,f};
+}
+
 const KOERPER={
   wuerfel:   ()=>bauQuader(1,1,1),
   quader:    ()=>bauQuader(1.35,.75,.85),
   prisma:    ()=>bauPrisma(3,1.15,1.0,-Math.PI/2),
   pyramideq: ()=>bauPyramide(4,1.15,1.2,Math.PI/4),
-  tetraeder: ()=>bauPyramide(3,1.2,1.15,-Math.PI/2),
+  tetraeder: ()=>bauTetraeder(1.2),
   pyramide:  ()=>bauPyramide(5,1.1,1.2,-Math.PI/2),
   zylinder:  ()=>bauZylinder(.95,1.0,28),
   kegel:     ()=>bauKegel(1.05,1.25,28),
@@ -395,7 +413,7 @@ const DATEN={
     istnicht:{
       pyramideq:'Eine Pyramide läuft in einer Spitze zusammen. Der Würfel hat oben eine ganze Deckfläche statt einer Spitze.',
       pyramide:'Auch hier fehlt die Spitze: Der Würfel hat zwei gleiche Grundflächen, keine Spitze.',
-      tetraeder:'Ein Tetraeder besteht aus vier Dreiecken. Der Würfel hat sechs Quadrate.',
+      tetraeder:'Ein Tetraeder besteht aus vier gleichseitigen Dreiecken. Der Würfel hat sechs Quadrate.',
       zylinder:'Ein Zylinder hat einen Kreis als Grundfläche und eine krumme Mantelfläche. Beim Würfel ist alles eben und eckig.',
       kegel:'Dafür bräuchte er eine kreisförmige Grundfläche und eine Spitze.',
       kugel:'Eine Kugel ist rundum krumm – der Würfel hat nur ebene Flächen.',
@@ -413,7 +431,7 @@ const DATEN={
       wuerfel:'Ein Würfel braucht lauter gleich lange Kanten. Ein Quader darf lang und flach sein – wie ein Schuhkarton.',
       pyramideq:'Beim Quader sitzt oben eine Deckfläche, keine Spitze.',
       pyramide:'Auch hier gilt: zwei Grundflächen statt einer Spitze.',
-      tetraeder:'Ein Tetraeder hat vier Dreiecke – der Quader sechs Rechtecke.',
+      tetraeder:'Ein Tetraeder hat vier gleichseitige Dreiecke – der Quader sechs Rechtecke.',
       zylinder:'Die Grundfläche des Quaders ist ein Rechteck, keine Kreisfläche. Der Zylinder ist aber sein runder Verwandter: beide sind Säulen.',
       kegel:'Dafür bräuchte er eine kreisförmige Grundfläche und eine Spitze.',
       kugel:'Der Quader hat nur ebene Flächen, die Kugel ist rundum krumm.',
@@ -431,7 +449,7 @@ const DATEN={
       wuerfel:'Dafür müssten alle Kanten gleich lang und alle Flächen Quadrate sein.',
       pyramideq:'Ein Prisma hat zwei gleiche Grundflächen – eine Pyramide läuft dagegen in einer Spitze zusammen.',
       pyramide:'Prisma und Pyramide sind Gegenstücke: Säule mit Deckfläche gegen Spitzkörper.',
-      tetraeder:'Ein Tetraeder ist eine Pyramide aus vier Dreiecken – es hat eine Spitze statt einer Deckfläche.',
+      tetraeder:'Ein Tetraeder ist eine Pyramide aus vier gleichseitigen Dreiecken – es hat eine Spitze statt einer Deckfläche.',
       zylinder:'Der Zylinder ist der runde Verwandte des Prismas: Er ist ebenfalls eine Säule, seine Grundfläche ist aber ein Kreis und sein Mantel ist krumm. Ein Prisma hat nur ebene Flächen.',
       kegel:'Dafür bräuchte es eine kreisförmige Grundfläche und eine Spitze.',
       kugel:'Ein Prisma hat nur ebene Flächen.',
@@ -446,7 +464,7 @@ const DATEN={
       koerper:'Sie nimmt Raum ein und hat Ecken, Kanten und Flächen – ein Körper.'
     },
     istnicht:{
-      tetraeder:'Ein Tetraeder hat ein Dreieck als Grundfläche und insgesamt vier Dreiecksflächen. Hier ist die Grundfläche aber ein Quadrat.',
+      tetraeder:'Ein Tetraeder hat ein gleichseitiges Dreieck als Grundfläche und insgesamt vier gleiche Dreiecksflächen. Hier ist die Grundfläche aber ein Quadrat.',
       prisma:'Ein Prisma hat oben eine zweite Grundfläche. Die Pyramide läuft stattdessen in einer Spitze zusammen.',
       quader:'Dafür bräuchte sie sechs Rechtecke statt einer Spitze.',
       wuerfel:'Dafür bräuchte sie sechs gleiche Quadrate statt einer Spitze.',
@@ -460,7 +478,7 @@ const DATEN={
   tetraeder:{
     label:'Tetraeder',
     ist:{
-      pyramide:'Er hat eine Grundfläche (ein Dreieck) und eine Spitze – also eine Pyramide mit dreieckiger Grundfläche.',
+      pyramide:'Er hat eine Grundfläche (ein gleichseitiges Dreieck) und eine Spitze – also eine Pyramide mit dreieckiger Grundfläche.',
       koerper:'Er nimmt Raum ein und hat Ecken, Kanten und Flächen – ein Körper.'
     },
     istnicht:{
@@ -473,7 +491,7 @@ const DATEN={
       kugel:'Eine Kugel hat keine Ecken und Kanten.',
       halbkugel:'Auch dafür bräuchte er eine krumme Fläche.'
     },
-    merksatz:'Der Tetraeder ist die einfachste Pyramide: vier Dreiecke, vier Ecken, sechs Kanten. Er steht bei den Spitzkörpern ganz oben – wie der Würfel bei den Säulen.'
+    merksatz:'Der Tetraeder ist die einfachste Pyramide: vier Dreiecke, vier Ecken, sechs Kanten. Dabei sind alle sechs Kanten gleich lang und alle vier Dreiecke gleich groß und gleichseitig. Genau darum steht er bei den Spitzkörpern ganz oben – wie der Würfel bei den Säulen, bei dem ja auch alle Kanten gleich lang sind.'
   },
   pyramide:{
     label:'Pyramide',
@@ -482,7 +500,7 @@ const DATEN={
     },
     istnicht:{
       pyramideq:'Die Grundfläche einer Pyramide kann auch ein Dreieck, Fünfeck oder Sechseck sein – nicht nur ein Quadrat.',
-      tetraeder:'Ein Tetraeder ist die besondere Pyramide mit dreieckiger Grundfläche.',
+      tetraeder:'Ein Tetraeder ist die besondere Pyramide, bei der alle vier Flächen gleichseitige Dreiecke sind.',
       prisma:'Ein Prisma hat zwei gleiche Grundflächen, die Pyramide nur eine – dafür eine Spitze.',
       quader:'Dafür bräuchte sie sechs Rechtecke statt einer Spitze.',
       wuerfel:'Dafür bräuchte sie sechs gleiche Quadrate statt einer Spitze.',
@@ -590,7 +608,7 @@ const STECKBRIEF={
   quader:['6 Flächen – alles Rechtecke','12 Kanten, 8 Ecken','Ist immer auch ein Prisma','Beispiel: Schuhkarton, Ziegelstein'],
   prisma:['2 gleiche Grundflächen (Vieleck)','Seitenflächen sind Rechtecke','Säulenform, alle Flächen eben','Beispiel: Toblerone-Schachtel'],
   pyramideq:['Grundfläche: Quadrat','4 Dreiecke laufen in einer Spitze zusammen','5 Ecken, 8 Kanten','Beispiel: Pyramiden von Gizeh'],
-  tetraeder:['4 Flächen – alles Dreiecke','4 Ecken, 6 Kanten','Ist die Pyramide mit dreieckiger Grundfläche','Beispiel: Tetraeder-Würfel im Spiel'],
+  tetraeder:['4 Flächen – alles <b>gleichseitige</b> Dreiecke','Alle 4 Dreiecke sind <b>gleich groß</b>','Alle 6 Kanten sind <b>gleich lang</b>','4 Ecken, 6 Kanten','Ist die Pyramide mit dreieckiger Grundfläche','Beispiel: Tetraeder-Würfel im Spiel'],
   pyramide:['1 Grundfläche (Vieleck) + 1 Spitze','Seitenflächen sind Dreiecke','Alle Flächen eben','Beispiel: Zeltdach, Kirchturmspitze'],
   zylinder:['2 Kreisflächen (unten und oben)','1 krumme Mantelfläche','Keine Ecken – 2 krumme Kanten','Beispiel: Konservendose, Kerze'],
   kegel:['1 Kreisfläche + 1 Spitze','1 krumme Mantelfläche','Beispiel: Eishörnchen, Verkehrshütchen'],
@@ -767,7 +785,8 @@ function kReset(){
     {f:'Warum ist jeder Quader auch ein Prisma?', b:'Weil er unten und oben die gleiche Fläche hat und die Seitenflächen senkrecht darauf stehen – eine Säule mit rechteckiger Grundfläche.'},
     {f:'Ist ein Zylinder ein Prisma?', b:'Nein. Er ist zwar eine Säule wie ein Prisma, aber seine Grundfläche ist ein Kreis und sein Mantel ist krumm. Er ist der runde Verwandte des Prismas.'},
     {f:'Ist ein Kegel eine Pyramide?', b:'Nein. Beide sind Spitzkörper, aber der Kegel hat eine kreisförmige Grundfläche und eine krumme Mantelfläche statt ebener Dreiecke. Er ist der runde Verwandte der Pyramide.'},
-    {f:'Was ist ein Tetraeder?', b:'Eine Pyramide mit dreieckiger Grundfläche: vier Dreiecke, vier Ecken, sechs Kanten. Er ist damit die einfachste Pyramide.'},
+    {f:'Was ist ein Tetraeder?', b:'Eine Pyramide mit dreieckiger Grundfläche: vier Dreiecke, vier Ecken, sechs Kanten. Das Besondere: Alle sechs Kanten sind gleich lang, deshalb sind alle vier Dreiecke gleich groß und gleichseitig.'},
+    {f:'Ist jede Pyramide mit dreieckiger Grundfläche ein Tetraeder?', b:'Nein. Beim Tetraeder sind alle sechs Kanten gleich lang, dadurch sind alle vier Dreiecke gleich groß und gleichseitig. Eine Pyramide mit dreieckiger Grundfläche darf auch eine hohe, schmale Spitze haben – dann sind ihre Dreiecke nicht mehr gleichseitig.'},
     {f:'Ist jede Pyramide eine quadratische Pyramide?', b:'Nein. Die Grundfläche kann auch ein Dreieck, Fünfeck oder Sechseck sein. Nur wenn sie ein Quadrat ist, heißt sie quadratische Pyramide.'},
     {f:'Kann ein Prisma auch eine Spitze haben?', b:'Nein. Ein Prisma hat oben eine zweite Grundfläche statt einer Spitze. Spitze bedeutet: Pyramide oder Kegel.'},
     {f:'Wie unterscheiden sich Kugel und Halbkugel?', b:'Die Kugel ist rundum gewölbt und hat keine einzige ebene Fläche. Die Halbkugel ist die halbe Kugel und hat unten zusätzlich eine ebene Kreisfläche.'},
