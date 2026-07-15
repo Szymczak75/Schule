@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rote Kante und Punkt P – Würfelnetze erforschen</title>
+<meta name="description" content="Erarbeitungsseite zu Würfelnetzen in Klasse 5: Kanten markieren, die beim Zusammenfalten die rote Kante berühren, und Ecken finden, die auf den Punkt P treffen – mit Faltanimation zur Selbstkontrolle.">
+<meta name="keywords" content="Würfel, Würfelnetz, Kante, Ecke, Punkt P, Falten, Klasse 5, Geometrie">
+<meta name="typ" content="Lernseite">
+<meta name="klasse" content="5">
+<meta name="fach" content="mathe">
+<meta name="oberthema" content="Geometrie">
+<meta name="thema" content="Würfelnetze">
+<style>
+  :root{
+    --ink:#22303f;
+    --card:#ffffff;
+    --green:#1e7d32;
+    --red:#c1272d;
+    --amber:#b8860b;
+    --amber-light:#fdf3d9;
+    --amber-dark:#96690a;
+    --orange:#c97a2e;
+    --orange-dark:#a5611e;
+    --orange-light:#fbeee0;
+    --bg:#faf7f2;
+    --line:#e4dcd0;
+    --netlinie:#33586b;
+    --blau-vorgabe:#6fb0c9;
+    --blau-mark:#1f4680;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);color:var(--ink);
+    font-family:'Segoe UI',Verdana,'Helvetica Neue',sans-serif;
+    font-size:1.05rem;line-height:1.5;padding-bottom:5rem;
+  }
+  header{
+    background:linear-gradient(135deg,var(--orange),var(--orange-dark));
+    color:#fff;padding:1.3rem 1.2rem;box-shadow:0 3px 10px rgba(0,0,0,.12);
+  }
+  header .typ{
+    display:inline-block;background:rgba(255,255,255,.25);
+    padding:.2rem .7rem;border-radius:1rem;font-size:.85rem;font-weight:700;
+    letter-spacing:.04em;margin-bottom:.5rem;
+  }
+  header h1{margin:0;font-size:1.55rem;line-height:1.2;}
+  header p{margin:.4rem 0 0;font-size:1rem;opacity:.95;}
+
+  .tabs{display:flex;flex-wrap:wrap;gap:.5rem;padding:1rem 1rem 0;max-width:1024px;margin:0 auto;}
+  .tab{
+    flex:1 1 auto;min-width:7rem;min-height:44px;
+    border:2px solid var(--line);background:#fff;color:var(--ink);
+    font-size:1rem;font-weight:600;border-radius:.7rem .7rem 0 0;
+    padding:.6rem .5rem;cursor:pointer;
+    transition:background .15s,border-color .15s,transform .05s;
+  }
+  .tab:active{transform:scale(.97);}
+  .tab.aktiv{background:var(--orange);color:#fff;border-color:var(--orange-dark);}
+  .tab .done{margin-left:.3rem;}
+
+  main{max-width:1024px;margin:0 auto;padding:0 1rem;}
+  .karte{
+    display:none;background:var(--card);border:2px solid var(--line);
+    border-radius:0 .9rem .9rem .9rem;padding:1.3rem 1.2rem;margin-top:-2px;
+    box-shadow:0 2px 8px rgba(0,0,0,.05);animation:einblenden .25s ease;
+  }
+  .karte.aktiv{display:block;}
+  @keyframes einblenden{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .karte h2{margin-top:0;font-size:1.35rem;color:var(--orange-dark);}
+  .frage{font-weight:700;margin:.8rem 0 .5rem;}
+  .hinweis{
+    background:var(--orange-light);border-left:5px solid var(--orange);
+    padding:.7rem .9rem;border-radius:.4rem;margin:1rem 0;
+  }
+  .legende{font-size:.95rem;color:#5b6472;margin:.3rem 0 .6rem;}
+
+  button{font-family:inherit;}
+  .btn{
+    min-height:44px;border:none;border-radius:.6rem;padding:.6rem 1.1rem;
+    font-size:1rem;font-weight:700;cursor:pointer;transition:transform .05s,filter .15s;
+  }
+  .btn:active{transform:scale(.97);}
+  .btn:disabled{opacity:.45;cursor:default;}
+  .btn-pruefen{background:var(--orange-dark);color:#fff;}
+  .btn-leeren{background:#8a7e6a;color:#fff;margin-left:.5rem;display:none;}
+  .btn-leeren.zeig{display:inline-block;}
+  .btn-sek{background:#efe6d2;color:var(--ink);margin:.2rem .3rem .2rem 0;}
+  .btn-play{background:var(--orange);color:#fff;}
+
+  .feedback{margin:.8rem 0;padding:.8rem 1rem;border-radius:.5rem;font-weight:700;display:none;}
+  .feedback.zeig{display:block;}
+  .feedback.ok{background:var(--green);color:#fff;}
+  .feedback.nok{background:var(--red);color:#fff;}
+  .feedback.neutral{background:var(--orange-light);color:var(--ink);}
+
+  details.tipp{
+    background:var(--amber-light);border:2px solid var(--amber);
+    border-radius:.6rem;margin:.6rem 0;padding:.2rem .8rem;
+  }
+  details.tipp summary{
+    cursor:pointer;font-weight:700;color:var(--amber-dark);
+    min-height:44px;display:flex;align-items:center;
+  }
+  details.tipp[open]{border-color:var(--amber-dark);}
+  details.tipp p{margin:.2rem 0 .8rem;}
+
+  /* Teilaufgaben-Umschalter: dauerhaft sichtbare Buttons */
+  .modewahl{display:flex;flex-wrap:wrap;gap:.5rem;margin:.4rem 0 .6rem;}
+  .modewahl button{
+    flex:1 1 10rem;min-height:44px;border:2px solid var(--line);
+    background:#fff;color:var(--ink);border-radius:.6rem;
+    font-size:1rem;font-weight:700;cursor:pointer;
+    transition:background .12s,border-color .12s,transform .05s;
+  }
+  .modewahl button:active{transform:scale(.97);}
+  .modewahl button.aktiv{background:var(--orange);color:#fff;border-color:var(--orange-dark);}
+  .aufg{display:none;}
+  .aufg.aktiv{display:block;}
+
+  /* ===== Drehbarer 3D-Würfel ===== */
+  .cubeViewport{
+    height:280px;margin:1rem auto;max-width:480px;
+    perspective:950px;-webkit-perspective:950px;
+    touch-action:none;overscroll-behavior:contain;
+    display:flex;align-items:center;justify-content:center;
+    background:#fdfbf7;border:2px solid var(--line);border-radius:.8rem;
+    cursor:grab;user-select:none;-webkit-user-select:none;
+  }
+  .cubeViewport:active{cursor:grabbing;}
+  .cube{
+    width:150px;height:150px;position:relative;
+    transform-style:preserve-3d;-webkit-transform-style:preserve-3d;
+  }
+  .cface{
+    position:absolute;inset:0;
+    background:rgba(233,243,248,.94);
+    border:2px solid var(--netlinie);
+  }
+  .cface .kbar{position:absolute;background:var(--red);border-radius:4px;}
+  .cface .pdot{
+    position:absolute;width:26px;height:26px;border-radius:50%;
+    background:var(--red);color:#fff;font-weight:700;font-size:.95rem;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .dreh-hinweis{text-align:center;font-size:.95rem;color:#5b6472;margin:.2rem 0 .6rem;}
+  .presets{display:flex;flex-wrap:wrap;gap:.4rem;justify-content:center;margin:.4rem 0 1rem;}
+
+  .wahl{display:flex;flex-wrap:wrap;gap:.6rem;margin:.8rem 0;}
+  .wahl button{
+    flex:1 1 6rem;min-height:48px;border:2px solid var(--line);
+    background:#fff;color:var(--ink);border-radius:.6rem;
+    font-size:1.1rem;font-weight:700;cursor:pointer;
+    transition:background .12s,border-color .12s,transform .05s;
+  }
+  .wahl button:active{transform:scale(.97);}
+  .wahl button.gewaehlt{background:var(--orange-light);border-color:var(--orange);}
+  .wahl button.richtig{background:var(--green);color:#fff;border-color:var(--green);}
+  .wahl button.falsch{background:var(--red);color:#fff;border-color:var(--red);}
+
+  /* ===== Netz-Bühne ===== */
+  .viewport{
+    margin:1rem auto 0;padding:1.6rem .5rem 1.2rem;
+    background:#fdfbf7;border:2px solid var(--line);border-radius:.8rem;
+    perspective:1150px;-webkit-perspective:1150px;
+    perspective-origin:50% 22%;-webkit-perspective-origin:50% 22%;
+    overflow:hidden;
+    touch-action:none;overscroll-behavior:contain;
+    cursor:grab;user-select:none;-webkit-user-select:none;
+  }
+  .viewport:active{cursor:grabbing;}
+  .stage{margin:0 auto;transform-style:preserve-3d;-webkit-transform-style:preserve-3d;}
+  .plane{
+    position:relative;margin:0 auto;
+    transform-style:preserve-3d;-webkit-transform-style:preserve-3d;
+    will-change:transform;
+  }
+  .face{
+    position:absolute;
+    background:rgba(252,253,255,.92);
+    box-shadow:inset 0 0 0 1.5px var(--netlinie);
+    -webkit-box-shadow:inset 0 0 0 1.5px var(--netlinie);
+    transform-style:preserve-3d;-webkit-transform-style:preserve-3d;
+    will-change:transform;
+  }
+
+  /* --- Kanten-Zonen (Teil a): volle 44px-Tippstreifen, Linie nur Optik --- */
+  .kz{position:absolute;cursor:pointer;}
+  .kz.s0{left:0;top:-22px;width:88px;height:44px;}
+  .kz.s1{left:66px;top:0;width:44px;height:88px;}
+  .kz.s2{left:0;top:66px;width:88px;height:44px;}
+  .kz.s3{left:-22px;top:0;width:44px;height:88px;}
+  .kz::after{
+    content:'';position:absolute;border-radius:5px;
+    background:rgba(51,88,107,.28);
+    transition:all .1s ease;
+  }
+  .kz.s0::after,.kz.s2::after{left:5px;right:5px;height:8px;top:50%;transform:translateY(-50%);}
+  .kz.s1::after,.kz.s3::after{top:5px;bottom:5px;width:8px;left:50%;transform:translateX(-50%);}
+  .kz.tipp.s0::after,.kz.tipp.s2::after{height:16px;background:rgba(47,95,166,.55);}
+  .kz.tipp.s1::after,.kz.tipp.s3::after{width:16px;background:rgba(47,95,166,.55);}
+  .kz.sel.s0::after,.kz.sel.s2::after{height:13px;background:var(--blau-mark);}
+  .kz.sel.s1::after,.kz.sel.s3::after{width:13px;background:var(--blau-mark);}
+  .kz.rot{cursor:default;}
+  .kz.rot.s0::after,.kz.rot.s2::after{height:13px;background:var(--red);}
+  .kz.rot.s1::after,.kz.rot.s3::after{width:13px;background:var(--red);}
+  /* Lösungs-Linie (Partnerkante), erscheint nur in der Animation nach dem Prüfen */
+  .solK{position:absolute;pointer-events:none;opacity:0;transition:opacity .3s;}
+  .solK.s0{left:0;top:-9px;width:88px;height:18px;}
+  .solK.s1{left:79px;top:0;width:18px;height:88px;}
+  .solK.s2{left:0;top:79px;width:88px;height:18px;}
+  .solK.s3{left:-9px;top:0;width:18px;height:88px;}
+  .solK::after{content:'';position:absolute;inset:2px;border-radius:5px;background:var(--blau-vorgabe);}
+  .plane.zeigA .solK{opacity:1;}
+  /* Modus/Faltung: nur im Kanten-Modus antippbar, Hinweise flach sichtbar */
+  .plane:not(.mode-a) .kz:not(.rot){pointer-events:none;}
+  .plane:not(.mode-a) .kz:not(.rot):not(.sel)::after{opacity:0;}
+  .plane.gefaltet .kz{pointer-events:none;}
+  .plane.gefaltet .kz:not(.rot):not(.sel)::after{opacity:0;}
+
+  /* --- Ecken-Punkte (Teil b) --- */
+  /* Tippflächen auf der Netz-Ebene (nur flach aktiv) */
+  .pz{position:absolute;width:44px;height:44px;cursor:pointer;}
+  .pz::after{
+    content:'';position:absolute;left:50%;top:50%;
+    width:13px;height:13px;border-radius:50%;
+    transform:translate(-50%,-50%);
+    background:rgba(51,88,107,.35);
+    transition:all .1s ease;
+  }
+  .pz.tipp::after{width:32px;height:32px;background:rgba(47,95,166,.55);}
+  .pz.sel::after{opacity:0;}
+  .plane:not(.mode-b) .pz{pointer-events:none;}
+  .plane:not(.mode-b) .pz:not(.sel)::after{opacity:0;}
+  .plane.gefaltet .pz{pointer-events:none;}
+  .plane.gefaltet .pz::after{opacity:0;}
+  /* Sichtbare Punkt-Marken an den Flächenecken: falten mit! */
+  .cd{
+    position:absolute;width:26px;height:26px;border-radius:50%;
+    pointer-events:none;opacity:0;
+    display:flex;align-items:center;justify-content:center;
+    font-weight:700;font-size:.9rem;color:#fff;
+    transition:opacity .15s,box-shadow .2s;
+  }
+  .cd.e0{left:-13px;top:-13px;}
+  .cd.e1{right:-13px;top:-13px;}
+  .cd.e2{right:-13px;bottom:-13px;}
+  .cd.e3{left:-13px;bottom:-13px;}
+  .cd.m{background:var(--blau-mark);opacity:1;}
+  .cd.p{background:var(--red);opacity:1;}
+  .plane.zeigB .cd.lsg{opacity:1;background:var(--blau-vorgabe);box-shadow:0 0 0 4px rgba(111,176,201,.55);}
+  .plane.zeigB .cd.lsg.m{background:var(--blau-mark);}
+  .plane.zeigB .cd.lsg.p{background:var(--red);}
+
+  .anim-bereich{
+    border:2px dashed var(--line);border-radius:.7rem;padding:.7rem 1rem;margin:.3rem 0 1rem;
+  }
+  .anim-bereich h3{margin:0 0 .4rem;font-size:1.05rem;color:var(--orange-dark);}
+  .anim-immer{margin-top:.5rem;}
+  .anim-sperr{color:#5b6472;margin:.2rem 0;}
+  .anim-steuer{display:none;align-items:center;flex-wrap:wrap;gap:.8rem;}
+  .anim-bereich.frei .anim-steuer{display:flex;}
+  .anim-bereich.frei .anim-sperr{display:none;}
+  .slider-wrap{flex:1 1 12rem;display:flex;align-items:center;gap:.5rem;min-height:44px;}
+  .slider-wrap span{font-size:.9rem;color:#5b6472;white-space:nowrap;}
+  input[type=range]{flex:1;min-height:44px;-webkit-appearance:none;appearance:none;background:transparent;}
+  input[type=range]::-webkit-slider-runnable-track{height:10px;background:var(--orange-light);border:1px solid var(--line);border-radius:5px;}
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;appearance:none;width:30px;height:30px;margin-top:-11px;
+    border-radius:50%;background:var(--orange);border:2px solid var(--orange-dark);
+  }
+  input[type=range]::-moz-range-track{height:10px;background:var(--orange-light);border:1px solid var(--line);border-radius:5px;}
+  input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;background:var(--orange);border:2px solid var(--orange-dark);}
+
+  .trex{position:fixed;right:.7rem;bottom:.7rem;font-size:1.8rem;cursor:pointer;z-index:50;user-select:none;-webkit-user-select:none;}
+  .trex .bubble{
+    position:absolute;right:2.2rem;bottom:.2rem;white-space:nowrap;
+    background:var(--ink);color:#fff;padding:.3rem .6rem;border-radius:.5rem;
+    font-size:.85rem;opacity:0;pointer-events:none;transition:opacity .2s;
+  }
+  .trex.zeig .bubble,.trex:hover .bubble{opacity:1;}
+</style>
+</head>
+<body>
+
+<header>
+  <span class="typ">📘 Lernseite · Erarbeitung · Mathematik · Klasse 5</span>
+  <h1>Rote Kante und Punkt P</h1>
+  <p>Auf jedem Netz ist eine Kante rot markiert und eine Ecke mit P beschriftet. Finde heraus, was beim Zusammenfalten mit ihnen passiert – und prüfe es mit der Faltanimation.</p>
+</header>
+
+<nav class="tabs" id="tabs">
+  <button class="tab aktiv" data-ziel="k-wuerfel">🧊 Der Würfel</button>
+  <button class="tab" data-ziel="k-1">Netz ①<span class="done"></span></button>
+  <button class="tab" data-ziel="k-2">Netz ②<span class="done"></span></button>
+  <button class="tab" data-ziel="k-3">Netz ③<span class="done"></span></button>
+  <button class="tab" data-ziel="k-4">Netz ④<span class="done"></span></button>
+</nav>
+
+<main>
+  <!-- ===== Karte 1: drehbarer Würfel ===== -->
+  <section class="karte aktiv" id="k-wuerfel">
+    <h2>Kanten und Ecken am Würfel</h2>
+    <p>Am Würfel ist eine Kante rot markiert und eine Ecke mit P beschriftet. Drehe den Würfel und schau dir beide genau an: Wo überall siehst du die rote Kante? An welchen Flächen liegt der Punkt P?</p>
+    <div class="cubeViewport" id="cubeVP" aria-label="Drehbarer Würfel mit roter Kante und Punkt P">
+      <div class="cube" id="cube">
+        <div class="cface" data-f="front">
+          <div class="kbar" style="top:-2px;left:-2px;right:-2px;height:11px;"></div>
+          <div class="pdot" style="right:-13px;bottom:-13px;">P</div>
+        </div>
+        <div class="cface" data-f="back"></div>
+        <div class="cface" data-f="right">
+          <div class="pdot" style="left:-13px;bottom:-13px;">P</div>
+        </div>
+        <div class="cface" data-f="left"></div>
+        <div class="cface" data-f="top">
+          <div class="kbar" style="bottom:-2px;left:-2px;right:-2px;height:11px;"></div>
+        </div>
+        <div class="cface" data-f="bottom"></div>
+      </div>
+    </div>
+    <p class="dreh-hinweis">👆 Ziehe mit dem Finger über den Würfel, um ihn zu drehen.</p>
+    <div class="presets">
+      <button class="btn btn-sek" data-preset="kante">Rote Kante vorn</button>
+      <button class="btn btn-sek" data-preset="p">Punkt P zeigen</button>
+      <button class="btn btn-sek" data-preset="hinten">Gegenüberliegende Seite</button>
+    </div>
+
+    <p class="frage">Zwischenfrage: Wie viele Flächen treffen an einer Würfelkante zusammen?</p>
+    <div class="wahl" id="mcWahl">
+      <button data-w="2">2</button>
+      <button data-w="3">3</button>
+      <button data-w="4">4</button>
+    </div>
+    <button class="btn btn-pruefen" id="mcPruefen">✔️ Prüfen</button>
+    <button class="btn btn-leeren" id="mcLeeren">Leeren</button>
+    <div class="feedback" id="mcFb"></div>
+    <div class="hinweis">Merke: An jeder Würfel<strong>kante</strong> treffen genau <strong>2 Flächen</strong> zusammen, an jeder Würfel<strong>ecke</strong> genau <strong>3 Flächen</strong>. Deshalb legt sich im Netz genau <strong>eine</strong> andere Kante auf die rote Kante – und mehrere Netz-Ecken treffen auf den Punkt P.</div>
+  </section>
+
+  <!-- ===== Netz-Karten (werden per JS befüllt) ===== -->
+  <section class="karte" id="k-1"></section>
+  <section class="karte" id="k-2"></section>
+  <section class="karte" id="k-3"></section>
+  <section class="karte" id="k-4"></section>
+</main>
+
+<span class="trex" id="trex" role="img" aria-label="T-Rex" title="Made by Mathedino">🦖<span class="bubble">Made by Mathedino</span></span>
+
+<script>
+/* =================== Geometrie =================== */
+const S=88;
+const NETS = {
+  1:{cells:[[0,0],[0,1],[1,1],[2,1],[3,1],[1,2]],root:[1,1]},
+  2:{cells:[[0,0],[1,0],[1,1],[2,1],[3,1],[3,2]],root:[2,1]},
+  3:{cells:[[0,0],[1,0],[2,0],[2,1],[3,1],[4,1]],root:[2,0]},
+  4:{cells:[[0,0],[0,1],[1,1],[2,1],[3,1],[3,2]],root:[1,1]}
+};
+const NUMZ={1:'①',2:'②',3:'③',4:'④'};
+const DIRS={right:[1,0],left:[-1,0],down:[0,1],up:[0,-1]};
+const EDGE={down:[3,2],up:[0,1],right:[1,2],left:[0,3]};
+const CO=[[0,0],[1,0],[1,1],[0,1]];
+const SIDE_DIR=[[0,-1],[1,0],[0,1],[-1,0]];
+const SIDE_CORNERS=[[0,1],[1,2],[3,2],[0,3]];
+
+function buildTree(net){
+  const key=c=>c[0]+','+c[1];
+  const set=new Set(net.cells.map(key));
+  const faces=[];const seen=new Set([key(net.root)]);
+  const queue=[{cell:net.root,parent:-1,dir:null}];
+  while(queue.length){
+    const cur=queue.shift();const i=faces.length;
+    faces.push({cell:cur.cell,parent:cur.parent,dir:cur.dir,children:[]});
+    if(cur.parent>=0)faces[cur.parent].children.push(i);
+    for(const dn in DIRS){
+      const dv=DIRS[dn];
+      const nc=[cur.cell[0]+dv[0],cur.cell[1]+dv[1]];
+      if(set.has(key(nc))&&!seen.has(key(nc))){seen.add(key(nc));queue.push({cell:nc,parent:i,dir:dn});}
+    }
+  }
+  return faces;
+}
+function rotP(p,a,d,ang){
+  const v=[p[0]-a[0],p[1]-a[1],p[2]-a[2]];
+  const c=Math.cos(ang),s=Math.sin(ang);
+  const dot=v[0]*d[0]+v[1]*d[1]+v[2]*d[2];
+  const cr=[d[1]*v[2]-d[2]*v[1],d[2]*v[0]-d[0]*v[2],d[0]*v[1]-d[1]*v[0]];
+  return[a[0]+v[0]*c+cr[0]*s+d[0]*dot*(1-c),a[1]+v[1]*c+cr[1]*s+d[1]*dot*(1-c),a[2]+v[2]*c+cr[2]*s+d[2]*dot*(1-c)];
+}
+function rotV(v,d,ang){return rotP(v,[0,0,0],d,ang);}
+function foldSim(faces){
+  const pts=faces.map(f=>{const cx=f.cell[0],cy=f.cell[1];
+    return[[cx,cy,0],[cx+1,cy,0],[cx+1,cy+1,0],[cx,cy+1,0]];});
+  const nrm=faces.map(()=>[0,0,1]);
+  const subtree=i=>{const out=[i];for(const c of faces[i].children)out.push.apply(out,subtree(c));return out;};
+  (function process(i){
+    for(const c of faces[i].children){
+      const e=EDGE[faces[c].dir];
+      const e1=pts[i][e[0]],e2=pts[i][e[1]];
+      let d=[e2[0]-e1[0],e2[1]-e1[1],e2[2]-e1[2]];
+      const L=Math.hypot(d[0],d[1],d[2]);d=[d[0]/L,d[1]/L,d[2]/L];
+      const cen=pts[c].reduce((s,p)=>[s[0]+p[0]/4,s[1]+p[1]/4,s[2]+p[2]/4],[0,0,0]);
+      let ang=Math.PI/2;
+      const c2=rotP(cen,e1,d,ang);
+      const mv=[c2[0]-cen[0],c2[1]-cen[1],c2[2]-cen[2]];
+      if(mv[0]*nrm[i][0]+mv[1]*nrm[i][1]+mv[2]*nrm[i][2]<0)ang=-ang;
+      for(const s of subtree(c)){
+        pts[s]=pts[s].map(p=>rotP(p,e1,d,ang));
+        nrm[s]=rotV(nrm[s],d,ang);
+      }
+      process(c);
+    }
+  })(0);
+  return pts;
+}
+const rk=v=>Math.round(v*1000)/1000+0;
+// berechnet: rote Kante + Partnerkante (a) und P-Punkt + Antwort-Punkte (b)
+function analyse(net,faces){
+  const pts=foldSim(faces);
+  const key=c=>c[0]+','+c[1];
+  const cellSet=new Set(net.cells.map(key));
+  // Ecken-Cluster
+  const clMap={};
+  faces.forEach((f,fi)=>pts[fi].forEach((p,k)=>{
+    const ck=p.map(rk).join('|');
+    (clMap[ck]=clMap[ck]||[]).push({f:fi,k:k});
+  }));
+  const clusters=Object.keys(clMap).sort().map(k=>clMap[k]);
+  // Rand-Kanten + Paare
+  const rand=[];
+  faces.forEach((f,fi)=>{
+    for(let s=0;s<4;s++){
+      const nb=[f.cell[0]+SIDE_DIR[s][0],f.cell[1]+SIDE_DIR[s][1]];
+      if(cellSet.has(key(nb)))continue;
+      const kk=SIDE_CORNERS[s];
+      const P1=pts[fi][kk[0]],P2=pts[fi][kk[1]];
+      const fk=[P1.map(rk).join('|'),P2.map(rk).join('|')].sort().join('/');
+      const fl=k=>[f.cell[0]+CO[k][0],f.cell[1]+CO[k][1]];
+      const m1=fl(kk[0]),m2=fl(kk[1]);
+      rand.push({id:fi+':'+s,f:fi,s:s,fk:fk,mid:[(m1[0]+m2[0])/2,(m1[1]+m2[1])/2],ends:[m1,m2]});
+    }
+  });
+  const paare={};
+  rand.forEach(r=>{(paare[r.fk]=paare[r.fk]||[]).push(r);});
+  let rot=null,partner=null,best=-1;
+  Object.keys(paare).sort().forEach(k=>{
+    const g=paare[k];
+    const d=Math.hypot(g[0].mid[0]-g[1].mid[0],g[0].mid[1]-g[1].mid[1]);
+    if(d>best){best=d;rot=g[0];partner=g[1];}
+  });
+  // P-Cluster (nicht auf den Endpunkten der roten/Partner-Kante)
+  const flat=m=>{const c=faces[m.f].cell;return[c[0]+CO[m.k][0],c[1]+CO[m.k][1]];};
+  const tabu=new Set(rot.ends.concat(partner.ends).map(p=>p.join(',')));
+  let bestCl=null,bestScore=-1,fallback=null,fbScore=-1;
+  clusters.forEach(mem=>{
+    const fps=mem.map(flat);
+    const uniq=[...new Set(fps.map(p=>p.join(',')))];
+    let spread=0;
+    for(let i=0;i<fps.length;i++)for(let j=i+1;j<fps.length;j++)
+      spread+=Math.hypot(fps[i][0]-fps[j][0],fps[i][1]-fps[j][1]);
+    const score=uniq.length*100+spread;
+    if(score>fbScore){fbScore=score;fallback=mem;}
+    if(uniq.every(u=>!tabu.has(u))&&score>bestScore){bestScore=score;bestCl=mem;}
+  });
+  const cl=bestCl||fallback;
+  const uniqPts=[...new Set(cl.map(m=>flat(m).join(',')))].map(s=>s.split(',').map(Number));
+  uniqPts.sort((a,b)=>(b[1]-a[1])||(b[0]-a[0]));
+  const P=uniqPts[0],antworten=uniqPts.slice(1);
+  return {rand:rand,rot:rot,partner:partner,cluster:cl,P:P,antworten:antworten,flat:flat};
+}
+
+/* =================== Netz-Karten aufbauen =================== */
+const NSTATE={};
+const TABDONE={};
+
+function baueNetzKarte(name){
+  const sec=document.getElementById('k-'+name);
+  const net=NETS[name];
+  const faces=buildTree(net);
+  const ana=analyse(net,faces);
+
+  const xs=net.cells.map(c=>c[0]),ys=net.cells.map(c=>c[1]);
+  const minx=Math.min.apply(null,xs),miny=Math.min.apply(null,ys);
+  const cols=Math.max.apply(null,xs)-minx+1,rows=Math.max.apply(null,ys)-miny+1;
+
+  sec.innerHTML =
+    '<h2>Netz '+NUMZ[name]+'</h2>'+
+    '<p>Auf diesem Netz ist eine Kante <strong style="color:var(--red)">rot</strong> markiert und eine Ecke mit <strong style="color:var(--red)">P</strong> beschriftet. Bearbeite beide Teilaufgaben – die Reihenfolge ist egal.</p>'+
+    '<div class="modewahl">'+
+    '<button data-m="a">a) Kanten</button>'+
+    '<button data-m="b">b) Ecken bei P</button>'+
+    '</div>'+
+    '<div class="viewport"><div class="stage"><div class="plane"></div></div></div>'+
+    '<p class="dreh-hinweis">👆 1 Finger oder Maus: Ansicht drehen &nbsp;·&nbsp; ✌️ 2 Finger, rechte Maustaste oder Shift+Ziehen: verschieben</p>'+
+    '<div class="anim-bereich"><h3>🎬 Aufrollen &amp; Abrollen</h3>'+
+    '<p class="anim-sperr">🔒 Erst vermuten und prüfen – danach rollt sich das Netz hier Kante für Kante zum Würfel auf und wieder ab.</p>'+
+    '<div class="anim-steuer">'+
+    '<button class="btn btn-play">🎬 Aufrollen &amp; Abrollen</button>'+
+    '<div class="slider-wrap"><span>flach</span><input type="range" min="0" max="100" value="0" aria-label="Faltung von Hand steuern"><span>Würfel</span></div>'+
+    '</div>'+
+    '<div class="anim-immer"><button class="btn btn-sek btn-ansicht">🔄 Ansicht zurücksetzen</button></div>'+
+    '</div>'+
+    '<div class="aufg aufg-a">'+
+    '<p class="frage">a) Markiere die Kante, die nach dem Zusammenfalten die rote Kante berührt (genau auf ihr liegt).</p>'+
+    '<p class="legende">Tippe auf eine Kante am Rand des Netzes. Nochmal antippen löscht die Markierung.</p>'+
+    '<button class="btn btn-pruefen">✔️ Prüfen</button>'+
+    '<button class="btn btn-leeren">Leeren</button>'+
+    '<div class="feedback"></div>'+
+    '<details class="tipp"><summary>💡 Tipp 1</summary><p>Die rote Kante liegt am Rand des Netzes. Beim Zusammenfalten klebt genau <strong>eine</strong> andere Rand-Kante auf ihr – innere Kanten (zwischen zwei Quadraten) sind schon Faltkanten.</p></details>'+
+    '<details class="tipp"><summary>💡 Tipp 2</summary><p>Falte in Gedanken Schritt für Schritt: Welche Fläche legt sich am Ende an die Fläche mit der roten Kante an? Ihre freie Rand-Kante ist die gesuchte.</p></details>'+
+    '</div>'+
+    '<div class="aufg aufg-b">'+
+    '<p class="frage">b) Markiere alle Ecken des Netzes, die beim Zusammenfalten mit dem Punkt P aufeinandertreffen.</p>'+
+    '<p class="legende">Tippe auf die Punkte an den Ecken der Quadrate. Nochmal antippen löscht die Markierung.</p>'+
+    '<button class="btn btn-pruefen">✔️ Prüfen</button>'+
+    '<button class="btn btn-leeren">Leeren</button>'+
+    '<div class="feedback"></div>'+
+    '<details class="tipp"><summary>💡 Tipp 1</summary><p>Wandere von P aus an den Rand-Kanten entlang: Ecken, die am Ende einer zusammenklappenden Kante liegen, treffen aufeinander.</p></details>'+
+    '<details class="tipp"><summary>💡 Tipp 2</summary><p>An einer Würfelecke treffen 3 Quadratecken zusammen. Einige davon können im Netz am selben Punkt liegen – du suchst also noch ein bis zwei weitere Stellen.</p></details>'+
+    '</div>';
+
+  const plane=sec.querySelector('.plane');
+  const stage=sec.querySelector('.stage');
+  const viewport=sec.querySelector('.viewport');
+  plane.style.width=cols*S+'px';
+  plane.style.height=rows*S+'px';
+  plane.style.transformOrigin='50% 50%';
+  plane.style.webkitTransformOrigin='50% 50%';
+  plane.classList.add('mode-a');
+
+  // Flächen als verschachtelte Divs
+  const els=[];
+  faces.forEach((f,fi)=>{
+    const el=document.createElement('div');
+    el.className='face';
+    el.style.width=S+'px';el.style.height=S+'px';
+    if(f.parent<0){
+      el.style.left=(f.cell[0]-minx)*S+'px';
+      el.style.top=(f.cell[1]-miny)*S+'px';
+      plane.appendChild(el);
+    }else{
+      const dv=DIRS[f.dir];
+      el.style.left=dv[0]*S+'px';
+      el.style.top=dv[1]*S+'px';
+      const org={right:'0px 50%',left:S+'px 50%',down:'50% 0px',up:'50% '+S+'px'}[f.dir];
+      el.style.transformOrigin=org;
+      el.style.webkitTransformOrigin=org;
+      els[f.parent].appendChild(el);
+    }
+    els.push(el);
+  });
+
+  const st={selA:new Set(),selB:new Set(),geloestA:false,geloestB:false,
+    freiA:false,freiB:false,mode:'a',t:0,playing:null,
+    rx:0,ry:0,tx:0,ty:0};
+  NSTATE[name]=st;
+
+  // Kanten-Zonen (Teil a) an den Flächen
+  ana.rand.forEach(r=>{
+    const z=document.createElement('div');
+    z.className='kz s'+r.s+(r.id===ana.rot.id?' rot':'');
+    if(r.id!==ana.rot.id)z.dataset.id=r.id;
+    els[r.f].appendChild(z);
+    if(r.id===ana.partner.id){
+      const sol=document.createElement('div');
+      sol.className='solK s'+r.s;
+      els[r.f].appendChild(sol);
+    }
+  });
+
+  // Ecken-Marken (.cd) an allen Flächenecken + Tippflächen (.pz) auf der Ebene
+  const cdMap={};
+  const cdEls=[];
+  faces.forEach((f,fi)=>{
+    cdEls[fi]=[];
+    for(let k=0;k<4;k++){
+      const cd=document.createElement('div');
+      cd.className='cd e'+k;
+      els[fi].appendChild(cd);
+      cdEls[fi][k]=cd;
+      const pk=(f.cell[0]+CO[k][0])+','+(f.cell[1]+CO[k][1]);
+      (cdMap[pk]=cdMap[pk]||[]).push(cd);
+    }
+  });
+  const pKey=ana.P.join(',');
+  (cdMap[pKey]||[]).forEach(cd=>{cd.classList.add('p');cd.textContent='P';});
+  // Lösungs-Ringe an allen Ecken des Clusters (inkl. P – sie treffen sich in der Animation)
+  ana.cluster.forEach(m=>{cdEls[m.f][m.k].classList.add('lsg');});
+  const antwortKeys=new Set(ana.antworten.map(p=>p.join(',')));
+  const punktKeys=Object.keys(cdMap).filter(k=>k!==pKey);
+  punktKeys.forEach(k2=>{
+    const xy=k2.split(',').map(Number);
+    const z=document.createElement('div');
+    z.className='pz';
+    z.dataset.key=k2;
+    z.style.left=((xy[0]-minx)*S-22)+'px';
+    z.style.top=((xy[1]-miny)*S-22)+'px';
+    plane.appendChild(z);
+  });
+
+  // Teilaufgaben-Umschalter
+  const modeBtns=sec.querySelectorAll('.modewahl button');
+  const bloecke={a:sec.querySelector('.aufg-a'),b:sec.querySelector('.aufg-b')};
+  function setMode(m){
+    st.mode=m;
+    modeBtns.forEach(b=>b.classList.toggle('aktiv',b.dataset.m===m));
+    bloecke.a.classList.toggle('aktiv',m==='a');
+    bloecke.b.classList.toggle('aktiv',m==='b');
+    plane.classList.toggle('mode-a',m==='a');
+    plane.classList.toggle('mode-b',m==='b');
+  }
+  modeBtns.forEach(b=>b.addEventListener('click',()=>setMode(b.dataset.m)));
+  setMode('a');
+
+  // Prüfen / Leeren je Teilaufgabe
+  const animBereich=sec.querySelector('.anim-bereich');
+  function haken(){
+    TABDONE[name]=st.geloestA&&st.geloestB;
+    zeigeHaken();
+  }
+  // Teil a
+  const fbA=bloecke.a.querySelector('.feedback');
+  const leerA=bloecke.a.querySelector('.btn-leeren');
+  bloecke.a.querySelector('.btn-pruefen').addEventListener('click',()=>{
+    if(st.geloestA)return;
+    if(st.selA.size===0){
+      fbA.className='feedback zeig neutral';
+      fbA.textContent='Markiere zuerst eine Kante am Rand des Netzes.';
+      return;
+    }
+    st.freiA=true;animBereich.classList.add('frei');
+    const richtig=st.selA.size===1&&st.selA.has(ana.partner.id);
+    if(richtig){
+      st.geloestA=true;
+      fbA.className='feedback zeig ok';
+      fbA.textContent='✅ Richtig! Diese Kante legt sich beim Zusammenfalten genau auf die rote Kante. Schau es dir in der Animation an!';
+      leerA.classList.remove('zeig');
+      haken();
+    }else{
+      fbA.className='feedback zeig nok';
+      fbA.textContent='❌ Das passt noch nicht. Tippe „Leeren", nutze die Tipps oder falte den Würfel – dann versuch es noch einmal.';
+      leerA.classList.add('zeig');
+    }
+  });
+  leerA.addEventListener('click',()=>{
+    st.selA.clear();
+    sec.querySelectorAll('.kz.sel').forEach(z=>z.classList.remove('sel'));
+    fbA.className='feedback';
+    leerA.classList.remove('zeig');
+  });
+  // Teil b
+  const fbB=bloecke.b.querySelector('.feedback');
+  const leerB=bloecke.b.querySelector('.btn-leeren');
+  bloecke.b.querySelector('.btn-pruefen').addEventListener('click',()=>{
+    if(st.geloestB)return;
+    if(st.selB.size===0){
+      fbB.className='feedback zeig neutral';
+      fbB.textContent='Markiere zuerst mindestens eine Ecke, indem du auf einen Punkt tippst.';
+      return;
+    }
+    st.freiB=true;animBereich.classList.add('frei');
+    const richtig=st.selB.size===antwortKeys.size&&[...st.selB].every(k2=>antwortKeys.has(k2));
+    if(richtig){
+      st.geloestB=true;
+      fbB.className='feedback zeig ok';
+      fbB.textContent='✅ Richtig! Diese Netz-Ecken treffen beim Zusammenfalten genau auf den Punkt P. Schau dir unten an, wie sie sich treffen!';
+      leerB.classList.remove('zeig');
+      haken();
+    }else{
+      fbB.className='feedback zeig nok';
+      fbB.textContent='❌ Das passt noch nicht. Tippe „Leeren", nutze die Tipps oder falte den Würfel – dann versuch es noch einmal.';
+      leerB.classList.add('zeig');
+    }
+  });
+  leerB.addEventListener('click',()=>{
+    st.selB.forEach(k2=>{(cdMap[k2]||[]).forEach(cd=>cd.classList.remove('m'));});
+    st.selB.clear();
+    sec.querySelectorAll('.pz.sel').forEach(z=>z.classList.remove('sel'));
+    fbB.className='feedback';
+    leerB.classList.remove('zeig');
+  });
+
+  // Falt-/Abroll-Animation (Kanten klappen nacheinander)
+  const slider=sec.querySelector('input[type=range]');
+  const playBtn=sec.querySelector('.btn-play');
+  const reihenfolge=[];
+  for(let i=faces.length-1;i>=1;i--)reihenfolge.push(i);
+  const easeK=x=>0.5-0.5*Math.cos(Math.PI*x);
+  function anwendenView(){
+    const k=st.k||1;
+    const kipp=34*Math.min(1,st.t*reihenfolge.length)+st.rx;
+    const bx=cols*S*(k-1)/2+st.tx,by=rows*S*(k-1)/2+st.ty;
+    const tr='translate3d('+bx+'px,'+by+'px,0) rotateX('+kipp+'deg) rotateY('+st.ry+'deg) scale3d('+k+','+k+','+k+')';
+    plane.style.transform=tr;
+    plane.style.webkitTransform=tr;
+  }
+  function setzeFaltung(p){
+    st.t=p;
+    const n=reihenfolge.length;
+    reihenfolge.forEach((fi,pos)=>{
+      const a=easeK(Math.max(0,Math.min(1,p*n-pos)))*90;
+      const f=faces[fi];
+      const tr={right:'rotateY('+(-a)+'deg)',left:'rotateY('+a+'deg)',down:'rotateX('+a+'deg)',up:'rotateX('+(-a)+'deg)'}[f.dir];
+      els[fi].style.transform=tr;
+      els[fi].style.webkitTransform=tr;
+    });
+    anwendenView();
+    plane.classList.toggle('gefaltet',p>0.01);
+    plane.classList.toggle('zeigA',st.freiA&&p>0.01);
+    plane.classList.toggle('zeigB',st.freiB&&p>0.01);
+    slider.value=Math.round(p*100);
+  }
+  slider.addEventListener('input',()=>{
+    if(st.playing){cancelAnimationFrame(st.playing);st.playing=null;}
+    setzeFaltung(slider.value/100);
+  });
+  playBtn.addEventListener('click',()=>{
+    if(st.playing){cancelAnimationFrame(st.playing);st.playing=null;}
+    const nK=reihenfolge.length;
+    const D1=520*nK,HALT=900,D2=520*nK;
+    const start=performance.now();
+    function schritt(now){
+      const ms=now-start;
+      let p;
+      if(ms<D1)p=ms/D1;
+      else if(ms<D1+HALT)p=1;
+      else if(ms<D1+HALT+D2)p=1-(ms-D1-HALT)/D2;
+      else{setzeFaltung(0);st.playing=null;return;}
+      setzeFaltung(p);
+      st.playing=requestAnimationFrame(schritt);
+    }
+    st.playing=requestAnimationFrame(schritt);
+  });
+
+  // Größe an die verfügbare Breite anpassen
+  function passeAn(){
+    let avail=viewport.clientWidth;
+    if(!avail){
+      const m=document.querySelector('main');
+      avail=(m?m.clientWidth:400)-76;
+    }
+    avail-=18;
+    st.k=Math.min(1,Math.max(0.4,avail/(cols*S)));
+    stage.style.width=Math.round(cols*S*st.k)+'px';
+    stage.style.height=Math.round(rows*S*st.k)+'px';
+    viewport.style.height=Math.round(rows*S*st.k+180)+'px';
+    setzeFaltung(st.t);
+  }
+  st.passeAn=passeAn;
+  passeAn();
+
+  // Ansicht drehen/verschieben + robuste Zonen-Anwahl (Kanten & Punkte)
+  const zeiger=new Map();
+  let bewegt=false;
+  function zoneUmschalten(z){
+    if(z.dataset.id){ // Kante
+      const id=z.dataset.id;
+      if(st.selA.has(id)){st.selA.delete(id);z.classList.remove('sel');}
+      else{st.selA.add(id);z.classList.add('sel');}
+    }else if(z.dataset.key){ // Ecke
+      const k2=z.dataset.key;
+      if(st.selB.has(k2)){
+        st.selB.delete(k2);z.classList.remove('sel');
+        (cdMap[k2]||[]).forEach(cd=>cd.classList.remove('m'));
+      }else{
+        st.selB.add(k2);z.classList.add('sel');
+        (cdMap[k2]||[]).forEach(cd=>cd.classList.add('m'));
+      }
+    }
+  }
+  viewport.addEventListener('contextmenu',e=>e.preventDefault());
+  viewport.addEventListener('pointerdown',e=>{
+    const schieben=(e.pointerType==='mouse'&&(e.button===2||e.shiftKey));
+    let zone=(e.target&&e.target.closest)?e.target.closest('.kz,.pz'):null;
+    if(zone){
+      const kante=zone.classList.contains('kz');
+      const passt=kante?(st.mode==='a'&&zone.dataset.id&&!st.geloestA)
+                       :(st.mode==='b'&&zone.dataset.key&&!st.geloestB);
+      if(!passt||st.t>0.02)zone=null;
+    }
+    if(zone)zone.classList.add('tipp');
+    zeiger.set(e.pointerId,{x:e.clientX,y:e.clientY,schieben:schieben,zone:zone});
+    if(zeiger.size===1)bewegt=false;
+    try{viewport.setPointerCapture(e.pointerId);}catch(err){}
+  });
+  viewport.addEventListener('pointermove',e=>{
+    const p=zeiger.get(e.pointerId);
+    if(!p)return;
+    const dx=e.clientX-p.x,dy=e.clientY-p.y;
+    if(!bewegt&&Math.hypot(dx,dy)<12)return;
+    if(!bewegt){
+      bewegt=true;
+      zeiger.forEach(r=>{if(r.zone){r.zone.classList.remove('tipp');r.zone=null;}});
+    }
+    p.x=e.clientX;p.y=e.clientY;
+    if(zeiger.size>=2){
+      st.tx=Math.max(-400,Math.min(400,st.tx+dx/2));
+      st.ty=Math.max(-400,Math.min(400,st.ty+dy/2));
+    }else if(p.schieben){
+      st.tx=Math.max(-400,Math.min(400,st.tx+dx));
+      st.ty=Math.max(-400,Math.min(400,st.ty+dy));
+    }else{
+      st.ry+=dx*0.4;
+      st.rx=Math.max(-40,Math.min(65,st.rx-dy*0.4));
+    }
+    anwendenView();
+  });
+  ['pointerup','pointercancel'].forEach(ev=>viewport.addEventListener(ev,e=>{
+    const p=zeiger.get(e.pointerId);
+    if(p&&p.zone){
+      p.zone.classList.remove('tipp');
+      if(!bewegt&&e.type==='pointerup')zoneUmschalten(p.zone);
+    }
+    zeiger.delete(e.pointerId);
+  }));
+  sec.querySelector('.btn-ansicht').addEventListener('click',()=>{
+    st.rx=0;st.ry=0;st.tx=0;st.ty=0;anwendenView();
+  });
+}
+
+['1','2','3','4'].forEach(baueNetzKarte);
+
+/* =================== Karte 1: Würfel drehen =================== */
+const cube=document.getElementById('cube');
+const cubeVP=document.getElementById('cubeVP');
+const H=75;
+const FACE_TR={
+  front:'translateZ('+H+'px)',
+  back:'rotateY(180deg) translateZ('+H+'px)',
+  right:'rotateY(90deg) translateZ('+H+'px)',
+  left:'rotateY(-90deg) translateZ('+H+'px)',
+  top:'rotateX(90deg) translateZ('+H+'px)',
+  bottom:'rotateX(-90deg) translateZ('+H+'px)'
+};
+cube.querySelectorAll('.cface').forEach(f=>{
+  f.style.transform=FACE_TR[f.dataset.f];
+  f.style.webkitTransform=FACE_TR[f.dataset.f];
+});
+let rx=-24,ry=-34,zielAnim=null;
+function maleCube(){
+  const tr='rotateX('+rx+'deg) rotateY('+ry+'deg)';
+  cube.style.transform=tr;
+  cube.style.webkitTransform=tr;
+}
+maleCube();
+let ziehen=false,lx=0,ly=0;
+cubeVP.addEventListener('pointerdown',e=>{
+  ziehen=true;lx=e.clientX;ly=e.clientY;
+  cubeVP.setPointerCapture(e.pointerId);
+  if(zielAnim){cancelAnimationFrame(zielAnim);zielAnim=null;}
+});
+cubeVP.addEventListener('pointermove',e=>{
+  if(!ziehen)return;
+  ry+=(e.clientX-lx)*0.5;
+  rx-=(e.clientY-ly)*0.5;
+  rx=Math.max(-120,Math.min(120,rx));
+  lx=e.clientX;ly=e.clientY;
+  maleCube();
+});
+['pointerup','pointercancel'].forEach(ev=>cubeVP.addEventListener(ev,()=>{ziehen=false;}));
+const PRESETS={kante:[-24,-34],p:[10,-50],hinten:[-24,146]};
+document.querySelectorAll('[data-preset]').forEach(b=>{
+  b.addEventListener('click',()=>{
+    const ziel=PRESETS[b.dataset.preset];
+    if(zielAnim)cancelAnimationFrame(zielAnim);
+    const rx0=rx,ry0=ry,start=performance.now(),D=600;
+    let dy=((ziel[1]-ry0)%360+540)%360-180;
+    function schritt(now){
+      const p=Math.min(1,(now-start)/D);
+      const e=0.5-0.5*Math.cos(Math.PI*p);
+      rx=rx0+(ziel[0]-rx0)*e;
+      ry=ry0+dy*e;
+      maleCube();
+      if(p<1)zielAnim=requestAnimationFrame(schritt);
+      else zielAnim=null;
+    }
+    zielAnim=requestAnimationFrame(schritt);
+  });
+});
+
+/* Zwischenfrage (MC) */
+const mcSt={wahl:null,geprueft:false};
+document.querySelectorAll('#mcWahl button').forEach(b=>{
+  b.addEventListener('click',()=>{
+    if(mcSt.geprueft)return;
+    document.querySelectorAll('#mcWahl button').forEach(x=>x.classList.remove('gewaehlt'));
+    b.classList.add('gewaehlt');
+    mcSt.wahl=b.dataset.w;
+  });
+});
+document.getElementById('mcPruefen').addEventListener('click',()=>{
+  if(mcSt.wahl===null||mcSt.geprueft)return;
+  mcSt.geprueft=true;
+  const fb=document.getElementById('mcFb');
+  const btns=document.querySelectorAll('#mcWahl button');
+  if(mcSt.wahl==='2'){
+    btns.forEach(x=>{if(x.dataset.w==='2')x.classList.add('richtig');});
+    fb.className='feedback zeig ok';
+    fb.textContent='✅ Genau: 2 Flächen. Deshalb legt sich im Netz genau eine andere Kante auf die rote Kante.';
+  }else{
+    btns.forEach(x=>{
+      if(x.dataset.w===mcSt.wahl)x.classList.add('falsch');
+      if(x.dataset.w==='2')x.classList.add('richtig');
+    });
+    fb.className='feedback zeig nok';
+    fb.textContent='❌ Es sind 2 Flächen. Drehe den Würfel so, dass die rote Kante direkt vorn ist – links und rechts von ihr liegt je eine Fläche.';
+    document.getElementById('mcLeeren').classList.add('zeig');
+  }
+});
+document.getElementById('mcLeeren').addEventListener('click',()=>{
+  mcSt.wahl=null;mcSt.geprueft=false;
+  document.querySelectorAll('#mcWahl button').forEach(b=>b.classList.remove('gewaehlt','richtig','falsch'));
+  document.getElementById('mcFb').className='feedback';
+  document.getElementById('mcLeeren').classList.remove('zeig');
+});
+
+/* =================== Tabs =================== */
+function zeigeHaken(){
+  document.querySelectorAll('.tab').forEach(t=>{
+    const n=t.dataset.ziel.replace('k-','');
+    const d=t.querySelector('.done');
+    if(d)d.textContent=TABDONE[n]?'✅':'';
+  });
+}
+document.querySelectorAll('.tab').forEach(t=>{
+  t.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('aktiv'));
+    document.querySelectorAll('.karte').forEach(x=>x.classList.remove('aktiv'));
+    t.classList.add('aktiv');
+    document.getElementById(t.dataset.ziel).classList.add('aktiv');
+    const nm=t.dataset.ziel.replace('k-','');
+    if(NSTATE[nm]&&NSTATE[nm].passeAn)NSTATE[nm].passeAn();
+  });
+});
+window.addEventListener('resize',()=>{
+  for(const n in NSTATE){
+    if(document.getElementById('k-'+n).classList.contains('aktiv'))NSTATE[n].passeAn();
+  }
+});
+
+/* T-Rex */
+const trex=document.getElementById('trex');
+trex.addEventListener('click',()=>{
+  trex.classList.add('zeig');
+  setTimeout(()=>trex.classList.remove('zeig'),1800);
+});
+</script>
+</body>
+</html>
