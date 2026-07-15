@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Das geschlossene Muster – Würfelnetze erforschen</title>
+<meta name="description" content="Erarbeitungsseite zu Würfelnetzen in Klasse 5: das Muster auf der freien Fläche so ergänzen, dass auf dem gefalteten Würfel ein geschlossenes Band entsteht – geprüft durch Falten.">
+<meta name="keywords" content="Würfel, Würfelnetz, Muster, Band, Falten, Klasse 5, Geometrie">
+<meta name="typ" content="Lernseite">
+<meta name="klasse" content="5">
+<meta name="fach" content="mathe">
+<meta name="oberthema" content="Geometrie">
+<meta name="thema" content="Würfelnetze">
+<style>
+  :root{
+    --ink:#22303f;
+    --card:#ffffff;
+    --green:#1e7d32;
+    --red:#c1272d;
+    --amber:#b8860b;
+    --amber-light:#fdf3d9;
+    --amber-dark:#96690a;
+    --orange:#c97a2e;
+    --orange-dark:#a5611e;
+    --orange-light:#fbeee0;
+    --bg:#faf7f2;
+    --line:#e4dcd0;
+    --netlinie:#33586b;
+    --band:#bfe0ec;
+    --band-rand:#6fb0c9;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);color:var(--ink);
+    font-family:'Segoe UI',Verdana,'Helvetica Neue',sans-serif;
+    font-size:1.05rem;line-height:1.5;padding-bottom:5rem;
+  }
+  header{
+    background:linear-gradient(135deg,var(--orange),var(--orange-dark));
+    color:#fff;padding:1.3rem 1.2rem;box-shadow:0 3px 10px rgba(0,0,0,.12);
+  }
+  header .typ{
+    display:inline-block;background:rgba(255,255,255,.25);
+    padding:.2rem .7rem;border-radius:1rem;font-size:.85rem;font-weight:700;
+    letter-spacing:.04em;margin-bottom:.5rem;
+  }
+  header h1{margin:0;font-size:1.55rem;line-height:1.2;}
+  header p{margin:.4rem 0 0;font-size:1rem;opacity:.95;}
+
+  .tabs{display:flex;flex-wrap:wrap;gap:.5rem;padding:1rem 1rem 0;max-width:1024px;margin:0 auto;}
+  .tab{
+    flex:1 1 auto;min-width:7.5rem;min-height:44px;
+    border:2px solid var(--line);background:#fff;color:var(--ink);
+    font-size:1rem;font-weight:600;border-radius:.7rem .7rem 0 0;
+    padding:.6rem .5rem;cursor:pointer;
+    transition:background .15s,border-color .15s,transform .05s;
+  }
+  .tab:active{transform:scale(.97);}
+  .tab.aktiv{background:var(--orange);color:#fff;border-color:var(--orange-dark);}
+  .tab .done{margin-left:.3rem;}
+
+  main{max-width:1024px;margin:0 auto;padding:0 1rem;}
+  .karte{
+    display:none;background:var(--card);border:2px solid var(--line);
+    border-radius:0 .9rem .9rem .9rem;padding:1.3rem 1.2rem;margin-top:-2px;
+    box-shadow:0 2px 8px rgba(0,0,0,.05);animation:einblenden .25s ease;
+  }
+  .karte.aktiv{display:block;}
+  @keyframes einblenden{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .karte h2{margin-top:0;font-size:1.35rem;color:var(--orange-dark);}
+  .frage{font-weight:700;margin:.8rem 0 .5rem;}
+  .hinweis{
+    background:var(--orange-light);border-left:5px solid var(--orange);
+    padding:.7rem .9rem;border-radius:.4rem;margin:1rem 0;
+  }
+  .legende{font-size:.95rem;color:#5b6472;margin:.3rem 0 .6rem;}
+
+  button{font-family:inherit;}
+  .btn{
+    min-height:44px;border:none;border-radius:.6rem;padding:.6rem 1.1rem;
+    font-size:1rem;font-weight:700;cursor:pointer;transition:transform .05s,filter .15s;
+  }
+  .btn:active{transform:scale(.97);}
+  .btn-pruefen{background:var(--orange-dark);color:#fff;}
+  .btn-leeren{background:#8a7e6a;color:#fff;margin-left:.5rem;display:none;}
+  .btn-leeren.zeig{display:inline-block;}
+  .btn-sek{background:#efe6d2;color:var(--ink);margin:.2rem .3rem .2rem 0;}
+  .btn-play{background:var(--orange);color:#fff;}
+
+  .feedback{margin:.8rem 0;padding:.8rem 1rem;border-radius:.5rem;font-weight:700;display:none;}
+  .feedback.zeig{display:block;}
+  .feedback.ok{background:var(--green);color:#fff;}
+  .feedback.nok{background:var(--red);color:#fff;}
+  .feedback.neutral{background:var(--orange-light);color:var(--ink);}
+
+  details.tipp{
+    background:var(--amber-light);border:2px solid var(--amber);
+    border-radius:.6rem;margin:.6rem 0;padding:.2rem .8rem;
+  }
+  details.tipp summary{
+    cursor:pointer;font-weight:700;color:var(--amber-dark);
+    min-height:44px;display:flex;align-items:center;
+  }
+  details.tipp[open]{border-color:var(--amber-dark);}
+  details.tipp p{margin:.2rem 0 .8rem;}
+
+  /* Band-Auswahl: dauerhaft sichtbare Kachel-Knöpfe */
+  .kachelwahl{display:flex;flex-wrap:wrap;gap:.5rem;margin:.4rem 0 .6rem;}
+  .kachelwahl button{
+    flex:0 0 auto;width:60px;height:60px;padding:5px;
+    border:2px solid var(--line);background:#fff;border-radius:.6rem;
+    cursor:pointer;transition:border-color .12s,background .12s,transform .05s;
+  }
+  .kachelwahl button:active{transform:scale(.95);}
+  .kachelwahl button.aktiv{border-color:var(--orange-dark);background:var(--orange-light);}
+  .kachelwahl button svg{display:block;width:100%;height:100%;}
+
+  /* ===== Drehbarer 3D-Würfel ===== */
+  .cubeViewport{
+    height:280px;margin:1rem auto;max-width:480px;
+    perspective:950px;-webkit-perspective:950px;
+    touch-action:none;overscroll-behavior:contain;
+    display:flex;align-items:center;justify-content:center;
+    background:#fdfbf7;border:2px solid var(--line);border-radius:.8rem;
+    cursor:grab;user-select:none;-webkit-user-select:none;
+  }
+  .cubeViewport:active{cursor:grabbing;}
+  .cube{
+    width:150px;height:150px;position:relative;
+    transform-style:preserve-3d;-webkit-transform-style:preserve-3d;
+  }
+  .cface{
+    position:absolute;inset:0;
+    background:rgba(233,243,248,.94);
+    border:2px solid var(--netlinie);
+  }
+  .cface svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;}
+  .dreh-hinweis{text-align:center;font-size:.95rem;color:#5b6472;margin:.2rem 0 .6rem;}
+  .presets{display:flex;flex-wrap:wrap;gap:.4rem;justify-content:center;margin:.4rem 0 1rem;}
+
+  .wahl{display:flex;flex-wrap:wrap;gap:.6rem;margin:.8rem 0;}
+  .wahl button{
+    flex:1 1 6rem;min-height:48px;border:2px solid var(--line);
+    background:#fff;color:var(--ink);border-radius:.6rem;
+    font-size:1.1rem;font-weight:700;cursor:pointer;
+    transition:background .12s,border-color .12s,transform .05s;
+  }
+  .wahl button:active{transform:scale(.97);}
+  .wahl button.gewaehlt{background:var(--orange-light);border-color:var(--orange);}
+  .wahl button.richtig{background:var(--green);color:#fff;border-color:var(--green);}
+  .wahl button.falsch{background:var(--red);color:#fff;border-color:var(--red);}
+
+  /* ===== Netz-Bühne ===== */
+  .viewport{
+    margin:1rem auto 0;padding:1.6rem .5rem 1.2rem;
+    background:#fdfbf7;border:2px solid var(--line);border-radius:.8rem;
+    perspective:1150px;-webkit-perspective:1150px;
+    perspective-origin:50% 22%;-webkit-perspective-origin:50% 22%;
+    overflow:hidden;
+    touch-action:none;overscroll-behavior:contain;
+    cursor:grab;user-select:none;-webkit-user-select:none;
+  }
+  .viewport:active{cursor:grabbing;}
+  .stage{margin:0 auto;transform-style:preserve-3d;-webkit-transform-style:preserve-3d;}
+  .plane{
+    position:relative;margin:0 auto;
+    transform-style:preserve-3d;-webkit-transform-style:preserve-3d;
+    will-change:transform;
+  }
+  .face{
+    position:absolute;
+    background:rgba(252,253,255,.92);
+    box-shadow:inset 0 0 0 1.5px var(--netlinie);
+    -webkit-box-shadow:inset 0 0 0 1.5px var(--netlinie);
+    transform-style:preserve-3d;-webkit-transform-style:preserve-3d;
+    will-change:transform;
+  }
+  .face svg.band{position:absolute;left:0;top:0;pointer-events:none;}
+  .face.frei{
+    background:rgba(251,238,224,.95);
+    box-shadow:inset 0 0 0 3px var(--orange);
+    -webkit-box-shadow:inset 0 0 0 3px var(--orange);
+  }
+  .face.frei .fragez{
+    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    font-size:2.2rem;font-weight:700;color:var(--orange);pointer-events:none;
+  }
+  .fz{position:absolute;inset:0;cursor:pointer;}
+  .plane.gefaltet .fz{pointer-events:none;}
+
+  .anim-bereich{
+    border:2px dashed var(--line);border-radius:.7rem;padding:.7rem 1rem;margin:.3rem 0 1rem;
+  }
+  .anim-bereich h3{margin:0 0 .4rem;font-size:1.05rem;color:var(--orange-dark);}
+  .anim-steuer{display:flex;align-items:center;flex-wrap:wrap;gap:.8rem;}
+  .slider-wrap{flex:1 1 12rem;display:flex;align-items:center;gap:.5rem;min-height:44px;}
+  .slider-wrap span{font-size:.9rem;color:#5b6472;white-space:nowrap;}
+  input[type=range]{flex:1;min-height:44px;-webkit-appearance:none;appearance:none;background:transparent;}
+  input[type=range]::-webkit-slider-runnable-track{height:10px;background:var(--orange-light);border:1px solid var(--line);border-radius:5px;}
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;appearance:none;width:30px;height:30px;margin-top:-11px;
+    border-radius:50%;background:var(--orange);border:2px solid var(--orange-dark);
+  }
+  input[type=range]::-moz-range-track{height:10px;background:var(--orange-light);border:1px solid var(--line);border-radius:5px;}
+  input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;background:var(--orange);border:2px solid var(--orange-dark);}
+
+  .trex{position:fixed;right:.7rem;bottom:.7rem;font-size:1.8rem;cursor:pointer;z-index:50;user-select:none;-webkit-user-select:none;}
+  .trex .bubble{
+    position:absolute;right:2.2rem;bottom:.2rem;white-space:nowrap;
+    background:var(--ink);color:#fff;padding:.3rem .6rem;border-radius:.5rem;
+    font-size:.85rem;opacity:0;pointer-events:none;transition:opacity .2s;
+  }
+  .trex.zeig .bubble,.trex:hover .bubble{opacity:1;}
+</style>
+</head>
+<body>
+
+<header>
+  <span class="typ">📘 Lernseite · Erarbeitung · Mathematik · Klasse 5</span>
+  <h1>Das geschlossene Muster</h1>
+  <p>Fünf Flächen tragen schon ein Muster-Band. Ergänze das Band auf der freien Fläche so, dass auf dem zusammengebauten Würfel ein geschlossenes Muster entsteht – und prüfe es durch Falten.</p>
+</header>
+
+<nav class="tabs" id="tabs">
+  <button class="tab aktiv" data-ziel="k-wuerfel">🧊 Der Muster-Würfel</button>
+  <button class="tab" data-ziel="k-1">Netz ①<span class="done"></span></button>
+  <button class="tab" data-ziel="k-2">Netz ②<span class="done"></span></button>
+  <button class="tab" data-ziel="k-3">Netz ③<span class="done"></span></button>
+</nav>
+
+<main>
+  <!-- ===== Karte 1: drehbarer Muster-Würfel ===== -->
+  <section class="karte aktiv" id="k-wuerfel">
+    <h2>So soll der Würfel aussehen</h2>
+    <p>Auf diesem Würfel läuft ein blaues Band einmal ganz herum – ohne Anfang und ohne Ende. So ein Muster nennt man <strong>geschlossen</strong>. Drehe den Würfel und verfolge das Band mit dem Finger!</p>
+    <div class="cubeViewport" id="cubeVP" aria-label="Drehbarer Würfel mit geschlossenem Band">
+      <div class="cube" id="cube">
+        <div class="cface" data-f="front"></div>
+        <div class="cface" data-f="back"></div>
+        <div class="cface" data-f="right"></div>
+        <div class="cface" data-f="left"></div>
+        <div class="cface" data-f="top"></div>
+        <div class="cface" data-f="bottom"></div>
+      </div>
+    </div>
+    <p class="dreh-hinweis">👆 Ziehe mit dem Finger über den Würfel, um ihn zu drehen.</p>
+    <div class="presets">
+      <button class="btn btn-sek" data-preset="vorn">Band vorn</button>
+      <button class="btn btn-sek" data-preset="oben">Von oben</button>
+      <button class="btn btn-sek" data-preset="hinten">Rückseite</button>
+    </div>
+
+    <p class="frage">Zwischenfrage: Über wie viele Flächen läuft das geschlossene Band?</p>
+    <div class="wahl" id="mcWahl">
+      <button data-w="4">4</button>
+      <button data-w="5">5</button>
+      <button data-w="6">6</button>
+    </div>
+    <button class="btn btn-pruefen" id="mcPruefen">✔️ Prüfen</button>
+    <button class="btn btn-leeren" id="mcLeeren">Leeren</button>
+    <div class="feedback" id="mcFb"></div>
+    <div class="hinweis">Merke: Das Band überquert auf jeder Fläche genau eine Ecke des Würfels „diagonal". Damit es geschlossen ist, muss es auf <strong>allen 6 Flächen</strong> weiterlaufen – im Netz muss also auch die freie Fläche ihr Band-Stück bekommen!</div>
+  </section>
+
+  <!-- ===== Netz-Karten (werden per JS befüllt) ===== -->
+  <section class="karte" id="k-1"></section>
+  <section class="karte" id="k-2"></section>
+  <section class="karte" id="k-3"></section>
+</main>
+
+<span class="trex" id="trex" role="img" aria-label="T-Rex" title="Made by Mathedino">🦖<span class="bubble">Made by Mathedino</span></span>
+
+<script>
+/* =================== Geometrie =================== */
+const S=88;
+const NETS = {
+  1:{cells:[[0,0],[0,1],[1,1],[2,1],[3,1],[3,2]],root:[1,1],frei:[3,2]},
+  2:{cells:[[1,0],[0,1],[1,1],[2,1],[3,1],[1,2]],root:[1,1],frei:[1,2]},
+  3:{cells:[[0,0],[1,0],[1,1],[2,1],[2,2],[3,2]],root:[1,0],frei:[3,2]}
+};
+const NUMZ={1:'①',2:'②',3:'③'};
+const DIRS={right:[1,0],left:[-1,0],down:[0,1],up:[0,-1]};
+const EDGE={down:[3,2],up:[0,1],right:[1,2],left:[0,3]};
+const SIDE_CORNERS=[[0,1],[1,2],[3,2],[0,3]];
+
+function buildTree(net){
+  const key=c=>c[0]+','+c[1];
+  const set=new Set(net.cells.map(key));
+  const faces=[];const seen=new Set([key(net.root)]);
+  const queue=[{cell:net.root,parent:-1,dir:null}];
+  while(queue.length){
+    const cur=queue.shift();const i=faces.length;
+    faces.push({cell:cur.cell,parent:cur.parent,dir:cur.dir,children:[]});
+    if(cur.parent>=0)faces[cur.parent].children.push(i);
+    for(const dn in DIRS){
+      const dv=DIRS[dn];
+      const nc=[cur.cell[0]+dv[0],cur.cell[1]+dv[1]];
+      if(set.has(key(nc))&&!seen.has(key(nc))){seen.add(key(nc));queue.push({cell:nc,parent:i,dir:dn});}
+    }
+  }
+  return faces;
+}
+function rotP(p,a,d,ang){
+  const v=[p[0]-a[0],p[1]-a[1],p[2]-a[2]];
+  const c=Math.cos(ang),s=Math.sin(ang);
+  const dot=v[0]*d[0]+v[1]*d[1]+v[2]*d[2];
+  const cr=[d[1]*v[2]-d[2]*v[1],d[2]*v[0]-d[0]*v[2],d[0]*v[1]-d[1]*v[0]];
+  return[a[0]+v[0]*c+cr[0]*s+d[0]*dot*(1-c),a[1]+v[1]*c+cr[1]*s+d[1]*dot*(1-c),a[2]+v[2]*c+cr[2]*s+d[2]*dot*(1-c)];
+}
+function rotV(v,d,ang){return rotP(v,[0,0,0],d,ang);}
+function foldSim(faces){
+  const pts=faces.map(f=>{const cx=f.cell[0],cy=f.cell[1];
+    return[[cx,cy,0],[cx+1,cy,0],[cx+1,cy+1,0],[cx,cy+1,0]];});
+  const nrm=faces.map(()=>[0,0,1]);
+  const subtree=i=>{const out=[i];for(const c of faces[i].children)out.push.apply(out,subtree(c));return out;};
+  (function process(i){
+    for(const c of faces[i].children){
+      const e=EDGE[faces[c].dir];
+      const e1=pts[i][e[0]],e2=pts[i][e[1]];
+      let d=[e2[0]-e1[0],e2[1]-e1[1],e2[2]-e1[2]];
+      const L=Math.hypot(d[0],d[1],d[2]);d=[d[0]/L,d[1]/L,d[2]/L];
+      const cen=pts[c].reduce((s,p)=>[s[0]+p[0]/4,s[1]+p[1]/4,s[2]+p[2]/4],[0,0,0]);
+      let ang=Math.PI/2;
+      const c2=rotP(cen,e1,d,ang);
+      const mv=[c2[0]-cen[0],c2[1]-cen[1],c2[2]-cen[2]];
+      if(mv[0]*nrm[i][0]+mv[1]*nrm[i][1]+mv[2]*nrm[i][2]<0)ang=-ang;
+      for(const s of subtree(c)){
+        pts[s]=pts[s].map(p=>rotP(p,e1,d,ang));
+        nrm[s]=rotV(nrm[s],d,ang);
+      }
+      process(c);
+    }
+  })(0);
+  return pts;
+}
+// Für jede Fläche die 2 Seiten bestimmen, deren Mittelpunkte auf dem Ring liegen
+function bandKacheln(faces){
+  const pts=foldSim(faces);
+  let C=[0,0,0],n=0;
+  pts.forEach(fp=>fp.forEach(p=>{C=[C[0]+p[0],C[1]+p[1],C[2]+p[2]];n++;}));
+  C=C.map(v=>v/n);
+  const V=pts[0][0];
+  let d=[V[0]-C[0],V[1]-C[1],V[2]-C[2]];
+  const L=Math.hypot(d[0],d[1],d[2]);d=d.map(v=>v/L);
+  return faces.map((f,fi)=>{
+    const seiten=[];
+    for(let s=0;s<4;s++){
+      const kk=SIDE_CORNERS[s];
+      const m=[(pts[fi][kk[0]][0]+pts[fi][kk[1]][0])/2,
+               (pts[fi][kk[0]][1]+pts[fi][kk[1]][1])/2,
+               (pts[fi][kk[0]][2]+pts[fi][kk[1]][2])/2];
+      const dist=(m[0]-C[0])*d[0]+(m[1]-C[1])*d[1]+(m[2]-C[2])*d[2];
+      if(Math.abs(dist)<1e-6)seiten.push(s);
+    }
+    return seiten;
+  });
+}
+
+/* =================== Band-Grafik =================== */
+const SVGNS='http://www.w3.org/2000/svg';
+// Seiten-Mittelpunkte und Kantenrichtungen (Größe g)
+function seitenGeo(g){
+  return [
+    {m:[g/2,0],d:[1,0]},
+    {m:[g,g/2],d:[0,1]},
+    {m:[g/2,g],d:[1,0]},
+    {m:[0,g/2],d:[0,1]}
+  ];
+}
+function bandPolygon(pair,g,t){
+  const geo=seitenGeo(g);
+  const pts=[];
+  pair.forEach(s=>{
+    const{m,d}=geo[s];
+    pts.push([m[0]-t*d[0],m[1]-t*d[1]]);
+    pts.push([m[0]+t*d[0],m[1]+t*d[1]]);
+  });
+  // Punkte um den Schwerpunkt sortieren -> überschneidungsfreies Viereck
+  const cx=pts.reduce((a,p)=>a+p[0]/4,0),cy=pts.reduce((a,p)=>a+p[1]/4,0);
+  pts.sort((a,b)=>Math.atan2(a[1]-cy,a[0]-cx)-Math.atan2(b[1]-cy,b[0]-cx));
+  return pts;
+}
+function bandSVG(pair,g,t){
+  const svg=document.createElementNS(SVGNS,'svg');
+  svg.setAttribute('viewBox','0 0 '+g+' '+g);
+  svg.setAttribute('width',g);svg.setAttribute('height',g);
+  const mach=(tt,fill,op,sw)=>{
+    const p=document.createElementNS(SVGNS,'polygon');
+    p.setAttribute('points',bandPolygon(pair,g,tt).map(q=>q[0]+','+q[1]).join(' '));
+    p.setAttribute('fill',fill);
+    if(op)p.setAttribute('fill-opacity',op);
+    if(sw){p.setAttribute('stroke','var(--band-rand)');p.setAttribute('stroke-width',sw);}
+    svg.appendChild(p);
+  };
+  mach(t,'var(--band)',null,2);
+  mach(t*0.32,'#ffffff','0.65',null); // heller Innenstreifen
+  return svg;
+}
+
+/* =================== Netz-Karten =================== */
+const NSTATE={};
+const TABDONE={};
+const PAARE=[[0,1],[1,2],[2,3],[0,3],[0,2],[1,3]];
+const paarEq=(a,b)=>a&&b&&a.slice().sort().join()===b.slice().sort().join();
+
+function baueNetzKarte(name){
+  const sec=document.getElementById('k-'+name);
+  const net=NETS[name];
+  const faces=buildTree(net);
+  const kacheln=bandKacheln(faces);
+  const freiIdx=faces.findIndex(f=>f.cell[0]===net.frei[0]&&f.cell[1]===net.frei[1]);
+  const korrekt=kacheln[freiIdx];
+
+  const xs=net.cells.map(c=>c[0]),ys=net.cells.map(c=>c[1]);
+  const minx=Math.min.apply(null,xs),miny=Math.min.apply(null,ys);
+  const cols=Math.max.apply(null,xs)-minx+1,rows=Math.max.apply(null,ys)-miny+1;
+
+  sec.innerHTML =
+    '<h2>Netz '+NUMZ[name]+'</h2>'+
+    '<p class="frage">Ergänze das Muster auf der freien Fläche (orange umrandet) so, dass auf dem zusammengebauten Würfel ein geschlossenes Band entsteht. Prüfe dein Muster durch Falten!</p>'+
+    '<p class="legende">Wähle ein Band-Stück über die Knöpfe – oder tippe direkt auf die freie Fläche, um durch die Möglichkeiten zu blättern.</p>'+
+    '<div class="kachelwahl"></div>'+
+    '<div class="viewport"><div class="stage"><div class="plane"></div></div></div>'+
+    '<p class="dreh-hinweis">👆 1 Finger oder Maus: Ansicht drehen &nbsp;·&nbsp; ✌️ 2 Finger, rechte Maustaste oder Shift+Ziehen: verschieben</p>'+
+    '<div class="anim-bereich"><h3>🎬 Prüfe durch Falten</h3>'+
+    '<div class="anim-steuer">'+
+    '<button class="btn btn-play">🎬 Aufrollen &amp; Abrollen</button>'+
+    '<div class="slider-wrap"><span>flach</span><input type="range" min="0" max="100" value="0" aria-label="Faltung von Hand steuern"><span>Würfel</span></div>'+
+    '<button class="btn btn-sek btn-ansicht">🔄 Ansicht</button>'+
+    '</div></div>'+
+    '<button class="btn btn-pruefen">✔️ Prüfen</button>'+
+    '<button class="btn btn-leeren">Leeren</button>'+
+    '<div class="feedback"></div>'+
+    '<details class="tipp"><summary>💡 Tipp 1</summary><p>Schau dir die Nachbarflächen an: An welchen zwei Kanten der freien Fläche kommt das Band beim <strong>Falten</strong> an? Achtung – Nachbarn am Würfel sind nicht immer Nachbarn im Netz!</p></details>'+
+    '<details class="tipp"><summary>💡 Tipp 2</summary><p>Falte das Netz mit dem Regler ganz langsam und halte kurz vor dem Schluss an. Jetzt siehst du genau, wo die Band-Enden der anderen Flächen auf die freie Fläche treffen.</p></details>';
+
+  const plane=sec.querySelector('.plane');
+  const stage=sec.querySelector('.stage');
+  const viewport=sec.querySelector('.viewport');
+  plane.style.width=cols*S+'px';
+  plane.style.height=rows*S+'px';
+  plane.style.transformOrigin='50% 50%';
+  plane.style.webkitTransformOrigin='50% 50%';
+
+  // Flächen als verschachtelte Divs
+  const els=[];
+  faces.forEach((f,fi)=>{
+    const el=document.createElement('div');
+    el.className='face';
+    el.style.width=S+'px';el.style.height=S+'px';
+    if(f.parent<0){
+      el.style.left=(f.cell[0]-minx)*S+'px';
+      el.style.top=(f.cell[1]-miny)*S+'px';
+      plane.appendChild(el);
+    }else{
+      const dv=DIRS[f.dir];
+      el.style.left=dv[0]*S+'px';
+      el.style.top=dv[1]*S+'px';
+      const org={right:'0px 50%',left:S+'px 50%',down:'50% 0px',up:'50% '+S+'px'}[f.dir];
+      el.style.transformOrigin=org;
+      el.style.webkitTransformOrigin=org;
+      els[f.parent].appendChild(el);
+    }
+    els.push(el);
+  });
+
+  // feste Muster-Bänder auf 5 Flächen
+  faces.forEach((f,fi)=>{
+    if(fi===freiIdx)return;
+    const svg=bandSVG(kacheln[fi],S,14);
+    svg.classList.add('band');
+    els[fi].appendChild(svg);
+  });
+  // freie Fläche: Auswahl-Band + Fragezeichen + Tippfläche
+  els[freiIdx].classList.add('frei');
+  const wahlSvgWrap=document.createElement('div');
+  wahlSvgWrap.style.cssText='position:absolute;inset:0;pointer-events:none;';
+  els[freiIdx].appendChild(wahlSvgWrap);
+  const fragez=document.createElement('div');
+  fragez.className='fragez';fragez.textContent='?';
+  els[freiIdx].appendChild(fragez);
+  const fz=document.createElement('div');
+  fz.className='fz';
+  els[freiIdx].appendChild(fz);
+
+  const st={wahl:null,geloest:false,t:0,playing:null,rx:0,ry:0,tx:0,ty:0};
+  NSTATE[name]=st;
+
+  // Kachel-Knöpfe
+  const wahlDiv=sec.querySelector('.kachelwahl');
+  const btns=[];
+  PAARE.forEach((paar,i)=>{
+    const b=document.createElement('button');
+    b.setAttribute('aria-label','Band-Stück '+(i+1));
+    b.appendChild(bandSVG(paar,44,8));
+    wahlDiv.appendChild(b);
+    btns.push(b);
+    b.addEventListener('click',()=>{if(!st.geloest)setzeWahl(i);});
+  });
+  function setzeWahl(i){
+    st.wahl=i;
+    btns.forEach((b,j)=>b.classList.toggle('aktiv',j===i));
+    wahlSvgWrap.innerHTML='';
+    if(i!==null){
+      const svg=bandSVG(PAARE[i],S,14);
+      svg.classList.add('band');
+      wahlSvgWrap.appendChild(svg);
+      fragez.style.display='none';
+    }else{
+      fragez.style.display='flex';
+    }
+  }
+
+  // Prüfen / Leeren
+  const fb=sec.querySelector('.feedback');
+  const leerenBtn=sec.querySelector('.btn-leeren');
+  sec.querySelector('.btn-pruefen').addEventListener('click',()=>{
+    if(st.geloest)return;
+    if(st.wahl===null){
+      fb.className='feedback zeig neutral';
+      fb.textContent='Wähle zuerst ein Band-Stück – über die Knöpfe oder durch Antippen der freien Fläche.';
+      return;
+    }
+    const paar=PAARE[st.wahl];
+    if(paarEq(paar,korrekt)){
+      st.geloest=true;
+      fb.className='feedback zeig ok';
+      fb.textContent='✅ Richtig! Das Band ist geschlossen – falte den Würfel und verfolge es einmal ganz herum!';
+      leerenBtn.classList.remove('zeig');
+      TABDONE[name]=true;zeigeHaken();
+    }else{
+      const treffer=paar.filter(s=>korrekt.indexOf(s)>=0).length;
+      fb.className='feedback zeig nok';
+      fb.textContent=treffer===1
+        ?'❌ Fast! Ein Band-Ende passt schon, das andere läuft ins Leere. Falte den Würfel und schau, wo das Band abreißt.'
+        :'❌ So bleibt das Band offen – beide Enden laufen ins Leere. Falte den Würfel langsam und beobachte, wo die Band-Enden der Nachbarn ankommen.';
+      leerenBtn.classList.add('zeig');
+    }
+  });
+  leerenBtn.addEventListener('click',()=>{
+    setzeWahl(null);
+    st.wahl=null;
+    btns.forEach(b=>b.classList.remove('aktiv'));
+    fb.className='feedback';
+    leerenBtn.classList.remove('zeig');
+  });
+
+  // Falt-/Abroll-Animation (Kanten klappen nacheinander)
+  const slider=sec.querySelector('input[type=range]');
+  const playBtn=sec.querySelector('.btn-play');
+  const reihenfolge=[];
+  for(let i=faces.length-1;i>=1;i--)reihenfolge.push(i);
+  const easeK=x=>0.5-0.5*Math.cos(Math.PI*x);
+  function anwendenView(){
+    const k=st.k||1;
+    const kipp=34*Math.min(1,st.t*reihenfolge.length)+st.rx;
+    const bx=cols*S*(k-1)/2+st.tx,by=rows*S*(k-1)/2+st.ty;
+    const tr='translate3d('+bx+'px,'+by+'px,0) rotateX('+kipp+'deg) rotateY('+st.ry+'deg) scale3d('+k+','+k+','+k+')';
+    plane.style.transform=tr;
+    plane.style.webkitTransform=tr;
+  }
+  function setzeFaltung(p){
+    st.t=p;
+    const n=reihenfolge.length;
+    reihenfolge.forEach((fi,pos)=>{
+      const a=easeK(Math.max(0,Math.min(1,p*n-pos)))*90;
+      const f=faces[fi];
+      const tr={right:'rotateY('+(-a)+'deg)',left:'rotateY('+a+'deg)',down:'rotateX('+a+'deg)',up:'rotateX('+(-a)+'deg)'}[f.dir];
+      els[fi].style.transform=tr;
+      els[fi].style.webkitTransform=tr;
+    });
+    anwendenView();
+    plane.classList.toggle('gefaltet',p>0.01);
+    slider.value=Math.round(p*100);
+  }
+  slider.addEventListener('input',()=>{
+    if(st.playing){cancelAnimationFrame(st.playing);st.playing=null;}
+    setzeFaltung(slider.value/100);
+  });
+  playBtn.addEventListener('click',()=>{
+    if(st.playing){cancelAnimationFrame(st.playing);st.playing=null;}
+    const nK=reihenfolge.length;
+    const D1=520*nK,HALT=1100,D2=520*nK;
+    const start=performance.now();
+    function schritt(now){
+      const ms=now-start;
+      let p;
+      if(ms<D1)p=ms/D1;
+      else if(ms<D1+HALT)p=1;
+      else if(ms<D1+HALT+D2)p=1-(ms-D1-HALT)/D2;
+      else{setzeFaltung(0);st.playing=null;return;}
+      setzeFaltung(p);
+      st.playing=requestAnimationFrame(schritt);
+    }
+    st.playing=requestAnimationFrame(schritt);
+  });
+
+  // Größe an die verfügbare Breite anpassen
+  function passeAn(){
+    let avail=viewport.clientWidth;
+    if(!avail){
+      const m=document.querySelector('main');
+      avail=(m?m.clientWidth:400)-76;
+    }
+    avail-=18;
+    st.k=Math.min(1,Math.max(0.4,avail/(cols*S)));
+    stage.style.width=Math.round(cols*S*st.k)+'px';
+    stage.style.height=Math.round(rows*S*st.k)+'px';
+    viewport.style.height=Math.round(rows*S*st.k+180)+'px';
+    setzeFaltung(st.t);
+  }
+  st.passeAn=passeAn;
+  passeAn();
+
+  // Ansicht drehen/verschieben + Antippen der freien Fläche (blättert durch die Bänder)
+  const zeiger=new Map();
+  let bewegt=false;
+  viewport.addEventListener('contextmenu',e=>e.preventDefault());
+  viewport.addEventListener('pointerdown',e=>{
+    const schieben=(e.pointerType==='mouse'&&(e.button===2||e.shiftKey));
+    let zone=(e.target&&e.target.closest)?e.target.closest('.fz'):null;
+    if(zone&&(st.geloest||st.t>0.02))zone=null;
+    zeiger.set(e.pointerId,{x:e.clientX,y:e.clientY,schieben:schieben,zone:zone});
+    if(zeiger.size===1)bewegt=false;
+    try{viewport.setPointerCapture(e.pointerId);}catch(err){}
+  });
+  viewport.addEventListener('pointermove',e=>{
+    const p=zeiger.get(e.pointerId);
+    if(!p)return;
+    const dx=e.clientX-p.x,dy=e.clientY-p.y;
+    if(!bewegt&&Math.hypot(dx,dy)<12)return;
+    if(!bewegt){
+      bewegt=true;
+      zeiger.forEach(r=>{r.zone=null;});
+    }
+    p.x=e.clientX;p.y=e.clientY;
+    if(zeiger.size>=2){
+      st.tx=Math.max(-400,Math.min(400,st.tx+dx/2));
+      st.ty=Math.max(-400,Math.min(400,st.ty+dy/2));
+    }else if(p.schieben){
+      st.tx=Math.max(-400,Math.min(400,st.tx+dx));
+      st.ty=Math.max(-400,Math.min(400,st.ty+dy));
+    }else{
+      st.ry+=dx*0.4;
+      st.rx=Math.max(-40,Math.min(65,st.rx-dy*0.4));
+    }
+    anwendenView();
+  });
+  ['pointerup','pointercancel'].forEach(ev=>viewport.addEventListener(ev,e=>{
+    const p=zeiger.get(e.pointerId);
+    if(p&&p.zone&&!bewegt&&e.type==='pointerup'){
+      const next=st.wahl===null?0:(st.wahl+1)%PAARE.length;
+      setzeWahl(next);
+    }
+    zeiger.delete(e.pointerId);
+  }));
+  sec.querySelector('.btn-ansicht').addEventListener('click',()=>{
+    st.rx=0;st.ry=0;st.tx=0;st.ty=0;anwendenView();
+  });
+}
+
+['1','2','3'].forEach(baueNetzKarte);
+
+/* =================== Karte 1: Muster-Würfel drehen =================== */
+const cube=document.getElementById('cube');
+const cubeVP=document.getElementById('cubeVP');
+const H=75;
+const FACE_TR={
+  front:'translateZ('+H+'px)',
+  back:'rotateY(180deg) translateZ('+H+'px)',
+  right:'rotateY(90deg) translateZ('+H+'px)',
+  left:'rotateY(-90deg) translateZ('+H+'px)',
+  top:'rotateX(90deg) translateZ('+H+'px)',
+  bottom:'rotateX(-90deg) translateZ('+H+'px)'
+};
+// Band-Kacheln des Rings senkrecht zur Raumdiagonale vorn-oben-rechts (lokale Seiten je Fläche)
+const CUBE_BAND={front:[2,3],right:[1,2],top:[0,3],back:[0,3],left:[0,1],bottom:[0,1]};
+cube.querySelectorAll('.cface').forEach(f=>{
+  f.style.transform=FACE_TR[f.dataset.f];
+  f.style.webkitTransform=FACE_TR[f.dataset.f];
+  f.appendChild(bandSVG(CUBE_BAND[f.dataset.f],150,24));
+});
+let rx=-24,ry=-34,zielAnim=null;
+function maleCube(){
+  const tr='rotateX('+rx+'deg) rotateY('+ry+'deg)';
+  cube.style.transform=tr;
+  cube.style.webkitTransform=tr;
+}
+maleCube();
+let ziehen=false,lx=0,ly=0;
+cubeVP.addEventListener('pointerdown',e=>{
+  ziehen=true;lx=e.clientX;ly=e.clientY;
+  cubeVP.setPointerCapture(e.pointerId);
+  if(zielAnim){cancelAnimationFrame(zielAnim);zielAnim=null;}
+});
+cubeVP.addEventListener('pointermove',e=>{
+  if(!ziehen)return;
+  ry+=(e.clientX-lx)*0.5;
+  rx-=(e.clientY-ly)*0.5;
+  rx=Math.max(-120,Math.min(120,rx));
+  lx=e.clientX;ly=e.clientY;
+  maleCube();
+});
+['pointerup','pointercancel'].forEach(ev=>cubeVP.addEventListener(ev,()=>{ziehen=false;}));
+const PRESETS={vorn:[-24,-34],oben:[-72,-34],hinten:[-24,146]};
+document.querySelectorAll('[data-preset]').forEach(b=>{
+  b.addEventListener('click',()=>{
+    const ziel=PRESETS[b.dataset.preset];
+    if(zielAnim)cancelAnimationFrame(zielAnim);
+    const rx0=rx,ry0=ry,start=performance.now(),D=600;
+    let dy=((ziel[1]-ry0)%360+540)%360-180;
+    function schritt(now){
+      const p=Math.min(1,(now-start)/D);
+      const e=0.5-0.5*Math.cos(Math.PI*p);
+      rx=rx0+(ziel[0]-rx0)*e;
+      ry=ry0+dy*e;
+      maleCube();
+      if(p<1)zielAnim=requestAnimationFrame(schritt);
+      else zielAnim=null;
+    }
+    zielAnim=requestAnimationFrame(schritt);
+  });
+});
+
+/* Zwischenfrage (MC) */
+const mcSt={wahl:null,geprueft:false};
+document.querySelectorAll('#mcWahl button').forEach(b=>{
+  b.addEventListener('click',()=>{
+    if(mcSt.geprueft)return;
+    document.querySelectorAll('#mcWahl button').forEach(x=>x.classList.remove('gewaehlt'));
+    b.classList.add('gewaehlt');
+    mcSt.wahl=b.dataset.w;
+  });
+});
+document.getElementById('mcPruefen').addEventListener('click',()=>{
+  if(mcSt.wahl===null||mcSt.geprueft)return;
+  mcSt.geprueft=true;
+  const fb=document.getElementById('mcFb');
+  const btns=document.querySelectorAll('#mcWahl button');
+  if(mcSt.wahl==='6'){
+    btns.forEach(x=>{if(x.dataset.w==='6')x.classList.add('richtig');});
+    fb.className='feedback zeig ok';
+    fb.textContent='✅ Genau: Das Band läuft über alle 6 Flächen. Im Netz braucht also jede Fläche ihr Band-Stück – auch die freie!';
+  }else{
+    btns.forEach(x=>{
+      if(x.dataset.w===mcSt.wahl)x.classList.add('falsch');
+      if(x.dataset.w==='6')x.classList.add('richtig');
+    });
+    fb.className='feedback zeig nok';
+    fb.textContent='❌ Es sind alle 6 Flächen. Drehe den Würfel einmal ganz herum und zähle mit – das Band lässt keine Fläche aus.';
+    document.getElementById('mcLeeren').classList.add('zeig');
+  }
+});
+document.getElementById('mcLeeren').addEventListener('click',()=>{
+  mcSt.wahl=null;mcSt.geprueft=false;
+  document.querySelectorAll('#mcWahl button').forEach(b=>b.classList.remove('gewaehlt','richtig','falsch'));
+  document.getElementById('mcFb').className='feedback';
+  document.getElementById('mcLeeren').classList.remove('zeig');
+});
+
+/* =================== Tabs =================== */
+function zeigeHaken(){
+  document.querySelectorAll('.tab').forEach(t=>{
+    const n=t.dataset.ziel.replace('k-','');
+    const d=t.querySelector('.done');
+    if(d)d.textContent=TABDONE[n]?'✅':'';
+  });
+}
+document.querySelectorAll('.tab').forEach(t=>{
+  t.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('aktiv'));
+    document.querySelectorAll('.karte').forEach(x=>x.classList.remove('aktiv'));
+    t.classList.add('aktiv');
+    document.getElementById(t.dataset.ziel).classList.add('aktiv');
+    const nm=t.dataset.ziel.replace('k-','');
+    if(NSTATE[nm]&&NSTATE[nm].passeAn)NSTATE[nm].passeAn();
+  });
+});
+window.addEventListener('resize',()=>{
+  for(const n in NSTATE){
+    if(document.getElementById('k-'+n).classList.contains('aktiv'))NSTATE[n].passeAn();
+  }
+});
+
+/* T-Rex */
+const trex=document.getElementById('trex');
+trex.addEventListener('click',()=>{
+  trex.classList.add('zeig');
+  setTimeout(()=>trex.classList.remove('zeig'),1800);
+});
+</script>
+</body>
+</html>
