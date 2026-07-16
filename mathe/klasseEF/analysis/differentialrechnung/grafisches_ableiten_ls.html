@@ -190,6 +190,10 @@ svg text{-webkit-user-select:none;user-select:none;}
   background:#fdfbf8;border:2px solid var(--line);border-radius:12px;
   padding:12px 14px;margin:12px 0;
 }
+.ziehhinweis{
+  background:#eef4fb;border:2px solid #2f5fa6;border-radius:12px;
+  padding:10px 14px;margin:12px 0;font-size:.92rem;color:#1f4680;line-height:1.55;
+}
 .sliderbox label{
   display:block;font-weight:800;color:var(--orange-dark);
   margin-bottom:8px;font-size:.95rem;
@@ -365,10 +369,10 @@ table.wert{ display:block; overflow-x:auto; -webkit-overflow-scrolling:touch; }
 
     <div class="infozeile" id="infoIdee"></div>
 
-    <div class="sliderbox">
-      <label for="sliderIdee">🎯 Punkt über den Graphen schieben</label>
-      <input type="range" id="sliderIdee" min="0" max="100" value="10" step="1">
-    </div>
+    <p class="ziehhinweis">
+      👆 Ziehe den <b>roten Punkt</b> direkt über den Graphen. Unten wird für jede Position
+      die zugehörige Tangentensteigung als blauer Punkt eingetragen.
+    </p>
 
     <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
       <button class="btn sekundaer" onclick="ideeAnim()">▶ Automatisch abfahren</button>
@@ -427,10 +431,10 @@ table.wert{ display:block; overflow-x:auto; -webkit-overflow-scrolling:touch; }
 
     <div class="infozeile" id="infoLeit"></div>
 
-    <div class="sliderbox">
-      <label for="sliderLeit">🎯 Punkt verschieben</label>
-      <input type="range" id="sliderLeit" min="0" max="100" value="8" step="1">
-    </div>
+    <p class="ziehhinweis">
+      👆 Ziehe den <b>roten Punkt</b> direkt über den Graphen und beobachte, wann die
+      Tangente steigt, fällt oder waagerecht wird.
+    </p>
 
     <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
       <button class="btn sekundaer" onclick="leitSpringe(-2)">↦ zum Hochpunkt</button>
@@ -694,10 +698,9 @@ table.wert{ display:block; overflow-x:auto; -webkit-overflow-scrolling:touch; }
 
     <div class="infozeile" id="infoAuto"></div>
 
-    <div class="sliderbox">
-      <label for="sliderAuto">🎯 Zeitpunkt wählen</label>
-      <input type="range" id="sliderAuto" min="0" max="100" value="0" step="1">
-    </div>
+    <p class="ziehhinweis">
+      👆 Ziehe den <b>roten Punkt</b> auf dem Weg-Graphen, um einen Zeitpunkt zu wählen.
+    </p>
 
     <div class="merk blau">
       <b>Lies den blauen Graphen wie einen Tacho.</b><br><br>
@@ -932,6 +935,7 @@ function xVonT(t,K){ return K.xmin+0.15 + (K.xmax-K.xmin-0.3)*t/100; }
 
 function zeichneID(){
   const G=zeichneDoppel(svgID,ID,fID,fsID,{titelO:'f(x) = x²',titelU:"f'(x)",zeigeFs:false});
+  ID._G=G;
   const x=xVonT(ID.t,ID);
   const y=fID(x), m=fsID(x);
 
@@ -946,9 +950,12 @@ function zeichneID(){
   // Tangente oben (Pixel-korrekt)
   tangente(svgID,G,x,y,m,52,'#1e7d32');
 
-  // Punkt oben
+  // Punkt oben (direkt ziehbar)
+  svgID.appendChild(el('circle',{cx:G.sx(x),cy:G.syO(y),r:11,fill:'none',
+    stroke:'#c1272d','stroke-width':1.5,opacity:.4}));
   svgID.appendChild(el('circle',{cx:G.sx(x),cy:G.syO(y),r:7,fill:'#c1272d',
     stroke:'#fff','stroke-width':2}));
+  { const gr=el('circle',{cx:G.sx(x),cy:G.syO(y),r:24,fill:'transparent','pointer-events':'all',style:'cursor:grab;'}); gr.setAttribute('id','gripIdee'); svgID.appendChild(gr); }
 
   // Verbindungslinie nach unten
   svgID.appendChild(el('line',{x1:G.sx(x),y1:G.syO(y),x2:G.sx(x),y2:G.syU(m),
@@ -972,26 +979,74 @@ function zeichneID(){
     'Punkt eingetragen: \\(f\'('+fmt(x,1)+') = '+fmt(m,1)+'\\)</span>';
   mj(box);
 }
-document.getElementById('sliderIdee').addEventListener('input',ev=>{
-  if(ID.anim){cancelAnimationFrame(ID.anim);ID.anim=null;}
-  ID.t=parseFloat(ev.target.value);
-  const x=xVonT(ID.t,ID);
-  ID.punkte.push({x:x,m:fsID(x)});
-  if(ID.punkte.length>400) ID.punkte.shift();
-  zeichneID();
+
+/* =========================================================
+   Direktes Ziehen eines Punktes auf dem Graphen (ersetzt die Slider).
+   Generisch: liest die x-Position des Fingers, rechnet sie über das gespeicherte
+   Scaling K._G in eine Daten-x um und daraus in den Parameter t (0..100).
+   Pointer-Events + setPointerCapture, rAF-gedrosselt, Scroll-Sperre -> iPad-tauglich.
+   ========================================================= */
+function installPunktZiehen(svg, K, gripId, redraw, opt){
+  opt=opt||{};
+  const onDrag = opt.onDrag || null;      // optionaler Zusatz-Callback (z.B. Spur füllen)
+  let zieht=false, pid=null, raf=false;
+  function datenXausPointer(ev){
+    const G=K._G; if(!G) return null;
+    const r=svg.getBoundingClientRect();
+    const vx=(ev.clientX-r.left)/r.width*K.W;          // in viewBox-x
+    // inverse von G.sx: vx = padL + (x-xmin)/(xmax-xmin)*(W-padL-padR)
+    const x = K.xmin + (vx-G.padL)/(K.W-G.padL-G.padR)*(K.xmax-K.xmin);
+    return x;
+  }
+  function tAusX(x){
+    // Standard-Mapping xVonT: x = xmin+0.15 + (xmax-xmin-0.3)*t/100
+    const lo = (opt.xLo!==undefined)? opt.xLo : (K.xmin+0.15);
+    const spann = (opt.xSpann!==undefined)? opt.xSpann : (K.xmax-K.xmin-0.3);
+    let t=(x-lo)/spann*100;
+    return Math.max(0, Math.min(100, t));
+  }
+  function update(ev){
+    const x=datenXausPointer(ev); if(x===null) return;
+    K.t=tAusX(x);
+    if(onDrag) onDrag(K);
+    if(!raf){ raf=true; requestAnimationFrame(()=>{ raf=false; redraw(); }); }
+  }
+  function trifftGriff(ev){
+    const g=document.getElementById(gripId); if(!g) return false;
+    const r=svg.getBoundingClientRect();
+    const gx=parseFloat(g.getAttribute('cx'))/K.W*r.width + r.left;
+    const gy=parseFloat(g.getAttribute('cy'))/K.H*r.height + r.top;
+    return Math.hypot(ev.clientX-gx, ev.clientY-gy) <= 28/K.W*r.width + 18;
+  }
+  svg.addEventListener('pointerdown',ev=>{
+    if(!trifftGriff(ev)) return;
+    if(K.anim){cancelAnimationFrame(K.anim);K.anim=null;}
+    zieht=true; pid=ev.pointerId;
+    try{svg.setPointerCapture(pid);}catch(_){}
+    update(ev); ev.preventDefault();
+  });
+  svg.addEventListener('pointermove',ev=>{
+    if(!zieht||ev.pointerId!==pid) return;
+    update(ev); ev.preventDefault();
+  });
+  function ende(ev){ if(ev&&ev.pointerId!==pid) return; zieht=false; pid=null; }
+  svg.addEventListener('pointerup',ende);
+  svg.addEventListener('pointercancel',ende);
+  svg.addEventListener('touchmove',ev=>{ if(zieht) ev.preventDefault(); },{passive:false});
+}
+
+installPunktZiehen(svgID, ID, 'gripIdee', zeichneID, {
+  onDrag:(K)=>{ const x=xVonT(K.t,K); K.punkte.push({x:x,m:fsID(x)}); if(K.punkte.length>400) K.punkte.shift(); }
 });
 function ideeAnim(){
   if(ID.anim){cancelAnimationFrame(ID.anim);ID.anim=null;}
   ID.t=0; ID.punkte=[];
-  document.getElementById('sliderIdee').value=0;
   const schritt=()=>{
     ID.t+=0.5;
     if(ID.t>=100){
       ID.t=100;
-      document.getElementById('sliderIdee').value=100;
       zeichneID(); ID.anim=null; return;
     }
-    document.getElementById('sliderIdee').value=ID.t;
     const x=xVonT(ID.t,ID);
     ID.punkte.push({x:x,m:fsID(x)});
     zeichneID();
@@ -1003,7 +1058,6 @@ function ideeSpur(){ ID.spur=!ID.spur; zeichneID(); }
 function ideeReset(){
   if(ID.anim){cancelAnimationFrame(ID.anim);ID.anim=null;}
   ID.t=10; ID.punkte=[];
-  document.getElementById('sliderIdee').value=10;
   zeichneID();
 }
 
@@ -1022,14 +1076,18 @@ const fsLT = x => x*x - 1;
 
 function zeichneLT(){
   const G=zeichneDoppel(svgLT,LT,fLT,fsLT,{titelO:'f',titelU:"f'",zeigeFs:true});
+  LT._G=G;
   const x=xVonT(LT.t,LT);
   const y=fLT(x), m=fsLT(x);
 
   // Tangente (Pixel-korrekt)
   tangente(svgLT,G,x,y,m,48,'#1e7d32');
 
+  svgLT.appendChild(el('circle',{cx:G.sx(x),cy:G.syO(y),r:11,fill:'none',
+    stroke:'#c1272d','stroke-width':1.5,opacity:.4}));
   svgLT.appendChild(el('circle',{cx:G.sx(x),cy:G.syO(y),r:7,fill:'#c1272d',
     stroke:'#fff','stroke-width':2}));
+  { const gr=el('circle',{cx:G.sx(x),cy:G.syO(y),r:24,fill:'transparent','pointer-events':'all',style:'cursor:grab;'}); gr.setAttribute('id','gripLeit'); svgLT.appendChild(gr); }
   svgLT.appendChild(el('line',{x1:G.sx(x),y1:G.syO(y),x2:G.sx(x),y2:G.syU(m),
     stroke:'#c1272d','stroke-width':1.5,'stroke-dasharray':'4 4',opacity:.5}));
   svgLT.appendChild(el('circle',{cx:G.sx(x),cy:G.syU(m),r:7,fill:'#1f4680',
@@ -1057,16 +1115,12 @@ function zeichneLT(){
   else { box.style.background=''; box.style.borderColor=''; }
   mj(box);
 }
-document.getElementById('sliderLeit').addEventListener('input',ev=>{
-  LT.t=parseFloat(ev.target.value);
-  zeichneLT();
-});
+installPunktZiehen(svgLT, LT, 'gripLeit', zeichneLT);
 function leitSpringe(ziel){
   // t so waehlen, dass x = ziel/2 (Hochpunkt bei -1, Tiefpunkt bei 1)
   const x = ziel<0 ? -1 : 1;
   const t = (x-(LT.xmin+0.15))/(LT.xmax-LT.xmin-0.3)*100;
   LT.t=Math.max(0,Math.min(100,t));
-  document.getElementById('sliderLeit').value=LT.t;
   zeichneLT();
 }
 
@@ -1287,14 +1341,18 @@ const svAU = t => -(t*t)/3 + 2*t;
 function zeichneAU(){
   const G=zeichneDoppel(svgAU,AU,sAU,svAU,
     {titelO:'Weg s(t) in m',titelU:"Tempo s'(t) in m/s",zeigeFs:true});
+  AU._G=G;
   const t=AU.xmin+0.2 + (AU.xmax-AU.xmin-0.5)*AU.t/100;
   const y=sAU(t), v=svAU(t);
 
   // Tangente oben (Pixel-korrekt)
   tangente(svgAU,G,t,y,v,52,'#1e7d32');
 
+  svgAU.appendChild(el('circle',{cx:G.sx(t),cy:G.syO(y),r:11,fill:'none',
+    stroke:'#c1272d','stroke-width':1.5,opacity:.4}));
   svgAU.appendChild(el('circle',{cx:G.sx(t),cy:G.syO(y),r:7,fill:'#c1272d',
     stroke:'#fff','stroke-width':2}));
+  { const gr=el('circle',{cx:G.sx(t),cy:G.syO(y),r:24,fill:'transparent','pointer-events':'all',style:'cursor:grab;'}); gr.setAttribute('id','gripAuto'); svgAU.appendChild(gr); }
   svgAU.appendChild(el('line',{x1:G.sx(t),y1:G.syO(y),x2:G.sx(t),y2:G.syU(v),
     stroke:'#c1272d','stroke-width':1.5,'stroke-dasharray':'4 4',opacity:.5}));
   svgAU.appendChild(el('circle',{cx:G.sx(t),cy:G.syU(v),r:7,fill:'#1f4680',
@@ -1316,10 +1374,7 @@ function zeichneAU(){
     '<span style="color:#1f4680;">Tempo <b>'+fmt(v,1)+'</b> m/s</span>'+zus;
   mj(box);
 }
-document.getElementById('sliderAuto').addEventListener('input',ev=>{
-  AU.t=parseFloat(ev.target.value);
-  zeichneAU();
-});
+installPunktZiehen(svgAU, AU, 'gripAuto', zeichneAU, { xLo:(AU.xmin+0.2), xSpann:(AU.xmax-AU.xmin-0.5) });
 
 /* =========================================================
    MULTIPLE CHOICE
@@ -1352,6 +1407,20 @@ const MC6={opt:[
   {t:'Er verläuft dort waagerecht.',ok:false}
 ],sel:null,gesperrt:false};
 
+
+/* === Fisher-Yates: MC-Optionen EINMAL beim Laden mischen (Projektvorgabe) ===
+   Mischt D.opt in place. Auswertung erfolgt über das ok-Flag, nicht über den Index,
+   daher bleibt alles korrekt. Wird pro MC-Objekt nur EINMAL aufgerufen -> Reihenfolge
+   ist innerhalb der Sitzung stabil (kein Neumischen bei Karten-/Stufenwechsel). */
+function mischeMC(D){
+  if(!D||!D.opt||D._gemischt) return;
+  for(let i=D.opt.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    const tmp=D.opt[i]; D.opt[i]=D.opt[j]; D.opt[j]=tmp;
+  }
+  D._gemischt=true;
+}
+
 function baueMC(D,box,pre){
   const b=document.getElementById(box);
   b.innerHTML='';
@@ -1383,6 +1452,7 @@ function pruefeMC(D,pre,nr,tOk,tNo){
 function leereMC(D,box,pre,nr){
   D.sel=null; D.gesperrt=false; baueMC(D,box,pre); fbWeg(nr); leerAn(nr,false);
 }
+/* Optionen einmalig mischen (Projektvorgabe) */ mischeMC(MC1); mischeMC(MC2); mischeMC(MC5); mischeMC(MC6); 
 baueMC(MC1,'mc1','m1');
 baueMC(MC2,'mc2','m2');
 baueMC(MC5,'mc5','m5');

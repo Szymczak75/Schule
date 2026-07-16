@@ -1483,6 +1483,20 @@ const MC6={opt:[
   {t:'Am Wendepunkt hat der Graph seinen höchsten Wert.',ok:false}
 ],sel:null,gesperrt:false};
 
+
+/* === Fisher-Yates: MC-Optionen EINMAL beim Laden mischen (Projektvorgabe) ===
+   Mischt D.opt in place. Auswertung erfolgt über das ok-Flag, nicht über den Index,
+   daher bleibt alles korrekt. Wird pro MC-Objekt nur EINMAL aufgerufen -> Reihenfolge
+   ist innerhalb der Sitzung stabil (kein Neumischen bei Karten-/Stufenwechsel). */
+function mischeMC(D){
+  if(!D||!D.opt||D._gemischt) return;
+  for(let i=D.opt.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    const tmp=D.opt[i]; D.opt[i]=D.opt[j]; D.opt[j]=tmp;
+  }
+  D._gemischt=true;
+}
+
 function baueMC(D,box,pre){
   const b=document.getElementById(box);
   b.innerHTML='';
@@ -1514,6 +1528,7 @@ function pruefeMC(D,pre,nr,tOk,tNo){
 function leereMC(D,box,pre,nr){
   D.sel=null; D.gesperrt=false; baueMC(D,box,pre); fbWeg(nr); leerAn(nr,false);
 }
+/* Optionen einmalig mischen (Projektvorgabe) */ mischeMC(MC1); mischeMC(MC2); mischeMC(MC6); 
 baueMC(MC1,'mc1','m1');
 baueMC(MC2,'mc2','m2');
 baueMC(MC6,'mc6','m6');

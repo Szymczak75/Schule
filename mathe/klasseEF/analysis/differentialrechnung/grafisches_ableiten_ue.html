@@ -1588,6 +1588,20 @@ const MC={
     {t:'f fällt links von x = 2 und steigt rechts davon.',ok:false}
   ],sel:null,gesperrt:false}
 };
+
+/* === Fisher-Yates: MC-Optionen EINMAL beim Laden mischen (Projektvorgabe) ===
+   Mischt D.opt in place. Auswertung erfolgt über das ok-Flag, nicht über den Index,
+   daher bleibt alles korrekt. Wird pro MC-Objekt nur EINMAL aufgerufen -> Reihenfolge
+   ist innerhalb der Sitzung stabil (kein Neumischen bei Karten-/Stufenwechsel). */
+function mischeMC(D){
+  if(!D||!D.opt||D._gemischt) return;
+  for(let i=D.opt.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    const tmp=D.opt[i]; D.opt[i]=D.opt[j]; D.opt[j]=tmp;
+  }
+  D._gemischt=true;
+}
+
 function baueMC(id,boxId){
   const D=MC[id];
   const b=document.getElementById(boxId);
@@ -1617,6 +1631,7 @@ function leereMC(id,boxId){
   MC[id].sel=null; MC[id].gesperrt=false;
   baueMC(id,boxId); reset(id);
 }
+/* Optionen einmalig mischen (Projektvorgabe) */ mischeMC(MC['g2']); mischeMC(MC['p2']); mischeMC(MC['g4']); mischeMC(MC['p4']); 
 baueMC('g2','mc_g2');
 baueMC('p2','mc_p2');
 baueMC('g4','mc_g4');

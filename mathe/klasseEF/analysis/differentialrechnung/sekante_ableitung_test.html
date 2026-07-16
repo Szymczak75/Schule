@@ -1100,14 +1100,28 @@ baueD10();
    ========================================================= */
 const D8={
   aussagen:[
-    {t:'Die Ableitung \\(f\'(x_0)\\) ist die Steigung der Tangente an der Stelle \\(x_0\\).', ok:true},
-    {t:'Zur Bestimmung des Grenzwerts darf man einfach \\(h = 0\\) einsetzen.', ok:false},
-    {t:'Die Sekantensteigung ist die mittlere Änderungsrate über ein Intervall.', ok:true},
-    {t:'Bei einer Geraden ist die Ableitung an jeder Stelle gleich.', ok:true},
-    {t:'Der Grenzwert von \\(3\\cdot h\\) für \\(h \\to 0\\) ist \\(3\\).', ok:false}
+    {t:'Die Ableitung \\(f\'(x_0)\\) ist die Steigung der Tangente an der Stelle \\(x_0\\).', ok:true,
+      erkl:'Die Ableitung ist genau die Tangentensteigung – das ist ihre geometrische Bedeutung.'},
+    {t:'Zur Bestimmung des Grenzwerts darf man einfach \\(h = 0\\) einsetzen.', ok:false,
+      erkl:'Bei \\(h = 0\\) stünde \\(\\dfrac{0}{0}\\) da – nicht definiert. Man muss <b>erst kürzen</b>, dann den Grenzwert bilden.'},
+    {t:'Die Sekantensteigung ist die mittlere Änderungsrate über ein Intervall.', ok:true,
+      erkl:'Sekante = zwei Punkte = ein Intervall = mittlere Änderungsrate.'},
+    {t:'Bei einer Geraden ist die Ableitung an jeder Stelle gleich.', ok:true,
+      erkl:'Eine Gerade hat überall dieselbe Steigung. Also ist auch die Ableitung überall gleich – nämlich \\(m\\).'},
+    {t:'Der Grenzwert von \\(3\\cdot h\\) für \\(h \\to 0\\) ist \\(3\\).', ok:false,
+      erkl:'Bei \\(3\\cdot h\\) steht <b>kein</b> Summand ohne \\(h\\). Für \\(h \\to 0\\) geht der ganze Ausdruck gegen \\(0\\), nicht gegen \\(3\\).'}
   ],
   antw:{}
 };
+/* Aussagen EINMAL beim Laden mischen (Projektvorgabe – auch Wahr/Falsch-Listen).
+   soll/richtig/Musterlösung werden unten dynamisch aus dieser (gemischten)
+   Reihenfolge abgeleitet, damit alles zueinander passt. */
+(function(){
+  for(let i=D8.aussagen.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    const t=D8.aussagen[i]; D8.aussagen[i]=D8.aussagen[j]; D8.aussagen[j]=t;
+  }
+})();
 function baueD8(){
   const box=document.getElementById('wf_a8');
   box.innerHTML='';
@@ -1530,30 +1544,26 @@ const LOESUNG={
   },
   a8:{
     pruef:w=>{
-      const soll=[true,false,true,true,false];
-      if(!w) return {ok:false,teil:0,max:5};
+      // soll aus der (gemischten) Aussagen-Reihenfolge ableiten
+      const soll=D8.aussagen.map(a=>a.ok);
+      if(!w) return {ok:false,teil:0,max:soll.length};
       let r=0;
-      soll.forEach((s,i)=>{
+      soll.forEach((sll,i)=>{
         const geg=(w[i]==='wahr');
-        if(w[i]!==undefined && geg===s) r++;
+        if(w[i]!==undefined && geg===sll) r++;
       });
-      return {ok:r===5, teil:r, max:5};
+      return {ok:r===soll.length, teil:r, max:soll.length};
     },
     deine:w=>{
       if(!w) return 'nicht bearbeitet';
-      return [0,1,2,3,4].map(i=>(i+1)+'. '+(w[i]||'—')).join(' · ');
+      return D8.aussagen.map((a,i)=>(i+1)+'. '+(w[i]||'—')).join(' · ');
     },
-    richtig:'1. wahr · 2. falsch · 3. wahr · 4. wahr · 5. falsch',
-    loes:`<div class="schritt"><b>1. WAHR.</b> Die Ableitung ist genau die Tangentensteigung –
-        das ist ihre geometrische Bedeutung.</div>
-      <div class="schritt"><b>2. FALSCH.</b> Bei \\(h = 0\\) stünde \\(\\dfrac{0}{0}\\) da –
-        nicht definiert. Man muss <b>erst kürzen</b>, dann den Grenzwert bilden.</div>
-      <div class="schritt"><b>3. WAHR.</b> Sekante = zwei Punkte = ein Intervall =
-        mittlere Änderungsrate.</div>
-      <div class="schritt"><b>4. WAHR.</b> Eine Gerade hat überall dieselbe Steigung.
-        Also ist auch die Ableitung überall gleich – nämlich \\(m\\).</div>
-      <div class="schritt"><b>5. FALSCH.</b> Bei \\(3\\cdot h\\) steht <b>kein</b> Summand
-        ohne \\(h\\). Für \\(h \\to 0\\) geht der ganze Ausdruck gegen \\(0\\), nicht gegen \\(3\\).</div>`
+    // richtig-String folgt der gemischten Reihenfolge
+    richtig:(()=>D8.aussagen.map((a,i)=>(i+1)+'. '+(a.ok?'wahr':'falsch')).join(' · '))(),
+    // Musterlösung folgt der gemischten Reihenfolge; Erklärung hängt an der Aussage
+    loes:(()=>D8.aussagen.map((a,i)=>
+      `<div class="schritt"><b>${i+1}. ${a.ok?'WAHR':'FALSCH'}.</b> ${a.erkl}</div>`
+    ).join(''))()
   },
   a9:{
     pruef:w=>{

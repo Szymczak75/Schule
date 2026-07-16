@@ -1236,6 +1236,20 @@ const MC3={opt:[
   {t:"f′(x) = 12x, denn man hängt ein x an.",ok:false}
 ],sel:null,gesperrt:false};
 
+
+/* === Fisher-Yates: MC-Optionen EINMAL beim Laden mischen (Projektvorgabe) ===
+   Mischt D.opt in place. Auswertung erfolgt über das ok-Flag, nicht über den Index,
+   daher bleibt alles korrekt. Wird pro MC-Objekt nur EINMAL aufgerufen -> Reihenfolge
+   ist innerhalb der Sitzung stabil (kein Neumischen bei Karten-/Stufenwechsel). */
+function mischeMC(D){
+  if(!D||!D.opt||D._gemischt) return;
+  for(let i=D.opt.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    const tmp=D.opt[i]; D.opt[i]=D.opt[j]; D.opt[j]=tmp;
+  }
+  D._gemischt=true;
+}
+
 function baueMC(D,box,pre){
   const b=document.getElementById(box);
   b.innerHTML='';
@@ -1252,6 +1266,7 @@ function baueMC(D,box,pre){
   });
   mj(b);
 }
+/* Optionen einmalig mischen (Projektvorgabe) */ mischeMC(MC3); 
 baueMC(MC3,'mc3','m3');
 function pruefe3(){
   if(MC3.sel===null){ fbNo('3','Wähle zuerst eine Antwort aus.',false); return; }

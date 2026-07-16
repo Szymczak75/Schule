@@ -191,6 +191,10 @@ svg text{-webkit-user-select:none;user-select:none;}
   background:#fdfbf8;border:2px solid var(--line);border-radius:12px;
   padding:12px 14px;margin:12px 0;
 }
+.ziehhinweis{
+  background:#eef4fb;border:2px solid var(--blue,#2f5fa6);border-radius:12px;
+  padding:10px 14px;margin:12px 0;font-size:.92rem;color:#1f4680;line-height:1.55;
+}
 .sliderbox label{
   display:block;font-weight:800;color:var(--orange-dark);
   margin-bottom:8px;font-size:.95rem;
@@ -379,14 +383,10 @@ table.wert{ display:block; overflow-x:auto; -webkit-overflow-scrolling:touch; }
 
     <div class="infozeile" id="infoSek"></div>
 
-    <div class="sliderbox">
-      <label for="sliderQ">🎯 Position von Q verschieben</label>
-      <input type="range" id="sliderQ" min="0" max="100" value="0" step="1">
-      <div class="sliderwerte">
-        <span>Q weit weg (x = 3)</span>
-        <span>Q ganz nah an P</span>
-      </div>
-    </div>
+    <p class="ziehhinweis" id="ziehHinweisSek">
+      👆 Ziehe den blauen Punkt <b>Q</b> direkt auf der Kurve – schiebe ihn Richtung <b>P</b>
+      und beobachte, wie sich die Sekante der Tangente annähert.
+    </p>
 
     <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
       <button class="btn sekundaer" onclick="sekAnim()">▶ Automatisch annähern</button>
@@ -1030,6 +1030,14 @@ function hVonT(t){
   const a=Math.log(2), b=Math.log(0.001);
   return Math.exp(a+(b-a)*t/100);
 }
+/* Inverse: aus der x-Position von Q (x2 = X0 + h) den Regler-Parameter t gewinnen.
+   Wird beim direkten Ziehen von Q gebraucht. Q-Bereich: x2 von 3 (t=0) bis ~1,001 (t=100). */
+function tVonX2(x2){
+  const h=Math.max(0.001, Math.min(2, x2 - X0));   // h auf den sinnvollen Bereich begrenzen
+  const a=Math.log(2), b=Math.log(0.001);
+  const t=(Math.log(h)-a)/(b-a)*100;
+  return Math.max(0, Math.min(100, t));
+}
 function zeichneSK(){
   svgSK.innerHTML='';
   achsen(svgSK,SK,skx,sky,1,2);
@@ -1067,8 +1075,17 @@ function zeichneSK(){
   }
 
   // Punkte
+  // Q: sichtbarer Punkt + große transparente Trefferfläche zum direkten Ziehen (>=44px)
   svgSK.appendChild(el('circle',{cx:skx(x2),cy:sky(y2),r:8,fill:'#1f4680',
     stroke:'#fff','stroke-width':2}));
+  // dezenter Zieh-Ring als Affordanz
+  svgSK.appendChild(el('circle',{cx:skx(x2),cy:sky(y2),r:13,fill:'none',
+    stroke:'#1f4680','stroke-width':1.5,opacity:.45}));
+  // unsichtbare, große Greiffläche (id fürs Cursor-Styling)
+  const grip=el('circle',{cx:skx(x2),cy:sky(y2),r:24,fill:'transparent',
+    'pointer-events':'all',style:'cursor:grab;'});
+  grip.setAttribute('id','qGrip');
+  svgSK.appendChild(grip);
   svgSK.appendChild(el('circle',{cx:skx(X0),cy:sky(y0),r:8,fill:'#c1272d',
     stroke:'#fff','stroke-width':2}));
 
@@ -1122,23 +1139,59 @@ function fuelleTabelle(){
   const c3=tr.insertCell(); c3.innerHTML='<b>→ ?</b>'; c3.style.color='#14591f';
   c3.style.fontSize='1.1rem';
 }
-document.getElementById('sliderQ').addEventListener('input',ev=>{
-  if(SK.anim){cancelAnimationFrame(SK.anim);SK.anim=null;}
-  SK.t=parseFloat(ev.target.value);
-  zeichneSK();
-});
+/* ---- Q direkt ziehen (Pointer-Events + setPointerCapture, iPad-tauglich) ---- */
+(function(){
+  let ziehtQ=false, pid=null, raf=false;
+  function x2AusPointer(ev){
+    const r=svgSK.getBoundingClientRect();
+    // Pointer-x in viewBox-Koordinaten (0..W) umrechnen, dann in Daten-x
+    const vx=(ev.clientX-r.left)/r.width*SK.W;
+    const datX = SK.xmin + (vx-SK.padL)/(SK.W-SK.padL-SK.padR)*(SK.xmax-SK.xmin);
+    return datX;
+  }
+  function updateVonPointer(ev){
+    const x2=x2AusPointer(ev);
+    SK.t=tVonX2(x2);
+    if(!raf){ raf=true; requestAnimationFrame(()=>{ raf=false; zeichneSK(); }); }
+  }
+  function nahAnQ(ev){
+    // nur starten, wenn der Griff (oder seine Nähe) getroffen wird
+    const g=document.getElementById('qGrip');
+    if(!g) return false;
+    const r=svgSK.getBoundingClientRect();
+    const gx=parseFloat(g.getAttribute('cx'))/SK.W*r.width + r.left;
+    const gy=parseFloat(g.getAttribute('cy'))/SK.H*r.height + r.top;
+    const dist=Math.hypot(ev.clientX-gx, ev.clientY-gy);
+    return dist <= 30/SK.W*r.width + 18;   // großzügige Trefferzone
+  }
+  svgSK.addEventListener('pointerdown',ev=>{
+    if(!nahAnQ(ev)) return;
+    if(SK.anim){cancelAnimationFrame(SK.anim);SK.anim=null;}
+    ziehtQ=true; pid=ev.pointerId;
+    try{svgSK.setPointerCapture(pid);}catch(_){}
+    updateVonPointer(ev);
+    ev.preventDefault();
+  });
+  svgSK.addEventListener('pointermove',ev=>{
+    if(!ziehtQ||ev.pointerId!==pid) return;
+    updateVonPointer(ev);
+    ev.preventDefault();
+  });
+  function ende(ev){ if(ev&&ev.pointerId!==pid) return; ziehtQ=false; pid=null; }
+  svgSK.addEventListener('pointerup',ende);
+  svgSK.addEventListener('pointercancel',ende);
+  // Scroll-Sperre während des Ziehens (nicht-passiv), damit die Seite nicht mitscrollt
+  svgSK.addEventListener('touchmove',ev=>{ if(ziehtQ) ev.preventDefault(); },{passive:false});
+})();
 function sekAnim(){
   if(SK.anim){cancelAnimationFrame(SK.anim);SK.anim=null;}
   SK.t=0;
-  document.getElementById('sliderQ').value=0;
   const schritt=()=>{
     SK.t+=0.55;
     if(SK.t>=100){
       SK.t=100;
-      document.getElementById('sliderQ').value=100;
       zeichneSK(); SK.anim=null; return;
     }
-    document.getElementById('sliderQ').value=SK.t;
     zeichneSK();
     SK.anim=requestAnimationFrame(schritt);
   };
@@ -1146,7 +1199,7 @@ function sekAnim(){
 }
 function sekReset(){
   if(SK.anim){cancelAnimationFrame(SK.anim);SK.anim=null;}
-  SK.t=0; document.getElementById('sliderQ').value=0; zeichneSK();
+  SK.t=0; zeichneSK();
 }
 
 /* =========================================================
@@ -1373,6 +1426,20 @@ const MC6={opt:[
   {t:'Beide Raten sind bei jeder Funktion gleich groß.',ok:false}
 ],sel:null,gesperrt:false};
 
+
+/* === Fisher-Yates: MC-Optionen EINMAL beim Laden mischen (Projektvorgabe) ===
+   Mischt D.opt in place. Auswertung erfolgt über das ok-Flag, nicht über den Index,
+   daher bleibt alles korrekt. Wird pro MC-Objekt nur EINMAL aufgerufen -> Reihenfolge
+   ist innerhalb der Sitzung stabil (kein Neumischen bei Karten-/Stufenwechsel). */
+function mischeMC(D){
+  if(!D||!D.opt||D._gemischt) return;
+  for(let i=D.opt.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    const tmp=D.opt[i]; D.opt[i]=D.opt[j]; D.opt[j]=tmp;
+  }
+  D._gemischt=true;
+}
+
 function baueMC(D,box,pre){
   const b=document.getElementById(box);
   b.innerHTML='';
@@ -1404,6 +1471,7 @@ function pruefeMC(D,pre,nr,tOk,tNo){
 function leereMC(D,box,pre,nr){
   D.sel=null; D.gesperrt=false; baueMC(D,box,pre); fbWeg(nr); leerAn(nr,false);
 }
+/* Optionen einmalig mischen (Projektvorgabe) */ mischeMC(MC1); mischeMC(MC3); mischeMC(MC6); 
 baueMC(MC1,'mc1','m1');
 baueMC(MC3,'mc3','m3');
 baueMC(MC6,'mc6','m6');
