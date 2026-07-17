@@ -1,0 +1,1703 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🦖 Mathedino Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Source+Sans+3:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#f0f2f8;--surface:#fff;--border:#d4daf0;--bl:#e8ecf8;
+    --mathe:#1d4ed8;--ml:#eff6ff;--bio:#15803d;--biol:#f0fdf4;
+    --kompass:#be185d;--kl:#fdf2f8;--sonst:#475569;--sl:#f8fafc;
+    --text:#0f172a;--muted:#64748b;
+    --shadow:0 4px 12px rgba(15,23,42,.10),0 12px 40px rgba(15,23,42,.08);
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:'Source Sans 3',sans-serif;font-weight:400;min-height:100vh;padding:0 0 6rem;overflow-x:hidden}
+
+  /* topbar */
+  .topbar{background:#0f1f0f;padding:1rem 1.5rem .9rem;position:sticky;top:0;z-index:50;box-shadow:0 2px 12px rgba(15,23,42,.4);border-bottom:3px solid #22c55e}
+  .topbar-inner{max-width:960px;margin:0 auto}
+  .topbar h1{font-family:'Playfair Display',serif;font-size:1rem;color:#e2e8f0;margin-bottom:.7rem;display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
+  .topbar h1 .ts{margin-left:auto;font-size:.7rem;opacity:.5;font-family:'Source Sans 3',sans-serif;font-weight:400}
+  .lehrer-badge{background:#f59e0b;color:#0f172a;font-size:.7rem;font-weight:700;padding:.2rem .6rem;border-radius:20px;display:none}
+  .lehrer-badge.visible{display:inline-block}
+  .tabs{display:flex;gap:.5rem;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  .tabs::-webkit-scrollbar{display:none}
+  .tab-btn{display:flex;align-items:center;gap:.45rem;padding:.52rem 1rem;border-radius:10px;border:1.5px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:#94a3b8;font-family:'Source Sans 3',sans-serif;font-size:.82rem;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .18s;-webkit-tap-highlight-color:transparent;min-height:40px}
+  .tab-btn:hover{background:rgba(255,255,255,.12);color:#e2e8f0}
+  .tab-btn.active[data-fach="mathe"]{background:var(--mathe);color:#fff;border-color:var(--mathe)}
+  .tab-btn.active[data-fach="bio"]{background:var(--bio);color:#fff;border-color:var(--bio)}
+  .tab-btn.active[data-fach="kompass"]{background:var(--kompass);color:#fff;border-color:var(--kompass)}
+  .tab-btn.active[data-fach="sonst"]{background:var(--sonst);color:#fff;border-color:var(--sonst)}
+  .tab-btn.active[data-fach="suche"]{background:#7c3aed;color:#fff;border-color:#7c3aed}
+
+  /* Lehrermodus */
+  .lehrer-only{display:none}
+  body.lehrer-mode .lehrer-only{display:block}
+  body.lehrer-mode .kachel-links a.lehrer-link{display:block}
+  .kachel-links a.lehrer-link{display:none;color:#92400e !important;font-style:italic}
+  .kachel-links a.lehrer-link::before{content:'👨‍🏫 '}
+
+  /* search */
+  .search-bar{max-width:960px;margin:1.25rem auto 0;padding:0 1.25rem;display:none}
+  .search-bar.visible{display:block}
+  .search-row{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:.75rem 1rem;box-shadow:var(--shadow);margin-bottom:.75rem}
+  .search-input{flex:1;min-width:180px;border:none;outline:none;font-family:'Source Sans 3',sans-serif;font-size:.95rem;color:var(--text);background:transparent}
+  .search-input::placeholder{color:var(--muted)}
+  .filter-group{display:flex;gap:.4rem;flex-wrap:wrap}
+  .filter-btn{padding:.3rem .7rem;border-radius:20px;border:1.5px solid var(--border);background:#f8fafd;color:var(--muted);font-size:.75rem;font-weight:600;cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent}
+  .filter-btn.active{background:#7c3aed;color:#fff;border-color:#7c3aed}
+  .fach-filter-btn{padding:.3rem .7rem;border-radius:20px;border:1.5px solid var(--border);background:#f8fafd;color:var(--muted);font-size:.75rem;font-weight:600;cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent}
+  .fach-filter-btn.active[data-val="mathe"]{background:var(--mathe);color:#fff;border-color:var(--mathe)}
+  .fach-filter-btn.active[data-val="bio"]{background:var(--bio);color:#fff;border-color:var(--bio)}
+  .fach-filter-btn.active[data-val=""]{background:#7c3aed;color:#fff;border-color:#7c3aed}
+  .search-results{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:var(--shadow)}
+  .sri{display:flex;align-items:center;gap:.75rem;padding:.65rem 1.2rem;text-decoration:none;color:var(--text);border-bottom:1px solid var(--bl);transition:background .12s;min-height:48px}
+  .sri:last-child{border-bottom:none}
+  .sri:hover{background:#f0f4ff}
+  .sri-icon{font-size:.8rem;opacity:.3;flex-shrink:0}
+  .sri-info{flex:1;min-width:0}
+  .sri-title{font-size:.9rem;font-weight:600}
+  .sri-desc{font-size:.75rem;color:var(--muted);margin-top:.1rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .sri-tags{display:flex;gap:.3rem;flex-shrink:0}
+  .no-results{padding:2rem;text-align:center;color:var(--muted);font-size:.9rem}
+
+  /* meta hint */
+  .meta-hinweis{max-width:960px;margin:0 auto 1.5rem;padding:0 1.25rem;display:none}
+  .meta-hinweis.visible{display:block}
+  .meta-box{background:#fffbeb;border:1.5px solid #f59e0b;border-radius:14px;padding:1rem 1.25rem}
+  .meta-box h3{font-size:.85rem;font-weight:700;color:#92400e;margin-bottom:.6rem}
+  .meta-box ul{list-style:none;display:flex;flex-direction:column;gap:.35rem}
+  .meta-box li{display:flex;align-items:center;gap:.6rem}
+  .meta-box a{font-size:.83rem;font-weight:600;color:#1d4ed8;text-decoration:none}
+  .meta-box .path{font-size:.7rem;color:var(--muted)}
+
+  /* cards */
+  .card-area{padding:1.5rem 1.25rem;max-width:960px;margin:0 auto}
+  .card{display:none;background:var(--surface);border:1px solid var(--border);border-radius:20px;overflow:hidden;box-shadow:var(--shadow);animation:fadeIn .2s ease}
+  .card.active{display:block}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .card[data-fach="mathe"]{border-top:4px solid var(--mathe)}
+  .card[data-fach="bio"]{border-top:4px solid var(--bio)}
+  .card[data-fach="kompass"]{border-top:4px solid var(--kompass)}
+  .card[data-fach="sonst"]{border-top:4px solid var(--sonst)}
+  .card-header{display:flex;align-items:center;gap:1rem;padding:1.1rem 1.5rem;border-bottom:1px solid var(--bl)}
+  .card[data-fach="mathe"] .card-header{background:var(--ml)}
+  .card[data-fach="bio"] .card-header{background:var(--biol)}
+  .card[data-fach="kompass"] .card-header{background:var(--kl)}
+  .card[data-fach="sonst"] .card-header{background:var(--sl)}
+  .card-icon{font-size:1.5rem}
+  .card-title{font-family:'Playfair Display',serif;font-size:1.3rem;flex:1;font-weight:900}
+  .card[data-fach="mathe"] .card-title{color:var(--mathe)}
+  .card[data-fach="bio"] .card-title{color:var(--bio)}
+  .card[data-fach="kompass"] .card-title{color:var(--kompass)}
+  .card[data-fach="sonst"] .card-title{color:var(--sonst)}
+  .card-meta{font-size:.7rem;color:var(--muted);background:#fff;padding:.2rem .6rem;border-radius:20px;border:1px solid var(--border);font-weight:600}
+
+  /* klassen */
+  .klasse-wrap{border-bottom:1px solid var(--bl)}
+  .klasse-wrap:last-child{border-bottom:none}
+  .klasse-btn{width:100%;display:flex;align-items:center;gap:.75rem;padding:.85rem 1.5rem;background:none;border:none;cursor:pointer;text-align:left;font-family:'Source Sans 3',sans-serif;font-size:1rem;font-weight:700;color:var(--text);-webkit-tap-highlight-color:transparent;transition:background .12s;min-height:52px}
+  .klasse-btn:hover{background:#f8fafd}
+  .card[data-fach="mathe"] .klasse-btn:hover{background:var(--ml)}
+  .card[data-fach="bio"] .klasse-btn:hover{background:var(--biol)}
+  .klasse-label{flex:1}
+  .klasse-count{font-size:.7rem;font-weight:600;color:#fff;padding:.15rem .5rem;border-radius:12px;background:#94a3b8}
+  .card[data-fach="mathe"] .klasse-count{background:var(--mathe)}
+  .card[data-fach="bio"] .klasse-count{background:var(--bio)}
+  .card[data-fach="kompass"] .klasse-count{background:var(--kompass)}
+  .card[data-fach="sonst"] .klasse-count{background:var(--sonst)}
+  .klasse-arrow{font-size:.65rem;color:var(--muted);transition:transform .22s;margin-left:.3rem}
+  .klasse-btn[aria-expanded="true"] .klasse-arrow{transform:rotate(180deg)}
+  .klasse-panel{display:none;border-top:2px solid var(--bl)}
+  .klasse-panel.open{display:block}
+
+  /* themen kacheln */
+  .themen-bereich{padding:.75rem 1rem 1rem;display:flex;flex-direction:column;gap:.6rem}
+  .thema-block{background:var(--surface);border:1px solid var(--bl);border-radius:14px;overflow:hidden}
+  .thema-header{display:flex;align-items:center;gap:.6rem;padding:.6rem 1rem;border-bottom:1px solid var(--bl)}
+  .card[data-fach="mathe"] .thema-header{background:var(--ml)}
+  .card[data-fach="bio"] .thema-header{background:var(--biol)}
+  .thema-icon{font-size:1.1rem}
+  .thema-title{font-weight:700;font-size:.9rem;flex:1}
+  .card[data-fach="mathe"] .thema-title{color:var(--mathe)}
+  .card[data-fach="bio"] .thema-title{color:var(--bio)}
+  .thema-leer{font-size:.7rem;color:var(--muted);font-style:italic}
+  .kachel-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:.5rem;padding:.6rem}
+  .kachel{position:relative;background:#f8fafd;border:1px solid var(--bl);border-radius:10px;padding:.55rem .7rem;cursor:pointer;transition:background .12s,border-color .12s;-webkit-tap-highlight-color:transparent}
+  .kachel:not(.kachel-leer):hover{background:var(--ml);border-color:#93c5fd}
+  .kachel.open{background:var(--ml);border-color:#93c5fd}
+  .kachel-leer{opacity:.4;cursor:default}
+  .kachel-name{font-size:.82rem;font-weight:600;color:var(--text);margin-bottom:.35rem;line-height:1.3}
+  .kachel-badges{display:flex;gap:.3rem;flex-wrap:wrap}
+  .kbadge{font-size:.65rem;padding:.15rem .45rem;border-radius:20px;font-weight:600}
+  .kbadge.ls{background:#dbeafe;color:#1d4ed8}
+  .kbadge.ue{background:#ccfbf1;color:#0f766e}
+  .kbadge.test{background:#fee2e2;color:#b91c1c}
+  .kbadge.bonus{background:#ede9fe;color:#6d28d9}
+  .kbadge.rbka{background:#fef2f2;color:#9f1239}
+  .kbadge.rb{background:#fff7ed;color:#9a3412}
+  .kbadge.leer{background:#f1f5f9;color:#94a3b8}
+  .kbadge.lehrer{background:#fef3c7;color:#92400e;display:none}
+  .kbadge.rbka{background:#fef3c7;color:#b45309}
+  body.lehrer-mode .kbadge.lehrer{display:inline-block}
+  /* ── Paar-Darstellung ls+ue ── */
+  .kachel-links{margin-top:.5rem;border-top:1px solid var(--bl);padding-top:.4rem;display:flex;flex-direction:column;gap:.2rem}
+  .kachel-links a{font-size:.78rem;color:var(--mathe);text-decoration:none;padding:.2rem .1rem;display:block}
+  .kachel-links a:hover{text-decoration:underline}
+  .card[data-fach="bio"] .kachel-links a{color:var(--bio)}
+  .link-pair{display:grid;grid-template-columns:1fr 1fr;gap:.3rem;background:#f0f7ff;border-radius:6px;padding:.2rem .3rem}
+  .card[data-fach="bio"] .link-pair{background:#f0fdf4}
+  .link-pair a{font-size:.75rem;padding:.15rem .2rem}
+  .link-pair a:first-child{border-right:1px solid var(--bl)}
+  .link-single{display:block}
+
+  /* ── Tooltip / Long-Press Info ── */
+  .kachel-tooltip{display:none;position:absolute;top:0;left:100%;margin-left:.5rem;width:200px;max-width:60vw;padding:.5rem .65rem;background:#1e293b;color:#e2e8f0;border-radius:8px;font-size:.72rem;line-height:1.4;box-shadow:0 8px 24px rgba(15,23,42,.35);z-index:30}
+  .kachel-tooltip.tt-left{left:auto;right:100%;margin-left:0;margin-right:.5rem}
+  .kachel-tooltip .tt-typ{font-weight:700;color:#94a3b8;font-size:.65rem;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.15rem}
+  .kachel-tooltip .tt-desc{color:#cbd5e1}
+  .kachel-tooltip .tt-path{color:#475569;font-size:.62rem;margin-top:.2rem;word-break:break-all}
+  .kachel.tooltip-open .kachel-tooltip{display:block}
+
+  /* Long-press highlight */
+  .kachel.pressing{outline:2px solid #f59e0b;outline-offset:2px}
+
+  /* alt */
+  .alt-wrap{border-top:2px dashed #cbd5e1}
+  .alt-btn{width:100%;display:flex;align-items:center;gap:.75rem;padding:.75rem 1.5rem;background:#f8fafc;border:none;cursor:pointer;text-align:left;font-family:'Source Sans 3',sans-serif;font-size:.8rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.1em;-webkit-tap-highlight-color:transparent;transition:background .12s;min-height:48px}
+  .alt-btn:hover{background:#f1f5f9}
+  .alt-arrow{font-size:.65rem;transition:transform .22s;margin-left:.3rem}
+  .alt-btn[aria-expanded="true"] .alt-arrow{transform:rotate(180deg)}
+  .alt-panel{display:none}
+  .alt-panel.open{display:block}
+
+  /* jgst (alte Struktur) */
+  .jgst{border-bottom:1px solid var(--bl)}
+  .jgst:last-child{border-bottom:none}
+  .jgst-toggle{width:100%;display:flex;align-items:center;gap:.75rem;padding:.85rem 1.5rem;background:none;border:none;cursor:pointer;text-align:left;color:var(--text);font-family:'Source Sans 3',sans-serif;font-size:.92rem;font-weight:700;-webkit-tap-highlight-color:transparent;transition:background .12s;min-height:48px}
+  .jgst-toggle:hover{background:#f8fafd}
+  .jgst-label{flex:1}
+  .jgst-count{font-size:.7rem;font-weight:600;color:#fff;padding:.15rem .5rem;border-radius:12px;background:#94a3b8}
+  .card[data-fach="mathe"] .jgst-count{background:var(--mathe)}
+  .jgst-arrow{font-size:.65rem;color:var(--muted);transition:transform .22s;margin-left:.3rem}
+  .jgst-toggle[aria-expanded="true"] .jgst-arrow{transform:rotate(180deg)}
+  .jgst-panel{display:none;border-top:1px solid var(--bl);background:#f8fafd}
+  .jgst-panel.open{display:block}
+
+  /* cols */
+  .col-grid{display:grid;grid-template-columns:repeat(3,1fr);align-items:start}
+  .col-grid.c4{grid-template-columns:repeat(4,1fr)}
+  .col-grid.c1{grid-template-columns:1fr}
+  .col-group{border-right:1px solid var(--bl);min-width:0}
+  .col-group:last-child{border-right:none}
+  .col-head{padding:.5rem 1rem .45rem;font-size:.68rem;text-transform:uppercase;letter-spacing:.13em;font-weight:700;border-bottom:2px solid;display:flex;align-items:center;gap:.35rem}
+  .col-head.lernen{color:#1d4ed8;background:#eff6ff;border-color:#1d4ed8}
+  .col-head.uebung{color:#0f766e;background:#f0fdfa;border-color:#0f766e}
+  .col-head.sonstig{color:#7c3aed;background:#f5f3ff;border-color:#7c3aed}
+  .col-head.test{color:#b91c1c;background:#fff1f2;border-color:#b91c1c}
+  .col-head.arbeit{color:#c2410c;background:#fff7ed;border-color:#c2410c}
+  .col-head.ha{color:#854d0e;background:#fefce8;border-color:#854d0e}
+  .links{display:flex;flex-direction:column}
+  .link-row{display:flex;align-items:flex-start;gap:.55rem;padding:.6rem 1rem;text-decoration:none;color:var(--text);border-top:1px solid var(--bl);transition:background .1s;-webkit-tap-highlight-color:transparent;min-height:44px}
+  .link-row:first-child{border-top:none}
+  .link-row:hover{background:#e8f0fe}
+  .link-icon{font-size:.72rem;opacity:.3;flex-shrink:0;margin-top:.18rem}
+  .link-name{flex:1;font-size:.88rem;font-weight:600;color:var(--text);line-height:1.35}
+  .link-row:hover .link-name{color:var(--mathe)}
+  .empty-col{padding:.7rem 1rem;font-size:.78rem;font-style:italic;color:#94a3b8}
+  .link-tag{font-size:.6rem;padding:.13rem .42rem;border-radius:20px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;flex-shrink:0;margin-top:.18rem}
+  .tag-arbeit{background:#ffedd5;color:#c2410c}
+  .tag-entwurf{background:#f1f5f9;color:#475569}
+  .tag-bonus{background:#ede9fe;color:#6d28d9}
+  .tag-test{background:#fee2e2;color:#b91c1c}
+  .tag-orga{background:#fef9c3;color:#854d0e}
+
+  @media(max-width:600px){
+    .col-grid,.col-grid.c4{grid-template-columns:1fr}
+    .col-group{border-right:none;border-bottom:1px solid var(--bl)}
+    .col-group:last-child{border-bottom:none}
+    .kachel-grid{grid-template-columns:repeat(2,1fr)}
+  }
+
+  /* Dino */
+  #dino{position:fixed;bottom:1.5rem;right:1.5rem;font-size:2.2rem;cursor:pointer;user-select:none;transition:transform .25s cubic-bezier(.34,1.56,.64,1);z-index:100;filter:drop-shadow(0 3px 6px rgba(0,0,0,.25))}
+  #dino:hover{transform:scale(1.25) rotate(-10deg)}
+  #dino:active{transform:scale(.92) rotate(5deg)}
+  body.lehrer-mode #dino{filter:drop-shadow(0 3px 12px rgba(245,158,11,.6))}
+  #dino-tip{position:fixed;bottom:4.8rem;right:1.5rem;background:#0f172a;color:#e2e8f0;font-family:'Source Sans 3',sans-serif;font-size:.78rem;font-weight:600;padding:.45rem .9rem;border-radius:10px;white-space:nowrap;pointer-events:none;opacity:0;transform:translateY(6px);transition:opacity .2s,transform .2s}
+  #dino-tip.visible{opacity:1;transform:translateY(0)}
+  #dino-tip::after{content:'';position:absolute;top:100%;right:1.1rem;border:5px solid transparent;border-top-color:#0f172a}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <h1>🦖 Mathedino <span>· Materialübersicht</span>
+      <span class="lehrer-badge" id="lehrerBadge">👨‍🏫 Lehrermodus</span>
+      <span class="ts">aktualisiert 16.07.2026</span>
+    </h1>
+    <div class="tabs" id="tabBar"></div>
+  </div>
+</div>
+
+<div class="search-bar" id="searchBar">
+  <div class="search-row">
+    <span style="font-size:1rem;opacity:.5">🔍</span>
+    <input class="search-input" id="searchInput" type="search" placeholder="Schlagwort suchen…" oninput="doSearch()">
+  </div>
+  <div class="search-row" style="gap:.5rem;padding:.5rem .75rem;">
+    <span style="font-size:.75rem;color:var(--muted);font-weight:600;white-space:nowrap;">Fach:</span>
+    <div class="filter-group" id="filterFach">
+      <button class="fach-filter-btn active" data-val="">Alle</button>
+      <button class="fach-filter-btn" data-val="mathe">📐 Mathe</button>
+      <button class="fach-filter-btn" data-val="bio">🧬 Bio</button>
+      <button class="fach-filter-btn" data-val="kompass">🧭 Kompass</button>
+    </div>
+    <span style="font-size:.75rem;color:var(--muted);font-weight:600;white-space:nowrap;margin-left:.5rem;">Klasse:</span>
+    <div class="filter-group" id="filterKlasse">
+      <button class="filter-btn active" data-val="">Alle</button>
+      <button class="filter-btn" data-val="5">5</button>
+      <button class="filter-btn" data-val="6">6</button>
+      <button class="filter-btn" data-val="7">7</button>
+      <button class="filter-btn" data-val="8">8</button>
+      <button class="filter-btn" data-val="9">9</button>
+      <button class="filter-btn" data-val="10">10</button>
+      <button class="filter-btn" data-val="EF">EF</button>
+    </div>
+    <span style="font-size:.75rem;color:var(--muted);font-weight:600;white-space:nowrap;margin-left:.5rem;">Typ:</span>
+    <div class="filter-group" id="filterTyp">
+      <button class="filter-btn active" data-val="">Alle</button>
+      <button class="filter-btn" data-val="Lernseite">Lernseite</button>
+      <button class="filter-btn" data-val="Übung">Übung</button>
+      <button class="filter-btn" data-val="Test">Test</button>
+      <button class="filter-btn" data-val="Bonus">Bonus</button>
+    </div>
+  </div>
+  <div class="search-results" id="searchResults"></div>
+</div>
+
+<div class="meta-hinweis" id="metaHinweis">
+  <div class="meta-box">
+    <h3>🛠️ Vorschlag: Metadaten ergänzen</h3>
+    <ul id="metaList"></ul>
+  </div>
+</div>
+
+<div class="card-area" id="cardArea">
+
+<!-- ══ MATHEMATIK ══ -->
+<div class="card" data-fach="mathe" id="card-mathe">
+  <div class="card-header">
+    <span class="card-icon">📐</span>
+    <span class="card-title">Mathematik</span>
+    <span class="card-meta">Klasse 5–10 · EF</span>
+  </div>
+
+  <!-- Klasse 5 -->
+  <div class="klasse-wrap">
+    <button class="klasse-btn" aria-expanded="false" onclick="toggleKlasse(this)">
+      <span class="klasse-label">📚 Klasse 5</span><span class="klasse-count">34 neu</span><span class="klasse-arrow">▼</span>
+    </button>
+    <div class="klasse-panel">
+      <div class="themen-bereich">
+        <div class="thema-block">
+          <div class="thema-header"><span class="thema-icon">🔢</span><span class="thema-title">Rechnen</span></div>
+          <div class="kachel-grid">
+            <div class="kachel" onclick="toggleKachel(this, event)">
+              <div class="kachel-name">⚙️ Rechengesetze</div>
+              <div class="kachel-badges"><span class="kbadge ls">📖 2</span><span class="kbadge ue">✏️ 5</span></div>
+              <div class="kachel-links" style="display:none">
+                <a href="mathe/klasse05/rechnen/rechengesetze/kommutativ_assoziativ_ls.html" target="_blank" rel="noopener">📖 Kommutativ- &amp; Assoziativgesetz</a>
+                <a href="mathe/klasse05/rechnen/rechengesetze/rechengesetze_ls.html" target="_blank" rel="noopener">📖 Rechengesetze</a>
+                <a href="mathe/klasse05/rechnen/rechengesetze/distributiv_ue.html" target="_blank" rel="noopener">✏️ Distributivgesetz</a>
+                <a href="mathe/klasse05/rechnen/rechengesetze/distributivgesetz_ue.html" target="_blank" rel="noopener">✏️ Distributivgesetz – Übung</a>
+                <a href="mathe/klasse05/rechnen/rechengesetze/rechengesetze_textaufgaben_ue.html" target="_blank" rel="noopener">✏️ Textaufgaben</a>
+                <a href="mathe/klasse05/rechnen/rechengesetze/rechengesetze_ue.html" target="_blank" rel="noopener">✏️ Rechengesetze – Übung</a>
+                <a href="mathe/klasse05/rechnen/rechengesetze/rechenregeln_ue.html" target="_blank" rel="noopener">✏️ Rechenregeln</a>
+              </div>
+            </div>
+            <div class="kachel" onclick="toggleKachel(this, event)">
+              <div class="kachel-name">🔍 Teilbarkeit &amp; Primzahlen</div>
+              <div class="kachel-badges"><span class="kbadge ls">📖 2</span><span class="kbadge ue">✏️ 3</span><span class="kbadge bonus">⭐ 1</span></div>
+              <div class="kachel-links" style="display:none">
+                <a href="mathe/klasse05/rechnen/teilbarkeit_primzahlen/teilbarkeitsregeln_ls.html" target="_blank" rel="noopener">📖 Teilbarkeitsregeln</a>
+                <a href="mathe/klasse05/rechnen/teilbarkeit_primzahlen/primzahlen_ls.html" target="_blank" rel="noopener">📖 Primzahlen</a>
+                <a href="mathe/klasse05/rechnen/teilbarkeit_primzahlen/teilbarkeitsregeln_ue.html" target="_blank" rel="noopener">✏️ Teilbarkeitsregeln – Übung</a>
+                <a href="mathe/klasse05/rechnen/teilbarkeit_primzahlen/primzahlen_ue.html" target="_blank" rel="noopener">✏️ Primzahlen – Übung</a>
+                <a href="mathe/klasse05/rechnen/teilbarkeit_primzahlen/teiler_pfz_ue.html" target="_blank" rel="noopener">✏️ Teiler &amp; PFZ</a>
+                <a href="mathe/klasse05/rechnen/teilbarkeit_primzahlen/sieb_eratosthenes_bonus.html" target="_blank" rel="noopener">⭐ Sieb des Eratosthenes</a>
+              </div>
+            </div>
+            <div class="kachel" onclick="toggleKachel(this, event)">
+              <div class="kachel-name">🔺 Potenzrechnung</div>
+              <div class="kachel-badges"><span class="kbadge ue">✏️ 1</span></div>
+              <div class="kachel-links" style="display:none">
+                <a href="mathe/klasse05/rechnen/potenzrechnung/potenzrechnung_ue.html" target="_blank" rel="noopener">✏️ Potenzrechnung</a>
+              </div>
+            </div>
+            <div class="kachel" onclick="toggleKachel(this, event)">
+              <div class="kachel-name">✍️ Schriftliches Rechnen</div>
+              <div class="kachel-badges"><span class="kbadge ue">✏️ 1</span></div>
+              <div class="kachel-links" style="display:none">
+                <a href="mathe/klasse05/rechnen/schriftliches_rechnen/schriftliches_rechnen_ue.html" target="_blank" rel="noopener">✏️ Schriftliches Rechnen</a>
+              </div>
+            </div>
+            <div class="kachel" onclick="toggleKachel(this, event)">
+              <div class="kachel-name">📝 Sachaufgaben</div>
+              <div class="kachel-badges"><span class="kbadge ls">📖 1</span><span class="kbadge ue">✏️ 1</span></div>
+              <div class="kachel-links" style="display:none">
+                <a href="mathe/klasse05/rechnen/sachaufgaben/sachaufgaben_loesen_ls.html" target="_blank" rel="noopener">📖 Sachaufgaben lösen</a>
+                <a href="mathe/klasse05/rechnen/sachaufgaben/sachaufgaben_ue.html" target="_blank" rel="noopener">✏️ Sachaufgaben – Übung</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="thema-block">
+          <div class="thema-header"><span class="thema-icon">📐</span><span class="thema-title">Geometrie</span></div>
+          <div class="kachel-grid">
+            <div class="kachel" onclick="toggleKachel(this, event)">
+              <div class="kachel-name">🔷 Grundlagen</div>
+              <div class="kachel-badges"><span class="kbadge ls">📖 2</span><span class="kbadge ue">✏️ 1</span></div>
+              <div class="kachel-links" style="display:none">
+                <a href="mathe/klasse05/geometrie/grundlagen/haus_der_vierecke_ls.html" target="_blank" rel="noopener">📖 Haus der Vierecke</a>
+                <a href="mathe/klasse05/geometrie/grundlagen/geradenlagen_geodreieck_ls.html" target="_blank" rel="noopener">📖 Geradenlagen &amp; Geodreieck</a>
+                <a href="mathe/klasse05/geometrie/grundlagen/geometrie_grundbegriffe_ue.html" target="_blank" rel="noopener">✏️ Grundbegriffe</a>
+              </div>
+            </div>
+            <div class="kachel" onclick="toggleKachel(this, event)">
+              <div class="kachel-name">⬜ Flächeninhalt</div>
+              <div class="kachel-badges"><span class="kbadge ls">📖 5</span><span class="kbadge ue">✏️ 7</span><span class="kbadge test">🔍 1</span></div>
+              <div class="kachel-links" style="display:none">
+                <a href="mathe/klasse05/geometrie/flaecheninhalt/flaechen_vergleichen_ls.html" target="_blank" rel="noopener">📖 Flächen vergleichen</a>
+                <a href="mathe/klasse05/geometrie/flaecheninhalt/flaecheneinheiten_ls.html" target="_blank" rel="noopener">📖 Flächeneinheiten</a>
+                <a href="mathe/klasse05/geometrie/flaecheninhalt/flaecheninhalt_rechteck_ls.html" target="_blank" rel="noopener">📖 Flächeninhalt Rechteck</a>
+                <a href="mathe/klasse05/geometrie/flaecheninhalt/flaecheninhalt_dreieck_ls.html" target="_blank" rel="noopener">📖 Flächeninhalt Dreieck</a>
+                <a href="mathe/klasse05/geometrie/flaecheninhalt/zusammengesetzte_flaechen_ls.html" target="_blank" rel="noopener">📖 Zusammengesetzte Flächen</a>
+                <a href="mathe/klasse05/geometrie/flaecheninhalt/Flaecheninhalt_ue.html" target="_blank" rel="noopener">✏️ Flächeninhalt – Aufgaben</a>
+                <a href="mathe/klasse05/geometrie/flaecheninhalt/flaechen_vergleichen_ue.html" target="_blank" rel="noopener">✏️ Flächen vergleichen</a>
+                <a href="mathe/klasse05/geometrie/flaecheninhalt/flaecheneinheiten_ue.html" target="_blank" rel="noopener">✏️ Flächeneinheiten – Übung</a>
+                <a href="mathe/klasse05/geometrie/flaecheninhalt/rechnen_flaecheneinheiten_ls.html" target="_blank" rel="noopener">📖 Flächeneinheiten – Rechnen</a>
+                <a href="mathe/klasse05/geometrie/flaecheninhalt/rechnen_flaecheneinheiten_ue.html" target="_blank" rel="noopener">✏️ Flächeneinheiten – Rechnen</a>
+                <a href="mathe/klasse05/geometrie/flaecheninhalt/flaecheninhalt_rechteck_ue.html" target="_blank" rel="noopener">✏️ Flächeninhalt Rechteck – Übung</a>
+                <a href="mathe/klasse05/geometrie/flaecheninhalt/flaecheninhalt_dreieck_ue.html" target="_blank" rel="noopener">✏️ Flächeninhalt Dreieck – Übung</a>
+                <a href="mathe/klasse05/geometrie/flaecheninhalt/zusammengesetzte_flaechen_ue.html" target="_blank" rel="noopener">✏️ Zusammengesetzte Flächen – Übung</a>
+                <a href="mathe/klasse05/geometrie/flaecheninhalt/flaechen_test.html" target="_blank" rel="noopener">🔍 Flächen – Test</a>
+              </div>
+            </div>
+            <div class="kachel kachel-leer"><div class="kachel-name">🔄 Symmetrie</div><div class="kachel-badges"><span class="kbadge leer">noch leer</span></div></div>
+            <div class="kachel" onclick="toggleKachel(this, event)">
+              <div class="kachel-name">📦 Körper</div>
+              <div class="kachel-badges"><span class="kbadge ls">📖 6</span><span class="kbadge ue">✏️ 3</span><span class="kbadge test">🔍 1</span><span class="kbadge">📄 1</span></div>
+              <div class="kachel-links" style="display:none">
+                <a href="mathe/klasse05/geometrie/koerper/koerper_eigenschaften_ls.html" target="_blank" rel="noopener">📖 Körper-Eigenschaften</a>
+                <a href="mathe/klasse05/geometrie/koerper/koerpernetze_ls.html" target="_blank" rel="noopener">📖 Körpernetze</a>
+                <a href="mathe/klasse05/geometrie/koerper/grundkoerper_netze_ls.html" target="_blank" rel="noopener">📖 Grundkörper &amp; Netze</a>
+                <a href="mathe/klasse05/geometrie/koerper/wuerfelecke_netze_ls.html" target="_blank" rel="noopener">📖 Würfelecke &amp; Netze</a>
+                <a href="mathe/klasse05/geometrie/koerper/wuerfelmuster_band_ls.html" target="_blank" rel="noopener">📖 Würfelmuster – Band</a>
+                <a href="mathe/klasse05/geometrie/koerper/schraegbilder_ls.html" target="_blank" rel="noopener">📖 Schrägbilder</a>
+                <a href="mathe/klasse05/geometrie/koerper/koerper_eigenschaften_ue.html" target="_blank" rel="noopener">✏️ Körper-Eigenschaften – Übung</a>
+                <a href="mathe/klasse05/geometrie/koerper/koerpernetze_ue.html" target="_blank" rel="noopener">✏️ Körpernetze – Übung</a>
+                <a href="mathe/klasse05/geometrie/koerper/schraegbilder_ue.html" target="_blank" rel="noopener">✏️ Schrägbilder – Übung</a>
+                <a href="mathe/klasse05/geometrie/koerper/haus_der_grundkoerper.html" target="_blank" rel="noopener">📄 Haus der Grundkörper</a>
+                <a href="mathe/klasse05/geometrie/koerper/haus_der_grundkoerper_test.html" target="_blank" rel="noopener">🔍 Haus der Grundkörper – Test</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="thema-block">
+          <div class="thema-header"><span class="thema-icon">➗</span><span class="thema-title">Brüche</span><span class="thema-leer">noch keine Dateien</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Klasse 6 -->
+  <div class="klasse-wrap">
+    <button class="klasse-btn" aria-expanded="false" onclick="toggleKlasse(this)">
+      <span class="klasse-label">📚 Klasse 6</span><span class="klasse-count">37 neu</span><span class="klasse-arrow">▼</span>
+    </button>
+    <div class="klasse-panel">
+      <div class="themen-bereich">
+        <div class="thema-block">
+          <div class="thema-header"><span class="thema-icon">➗</span><span class="thema-title">Brüche</span></div>
+          <div class="kachel-grid">
+            <div class="kachel" onclick="toggleKachel(this, event)">
+              <div class="kachel-name">🍕 Bruch &amp; Anteil</div>
+              <div class="kachel-badges"><span class="kbadge ls">📖 1</span></div>
+              <div class="kachel-links" style="display:none">
+                <a href="mathe/klasse06/brueche/bruch_anteil/echte_brueche_bilder_ls.html" target="_blank" rel="noopener">📖 Echte Brüche – Bilder</a>
+              </div>
+            </div>
+            <div class="kachel" onclick="toggleKachel(this, event)">
+              <div class="kachel-name">🔀 Vermischtes</div>
+              <div class="kachel-badges"><span class="kbadge ue">✏️ 1</span></div>
+              <div class="kachel-links" style="display:none">
+                <a href="mathe/klasse06/brueche/vermischtes/bruech_dezimalzahlen_runden_vergleichen_ue.html" target="_blank" rel="noopener">✏️ Brüche &amp; Dez. – Runden &amp; Vergleichen</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="thema-block">
+          <div class="thema-header"><span class="thema-icon">✖️</span><span class="thema-title">Rechnen</span></div>
+          <div class="kachel-grid">
+            <div class="kachel" onclick="toggleKachel(this, event)">
+              <div class="kachel-name">✖️➗ Brüche mult. &amp; div.</div>
+              <div class="kachel-badges"><span class="kbadge ls">📖 4</span><span class="kbadge ue">✏️ 5</span></div>
+              <div class="kachel-links" style="display:none">
+                <a href="mathe/klasse06/rechnen/brueche_multiplizieren_dividieren/brueche_multiplizieren_ls.html" target="_blank" rel="noopener">📖 Brüche multiplizieren</a>
+                <a href="mathe/klasse06/rechnen/brueche_multiplizieren_dividieren/dezimalzahlen_multiplizieren_erarbeitung_ls.html" target="_blank" rel="noopener">📖 Dezimalzahlen multiplizieren</a>
+                <a href="mathe/klasse06/rechnen/brueche_multiplizieren_dividieren/division_brueche_klasse6_ls.html" target="_blank" rel="noopener">📖 Division von Brüchen</a>
+                <a href="mathe/klasse06/rechnen/brueche_multiplizieren_dividieren/dezimalzahlen_division_ls.html" target="_blank" rel="noopener">📖 Dezimalzahlen – Division</a>
+                <a href="mathe/klasse06/rechnen/brueche_multiplizieren_dividieren/bruch_multiplikation_ue.html" target="_blank" rel="noopener">✏️ Bruch-Multiplikation</a>
+                <a href="mathe/klasse06/rechnen/brueche_multiplizieren_dividieren/brueche_mal_geteilt_ue.html" target="_blank" rel="noopener">✏️ Brüche · und ÷</a>
+                <a href="mathe/klasse06/rechnen/brueche_multiplizieren_dividieren/brueche_grundrechenarten_ue.html" target="_blank" rel="noopener">✏️ Brüche Grundrechenarten</a>
+                <a href="mathe/klasse06/rechnen/brueche_multiplizieren_dividieren/dezimalzahlen_multiplikation_ue.html" target="_blank" rel="noopener">✏️ Dezimalzahlen – Multiplikation</a>
+                <a href="mathe/klasse06/rechnen/brueche_multiplizieren_dividieren/dezimalzahlen_division_ue.html" target="_blank" rel="noopener">✏️ Dezimalzahlen – Division</a>
+              </div>
+            </div>
+            <div class="kachel" onclick="toggleKachel(this, event)">
+              <div class="kachel-name">➗ Dez. dividieren</div>
+              <div class="kachel-badges"><span class="kbadge ls">📖 1</span></div>
+              <div class="kachel-links" style="display:none">
+                <a href="mathe/klasse06/rechnen/dezimalzahlen_dividieren/dezimalzahlen_division_ls.html" target="_blank" rel="noopener">📖 Dezimalzahlen – Division</a>
+              </div>
+            </div>
+            <div class="kachel" onclick="toggleKachel(this, event)">
+              <div class="kachel-name">🔢 Dez. mult. &amp; div.</div>
+              <div class="kachel-badges"><span class="kbadge ue">✏️ 3</span></div>
+              <div class="kachel-links" style="display:none">
+                <a href="mathe/klasse06/rechnen/dezimalzahlen_multiplizieren_dividieren/dezimalzahlen_multiplikation_ue.html" target="_blank" rel="noopener">✏️ Dezimalzahlen Mult. I</a>
+                <a href="mathe/klasse06/rechnen/dezimalzahlen_multiplizieren_dividieren/dezimalzahlen_multiplikation2_ue.html" target="_blank" rel="noopener">✏️ Dezimalzahlen Mult. II</a>
+                <a href="mathe/klasse06/rechnen/dezimalzahlen_multiplizieren_dividieren/dezimalzahlen_multiplikation_uebung_II.html" target="_blank" rel="noopener">✏️ Dezimalzahlen Mult. II (weitere Übung)</a>
+              </div>
+            </div>
+            <div class="kachel" onclick="toggleKachel(this, event)">
+              <div class="kachel-name">🔀 Gemischt</div>
+              <div class="kachel-badges"><span class="kbadge ue">✏️ 7</span><span class="kbadge rbka">📋 1 rbka</span></div>
+              <div class="kachel-links" style="display:none">
+                <a href="mathe/klasse06/rechnen/gemischt_brueche_dezimalzahlen/bruch_dezimal_rbka.html" target="_blank" rel="noopener">📋 Bruch &amp; Dezimal – Rückblick KA</a>
+                <a href="mathe/klasse06/rechnen/gemischt_brueche_dezimalzahlen/brueche_grundrechenarten_ue.html" target="_blank" rel="noopener">✏️ Brüche Grundrechenarten</a>
+                <a href="mathe/klasse06/rechnen/gemischt_brueche_dezimalzahlen/brueche_dezimal_check_ue.html" target="_blank" rel="noopener">✏️ Brüche &amp; Dezimal – Check</a>
+                <a href="mathe/klasse06/rechnen/gemischt_brueche_dezimalzahlen/grundrechenarten_brueche_dezimalzahlen_ue.html" target="_blank" rel="noopener">✏️ Grundrechenarten gemischt</a>
+                <a href="mathe/klasse06/rechnen/gemischt_brueche_dezimalzahlen/punktrechnung_sachaufgaben_ue.html" target="_blank" rel="noopener">✏️ Punktrechnung – Sachaufgaben</a>
+                <a href="mathe/klasse06/rechnen/gemischt_brueche_dezimalzahlen/rechengesetze_ue.html" target="_blank" rel="noopener">✏️ Rechengesetze – Übung</a>
+                <a href="mathe/klasse06/rechnen/gemischt_brueche_dezimalzahlen/sachaufgaben_mult_div_ ue.html" target="_blank" rel="noopener">✏️ Sachaufgaben Mult. &amp; Div.</a>
+              </div>
+            </div>
+            <div class="kachel" onclick="toggleKachel(this, event)">
+              <div class="kachel-name">↔️ Kommaverschiebung</div>
+              <div class="kachel-badges"><span class="kbadge ls">📖 1</span><span class="kbadge ue">✏️ 1</span></div>
+              <div class="kachel-links" style="display:none">
+                <a href="mathe/klasse06/rechnen/kommaverschiebung/kommaverschiebung_ls.html" target="_blank" rel="noopener">📖 Kommaverschiebung</a>
+                <a href="mathe/klasse06/rechnen/kommaverschiebung/kommaverschiebung_ue.html" target="_blank" rel="noopener">✏️ Kommaverschiebung – Übung</a>
+              </div>
+            </div>
+            <div class="kachel" onclick="toggleKachel(this, event)">
+              <div class="kachel-name">⚙️ Rechengesetze</div>
+              <div class="kachel-badges"><span class="kbadge ue">✏️ 1</span></div>
+              <div class="kachel-links" style="display:none">
+                <a href="mathe/klasse06/rechnen/rechengesetze/rechengesetze_brueche_dezimalzahlen_ue.html" target="_blank" rel="noopener">✏️ Rechengesetze – Brüche &amp; Dez.</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="thema-block">
+          <div class="thema-header"><span class="thema-icon">🔵</span><span class="thema-title">Muster &amp; Figuren</span></div>
+          <div class="kachel-grid">
+            <div class="kachel" onclick="toggleKachel(this, event)">
+              <div class="kachel-name">🔄 Drehungen</div>
+              <div class="kachel-badges"><span class="kbadge ls">📖 1</span><span class="kbadge ue">✏️ 1</span></div>
+              <div class="kachel-links" style="display:none">
+                <a href="mathe/klasse06/muster_figuren/drehungen/drehungen_ls.html" target="_blank" rel="noopener">📖 Drehungen</a>
+                <a href="mathe/klasse06/muster_figuren/drehungen/drehungen_ue.html" target="_blank" rel="noopener">✏️ Drehungen – Übung</a>
+              </div>
+            </div>
+            <div class="kachel" onclick="toggleKachel(this, event)">
+              <div class="kachel-name">📍 Koordinatensystem</div>
+              <div class="kachel-badges"><span class="kbadge ls">📖 1</span><span class="kbadge ue">✏️ 1</span></div>
+              <div class="kachel-links" style="display:none">
+                <a href="mathe/klasse06/muster_figuren/koordinatensystem_negative_koordinaten/figuren_koordinatensystem_ls.html" target="_blank" rel="noopener">📖 Figuren im Koordinatensystem</a>
+                <a href="mathe/klasse06/muster_figuren/koordinatensystem_negative_koordinaten/figuren_koordinatensystem_ue.html" target="_blank" rel="noopener">✏️ Koordinatensystem – Übung</a>
+              </div>
+            </div>
+            <div class="kachel" onclick="toggleKachel(this, event)">
+              <div class="kachel-name">⭕ Kreise &amp; Kreisfiguren</div>
+              <div class="kachel-badges"><span class="kbadge ls">📖 1</span><span class="kbadge ue">✏️ 2</span></div>
+              <div class="kachel-links" style="display:none">
+                <a href="mathe/klasse06/muster_figuren/kreise_kreisfiguren/kreise_kreisfiguren_ls.html" target="_blank" rel="noopener">📖 Kreise &amp; Kreisfiguren</a>
+                <a href="mathe/klasse06/muster_figuren/kreise_kreisfiguren/kreise_zeichnen_begleitet.html" target="_blank" rel="noopener">✏️ Kreise zeichnen – begleitet</a>
+                <a href="mathe/klasse06/muster_figuren/kreise_kreisfiguren/kreise_zeichnen_ue.html" target="_blank" rel="noopener">✏️ Kreise zeichnen – Übung</a>
+              </div>
+            </div>
+            <div class="kachel" onclick="toggleKachel(this, event)">
+              <div class="kachel-name">➡️ Verschiebungen</div>
+              <div class="kachel-badges"><span class="kbadge ls">📖 1</span><span class="kbadge ue">✏️ 1</span></div>
+              <div class="kachel-links" style="display:none">
+                <a href="mathe/klasse06/muster_figuren/verschiebungen/verschiebungen_ls.html" target="_blank" rel="noopener">📖 Verschiebungen</a>
+                <a href="mathe/klasse06/muster_figuren/verschiebungen/verschiebungen_ue.html" target="_blank" rel="noopener">✏️ Verschiebungen – Übung</a>
+              </div>
+            </div>
+            <div class="kachel" onclick="toggleKachel(this, event)">
+              <div class="kachel-name">📐 Winkel</div>
+              <div class="kachel-badges"><span class="kbadge ls">📖 4</span><span class="kbadge ue">✏️ 3</span></div>
+              <div class="kachel-links" style="display:none">
+                <a href="mathe/klasse06/muster_figuren/winkel/griechische_buchstaben_winkelmass_ls.html" target="_blank" rel="noopener">📖 Griechische Buchstaben &amp; Winkelmaß</a>
+                <a href="mathe/klasse06/muster_figuren/winkel/winkel_benennen_ls.html" target="_blank" rel="noopener">📖 Winkel benennen</a>
+                <a href="mathe/klasse06/muster_figuren/winkel/winkel_messen_geodreieck_ls.html" target="_blank" rel="noopener">📖 Winkel messen mit Geodreieck</a>
+                <a href="mathe/klasse06/muster_figuren/winkel/winkel_geodreieck_zeichnen_ls.html" target="_blank" rel="noopener">📖 Winkel zeichnen mit Geodreieck</a>
+                <a href="mathe/klasse06/muster_figuren/winkel/winkel_benennen_ue.html" target="_blank" rel="noopener">✏️ Winkel benennen – Übung</a>
+                <a href="mathe/klasse06/muster_figuren/winkel/winkel_messen_ue.html" target="_blank" rel="noopener">✏️ Winkel messen – Übung</a>
+                <a href="mathe/klasse06/muster_figuren/winkel/winkel_geodreieck_zeichnen_ue.html" target="_blank" rel="noopener">✏️ Winkel zeichnen – Übung</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Klasse 7 -->
+  <div class="klasse-wrap">
+    <button class="klasse-btn" aria-expanded="false" onclick="toggleKlasse(this)">
+      <span class="klasse-label">📚 Klasse 7</span><span class="klasse-count">19 neu</span><span class="klasse-arrow">▼</span>
+    </button>
+    <div class="klasse-panel">
+      <div class="themen-bereich">
+        <div class="thema-block">
+          <div class="thema-header"><span class="thema-icon">🔢</span><span class="thema-title">Rationale Zahlen</span><span class="thema-leer">noch keine Dateien</span></div>
+        </div>
+        <div class="thema-block">
+          <div class="thema-header"><span class="thema-icon">📈</span><span class="thema-title">Zuordnungen</span><span class="thema-leer">noch keine Dateien</span></div>
+        </div>
+        <div class="thema-block">
+          <div class="thema-header"><span class="thema-icon">💯</span><span class="thema-title">Prozent- &amp; Zinsrechnung</span><span class="thema-leer">noch keine Dateien</span></div>
+        </div>
+        <div class="thema-block">
+          <div class="thema-header"><span class="thema-icon">🔤</span><span class="thema-title">Terme &amp; Gleichungen</span></div>
+          <div class="kachel-grid">
+            <div class="kachel" onclick="toggleKachel(this, event)">
+              <div class="kachel-name">📝 Terme mit einer Variable</div>
+              <div class="kachel-badges"><span class="kbadge ls">📖 1</span></div>
+              <div class="kachel-links" style="display:none">
+                <a href="mathe/klasse07/terme_gleichungen/terme_mit_einer_variablen_ls.html" target="_blank" rel="noopener">📖 Terme mit einer Variablen</a>
+              </div>
+            </div>
+            <div class="kachel" onclick="toggleKachel(this, event)">
+              <div class="kachel-name">⚖️ Äquivalenzumformungen</div>
+              <div class="kachel-badges"><span class="kbadge ls">📖 1</span><span class="kbadge ue">✏️ 2</span></div>
+              <div class="kachel-links" style="display:none">
+                <a href="mathe/klasse07/terme_gleichungen/aequivalenzumformungen_lin_gl_ls.html" target="_blank" rel="noopener">📖 Äquivalenzumformungen</a>
+                <a href="mathe/klasse07/terme_gleichungen/aequivalenzumformungen_ue.html" target="_blank" rel="noopener">✏️ Äquivalenzumformungen – Übung</a>
+                <a href="mathe/klasse07/terme_gleichungen/gleichungen_aequivalenzumformungen_ue.html" target="_blank" rel="noopener">✏️ Gleichungen – Äquiv.</a>
+              </div>
+            </div>
+            <div class="kachel" onclick="toggleKachel(this, event)">
+              <div class="kachel-name">📝 Sachaufgaben</div>
+              <div class="kachel-badges"><span class="kbadge ue">✏️ 3</span></div>
+              <div class="kachel-links" style="display:none">
+                <a href="mathe/klasse07/terme_gleichungen/gleichungen_textaufgaben_ue.html" target="_blank" rel="noopener">✏️ Gleichungen – Textaufgaben</a>
+                <a href="mathe/klasse07/terme_gleichungen/lineare_gleichungen_sachaufgaben_ue.html" target="_blank" rel="noopener">✏️ Lineare Gleichungen – Sachaufgaben</a>
+                <a href="mathe/klasse07/terme_gleichungen/wuerfelmuster_terme_ue.html" target="_blank" rel="noopener">✏️ Würfelmuster – Terme</a>
+              </div>
+            </div>
+            <div class="kachel" onclick="toggleKachel(this, event)">
+              <div class="kachel-name">➗ Bruchterme &amp; -gleichungen</div>
+              <div class="kachel-badges"><span class="kbadge ls">📖 4</span><span class="kbadge ue">✏️ 1</span></div>
+              <div class="kachel-links" style="display:none">
+                <a href="mathe/klasse07/terme_gleichungen/bruchterme_bruchgleichungen/bruchterme_01_definitionsmenge_ls.html" target="_blank" rel="noopener">📖 Bruchterme – Definitionsmenge</a>
+                <a href="mathe/klasse07/terme_gleichungen/bruchterme_bruchgleichungen/bruchterme_02_kuerzen_ls.html" target="_blank" rel="noopener">📖 Bruchterme – Kürzen</a>
+                <a href="mathe/klasse07/terme_gleichungen/bruchterme_bruchgleichungen/bruchgleichungen_03_loesen_ls.html" target="_blank" rel="noopener">📖 Bruchgleichungen – Lösen</a>
+                <a href="mathe/klasse07/terme_gleichungen/bruchterme_bruchgleichungen/bruchgleichungen_04_anwendung_ls.html" target="_blank" rel="noopener">📖 Bruchgleichungen – Anwendung</a>
+                <a href="mathe/klasse07/terme_gleichungen/bruchterme_bruchgleichungen/bruchgleichungen_ue.html" target="_blank" rel="noopener">✏️ Bruchgleichungen – Übung</a>
+              </div>
+            </div>
+            <div class="kachel" onclick="toggleKachel(this, event)">
+              <div class="kachel-name">📋 Klassenarbeit-Übungen</div>
+              <div class="kachel-badges"><span class="kbadge ue">✏️ 7</span></div>
+              <div class="kachel-links" style="display:none">
+                <a href="mathe/klasse07/terme_gleichungen/terme_gleichungen_s1_ue.html" target="_blank" rel="noopener">✏️ Terme &amp; Gleichungen – S1</a>
+                <a href="mathe/klasse07/terme_gleichungen/terme_gleichungen_s2_ue.html" target="_blank" rel="noopener">✏️ S2</a>
+                <a href="mathe/klasse07/terme_gleichungen/terme_gleichungen_s3_ue.html" target="_blank" rel="noopener">✏️ S3</a>
+                <a href="mathe/klasse07/terme_gleichungen/terme_gleichungen_s4_ue.html" target="_blank" rel="noopener">✏️ S4</a>
+                <a href="mathe/klasse07/terme_gleichungen/terme_gleichungen_s5_ue.html" target="_blank" rel="noopener">✏️ S5</a>
+                <a href="mathe/klasse07/terme_gleichungen/terme_gleichungen_s6_ue.html" target="_blank" rel="noopener">✏️ S6</a>
+                <a href="mathe/klasse07/terme_gleichungen/terme_gleichungen_s7_ue.html" target="_blank" rel="noopener">✏️ S7</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="thema-block">
+          <div class="thema-header"><span class="thema-icon">📐</span><span class="thema-title">Konstruieren &amp; Argumentieren</span></div>
+          <div class="kachel-grid">
+            <div class="kachel" onclick="toggleKachel(this, event)">
+              <div class="kachel-name">📐 Winkelsumme im Dreieck</div>
+              <div class="kachel-badges"><span class="kbadge ls">📖 1</span><span class="kbadge ue">✏️ 1</span><span class="kbadge test">🔍 1</span></div>
+              <div class="kachel-links" style="display:none">
+                <a href="mathe/klasse07/konstruieren_argumentieren/winkel_geraden/winkelsumme_dreieck_ls.html" target="_blank" rel="noopener">📖 Winkelsumme im Dreieck</a>
+                <a href="mathe/klasse07/konstruieren_argumentieren/winkel_geraden/winkelsumme_dreieck_ue.html" target="_blank" rel="noopener">✏️ Winkelsumme im Dreieck – Übung</a>
+                <a href="mathe/klasse07/konstruieren_argumentieren/winkel_geraden/winkel_dreieck_test.html" target="_blank" rel="noopener">🔍 Winkel im Dreieck – Test</a>
+              </div>
+            </div>
+            <div class="kachel" onclick="toggleKachel(this, event)">
+              <div class="kachel-name">✖️ Winkel an sich kreuzenden Geraden</div>
+              <div class="kachel-badges"><span class="kbadge ls">📖 1</span><span class="kbadge ue">✏️ 1</span></div>
+              <div class="kachel-links" style="display:none">
+                <a href="mathe/klasse07/konstruieren_argumentieren/winkel_geraden/winkel_kreuzung_ls.html" target="_blank" rel="noopener">📖 Winkel an sich kreuzenden Geraden</a>
+                <a href="mathe/klasse07/konstruieren_argumentieren/winkel_geraden/winkel_kreuzung_ue.html" target="_blank" rel="noopener">✏️ Winkel an sich kreuzenden Geraden – Übung</a>
+              </div>
+            </div>
+            <div class="kachel" onclick="toggleKachel(this, event)">
+              <div class="kachel-name">📏 Winkel an Parallelen</div>
+              <div class="kachel-badges"><span class="kbadge ls">📖 1</span><span class="kbadge ue">✏️ 1</span></div>
+              <div class="kachel-links" style="display:none">
+                <a href="mathe/klasse07/konstruieren_argumentieren/winkel_geraden/winkel_parallelen_ls.html" target="_blank" rel="noopener">📖 Winkel an Parallelen</a>
+                <a href="mathe/klasse07/konstruieren_argumentieren/winkel_geraden/winkel_parallelen_ue.html" target="_blank" rel="noopener">✏️ Winkel an Parallelen – Übung</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="thema-block">
+          <div class="thema-header"><span class="thema-icon">🎲</span><span class="thema-title">Wahrscheinlichkeit</span><span class="thema-leer">noch keine Dateien</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Klasse 8 -->
+  <div class="klasse-wrap">
+    <button class="klasse-btn" aria-expanded="false" onclick="toggleKlasse(this)">
+      <span class="klasse-label">📚 Klasse 8</span><span class="klasse-count">19 neu</span><span class="klasse-arrow">▼</span>
+    </button>
+    <div class="klasse-panel">
+      <div class="themen-bereich">
+        <div class="thema-block">
+          <div class="thema-header"><span class="thema-icon">📈</span><span class="thema-title">Lineare Funktionen</span></div>
+          <div class="kachel-grid">
+            <div class="kachel" onclick="toggleKachel(this, event)">
+              <div class="kachel-name">📉 Gleichung y = mx</div>
+              <div class="kachel-badges"><span class="kbadge ls">📖 1</span><span class="kbadge ue">✏️ 1</span></div>
+              <div class="kachel-links" style="display:none">
+                <a href="mathe/klasse08/lineare_funktionen/gleichung_y_mx/lineare_funktionen_ls.html" target="_blank" rel="noopener">📖 Lineare Funktionen</a>
+                <a href="mathe/klasse08/lineare_funktionen/gleichung_y_mx/lineare_funktionen_ue.html" target="_blank" rel="noopener">✏️ Lineare Funktionen – Übung</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="thema-block">
+          <div class="thema-header"><span class="thema-icon">🔤</span><span class="thema-title">Terme mit mehreren Variablen</span></div>
+          <div class="kachel-grid">
+            <div class="kachel" onclick="toggleKachel(this, event)">
+              <div class="kachel-name">➕ Additionsverfahren</div>
+              <div class="kachel-badges"><span class="kbadge ls">📖 1</span><span class="kbadge ue">✏️ 1</span></div>
+              <div class="kachel-links" style="display:none">
+                <a href="mathe/klasse08/terme_mehrere_variablen/lineare_gls/additionsverfahren_ls.html" target="_blank" rel="noopener">📖 Additionsverfahren</a>
+                <a href="mathe/klasse08/terme_mehrere_variablen/lineare_gls/additionsverfahren_ue.html" target="_blank" rel="noopener">✏️ Additionsverfahren – Übung</a>
+              </div>
+            </div>
+            <div class="kachel" onclick="toggleKachel(this, event)">
+              <div class="kachel-name">🔢 Zahlenrätsel LGS</div>
+              <div class="kachel-badges"><span class="kbadge ls">📖 2</span><span class="kbadge ue">✏️ 1</span></div>
+              <div class="kachel-links" style="display:none">
+                <a href="mathe/klasse08/terme_mehrere_variablen/lineare_gls/zahlenraetsel_lgs_ls.html" target="_blank" rel="noopener">📖 Zahlenrätsel LGS</a>
+                <a href="mathe/klasse08/terme_mehrere_variablen/lineare_gls/zahlenraetsel_lgs_erarbeitung.html" target="_blank" rel="noopener">📖 Zahlenrätsel LGS – Erarbeitung</a>
+                <a href="mathe/klasse08/terme_mehrere_variablen/lineare_gls/zahlenraetsel_lgs_ue.html" target="_blank" rel="noopener">✏️ Zahlenrätsel LGS – Übung</a>
+              </div>
+            </div>
+            <div class="kachel" onclick="toggleKachel(this, event)">
+              <div class="kachel-name">🧪 Mischungsaufgaben</div>
+              <div class="kachel-badges"><span class="kbadge ls">📖 1</span></div>
+              <div class="kachel-links" style="display:none">
+                <a href="mathe/klasse08/terme_mehrere_variablen/lineare_gls/mischungsaufgaben_ls.html" target="_blank" rel="noopener">📖 Mischungsaufgaben</a>
+              </div>
+            </div>
+            <div class="kachel" onclick="toggleKachel(this, event)">
+              <div class="kachel-name">🔀 LGS komplett</div>
+              <div class="kachel-badges"><span class="kbadge ue">✏️ 1</span><span class="kbadge rb">🔁 1 rb</span></div>
+              <div class="kachel-links" style="display:none">
+                <a href="mathe/klasse08/terme_mehrere_variablen/lineare_gls/einsetzen_gleichsetzen_rb.html" target="_blank" rel="noopener">🔁 Einsetzen &amp; Gleichsetzen – Rückblick</a>
+                <a href="mathe/klasse08/terme_mehrere_variablen/lineare_gls/gls_komplett_ue.html" target="_blank" rel="noopener">✏️ LGS komplett – Übung</a>
+              </div>
+            </div>
+            <div class="kachel" onclick="toggleKachel(this, event)">
+              <div class="kachel-name">3️⃣ Drei Unbekannte</div>
+              <div class="kachel-badges"><span class="kbadge ls">📖 1</span></div>
+              <div class="kachel-links" style="display:none">
+                <a href="mathe/klasse08/terme_mehrere_variablen/lineare_gls/gls_drei_unbekannte_ls.html" target="_blank" rel="noopener">📖 GLS – Drei Unbekannte</a>
+              </div>
+            </div>
+            <div class="kachel" onclick="toggleKachel(this, event)">
+              <div class="kachel-name">📋 Klassenarbeit – Übungen</div>
+              <div class="kachel-badges"><span class="kbadge ue">✏️ 8</span></div>
+              <div class="kachel-links" style="display:none">
+                <a href="mathe/klasse08/terme_mehrere_variablen/lineare_gls/klassenarbeit/lgs_uebersicht_ue.html" target="_blank" rel="noopener">✏️ Übersicht</a>
+                <a href="mathe/klasse08/terme_mehrere_variablen/lineare_gls/klassenarbeit/lgs_zahlenraetsel_ue.html" target="_blank" rel="noopener">✏️ Zahlenrätsel</a>
+                <a href="mathe/klasse08/terme_mehrere_variablen/lineare_gls/klassenarbeit/lgs_ziffernraetsel_ue.html" target="_blank" rel="noopener">✏️ Ziffernrätsel</a>
+                <a href="mathe/klasse08/terme_mehrere_variablen/lineare_gls/klassenarbeit/lgs_altersraetsel_ue.html" target="_blank" rel="noopener">✏️ Altersrätsel</a>
+                <a href="mathe/klasse08/terme_mehrere_variablen/lineare_gls/klassenarbeit/lgs_preise_ue.html" target="_blank" rel="noopener">✏️ Preise</a>
+                <a href="mathe/klasse08/terme_mehrere_variablen/lineare_gls/klassenarbeit/lgs_bewegung_ue.html" target="_blank" rel="noopener">✏️ Bewegung</a>
+                <a href="mathe/klasse08/terme_mehrere_variablen/lineare_gls/klassenarbeit/lgs_situationen_ue.html" target="_blank" rel="noopener">✏️ Situationen</a>
+                <a href="mathe/klasse08/terme_mehrere_variablen/lineare_gls/klassenarbeit/lgs_wiederholung_ue.html" target="_blank" rel="noopener">✏️ Wiederholung</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="thema-block"><div class="thema-header"><span class="thema-icon">⬛</span><span class="thema-title">Flächen</span><span class="thema-leer">noch keine Dateien</span></div></div>
+        <div class="thema-block">
+          <div class="thema-header"><span class="thema-icon">⚖️</span><span class="thema-title">Lineare Gleichungssysteme</span></div>
+          <div class="kachel-grid">
+            <div class="kachel" onclick="toggleKachel(this, event)">
+              <div class="kachel-name">📝 Klassenarbeit IV</div>
+              <div class="kachel-badges"><span class="kbadge ue">📄 8</span></div>
+              <div class="kachel-links" style="display:none">
+                <a href="mathe/klasse08/terme_mehrere_variablen/Klassenarbeit IV/lgs_uebung_00_uebersicht.html" target="_blank" rel="noopener">📄 Übersicht</a>
+                <a href="mathe/klasse08/terme_mehrere_variablen/Klassenarbeit IV/lgs_uebung_01_zahlenraetsel.html" target="_blank" rel="noopener">📄 1 – Zahlenrätsel</a>
+                <a href="mathe/klasse08/terme_mehrere_variablen/Klassenarbeit IV/lgs_uebung_02_ziffernraetsel.html" target="_blank" rel="noopener">📄 2 – Ziffernrätsel</a>
+                <a href="mathe/klasse08/terme_mehrere_variablen/Klassenarbeit IV/lgs_uebung_03_altersraetsel.html" target="_blank" rel="noopener">📄 3 – Altersrätsel</a>
+                <a href="mathe/klasse08/terme_mehrere_variablen/Klassenarbeit IV/lgs_uebung_04_preise.html" target="_blank" rel="noopener">📄 4 – Preise</a>
+                <a href="mathe/klasse08/terme_mehrere_variablen/Klassenarbeit IV/lgs_uebung_05_bewegung.html" target="_blank" rel="noopener">📄 5 – Bewegung</a>
+                <a href="mathe/klasse08/terme_mehrere_variablen/Klassenarbeit IV/lgs_uebung_06_situationen.html" target="_blank" rel="noopener">📄 6 – Situationen</a>
+                <a href="mathe/klasse08/terme_mehrere_variablen/Klassenarbeit IV/lgs_uebung_07_wiederholung.html" target="_blank" rel="noopener">📄 7 – Wiederholung</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="thema-block">
+          <div class="thema-header"><span class="thema-icon">⭕</span><span class="thema-title">Kreise &amp; Dreiecke</span></div>
+          <div class="kachel-grid">
+            <div class="kachel" onclick="toggleKachel(this, event)">
+              <div class="kachel-name">📏 Konstruieren mit Zirkel &amp; Lineal</div>
+              <div class="kachel-badges"><span class="kbadge ls">📖 1</span><span class="kbadge ue">✏️ 1</span></div>
+              <div class="kachel-links" style="display:none">
+                <a href="mathe/klasse08/kreise_dreiecke/konstruieren_besonderes/konstruktion_zirkel_lineal_ls.html" target="_blank" rel="noopener">📖 Konstruieren mit Zirkel &amp; Lineal</a>
+                <a href="mathe/klasse08/kreise_dreiecke/konstruieren_besonderes/konstruktion_zirkel_lineal_ue.html" target="_blank" rel="noopener">✏️ Konstruktion – Übung</a>
+              </div>
+            </div>
+            <div class="kachel" onclick="toggleKachel(this, event)">
+              <div class="kachel-name">⭕ Satz des Thales</div>
+              <div class="kachel-badges"><span class="kbadge ls">📖 2</span><span class="kbadge ue">✏️ 2</span></div>
+              <div class="kachel-links" style="display:none">
+                <a href="mathe/klasse08/kreise_dreiecke/satz_des_thales/thales_ls.html" target="_blank" rel="noopener">📖 Satz des Thales</a>
+                <a href="mathe/klasse08/kreise_dreiecke/satz_des_thales/thales_beweis_ls.html" target="_blank" rel="noopener">📖 Thales – Beweis</a>
+                <a href="mathe/klasse08/kreise_dreiecke/satz_des_thales/thales_ue.html" target="_blank" rel="noopener">✏️ Thales – Übung</a>
+                <a href="mathe/klasse08/kreise_dreiecke/satz_des_thales/thales_beweis_ue.html" target="_blank" rel="noopener">✏️ Thales Beweis – Übung</a>
+              </div>
+            </div>
+            <div class="kachel" onclick="toggleKachel(this, event)">
+              <div class="kachel-name">🔵 Umkreis &amp; Inkreis</div>
+              <div class="kachel-badges"><span class="kbadge ls">📖 1</span><span class="kbadge ue">✏️ 1</span></div>
+              <div class="kachel-links" style="display:none">
+                <a href="mathe/klasse08/kreise_dreiecke/dreiecke_innkreis_umkreis_schwerpunkt/umkreis_inkreis_ls.html" target="_blank" rel="noopener">📖 Umkreis &amp; Inkreis</a>
+                <a href="mathe/klasse08/kreise_dreiecke/dreiecke_innkreis_umkreis_schwerpunkt/umkreis_inkreis_ue.html" target="_blank" rel="noopener">✏️ Umkreis &amp; Inkreis – Übung</a>
+              </div>
+            </div>
+            <div class="kachel" onclick="toggleKachel(this, event)">
+              <div class="kachel-name">⚖️ Schwerpunkt</div>
+              <div class="kachel-badges"><span class="kbadge ls">📖 1</span><span class="kbadge ue">✏️ 1</span><span class="kbadge bonus">⭐ 1</span></div>
+              <div class="kachel-links" style="display:none">
+                <a href="mathe/klasse08/kreise_dreiecke/dreiecke_innkreis_umkreis_schwerpunkt/schwerpunkt_ls.html" target="_blank" rel="noopener">📖 Schwerpunkt des Dreiecks</a>
+                <a href="mathe/klasse08/kreise_dreiecke/dreiecke_innkreis_umkreis_schwerpunkt/schwerpunkt_ue.html" target="_blank" rel="noopener">✏️ Schwerpunkt – Übung</a>
+                <a href="mathe/klasse08/kreise_dreiecke/dreiecke_innkreis_umkreis_schwerpunkt/euler_gerade_bonus.html" target="_blank" rel="noopener">⭐ Euler-Gerade (Bonus)</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Klasse 10 -->
+  <div class="klasse-wrap">
+    <button class="klasse-btn" aria-expanded="false" onclick="toggleKlasse(this)">
+      <span class="klasse-label">📚 Klasse 10</span><span class="klasse-count">2 neu</span><span class="klasse-arrow">▼</span>
+    </button>
+    <div class="klasse-panel">
+      <div class="themen-bereich">
+        <div class="thema-block">
+          <div class="thema-header"><span class="thema-icon">🧮</span><span class="thema-title">Quadratische Gleichungen</span></div>
+          <div class="kachel-grid">
+            <div class="kachel" onclick="toggleKachel(this, event)">
+              <div class="kachel-name">➗ Quadratische Gleichungen lösen</div>
+              <div class="kachel-badges"><span class="kbadge ls">📖 1</span><span class="kbadge ue">✏️ 1</span></div>
+              <div class="kachel-links" style="display:none">
+                <a href="mathe/klasse10/quadratische_gleichungen/uebergreifend/quadratische_gleichungen_loesen_ls.html" target="_blank" rel="noopener">📖 Quadratische Gleichungen lösen</a>
+                <a href="mathe/klasse10/quadratische_gleichungen/uebergreifend/quadratische_gleichungen_loesen_ue.html" target="_blank" rel="noopener">✏️ Quadratische Gleichungen lösen – Übung</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Klasse EF -->
+  <div class="klasse-wrap">
+    <button class="klasse-btn" aria-expanded="false" onclick="toggleKlasse(this)">
+      <span class="klasse-label">📚 Klasse EF</span><span class="klasse-count">28 neu</span><span class="klasse-arrow">▼</span>
+    </button>
+    <div class="klasse-panel">
+      <div class="themen-bereich">
+
+        <div class="thema-block">
+          <div class="thema-header"><span class="thema-icon">📈</span><span class="thema-title">Analysis</span></div>
+          <div class="kachel-grid">
+            <div class="kachel" onclick="toggleKachel(this, event)">
+              <div class="kachel-name">🏔️ Extrempunkte</div>
+              <div class="kachel-badges"><span class="kbadge ls">📖 1</span><span class="kbadge ue">✏️ 1</span></div>
+              <div class="kachel-links" style="display:none">
+                <a href="mathe/klasseEF/analysis/extrempunkte_berechnen_vorgehen_ls.html" target="_blank" rel="noopener">📖 Extrempunkte berechnen – Vorgehen</a>
+                <a href="mathe/klasseEF/analysis/extrempunkte_berechnen_ue.html" target="_blank" rel="noopener">✏️ Extrempunkte berechnen – Übung</a>
+              </div>
+            </div>
+            <div class="kachel" onclick="toggleKachel(this, event)">
+              <div class="kachel-name">〰️ Wendepunkte</div>
+              <div class="kachel-badges"><span class="kbadge ls">📖 2</span><span class="kbadge ue">✏️ 3</span></div>
+              <div class="kachel-links" style="display:none">
+                <a href="mathe/klasseEF/analysis/differentialrechnung/wendepunkte_erarbeitung_ls.html" target="_blank" rel="noopener">📖 Wendepunkte – Erarbeitung</a>
+                <a href="mathe/klasseEF/analysis/differentialrechnung/wendepunkte_ls.html" target="_blank" rel="noopener">📖 Wendepunkte</a>
+                <a href="mathe/klasseEF/analysis/differentialrechnung/wendepunkte_berechnen_ablauf_ue.html" target="_blank" rel="noopener">✏️ Wendepunkte berechnen – Ablauf</a>
+                <a href="mathe/klasseEF/analysis/differentialrechnung/wendepunkte_loesen_aufklappen_ue.html" target="_blank" rel="noopener">✏️ Wendepunkte lösen – Aufklappaufgabe</a>
+                <a href="mathe/klasseEF/analysis/differentialrechnung/wendepunkte_ue.html" target="_blank" rel="noopener">✏️ Wendepunkte – Übung</a>
+              </div>
+            </div>
+            <div class="kachel" onclick="toggleKachel(this, event)">
+              <div class="kachel-name">📉 Ableitung &amp; Sekantensteigung</div>
+              <div class="kachel-badges"><span class="kbadge ls">📖 5</span><span class="kbadge ue">✏️ 5</span><span class="kbadge test">🔍 1</span></div>
+              <div class="kachel-links" style="display:none">
+                <a href="mathe/klasseEF/analysis/differentialrechnung/sekante_tangente_grundlagen_ls.html" target="_blank" rel="noopener">📖 Sekante &amp; Tangente – Grundlagen</a>
+                <a href="mathe/klasseEF/analysis/differentialrechnung/sekantensteigung_ls.html" target="_blank" rel="noopener">📖 Sekantensteigung</a>
+                <a href="mathe/klasseEF/analysis/differentialrechnung/sekante_zu_tangente_ls.html" target="_blank" rel="noopener">📖 Von der Sekante zur Tangente</a>
+                <a href="mathe/klasseEF/analysis/differentialrechnung/grafisches_ableiten_ls.html" target="_blank" rel="noopener">📖 Grafisches Ableiten</a>
+                <a href="mathe/klasseEF/analysis/differentialrechnung/ableitungsfunktion_ls.html" target="_blank" rel="noopener">📖 Ableitungsfunktion</a>
+                <a href="mathe/klasseEF/analysis/differentialrechnung/sekante_tangente_grundlagen_ue.html" target="_blank" rel="noopener">✏️ Sekante &amp; Tangente – Grundlagen – Übung</a>
+                <a href="mathe/klasseEF/analysis/differentialrechnung/sekantensteigung_ue.html" target="_blank" rel="noopener">✏️ Sekantensteigung – Übung</a>
+                <a href="mathe/klasseEF/analysis/differentialrechnung/sekante_zu_tangente_ue.html" target="_blank" rel="noopener">✏️ Von der Sekante zur Tangente – Übung</a>
+                <a href="mathe/klasseEF/analysis/differentialrechnung/grafisches_ableiten_ue.html" target="_blank" rel="noopener">✏️ Grafisches Ableiten – Übung</a>
+                <a href="mathe/klasseEF/analysis/differentialrechnung/ableitungsfunktion_ue.html" target="_blank" rel="noopener">✏️ Ableitungsfunktion – Übung</a>
+                <a href="mathe/klasseEF/analysis/differentialrechnung/sekante_ableitung_test.html" target="_blank" rel="noopener">🔍 Sekante &amp; Ableitung – Test</a>
+              </div>
+            </div>
+            <div class="kachel" onclick="toggleKachel(this, event)">
+              <div class="kachel-name">🗼 Klausuraufgabe – Wasserturm</div>
+              <div class="kachel-badges"><span class="kbadge ue">✏️ 1</span></div>
+              <div class="kachel-links" style="display:none">
+                <a href="mathe/klasseEF/analysis/differentialrechnung/klausuraufgabe_wasserturm_ue.html" target="_blank" rel="noopener">✏️ Klausuraufgabe – Wasserturm</a>
+              </div>
+            </div>
+            <div class="kachel" onclick="toggleKachel(this, event)">
+              <div class="kachel-name">📋 Lerneinheiten</div>
+              <div class="kachel-badges"><span class="kbadge ls">📖 1</span><span class="kbadge test">🔍 1</span></div>
+              <div class="kachel-links" style="display:none">
+                <a href="mathe/klasseEF/analysis/uebergreifend/mathe_lerneinheit_ef_v2.html" target="_blank" rel="noopener">📖 Lerneinheit EF v2</a>
+                <a href="mathe/klasseEF/analysis/uebergreifend/potenzfunktionen_quadratische_ef_test.html" target="_blank" rel="noopener">🔍 Potenzfunktionen &amp; quadratische Funktionen – Test</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="thema-block">
+          <div class="thema-header"><span class="thema-icon">🔄</span><span class="thema-title">Rückblick: Funktionen &amp; Gleichungen</span></div>
+          <div class="kachel-grid">
+            <div class="kachel" onclick="toggleKachel(this, event)">
+              <div class="kachel-name">🔁 Funktionen – Wiederholung</div>
+              <div class="kachel-badges"><span class="kbadge ls">📖 1</span><span class="kbadge ue">✏️ 1</span></div>
+              <div class="kachel-links" style="display:none">
+                <a href="mathe/klasseEF/analysis/rueckblick_funktionen_gleichungen/funktionen_wiederholung_ls.html" target="_blank" rel="noopener">📖 Funktionen – Wiederholung</a>
+                <a href="mathe/klasseEF/analysis/rueckblick_funktionen_gleichungen/funktionen_wiederholung_ue.html" target="_blank" rel="noopener">✏️ Funktionen – Wiederholung</a>
+              </div>
+            </div>
+            <div class="kachel" onclick="toggleKachel(this, event)">
+              <div class="kachel-name">📐 Quadratische Funktionen umformen</div>
+              <div class="kachel-badges"><span class="kbadge ls">📖 1</span><span class="kbadge ue">✏️ 1</span></div>
+              <div class="kachel-links" style="display:none">
+                <a href="mathe/klasseEF/analysis/rueckblick_funktionen_gleichungen/quadratische_funktionen_umformen_ls.html" target="_blank" rel="noopener">📖 Quadratische Funktionen umformen</a>
+                <a href="mathe/klasseEF/analysis/rueckblick_funktionen_gleichungen/quadratische_funktionen_umformen_ue.html" target="_blank" rel="noopener">✏️ Quadratische Funktionen umformen</a>
+              </div>
+            </div>
+            <div class="kachel" onclick="toggleKachel(this, event)">
+              <div class="kachel-name">📝 Sachaufgaben – Funktionen</div>
+              <div class="kachel-badges"><span class="kbadge ue">✏️ 1</span></div>
+              <div class="kachel-links" style="display:none">
+                <a href="mathe/klasseEF/analysis/rueckblick_funktionen_gleichungen/sachaufgaben_funktionen_ue.html" target="_blank" rel="noopener">✏️ Sachaufgaben – Funktionen</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="thema-block">
+          <div class="thema-header"><span class="thema-icon">📈</span><span class="thema-title">Potenzfunktionen</span></div>
+          <div class="kachel-grid">
+            <div class="kachel" onclick="toggleKachel(this, event)">
+              <div class="kachel-name">〽️ Potenzfunktionen</div>
+              <div class="kachel-badges"><span class="kbadge ls">📖 1</span><span class="kbadge ue">✏️ 1</span><span class="kbadge test">🔍 1</span></div>
+              <div class="kachel-links" style="display:none">
+                <a href="mathe/klasseEF/analysis/potenzfunktionen/potenzfunktionen_ls.html" target="_blank" rel="noopener">📖 Potenzfunktionen</a>
+                <a href="mathe/klasseEF/analysis/potenzfunktionen/potenzfunktionen_ue.html" target="_blank" rel="noopener">✏️ Potenzfunktionen – Übung</a>
+                <a href="mathe/klasseEF/analysis/potenzfunktionen/funktionen_transformationen_test.html" target="_blank" rel="noopener">🔍 Funktionen &amp; Transformationen – Test</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="thema-block">
+          <div class="thema-header"><span class="thema-icon">🔀</span><span class="thema-title">Transformationen</span></div>
+          <div class="kachel-grid">
+            <div class="kachel" onclick="toggleKachel(this, event)">
+              <div class="kachel-name">🔀 Transformationen</div>
+              <div class="kachel-badges"><span class="kbadge ls">📖 1</span><span class="kbadge ue">✏️ 1</span></div>
+              <div class="kachel-links" style="display:none">
+                <a href="mathe/klasseEF/analysis/transformationen/transformation_ls.html" target="_blank" rel="noopener">📖 Transformationen</a>
+                <a href="mathe/klasseEF/analysis/transformationen/transformation_ue.html" target="_blank" rel="noopener">✏️ Transformationen – Übung</a>
+              </div>
+            </div>
+            <div class="kachel" onclick="toggleKachel(this, event)">
+              <div class="kachel-name">〽️ Potenzfunktionen – Transformation</div>
+              <div class="kachel-badges"><span class="kbadge ls">📖 1</span><span class="kbadge ue">✏️ 1</span></div>
+              <div class="kachel-links" style="display:none">
+                <a href="mathe/klasseEF/analysis/transformationen/potenzfunktionen_transformation_ls.html" target="_blank" rel="noopener">📖 Potenzfunktionen – Transformation</a>
+                <a href="mathe/klasseEF/analysis/transformationen/potenzfunktionen_transformation_ue.html" target="_blank" rel="noopener">✏️ Potenzfunktionen – Transformation – Übung</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="thema-block">
+          <div class="thema-header"><span class="thema-icon">📉</span><span class="thema-title">Ganzrationale Funktionen</span></div>
+          <div class="kachel-grid">
+            <div class="kachel" onclick="toggleKachel(this, event)">
+              <div class="kachel-name">📉 Ganzrationale Funktionen</div>
+              <div class="kachel-badges"><span class="kbadge ls">📖 1</span><span class="kbadge ue">✏️ 1</span><span class="kbadge test">🔍 1</span></div>
+              <div class="kachel-links" style="display:none">
+                <a href="mathe/klasseEF/analysis/ganzrationale Funktionen/ganzrationale_funktionen_ls.html" target="_blank" rel="noopener">📖 Ganzrationale Funktionen</a>
+                <a href="mathe/klasseEF/analysis/ganzrationale Funktionen/ganzrationale_funktionen_ue.html" target="_blank" rel="noopener">✏️ Ganzrationale Funktionen – Übung</a>
+                <a href="mathe/klasseEF/analysis/ganzrationale Funktionen/ganzrationale_funktionen_test.html" target="_blank" rel="noopener">🔍 Ganzrationale Funktionen – Test</a>
+              </div>
+            </div>
+            <div class="kachel" onclick="toggleKachel(this, event)">
+              <div class="kachel-name">🎯 Nullstellen</div>
+              <div class="kachel-badges"><span class="kbadge ls">📖 1</span><span class="kbadge ue">✏️ 1</span></div>
+              <div class="kachel-links" style="display:none">
+                <a href="mathe/klasseEF/analysis/ganzrationale Funktionen/nullstellen_ganzrational_ls.html" target="_blank" rel="noopener">📖 Nullstellen ganzrationaler Funktionen</a>
+                <a href="mathe/klasseEF/analysis/ganzrationale Funktionen/nullstellen_ganzrational_ue.html" target="_blank" rel="noopener">✏️ Nullstellen ganzrationaler Funktionen – Übung</a>
+              </div>
+            </div>
+            <div class="kachel" onclick="toggleKachel(this, event)">
+              <div class="kachel-name">🪞 Symmetrie &amp; Grenzverhalten</div>
+              <div class="kachel-badges"><span class="kbadge ls">📖 1</span><span class="kbadge ue">✏️ 1</span></div>
+              <div class="kachel-links" style="display:none">
+                <a href="mathe/klasseEF/analysis/ganzrationale Funktionen/symmetrie_grenzverhalten_ls.html" target="_blank" rel="noopener">📖 Symmetrie &amp; Grenzverhalten</a>
+                <a href="mathe/klasseEF/analysis/ganzrationale Funktionen/symmetrie_grenzverhalten_ue.html" target="_blank" rel="noopener">✏️ Symmetrie &amp; Grenzverhalten – Übung</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="thema-block">
+          <div class="thema-header"><span class="thema-icon">🖥️</span><span class="thema-title">GeoGebra nutzen</span></div>
+          <div class="kachel-grid">
+            <div class="kachel" onclick="toggleKachel(this, event)">
+              <div class="kachel-name">📊 Kurvendiskussion mit GeoGebra</div>
+              <div class="kachel-badges"><span class="kbadge ls">📖 1</span></div>
+              <div class="kachel-links" style="display:none">
+                <a href="mathe/klasseEF/geogebra nutzen/kurvendiskussion_geogebra_ls.html" target="_blank" rel="noopener">📖 Kurvendiskussion mit GeoGebra</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="thema-block">
+          <div class="thema-header"><span class="thema-icon">📐</span><span class="thema-title">Lineare Algebra &amp; Vektorrechnung</span></div>
+          <div class="kachel-grid">
+            <div class="kachel" onclick="toggleKachel(this, event)">
+              <div class="kachel-name">🎯 3D-Koordinaten</div>
+              <div class="kachel-badges"><span class="kbadge ls">📖 2</span><span class="kbadge ue">✏️ 4</span></div>
+              <div class="kachel-links" style="display:none">
+                <a href="mathe/klasseEF/lineare_algebra/3D_koordinate_vektoroperationen/besondere_figuren_ls.html" target="_blank" rel="noopener">📖 Besondere Figuren</a>
+                <a href="mathe/klasseEF/lineare_algebra/3D_koordinate_vektoroperationen/vektoren_punkte_laenge_kollinear_ls.html" target="_blank" rel="noopener">📖 Vektoren, Punkte, Länge &amp; Kollinearität</a>
+                <a href="mathe/klasseEF/lineare_algebra/3D_koordinate_vektoroperationen/koordinatensystem_3d_ue.html" target="_blank" rel="noopener">✏️ Koordinatensystem 3D</a>
+                <a href="mathe/klasseEF/lineare_algebra/3D_koordinate_vektoroperationen/punkt_D_eines_besonderen_Vierecks_ue.html" target="_blank" rel="noopener">✏️ Punkt D – Besonderes Viereck</a>
+                <a href="mathe/klasseEF/lineare_algebra/3D_koordinate_vektoroperationen/besondere_figuren_ue.html" target="_blank" rel="noopener">✏️ Besondere Figuren – Übung</a>
+                <a href="mathe/klasseEF/lineare_algebra/3D_koordinate_vektoroperationen/vektoren_punkte_laenge_kollinear_ue.html" target="_blank" rel="noopener">✏️ Vektoren, Punkte, Länge – Übung</a>
+              </div>
+            </div>
+            <div class="kachel" onclick="toggleKachel(this, event)">
+              <div class="kachel-name">📏 Parametergleichung der Geraden</div>
+              <div class="kachel-badges"><span class="kbadge ls">📖 5</span><span class="kbadge ue">✏️ 3</span></div>
+              <div class="kachel-links" style="display:none">
+                <a href="mathe/klasseEF/lineare_algebra/parametergleichung_gerade/parameterform_gerade_ls.html" target="_blank" rel="noopener">📖 Parameterform der Geraden</a>
+                <a href="mathe/klasseEF/lineare_algebra/parametergleichung_gerade/parameterform_gerade_ue.html" target="_blank" rel="noopener">✏️ Parameterform – Übung</a>
+                <a href="mathe/klasseEF/lineare_algebra/parametergleichung_gerade/geraden_lagebeziehung_ls.html" target="_blank" rel="noopener">📖 Geraden – Lagebeziehung</a>
+                <a href="mathe/klasseEF/lineare_algebra/parametergleichung_gerade/geraden_lagebeziehung_ue.html" target="_blank" rel="noopener">✏️ Lagebeziehung – Übung</a>
+                <a href="mathe/klasseEF/lineare_algebra/parametergleichung_gerade/bewegungen_modellieren_ls.html" target="_blank" rel="noopener">📖 Bewegungen modellieren</a>
+                <a href="mathe/klasseEF/lineare_algebra/parametergleichung_gerade/bewegungen_modellieren_ue.html" target="_blank" rel="noopener">✏️ Bewegungen – Übung</a>
+                <a href="mathe/klasseEF/lineare_algebra/parametergleichung_gerade/geraden_lage_raum_ls.html" target="_blank" rel="noopener">📖 Geraden – Lage im Raum</a>
+                <a href="mathe/klasseEF/lineare_algebra/parametergleichung_gerade/koordinatengeometrie_rueckblick_ls.html" target="_blank" rel="noopener">📖 Koordinatengeometrie – Rückblick</a>
+              </div>
+            </div>
+            <div class="kachel" onclick="toggleKachel(this, event)">
+              <div class="kachel-name">🔍 Tests Koordinatengeometrie</div>
+              <div class="kachel-badges"><span class="kbadge test">🔍 2</span></div>
+              <div class="kachel-links" style="display:none">
+                <a href="mathe/klasseEF/lineare_algebra/koordinatengeometrie_test1_test.html" target="_blank" rel="noopener">🔍 Koordinatengeometrie – Test 1</a>
+                <a href="mathe/klasseEF/lineare_algebra/koordinatengeometrie_test2_test.html" target="_blank" rel="noopener">🔍 Koordinatengeometrie – Test 2</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ALTE STRUKTUR -->
+  <div class="alt-wrap">
+    <button class="alt-btn" aria-expanded="false" onclick="toggleAlt(this)">
+      <span style="flex:1">📁 Alte Struktur – Migration ausstehend</span><span class="alt-arrow">▼</span>
+    </button>
+    <div class="alt-panel">
+      <div class="jgst">
+        <button class="jgst-toggle" aria-expanded="false" onclick="toggleJgst(this)">
+          <span class="jgst-label">Klasse 7 – alt</span><span class="jgst-count">22</span><span class="jgst-arrow">▼</span>
+        </button>
+        <div class="jgst-panel">
+          <div class="col-grid c4">
+            <div class="col-group"><div class="col-head lernen">📖 Lernseiten</div><div class="links">
+              <a class="link-row" href="mathe/klasse07/lernseiten/aequivalenzumformungen_erarbeitung.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Äquivalenzumformungen – Erarbeitung</span></a>
+              <a class="link-row" href="mathe/klasse07/lernseiten/aequivalenzumformungen_ueben.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Äquivalenzumformungen – Üben</span></a>
+              <a class="link-row" href="mathe/klasse07/lernseiten/gleichungen_aequivalenzumformungen_uebung.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Gleichungen – Äquiv.</span></a>
+              <a class="link-row" href="mathe/klasse07/lernseiten/terme_mit_einer_variablen.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Terme mit einer Variablen</span></a>
+            </div></div>
+            <div class="col-group"><div class="col-head uebung">✏️ Übungen &amp; Bruchgl.</div><div class="links">
+              <a class="link-row" href="mathe/klasse07/uebungen/gleichungen_textaufgaben_klasse7.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Gleichungen – Textaufgaben</span></a>
+              <a class="link-row" href="mathe/klasse07/uebungen/lineare_gleichungen_sachaufgaben_klasse7.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Lineare Gleichungen – Sachaufgaben</span></a>
+              <a class="link-row" href="mathe/klasse07/uebungen/wuerfelmuster_term.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Würfelmuster – Term</span></a>
+              <a class="link-row" href="mathe/klasse07/Bruchgleichungen/bruchterme_01_definitionsmenge.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Bruchterme – Definitionsmenge</span></a>
+              <a class="link-row" href="mathe/klasse07/Bruchgleichungen/bruchterme_02_kuerzen.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Bruchterme – Kürzen</span></a>
+              <a class="link-row" href="mathe/klasse07/Bruchgleichungen/bruchgleichungen_03_loesen.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Bruchgleichungen – Lösen</span></a>
+              <a class="link-row" href="mathe/klasse07/Bruchgleichungen/bruchgleichungen_04_anwendung.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Bruchgleichungen – Anwendung</span></a>
+            </div></div>
+            <div class="col-group"><div class="col-head arbeit">📝 Klassenarbeiten</div><div class="links">
+              <a class="link-row" href="mathe/klasse07/arbeiten/terme_gleichungen/terme_gleichungen_s1.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">S1</span><span class="link-tag tag-arbeit">Arbeit</span></a>
+              <a class="link-row" href="mathe/klasse07/arbeiten/terme_gleichungen/terme_gleichungen_s2.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">S2</span><span class="link-tag tag-arbeit">Arbeit</span></a>
+              <a class="link-row" href="mathe/klasse07/arbeiten/terme_gleichungen/terme_gleichungen_s3.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">S3</span><span class="link-tag tag-arbeit">Arbeit</span></a>
+              <a class="link-row" href="mathe/klasse07/arbeiten/terme_gleichungen/terme_gleichungen_s4.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">S4</span><span class="link-tag tag-arbeit">Arbeit</span></a>
+              <a class="link-row" href="mathe/klasse07/arbeiten/terme_gleichungen/terme_gleichungen_s5.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">S5</span><span class="link-tag tag-arbeit">Arbeit</span></a>
+              <a class="link-row" href="mathe/klasse07/arbeiten/terme_gleichungen/terme_gleichungen_s6.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">S6</span><span class="link-tag tag-arbeit">Arbeit</span></a>
+              <a class="link-row" href="mathe/klasse07/arbeiten/terme_gleichungen/terme_gleichungen_s7.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">S7</span><span class="link-tag tag-arbeit">Arbeit</span></a>
+            </div></div>
+            <div class="col-group"><div class="col-head sonstig">📎 Sonstiges</div><p class="empty-col">keine Einträge</p></div>
+          </div>
+        </div>
+      </div>
+      <div class="jgst">
+        <button class="jgst-toggle" aria-expanded="false" onclick="toggleJgst(this)">
+          <span class="jgst-label">Klasse 8 – alt</span><span class="jgst-count">19</span><span class="jgst-arrow">▼</span>
+        </button>
+        <div class="jgst-panel">
+          <div class="col-grid c4">
+            <div class="col-group"><div class="col-head lernen">📖 Lernseiten</div><div class="links">
+              <a class="link-row" href="mathe/klasse08/lernseiten/additionsverfahren_erarbeitung.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Additionsverfahren – Erarbeitung</span></a>
+              <a class="link-row" href="mathe/klasse08/lernseiten/additionsverfahren_uebung.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Additionsverfahren – Übung</span></a>
+              <a class="link-row" href="mathe/klasse08/lernseiten/gls_mischungsaufgaben.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">GLS – Mischungsaufgaben</span></a>
+              <a class="link-row" href="mathe/klasse08/lernseiten/zahlenraetsel_lgs_erarbeitung.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Zahlenrätsel LGS</span></a>
+              <a class="link-row" href="mathe/klasse08/lernseiten/bonus/gls_drei_unbekannte.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">GLS – Drei Unbekannte</span><span class="link-tag tag-bonus">Bonus</span></a>
+            </div></div>
+            <div class="col-group"><div class="col-head uebung">✏️ Übungen</div><div class="links">
+              <a class="link-row" href="mathe/klasse08/uebungen/einsetzen_gleichsetzen.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Einsetzen &amp; Gleichsetzen</span></a>
+              <a class="link-row" href="mathe/klasse08/uebungen/gls_uebung_klasse8.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">GLS – Übung Klasse 8</span></a>
+              <a class="link-row" href="mathe/klasse08/uebungen/uebung_lin_gls.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Lineare GLS – Übung</span></a>
+              <a class="link-row" href="mathe/klasse08/uebungen/zahlenraetsel_lgs_uebung.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Zahlenrätsel LGS – Übung</span></a>
+            </div></div>
+            <div class="col-group"><div class="col-head arbeit">📝 KA IV</div><div class="links">
+              <a class="link-row" href="mathe/klasse08/uebungen/Klassenarbeit IV/lgs_uebung_00_uebersicht.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Übersicht</span></a>
+              <a class="link-row" href="mathe/klasse08/uebungen/Klassenarbeit IV/lgs_uebung_01_zahlenraetsel.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">1 – Zahlenrätsel</span></a>
+              <a class="link-row" href="mathe/klasse08/uebungen/Klassenarbeit IV/lgs_uebung_02_ziffernraetsel.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">2 – Ziffernrätsel</span></a>
+              <a class="link-row" href="mathe/klasse08/uebungen/Klassenarbeit IV/lgs_uebung_03_altersraetsel.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">3 – Altersrätsel</span></a>
+              <a class="link-row" href="mathe/klasse08/uebungen/Klassenarbeit IV/lgs_uebung_04_preise.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">4 – Preise</span></a>
+              <a class="link-row" href="mathe/klasse08/uebungen/Klassenarbeit IV/lgs_uebung_05_bewegung.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">5 – Bewegung</span></a>
+              <a class="link-row" href="mathe/klasse08/uebungen/Klassenarbeit IV/lgs_uebung_06_situationen.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">6 – Situationen</span></a>
+              <a class="link-row" href="mathe/klasse08/uebungen/Klassenarbeit IV/lgs_uebung_07_wiederholung.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">7 – Wiederholung</span></a>
+            </div></div>
+            <div class="col-group"><div class="col-head ha">📋 HA</div><div class="links">
+              <a class="link-row" href="mathe/klasse08/HA/additionsverfahren.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Additionsverfahren (HA)</span></a>
+            </div></div>
+          </div>
+        </div>
+      </div>
+      <div class="jgst">
+        <button class="jgst-toggle" aria-expanded="false" onclick="toggleJgst(this)">
+          <span class="jgst-label">Klasse EF – alt</span><span class="jgst-count">13</span><span class="jgst-arrow">▼</span>
+        </button>
+        <div class="jgst-panel">
+          <div class="col-grid">
+            <div class="col-group"><div class="col-head lernen">📖 Lernseiten</div><div class="links">
+              <a class="link-row" href="mathe/klasseEF/lernseiten/extrempunkte_loesung.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Extrempunkte – Lösung</span></a>
+              <a class="link-row" href="mathe/klasseEF/lernseiten/extrempunkte_uebung.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Extrempunkte – Übung</span></a>
+              <a class="link-row" href="mathe/klasseEF/lernseiten/mathe_lerneinheit_ef_v2.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Lerneinheit EF v2</span></a>
+              <a class="link-row" href="mathe/klasseEF/lernseiten/wendepunkte_erarbeitung.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Wendepunkte – Erarbeitung</span></a>
+              <a class="link-row" href="mathe/klasseEF/lernseiten/wendepunkte_loesung.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Wendepunkte – Lösung</span></a>
+              <a class="link-row" href="mathe/klasseEF/lernseiten/wendepunkte_uebung.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Wendepunkte – Übung</span></a>
+            </div></div>
+            <div class="col-group"><div class="col-head uebung">✏️ Übungen</div><div class="links">
+              <a class="link-row" href="mathe/klasseEF/lernseiten/zkaufgabe.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">ZK-Aufgabe</span></a>
+            </div></div>
+            <div class="col-group"><div class="col-head sonstig">📎 Sonstiges</div><p class="empty-col">keine Einträge</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ BIOLOGIE ══ -->
+<div class="card" data-fach="bio" id="card-bio">
+  <div class="card-header"><span class="card-icon">🧬</span><span class="card-title">Biologie</span><span class="card-meta">Klasse 6 &amp; 9</span></div>
+
+  <div class="klasse-wrap">
+    <button class="klasse-btn" aria-expanded="false" onclick="toggleKlasse(this)">
+      <span class="klasse-label">🔬 Klasse 6</span><span class="klasse-count">8</span><span class="klasse-arrow">▼</span>
+    </button>
+    <div class="klasse-panel">
+      <div class="themen-bereich">
+        <div class="thema-block">
+          <div class="thema-header"><span class="thema-icon">❤️</span><span class="thema-title">Herz &amp; Kreislauf</span></div>
+          <div class="kachel-grid">
+            <div class="kachel" onclick="toggleKachel(this, event)">
+              <div class="kachel-name">🫀 Herz-Kreislauf-System</div>
+              <div class="kachel-badges"><span class="kbadge ls">📖 1</span></div>
+              <div class="kachel-links" style="display:none">
+                <a href="bio/klasse06/lernseiten/herz-kreislauf.html" target="_blank" rel="noopener">📖 Herz-Kreislauf</a>
+              </div>
+            </div>
+            <div class="kachel" onclick="toggleKachel(this, event)">
+              <div class="kachel-name">💓 Systole &amp; Diastole</div>
+              <div class="kachel-badges"><span class="kbadge ls">📖 1</span><span class="kbadge lehrer">👨‍🏫 1</span></div>
+              <div class="kachel-links" style="display:none">
+                <a href="bio/klasse06/lernseiten/schueler_systole_diastole_kl6.html" target="_blank" rel="noopener">📖 Systole &amp; Diastole – Schüler</a>
+                <a class="lehrer-link" href="bio/klasse06/lernseiten/lehrer_systole_diastole_kl6.html" target="_blank" rel="noopener">Systole &amp; Diastole – Lehrer</a>
+              </div>
+            </div>
+            <div class="kachel" onclick="toggleKachel(this, event)">
+              <div class="kachel-name">🩸 Blut</div>
+              <div class="kachel-badges"><span class="kbadge test">🔍 1</span></div>
+              <div class="kachel-links" style="display:none">
+                <a href="bio/klasse06/tests/blut_aufgaben.html" target="_blank" rel="noopener">🔍 Blut – Aufgaben</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="thema-block">
+          <div class="thema-header"><span class="thema-icon">🌱</span><span class="thema-title">Sexualerziehung</span></div>
+          <div class="kachel-grid">
+            <div class="kachel" onclick="toggleKachel(this, event)">
+              <div class="kachel-name">🗣️ Sprache &amp; Veränderungen</div>
+              <div class="kachel-badges"><span class="kbadge ls">📖 2</span><span class="kbadge lehrer">👨‍🏫 1</span><span class="kbadge methode">💬 TPS</span></div>
+              <div class="kachel-links" style="display:none">
+                <a href="bio/klasse06/sexual_erziehung/pubertaet_sprache_merkmale_ls.html" target="_blank" rel="noopener">📖 Pubertät – Sprache &amp; Merkmale</a>
+                <a href="bio/klasse06/sexual_erziehung/schueler_sprache_ver%C3%A4nderungen_einstieg_ls.html" target="_blank" rel="noopener">📖 Sprache &amp; Veränderungen – Schüler</a>
+                <a class="lehrer-link" href="bio/klasse06/sexual_erziehung/sprache_ver%C3%A4nderungen_einstieg_lehrer.html" target="_blank" rel="noopener">Sprache &amp; Veränderungen – Lehrer</a>
+                <a href="bio/klasse06/sexual_erziehung/pubertaet_geschlechterrollen_tps.html" target="_blank" rel="noopener">💬 Geschlechterrollen (Think-Pair-Share)</a>
+                <a class="lehrer-link" href="bio/klasse06/sexual_erziehung/vertretung_tps_geschlechterrollen_lehrer.html" target="_blank" rel="noopener">Geschlechterrollen (TPS) – Vertretung/Lehrer</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="klasse-wrap">
+    <button class="klasse-btn" aria-expanded="false" onclick="toggleKlasse(this)">
+      <span class="klasse-label">🔬 Klasse 9</span><span class="klasse-count">16</span><span class="klasse-arrow">▼</span>
+    </button>
+    <div class="klasse-panel">
+      <div class="themen-bereich">
+        <div class="thema-block">
+          <div class="thema-header"><span class="thema-icon">🍬</span><span class="thema-title">Blutzucker &amp; Hormone</span></div>
+          <div class="kachel-grid">
+            <div class="kachel" onclick="toggleKachel(this, event)">
+              <div class="kachel-name">📊 Blutzucker-Regelkreis</div>
+              <div class="kachel-badges"><span class="kbadge ls">📖 2</span><span class="kbadge lehrer">👨‍🏫 1</span></div>
+              <div class="kachel-links" style="display:none">
+                <a href="bio/klasse09/lernseiten/blutzucker_kl9_erarbeitung.html" target="_blank" rel="noopener">📖 Blutzucker – Erarbeitung</a>
+                <a href="bio/klasse09/lernseiten/blutzucker_kl9_tafelbild.html" target="_blank" rel="noopener">📖 Blutzucker – Tafelbild</a>
+                <a class="lehrer-link" href="bio/klasse09/lernseiten/blutzucker_kl9_lehrer.html" target="_blank" rel="noopener">Blutzucker – Lehrer</a>
+              </div>
+            </div>
+            <div class="kachel" onclick="toggleKachel(this, event)">
+              <div class="kachel-name">💉 Hormone</div>
+              <div class="kachel-badges"><span class="kbadge ls">📖 1</span><span class="kbadge lehrer">👨‍🏫 1</span></div>
+              <div class="kachel-links" style="display:none">
+                <a href="bio/klasse09/lernseiten/hormone_kl9_schueler.html" target="_blank" rel="noopener">📖 Hormone – Schüler</a>
+                <a class="lehrer-link" href="bio/klasse09/lernseiten/hormone_kl9_lehrer.html" target="_blank" rel="noopener">Hormone – Lehrer</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="thema-block">
+          <div class="thema-header"><span class="thema-icon">🦠</span><span class="thema-title">Immunsystem &amp; Krankheiten</span></div>
+          <div class="kachel-grid">
+            <div class="kachel" onclick="toggleKachel(this, event)">
+              <div class="kachel-name">🧫 HIV &amp; Antibiotika</div>
+              <div class="kachel-badges"><span class="kbadge ls">📖 1</span><span class="kbadge test">🔍 1</span></div>
+              <div class="kachel-links" style="display:none">
+                <a href="bio/klasse09/lernseiten/hiv_lerneinheit.html" target="_blank" rel="noopener">📖 HIV – Lerneinheit</a>
+                <a href="bio/klasse09/tests/Quiz_Antibiotika_HIV.html" target="_blank" rel="noopener">🔍 Quiz – Antibiotika &amp; HIV</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="thema-block">
+          <div class="thema-header"><span class="thema-icon">👶</span><span class="thema-title">Fortpflanzung &amp; Sexualerziehung</span></div>
+          <div class="kachel-grid">
+            <div class="kachel" onclick="toggleKachel(this, event)">
+              <div class="kachel-name">🔄 Weiblicher Zyklus</div>
+              <div class="kachel-badges"><span class="kbadge ls">📖 2</span><span class="kbadge lehrer">👨‍🏫 1</span></div>
+              <div class="kachel-links" style="display:none">
+                <a href="bio/klasse09/lernseiten/zyklus_erarbeitung.html" target="_blank" rel="noopener">📖 Zyklus – Erarbeitung</a>
+                <a href="bio/klasse09/lernseiten/tafelbild_zyklus.html" target="_blank" rel="noopener">📖 Zyklus – Tafelbild</a>
+                <a class="lehrer-link" href="bio/klasse09/lernseiten/lehrer_zyklus.html" target="_blank" rel="noopener">Zyklus – Lehrer</a>
+              </div>
+            </div>
+            <div class="kachel" onclick="toggleKachel(this, event)">
+              <div class="kachel-name">🛡️ Verhütung</div>
+              <div class="kachel-badges"><span class="kbadge ls">📖 2</span><span class="kbadge lehrer">👨‍🏫 1</span></div>
+              <div class="kachel-links" style="display:none">
+                <a href="bio/klasse09/lernseiten/verhuetung_erarbeitung.html" target="_blank" rel="noopener">📖 Verhütung – Erarbeitung</a>
+                <a href="bio/klasse09/lernseiten/tafelbild_verhuetung.html" target="_blank" rel="noopener">📖 Verhütung – Tafelbild</a>
+                <a class="lehrer-link" href="bio/klasse09/lernseiten/lehrer_verhuetung.html" target="_blank" rel="noopener">Verhütung – Lehrer</a>
+              </div>
+            </div>
+            <div class="kachel" onclick="toggleKachel(this, event)">
+              <div class="kachel-name">🤝 Partnerschaftliche Verhütung</div>
+              <div class="kachel-badges"><span class="kbadge ls">📖 1</span></div>
+              <div class="kachel-links" style="display:none">
+                <a href="bio/klasse09/sexualerziehung/partnerschaftliche_verhuetung_ls.html" target="_blank" rel="noopener">📖 Partnerschaftliche Verhütung</a>
+              </div>
+            </div>
+            <div class="kachel" onclick="toggleKachel(this, event)">
+              <div class="kachel-name">🌈 Toleranz &amp; Selbstbestimmung</div>
+              <div class="kachel-badges"><span class="kbadge ls">📖 2</span></div>
+              <div class="kachel-links" style="display:none">
+                <a href="bio/klasse09/sexualerziehung/toleranz_selbstbestimmung_ls.html" target="_blank" rel="noopener">📖 Toleranz &amp; Selbstbestimmung</a>
+                <a href="bio/klasse09/lernseiten/toleranz%20selbstbestimmung%20ls.html" target="_blank" rel="noopener">📖 Toleranz &amp; Selbstbestimmung (alte Version)</a>
+              </div>
+            </div>
+            <div class="kachel" onclick="toggleKachel(this, event)">
+              <div class="kachel-name">🌐 Geschlechtliche Identität</div>
+              <div class="kachel-badges"><span class="kbadge ls">📖 2</span><span class="kbadge lehrer">👨‍🏫 1</span></div>
+              <div class="kachel-links" style="display:none">
+                <a href="bio/klasse09/sexualerziehung/geschlechtliche_identitaet_teil1_ls.html" target="_blank" rel="noopener">📖 Geschlechtliche Identität – Teil 1</a>
+                <a href="bio/klasse09/sexualerziehung/geschlechtliche_identitaet_teil2_ls.html" target="_blank" rel="noopener">📖 Geschlechtliche Identität – Teil 2</a>
+                <a class="lehrer-link" href="bio/klasse09/sexualerziehung/geschlechtliche_identitaet_lehrerseite.html" target="_blank" rel="noopener">Geschlechtliche Identität – Lehrer</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ KOMPASS ══ -->
+<div class="card" data-fach="kompass" id="card-kompass">
+  <div class="card-header"><span class="card-icon">🧭</span><span class="card-title">Kompass</span><span class="card-meta">3 Dateien</span></div>
+  <div class="klasse-wrap">
+    <button class="klasse-btn" aria-expanded="false" onclick="toggleKlasse(this)">
+      <span class="klasse-label">🛡️ Cybergrooming</span><span class="klasse-count">3</span><span class="klasse-arrow">▼</span>
+    </button>
+    <div class="klasse-panel"><div class="col-grid">
+      <div class="col-group"><div class="col-head lernen">📖 Lernseiten</div><div class="links">
+        <a class="link-row" href="kompass/cybergrooming/schueler-cybergrooming.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Cybergrooming – Schüler</span></a>
+        <a class="link-row lehrer-only" href="kompass/cybergrooming/Lehrer-cybergrooming.html" target="_blank" rel="noopener"><span class="link-icon">👨‍🏫</span><span class="link-name">Cybergrooming – Lehrer</span></a>
+      </div></div>
+      <div class="col-group"><div class="col-head uebung">✏️ Übungen</div><p class="empty-col">keine Einträge</p></div>
+      <div class="col-group"><div class="col-head sonstig">📎 Sonstiges</div><div class="links">
+        <a class="link-row" href="kompass/cybergrooming/ki.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">KI</span></a>
+      </div></div>
+    </div></div>
+  </div>
+</div>
+
+<!-- ══ SONSTIGES ══ -->
+<div class="card" data-fach="sonst" id="card-sonst">
+  <div class="card-header"><span class="card-icon">📁</span><span class="card-title">Sonstiges</span><span class="card-meta">7 Dateien</span></div>
+  <div class="klasse-wrap">
+    <button class="klasse-btn" aria-expanded="false" onclick="toggleKlasse(this)"><span class="klasse-label">🏫 MCG</span><span class="klasse-count">1</span><span class="klasse-arrow">▼</span></button>
+    <div class="klasse-panel"><div class="col-grid c1"><div class="col-group"><div class="links">
+      <a class="link-row" href="MCG/Entlastung.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Entlastung</span><span class="link-tag tag-orga">Orga</span></a>
+    </div></div></div></div>
+  </div>
+  <div class="klasse-wrap">
+    <button class="klasse-btn" aria-expanded="false" onclick="toggleKlasse(this)"><span class="klasse-label">📝 BKO – Deutsch</span><span class="klasse-count">1</span><span class="klasse-arrow">▼</span></button>
+    <div class="klasse-panel"><div class="col-grid c1"><div class="col-group"><div class="links">
+      <a class="link-row" href="BKO/Deutsch/test/dramenvergleich_wissenstest.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Dramenvergleich – Wissenstest</span><span class="link-tag tag-test">Test</span></a>
+    </div></div></div></div>
+  </div>
+  <div class="klasse-wrap">
+    <button class="klasse-btn" aria-expanded="false" onclick="toggleKlasse(this)"><span class="klasse-label">🎓 EF Orga</span><span class="klasse-count">3</span><span class="klasse-arrow">▼</span></button>
+    <div class="klasse-panel"><div class="col-grid c1"><div class="col-group"><div class="links">
+      <a class="link-row" href="EF Orga/Salvadore A Haus/politische Bildung/demokratie-workshop.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Demokratie-Workshop</span></a>
+      <a class="link-row" href="EF Orga/Salvadore A Haus/Soziales/skt-druckvorlagen.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">SKT – Druckvorlagen</span></a>
+      <a class="link-row" href="EF Orga/Salvadore A Haus/Soziales/skt-verlaufsplan.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">SKT – Verlaufsplan</span></a>
+    </div></div></div></div>
+  </div>
+  <div class="klasse-wrap">
+    <button class="klasse-btn" aria-expanded="false" onclick="toggleKlasse(this)"><span class="klasse-label">🧪 TEST-Ordner</span><span class="klasse-count">6</span><span class="klasse-arrow">▼</span></button>
+    <div class="klasse-panel"><div class="col-grid c1"><div class="col-group"><div class="links">
+      <a class="link-row" href="TEST/Deutsch.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Deutsch</span><span class="link-tag tag-entwurf">Entwurf</span></a>
+      <a class="link-row" href="TEST/englisch.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Englisch</span><span class="link-tag tag-entwurf">Entwurf</span></a>
+      <a class="link-row" href="TEST/going_to_future_erarbeitung.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Going to Future – Erarbeitung</span><span class="link-tag tag-entwurf">Entwurf</span></a>
+      <a class="link-row" href="TEST/going_to_future_uebung.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Going to Future – Übung</span><span class="link-tag tag-entwurf">Entwurf</span></a>
+      <a class="link-row" href="TEST/questions_erarbeitung.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Questions – Erarbeitung</span><span class="link-tag tag-entwurf">Entwurf</span></a>
+      <a class="link-row" href="TEST/questions_uebung.html" target="_blank" rel="noopener"><span class="link-icon">📄</span><span class="link-name">Questions – Übung</span><span class="link-tag tag-entwurf">Entwurf</span></a>
+    </div></div></div></div>
+  </div>
+</div>
+
+</div><!-- /card-area -->
+
+<div id="dino" onclick="dinoClick()">🦖</div>
+<div id="dino-tip">Made by Mathedino 🦖</div>
+
+<script>
+// ── Lehrermodus ──────────────────────────────────────────────────────────────
+let dinoClicks = 0, dinoTimer;
+function dinoClick() {
+  dinoClicks++;
+  clearTimeout(dinoTimer);
+  dinoTimer = setTimeout(() => { dinoClicks = 0; }, 1200);
+  if (dinoClicks >= 3) {
+    dinoClicks = 0;
+    toggleLehrerModus();
+  }
+  // Tip bei Einfachklick
+  document.getElementById('dino-tip').classList.toggle('visible');
+  setTimeout(() => document.getElementById('dino-tip').classList.remove('visible'), 1500);
+}
+
+function setLehrerModus(aktiv) {
+  document.body.classList.toggle('lehrer-mode', aktiv);
+  document.getElementById('lehrerBadge').classList.toggle('visible', aktiv);
+  document.getElementById('dino-tip').textContent = aktiv ? '👨‍🏫 Lehrermodus aktiv!' : 'Made by Mathedino 🦖';
+}
+
+function toggleLehrerModus() {
+  const aktiv = !document.body.classList.contains('lehrer-mode');
+  setLehrerModus(aktiv);
+}
+
+// URL-Parameter ?lehrer=1
+const params = new URLSearchParams(window.location.search);
+if (params.get('lehrer') === '1') setLehrerModus(true);
+const fachParam = (params.get('fach') || 'alle').toLowerCase();
+
+// ── Tabs ─────────────────────────────────────────────────────────────────────
+const order = ['mathe','bio','kompass','sonst'];
+const allowed = fachParam === 'alle' ? order : fachParam.split(',').map(f=>f.trim()).filter(f=>order.includes(f));
+let suchFach = (fachParam !== 'alle' && allowed.length === 1) ? allowed[0] : '';
+
+const tabBar = document.getElementById('tabBar');
+const sb = document.createElement('button'); sb.className='tab-btn'; sb.dataset.fach='suche'; sb.textContent='🔍 Suche'; sb.onclick=()=>showCard('suche',sb); tabBar.appendChild(sb);
+const labels = {mathe:'📐 Mathematik',bio:'🧬 Biologie',kompass:'🧭 Kompass',sonst:'📁 Sonstiges'};
+allowed.forEach((f,i)=>{const b=document.createElement('button');b.className='tab-btn'+(i===0?' active':'');b.dataset.fach=f;b.textContent=labels[f];b.onclick=()=>showCard(f,b);tabBar.appendChild(b);});
+order.forEach(f=>{if(!allowed.includes(f)){const c=document.getElementById('card-'+f);if(c)c.remove();}});
+const firstCard=document.getElementById('card-'+allowed[0]);if(firstCard)firstCard.classList.add('active');
+
+if(suchFach){document.querySelectorAll('#filterFach .fach-filter-btn').forEach(b=>{b.classList.toggle('active',b.dataset.val===suchFach);});}
+let fF=suchFach,fK='',fT='';
+
+function showCard(fach,btn){
+  document.querySelectorAll('.card').forEach(c=>c.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  if(fach==='suche'){
+    document.getElementById('searchBar').classList.add('visible');
+    document.getElementById('cardArea').style.display='none';
+    document.getElementById('searchInput').focus();
+    showMetaHinweis();
+  } else {
+    document.getElementById('searchBar').classList.remove('visible');
+    document.getElementById('metaHinweis').classList.remove('visible');
+    document.getElementById('cardArea').style.display='';
+    const c=document.getElementById('card-'+fach);if(c)c.classList.add('active');
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+}
+
+function toggleKlasse(btn){const p=btn.nextElementSibling;const open=p.classList.toggle('open');btn.setAttribute('aria-expanded',open);}
+function toggleJgst(btn){const p=btn.nextElementSibling;const open=p.classList.toggle('open');btn.setAttribute('aria-expanded',open);}
+function toggleAlt(btn){const p=btn.nextElementSibling;const open=p.classList.toggle('open');btn.setAttribute('aria-expanded',open);}
+function toggleKachel(k, event){
+  if(k.classList.contains('kachel-leer'))return;
+  // Klick auf einen Link soll die Kachel NICHT schließen
+  if(event && event.target.closest('a')) return;
+  const l=k.querySelector('.kachel-links');if(!l)return;
+  const open=l.style.display!=='none';
+  l.style.display=open?'none':'flex';
+  k.classList.toggle('open',!open);
+  // Build pairs on first open
+  if(!open && !l.dataset.paired){
+    pairLinks(l);
+    l.dataset.paired='1';
+  }
+}
+
+// ── Paar-Gruppierung ────────────────────────────────────────────────────────
+function pairLinks(container){
+  const links = Array.from(container.querySelectorAll('a'));
+  if(!links.length) return;
+
+  // Stem: remove _ls / _ue / _ls2 / _ue2 suffix before .html
+  function stem(href){
+    return href.replace(/_(ls|ue)\d*\.html$/,'').replace(/_(ls|ue)\d*$/,'');
+  }
+
+  const paired = new Set();
+  const result = [];
+
+  links.forEach((a, i) => {
+    if(paired.has(i)) return;
+    const isLS = /_(ls)\d*\.html$/.test(a.href);
+    if(!isLS){ result.push({type:'single', a}); return; }
+
+    // Look for matching _ue
+    const s = stem(a.href);
+    const partner = links.findIndex((b, j) => j > i && !paired.has(j) && /_(ue)\d*\.html$/.test(b.href) && stem(b.href) === s);
+    if(partner !== -1){
+      paired.add(i); paired.add(partner);
+      result.push({type:'pair', ls:a, ue:links[partner]});
+    } else {
+      result.push({type:'single', a});
+    }
+  });
+  // Add singles that were partners
+  links.forEach((a,i)=>{ if(paired.has(i) && !result.find(r=>r.ue===a||r.ls===a)) result.push({type:'single',a}); });
+
+  // Rebuild DOM
+  container.innerHTML='';
+  result.forEach(r=>{
+    if(r.type==='pair'){
+      const div=document.createElement('div');
+      div.className='link-pair';
+      div.appendChild(r.ls.cloneNode(true));
+      div.appendChild(r.ue.cloneNode(true));
+      container.appendChild(div);
+    } else {
+      const wrap=document.createElement('div');
+      wrap.className='link-single';
+      wrap.appendChild(r.a.cloneNode(true));
+      container.appendChild(wrap);
+    }
+  });
+}
+
+// ── Long-Press / Mouseover Info ─────────────────────────────────────────────
+const META_INFO = {
+  // Dateiname (ohne Pfad) → {typ, desc}
+  'kommutativ_assoziativ_ls.html':          {typ:'Lernseite',desc:'Kommutativ- und Assoziativgesetz erklärt'},
+  'rechengesetze_ls.html':                  {typ:'Lernseite',desc:'Übersicht der Rechengesetze'},
+  'teilbarkeitsregeln_ls.html':             {typ:'Lernseite',desc:'Teilbarkeitsregeln für 2, 3, 5, 9, 10'},
+  'primzahlen_ls.html':                     {typ:'Lernseite',desc:'Was sind Primzahlen? Sieb des Eratosthenes'},
+  'sachaufgaben_loesen_ls.html':            {typ:'Lernseite',desc:'Strategien zum Lösen von Sachaufgaben'},
+  'haus_der_vierecke_ls.html':              {typ:'Lernseite',desc:'Übersicht der Vierecke und ihre Eigenschaften'},
+  'geradenlagen_geodreieck_ls.html':        {typ:'Lernseite',desc:'Parallele und senkrechte Geraden mit Geodreieck'},
+  'flaechen_vergleichen_ls.html':           {typ:'Lernseite',desc:'Flächen vergleichen und schätzen'},
+  'flaecheneinheiten_ls.html':              {typ:'Lernseite',desc:'Flächeneinheiten cm², dm², m² umrechnen'},
+  'flaecheninhalt_rechteck_ls.html':        {typ:'Lernseite',desc:'Flächeninhalt von Rechteck und Quadrat'},
+  'flaecheninhalt_dreieck_ls.html':         {typ:'Lernseite',desc:'Flächeninhalt des Dreiecks: A = g·h / 2'},
+  'zusammengesetzte_flaechen_ls.html':      {typ:'Lernseite',desc:'Flächeninhalt zusammengesetzter Figuren'},
+  'echte_brueche_bilder_ls.html':           {typ:'Lernseite',desc:'Echte Brüche bildlich darstellen'},
+  'brueche_multiplizieren_ls.html':         {typ:'Lernseite',desc:'Brüche multiplizieren – Zähler · Zähler'},
+  'dezimalzahlen_division_ls.html':         {typ:'Lernseite',desc:'Dezimalzahlen dividieren'},
+  'kommaverschiebung_ls.html':              {typ:'Lernseite',desc:'Kommaverschiebung beim Multiplizieren und Dividieren'},
+  'griechische_buchstaben_winkelmass_ls.html':{typ:'Lernseite',desc:'Griechische Buchstaben und Winkelmaße (°, rad)'},
+  'winkel_benennen_ls.html':                {typ:'Lernseite',desc:'Winkelarten: spitz, recht, stumpf, gestreckt'},
+  'winkel_messen_geodreieck_ls.html':       {typ:'Lernseite',desc:'Winkel messen mit dem Geodreieck'},
+  'winkel_geodreieck_zeichnen_ls.html':     {typ:'Lernseite',desc:'Winkel zeichnen mit dem Geodreieck'},
+  'figuren_koordinatensystem_ls.html':      {typ:'Lernseite',desc:'Figuren im Koordinatensystem mit negativen Koordinaten'},
+  'kreise_kreisfiguren_ls.html':            {typ:'Lernseite',desc:'Kreise und Kreisfiguren: Radius, Durchmesser, Mittelpunkt'},
+  'verschiebungen_ls.html':                 {typ:'Lernseite',desc:'Verschiebungen im Koordinatensystem'},
+  'terme_mit_einer_variablen_ls.html':      {typ:'Lernseite',desc:'Terme mit einer Variablen aufstellen und auswerten'},
+  'aequivalenzumformungen_lin_gl_ls.html':  {typ:'Lernseite',desc:'Lineare Gleichungen mit Äquivalenzumformungen lösen'},
+  'bruchterme_01_definitionsmenge_ls.html': {typ:'Lernseite',desc:'Definitionsmenge von Bruchtermen bestimmen'},
+  'bruchterme_02_kuerzen_ls.html':          {typ:'Lernseite',desc:'Bruchterme kürzen und vereinfachen'},
+  'bruchgleichungen_03_loesen_ls.html':     {typ:'Lernseite',desc:'Bruchgleichungen lösen – Schritt für Schritt'},
+  'bruchgleichungen_04_anwendung_ls.html':  {typ:'Lernseite',desc:'Bruchgleichungen in Sachaufgaben anwenden'},
+  'konstruktion_zirkel_lineal_ls.html':     {typ:'Lernseite',desc:'Konstruieren mit Zirkel und Lineal'},
+  'thales_ls.html':                         {typ:'Lernseite',desc:'Satz des Thales: Winkel im Halbkreis ist 90°'},
+  'thales_beweis_ls.html':                  {typ:'Lernseite',desc:'Beweis des Satzes des Thales'},
+  'umkreis_inkreis_ls.html':                {typ:'Lernseite',desc:'Umkreis und Inkreis eines Dreiecks konstruieren'},
+  'schwerpunkt_ls.html':                    {typ:'Lernseite',desc:'Schwerpunkt des Dreiecks – Schnittpunkt der Seitenhalbierenden'},
+  'vektorrechnung_3d_ls.html':              {typ:'Lernseite',desc:'Vektorrechnung im 3D-Koordinatensystem'},
+  'parameterform_gerade_ls.html':           {typ:'Lernseite',desc:'Parameterform einer Geraden im Raum aufstellen'},
+  'geraden_lagebeziehung_ls.html':          {typ:'Lernseite',desc:'Lagebeziehungen von Geraden: parallel, identisch, schneidend'},
+  'bewegungen_modellieren_ls.html':         {typ:'Lernseite',desc:'Bewegungen mit Geradengleichungen modellieren'},
+  'extrempunkte_loesung.html':              {typ:'Lernseite',desc:'Extrempunkte berechnen – Lösung'},
+  'extrempunkte_uebung.html':               {typ:'Übung',   desc:'Extrempunkte berechnen – Übungsaufgaben'},
+  'wendepunkte_erarbeitung.html':           {typ:'Lernseite',desc:'Wendepunkte und zweite Ableitung'},
+  'wendepunkte_loesung.html':               {typ:'Lernseite',desc:'Wendepunkte – Lösung'},
+  'wendepunkte_uebung.html':                {typ:'Übung',   desc:'Wendepunkte berechnen – Übungsaufgaben'},
+  'euler_gerade_bonus.html':                {typ:'Bonus',   desc:'Euler-Gerade: Umkreismittelpunkt, Schwerpunkt und Höhenschnittpunkt'},
+  'sieb_eratosthenes_bonus.html':           {typ:'Bonus',   desc:'Sieb des Eratosthenes – interaktive Erkundung'},
+};
+
+function getInfo(href){
+  const file = href.split('/').pop();
+  return META_INFO[file] || null;
+}
+
+function showTooltip(kachel, href){
+  // Remove old tooltip
+  const old = kachel.querySelector('.kachel-tooltip');
+  if(old) old.remove();
+  const info = getInfo(href);
+  const file = href.split('/').pop();
+  const path = href.replace('mathe/','').replace('bio/','').replace('kompass/','');
+  const div = document.createElement('div');
+  div.className = 'kachel-tooltip';
+  div.innerHTML = `<div class="tt-typ">${info ? info.typ : 'Datei'}</div>
+    ${info ? `<div class="tt-desc">${info.desc}</div>` : ''}
+    <div class="tt-path">📄 ${file}</div>`;
+  kachel.appendChild(div);
+  kachel.classList.add('tooltip-open');
+  // Seitlich rechts als Standard; bei Platzmangel am Bildschirmrand nach links ausweichen
+  const rect = kachel.getBoundingClientRect();
+  const tooltipWidth = Math.min(200, window.innerWidth * 0.6);
+  if(rect.right + tooltipWidth + 24 > window.innerWidth){
+    div.classList.add('tt-left');
+  }
+}
+
+function hideTooltip(kachel){
+  kachel.classList.remove('tooltip-open');
+  const t = kachel.querySelector('.kachel-tooltip');
+  if(t) t.remove();
+}
+
+// Long-press für iPad
+let pressTimer, pressTarget, pressHref;
+document.addEventListener('pointerdown', e=>{
+  const link = e.target.closest('.kachel-links a');
+  if(!link) return;
+  const kachel = link.closest('.kachel');
+  if(!kachel) return;
+  pressTarget = kachel;
+  pressHref = link.getAttribute('href');
+  kachel.classList.add('pressing');
+  pressTimer = setTimeout(()=>{
+    showTooltip(kachel, pressHref);
+    kachel.classList.remove('pressing');
+  }, 600);
+}, {passive:true});
+
+document.addEventListener('pointerup', e=>{
+  clearTimeout(pressTimer);
+  if(pressTarget) pressTarget.classList.remove('pressing');
+}, {passive:true});
+
+document.addEventListener('pointermove', e=>{
+  clearTimeout(pressTimer);
+  if(pressTarget) pressTarget.classList.remove('pressing');
+}, {passive:true});
+
+// Mouseover für Desktop
+document.addEventListener('mouseover', e=>{
+  const link = e.target.closest('.kachel-links a');
+  if(!link) return;
+  const kachel = link.closest('.kachel');
+  if(!kachel) return;
+  showTooltip(kachel, link.getAttribute('href'));
+});
+
+document.addEventListener('mouseout', e=>{
+  const link = e.target.closest('.kachel-links a');
+  if(!link) return;
+  const related = e.relatedTarget;
+  const kachel = link.closest('.kachel');
+  if(!kachel) return;
+  if(!kachel.contains(related)) hideTooltip(kachel);
+});
+
+// Klick auf Tooltip schließt ihn
+document.addEventListener('click', e=>{
+  if(e.target.closest('.kachel-tooltip')){
+    hideTooltip(e.target.closest('.kachel'));
+  }
+});
+
+// ── Filter ───────────────────────────────────────────────────────────────────
+document.querySelectorAll('#filterFach .fach-filter-btn').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('#filterFach .fach-filter-btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');fF=b.dataset.val;doSearch();}));
+document.querySelectorAll('#filterKlasse .filter-btn').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('#filterKlasse .filter-btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');fK=b.dataset.val;doSearch();}));
+document.querySelectorAll('#filterTyp .filter-btn').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('#filterTyp .filter-btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');fT=b.dataset.val;doSearch();}));
+
+const META = {
+  'mathe/klasse05/rechnen/rechengesetze/kommutativ_assoziativ_ls.html':{title:'Kommutativ- & Assoziativgesetz',desc:'Lernseite zu Rechengesetzen',kw:'Kommutativgesetz,Assoziativgesetz',typ:'Lernseite',kl:'5',fach:'mathe'},
+  'mathe/klasse05/rechnen/rechengesetze/rechengesetze_ls.html':{title:'Rechengesetze',desc:'Lernseite zu Rechengesetzen',kw:'Rechengesetze,Distributivgesetz',typ:'Lernseite',kl:'5',fach:'mathe'},
+  'mathe/klasse05/rechnen/teilbarkeit_primzahlen/teilbarkeitsregeln_ls.html':{title:'Teilbarkeitsregeln',desc:'Lernseite zu Teilbarkeitsregeln',kw:'Teilbarkeit,Teilbarkeitsregeln',typ:'Lernseite',kl:'5',fach:'mathe'},
+  'mathe/klasse05/rechnen/teilbarkeit_primzahlen/primzahlen_ls.html':{title:'Primzahlen',desc:'Lernseite zu Primzahlen',kw:'Primzahlen,Teilbarkeit',typ:'Lernseite',kl:'5',fach:'mathe'},
+  'mathe/klasse05/rechnen/sachaufgaben/sachaufgaben_loesen_ls.html':{title:'Sachaufgaben lösen',desc:'Strategien zum Sachaufgaben lösen',kw:'Sachaufgaben,Textaufgaben,Strategie',typ:'Lernseite',kl:'5',fach:'mathe'},
+  'mathe/klasse05/geometrie/grundlagen/haus_der_vierecke_ls.html':{title:'Haus der Vierecke',desc:'Lernseite zu Vierecken',kw:'Vierecke,Geometrie,Quadrat,Rechteck',typ:'Lernseite',kl:'5',fach:'mathe'},
+  'mathe/klasse05/geometrie/grundlagen/geradenlagen_geodreieck_ls.html':{title:'Geradenlagen & Geodreieck',desc:'Parallele und senkrechte Geraden',kw:'Geraden,Geodreieck,parallel,senkrecht',typ:'Lernseite',kl:'5',fach:'mathe'},
+  'mathe/klasse05/geometrie/flaecheninhalt/flaechen_vergleichen_ls.html':{title:'Flächen vergleichen',desc:'Flächen vergleichen und schätzen',kw:'Flächeninhalt,Geometrie,Schätzen',typ:'Lernseite',kl:'5',fach:'mathe'},
+  'mathe/klasse05/geometrie/flaecheninhalt/flaecheneinheiten_ls.html':{title:'Flächeneinheiten',desc:'Lernseite zu Flächeneinheiten',kw:'Flächeneinheiten,cm²,m²',typ:'Lernseite',kl:'5',fach:'mathe'},
+  'mathe/klasse05/geometrie/flaecheninhalt/flaecheninhalt_rechteck_ls.html':{title:'Flächeninhalt Rechteck',desc:'Flächeninhalt des Rechtecks',kw:'Flächeninhalt,Rechteck',typ:'Lernseite',kl:'5',fach:'mathe'},
+  'mathe/klasse05/geometrie/flaecheninhalt/flaecheninhalt_dreieck_ls.html':{title:'Flächeninhalt Dreieck',desc:'Flächeninhalt des Dreiecks',kw:'Flächeninhalt,Dreieck,Geometrie',typ:'Lernseite',kl:'5',fach:'mathe'},
+  'mathe/klasse06/brueche/bruch_anteil/echte_brueche_bilder_ls.html':{title:'Echte Brüche – Bilder',desc:'Bildliche Darstellung echter Brüche',kw:'Brüche,echte Brüche',typ:'Lernseite',kl:'6',fach:'mathe'},
+  'mathe/klasse06/rechnen/brueche_multiplizieren_dividieren/brueche_multiplizieren_ls.html':{title:'Brüche multiplizieren',desc:'Multiplizieren von Brüchen',kw:'Brüche,Multiplikation',typ:'Lernseite',kl:'6',fach:'mathe'},
+  'mathe/klasse06/rechnen/kommaverschiebung/kommaverschiebung_ls.html':{title:'Kommaverschiebung',desc:'Kommaverschiebung bei Dezimalzahlen',kw:'Kommaverschiebung,Dezimalzahlen',typ:'Lernseite',kl:'6',fach:'mathe'},
+  'mathe/klasse07/terme_gleichungen/terme_mit_einer_variablen_ls.html':{title:'Terme mit einer Variablen',desc:'Einführung in Terme mit Variablen',kw:'Terme,Variable,Algebra',typ:'Lernseite',kl:'7',fach:'mathe'},
+  'mathe/klasse07/terme_gleichungen/aequivalenzumformungen_lin_gl_ls.html':{title:'Äquivalenzumformungen',desc:'Lineare Gleichungen mit Äquivalenzumformungen',kw:'Äquivalenzumformungen,Gleichungen',typ:'Lernseite',kl:'7',fach:'mathe'},
+  'mathe/klasse07/terme_gleichungen/bruchterme_bruchgleichungen/bruchterme_01_definitionsmenge_ls.html':{title:'Bruchterme – Definitionsmenge',desc:'Definitionsmenge von Bruchtermen',kw:'Bruchterme,Definitionsmenge',typ:'Lernseite',kl:'7',fach:'mathe'},
+  'mathe/klasse07/terme_gleichungen/bruchterme_bruchgleichungen/bruchterme_02_kuerzen_ls.html':{title:'Bruchterme – Kürzen',desc:'Bruchterme kürzen',kw:'Bruchterme,Kürzen',typ:'Lernseite',kl:'7',fach:'mathe'},
+  'mathe/klasse07/terme_gleichungen/bruchterme_bruchgleichungen/bruchgleichungen_03_loesen_ls.html':{title:'Bruchgleichungen – Lösen',desc:'Bruchgleichungen lösen',kw:'Bruchgleichungen,Gleichungen',typ:'Lernseite',kl:'7',fach:'mathe'},
+  'mathe/klasse07/terme_gleichungen/bruchterme_bruchgleichungen/bruchgleichungen_04_anwendung_ls.html':{title:'Bruchgleichungen – Anwendung',desc:'Anwendungsaufgaben Bruchgleichungen',kw:'Bruchgleichungen,Sachaufgaben',typ:'Lernseite',kl:'7',fach:'mathe'},
+  'mathe/klasse08/kreise_dreiecke/satz_des_thales/thales_ls.html':{title:'Satz des Thales',desc:'Lernseite zum Satz des Thales',kw:'Thales,Kreise,Dreiecke,Geometrie',typ:'Lernseite',kl:'8',fach:'mathe'},
+  'mathe/klasse08/kreise_dreiecke/satz_des_thales/thales_beweis_ls.html':{title:'Thales – Beweis',desc:'Beweis des Satzes des Thales',kw:'Thales,Beweis,Geometrie',typ:'Lernseite',kl:'8',fach:'mathe'},
+  'mathe/klasseEF/lineare_algebra/parameterform_gerade_ls.html':{title:'Parameterform der Geraden',desc:'Parameterform einer Geraden im Raum',kw:'Parameterform,Gerade,Vektoren,lineare Algebra',typ:'Lernseite',kl:'EF',fach:'mathe'},
+  'bio/klasse06/lernseiten/herz-kreislauf.html':{title:'Herz-Kreislauf',desc:'Lernseite zum Herz-Kreislauf-System',kw:'Herz,Kreislauf,Blut',typ:'Lernseite',kl:'6',fach:'bio'},
+  'bio/klasse06/sexual_erziehung/pubertaet_sprache_merkmale_ls.html':{title:'Pubertät – Sprache & Merkmale',desc:'Sprache und Merkmale der Pubertät',kw:'Pubertät,Sexualerziehung,Merkmale',typ:'Lernseite',kl:'6',fach:'bio'},
+  'bio/klasse09/lernseiten/blutzucker_kl9_erarbeitung.html':{title:'Blutzucker – Erarbeitung',desc:'Blutzuckerregelkreis',kw:'Blutzucker,Insulin,Glucagon,Regelkreis',typ:'Lernseite',kl:'9',fach:'bio'},
+  'bio/klasse09/lernseiten/zyklus_erarbeitung.html':{title:'Zyklus – Erarbeitung',desc:'Weiblicher Zyklus',kw:'Zyklus,Menstruation,Hormone',typ:'Lernseite',kl:'9',fach:'bio'},
+  'bio/klasse09/lernseiten/verhuetung_erarbeitung.html':{title:'Verhütung – Erarbeitung',desc:'Verhütungsmethoden',kw:'Verhütung,Fortpflanzung',typ:'Lernseite',kl:'9',fach:'bio'},
+  'bio/klasse09/lernseiten/hiv_lerneinheit.html':{title:'HIV – Lerneinheit',desc:'HIV und AIDS',kw:'HIV,AIDS,Virus,Immunsystem',typ:'Lernseite',kl:'9',fach:'bio'},
+};
+
+function doSearch(){
+  const q=document.getElementById('searchInput').value.trim().toLowerCase();
+  const res=document.getElementById('searchResults');
+  const hits=Object.entries(META).filter(([path,m])=>{
+    if(fF&&m.fach!==fF)return false;
+    if(fK&&m.kl!==fK)return false;
+    if(fT&&m.typ!==fT)return false;
+    if(!q)return true;
+    return q.split(/\s+/).every(w=>(m.title+' '+m.desc+' '+m.kw).toLowerCase().includes(w));
+  });
+  if(!q&&!fF&&!fK&&!fT){res.innerHTML='';return;}
+  if(!hits.length){res.innerHTML='<div class="no-results">🦖 Keine Ergebnisse gefunden</div>';return;}
+  const tagMap={'Lernseite':'tag-lernen','Übung':'tag-uebung','Test':'tag-test','Bonus':'tag-bonus'};
+  const emoji={mathe:'📐',bio:'🧬',kompass:'🧭'};
+  res.innerHTML=hits.map(([path,m])=>`<a class="sri" href="${path}" target="_blank" rel="noopener"><span class="sri-icon">${emoji[m.fach]||'📄'}</span><div class="sri-info"><div class="sri-title">${m.title}</div><div class="sri-desc">${m.desc}</div></div><div class="sri-tags"><span class="link-tag ${tagMap[m.typ]||''}">${m.typ}</span><span style="font-size:.6rem;padding:.13rem .42rem;border-radius:20px;font-weight:700;background:#f1f5f9;color:#475569">Kl. ${m.kl}</span></div></a>`).join('');
+}
+
+function showMetaHinweis(){
+  const keys=Object.keys(META).sort(()=>Math.random()-.5).slice(0,2);
+  document.getElementById('metaList').innerHTML=keys.map(p=>{const m=META[p];return`<li><a href="${p}" target="_blank">${m.title}</a><span class="path"> ${p}</span></li>`;}).join('');
+  document.getElementById('metaHinweis').classList.add('visible');
+}
+
+// Swipe
+let tx=0;
+document.addEventListener('touchstart',e=>{tx=e.touches[0].clientX;},{passive:true});
+document.addEventListener('touchend',e=>{
+  const dx=e.changedTouches[0].clientX-tx;if(Math.abs(dx)<60)return;
+  const cur=document.querySelector('.card.active')?.dataset.fach;if(!cur)return;
+  const i=allowed.indexOf(cur);const n=dx<0?Math.min(i+1,allowed.length-1):Math.max(i-1,0);
+  if(n!==i){const b=document.querySelector(`.tab-btn[data-fach="${allowed[n]}"]`);if(b)showCard(allowed[n],b);}
+},{passive:true});
+</script>
+</body>
+</html>

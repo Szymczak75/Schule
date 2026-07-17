@@ -1,0 +1,54 @@
+name: Build Dino-Hub
+
+# Läuft bei jedem Push, der HTML-Dateien unter Schule/ verändert.
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - '**/*.html'
+      - 'build_hub.py'
+      - '.github/workflows/hub.yml'
+  workflow_dispatch:   # erlaubt manuellen Start über den Actions-Tab
+
+# Der Job committet die generierte dino_hub.html zurück – dafür Schreibrecht:
+permissions:
+  contents: write
+
+# Verhindert, dass sich zwei Läufe gegenseitig überholen:
+concurrency:
+  group: build-hub
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Repo auschecken
+        uses: actions/checkout@v4
+
+      - name: Python bereitstellen
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Hub generieren
+        run: |
+          # Repo-Wurzel IST der Schule-Ordner (Repo heißt "Schule").
+          python build_hub.py --root . --out dino_hub.html
+
+      - name: Änderungen committen (nur bei echten Inhaltsänderungen)
+        run: |
+          git config user.name  "dino-hub-bot"
+          git config user.email "actions@github.com"
+          # Vergleich ohne die Datumszeile: nur wenn sich echte Inhalte ändern,
+          # wird committet – sonst bleibt es still (kein täglicher Leer-Commit).
+          OLD=$(git show HEAD:dino_hub.html 2>/dev/null | grep -v 'aktualisiert [0-9]' || true)
+          NEW=$(grep -v 'aktualisiert [0-9]' dino_hub.html || true)
+          if [ "$OLD" = "$NEW" ]; then
+            echo "Keine inhaltliche Änderung – Datum allein löst keinen Commit aus."
+            git checkout -- dino_hub.html 2>/dev/null || true
+          else
+            git add dino_hub.html
+            git commit -m "Auto: dino_hub.html aktualisiert [skip ci]"
+            git push
+          fi
