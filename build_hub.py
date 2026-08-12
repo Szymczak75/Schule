@@ -431,7 +431,7 @@ TPL_HEAD = r"""<!DOCTYPE html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🦖 Mathedino Hub</title>
+<title>🦖 ASzym Hub</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Source+Sans+3:wght@300;400;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -664,7 +664,7 @@ TPL_HEAD = r"""<!DOCTYPE html>
 
 <div class="topbar">
   <div class="topbar-inner">
-    <h1>🦖 Mathedino <span>· Materialübersicht</span>
+    <h1>🦖 ASzym <span>· Materialübersicht</span>
       <span class="lehrer-badge" id="lehrerBadge">👨‍🏫 Lehrermodus</span>
       <span class="ts">aktualisiert 16.07.2026</span>
     </h1>
@@ -736,7 +736,7 @@ function dinoClick() {
 function setLehrerModus(aktiv) {
   document.body.classList.toggle('lehrer-mode', aktiv);
   document.getElementById('lehrerBadge').classList.toggle('visible', aktiv);
-  document.getElementById('dino-tip').textContent = aktiv ? '👨‍🏫 Lehrermodus aktiv!' : 'Made by Mathedino 🦖';
+  document.getElementById('dino-tip').textContent = aktiv ? '👨‍🏫 Lehrermodus aktiv!' : 'Made by ASzym 🦖';
 }
 
 function toggleLehrerModus() {
