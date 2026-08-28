@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Parameter und Schieberegler – Lernseite EF</title>
+<meta name="description" content="Erarbeitungsseite für die EF: Schieberegler im GeoGebra-Grafikrechner anlegen und den Einfluss der Parameter a, c und d auf den Graphen einer Funktion untersuchen.">
+<meta name="keywords" content="GeoGebra, Grafikrechner, Schieberegler, Parameter, Transformation, Verschiebung, Streckung, Scheitelpunktform, EF">
+<meta name="typ" content="Lernseite">
+<meta name="klasse" content="EF">
+<meta name="fach" content="mathe">
+<meta name="oberthema" content="GeoGebra Grafikrechner">
+<meta name="thema" content="Parameter und Schieberegler">
+<script>
+  MathJax = {
+    tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+    svg: { fontCache: 'global' }
+  };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+  :root{
+    --ink:#22303f;--card:#ffffff;--green:#1e7d32;--red:#c1272d;
+    --amber:#b8860b;--amber-light:#fdf3d9;--amber-dark:#96690a;
+    --orange:#c97a2e;--orange-dark:#a5611e;--orange-light:#fbeee0;
+    --bg:#faf7f2;--line:#e4dcd0;--blue:#2f5fa6;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);color:var(--ink);
+    font-family:'Segoe UI',Verdana,'Helvetica Neue',sans-serif;
+    font-size:1.05rem;line-height:1.55;padding-bottom:5rem;
+  }
+  header{
+    background:linear-gradient(135deg,var(--orange),var(--orange-dark));
+    color:#fff;padding:1.3rem 1.2rem;box-shadow:0 3px 10px rgba(0,0,0,.12);
+  }
+  header .typ{
+    display:inline-block;background:rgba(255,255,255,.25);
+    padding:.2rem .7rem;border-radius:1rem;font-size:.85rem;
+    font-weight:700;letter-spacing:.04em;margin-bottom:.5rem;
+  }
+  header h1{margin:0;font-size:1.55rem;line-height:1.25;}
+  header p{margin:.4rem 0 0;font-size:1rem;opacity:.95;}
+  header .serie{margin-top:.6rem;font-size:.9rem;opacity:.9;}
+
+  .tabs{display:flex;flex-wrap:wrap;gap:.5rem;padding:1rem 1rem 0;max-width:1024px;margin:0 auto;}
+  .tab{
+    flex:1 1 auto;min-width:7.5rem;min-height:44px;
+    border:2px solid var(--line);background:#fff;color:var(--ink);
+    font-size:.95rem;font-weight:600;border-radius:.7rem .7rem 0 0;
+    padding:.6rem .5rem;cursor:pointer;
+    transition:background .15s,border-color .15s,transform .05s;
+  }
+  .tab:active{transform:scale(.97);}
+  .tab.aktiv{background:var(--orange);color:#fff;border-color:var(--orange-dark);}
+  .tab .done{margin-left:.3rem;}
+
+  main{max-width:1024px;margin:0 auto;padding:0 1rem;}
+  .karte{
+    display:none;background:var(--card);border:2px solid var(--line);
+    border-radius:0 .9rem .9rem .9rem;padding:1.3rem 1.2rem;margin-top:-2px;
+    box-shadow:0 2px 8px rgba(0,0,0,.05);animation:einblenden .25s ease;
+  }
+  .karte.aktiv{display:block;}
+  @keyframes einblenden{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .karte h2{margin-top:0;font-size:1.3rem;color:var(--orange-dark);}
+  .frage{font-weight:700;margin:1rem 0 .6rem;}
+
+  .merk{
+    background:var(--orange-light);border-left:5px solid var(--orange);
+    padding:.8rem 1rem;border-radius:.4rem;margin:1rem 0;
+  }
+  code{
+    background:#eee3d4;border-radius:.3rem;padding:.05rem .4rem;
+    font-family:'Courier New',monospace;font-size:.95em;
+  }
+
+  .kennz{display:flex;flex-wrap:wrap;gap:.45rem;margin:.6rem 0 .4rem;}
+  .chip{
+    display:inline-flex;align-items:center;gap:.3rem;
+    font-size:.82rem;font-weight:700;letter-spacing:.01em;
+    border-radius:1rem;padding:.25rem .7rem;border:2px solid;
+  }
+  .chip-hm{background:#e6eefb;color:var(--blue);border-color:var(--blue);}
+  .chip-frei{background:#f1efe9;color:#6b6354;border-color:#a89e8c;}
+  .chip-art{background:var(--amber-light);color:var(--amber-dark);border-color:var(--amber);}
+
+  .tipp-box{border:2px solid var(--amber);border-radius:.6rem;margin:1rem 0;overflow:hidden;}
+  .tipp-kopf{
+    width:100%;min-height:44px;background:var(--amber-light);color:var(--amber-dark);
+    border:none;font-weight:700;font-size:1rem;padding:.6rem .9rem;text-align:left;cursor:pointer;
+    display:flex;justify-content:space-between;align-items:center;gap:.5rem;
+  }
+  .tipp-inhalt{display:none;padding:.9rem 1rem;background:var(--amber-light);color:var(--ink);}
+  .tipp-box.offen .tipp-inhalt{display:block;}
+  .tipp-box.offen .tipp-pfeil{transform:rotate(180deg);}
+  .tipp-pfeil{transition:transform .2s;flex-shrink:0;}
+
+  button{font-family:inherit;}
+  .btn{
+    min-height:44px;border:none;border-radius:.6rem;padding:.6rem 1.1rem;
+    font-size:1rem;font-weight:700;cursor:pointer;transition:transform .05s,filter .15s;
+  }
+  .btn:active{transform:scale(.97);}
+  .btn-pruefen{background:#3a6ea5;color:#fff;}
+  .btn-leeren{background:#8a7e6a;color:#fff;margin-left:.5rem;}
+  .btn-sek{background:var(--orange-light);color:var(--orange-dark);border:2px solid var(--orange);}
+
+  .feedback{margin:.8rem 0;padding:.8rem 1rem;border-radius:.5rem;font-weight:700;display:none;}
+  .feedback.zeig{display:block;}
+  .feedback.ok{background:var(--green);color:#fff;}
+  .feedback.nok{background:var(--red);color:#fff;}
+
+  .demo-liste{margin:1rem 0;display:flex;flex-direction:column;gap:.5rem;}
+  .demo-zeile{
+    display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;
+    background:#fff;border:2px solid var(--line);border-radius:.5rem;padding:.6rem .9rem;
+  }
+  .demo-tipp{font-size:.85rem;color:#6b6354;font-weight:600;}
+  .demo-pfeil{font-weight:800;color:var(--orange);}
+  .demo-ergebnis{font-weight:700;font-size:1.05rem;}
+
+  /* Interaktiver Graph: Bild und Bedienelemente in EINER Box */
+  .interaktiv{
+    border:2px solid var(--line);border-radius:.7rem;background:#fff;
+    padding:.8rem;margin:1rem auto;max-width:26rem;
+  }
+  .interaktiv svg{
+    display:block;width:100%;height:auto;
+    touch-action:none;overscroll-behavior:contain;
+  }
+  .term-anzeige{
+    text-align:center;font-weight:800;font-size:1.1rem;color:var(--orange-dark);
+    background:var(--orange-light);border-radius:.4rem;padding:.5rem;margin:.6rem 0 .2rem;
+  }
+  .regler-zeile{display:flex;align-items:center;gap:.7rem;margin:.7rem 0 .2rem;}
+  .regler-zeile label{font-weight:800;min-width:4.6rem;font-size:1rem;}
+  .regler-zeile input[type=range]{
+    flex:1;height:44px;-webkit-appearance:none;appearance:none;background:transparent;cursor:pointer;
+  }
+  .regler-zeile input[type=range]::-webkit-slider-runnable-track{
+    height:.5rem;background:var(--line);border-radius:.25rem;
+  }
+  .regler-zeile input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;appearance:none;
+    width:2.1rem;height:2.1rem;border-radius:50%;
+    background:var(--orange);border:3px solid #fff;
+    box-shadow:0 1px 4px rgba(0,0,0,.3);margin-top:-.8rem;
+  }
+  .regler-zeile input[type=range]::-moz-range-track{
+    height:.5rem;background:var(--line);border-radius:.25rem;
+  }
+  .regler-zeile input[type=range]::-moz-range-thumb{
+    width:2.1rem;height:2.1rem;border-radius:50%;border:3px solid #fff;
+    background:var(--orange);box-shadow:0 1px 4px rgba(0,0,0,.3);
+  }
+  .ziehhinweis{
+    text-align:center;font-size:.88rem;color:#6b6354;font-weight:600;margin:.4rem 0 0;
+  }
+  .reset-zeile{text-align:center;margin-top:.6rem;}
+
+  .vgl{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.98rem;}
+  .vgl th,.vgl td{border:2px solid var(--line);padding:.55rem .7rem;text-align:left;}
+  .vgl th{background:var(--orange-light);color:var(--orange-dark);}
+  .vgl td:first-child{font-weight:700;}
+
+  .mcwahl{display:flex;flex-wrap:wrap;gap:.6rem;margin:.6rem 0;}
+  .mcwahl button{
+    flex:1 1 9rem;min-height:48px;border:2px solid var(--line);background:#fff;color:var(--ink);
+    border-radius:.6rem;font-size:1rem;font-weight:700;cursor:pointer;padding:.5rem .7rem;
+  }
+  .mcwahl button.gewaehlt{background:#dce9f7;border-color:#3a6ea5;}
+  .mcwahl button.richtig{background:var(--green);color:#fff;border-color:var(--green);}
+  .mcwahl button.falsch{background:var(--red);color:#fff;border-color:var(--red);}
+
+  .aussage{border:2px solid var(--line);border-radius:.6rem;padding:.8rem .9rem;margin:.8rem 0;background:#fff;}
+  .wf-buttons{display:flex;gap:.6rem;margin-top:.6rem;}
+  .wf-buttons button{
+    flex:1 1 6rem;min-height:44px;border:2px solid var(--line);background:#fff;color:var(--ink);
+    border-radius:.6rem;font-weight:700;cursor:pointer;
+  }
+  .wf-buttons button.gewaehlt{background:#dce9f7;border-color:#3a6ea5;}
+  .wf-buttons button.richtig{background:var(--green);color:#fff;border-color:var(--green);}
+  .wf-buttons button.falsch{background:var(--red);color:#fff;border-color:var(--red);}
+
+  .zahltab{width:100%;border-collapse:separate;border-spacing:0 .6rem;}
+  .zahltab td{padding:.3rem .5rem;vertical-align:middle;}
+  .zahltab td:first-child{font-weight:600;min-width:10rem;}
+  input[type=text]{
+    font-family:inherit;font-size:1.05rem;min-height:44px;
+    border:2px solid var(--line);border-radius:.5rem;padding:.4rem .6rem;
+    width:7rem;text-align:center;
+  }
+  input[type=text]:focus{outline:none;border-color:var(--orange);}
+  .feld-status{margin-left:.5rem;font-weight:800;font-size:1.1rem;}
+  .punkt-zeile{display:flex;flex-wrap:wrap;align-items:center;gap:.4rem;margin:.6rem 0;font-weight:600;}
+  .punkt-zeile input{width:6rem;}
+
+  .stufen-tipps{display:none;margin:1rem 0;}
+  .stufen-tipps.zeig{display:block;}
+  .stufen-tipps h4{margin:0 0 .5rem;font-size:1rem;color:var(--amber-dark);}
+  .stufe{border:2px solid var(--amber);border-radius:.6rem;margin-bottom:.5rem;overflow:hidden;}
+  .stufe-kopf{
+    width:100%;min-height:44px;background:var(--amber-light);color:var(--amber-dark);
+    border:none;font-weight:700;font-size:.98rem;padding:.6rem .9rem;text-align:left;cursor:pointer;
+    display:flex;justify-content:space-between;align-items:center;gap:.5rem;
+  }
+  .stufe-inhalt{display:none;padding:.9rem 1rem;background:var(--amber-light);color:var(--ink);}
+  .stufe.offen .stufe-inhalt{display:block;}
+  .stufe.offen .stufe-pfeil{transform:rotate(180deg);}
+  .stufe-pfeil{transition:transform .2s;flex-shrink:0;}
+
+  .check-item{border:2px solid var(--line);border-radius:.6rem;padding:.9rem;margin:.9rem 0;background:#fff;}
+  .check-item h3{margin:0 0 .5rem;font-size:1.02rem;}
+  .zusammenfassung{
+    text-align:center;font-weight:800;font-size:1.1rem;margin-top:1rem;padding:.8rem;
+    border-radius:.6rem;background:var(--orange-light);color:var(--orange-dark);display:none;
+  }
+  .zusammenfassung.zeig{display:block;}
+  .rechnen-titel{margin:1.6rem 0 .3rem;font-size:1.15rem;color:var(--orange-dark);border-top:2px solid var(--line);padding-top:1.2rem;}
+
+  .trex{position:fixed;right:.7rem;bottom:.7rem;font-size:1.8rem;cursor:pointer;z-index:50;user-select:none;}
+  .trex .bubble{
+    position:absolute;right:2.2rem;bottom:.2rem;white-space:nowrap;
+    background:var(--ink);color:#fff;padding:.3rem .6rem;border-radius:.5rem;
+    font-size:.85rem;opacity:0;pointer-events:none;transition:opacity .2s;
+  }
+  .trex.zeig .bubble{opacity:1;}
+</style>
+</head>
+<body>
+<header>
+  <span class="typ">Erarbeitung · EF</span>
+  <h1>Parameter und Schieberegler</h1>
+  <p>Statt zwanzig Funktionen einzeln einzutippen: einen Parameter einbauen und den Graphen live wandern sehen. Hier findest du selbst heraus, was \(a\), \(c\) und \(d\) bewirken.</p>
+  <p class="serie">Lernhappen 4 der EF-Reihe „GeoGebra Grafikrechner"</p>
+</header>
+
+<nav class="tabs" id="tabs">
+  <button class="tab aktiv" data-ziel="k1">1 · Regler anlegen <span class="done" id="d1"></span></button>
+  <button class="tab" data-ziel="k2">2 · Verschieben <span class="done" id="d2"></span></button>
+  <button class="tab" data-ziel="k3">3 · Strecken <span class="done" id="d3"></span></button>
+  <button class="tab" data-ziel="k4">4 · Überprüfe dich <span class="done" id="d4"></span></button>
+</nav>
+
+<main>
+  <!-- KARTE 1 -->
+  <section class="karte aktiv" id="k1">
+    <h2>Einen Schieberegler anlegen</h2>
+    <p>Bisher hast du feste Funktionen eingegeben. Jetzt kommt ein <b>Parameter</b> dazu – ein Buchstabe, der für eine Zahl steht, die du verändern kannst. In GeoGebra geht das erstaunlich einfach:</p>
+
+    <div class="demo-liste">
+      <div class="demo-zeile"><span class="demo-tipp">1. Du tippst:</span> <code>a=1</code> <span class="demo-pfeil">→</span> <span class="demo-ergebnis">GeoGebra legt die Zahl \(a\) an</span></div>
+      <div class="demo-zeile"><span class="demo-tipp">2. Du tippst:</span> <code>f(x)=a*x^2</code> <span class="demo-pfeil">→</span> <span class="demo-ergebnis">der Graph erscheint</span></div>
+    </div>
+
+    <div class="merk">
+      <b>Der entscheidende Schritt:</b> Neben der Zeile mit <code>a=1</code> siehst du in der Algebra-Ansicht einen kleinen <b>Kreis</b> (bzw. Punkt) links vor der Zeile. Tippst du ihn an, wird \(a\) <b>eingeblendet</b> – und erscheint als <b>Schieberegler</b> in der Grafik-Ansicht. Ziehst du daran, verändert sich der Graph von \(f\) sofort mit.
+    </div>
+
+    <div class="tipp-box" id="tipp1">
+      <button class="tipp-kopf" onclick="toggleTipp('tipp1')">
+        <span>💡 Bereich und Schrittweite des Reglers einstellen</span>
+        <span class="tipp-pfeil">▾</span>
+      </button>
+      <div class="tipp-inhalt">
+        Standardmäßig läuft ein Regler von \(-5\) bis \(5\). Über das Menü-Symbol der Zeile → <b>Einstellungen</b> kommst du zum Reiter <b>Schieberegler</b>. Dort stellst du <b>Min</b>, <b>Max</b> und die <b>Schrittweite</b> ein.
+        <br><br>
+        Die Schrittweite lohnt sich: Mit <code>0.1</code> wird es fein, mit <code>1</code> springt der Regler nur auf ganze Zahlen – praktisch, wenn du gezielt \(a=2\) treffen willst statt \(a=1{,}97\).
+      </div>
+    </div>
+
+    <div class="merk">
+      <b>Warum sich das lohnt:</b> Ohne Parameter müsstest du \(f(x)=x^{2}\), \(f(x)=2x^{2}\), \(f(x)=3x^{2}\) … alle einzeln eintippen, um einen Zusammenhang zu erkennen. Mit einem Regler siehst du die ganze <b>Funktionenschar</b> in einer einzigen Bewegung – und erkennst das Muster viel schneller.
+    </div>
+
+    <p class="frage">Zwischenfrage: Du hast <code>a=1</code> eingegeben, aber es erscheint kein Regler in der Grafik-Ansicht. Woran liegt es?</p>
+    <div class="kennz">
+      <span class="chip chip-hm">🖩 mit GeoGebra</span>
+      <span class="chip chip-art">📋 Bedienung – keine Rechnung nötig</span>
+    </div>
+    <div class="mcwahl" id="mc1-wahl"></div>
+    <button class="btn btn-pruefen" onclick="pruefeMC1()">Prüfen</button>
+    <div class="feedback" id="fb1"></div>
+  </section>
+
+  <!-- KARTE 2 -->
+  <section class="karte" id="k2">
+    <h2>Verschieben: die Parameter \(c\) und \(d\)</h2>
+    <p>Wir starten mit der Normalparabel \(g(x)=x^{2}\) (grau gestrichelt) und untersuchen</p>
+    <p style="text-align:center;font-size:1.15rem;"><b>\(f(x)=(x-c)^{2}+d\)</b></p>
+    <p><b>Probier es aus:</b> Zieh den orangen Scheitelpunkt mit dem Finger durch das Koordinatensystem und beobachte, wie sich \(c\) und \(d\) im Funktionsterm verändern.</p>
+
+    <div class="interaktiv">
+      <svg id="svg2" viewBox="0 0 320 260" role="img" aria-label="Interaktives Koordinatensystem: verschiebbare Parabel"></svg>
+      <p class="ziehhinweis">👆 Den orangen Punkt ziehen</p>
+      <div class="term-anzeige" id="term2">f(x) = (x − 0)² + 0</div>
+      <div class="reset-zeile">
+        <button class="btn btn-sek" onclick="reset2()">Zurücksetzen</button>
+      </div>
+    </div>
+
+    <div class="merk">
+      <b>Das hast du hoffentlich entdeckt:</b>
+      <ul style="margin:.5rem 0 0;padding-left:1.2rem;">
+        <li><b>\(d\)</b> verschiebt den Graphen <b>nach oben</b> (bei \(d>0\)) oder nach unten. Das ist erwartbar: Du addierst ja etwas zum Funktionswert.</li>
+        <li><b>\(c\)</b> verschiebt den Graphen <b>nach rechts</b> (bei \(c>0\)) oder nach links – obwohl im Term ein <b>Minus</b> steht!</li>
+      </ul>
+    </div>
+
+    <div class="merk" style="border-left-color:var(--red);background:#fbe4e4;">
+      <b>⚠️ Die klassische Falle:</b> \(f(x)=(x-2)^{2}\) verschiebt <b>nach rechts</b>, nicht nach links.
+      <br><br>
+      <b>Merkhilfe:</b> Frag dich, <i>welches</i> \(x\) den Klammerinhalt zu null macht. Bei \((x-2)^{2}\) ist das \(x=2\) – dort liegt also der Scheitelpunkt, und der ist gegenüber \(x=0\) um 2 nach <b>rechts</b> gewandert.
+    </div>
+
+    <p class="frage">Jetzt du: Stelle mit dem Punkt den Scheitelpunkt \(S(2|-1)\) ein und lies ab, welche Werte \(c\) und \(d\) dann haben. Trage sie ein.</p>
+    <div class="kennz">
+      <span class="chip chip-hm">🖩 mit dem Regler oben</span>
+      <span class="chip chip-art">📊 grafisch ablesen</span>
+    </div>
+
+    <table class="zahltab">
+      <tr><td>\(c =\)</td><td><input type="text" id="z1" placeholder="?"><span class="feld-status" id="s1"></span></td></tr>
+      <tr><td>\(d =\)</td><td><input type="text" id="z2" placeholder="?"><span class="feld-status" id="s2"></span></td></tr>
+    </table>
+
+    <button class="btn btn-pruefen" onclick="pruefeVerschieben()">Prüfen</button>
+    <button class="btn btn-leeren" id="leeren2" style="display:none" onclick="leereVerschieben()">Leeren</button>
+    <div class="feedback" id="fb2"></div>
+
+    <div class="stufen-tipps" id="tipps2">
+      <h4>Brauchst du Hilfe? Decke so viel auf, wie du brauchst:</h4>
+      <div class="stufe">
+        <button class="stufe-kopf" onclick="toggleStufe(this)"><span>Tipp 1 – Wo liegt der Scheitelpunkt?</span><span class="stufe-pfeil">▾</span></button>
+        <div class="stufe-inhalt">Zieh den orangen Punkt so, dass er auf der Höhe \(x=2\) und \(y=-1\) sitzt. Die Anzeige unter dem Bild zeigt dir dabei laufend den passenden Funktionsterm.</div>
+      </div>
+      <div class="stufe">
+        <button class="stufe-kopf" onclick="toggleStufe(this)"><span>Tipp 2 – Zusammenhang</span><span class="stufe-pfeil">▾</span></button>
+        <div class="stufe-inhalt">Bei \(f(x)=(x-c)^{2}+d\) ist der Scheitelpunkt immer \(S(c|d)\). Der Scheitelpunkt verrät dir also die beiden Parameter direkt – und umgekehrt.</div>
+      </div>
+      <div class="stufe">
+        <button class="stufe-kopf" onclick="toggleStufe(this)"><span>Tipp 3 – Lösung</span><span class="stufe-pfeil">▾</span></button>
+        <div class="stufe-inhalt">\(c=2\) und \(d=-1\). Der Funktionsterm lautet \(f(x)=(x-2)^{2}-1\). Achtung beim \(c\): Obwohl der Scheitel bei \(x=2\) liegt, steht im Term ein Minus.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- KARTE 3 -->
+  <section class="karte" id="k3">
+    <h2>Strecken und Spiegeln: der Parameter \(a\)</h2>
+    <p>Jetzt der dritte Parameter. Wieder liegt \(g(x)=x^{2}\) grau gestrichelt darunter, untersucht wird</p>
+    <p style="text-align:center;font-size:1.15rem;"><b>\(f(x)=a\cdot x^{2}\)</b></p>
+    <p><b>Probier es aus:</b> Zieh den Schieberegler langsam von links nach rechts – besonders interessant wird es um die Null herum.</p>
+
+    <div class="interaktiv">
+      <svg id="svg3" viewBox="0 0 320 260" role="img" aria-label="Interaktives Koordinatensystem: gestreckte Parabel"></svg>
+      <div class="regler-zeile">
+        <label for="reglerA">a = <span id="wertA">1</span></label>
+        <input type="range" id="reglerA" min="-3" max="3" step="0.25" value="1">
+      </div>
+      <div class="term-anzeige" id="term3">f(x) = 1 · x²</div>
+      <div class="reset-zeile">
+        <button class="btn btn-sek" onclick="reset3()">Zurücksetzen</button>
+      </div>
+    </div>
+
+    <table class="vgl">
+      <tr><th>Wert von \(a\)</th><th>Was mit dem Graphen passiert</th></tr>
+      <tr><td>\(a>1\)</td><td>gestreckt – die Parabel wird <b>schmaler</b></td></tr>
+      <tr><td>\(0<a<1\)</td><td>gestaucht – die Parabel wird <b>breiter</b></td></tr>
+      <tr><td>\(a=1\)</td><td>die Normalparabel selbst</td></tr>
+      <tr><td>\(a<0\)</td><td>zusätzlich an der \(x\)-Achse <b>gespiegelt</b> – nach unten geöffnet</td></tr>
+      <tr><td>\(a=0\)</td><td>keine Parabel mehr, sondern die \(x\)-Achse: \(f(x)=0\)</td></tr>
+    </table>
+
+    <div class="merk">
+      <b>Vorsicht bei „schmaler" und „breiter":</b> Ein größeres \(a\) macht die Parabel <b>schmaler</b>, nicht breiter – auch wenn das erst einmal unlogisch klingt. Der Grund: Die Funktionswerte werden mit \(a\) multipliziert, der Graph steigt also <b>schneller</b> an und erreicht dieselbe Höhe schon näher am Scheitelpunkt.
+    </div>
+
+    <p class="frage">Jetzt du: Entscheide, ob die Aussagen über \(f(x)=a\cdot x^{2}\) stimmen. Probiere sie am Regler aus.</p>
+    <div class="kennz">
+      <span class="chip chip-hm">🖩 mit dem Regler oben</span>
+      <span class="chip chip-art">💭 begründen – nicht rechnen</span>
+    </div>
+
+    <div class="aussage" data-aussage data-richtig="wahr">
+      <p>Für \(a=-2\) ist die Parabel nach unten geöffnet und schmaler als die Normalparabel.</p>
+      <div class="wf-buttons"><button data-w="wahr">Wahr</button><button data-w="falsch">Falsch</button></div>
+    </div>
+    <div class="aussage" data-aussage data-richtig="falsch">
+      <p>Je größer \(a\), desto breiter wird die Parabel.</p>
+      <div class="wf-buttons"><button data-w="wahr">Wahr</button><button data-w="falsch">Falsch</button></div>
+    </div>
+    <div class="aussage" data-aussage data-richtig="wahr">
+      <p>Für jedes \(a\) bleibt der Scheitelpunkt im Ursprung \(S(0|0)\).</p>
+      <div class="wf-buttons"><button data-w="wahr">Wahr</button><button data-w="falsch">Falsch</button></div>
+    </div>
+
+    <button class="btn btn-pruefen" onclick="pruefeStrecken()">Prüfen</button>
+    <div class="feedback" id="fb3"></div>
+  </section>
+
+  <!-- KARTE 4 -->
+  <section class="karte" id="k4">
+    <h2>Überprüfe dich</h2>
+    <p>Jetzt alle drei Parameter zusammen: \(f(x)=a\cdot(x-c)^{2}+d\).</p>
+
+    <div class="check-item">
+      <h3>1. Wohin verschiebt \(f(x)=(x-4)^{2}\) die Normalparabel?</h3>
+      <div class="mcwahl" id="c1-wahl"></div>
+    </div>
+    <div class="check-item">
+      <h3>2. Wo liegt der Scheitelpunkt von \(f(x)=(x+3)^{2}-2\)?</h3>
+      <div class="mcwahl" id="c2-wahl"></div>
+    </div>
+    <div class="check-item">
+      <h3>3. Was bewirkt \(a=-0{,}5\) gegenüber der Normalparabel?</h3>
+      <div class="mcwahl" id="c3-wahl"></div>
+    </div>
+    <div class="check-item">
+      <h3>4. Wozu stellst du die <b>Schrittweite</b> eines Reglers auf 1?</h3>
+      <div class="mcwahl" id="c4-wahl"></div>
+    </div>
+
+    <button class="btn btn-pruefen" onclick="pruefeCheck()">Alle prüfen</button>
+    <div class="zusammenfassung" id="zsf"></div>
+
+    <h3 class="rechnen-titel">Jetzt rechnen! (mit dem Grafikrechner)</h3>
+    <p>Gib die Funktionen im Grafikrechner ein und beantworte die Fragen. Dezimalzahlen mit <b>Punkt</b>.</p>
+    <div class="kennz">
+      <span class="chip chip-hm">🖩 mit GeoGebra</span>
+      <span class="chip chip-art">🎯 bestimmen</span>
+    </div>
+
+    <p style="margin-bottom:.2rem;"><b>a)</b> \(f(x)=-2(x+3)^{2}+5\) – Scheitelpunkt und ein Funktionswert:</p>
+    <div class="punkt-zeile">
+      Scheitelpunkt \(S\)( <input type="text" id="r1" placeholder="x"> | <input type="text" id="r2" placeholder="y"> )
+      <span class="feld-status" id="rs1"></span>
+    </div>
+    <table class="zahltab">
+      <tr><td>\(f(1) =\)</td><td><input type="text" id="r3" placeholder="?"><span class="feld-status" id="rs2"></span></td></tr>
+    </table>
+
+    <p style="margin:.9rem 0 .2rem;"><b>b)</b> \(h(x)=0{,}5(x-4)^{2}-3\) – Scheitelpunkt und ein Funktionswert:</p>
+    <div class="punkt-zeile">
+      Scheitelpunkt \(S\)( <input type="text" id="r4" placeholder="x"> | <input type="text" id="r5" placeholder="y"> )
+      <span class="feld-status" id="rs3"></span>
+    </div>
+    <table class="zahltab">
+      <tr><td>\(h(0) =\)</td><td><input type="text" id="r6" placeholder="?"><span class="feld-status" id="rs4"></span></td></tr>
+    </table>
+
+    <button class="btn btn-pruefen" onclick="pruefeRechnen()">Ergebnisse prüfen</button>
+    <button class="btn btn-leeren" id="leerenRechnen" style="display:none" onclick="leereRechnen()">Leeren</button>
+    <div class="feedback" id="fbRechnen"></div>
+
+    <div class="stufen-tipps" id="tippsRechnen">
+      <h4>Brauchst du Hilfe? Decke so viel auf, wie du brauchst:</h4>
+      <div class="stufe">
+        <button class="stufe-kopf" onclick="toggleStufe(this)"><span>Tipp 1 – Scheitelpunkt ablesen</span><span class="stufe-pfeil">▾</span></button>
+        <div class="stufe-inhalt">Bei \(f(x)=a(x-c)^{2}+d\) ist der Scheitelpunkt \(S(c|d)\). Achte auf das Vorzeichen: In \((x+3)^{2}\) steht ein Plus – das entspricht \((x-(-3))^{2}\), also \(c=-3\).</div>
+      </div>
+      <div class="stufe">
+        <button class="stufe-kopf" onclick="toggleStufe(this)"><span>Tipp 2 – Funktionswerte</span><span class="stufe-pfeil">▾</span></button>
+        <div class="stufe-inhalt">Gib die Funktion mit Namen ein, z. B. <code>f(x)=-2(x+3)^2+5</code>, und tippe dann in eine neue Zeile <code>f(1)</code>. Denk an die <b>Pfeiltaste →</b> nach dem Exponenten, bevor du <code>+5</code> schreibst.</div>
+      </div>
+      <div class="stufe">
+        <button class="stufe-kopf" onclick="toggleStufe(this)"><span>Tipp 3 – Lösung</span><span class="stufe-pfeil">▾</span></button>
+        <div class="stufe-inhalt">a) \(S(-3|5)\) und \(f(1)=-2\cdot 16+5=-27\). &nbsp; b) \(S(4|-3)\) und \(h(0)=0{,}5\cdot 16-3=5\).</div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="trex" id="trex">🦖<span class="bubble">Made by ASzym</span></div>
+
+<script>
+const state = {
+  k1:{mcWahl:null, geprueft:false, erledigt:false},
+  k2:{c:0, d:0, geprueft:false, erledigt:false},
+  k3:{a:1, wahlen:{0:null,1:null,2:null}, geprueft:false, erledigt:false},
+  k4:{wahlen:{0:null,1:null,2:null,3:null}, geprueft:false, mcRichtig:false, rechnenRichtig:false, erledigt:false}
+};
+
+function mische(arr){
+  const a=arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+document.querySelectorAll('.tab').forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('aktiv'));
+    document.querySelectorAll('.karte').forEach(k=>k.classList.remove('aktiv'));
+    tab.classList.add('aktiv');
+    document.getElementById(tab.dataset.ziel).classList.add('aktiv');
+  });
+});
+
+function toggleTipp(id){ document.getElementById(id).classList.toggle('offen'); }
+function toggleStufe(btn){ btn.parentElement.classList.toggle('offen'); }
+
+function pruefeFortschritt(){
+  [['k1','d1'],['k2','d2'],['k3','d3'],['k4','d4']].forEach(([k,d])=>{
+    document.getElementById(d).textContent = state[k].erledigt ? '✅' : '';
+  });
+}
+
+function parseZahlOderBruch(s){
+  s=String(s).trim().replace(',', '.');
+  if(s==='') return NaN;
+  const bruch=s.match(/^(-?\d+(?:\.\d+)?)\s*\/\s*(-?\d+(?:\.\d+)?)$/);
+  if(bruch){
+    const z=parseFloat(bruch[1]), n=parseFloat(bruch[2]);
+    return n!==0 ? z/n : NaN;
+  }
+  return parseFloat(s);
+}
+function feldStimmt(id, erwartet, tol){
+  const roh=document.getElementById(id).value;
+  const wert=parseZahlOderBruch(roh);
+  return roh.trim()!=='' && !isNaN(wert) && Math.abs(wert-erwartet)<=(tol!==undefined?tol:0.0001);
+}
+function pruefeGruppen(gruppen){
+  let alleRichtig=true;
+  gruppen.forEach(gr=>{
+    const ok=gr.felder.every(f=>feldStimmt(f.id,f.erwartet,f.tol));
+    const status=document.getElementById(gr.statusId);
+    status.textContent = ok ? '✅' : '❌';
+    status.style.color = ok ? 'var(--green)' : 'var(--red)';
+    if(!ok) alleRichtig=false;
+  });
+  return alleRichtig;
+}
+function leereGruppen(gruppen){
+  gruppen.forEach(gr=>{
+    gr.felder.forEach(f=>{ document.getElementById(f.id).value=''; });
+    document.getElementById(gr.statusId).textContent='';
+  });
+}
+
+/* =========================================================
+   Interaktive Koordinatensysteme (SVG, ohne Bibliothek)
+   ========================================================= */
+const NS='http://www.w3.org/2000/svg';
+const GEO={W:320,H:260,pad:28,xmin:-4,xmax:4,ymin:-3,ymax:7};
+function sx(v){ return GEO.pad + (v-GEO.xmin)/(GEO.xmax-GEO.xmin)*(GEO.W-2*GEO.pad); }
+function sy(v){ return GEO.H-GEO.pad - (v-GEO.ymin)/(GEO.ymax-GEO.ymin)*(GEO.H-2*GEO.pad); }
+function invX(px){ return GEO.xmin + (px-GEO.pad)/(GEO.W-2*GEO.pad)*(GEO.xmax-GEO.xmin); }
+function invY(py){ return GEO.ymin + (GEO.H-GEO.pad-py)/(GEO.H-2*GEO.pad)*(GEO.ymax-GEO.ymin); }
+
+function el(name, attrs){
+  const e=document.createElementNS(NS,name);
+  for(const k in attrs) e.setAttribute(k, attrs[k]);
+  return e;
+}
+/* Achsenkreuz mit Pfeilen, Beschriftung und Einheiten */
+function zeichneAchsen(svg){
+  const y0=sy(0), x0=sx(0);
+  // Gitter
+  for(let v=-4;v<=4;v++){
+    if(v===0) continue;
+    svg.appendChild(el('line',{x1:sx(v),y1:GEO.pad-6,x2:sx(v),y2:GEO.H-GEO.pad+6,stroke:'#eee7dc','stroke-width':1}));
+  }
+  for(let v=-3;v<=7;v++){
+    if(v===0) continue;
+    svg.appendChild(el('line',{x1:GEO.pad-6,y1:sy(v),x2:GEO.W-GEO.pad+6,y2:sy(v),stroke:'#eee7dc','stroke-width':1}));
+  }
+  // Achsen
+  svg.appendChild(el('line',{x1:12,y1:y0,x2:GEO.W-8,y2:y0,stroke:'#22303f','stroke-width':1.6}));
+  svg.appendChild(el('polygon',{points:(GEO.W-8)+','+y0+' '+(GEO.W-17)+','+(y0-4)+' '+(GEO.W-17)+','+(y0+4),fill:'#22303f'}));
+  svg.appendChild(el('line',{x1:x0,y1:GEO.H-10,x2:x0,y2:10,stroke:'#22303f','stroke-width':1.6}));
+  svg.appendChild(el('polygon',{points:x0+',10 '+(x0-4)+',19 '+(x0+4)+',19',fill:'#22303f'}));
+  // Einheiten x
+  [-3,-2,-1,1,2,3].forEach(v=>{
+    svg.appendChild(el('line',{x1:sx(v),y1:y0-4,x2:sx(v),y2:y0+4,stroke:'#22303f','stroke-width':1.6}));
+    const t=el('text',{x:sx(v),y:y0+16,'font-size':10,fill:'#22303f','text-anchor':'middle'});
+    t.textContent=v; svg.appendChild(t);
+  });
+  // Einheiten y
+  [-2,2,4,6].forEach(v=>{
+    svg.appendChild(el('line',{x1:x0-4,y1:sy(v),x2:x0+4,y2:sy(v),stroke:'#22303f','stroke-width':1.6}));
+    const t=el('text',{x:x0-8,y:sy(v)+3.5,'font-size':10,fill:'#22303f','text-anchor':'end'});
+    t.textContent=v; svg.appendChild(t);
+  });
+  const tx=el('text',{x:GEO.W-14,y:y0-8,'font-size':12,'font-style':'italic',fill:'#22303f','text-anchor':'end'});
+  tx.textContent='x'; svg.appendChild(tx);
+  const ty=el('text',{x:x0+8,y:20,'font-size':12,'font-style':'italic',fill:'#22303f'});
+  ty.textContent='y'; svg.appendChild(ty);
+}
+/* Polyline für eine Funktion, am Fenster geclippt */
+function kurvePunkte(fn){
+  const teile=[]; let akt=[];
+  for(let i=0;i<=200;i++){
+    const x=GEO.xmin+(GEO.xmax-GEO.xmin)*i/200;
+    const y=fn(x);
+    if(isFinite(y) && y>=GEO.ymin && y<=GEO.ymax){
+      akt.push(sx(x).toFixed(1)+','+sy(y).toFixed(1));
+    }else if(akt.length){ teile.push(akt); akt=[]; }
+  }
+  if(akt.length) teile.push(akt);
+  return teile;
+}
+function zeichneKurve(svg, fn, farbe, breite, gestrichelt){
+  kurvePunkte(fn).forEach(teil=>{
+    if(teil.length<2) return;
+    const attrs={points:teil.join(' '),fill:'none',stroke:farbe,'stroke-width':breite,'stroke-linecap':'round'};
+    if(gestrichelt) attrs['stroke-dasharray']='5 4';
+    svg.appendChild(el('polyline',attrs));
+  });
+}
+
+/* ---------- KARTE 2: Scheitelpunkt direkt ziehen ---------- */
+const svg2=document.getElementById('svg2');
+let rafId2=null;
+function zeichne2(){
+  rafId2=null;
+  svg2.innerHTML='';
+  zeichneAchsen(svg2);
+  zeichneKurve(svg2, x=>x*x, '#a89e8c', 2, true);
+  const c=state.k2.c, d=state.k2.d;
+  zeichneKurve(svg2, x=>(x-c)*(x-c)+d, '#c97a2e', 2.8, false);
+  // Scheitelpunkt als Ziehpunkt (Trefferfläche großzügig)
+  svg2.appendChild(el('circle',{cx:sx(c),cy:sy(d),r:22,fill:'transparent','pointer-events':'all',id:'griff2',style:'cursor:grab'}));
+  svg2.appendChild(el('circle',{cx:sx(c),cy:sy(d),r:8,fill:'#c97a2e',stroke:'#fff','stroke-width':2.5,'pointer-events':'none'}));
+  const vz = c<0 ? '+' : '−';
+  document.getElementById('term2').textContent =
+    'f(x) = (x ' + vz + ' ' + Math.abs(c).toString().replace('.',',') + ')² '
+    + (d<0?'− ':'+ ') + Math.abs(d).toString().replace('.',',');
+}
+function plane2(){ if(rafId2===null) rafId2=requestAnimationFrame(zeichne2); }
+
+let zieht2=false;
+svg2.addEventListener('pointerdown',e=>{
+  if(e.target.id!=='griff2') return;
+  zieht2=true;
+  svg2.setPointerCapture(e.pointerId);
+  e.preventDefault();
+});
+svg2.addEventListener('pointermove',e=>{
+  if(!zieht2) return;
+  e.preventDefault();
+  const r=svg2.getBoundingClientRect();
+  const px=(e.clientX-r.left)/r.width*GEO.W;
+  const py=(e.clientY-r.top)/r.height*GEO.H;
+  let c=Math.round(invX(px)*2)/2;
+  let d=Math.round(invY(py)*2)/2;
+  c=Math.max(-3,Math.min(3,c));
+  d=Math.max(-3,Math.min(3,d));
+  if(c!==state.k2.c || d!==state.k2.d){
+    state.k2.c=c; state.k2.d=d;
+    plane2();
+  }
+});
+function endeZiehen2(e){
+  if(!zieht2) return;
+  zieht2=false;
+  try{ svg2.releasePointerCapture(e.pointerId); }catch(err){}
+}
+svg2.addEventListener('pointerup',endeZiehen2);
+svg2.addEventListener('pointercancel',endeZiehen2);
+/* Seite darf beim Ziehen nicht mitscrollen */
+svg2.addEventListener('touchmove',e=>{ if(zieht2) e.preventDefault(); },{passive:false});
+
+function reset2(){ state.k2.c=0; state.k2.d=0; zeichne2(); }
+
+/* ---------- KARTE 3: Schieberegler für a ---------- */
+const svg3=document.getElementById('svg3');
+let rafId3=null;
+function zeichne3(){
+  rafId3=null;
+  svg3.innerHTML='';
+  zeichneAchsen(svg3);
+  zeichneKurve(svg3, x=>x*x, '#a89e8c', 2, true);
+  const a=state.k3.a;
+  zeichneKurve(svg3, x=>a*x*x, '#c97a2e', 2.8, false);
+  svg3.appendChild(el('circle',{cx:sx(0),cy:sy(0),r:6,fill:'#c97a2e',stroke:'#fff','stroke-width':2}));
+  const aTxt=String(a).replace('.',',').replace('-','−');
+  document.getElementById('wertA').textContent=aTxt;
+  document.getElementById('term3').textContent='f(x) = '+aTxt+' · x²';
+}
+function plane3(){ if(rafId3===null) rafId3=requestAnimationFrame(zeichne3); }
+const reglerA=document.getElementById('reglerA');
+reglerA.addEventListener('input',()=>{
+  state.k3.a=parseFloat(reglerA.value);
+  plane3();
+});
+function reset3(){ state.k3.a=1; reglerA.value=1; zeichne3(); }
+
+/* ===== KARTE 1 ===== */
+const MC1_OPTIONEN=mische([
+  {t:'a ist noch nicht eingeblendet – den Kreis vor der Zeile antippen', korrekt:true},
+  {t:'a muss zuerst in einer Funktion vorkommen', korrekt:false},
+  {t:'Schieberegler gibt es nur im CAS-Rechner', korrekt:false}
+]);
+const mc1wahl=document.getElementById('mc1-wahl');
+MC1_OPTIONEN.forEach((o,i)=>{
+  const b=document.createElement('button');
+  b.textContent=o.t; b.dataset.i=i;
+  b.addEventListener('click',()=>{
+    if(state.k1.geprueft) return;
+    mc1wahl.querySelectorAll('button').forEach(x=>x.classList.remove('gewaehlt'));
+    b.classList.add('gewaehlt');
+    state.k1.mcWahl=i;
+  });
+  mc1wahl.appendChild(b);
+});
+function pruefeMC1(){
+  if(state.k1.mcWahl===null) return;
+  state.k1.geprueft=true;
+  const fb=document.getElementById('fb1');
+  mc1wahl.querySelectorAll('button').forEach((b,i)=>{
+    if(MC1_OPTIONEN[i].korrekt) b.classList.add('richtig');
+    else if(i===state.k1.mcWahl) b.classList.add('falsch');
+  });
+  if(MC1_OPTIONEN[state.k1.mcWahl].korrekt){
+    fb.className='feedback zeig ok';
+    fb.textContent='✅ Richtig! Der Kreis vor der Zeile schaltet die Anzeige des Reglers ein.';
+    state.k1.erledigt=true;
+  }else{
+    fb.className='feedback zeig nok';
+    fb.textContent='❌ Nicht ganz. Die Zahl a existiert bereits – sie wird nur noch nicht angezeigt. Tippe den Kreis links vor der Zeile an.';
+  }
+  pruefeFortschritt();
+}
+
+/* ===== KARTE 2: Eingaben ===== */
+const VERSCH_GRUPPEN=[
+  {statusId:'s1', felder:[{id:'z1',erwartet:2}]},
+  {statusId:'s2', felder:[{id:'z2',erwartet:-1}]}
+];
+function pruefeVerschieben(){
+  const ok=pruefeGruppen(VERSCH_GRUPPEN);
+  state.k2.geprueft=true;
+  const fb=document.getElementById('fb2');
+  if(ok){
+    fb.className='feedback zeig ok';
+    fb.textContent='✅ Richtig: c = 2 und d = −1. Der Term lautet f(x) = (x − 2)² − 1.';
+    state.k2.erledigt=true;
+    document.getElementById('leeren2').style.display='none';
+    document.getElementById('tipps2').classList.remove('zeig');
+  }else{
+    fb.className='feedback zeig nok';
+    fb.textContent='❌ Noch nicht. Denk daran: Der Scheitelpunkt ist S(c|d) – die Werte kannst du also direkt am Punkt ablesen.';
+    document.getElementById('leeren2').style.display='inline-block';
+    document.getElementById('tipps2').classList.add('zeig');
+  }
+  pruefeFortschritt();
+}
+function leereVerschieben(){
+  leereGruppen(VERSCH_GRUPPEN);
+  document.getElementById('fb2').className='feedback';
+  document.getElementById('leeren2').style.display='none';
+  state.k2.geprueft=false; state.k2.erledigt=false;
+  pruefeFortschritt();
+}
+
+/* ===== KARTE 3: Wahr/Falsch ===== */
+document.querySelectorAll('#k3 [data-aussage]').forEach((box,i)=>{
+  box.querySelectorAll('.wf-buttons button').forEach(b=>{
+    b.addEventListener('click',()=>{
+      if(state.k3.geprueft) return;
+      box.querySelectorAll('.wf-buttons button').forEach(x=>x.classList.remove('gewaehlt'));
+      b.classList.add('gewaehlt');
+      state.k3.wahlen[i]=b.dataset.w;
+    });
+  });
+});
+function pruefeStrecken(){
+  const boxen=document.querySelectorAll('#k3 [data-aussage]');
+  if(Object.values(state.k3.wahlen).some(v=>v===null)) return;
+  state.k3.geprueft=true;
+  let richtig=0;
+  boxen.forEach((box,i)=>{
+    const soll=box.dataset.richtig;
+    box.querySelectorAll('.wf-buttons button').forEach(b=>{
+      if(b.dataset.w===soll) b.classList.add('richtig');
+      else if(b.dataset.w===state.k3.wahlen[i]) b.classList.add('falsch');
+    });
+    if(state.k3.wahlen[i]===soll) richtig++;
+  });
+  const fb=document.getElementById('fb3');
+  if(richtig===boxen.length){
+    fb.className='feedback zeig ok';
+    fb.textContent='✅ Alle Aussagen richtig eingeschätzt.';
+    state.k3.erledigt=true;
+  }else{
+    fb.className='feedback zeig nok';
+    fb.textContent='❌ '+richtig+' von '+boxen.length+' richtig. Probiere die strittige Aussage noch einmal am Regler aus.';
+  }
+  pruefeFortschritt();
+}
+
+/* ===== KARTE 4 ===== */
+const CHECK_FRAGEN=[
+  {optionen: mische([
+    {t:'4 nach rechts', korrekt:true},
+    {t:'4 nach links', korrekt:false},
+    {t:'4 nach oben', korrekt:false}
+  ])},
+  {optionen: mische([
+    {t:'S(−3|−2)', korrekt:true},
+    {t:'S(3|−2)', korrekt:false},
+    {t:'S(−3|2)', korrekt:false}
+  ])},
+  {optionen: mische([
+    {t:'gespiegelt und breiter', korrekt:true},
+    {t:'gespiegelt und schmaler', korrekt:false},
+    {t:'nur nach unten verschoben', korrekt:false}
+  ])},
+  {optionen: mische([
+    {t:'Damit der Regler nur ganze Zahlen trifft', korrekt:true},
+    {t:'Damit der Regler schneller läuft', korrekt:false},
+    {t:'Damit der Graph feiner gezeichnet wird', korrekt:false}
+  ])}
+];
+CHECK_FRAGEN.forEach((f,idx)=>{
+  const wrap=document.getElementById('c'+(idx+1)+'-wahl');
+  f.optionen.forEach((o,i)=>{
+    const b=document.createElement('button');
+    b.textContent=o.t; b.dataset.i=i;
+    b.addEventListener('click',()=>{
+      if(state.k4.geprueft) return;
+      wrap.querySelectorAll('button').forEach(x=>x.classList.remove('gewaehlt'));
+      b.classList.add('gewaehlt');
+      state.k4.wahlen[idx]=i;
+    });
+    wrap.appendChild(b);
+  });
+});
+function pruefeCheck(){
+  if(Object.values(state.k4.wahlen).some(v=>v===null)) return;
+  state.k4.geprueft=true;
+  let richtig=0;
+  CHECK_FRAGEN.forEach((f,idx)=>{
+    const wrap=document.getElementById('c'+(idx+1)+'-wahl');
+    wrap.querySelectorAll('button').forEach((b,i)=>{
+      if(f.optionen[i].korrekt) b.classList.add('richtig');
+      else if(i===state.k4.wahlen[idx]) b.classList.add('falsch');
+    });
+    if(f.optionen[state.k4.wahlen[idx]].korrekt) richtig++;
+  });
+  const zsf=document.getElementById('zsf');
+  zsf.classList.add('zeig');
+  zsf.textContent='Du hast '+richtig+' von '+CHECK_FRAGEN.length+' richtig beantwortet.'
+    + (richtig===CHECK_FRAGEN.length ? ' Stark!' : ' Schau dir die roten Antworten an und probiere sie an den Reglern noch einmal aus.');
+  state.k4.mcRichtig=(richtig===CHECK_FRAGEN.length);
+  aktualisiereK4Fortschritt();
+}
+
+const RECHEN_GRUPPEN=[
+  {statusId:'rs1', felder:[{id:'r1',erwartet:-3},{id:'r2',erwartet:5}]},
+  {statusId:'rs2', felder:[{id:'r3',erwartet:-27}]},
+  {statusId:'rs3', felder:[{id:'r4',erwartet:4},{id:'r5',erwartet:-3}]},
+  {statusId:'rs4', felder:[{id:'r6',erwartet:5}]}
+];
+function pruefeRechnen(){
+  const ok=pruefeGruppen(RECHEN_GRUPPEN);
+  const fb=document.getElementById('fbRechnen');
+  if(ok){
+    fb.className='feedback zeig ok';
+    fb.textContent='✅ Alle Ergebnisse stimmen!';
+    document.getElementById('leerenRechnen').style.display='none';
+    document.getElementById('tippsRechnen').classList.remove('zeig');
+  }else{
+    fb.className='feedback zeig nok';
+    fb.textContent='❌ Mindestens ein Ergebnis stimmt noch nicht. Achte beim Scheitelpunkt besonders auf das Vorzeichen von c.';
+    document.getElementById('leerenRechnen').style.display='inline-block';
+    document.getElementById('tippsRechnen').classList.add('zeig');
+  }
+  state.k4.rechnenRichtig=ok;
+  aktualisiereK4Fortschritt();
+}
+function leereRechnen(){
+  leereGruppen(RECHEN_GRUPPEN);
+  document.getElementById('fbRechnen').className='feedback';
+  document.getElementById('leerenRechnen').style.display='none';
+  state.k4.rechnenRichtig=false;
+  aktualisiereK4Fortschritt();
+}
+function aktualisiereK4Fortschritt(){
+  state.k4.erledigt = !!(state.k4.mcRichtig && state.k4.rechnenRichtig);
+  pruefeFortschritt();
+}
+
+const trex=document.getElementById('trex');
+trex.addEventListener('click',()=>{
+  trex.classList.add('zeig');
+  setTimeout(()=>trex.classList.remove('zeig'),1800);
+});
+
+zeichne2();
+zeichne3();
+pruefeFortschritt();
+</script>
+</body>
+</html>
