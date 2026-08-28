@@ -243,8 +243,6 @@ def build(root, out):
                 continue
             if fn.lower().startswith("xxx"):
                 continue
-            if fn.startswith("_"):        # ausgeblendet (z. B. generierte Ordner-Übersichten)
-                continue
             files.append((rel, fn, full))
 
     metas = {}
@@ -332,159 +330,7 @@ def build(root, out):
     with open(out, "w", encoding="utf-8") as f:
         f.write(full_html)
 
-    # ── Teilbaum-Übersichten aus linking.txt ──
-    uebersichten = build_linking_overviews(root, heute)
-
-    return len(files), out, uebersichten
-
-
-def build_linking_overviews(root, heute):
-    """Sucht in allen Ordnern nach 'linking.txt' und baut je eine
-    Ordner-Übersicht über den Teilbaum ab diesem Ordner."""
-    gebaut = []
-    for dirpath, _, fnames in os.walk(root):
-        if "linking.txt" not in [f.lower() for f in fnames]:
-            continue
-        # Ausgabenamen bestimmen: erste nichtleere Zeile
-        lp = os.path.join(dirpath, next(f for f in fnames if f.lower() == "linking.txt"))
-        outname = ""
-        try:
-            with open(lp, encoding="utf-8") as f:
-                for line in f:
-                    line = line.strip()
-                    if line:
-                        outname = line
-                        break
-        except Exception:
-            with open(lp, encoding="cp1252") as f:
-                for line in f:
-                    line = line.strip()
-                    if line:
-                        outname = line
-                        break
-        if not outname:
-            outname = "_uebersicht.html"
-        # Sicherheit: nur Dateiname, .html erzwingen, _-Präfix erzwingen
-        outname = os.path.basename(outname)
-        if not outname.lower().endswith(".html"):
-            outname += ".html"
-        if not outname.startswith("_"):
-            outname = "_" + outname
-
-        # Teilbaum ab dirpath sammeln (relativ zu diesem Ordner)
-        sub = []
-        for dp, _, fns in os.walk(dirpath):
-            for fn in fns:
-                if not fn.lower().endswith(".html"):
-                    continue
-                if fn.startswith("_") or fn.lower().startswith("xxx"):
-                    continue
-                if fn.lower() == "dino_hub.html":
-                    continue
-                full = os.path.join(dp, fn)
-                rel_here = os.path.relpath(full, dirpath).replace(os.sep, "/")
-                sub.append((rel_here, fn, full))
-        if not sub:
-            continue
-
-        html_out = render_overview(dirpath, root, sub, heute)
-        with open(os.path.join(dirpath, outname), "w", encoding="utf-8") as f:
-            f.write(html_out)
-        gebaut.append((os.path.relpath(dirpath, root).replace(os.sep, "/"), outname, len(sub)))
-    return gebaut
-
-
-def render_overview(dirpath, root, sub, heute):
-    """Baut eine schlanke Übersicht im Dino-Hub-Stil über den Teilbaum.
-    Gruppierung nach dem jeweils ersten Unterordner-Segment (soweit vorhanden),
-    Links relativ zum Ordner."""
-    metas = {rel: read_meta(full) for rel, fn, full in sub}
-    ordner_name = os.path.basename(dirpath.rstrip(os.sep)) or "Übersicht"
-
-    # Gruppieren nach erstem Segment des relativen Pfads (Unterordner);
-    # Dateien direkt im Ordner kommen in Gruppe "" (oben, ohne Überschrift).
-    groups = defaultdict(list)
-    for rel, fn, full in sub:
-        seg = rel.split("/")[0] if "/" in rel else ""
-        groups[seg].append((rel, fn))
-
-    def link_row(rel, fn):
-        info = metas[rel]
-        typ = info.get("typ", "")
-        icon = link_icon(typ)
-        title = link_title(info, fn)
-        desc = info.get("description") or info.get("title") or ""
-        cls = ' class="lehrer-link"' if typ == "Lehrer" else ""
-        label = title if typ == "Lehrer" else f"{icon} {title}"
-        tip = f' title="{esc(desc)}"' if desc else ""
-        return f'      <a href="{esc(rel)}"{cls}{tip} target="_blank" rel="noopener">{esc(label)}</a>'
-
-    blocks = []
-    # direkte Dateien zuerst
-    if groups.get(""):
-        rows = "\n".join(link_row(r, f) for r, f in sorted(groups[""], key=lambda x: x[1]))
-        blocks.append(f'    <div class="ov-group">\n{rows}\n    </div>')
-    def seg_label(seg):
-        m = re.match(r"klasse(\d{2}|EF)$", seg)
-        if m:
-            return "EF" if m.group(1) == "EF" else f"Klasse {int(m.group(1))}"
-        return prettify(seg)
-    for seg in sorted(k for k in groups if k):
-        em = thema_emoji(seg) or KACHEL_EMOJI_FALLBACK
-        rows = "\n".join(link_row(r, f) for r, f in sorted(groups[seg], key=lambda x: x[1]))
-        blocks.append(
-            f'    <div class="ov-group">\n'
-            f'      <h2>{em} {esc(seg_label(seg))}</h2>\n{rows}\n    </div>'
-        )
-    body = "\n".join(blocks)
-
-    return f"""<!DOCTYPE html>
-<html lang="de">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="hubignore" content="1">
-<title>{esc(prettify(ordner_name))} – Übersicht</title>
-<style>
-  :root {{ color-scheme: light; }}
-  body {{ font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-         max-width: 820px; margin: 0 auto; padding: 24px 18px;
-         background: #f6f8fb; color: #1f2a37; }}
-  h1 {{ font-size: 1.5rem; margin: 0 0 4px; }}
-  .ts {{ color: #6b7280; font-size: .85rem; margin-bottom: 20px; }}
-  .ov-group {{ background: #fff; border: 1px solid #e5e9f0; border-radius: 12px;
-              padding: 14px 16px; margin-bottom: 14px; }}
-  .ov-group h2 {{ font-size: 1.05rem; margin: 2px 0 10px; color: #1a5490; }}
-  .ov-group a {{ display: block; padding: 7px 10px; margin: 2px 0; border-radius: 8px;
-                color: #1155cc; text-decoration: none; font-size: .98rem; }}
-  .ov-group a:hover {{ background: #eef4ff; }}
-  .lehrer-link {{ color: #9333ea !important; }}
-  .search {{ width: 100%; padding: 10px 12px; font-size: 1rem; margin-bottom: 18px;
-            border: 1px solid #d1d9e6; border-radius: 10px; box-sizing: border-box; }}
-  .foot {{ color: #9aa4b2; font-size: .8rem; text-align: center; margin-top: 24px; }}
-</style>
-</head>
-<body>
-  <h1>📂 {esc(prettify(ordner_name))}</h1>
-  <div class="ts">Übersicht · aktualisiert {heute} · {len(sub)} Seiten</div>
-  <input class="search" placeholder="🔍 filtern…" oninput="ovFilter(this.value)">
-{body}
-  <div class="foot">Automatisch erzeugt · Links relativ zu diesem Ordner</div>
-<script>
-function ovFilter(q){{
-  q=q.toLowerCase();
-  document.querySelectorAll('.ov-group').forEach(g=>{{
-    let any=false;
-    g.querySelectorAll('a').forEach(a=>{{
-      const t=(a.textContent+' '+(a.getAttribute('title')||'')).toLowerCase();
-      const hit=t.includes(q); a.style.display=hit?'block':'none'; if(hit)any=true;
-    }});
-    g.style.display=any?'block':'none';
-  }});
-}}
-</script>
-</body>
-</html>"""
+    return len(files), out
 
 
 def build_fach_card(fach, klassen, alt_klassen, metas):
@@ -585,7 +431,7 @@ TPL_HEAD = r"""<!DOCTYPE html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🦖 Mathedino Hub</title>
+<title>🦖 ASzym Hub</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Source+Sans+3:wght@300;400;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -818,7 +664,7 @@ TPL_HEAD = r"""<!DOCTYPE html>
 
 <div class="topbar">
   <div class="topbar-inner">
-    <h1>🦖 Mathedino <span>· Materialübersicht</span>
+    <h1>🦖 ASzym <span>· Materialübersicht</span>
       <span class="lehrer-badge" id="lehrerBadge">👨‍🏫 Lehrermodus</span>
       <span class="ts">aktualisiert 16.07.2026</span>
     </h1>
@@ -890,7 +736,7 @@ function dinoClick() {
 function setLehrerModus(aktiv) {
   document.body.classList.toggle('lehrer-mode', aktiv);
   document.getElementById('lehrerBadge').classList.toggle('visible', aktiv);
-  document.getElementById('dino-tip').textContent = aktiv ? '👨‍🏫 Lehrermodus aktiv!' : 'Made by Mathedino 🦖';
+  document.getElementById('dino-tip').textContent = aktiv ? '👨‍🏫 Lehrermodus aktiv!' : 'Made by ASzym 🦖';
 }
 
 function toggleLehrerModus() {
@@ -1146,9 +992,5 @@ if __name__ == "__main__":
     ap.add_argument("--out", default=None)
     args = ap.parse_args()
     out = args.out or os.path.join(args.root, "dino_hub.html")
-    n, path, uebersichten = build(args.root, out)
+    n, path = build(args.root, out)
     print(f"OK – {n} Dateien verarbeitet → {path}")
-    if uebersichten:
-        print(f"Ordner-Übersichten ({len(uebersichten)}):")
-        for ordner, name, cnt in uebersichten:
-            print(f"  {ordner}/{name}  ({cnt} Seiten)")

@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nullstellen bestimmen – Lernseite EF</title>
+<meta name="description" content="Erarbeitungsseite für die EF: Nullstellen am Graphen ablesen, mit dem Befehl Nullstelle bestimmen lassen und über die Gleichung f(x)=0 rechnerisch exakt berechnen.">
+<meta name="keywords" content="GeoGebra, Grafikrechner, Nullstellen, Nullstelle-Befehl, Löse, Gleichung, ablesen, exakt, EF">
+<meta name="typ" content="Lernseite">
+<meta name="klasse" content="EF">
+<meta name="fach" content="mathe">
+<meta name="oberthema" content="GeoGebra Grafikrechner">
+<meta name="thema" content="Nullstellen bestimmen">
+<script>
+  MathJax = {
+    tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+    svg: { fontCache: 'global' }
+  };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+  :root{
+    --ink:#22303f;
+    --card:#ffffff;
+    --green:#1e7d32;
+    --red:#c1272d;
+    --amber:#b8860b;
+    --amber-light:#fdf3d9;
+    --amber-dark:#96690a;
+    --orange:#c97a2e;
+    --orange-dark:#a5611e;
+    --orange-light:#fbeee0;
+    --bg:#faf7f2;
+    --line:#e4dcd0;
+    --blue:#2f5fa6;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);color:var(--ink);
+    font-family:'Segoe UI',Verdana,'Helvetica Neue',sans-serif;
+    font-size:1.05rem;line-height:1.55;padding-bottom:5rem;
+  }
+  header{
+    background:linear-gradient(135deg,var(--orange),var(--orange-dark));
+    color:#fff;padding:1.3rem 1.2rem;box-shadow:0 3px 10px rgba(0,0,0,.12);
+  }
+  header .typ{
+    display:inline-block;background:rgba(255,255,255,.25);
+    padding:.2rem .7rem;border-radius:1rem;font-size:.85rem;
+    font-weight:700;letter-spacing:.04em;margin-bottom:.5rem;
+  }
+  header h1{margin:0;font-size:1.55rem;line-height:1.25;}
+  header p{margin:.4rem 0 0;font-size:1rem;opacity:.95;}
+  header .serie{margin-top:.6rem;font-size:.9rem;opacity:.9;}
+
+  .tabs{display:flex;flex-wrap:wrap;gap:.5rem;padding:1rem 1rem 0;max-width:1024px;margin:0 auto;}
+  .tab{
+    flex:1 1 auto;min-width:7.5rem;min-height:44px;
+    border:2px solid var(--line);background:#fff;color:var(--ink);
+    font-size:.95rem;font-weight:600;border-radius:.7rem .7rem 0 0;
+    padding:.6rem .5rem;cursor:pointer;
+    transition:background .15s,border-color .15s,transform .05s;
+  }
+  .tab:active{transform:scale(.97);}
+  .tab.aktiv{background:var(--orange);color:#fff;border-color:var(--orange-dark);}
+  .tab .done{margin-left:.3rem;}
+
+  main{max-width:1024px;margin:0 auto;padding:0 1rem;}
+  .karte{
+    display:none;background:var(--card);border:2px solid var(--line);
+    border-radius:0 .9rem .9rem .9rem;padding:1.3rem 1.2rem;margin-top:-2px;
+    box-shadow:0 2px 8px rgba(0,0,0,.05);animation:einblenden .25s ease;
+  }
+  .karte.aktiv{display:block;}
+  @keyframes einblenden{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .karte h2{margin-top:0;font-size:1.3rem;color:var(--orange-dark);}
+  .frage{font-weight:700;margin:1rem 0 .6rem;}
+
+  .merk{
+    background:var(--orange-light);border-left:5px solid var(--orange);
+    padding:.8rem 1rem;border-radius:.4rem;margin:1rem 0;
+  }
+  code{
+    background:#eee3d4;border-radius:.3rem;padding:.05rem .4rem;
+    font-family:'Courier New',monospace;font-size:.95em;
+  }
+
+  .kennz{display:flex;flex-wrap:wrap;gap:.45rem;margin:.6rem 0 .4rem;}
+  .chip{
+    display:inline-flex;align-items:center;gap:.3rem;
+    font-size:.82rem;font-weight:700;letter-spacing:.01em;
+    border-radius:1rem;padding:.25rem .7rem;border:2px solid;
+  }
+  .chip-hm{background:#e6eefb;color:var(--blue);border-color:var(--blue);}
+  .chip-frei{background:#f1efe9;color:#6b6354;border-color:#a89e8c;}
+  .chip-art{background:var(--amber-light);color:var(--amber-dark);border-color:var(--amber);}
+
+  .tipp-box{border:2px solid var(--amber);border-radius:.6rem;margin:1rem 0;overflow:hidden;}
+  .tipp-kopf{
+    width:100%;min-height:44px;background:var(--amber-light);color:var(--amber-dark);
+    border:none;font-weight:700;font-size:1rem;padding:.6rem .9rem;text-align:left;cursor:pointer;
+    display:flex;justify-content:space-between;align-items:center;gap:.5rem;
+  }
+  .tipp-inhalt{display:none;padding:.9rem 1rem;background:var(--amber-light);color:var(--ink);}
+  .tipp-box.offen .tipp-inhalt{display:block;}
+  .tipp-box.offen .tipp-pfeil{transform:rotate(180deg);}
+  .tipp-pfeil{transition:transform .2s;flex-shrink:0;}
+
+  button{font-family:inherit;}
+  .btn{
+    min-height:44px;border:none;border-radius:.6rem;padding:.6rem 1.1rem;
+    font-size:1rem;font-weight:700;cursor:pointer;transition:transform .05s,filter .15s;
+  }
+  .btn:active{transform:scale(.97);}
+  .btn-pruefen{background:#3a6ea5;color:#fff;}
+  .btn-leeren{background:#8a7e6a;color:#fff;margin-left:.5rem;}
+
+  .feedback{margin:.8rem 0;padding:.8rem 1rem;border-radius:.5rem;font-weight:700;display:none;}
+  .feedback.zeig{display:block;}
+  .feedback.ok{background:var(--green);color:#fff;}
+  .feedback.nok{background:var(--red);color:#fff;}
+
+  .demo-liste{margin:1rem 0;display:flex;flex-direction:column;gap:.5rem;}
+  .demo-zeile{
+    display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;
+    background:#fff;border:2px solid var(--line);border-radius:.5rem;padding:.6rem .9rem;
+  }
+  .demo-tipp{font-size:.85rem;color:#6b6354;font-weight:600;}
+  .demo-pfeil{font-weight:800;color:var(--orange);}
+  .demo-ergebnis{font-weight:700;font-size:1.05rem;}
+
+  .graf-box{margin:1rem auto;max-width:24rem;text-align:center;}
+  .graf-box svg{display:block;width:100%;height:auto;background:#fff;border:2px solid var(--line);border-radius:.5rem;}
+  .graf-box .bereich{display:block;margin-top:.4rem;font-size:.9rem;color:#6b6354;font-weight:600;}
+
+  /* Vergleichstabelle */
+  .vgl{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.98rem;}
+  .vgl th,.vgl td{border:2px solid var(--line);padding:.55rem .7rem;text-align:left;}
+  .vgl th{background:var(--orange-light);color:var(--orange-dark);}
+  .vgl td:first-child{font-weight:700;}
+
+  .mcwahl{display:flex;flex-wrap:wrap;gap:.6rem;margin:.6rem 0;}
+  .mcwahl button{
+    flex:1 1 9rem;min-height:48px;border:2px solid var(--line);background:#fff;color:var(--ink);
+    border-radius:.6rem;font-size:1rem;font-weight:700;cursor:pointer;padding:.5rem .7rem;
+  }
+  .mcwahl button.gewaehlt{background:#dce9f7;border-color:#3a6ea5;}
+  .mcwahl button.richtig{background:var(--green);color:#fff;border-color:var(--green);}
+  .mcwahl button.falsch{background:var(--red);color:#fff;border-color:var(--red);}
+
+  .aussage{border:2px solid var(--line);border-radius:.6rem;padding:.8rem .9rem;margin:.8rem 0;background:#fff;}
+  .wf-buttons{display:flex;gap:.6rem;margin-top:.6rem;}
+  .wf-buttons button{
+    flex:1 1 6rem;min-height:44px;border:2px solid var(--line);background:#fff;color:var(--ink);
+    border-radius:.6rem;font-weight:700;cursor:pointer;
+  }
+  .wf-buttons button.gewaehlt{background:#dce9f7;border-color:#3a6ea5;}
+  .wf-buttons button.richtig{background:var(--green);color:#fff;border-color:var(--green);}
+  .wf-buttons button.falsch{background:var(--red);color:#fff;border-color:var(--red);}
+
+  .zahltab{width:100%;border-collapse:separate;border-spacing:0 .6rem;}
+  .zahltab td{padding:.3rem .5rem;vertical-align:middle;}
+  .zahltab td:first-child{font-weight:600;min-width:10rem;}
+  input[type=text]{
+    font-family:inherit;font-size:1.05rem;min-height:44px;
+    border:2px solid var(--line);border-radius:.5rem;padding:.4rem .6rem;
+    width:7.5rem;text-align:center;
+  }
+  input:focus{outline:none;border-color:var(--orange);}
+  .feld-status{margin-left:.5rem;font-weight:800;font-size:1.1rem;}
+
+  .frac{
+    display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;
+    margin:0 .15em;font-size:1em;line-height:1.15;
+  }
+  .frac span{display:block;padding:0 .3em;}
+  .frac span:first-child{border-bottom:1.5px solid currentColor;padding-bottom:.08em;}
+  .frac span:last-child{padding-top:.08em;}
+
+  .stufen-tipps{display:none;margin:1rem 0;}
+  .stufen-tipps.zeig{display:block;}
+  .stufen-tipps h4{margin:0 0 .5rem;font-size:1rem;color:var(--amber-dark);}
+  .stufe{border:2px solid var(--amber);border-radius:.6rem;margin-bottom:.5rem;overflow:hidden;}
+  .stufe-kopf{
+    width:100%;min-height:44px;background:var(--amber-light);color:var(--amber-dark);
+    border:none;font-weight:700;font-size:.98rem;padding:.6rem .9rem;text-align:left;cursor:pointer;
+    display:flex;justify-content:space-between;align-items:center;gap:.5rem;
+  }
+  .stufe-inhalt{display:none;padding:.9rem 1rem;background:var(--amber-light);color:var(--ink);}
+  .stufe.offen .stufe-inhalt{display:block;}
+  .stufe.offen .stufe-pfeil{transform:rotate(180deg);}
+  .stufe-pfeil{transition:transform .2s;flex-shrink:0;}
+
+  .check-item{border:2px solid var(--line);border-radius:.6rem;padding:.9rem;margin:.9rem 0;background:#fff;}
+  .check-item h3{margin:0 0 .5rem;font-size:1.02rem;}
+  .zusammenfassung{
+    text-align:center;font-weight:800;font-size:1.1rem;margin-top:1rem;padding:.8rem;
+    border-radius:.6rem;background:var(--orange-light);color:var(--orange-dark);display:none;
+  }
+  .zusammenfassung.zeig{display:block;}
+  .rechnen-titel{margin:1.6rem 0 .3rem;font-size:1.15rem;color:var(--orange-dark);border-top:2px solid var(--line);padding-top:1.2rem;}
+
+  .trex{position:fixed;right:.7rem;bottom:.7rem;font-size:1.8rem;cursor:pointer;z-index:50;user-select:none;}
+  .trex .bubble{
+    position:absolute;right:2.2rem;bottom:.2rem;white-space:nowrap;
+    background:var(--ink);color:#fff;padding:.3rem .6rem;border-radius:.5rem;
+    font-size:.85rem;opacity:0;pointer-events:none;transition:opacity .2s;
+  }
+  .trex.zeig .bubble{opacity:1;}
+</style>
+</head>
+<body>
+<header>
+  <span class="typ">Erarbeitung · EF</span>
+  <h1>Nullstellen bestimmen</h1>
+  <p>Drei Wege zur selben Stelle: am Graphen ablesen, vom Grafikrechner bestimmen lassen oder über die Gleichung exakt berechnen – und wann du welchen nehmen darfst.</p>
+  <p class="serie">Lernhappen 2 der EF-Reihe „GeoGebra Grafikrechner"</p>
+</header>
+
+<nav class="tabs" id="tabs">
+  <button class="tab aktiv" data-ziel="k1">1 · Ablesen <span class="done" id="d1"></span></button>
+  <button class="tab" data-ziel="k2">2 · Bestimmen <span class="done" id="d2"></span></button>
+  <button class="tab" data-ziel="k3">3 · Berechnen <span class="done" id="d3"></span></button>
+  <button class="tab" data-ziel="k4">4 · Überprüfe dich <span class="done" id="d4"></span></button>
+</nav>
+
+<main>
+  <!-- KARTE 1 -->
+  <section class="karte aktiv" id="k1">
+    <h2>Nullstellen am Graphen ablesen</h2>
+    <p>Eine <b>Nullstelle</b> von \(f\) ist eine Stelle \(x\), an der \(f(x)=0\) gilt. Im Bild ist das genau dort, wo der Graph die \(x\)-Achse schneidet oder berührt.</p>
+
+    <div class="graf-box">
+      <svg viewBox="0 0 320 240" role="img" aria-label="Graph der Parabel q von x gleich x Quadrat minus 2 mit zwei Nullstellen">
+        <line x1="14" y1="160.3" x2="306" y2="160.3" stroke="#22303f" stroke-width="1.6"/>
+        <polygon points="306,160.3 297,156.3 297,164.3" fill="#22303f"/>
+        <line x1="160" y1="228" x2="160" y2="12" stroke="#22303f" stroke-width="1.6"/>
+        <polygon points="160,12 156,21 164,21" fill="#22303f"/>
+        <line x1="204.7" y1="156.3" x2="204.7" y2="164.3" stroke="#22303f" stroke-width="1.6"/>
+        <text x="201" y="177" font-size="11" fill="#22303f">1</text>
+        <line x1="249.3" y1="156.3" x2="249.3" y2="164.3" stroke="#22303f" stroke-width="1.6"/>
+        <text x="246" y="177" font-size="11" fill="#22303f">2</text>
+        <line x1="115.3" y1="156.3" x2="115.3" y2="164.3" stroke="#22303f" stroke-width="1.6"/>
+        <text x="107" y="177" font-size="11" fill="#22303f">-1</text>
+        <line x1="70.7" y1="156.3" x2="70.7" y2="164.3" stroke="#22303f" stroke-width="1.6"/>
+        <text x="62" y="177" font-size="11" fill="#22303f">-2</text>
+        <line x1="156" y1="124.5" x2="164" y2="124.5" stroke="#22303f" stroke-width="1.6"/>
+        <text x="145" y="128" font-size="11" fill="#22303f">2</text>
+        <line x1="156" y1="88.7" x2="164" y2="88.7" stroke="#22303f" stroke-width="1.6"/>
+        <text x="145" y="92" font-size="11" fill="#22303f">4</text>
+        <line x1="156" y1="196.1" x2="164" y2="196.1" stroke="#22303f" stroke-width="1.6"/>
+        <text x="140" y="200" font-size="11" fill="#22303f">-2</text>
+        <text x="296" y="150" font-size="12" font-style="italic" fill="#22303f">x</text>
+        <text x="168" y="22" font-size="12" font-style="italic" fill="#22303f">y</text>
+        <circle cx="223.2" cy="160.3" r="4" fill="#c1272d"/>
+        <circle cx="96.8" cy="160.3" r="4" fill="#c1272d"/>
+        <polyline fill="none" stroke="#c97a2e" stroke-width="2.6" points="26.0,35.0 34.9,55.7 43.9,75.1 52.8,93.0 61.7,109.4 70.7,124.5 79.6,138.1 88.5,150.3 97.5,161.0 106.4,170.3 115.3,178.2 124.3,184.6 133.2,189.6 142.1,193.2 151.1,195.4 160.0,196.1 168.9,195.4 177.9,193.2 186.8,189.6 195.7,184.6 204.7,178.2 213.6,170.3 222.5,161.0 231.5,150.3 240.4,138.1 249.3,124.5 258.3,109.4 267.2,93.0 276.1,75.1 285.1,55.7 294.0,35.0"/>
+      </svg>
+      <span class="bereich">\(q(x)=x^{2}-2\)</span>
+    </div>
+
+    <p>Die beiden roten Punkte sind die Schnittpunkte mit der \(x\)-Achse. Ablesen kannst du: die linke Nullstelle liegt bei etwa \(-1{,}4\), die rechte bei etwa \(1{,}4\).</p>
+
+    <div class="merk">
+      <b>Nullstelle oder Punkt?</b> Die <b>Nullstelle ist der \(x\)-Wert</b> – also \(x \approx 1{,}4\). Der zugehörige <b>Punkt</b> auf dem Graphen ist \(N(1{,}4|0)\). GeoGebra gibt dir gleich Punkte aus; die Nullstelle ist dann die \(x\)-Koordinate davon. Achte in Antworten darauf, was gefragt ist.
+    </div>
+
+    <div class="merk">
+      <b>Die Grenze des Ablesens:</b> Der abgelesene Wert \(1{,}4\) ist nur ein <b>Näherungswert</b>. Der exakte Wert ist \(\sqrt{2}=1{,}41421\ldots\) – das siehst du dem Bild nicht an. Und wie du auf der letzten Seite gesehen hast: Nullstellen außerhalb des Sichtfensters bemerkst du beim Ablesen gar nicht.
+    </div>
+
+    <p class="frage">Jetzt du: Entscheide, ob die Aussagen stimmen.</p>
+    <div class="kennz">
+      <span class="chip chip-frei">✏️ ohne Hilfsmittel</span>
+      <span class="chip chip-art">💭 begründen – nicht rechnen</span>
+    </div>
+
+    <div class="aussage" data-aussage data-richtig="wahr">
+      <p>Eine Nullstelle von \(f\) ist eine Stelle \(x\), für die \(f(x)=0\) gilt.</p>
+      <div class="wf-buttons"><button data-w="wahr">Wahr</button><button data-w="falsch">Falsch</button></div>
+    </div>
+    <div class="aussage" data-aussage data-richtig="falsch">
+      <p>Am Graphen abgelesene Nullstellen sind exakte Werte.</p>
+      <div class="wf-buttons"><button data-w="wahr">Wahr</button><button data-w="falsch">Falsch</button></div>
+    </div>
+    <div class="aussage" data-aussage data-richtig="falsch">
+      <p>Wenn im Sichtfenster keine Nullstelle zu sehen ist, hat die Funktion keine.</p>
+      <div class="wf-buttons"><button data-w="wahr">Wahr</button><button data-w="falsch">Falsch</button></div>
+    </div>
+
+    <button class="btn btn-pruefen" onclick="pruefeAussagen()">Prüfen</button>
+    <div class="feedback" id="fb1"></div>
+  </section>
+
+  <!-- KARTE 2 -->
+  <section class="karte" id="k2">
+    <h2>Nullstellen bestimmen lassen – der Befehl</h2>
+    <p>Statt zu schätzen, lässt du GeoGebra die Nullstellen suchen. Der Befehl heißt <code>Nullstelle</code> und bekommt den <b>Namen</b> der Funktion – deshalb war das Benennen auf der letzten Seite so wichtig:</p>
+
+    <div class="demo-liste">
+      <div class="demo-zeile"><span class="demo-tipp">Du tippst:</span> <code>Nullstelle(q)</code> <span class="demo-pfeil">→</span> <span class="demo-ergebnis"><code>(-1.41, 0)</code> und <code>(1.41, 0)</code></span></div>
+    </div>
+
+    <div class="merk">
+      <b>Achtung – zwei Stolperfallen:</b>
+      <ul style="margin:.5rem 0 0;padding-left:1.2rem;">
+        <li>GeoGebra gibt <b>Punkte</b> aus, keine Zahlen. Die Nullstelle ist die \(x\)-Koordinate: aus \((1{,}41|0)\) wird die Antwort \(x \approx 1{,}41\).</li>
+        <li>Die Ausgabe ist eine <b>Dezimalzahl</b>, also gerundet. Den exakten Wert \(\sqrt{2}\) bekommst du so <b>nicht</b> – dafür brauchst du Karte 3.</li>
+      </ul>
+    </div>
+
+    <div class="tipp-box" id="tipp2">
+      <button class="tipp-kopf" onclick="toggleTipp('tipp2')">
+        <span>💡 Findet der Befehl immer alle Nullstellen?</span>
+        <span class="tipp-pfeil">▾</span>
+      </button>
+      <div class="tipp-inhalt">
+        Bei <b>ganzrationalen Funktionen</b> (Polynomen wie \(x^{3}-7x+6\)) findet <code>Nullstelle</code> zuverlässig alle.
+        Bei anderen Funktionstypen – etwa mit Sinus oder \(e\)-Funktion – sucht der Befehl im Wesentlichen nur dort, wo der Graph gerade <b>sichtbar</b> ist. Findest du weniger Nullstellen als erwartet, vergrößere zuerst das Sichtfenster.
+        <br><br>
+        Gezielt in einem Bereich suchen kannst du mit zwei zusätzlichen Zahlen: <code>Nullstelle(f, -5, 5)</code> sucht nur zwischen \(-5\) und \(5\).
+      </div>
+    </div>
+
+    <div class="graf-box">
+      <svg viewBox="0 0 320 240" role="img" aria-label="Graph der Funktion r von x gleich x hoch drei minus sieben x plus sechs mit drei Nullstellen">
+        <line x1="14" y1="151.3" x2="306" y2="151.3" stroke="#22303f" stroke-width="1.6"/>
+        <polygon points="306,151.3 297,147.3 297,155.3" fill="#22303f"/>
+        <line x1="179.1" y1="228" x2="179.1" y2="12" stroke="#22303f" stroke-width="1.6"/>
+        <polygon points="179.1,12 175.1,21 183.1,21" fill="#22303f"/>
+        <line x1="64.3" y1="147.3" x2="64.3" y2="155.3" stroke="#22303f" stroke-width="1.6"/>
+        <text x="56" y="168" font-size="11" fill="#22303f">-3</text>
+        <line x1="102.6" y1="147.3" x2="102.6" y2="155.3" stroke="#22303f" stroke-width="1.6"/>
+        <text x="94" y="168" font-size="11" fill="#22303f">-2</text>
+        <line x1="140.9" y1="147.3" x2="140.9" y2="155.3" stroke="#22303f" stroke-width="1.6"/>
+        <text x="133" y="168" font-size="11" fill="#22303f">-1</text>
+        <line x1="217.4" y1="147.3" x2="217.4" y2="155.3" stroke="#22303f" stroke-width="1.6"/>
+        <text x="214" y="168" font-size="11" fill="#22303f">1</text>
+        <line x1="255.7" y1="147.3" x2="255.7" y2="155.3" stroke="#22303f" stroke-width="1.6"/>
+        <text x="252" y="168" font-size="11" fill="#22303f">2</text>
+        <line x1="175.1" y1="112.2" x2="183.1" y2="112.2" stroke="#22303f" stroke-width="1.6"/>
+        <text x="163" y="116" font-size="11" fill="#22303f">5</text>
+        <line x1="175.1" y1="73.0" x2="183.1" y2="73.0" stroke="#22303f" stroke-width="1.6"/>
+        <text x="159" y="77" font-size="11" fill="#22303f">10</text>
+        <line x1="175.1" y1="190.5" x2="183.1" y2="190.5" stroke="#22303f" stroke-width="1.6"/>
+        <text x="159" y="194" font-size="11" fill="#22303f">-5</text>
+        <text x="296" y="141" font-size="12" font-style="italic" fill="#22303f">x</text>
+        <text x="187" y="22" font-size="12" font-style="italic" fill="#22303f">y</text>
+        <polyline fill="none" stroke="#c97a2e" stroke-width="2.6" points="51.5,212.0 56.8,184.6 62.2,160.2 67.5,138.5 72.9,119.6 78.3,103.2 83.6,89.2 89.0,77.5 94.3,68.0 99.7,60.5 105.1,55.0 110.4,51.2 115.8,49.1 121.1,48.5 126.5,49.3 131.9,51.4 137.2,54.6 142.6,58.8 147.9,63.9 153.3,69.7 158.7,76.2 164.0,83.2 169.4,90.5 174.7,98.0 180.1,105.7 185.5,113.3 190.8,120.8 196.2,128.0 201.5,134.8 206.9,141.1 212.3,146.7 217.6,151.5 223.0,155.4 228.3,158.2 233.7,159.8 239.1,160.1 244.4,159.0 249.8,156.3 255.1,151.9 260.5,145.7 265.9,137.5 271.2,127.2 276.6,114.8 281.9,99.9 287.3,82.6 292.7,62.7"/>
+      </svg>
+      <span class="bereich">\(r(x)=x^{3}-7x+6\)</span>
+    </div>
+
+    <p class="frage">Jetzt du: Gib \(r(x)=x^{3}-7x+6\) mit Namen ein und lass die Nullstellen bestimmen. Trage die drei \(x\)-Werte der Größe nach ein.</p>
+    <div class="kennz">
+      <span class="chip chip-hm">🖩 mit GeoGebra</span>
+      <span class="chip chip-art">🎯 bestimmen – Befehl erlaubt, kein Rechenweg nötig</span>
+    </div>
+
+    <table class="zahltab">
+      <tr><td>kleinste Nullstelle</td><td><input type="text" id="z1" placeholder="?"><span class="feld-status" id="s1"></span></td></tr>
+      <tr><td>mittlere Nullstelle</td><td><input type="text" id="z2" placeholder="?"><span class="feld-status" id="s2"></span></td></tr>
+      <tr><td>größte Nullstelle</td><td><input type="text" id="z3" placeholder="?"><span class="feld-status" id="s3"></span></td></tr>
+    </table>
+
+    <button class="btn btn-pruefen" onclick="pruefeNullstellen()">Prüfen</button>
+    <button class="btn btn-leeren" id="leeren2" style="display:none" onclick="leereNullstellen()">Leeren</button>
+    <div class="feedback" id="fb2"></div>
+
+    <div class="stufen-tipps" id="tipps2">
+      <h4>Brauchst du Hilfe? Decke so viel auf, wie du brauchst:</h4>
+      <div class="stufe">
+        <button class="stufe-kopf" onclick="toggleStufe(this)"><span>Tipp 1 – Wie fange ich an?</span><span class="stufe-pfeil">▾</span></button>
+        <div class="stufe-inhalt">Erst die Funktion <b>mit Namen</b> in eine eigene Zeile: <code>r(x)=x^3-7x+6</code>. Nach <code>x^3</code> mit der <b>Pfeiltaste →</b> aus dem Exponenten heraus, sonst rutscht <code>-7x+6</code> mit nach oben.</div>
+      </div>
+      <div class="stufe">
+        <button class="stufe-kopf" onclick="toggleStufe(this)"><span>Tipp 2 – Der Befehl</span><span class="stufe-pfeil">▾</span></button>
+        <div class="stufe-inhalt">Schreibe in eine neue Zeile <code>Nullstelle(r)</code>. GeoGebra gibt dir drei <b>Punkte</b> aus. Gefragt sind aber die <b>\(x\)-Werte</b> – also jeweils die erste Zahl in der Klammer.</div>
+      </div>
+      <div class="stufe">
+        <button class="stufe-kopf" onclick="toggleStufe(this)"><span>Tipp 3 – Lösung</span><span class="stufe-pfeil">▾</span></button>
+        <div class="stufe-inhalt">GeoGebra liefert die Punkte \((-3|0)\), \((1|0)\) und \((2|0)\). Die Nullstellen sind also \(x_1=-3\), \(x_2=1\) und \(x_3=2\). Probe: \(r(1)=1-7+6=0\) ✓</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- KARTE 3 -->
+  <section class="karte" id="k3">
+    <h2>Nullstellen berechnen – über die Gleichung</h2>
+    <p>Steht in der Aufgabe <b>„berechne"</b>, reicht der <code>Nullstelle</code>-Befehl nicht. Dann musst du den <b>Ansatz aufschreiben</b> – und der ist bei Nullstellen immer derselbe:</p>
+
+    <div class="merk" style="text-align:center;font-size:1.1rem;">
+      Setze den Funktionsterm gleich null: &nbsp; \(f(x)=0\)
+    </div>
+
+    <p>Diese <b>Gleichung</b> schreibst du ins Heft. Lösen darf sie dann GeoGebra für dich – mit dem Befehl <code>Löse</code>:</p>
+
+    <div class="demo-liste">
+      <div class="demo-zeile"><span class="demo-tipp">Du tippst:</span> <code>Löse(x^2-2=0)</code> <span class="demo-pfeil">→</span> <span class="demo-ergebnis">\(\left\{x=-\sqrt{2},\; x=\sqrt{2}\right\}\)</span></div>
+      <div class="demo-zeile"><span class="demo-tipp">Geht auch:</span> <code>Löse(q(x)=0)</code> <span class="demo-pfeil">→</span> <span class="demo-ergebnis">dasselbe Ergebnis</span></div>
+    </div>
+
+    <p>Jetzt siehst du den Unterschied der drei Wege an <b>einer</b> Funktion:</p>
+
+    <table class="vgl">
+      <tr><th>Weg</th><th>Ergebnis für \(q(x)=x^{2}-2\)</th><th>Genauigkeit</th></tr>
+      <tr><td>Am Graphen ablesen</td><td>\(x \approx 1{,}4\)</td><td>grobe Näherung</td></tr>
+      <tr><td><code>Nullstelle(q)</code></td><td>\(x \approx 1{,}41\)</td><td>gerundeter Dezimalwert</td></tr>
+      <tr><td><code>Löse(q(x)=0)</code></td><td>\(x = \sqrt{2}\)</td><td><b>exakt</b></td></tr>
+    </table>
+
+    <div class="merk">
+      <b>Merke für Klausuren:</b> <code>Löse</code> liefert die Lösungen <b>exakt</b> – also mit Wurzeln oder Brüchen statt gerundeter Dezimalzahlen. Genau das ist bei „berechne" verlangt. Und der entscheidende Teil deiner Lösung steht trotzdem im Heft: die Gleichung \(f(x)=0\) und der Weg dorthin. GeoGebra übernimmt nur das Auflösen.
+    </div>
+
+    <p class="frage">Jetzt du: Gegeben ist \(w(x)=x^{2}-5\). Schreibe zuerst die Gleichung \(x^{2}-5=0\) auf und lass sie dann lösen. Trage die Nullstellen <b>auf drei Nachkommastellen gerundet</b> ein.</p>
+    <div class="kennz">
+      <span class="chip chip-hm">🖩 mit GeoGebra (nur zum Lösen)</span>
+      <span class="chip chip-art">✍️ rechnerisch – Gleichung aufstellen</span>
+    </div>
+
+    <table class="zahltab">
+      <tr><td>kleinere Nullstelle</td><td><input type="text" id="w1" placeholder="?"><span class="feld-status" id="ws1"></span></td></tr>
+      <tr><td>größere Nullstelle</td><td><input type="text" id="w2" placeholder="?"><span class="feld-status" id="ws2"></span></td></tr>
+    </table>
+
+    <button class="btn btn-pruefen" onclick="pruefeBerechnen()">Prüfen</button>
+    <button class="btn btn-leeren" id="leeren3" style="display:none" onclick="leereBerechnen()">Leeren</button>
+    <div class="feedback" id="fb3"></div>
+
+    <div class="stufen-tipps" id="tipps3">
+      <h4>Brauchst du Hilfe? Decke so viel auf, wie du brauchst:</h4>
+      <div class="stufe">
+        <button class="stufe-kopf" onclick="toggleStufe(this)"><span>Tipp 1 – Der Ansatz</span><span class="stufe-pfeil">▾</span></button>
+        <div class="stufe-inhalt">Nullstellen heißt immer: Funktionsterm gleich null setzen. Hier also \(x^{2}-5=0\). Diese Gleichung gehört ins Heft – sie ist der Rechenweg, den der Operator „berechne" verlangt.</div>
+      </div>
+      <div class="stufe">
+        <button class="stufe-kopf" onclick="toggleStufe(this)"><span>Tipp 2 – Der Befehl</span><span class="stufe-pfeil">▾</span></button>
+        <div class="stufe-inhalt">Tippe <code>Löse(x^2-5=0)</code>. Du bekommst die exakten Lösungen mit Wurzel. Für die Eingabe hier brauchst du den <b>Dezimalwert</b> davon – tippe dazu einfach <code>sqrt(5)</code> in eine neue Zeile, dann zeigt GeoGebra den Zahlenwert an.</div>
+      </div>
+      <div class="stufe">
+        <button class="stufe-kopf" onclick="toggleStufe(this)"><span>Tipp 3 – Lösung</span><span class="stufe-pfeil">▾</span></button>
+        <div class="stufe-inhalt">Exakt: \(x_1=-\sqrt{5}\) und \(x_2=\sqrt{5}\). Gerundet auf drei Nachkommastellen: \(x_1 \approx -2{,}236\) und \(x_2 \approx 2{,}236\).</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- KARTE 4 -->
+  <section class="karte" id="k4">
+    <h2>Überprüfe dich</h2>
+    <p>Eine Selbstkontrolle zu allen drei Wegen.</p>
+
+    <div class="check-item">
+      <h3>1. Was genau ist die Nullstelle, wenn GeoGebra den Punkt \((2|0)\) ausgibt?</h3>
+      <div class="mcwahl" id="c1-wahl"></div>
+    </div>
+    <div class="check-item">
+      <h3>2. Welcher Befehl liefert die Nullstellen <b>exakt</b>, also mit Wurzel statt Dezimalzahl?</h3>
+      <div class="mcwahl" id="c2-wahl"></div>
+    </div>
+    <div class="check-item">
+      <h3>3. In der Aufgabe steht „<b>Berechne</b> die Nullstellen von \(f\)". Was musst du tun?</h3>
+      <div class="mcwahl" id="c3-wahl"></div>
+    </div>
+    <div class="check-item">
+      <h3>4. <code>Nullstelle(f)</code> zeigt bei einer Sinusfunktion nur zwei Nullstellen. Woran liegt das am ehesten?</h3>
+      <div class="mcwahl" id="c4-wahl"></div>
+    </div>
+
+    <button class="btn btn-pruefen" onclick="pruefeCheck()">Alle prüfen</button>
+    <div class="zusammenfassung" id="zsf"></div>
+
+    <h3 class="rechnen-titel">Jetzt rechnen! (mit dem Grafikrechner)</h3>
+    <p>Bestimme die Nullstellen. Trage Dezimalzahlen mit <b>Punkt</b> ein (z. B. <code>1.732</code>); Brüche wie <code>7/2</code> werden auch akzeptiert.</p>
+    <div class="kennz">
+      <span class="chip chip-hm">🖩 mit GeoGebra</span>
+      <span class="chip chip-art">🎯 bestimmen</span>
+    </div>
+
+    <p style="margin-bottom:.2rem;"><b>a)</b> \(u(x)=x^{3}-6x^{2}+3x+10\) – die drei Nullstellen der Größe nach:</p>
+    <table class="zahltab">
+      <tr><td>kleinste</td><td><input type="text" id="r1" placeholder="?"><span class="feld-status" id="rs1"></span></td></tr>
+      <tr><td>mittlere</td><td><input type="text" id="r2" placeholder="?"><span class="feld-status" id="rs2"></span></td></tr>
+      <tr><td>größte</td><td><input type="text" id="r3" placeholder="?"><span class="feld-status" id="rs3"></span></td></tr>
+    </table>
+
+    <p style="margin-bottom:.2rem;"><b>b)</b> \(v(x)=x^{2}-3\) – die <b>positive</b> Nullstelle, auf drei Nachkommastellen gerundet:</p>
+    <table class="zahltab">
+      <tr><td>positive Nullstelle</td><td><input type="text" id="r4" placeholder="?"><span class="feld-status" id="rs4"></span></td></tr>
+    </table>
+
+    <button class="btn btn-pruefen" onclick="pruefeRechnen()">Ergebnisse prüfen</button>
+    <button class="btn btn-leeren" id="leerenRechnen" style="display:none" onclick="leereRechnen()">Leeren</button>
+    <div class="feedback" id="fbRechnen"></div>
+
+    <div class="stufen-tipps" id="tippsRechnen">
+      <h4>Brauchst du Hilfe? Decke so viel auf, wie du brauchst:</h4>
+      <div class="stufe">
+        <button class="stufe-kopf" onclick="toggleStufe(this)"><span>Tipp 1 – Vorgehen</span><span class="stufe-pfeil">▾</span></button>
+        <div class="stufe-inhalt">Gib jede Funktion mit eigenem Namen ein, z. B. <code>u(x)=x^3-6x^2+3x+10</code> und <code>v(x)=x^2-3</code>. Danach in einer neuen Zeile <code>Nullstelle(u)</code> bzw. <code>Nullstelle(v)</code>.</div>
+      </div>
+      <div class="stufe">
+        <button class="stufe-kopf" onclick="toggleStufe(this)"><span>Tipp 2 – Stolperstellen</span><span class="stufe-pfeil">▾</span></button>
+        <div class="stufe-inhalt">Denk an die <b>Pfeiltaste →</b> nach jedem Exponenten. GeoGebra gibt <b>Punkte</b> aus – gefragt ist jeweils nur die \(x\)-Koordinate. Bei b) ist die positive Nullstelle \(\sqrt{3}\); den Dezimalwert siehst du, wenn du <code>sqrt(3)</code> eintippst. Auf drei Nachkommastellen runden!</div>
+      </div>
+      <div class="stufe">
+        <button class="stufe-kopf" onclick="toggleStufe(this)"><span>Tipp 3 – Lösung</span><span class="stufe-pfeil">▾</span></button>
+        <div class="stufe-inhalt">a) \(x_1=-1\), \(x_2=2\), \(x_3=5\). &nbsp; b) \(x=\sqrt{3}\approx 1{,}732\).</div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="trex" id="trex">🦖<span class="bubble">Made by ASzym</span></div>
+
+<script>
+const state = {
+  k1:{wahlen:{0:null,1:null,2:null}, geprueft:false, erledigt:false},
+  k2:{geprueft:false, erledigt:false},
+  k3:{geprueft:false, erledigt:false},
+  k4:{wahlen:{0:null,1:null,2:null,3:null}, geprueft:false, mcRichtig:false, rechnenRichtig:false, erledigt:false}
+};
+
+function mische(arr){
+  const a=arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+document.querySelectorAll('.tab').forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('aktiv'));
+    document.querySelectorAll('.karte').forEach(k=>k.classList.remove('aktiv'));
+    tab.classList.add('aktiv');
+    document.getElementById(tab.dataset.ziel).classList.add('aktiv');
+  });
+});
+
+function toggleTipp(id){ document.getElementById(id).classList.toggle('offen'); }
+function toggleStufe(btn){ btn.parentElement.classList.toggle('offen'); }
+
+function pruefeFortschritt(){
+  [['k1','d1'],['k2','d2'],['k3','d3'],['k4','d4']].forEach(([k,d])=>{
+    document.getElementById(d).textContent = state[k].erledigt ? '✅' : '';
+  });
+}
+
+function parseZahlOderBruch(s){
+  s=String(s).trim().replace(',', '.');
+  if(s==='') return NaN;
+  const bruch=s.match(/^(-?\d+(?:\.\d+)?)\s*\/\s*(-?\d+(?:\.\d+)?)$/);
+  if(bruch){
+    const z=parseFloat(bruch[1]), n=parseFloat(bruch[2]);
+    return n!==0 ? z/n : NaN;
+  }
+  return parseFloat(s);
+}
+
+/* Allgemeine Prüfroutine für Eingabefelder */
+function pruefeFelder(aufgaben){
+  let alleRichtig=true;
+  aufgaben.forEach(a=>{
+    const roh=document.getElementById(a.id).value;
+    const wert=parseZahlOderBruch(roh);
+    const status=document.getElementById(a.statusId);
+    const tol=a.tol!==undefined ? a.tol : 0.0001;
+    if(roh.trim()!=='' && !isNaN(wert) && Math.abs(wert-a.erwartet)<=tol){
+      status.textContent='✅'; status.style.color='var(--green)';
+    }else{
+      status.textContent='❌'; status.style.color='var(--red)';
+      alleRichtig=false;
+    }
+  });
+  return alleRichtig;
+}
+function leereFelder(aufgaben){
+  aufgaben.forEach(a=>{
+    document.getElementById(a.id).value='';
+    document.getElementById(a.statusId).textContent='';
+  });
+}
+
+/* ===== KARTE 1: Wahr/Falsch ===== */
+document.querySelectorAll('[data-aussage]').forEach((box,i)=>{
+  box.querySelectorAll('.wf-buttons button').forEach(b=>{
+    b.addEventListener('click',()=>{
+      if(state.k1.geprueft) return;
+      box.querySelectorAll('.wf-buttons button').forEach(x=>x.classList.remove('gewaehlt'));
+      b.classList.add('gewaehlt');
+      state.k1.wahlen[i]=b.dataset.w;
+    });
+  });
+});
+function pruefeAussagen(){
+  const boxen=document.querySelectorAll('[data-aussage]');
+  if(Object.values(state.k1.wahlen).some(v=>v===null)) return;
+  state.k1.geprueft=true;
+  let richtig=0;
+  boxen.forEach((box,i)=>{
+    const soll=box.dataset.richtig;
+    box.querySelectorAll('.wf-buttons button').forEach(b=>{
+      if(b.dataset.w===soll) b.classList.add('richtig');
+      else if(b.dataset.w===state.k1.wahlen[i]) b.classList.add('falsch');
+    });
+    if(state.k1.wahlen[i]===soll) richtig++;
+  });
+  const fb=document.getElementById('fb1');
+  if(richtig===boxen.length){
+    fb.className='feedback zeig ok';
+    fb.textContent='✅ Alle Aussagen richtig eingeschätzt.';
+    state.k1.erledigt=true;
+  }else{
+    fb.className='feedback zeig nok';
+    fb.textContent='❌ '+richtig+' von '+boxen.length+' richtig. Grün zeigt jeweils die korrekte Antwort.';
+  }
+  pruefeFortschritt();
+}
+
+/* ===== KARTE 2: Nullstellen per Befehl ===== */
+const NS_AUFGABEN=[
+  {id:'z1', statusId:'s1', erwartet:-3},
+  {id:'z2', statusId:'s2', erwartet:1},
+  {id:'z3', statusId:'s3', erwartet:2}
+];
+function pruefeNullstellen(){
+  const ok=pruefeFelder(NS_AUFGABEN);
+  state.k2.geprueft=true;
+  const fb=document.getElementById('fb2');
+  if(ok){
+    fb.className='feedback zeig ok';
+    fb.textContent='✅ Alle drei Nullstellen stimmen. Beachte: GeoGebra hat Punkte ausgegeben – gefragt waren die x-Werte.';
+    state.k2.erledigt=true;
+    document.getElementById('leeren2').style.display='none';
+    document.getElementById('tipps2').classList.remove('zeig');
+  }else{
+    fb.className='feedback zeig nok';
+    fb.textContent='❌ Mindestens ein Wert stimmt noch nicht. Achte darauf, die x-Koordinate der ausgegebenen Punkte einzutragen – und der Größe nach zu sortieren.';
+    document.getElementById('leeren2').style.display='inline-block';
+    document.getElementById('tipps2').classList.add('zeig');
+  }
+  pruefeFortschritt();
+}
+function leereNullstellen(){
+  leereFelder(NS_AUFGABEN);
+  document.getElementById('fb2').className='feedback';
+  document.getElementById('leeren2').style.display='none';
+  state.k2={geprueft:false, erledigt:false};
+  pruefeFortschritt();
+}
+
+/* ===== KARTE 3: Berechnen ===== */
+const BER_AUFGABEN=[
+  {id:'w1', statusId:'ws1', erwartet:-Math.sqrt(5), tol:0.001},
+  {id:'w2', statusId:'ws2', erwartet:Math.sqrt(5), tol:0.001}
+];
+function pruefeBerechnen(){
+  const ok=pruefeFelder(BER_AUFGABEN);
+  state.k3.geprueft=true;
+  const fb=document.getElementById('fb3');
+  if(ok){
+    fb.className='feedback zeig ok';
+    fb.textContent='✅ Richtig. Exakt sind die Nullstellen −√5 und √5 – die Dezimalzahl ist nur die gerundete Anzeige davon.';
+    state.k3.erledigt=true;
+    document.getElementById('leeren3').style.display='none';
+    document.getElementById('tipps3').classList.remove('zeig');
+  }else{
+    fb.className='feedback zeig nok';
+    fb.textContent='❌ Noch nicht richtig. Denk an das Minuszeichen bei der kleineren Nullstelle und runde auf drei Nachkommastellen.';
+    document.getElementById('leeren3').style.display='inline-block';
+    document.getElementById('tipps3').classList.add('zeig');
+  }
+  pruefeFortschritt();
+}
+function leereBerechnen(){
+  leereFelder(BER_AUFGABEN);
+  document.getElementById('fb3').className='feedback';
+  document.getElementById('leeren3').style.display='none';
+  state.k3={geprueft:false, erledigt:false};
+  pruefeFortschritt();
+}
+
+/* ===== KARTE 4 ===== */
+const CHECK_FRAGEN=[
+  {optionen: mische([
+    {t:'x = 2', korrekt:true},
+    {t:'Der Punkt (2|0) selbst', korrekt:false},
+    {t:'y = 0', korrekt:false}
+  ])},
+  {optionen: mische([
+    {t:'Löse(f(x)=0)', korrekt:true},
+    {t:'Nullstelle(f)', korrekt:false},
+    {t:'Wertetabelle zu f', korrekt:false}
+  ])},
+  {optionen: mische([
+    {t:'Die Gleichung f(x)=0 aufstellen und den Lösungsweg zeigen', korrekt:true},
+    {t:'Die Werte am Graphen ablesen', korrekt:false},
+    {t:'Nur das Ergebnis von Nullstelle(f) hinschreiben', korrekt:false}
+  ])},
+  {optionen: mische([
+    {t:'Der Befehl sucht nur im sichtbaren Fenster', korrekt:true},
+    {t:'Eine Sinusfunktion hat höchstens zwei Nullstellen', korrekt:false},
+    {t:'Der Befehl funktioniert nur bei Parabeln', korrekt:false}
+  ])}
+];
+CHECK_FRAGEN.forEach((f,idx)=>{
+  const wrap=document.getElementById('c'+(idx+1)+'-wahl');
+  f.optionen.forEach((o,i)=>{
+    const b=document.createElement('button');
+    b.textContent=o.t; b.dataset.i=i;
+    b.addEventListener('click',()=>{
+      if(state.k4.geprueft) return;
+      wrap.querySelectorAll('button').forEach(x=>x.classList.remove('gewaehlt'));
+      b.classList.add('gewaehlt');
+      state.k4.wahlen[idx]=i;
+    });
+    wrap.appendChild(b);
+  });
+});
+function pruefeCheck(){
+  if(Object.values(state.k4.wahlen).some(v=>v===null)) return;
+  state.k4.geprueft=true;
+  let richtig=0;
+  CHECK_FRAGEN.forEach((f,idx)=>{
+    const wrap=document.getElementById('c'+(idx+1)+'-wahl');
+    wrap.querySelectorAll('button').forEach((b,i)=>{
+      if(f.optionen[i].korrekt) b.classList.add('richtig');
+      else if(i===state.k4.wahlen[idx]) b.classList.add('falsch');
+    });
+    if(f.optionen[state.k4.wahlen[idx]].korrekt) richtig++;
+  });
+  const zsf=document.getElementById('zsf');
+  zsf.classList.add('zeig');
+  zsf.textContent='Du hast '+richtig+' von '+CHECK_FRAGEN.length+' richtig beantwortet.'
+    + (richtig===CHECK_FRAGEN.length ? ' Stark!' : ' Schau dir die roten Antworten an und wirf noch einmal einen Blick auf die passende Karte.');
+  state.k4.mcRichtig=(richtig===CHECK_FRAGEN.length);
+  aktualisiereK4Fortschritt();
+}
+
+const RECHEN_AUFGABEN=[
+  {id:'r1', statusId:'rs1', erwartet:-1},
+  {id:'r2', statusId:'rs2', erwartet:2},
+  {id:'r3', statusId:'rs3', erwartet:5},
+  {id:'r4', statusId:'rs4', erwartet:Math.sqrt(3), tol:0.001}
+];
+function pruefeRechnen(){
+  const ok=pruefeFelder(RECHEN_AUFGABEN);
+  const fb=document.getElementById('fbRechnen');
+  if(ok){
+    fb.className='feedback zeig ok';
+    fb.textContent='✅ Alle Ergebnisse stimmen!';
+    document.getElementById('leerenRechnen').style.display='none';
+    document.getElementById('tippsRechnen').classList.remove('zeig');
+  }else{
+    fb.className='feedback zeig nok';
+    fb.textContent='❌ Mindestens ein Ergebnis stimmt noch nicht. Prüfe die rot markierten Felder – bei b) auf drei Nachkommastellen runden.';
+    document.getElementById('leerenRechnen').style.display='inline-block';
+    document.getElementById('tippsRechnen').classList.add('zeig');
+  }
+  state.k4.rechnenRichtig=ok;
+  aktualisiereK4Fortschritt();
+}
+function leereRechnen(){
+  leereFelder(RECHEN_AUFGABEN);
+  document.getElementById('fbRechnen').className='feedback';
+  document.getElementById('leerenRechnen').style.display='none';
+  state.k4.rechnenRichtig=false;
+  aktualisiereK4Fortschritt();
+}
+function aktualisiereK4Fortschritt(){
+  state.k4.erledigt = !!(state.k4.mcRichtig && state.k4.rechnenRichtig);
+  pruefeFortschritt();
+}
+
+const trex=document.getElementById('trex');
+trex.addEventListener('click',()=>{
+  trex.classList.add('zeig');
+  setTimeout(()=>trex.classList.remove('zeig'),1800);
+});
+
+pruefeFortschritt();
+</script>
+</body>
+</html>

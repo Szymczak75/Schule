@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Funktionen eingeben und das Fenster einstellen – Lernseite EF</title>
+<meta name="description" content="Erarbeitungsseite für die EF: Funktionen im GeoGebra-Grafikrechner mit Namen eingeben, das Sichtfenster sinnvoll einstellen und Funktionswerte gezielt bestimmen.">
+<meta name="keywords" content="GeoGebra, Grafikrechner, Funktionen eingeben, Sichtfenster, Achsenbereich, Funktionswert, Wertetabelle, EF">
+<meta name="typ" content="Lernseite">
+<meta name="klasse" content="EF">
+<meta name="fach" content="mathe">
+<meta name="oberthema" content="GeoGebra Grafikrechner">
+<meta name="thema" content="Funktionen eingeben und Sichtfenster">
+<script>
+  MathJax = {
+    tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+    svg: { fontCache: 'global' }
+  };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+  :root{
+    --ink:#22303f;
+    --card:#ffffff;
+    --green:#1e7d32;
+    --red:#c1272d;
+    --amber:#b8860b;
+    --amber-light:#fdf3d9;
+    --amber-dark:#96690a;
+    --orange:#c97a2e;
+    --orange-dark:#a5611e;
+    --orange-light:#fbeee0;
+    --bg:#faf7f2;
+    --line:#e4dcd0;
+    --blue:#2f5fa6;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Segoe UI',Verdana,'Helvetica Neue',sans-serif;
+    font-size:1.05rem;
+    line-height:1.55;
+    padding-bottom:5rem;
+  }
+  header{
+    background:linear-gradient(135deg,var(--orange),var(--orange-dark));
+    color:#fff;
+    padding:1.3rem 1.2rem;
+    box-shadow:0 3px 10px rgba(0,0,0,.12);
+  }
+  header .typ{
+    display:inline-block;
+    background:rgba(255,255,255,.25);
+    padding:.2rem .7rem;
+    border-radius:1rem;
+    font-size:.85rem;
+    font-weight:700;
+    letter-spacing:.04em;
+    margin-bottom:.5rem;
+  }
+  header h1{margin:0;font-size:1.55rem;line-height:1.25;}
+  header p{margin:.4rem 0 0;font-size:1rem;opacity:.95;}
+  header .serie{margin-top:.6rem;font-size:.9rem;opacity:.9;}
+
+  .tabs{
+    display:flex;flex-wrap:wrap;gap:.5rem;
+    padding:1rem 1rem 0;max-width:1024px;margin:0 auto;
+  }
+  .tab{
+    flex:1 1 auto;min-width:7.5rem;min-height:44px;
+    border:2px solid var(--line);background:#fff;color:var(--ink);
+    font-size:.95rem;font-weight:600;border-radius:.7rem .7rem 0 0;
+    padding:.6rem .5rem;cursor:pointer;
+    transition:background .15s,border-color .15s,transform .05s;
+  }
+  .tab:active{transform:scale(.97);}
+  .tab.aktiv{background:var(--orange);color:#fff;border-color:var(--orange-dark);}
+  .tab .done{margin-left:.3rem;}
+
+  main{max-width:1024px;margin:0 auto;padding:0 1rem;}
+  .karte{
+    display:none;background:var(--card);border:2px solid var(--line);
+    border-radius:0 .9rem .9rem .9rem;padding:1.3rem 1.2rem;margin-top:-2px;
+    box-shadow:0 2px 8px rgba(0,0,0,.05);animation:einblenden .25s ease;
+  }
+  .karte.aktiv{display:block;}
+  @keyframes einblenden{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .karte h2{margin-top:0;font-size:1.3rem;color:var(--orange-dark);}
+  .frage{font-weight:700;margin:1rem 0 .6rem;}
+
+  .merk{
+    background:var(--orange-light);border-left:5px solid var(--orange);
+    padding:.8rem 1rem;border-radius:.4rem;margin:1rem 0;
+  }
+  code{
+    background:#eee3d4;border-radius:.3rem;padding:.05rem .4rem;
+    font-family:'Courier New',monospace;font-size:.95em;
+  }
+
+  /* Kennzeichnung Hilfsmittel / Lösungsart (Pflicht ab EF) */
+  .kennz{display:flex;flex-wrap:wrap;gap:.45rem;margin:.6rem 0 .4rem;}
+  .chip{
+    display:inline-flex;align-items:center;gap:.3rem;
+    font-size:.82rem;font-weight:700;letter-spacing:.01em;
+    border-radius:1rem;padding:.25rem .7rem;border:2px solid;
+  }
+  .chip-hm{background:#e6eefb;color:var(--blue);border-color:var(--blue);}
+  .chip-frei{background:#f1efe9;color:#6b6354;border-color:#a89e8c;}
+  .chip-art{background:var(--amber-light);color:var(--amber-dark);border-color:var(--amber);}
+
+  .tipp-box{
+    border:2px solid var(--amber);border-radius:.6rem;margin:1rem 0;overflow:hidden;
+  }
+  .tipp-kopf{
+    width:100%;min-height:44px;background:var(--amber-light);color:var(--amber-dark);
+    border:none;font-weight:700;font-size:1rem;padding:.6rem .9rem;text-align:left;cursor:pointer;
+    display:flex;justify-content:space-between;align-items:center;
+  }
+  .tipp-inhalt{display:none;padding:.9rem 1rem;background:var(--amber-light);color:var(--ink);}
+  .tipp-box.offen .tipp-inhalt{display:block;}
+  .tipp-box.offen .tipp-pfeil{transform:rotate(180deg);}
+  .tipp-pfeil{transition:transform .2s;}
+
+  button{font-family:inherit;}
+  .btn{
+    min-height:44px;border:none;border-radius:.6rem;padding:.6rem 1.1rem;
+    font-size:1rem;font-weight:700;cursor:pointer;transition:transform .05s,filter .15s;
+  }
+  .btn:active{transform:scale(.97);}
+  .btn-pruefen{background:#3a6ea5;color:#fff;}
+  .btn-leeren{background:#8a7e6a;color:#fff;margin-left:.5rem;}
+
+  .feedback{margin:.8rem 0;padding:.8rem 1rem;border-radius:.5rem;font-weight:700;display:none;}
+  .feedback.zeig{display:block;}
+  .feedback.ok{background:var(--green);color:#fff;}
+  .feedback.nok{background:var(--red);color:#fff;}
+
+  /* Demo-Zeilen */
+  .demo-liste{margin:1rem 0;display:flex;flex-direction:column;gap:.5rem;}
+  .demo-zeile{
+    display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;
+    background:#fff;border:2px solid var(--line);border-radius:.5rem;padding:.6rem .9rem;
+  }
+  .demo-tipp{font-size:.85rem;color:#6b6354;font-weight:600;}
+  .demo-pfeil{font-weight:800;color:var(--orange);}
+  .demo-ergebnis{font-weight:700;font-size:1.05rem;}
+
+  /* Fenstervergleich */
+  .fenster-vergleich{display:flex;flex-wrap:wrap;gap:1rem;margin:1rem 0;justify-content:center;}
+  .fenster-box{flex:1 1 20rem;max-width:24rem;text-align:center;}
+  .fenster-box svg{display:block;width:100%;height:auto;background:#fff;border:2px solid var(--line);border-radius:.5rem;}
+  .fenster-box .bereich{
+    display:block;margin-top:.4rem;font-size:.9rem;color:#6b6354;font-weight:600;
+  }
+
+  /* MC */
+  .mcwahl{display:flex;flex-wrap:wrap;gap:.6rem;margin:.6rem 0;}
+  .mcwahl button{
+    flex:1 1 9rem;min-height:48px;border:2px solid var(--line);background:#fff;color:var(--ink);
+    border-radius:.6rem;font-size:1rem;font-weight:700;cursor:pointer;padding:.5rem .7rem;
+  }
+  .mcwahl button.gewaehlt{background:#dce9f7;border-color:#3a6ea5;}
+  .mcwahl button.richtig{background:var(--green);color:#fff;border-color:var(--green);}
+  .mcwahl button.falsch{background:var(--red);color:#fff;border-color:var(--red);}
+
+  /* Wahr/Falsch */
+  .aussage{
+    border:2px solid var(--line);border-radius:.6rem;padding:.8rem .9rem;margin:.8rem 0;background:#fff;
+  }
+  .wf-buttons{display:flex;gap:.6rem;margin-top:.6rem;}
+  .wf-buttons button{
+    flex:1 1 6rem;min-height:44px;border:2px solid var(--line);background:#fff;color:var(--ink);
+    border-radius:.6rem;font-weight:700;cursor:pointer;
+  }
+  .wf-buttons button.gewaehlt{background:#dce9f7;border-color:#3a6ea5;}
+  .wf-buttons button.richtig{background:var(--green);color:#fff;border-color:var(--green);}
+  .wf-buttons button.falsch{background:var(--red);color:#fff;border-color:var(--red);}
+
+  /* Eingabetabelle */
+  .zahltab{width:100%;border-collapse:separate;border-spacing:0 .6rem;}
+  .zahltab td{padding:.3rem .5rem;vertical-align:middle;}
+  .zahltab td:first-child{font-weight:600;min-width:9rem;}
+  input[type=text]{
+    font-family:inherit;font-size:1.05rem;min-height:44px;
+    border:2px solid var(--line);border-radius:.5rem;padding:.4rem .6rem;
+    width:7.5rem;text-align:center;
+  }
+  input:focus{outline:none;border-color:var(--orange);}
+  .feld-status{margin-left:.5rem;font-weight:800;font-size:1.1rem;}
+
+  .frac{
+    display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;
+    margin:0 .15em;font-size:1em;line-height:1.15;
+  }
+  .frac span{display:block;padding:0 .3em;}
+  .frac span:first-child{border-bottom:1.5px solid currentColor;padding-bottom:.08em;}
+  .frac span:last-child{padding-top:.08em;}
+
+  /* Gestufte Tipps nach einem Fehler */
+  .stufen-tipps{display:none;margin:1rem 0;}
+  .stufen-tipps.zeig{display:block;}
+  .stufen-tipps h4{
+    margin:0 0 .5rem;font-size:1rem;color:var(--amber-dark);
+  }
+  .stufe{
+    border:2px solid var(--amber);border-radius:.6rem;margin-bottom:.5rem;overflow:hidden;
+  }
+  .stufe-kopf{
+    width:100%;min-height:44px;background:var(--amber-light);color:var(--amber-dark);
+    border:none;font-weight:700;font-size:.98rem;padding:.6rem .9rem;text-align:left;cursor:pointer;
+    display:flex;justify-content:space-between;align-items:center;gap:.5rem;
+  }
+  .stufe-inhalt{display:none;padding:.9rem 1rem;background:var(--amber-light);color:var(--ink);}
+  .stufe.offen .stufe-inhalt{display:block;}
+  .stufe.offen .stufe-pfeil{transform:rotate(180deg);}
+  .stufe-pfeil{transition:transform .2s;flex-shrink:0;}
+
+  .check-item{border:2px solid var(--line);border-radius:.6rem;padding:.9rem;margin:.9rem 0;background:#fff;}
+  .check-item h3{margin:0 0 .5rem;font-size:1.02rem;}
+  .zusammenfassung{
+    text-align:center;font-weight:800;font-size:1.1rem;margin-top:1rem;padding:.8rem;
+    border-radius:.6rem;background:var(--orange-light);color:var(--orange-dark);display:none;
+  }
+  .zusammenfassung.zeig{display:block;}
+  .rechnen-titel{margin:1.6rem 0 .3rem;font-size:1.15rem;color:var(--orange-dark);border-top:2px solid var(--line);padding-top:1.2rem;}
+
+  .trex{
+    position:fixed;right:.7rem;bottom:.7rem;font-size:1.8rem;cursor:pointer;
+    z-index:50;user-select:none;
+  }
+  .trex .bubble{
+    position:absolute;right:2.2rem;bottom:.2rem;white-space:nowrap;
+    background:var(--ink);color:#fff;padding:.3rem .6rem;border-radius:.5rem;
+    font-size:.85rem;opacity:0;pointer-events:none;transition:opacity .2s;
+  }
+  .trex.zeig .bubble{opacity:1;}
+</style>
+</head>
+<body>
+<header>
+  <span class="typ">Erarbeitung · EF</span>
+  <h1>Funktionen eingeben und das Fenster einstellen</h1>
+  <p>Die Basis für alles Weitere: Funktionen so eingeben, dass du später damit weiterarbeiten kannst – und ein Sichtfenster wählen, das dich nicht täuscht.</p>
+  <p class="serie">Lernhappen 1 der EF-Reihe „GeoGebra Grafikrechner"</p>
+</header>
+
+<nav class="tabs" id="tabs">
+  <button class="tab aktiv" data-ziel="k1">1 · Eingeben <span class="done" id="d1"></span></button>
+  <button class="tab" data-ziel="k2">2 · Sichtfenster <span class="done" id="d2"></span></button>
+  <button class="tab" data-ziel="k3">3 · Funktionswerte <span class="done" id="d3"></span></button>
+  <button class="tab" data-ziel="k4">4 · Überprüfe dich <span class="done" id="d4"></span></button>
+</nav>
+
+<main>
+  <!-- KARTE 1 -->
+  <section class="karte aktiv" id="k1">
+    <h2>Funktionen mit Namen eingeben</h2>
+    <p>Du kannst einen Term einfach so eintippen – aber in der EF lohnt es sich fast immer, der Funktion einen <b>Namen</b> zu geben. Schreibe also nicht nur <code>x^3-3x+1</code>, sondern:</p>
+
+    <div class="demo-liste">
+      <div class="demo-zeile"><span class="demo-tipp">Du tippst:</span> <code>f(x)=x^3-3x+1</code> <span class="demo-pfeil">→</span> <span class="demo-ergebnis">\(f(x)=x^{3}-3x+1\)</span></div>
+      <div class="demo-zeile"><span class="demo-tipp">Du tippst:</span> <code>g(x)=2x-1</code> <span class="demo-pfeil">→</span> <span class="demo-ergebnis">\(g(x)=2x-1\)</span></div>
+    </div>
+
+    <div class="merk">
+      <b>Warum der Name so wichtig ist:</b> Nur mit einem Namen kannst du die Funktion später <i>ansprechen</i>. Alles Folgende funktioniert erst dadurch:
+      <ul style="margin:.5rem 0 0;padding-left:1.2rem;">
+        <li><code>f(2)</code> – Funktionswert an einer Stelle</li>
+        <li><code>f'(x)</code> – die Ableitung (Lernhappen zur Ableitung)</li>
+        <li><code>Schneide(f,g)</code> – Schnittpunkte zweier Funktionen</li>
+        <li><code>Nullstelle(f)</code> – Nullstellen</li>
+      </ul>
+      Ohne Namen musst du den ganzen Term jedes Mal neu eintippen.
+    </div>
+
+    <div class="merk">
+      <b>Aus der Hochzahl wieder herauskommen:</b> Nach <code>x^3</code> stehst du noch oben in der Hochzahl. Mit der <b>Pfeiltaste →</b> springst du zurück auf die normale Zeile. Sonst wird aus <code>x^3-3x</code> versehentlich \(x^{3-3x}\).
+    </div>
+
+    <div class="tipp-box" id="tipp1">
+      <button class="tipp-kopf" onclick="toggleTipp('tipp1')">
+        <span>💡 Muss ich das Malzeichen mit eingeben?</span>
+        <span class="tipp-pfeil">▾</span>
+      </button>
+      <div class="tipp-inhalt">Bei Zahl mal Variable versteht GeoGebra auch <code>3x</code> ohne Malzeichen. Sicherer – und näher an der Schreibweise im Heft – ist aber <code>3*x</code>; angezeigt wird ohnehin \(3\cdot x\). Zwischen zwei Variablen (z. B. <code>a*b</code>) brauchst du das Malzeichen zwingend, sonst liest GeoGebra <code>ab</code> als einen neuen Namen.</div>
+    </div>
+
+    <p class="frage">Zwischenfrage: Du willst später die Ableitung dieser Funktion bestimmen lassen. Welche Eingabe ist dafür geeignet?</p>
+    <div class="kennz">
+      <span class="chip chip-hm">🖩 mit GeoGebra</span>
+      <span class="chip chip-art">📋 Bedienung – keine Rechnung nötig</span>
+    </div>
+    <div class="mcwahl" id="mc1-wahl"></div>
+    <button class="btn btn-pruefen" onclick="pruefeMC1()">Prüfen</button>
+    <div class="feedback" id="fb1"></div>
+  </section>
+
+  <!-- KARTE 2 -->
+  <section class="karte" id="k2">
+    <h2>Das Sichtfenster – der Graph kann täuschen</h2>
+    <p>GeoGebra zeigt immer nur einen <b>Ausschnitt</b>. Beide Bilder unten zeigen <b>dieselbe</b> Funktion \(f(x)=x^{3}-3x+1\) – nur in verschiedenen Fenstern:</p>
+
+    <div class="fenster-vergleich">
+      <div class="fenster-box">
+        <svg viewBox="0 0 320 240" role="img" aria-label="Zu enges Sichtfenster: der Graph wirkt wie eine Gerade">
+          <line x1="14" y1="182.7" x2="306" y2="182.7" stroke="#22303f" stroke-width="1.6"/>
+          <polygon points="306,182.7 297,178.7 297,186.7" fill="#22303f"/>
+          <line x1="160" y1="228" x2="160" y2="12" stroke="#22303f" stroke-width="1.6"/>
+          <polygon points="160,12 156,21 164,21" fill="#22303f"/>
+          <line x1="294" y1="178.7" x2="294" y2="186.7" stroke="#22303f" stroke-width="1.6"/>
+          <text x="279" y="199" font-size="11" fill="#22303f">0,5</text>
+          <line x1="156" y1="120" x2="164" y2="120" stroke="#22303f" stroke-width="1.6"/>
+          <text x="140" y="124" font-size="11" fill="#22303f">1</text>
+          <line x1="156" y1="57.3" x2="164" y2="57.3" stroke="#22303f" stroke-width="1.6"/>
+          <text x="140" y="61" font-size="11" fill="#22303f">2</text>
+          <text x="296" y="172" font-size="12" font-style="italic" fill="#22303f">x</text>
+          <text x="168" y="22" font-size="12" font-style="italic" fill="#22303f">y</text>
+          <polyline fill="none" stroke="#c97a2e" stroke-width="2.6" points="26.0,33.8 45.0,44.3 64.0,55.5 83.0,67.4 102.0,79.9 121.0,92.8 140.0,106.0 159.0,119.5 178.0,133.0 197.0,146.5 216.0,159.7 235.0,172.4 254.0,184.5 273.0,195.7 294.0,206.2"/>
+        </svg>
+        <span class="bereich">Fenster: \(-0{,}5 \le x \le 0{,}5\)</span>
+      </div>
+      <div class="fenster-box">
+        <svg viewBox="0 0 320 240" role="img" aria-label="Passendes Sichtfenster: Hoch- und Tiefpunkt sowie alle Nullstellen sind sichtbar">
+          <line x1="14" y1="130.4" x2="306" y2="130.4" stroke="#22303f" stroke-width="1.6"/>
+          <polygon points="306,130.4 297,126.4 297,134.4" fill="#22303f"/>
+          <line x1="160" y1="228" x2="160" y2="12" stroke="#22303f" stroke-width="1.6"/>
+          <polygon points="160,12 156,21 164,21" fill="#22303f"/>
+          <line x1="204.7" y1="126.4" x2="204.7" y2="134.4" stroke="#22303f" stroke-width="1.6"/>
+          <text x="201" y="147" font-size="11" fill="#22303f">1</text>
+          <line x1="249.3" y1="126.4" x2="249.3" y2="134.4" stroke="#22303f" stroke-width="1.6"/>
+          <text x="246" y="147" font-size="11" fill="#22303f">2</text>
+          <line x1="115.3" y1="126.4" x2="115.3" y2="134.4" stroke="#22303f" stroke-width="1.6"/>
+          <text x="107" y="147" font-size="11" fill="#22303f">-1</text>
+          <line x1="70.7" y1="126.4" x2="70.7" y2="134.4" stroke="#22303f" stroke-width="1.6"/>
+          <text x="62" y="147" font-size="11" fill="#22303f">-2</text>
+          <line x1="156" y1="109.6" x2="164" y2="109.6" stroke="#22303f" stroke-width="1.6"/>
+          <text x="145" y="113" font-size="11" fill="#22303f">1</text>
+          <line x1="156" y1="67.8" x2="164" y2="67.8" stroke="#22303f" stroke-width="1.6"/>
+          <text x="145" y="71" font-size="11" fill="#22303f">3</text>
+          <line x1="156" y1="151.3" x2="164" y2="151.3" stroke="#22303f" stroke-width="1.6"/>
+          <text x="140" y="155" font-size="11" fill="#22303f">-1</text>
+          <text x="296" y="120" font-size="12" font-style="italic" fill="#22303f">x</text>
+          <text x="168" y="22" font-size="12" font-style="italic" fill="#22303f">y</text>
+          <polyline fill="none" stroke="#c97a2e" stroke-width="2.6" points="55.0,233.4 62.9,188.2 70.7,151.3 78.5,122.2 86.3,100.0 94.1,84.2 101.9,74.0 109.8,68.8 115.3,67.8 120.9,68.7 128.7,72.9 136.6,79.7 144.4,88.5 152.2,98.7 160.0,109.6 167.8,120.4 175.6,130.6 183.5,139.4 191.3,146.3 199.1,150.4 204.7,151.3 210.3,150.3 218.1,145.1 225.9,135.0 233.7,119.1 241.5,97.0 249.3,67.8 257.1,30.9 261.6,6.2"/>
+        </svg>
+        <span class="bereich">Fenster: \(-3 \le x \le 3\)</span>
+      </div>
+    </div>
+
+    <div class="merk">
+      <b>Merke:</b> Im linken Fenster sieht der Graph aus wie eine <b>fallende Gerade</b> – Hoch- und Tiefpunkt und zwei der drei Nullstellen liegen einfach außerhalb des Ausschnitts. Der Graph allein <b>beweist nie</b>, dass es keine weiteren Nullstellen oder Extrempunkte gibt. Vergrößere im Zweifel das Fenster.
+    </div>
+
+    <div class="tipp-box" id="tipp2">
+      <button class="tipp-kopf" onclick="toggleTipp('tipp2')">
+        <span>💡 Wie stelle ich das Fenster ein?</span>
+        <span class="tipp-pfeil">▾</span>
+      </button>
+      <div class="tipp-inhalt">Am schnellsten mit zwei Fingern auf der Zeichenfläche <b>zusammen-/auseinanderziehen</b> (zoomen) und mit einem Finger <b>verschieben</b>. Genau geht es über die Einstellungen der Grafik-Ansicht: dort trägst du \(x_{\min}\), \(x_{\max}\), \(y_{\min}\) und \(y_{\max}\) direkt als Zahlen ein. Und der Knopf „Standardansicht" bringt dich zurück, wenn du dich verzoomt hast.</div>
+    </div>
+
+    <div class="merk">
+      <b>Nur eine Achse skalieren – der wichtigste Fenster-Trick:</b> Beim normalen Zoomen werden <b>beide</b> Achsen gleichzeitig verändert. Oft brauchst du aber nur eine: Bei \(f(x)=x^{4}-20x^{2}\) genügt in \(x\)-Richtung der Bereich \(-5 \le x \le 5\), die Funktionswerte reichen dort aber von \(-100\) bis über \(+100\). Zoomst du so weit heraus, dass die Tiefpunkte ins Bild passen, ist in \(x\)-Richtung kaum noch etwas zu erkennen.
+      <br><br>
+      So skalierst du nur eine Achse:
+      <ul style="margin:.5rem 0 0;padding-left:1.2rem;">
+        <li><b>Direkt an der Achse ziehen:</b> Lege den Finger <b>genau auf die Achse</b> (nicht daneben) und ziehe – dann wird <b>nur diese eine Achse</b> gestreckt oder gestaucht.</li>
+        <li><b>Über die Einstellungen:</b> In der Grafik-Ansicht kannst du \(y_{\min}\) und \(y_{\max}\) getrennt von \(x_{\min}\) und \(x_{\max}\) eintragen – am zuverlässigsten, wenn du einen bestimmten Bereich brauchst.</li>
+      </ul>
+      Achtung: Sobald \(x\)- und \(y\)-Achse unterschiedlich skaliert sind, sind <b>Winkel und Steigungen verzerrt</b>. Eine Steigung von 1 sieht dann nicht mehr wie 45° aus. Zum reinen Ablesen von Werten ist das völlig in Ordnung – für Aussagen über Winkel brauchst du das Achsenverhältnis 1 : 1.
+    </div>
+
+    <p class="frage">Jetzt du: Entscheide, ob die Aussagen stimmen.</p>
+    <div class="kennz">
+      <span class="chip chip-frei">✏️ ohne Hilfsmittel</span>
+      <span class="chip chip-art">💭 begründen – nicht rechnen</span>
+    </div>
+
+    <div class="aussage" data-aussage data-richtig="falsch">
+      <p>Im linken Fenster ist zu sehen, dass \(f\) genau eine Nullstelle hat.</p>
+      <div class="wf-buttons">
+        <button data-w="wahr">Wahr</button>
+        <button data-w="falsch">Falsch</button>
+      </div>
+    </div>
+
+    <div class="aussage" data-aussage data-richtig="wahr">
+      <p>Ein zu kleines Fenster kann Extrempunkte verstecken, die tatsächlich vorhanden sind.</p>
+      <div class="wf-buttons">
+        <button data-w="wahr">Wahr</button>
+        <button data-w="falsch">Falsch</button>
+      </div>
+    </div>
+
+    <div class="aussage" data-aussage data-richtig="falsch">
+      <p>Wenn der Graph im gewählten Fenster wie eine Gerade aussieht, ist \(f\) eine lineare Funktion.</p>
+      <div class="wf-buttons">
+        <button data-w="wahr">Wahr</button>
+        <button data-w="falsch">Falsch</button>
+      </div>
+    </div>
+
+    <button class="btn btn-pruefen" onclick="pruefeAussagen()">Prüfen</button>
+    <div class="feedback" id="fb2"></div>
+  </section>
+
+  <!-- KARTE 3 -->
+  <section class="karte" id="k3">
+    <h2>Funktionswerte gezielt bestimmen</h2>
+    <p>Sobald die Funktion einen Namen hat, brauchst du den Term nie wieder einzutippen. Für den Funktionswert an einer Stelle schreibst du einfach den Namen mit der Stelle in Klammern:</p>
+
+    <div class="demo-liste">
+      <div class="demo-zeile"><span class="demo-tipp">Du tippst:</span> <code>f(2)</code> <span class="demo-pfeil">→</span> <span class="demo-ergebnis"><code>3</code></span></div>
+      <div class="demo-zeile"><span class="demo-tipp">Du tippst:</span> <code>f(-1)</code> <span class="demo-pfeil">→</span> <span class="demo-ergebnis"><code>3</code></span></div>
+    </div>
+    <p style="font-size:.95rem;color:#6b6354;">(hier weiterhin für \(f(x)=x^{3}-3x+1\))</p>
+
+    <div class="merk">
+      <b>Ablesen oder berechnen?</b> Du kannst den Wert auch am Graphen abschätzen – das ist aber nur ein <b>Näherungswert</b>. Mit <code>f(2)</code> bekommst du den <b>exakten</b> Wert. In Klausuren macht genau das den Unterschied: „schätze am Graphen ab oder bestimme" ist etwas anderes als „berechne \(f(2)\)".
+    </div>
+
+    <div class="merk">
+      <b>Achte ab jetzt immer genau auf den Operator!</b> Er legt fest, welcher Weg erlaubt ist – und wie viel du aufschreiben musst:
+      <ul style="margin:.5rem 0 0;padding-left:1.2rem;">
+        <li><b>„lies ab" / „schätze ab"</b> – ein am Graphen abgelesener Näherungswert genügt.</li>
+        <li><b>„bestimme"</b> – du darfst die GeoGebra-Funktionen benutzen (z. B. <code>f(2)</code>, später <code>Nullstelle(f)</code>). Das Ergebnis muss exakt sein, einen Rechenweg brauchst du nicht.</li>
+        <li><b>„berechne"</b> – hier ist ein <b>nachvollziehbarer Rechenweg</b> verlangt: Ansatz bzw. Gleichung aufschreiben. GeoGebra darf dir dann höchstens beim Lösen helfen.</li>
+      </ul>
+      Ein Ergebnis kann also richtig sein und trotzdem Punkte kosten, wenn der geforderte Weg fehlt. Deshalb steht bei jeder Aufgabe dieser Reihe oben dran, was verlangt ist.
+    </div>
+
+    <div class="tipp-box" id="tipp3">
+      <button class="tipp-kopf" onclick="toggleTipp('tipp3')">
+        <span>💡 Und wenn ich viele Werte auf einmal brauche?</span>
+        <span class="tipp-pfeil">▾</span>
+      </button>
+      <div class="tipp-inhalt">
+        Dann lässt du dir eine <b>Wertetabelle</b> ausgeben. So geht es in der GeoGebra Suite Schritt für Schritt:
+        <ol style="margin:.6rem 0 0;padding-left:1.3rem;">
+          <li>Funktion mit Namen eingeben, z. B. <code>f(x)=x^3-3x+1</code>, und mit <b>Enter</b> bestätigen.</li>
+          <li>Am <b>rechten Rand der Funktionszeile</b> auf das Menü-Symbol (drei Punkte bzw. ☰) tippen.</li>
+          <li>Im Menü <b>„Wertetabelle"</b> auswählen.</li>
+          <li>Im Dialog die drei Felder ausfüllen: <b>Startwert für x</b>, <b>Endwert für x</b> und <b>Schrittweite</b> – z. B. <code>-3</code>, <code>3</code> und <code>0.5</code>.</li>
+          <li>Mit <b>OK</b> bestätigen. Die Tabellen-Ansicht öffnet sich und zeigt die Wertepaare.</li>
+        </ol>
+        <p style="margin:.7rem 0 0;">Willst du den Bereich später ändern, tippst du auf das Menü neben der Spalte <b>x</b> und wählst <b>„Bearbeiten"</b> – dann erscheint derselbe Dialog wieder.</p>
+        <p style="margin:.7rem 0 0;">Wofür das gut ist: Du siehst auf einen Blick, wo die Funktionswerte das Vorzeichen wechseln (dort liegt eine Nullstelle) und wie groß sie überhaupt werden – genau die Information, die du brauchst, um anschließend ein sinnvolles Sichtfenster einzustellen.</p>
+      </div>
+    </div>
+
+    <p class="frage">Jetzt du: Gegeben ist \(h(x)=x^{4}-5x^{2}+2x+3\). Gib die Funktion mit Namen ein und bestimme die Funktionswerte.</p>
+    <div class="kennz">
+      <span class="chip chip-hm">🖩 mit GeoGebra</span>
+      <span class="chip chip-art">🔢 exakten Wert berechnen – nicht ablesen</span>
+    </div>
+
+    <table class="zahltab">
+      <tr><td>\(h(2)\)</td><td><input type="text" inputmode="text" id="z1" placeholder="?"><span class="feld-status" id="s1"></span></td></tr>
+      <tr><td>\(h(-3)\)</td><td><input type="text" inputmode="text" id="z2" placeholder="?"><span class="feld-status" id="s2"></span></td></tr>
+      <tr><td>\(h(1{,}5)\)</td><td><input type="text" inputmode="text" id="z3" placeholder="?"><span class="feld-status" id="s3"></span></td></tr>
+    </table>
+
+    <button class="btn btn-pruefen" onclick="pruefeWerte()">Prüfen</button>
+    <button class="btn btn-leeren" id="leeren3" style="display:none" onclick="leereWerte()">Leeren</button>
+    <div class="feedback" id="fb3"></div>
+
+    <div class="stufen-tipps" id="tipps3">
+      <h4>Brauchst du Hilfe? Decke so viel auf, wie du brauchst:</h4>
+      <div class="stufe">
+        <button class="stufe-kopf" onclick="toggleStufe(this)"><span>Tipp 1 – Wie fange ich an?</span><span class="stufe-pfeil">▾</span></button>
+        <div class="stufe-inhalt">Gib die Funktion zuerst <b>mit Namen</b> in eine eigene Zeile ein: <code>h(x)=x^4-5x^2+2x+3</code>. Denk daran, nach jeder Hochzahl mit der <b>Pfeiltaste →</b> aus dem Exponenten herauszuspringen – sonst landet der Rest versehentlich oben.</div>
+      </div>
+      <div class="stufe">
+        <button class="stufe-kopf" onclick="toggleStufe(this)"><span>Tipp 2 – Wie bekomme ich den Wert?</span><span class="stufe-pfeil">▾</span></button>
+        <div class="stufe-inhalt">Schreibe in eine <b>neue Zeile</b> einfach <code>h(2)</code>. GeoGebra gibt den Funktionswert direkt aus. Genauso <code>h(-3)</code> – und für die Stelle 1,5 achte auf den <b>Punkt</b>: <code>h(1.5)</code>, nicht <code>h(1,5)</code>.</div>
+      </div>
+      <div class="stufe">
+        <button class="stufe-kopf" onclick="toggleStufe(this)"><span>Tipp 3 – Lösung</span><span class="stufe-pfeil">▾</span></button>
+        <div class="stufe-inhalt">\(h(2)=3\), \(h(-3)=33\) und \(h(1{,}5)=-0{,}1875\) (das ist \(-\)<span class="frac"><span>3</span><span>16</span></span>).</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- KARTE 4 -->
+  <section class="karte" id="k4">
+    <h2>Überprüfe dich</h2>
+    <p>Eine Selbstkontrolle zu allen drei Themen dieser Seite.</p>
+
+    <div class="check-item">
+      <h3>1. Warum gibt man einer Funktion einen Namen wie \(f\)?</h3>
+      <div class="mcwahl" id="c1-wahl"></div>
+    </div>
+
+    <div class="check-item">
+      <h3>2. Der Graph zeigt im aktuellen Fenster keine Nullstelle. Was folgt daraus?</h3>
+      <div class="mcwahl" id="c2-wahl"></div>
+    </div>
+
+    <div class="check-item">
+      <h3>3. Wie bekommst du den exakten Wert von \(f\) an der Stelle 3?</h3>
+      <div class="mcwahl" id="c3-wahl"></div>
+    </div>
+
+    <button class="btn btn-pruefen" onclick="pruefeCheck()">Alle prüfen</button>
+    <div class="zusammenfassung" id="zsf"></div>
+
+    <h3 class="rechnen-titel">Jetzt rechnen! (mit dem Grafikrechner)</h3>
+    <p>Gegeben ist \(g(x)=2x^{3}-7x^{2}+4x-11\). Gib sie mit Namen ein und bestimme die Werte. Trage das Ergebnis als Dezimalzahl (z. B. <code>47.5</code>) oder als Bruch (z. B. <code>95/2</code>) ein.</p>
+    <div class="kennz">
+      <span class="chip chip-hm">🖩 mit GeoGebra</span>
+      <span class="chip chip-art">🔢 exakten Wert berechnen</span>
+    </div>
+
+    <table class="zahltab">
+      <tr><td>\(g(3)\)</td><td><input type="text" inputmode="text" id="r1" placeholder="?"><span class="feld-status" id="rs1"></span></td></tr>
+      <tr><td>\(g(-2)\)</td><td><input type="text" inputmode="text" id="r2" placeholder="?"><span class="feld-status" id="rs2"></span></td></tr>
+      <tr><td>\(g(4{,}5)\)</td><td><input type="text" inputmode="text" id="r3" placeholder="?"><span class="feld-status" id="rs3"></span></td></tr>
+      <tr><td>\(g(0)\)</td><td><input type="text" inputmode="text" id="r4" placeholder="?"><span class="feld-status" id="rs4"></span></td></tr>
+    </table>
+
+    <button class="btn btn-pruefen" onclick="pruefeRechnen()">Ergebnisse prüfen</button>
+    <button class="btn btn-leeren" id="leerenRechnen" style="display:none" onclick="leereRechnen()">Leeren</button>
+    <div class="feedback" id="fbRechnen"></div>
+
+    <div class="stufen-tipps" id="tippsRechnen">
+      <h4>Brauchst du Hilfe? Decke so viel auf, wie du brauchst:</h4>
+      <div class="stufe">
+        <button class="stufe-kopf" onclick="toggleStufe(this)"><span>Tipp 1 – Wie fange ich an?</span><span class="stufe-pfeil">▾</span></button>
+        <div class="stufe-inhalt">Gib zuerst <code>g(x)=2x^3-7x^2+4x-11</code> in eine eigene Zeile ein. Nach <code>x^3</code> und <code>x^2</code> jeweils mit der <b>Pfeiltaste →</b> aus dem Exponenten heraus, sonst rutscht der Rest der Funktion mit nach oben.</div>
+      </div>
+      <div class="stufe">
+        <button class="stufe-kopf" onclick="toggleStufe(this)"><span>Tipp 2 – Häufige Stolperstellen</span><span class="stufe-pfeil">▾</span></button>
+        <div class="stufe-inhalt">Schreibe die Stelle in Klammern hinter den Namen, z. B. <code>g(3)</code>. Bei negativen Stellen unbedingt die Klammer mitnehmen: <code>g(-2)</code>. Und für 4,5 gilt wieder <b>Punkt statt Komma</b>: <code>g(4.5)</code>. Der Wert <code>g(0)</code> ist übrigens genau das absolute Glied – den kannst du zur Kontrolle auch im Kopf ablesen.</div>
+      </div>
+      <div class="stufe">
+        <button class="stufe-kopf" onclick="toggleStufe(this)"><span>Tipp 3 – Lösung</span><span class="stufe-pfeil">▾</span></button>
+        <div class="stufe-inhalt">\(g(3)=-8\), \(g(-2)=-63\), \(g(4{,}5)=47{,}5\) und \(g(0)=-11\).</div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="trex" id="trex">🦖<span class="bubble">Made by ASzym</span></div>
+
+<script>
+/* ===== Zustand im JS-Speicher (nur Sitzung) ===== */
+const state = {
+  k1:{mcWahl:null, geprueft:false, erledigt:false},
+  k2:{wahlen:{0:null,1:null,2:null}, geprueft:false, erledigt:false},
+  k3:{geprueft:false, erledigt:false},
+  k4:{wahlen:{0:null,1:null,2:null}, geprueft:false, mcRichtig:false, rechnenRichtig:false, erledigt:false}
+};
+
+function mische(arr){
+  const a=arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+document.querySelectorAll('.tab').forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('aktiv'));
+    document.querySelectorAll('.karte').forEach(k=>k.classList.remove('aktiv'));
+    tab.classList.add('aktiv');
+    document.getElementById(tab.dataset.ziel).classList.add('aktiv');
+  });
+});
+
+function toggleTipp(id){
+  document.getElementById(id).classList.toggle('offen');
+}
+
+/* Gestufte Tipps: einzelne Stufe auf-/zuklappen */
+function toggleStufe(btn){
+  btn.parentElement.classList.toggle('offen');
+}
+
+function pruefeFortschritt(){
+  [['k1','d1'],['k2','d2'],['k3','d3'],['k4','d4']].forEach(([k,d])=>{
+    document.getElementById(d).textContent = state[k].erledigt ? '✅' : '';
+  });
+}
+
+/* Zahl oder Bruch akzeptieren */
+function parseZahlOderBruch(s){
+  s=String(s).trim().replace(',', '.');
+  if(s==='') return NaN;
+  const bruch=s.match(/^(-?\d+(?:\.\d+)?)\s*\/\s*(-?\d+(?:\.\d+)?)$/);
+  if(bruch){
+    const z=parseFloat(bruch[1]), n=parseFloat(bruch[2]);
+    return n!==0 ? z/n : NaN;
+  }
+  return parseFloat(s);
+}
+
+/* ===== KARTE 1 ===== */
+const MC1_OPTIONEN=mische([
+  {t:'f(x)=x^3-3x+1', korrekt:true},
+  {t:'x^3-3x+1', korrekt:false},
+  {t:'y=x^3-3x+1', korrekt:false}
+]);
+const mc1wahl=document.getElementById('mc1-wahl');
+MC1_OPTIONEN.forEach((o,i)=>{
+  const b=document.createElement('button');
+  b.innerHTML='<code>'+o.t+'</code>'; b.dataset.i=i;
+  b.addEventListener('click',()=>{
+    if(state.k1.geprueft) return;
+    mc1wahl.querySelectorAll('button').forEach(x=>x.classList.remove('gewaehlt'));
+    b.classList.add('gewaehlt');
+    state.k1.mcWahl=i;
+  });
+  mc1wahl.appendChild(b);
+});
+function pruefeMC1(){
+  if(state.k1.mcWahl===null) return;
+  state.k1.geprueft=true;
+  const fb=document.getElementById('fb1');
+  mc1wahl.querySelectorAll('button').forEach((b,i)=>{
+    if(MC1_OPTIONEN[i].korrekt) b.classList.add('richtig');
+    else if(i===state.k1.mcWahl) b.classList.add('falsch');
+  });
+  if(MC1_OPTIONEN[state.k1.mcWahl].korrekt){
+    fb.className='feedback zeig ok';
+    fb.textContent='✅ Richtig! Nur mit dem Namen f kannst du danach f ′(x) oder f(2) verwenden.';
+    state.k1.erledigt=true;
+  }else{
+    fb.className='feedback zeig nok';
+    fb.textContent='❌ Noch nicht. Ohne den Namen f (bzw. mit y=) kannst du die Funktion später nicht mit f ′(x) oder f(2) ansprechen.';
+  }
+  pruefeFortschritt();
+}
+
+/* ===== KARTE 2: Wahr/Falsch ===== */
+document.querySelectorAll('[data-aussage]').forEach((box,i)=>{
+  box.querySelectorAll('.wf-buttons button').forEach(b=>{
+    b.addEventListener('click',()=>{
+      if(state.k2.geprueft) return;
+      box.querySelectorAll('.wf-buttons button').forEach(x=>x.classList.remove('gewaehlt'));
+      b.classList.add('gewaehlt');
+      state.k2.wahlen[i]=b.dataset.w;
+    });
+  });
+});
+function pruefeAussagen(){
+  const boxen=document.querySelectorAll('[data-aussage]');
+  if(Object.values(state.k2.wahlen).some(v=>v===null)) return;
+  state.k2.geprueft=true;
+  let richtig=0;
+  boxen.forEach((box,i)=>{
+    const soll=box.dataset.richtig;
+    box.querySelectorAll('.wf-buttons button').forEach(b=>{
+      if(b.dataset.w===soll) b.classList.add('richtig');
+      else if(b.dataset.w===state.k2.wahlen[i]) b.classList.add('falsch');
+    });
+    if(state.k2.wahlen[i]===soll) richtig++;
+  });
+  const fb=document.getElementById('fb2');
+  if(richtig===boxen.length){
+    fb.className='feedback zeig ok';
+    fb.textContent='✅ Alle Aussagen richtig eingeschätzt.';
+    state.k2.erledigt=true;
+  }else{
+    fb.className='feedback zeig nok';
+    fb.textContent='❌ '+richtig+' von '+boxen.length+' richtig. Grün zeigt jeweils die korrekte Antwort – denk daran: der Ausschnitt zeigt nie die ganze Funktion.';
+  }
+  pruefeFortschritt();
+}
+
+/* ===== KARTE 3: Funktionswerte ===== */
+const WERTE_AUFGABEN=[
+  {id:'z1', statusId:'s1', erwartet:3},
+  {id:'z2', statusId:'s2', erwartet:33},
+  {id:'z3', statusId:'s3', erwartet:-0.1875}
+];
+function pruefeWerte(){
+  let alleRichtig=true, alleGefuellt=true;
+  WERTE_AUFGABEN.forEach(a=>{
+    const roh=document.getElementById(a.id).value;
+    if(roh.trim()==='') alleGefuellt=false;
+    const wert=parseZahlOderBruch(roh);
+    const status=document.getElementById(a.statusId);
+    if(roh.trim()!=='' && !isNaN(wert) && Math.abs(wert-a.erwartet)<0.0001){
+      status.textContent='✅'; status.style.color='var(--green)';
+    }else{
+      status.textContent='❌'; status.style.color='var(--red)';
+      alleRichtig=false;
+    }
+  });
+  if(!alleGefuellt && !state.k3.geprueft){ /* trotzdem prüfen, Felder zeigen den Stand */ }
+  state.k3.geprueft=true;
+  const fb=document.getElementById('fb3');
+  if(alleRichtig){
+    fb.className='feedback zeig ok';
+    fb.textContent='✅ Alle drei Werte stimmen. Beachte: h(1,5) ist negativ – am Graphen hättest du das leicht übersehen.';
+    state.k3.erledigt=true;
+    document.getElementById('leeren3').style.display='none';
+    document.getElementById('tipps3').classList.remove('zeig');
+  }else{
+    fb.className='feedback zeig nok';
+    fb.textContent='❌ Mindestens ein Wert stimmt noch nicht. Prüfe, ob du h wirklich mit Namen eingegeben hast, und rechne die rot markierten Stellen noch einmal nach.';
+    document.getElementById('leeren3').style.display='inline-block';
+    document.getElementById('tipps3').classList.add('zeig');
+  }
+  pruefeFortschritt();
+}
+function leereWerte(){
+  WERTE_AUFGABEN.forEach(a=>{
+    document.getElementById(a.id).value='';
+    document.getElementById(a.statusId).textContent='';
+  });
+  document.getElementById('fb3').className='feedback';
+  document.getElementById('leeren3').style.display='none';
+  state.k3={geprueft:false, erledigt:false};
+  pruefeFortschritt();
+}
+
+/* ===== KARTE 4: Überprüfe dich ===== */
+const CHECK_FRAGEN=[
+  {optionen: mische([
+    {t:'Damit man sie später mit f(2) oder f ′(x) ansprechen kann', korrekt:true},
+    {t:'Damit der Graph in einer anderen Farbe erscheint', korrekt:false},
+    {t:'Damit das Sichtfenster automatisch passt', korrekt:false}
+  ])},
+  {optionen: mische([
+    {t:'Es könnte trotzdem Nullstellen außerhalb des Fensters geben', korrekt:true},
+    {t:'Die Funktion hat sicher keine Nullstelle', korrekt:false},
+    {t:'Die Funktion ist sicher immer positiv', korrekt:false}
+  ])},
+  {optionen: mische([
+    {t:'f(3) eingeben', korrekt:true},
+    {t:'Den Wert am Graphen abschätzen', korrekt:false},
+    {t:'Das Fenster auf x = 3 zoomen', korrekt:false}
+  ])}
+];
+CHECK_FRAGEN.forEach((f,idx)=>{
+  const wrap=document.getElementById('c'+(idx+1)+'-wahl');
+  f.optionen.forEach((o,i)=>{
+    const b=document.createElement('button');
+    b.textContent=o.t; b.dataset.i=i;
+    b.addEventListener('click',()=>{
+      if(state.k4.geprueft) return;
+      wrap.querySelectorAll('button').forEach(x=>x.classList.remove('gewaehlt'));
+      b.classList.add('gewaehlt');
+      state.k4.wahlen[idx]=i;
+    });
+    wrap.appendChild(b);
+  });
+});
+function pruefeCheck(){
+  if(Object.values(state.k4.wahlen).some(v=>v===null)) return;
+  state.k4.geprueft=true;
+  let richtig=0;
+  CHECK_FRAGEN.forEach((f,idx)=>{
+    const wrap=document.getElementById('c'+(idx+1)+'-wahl');
+    wrap.querySelectorAll('button').forEach((b,i)=>{
+      if(f.optionen[i].korrekt) b.classList.add('richtig');
+      else if(i===state.k4.wahlen[idx]) b.classList.add('falsch');
+    });
+    if(f.optionen[state.k4.wahlen[idx]].korrekt) richtig++;
+  });
+  const zsf=document.getElementById('zsf');
+  zsf.classList.add('zeig');
+  zsf.textContent='Du hast '+richtig+' von '+CHECK_FRAGEN.length+' richtig beantwortet.'
+    + (richtig===CHECK_FRAGEN.length ? ' Stark!' : ' Schau dir die roten Antworten an und wirf noch einmal einen Blick auf die passende Karte.');
+  state.k4.mcRichtig=(richtig===CHECK_FRAGEN.length);
+  aktualisiereK4Fortschritt();
+}
+
+const RECHEN_AUFGABEN=[
+  {id:'r1', statusId:'rs1', erwartet:-8},
+  {id:'r2', statusId:'rs2', erwartet:-63},
+  {id:'r3', statusId:'rs3', erwartet:47.5},
+  {id:'r4', statusId:'rs4', erwartet:-11}
+];
+function pruefeRechnen(){
+  let alleRichtig=true;
+  RECHEN_AUFGABEN.forEach(a=>{
+    const roh=document.getElementById(a.id).value;
+    const wert=parseZahlOderBruch(roh);
+    const status=document.getElementById(a.statusId);
+    if(roh.trim()!=='' && !isNaN(wert) && Math.abs(wert-a.erwartet)<0.0001){
+      status.textContent='✅'; status.style.color='var(--green)';
+    }else{
+      status.textContent='❌'; status.style.color='var(--red)';
+      alleRichtig=false;
+    }
+  });
+  const fb=document.getElementById('fbRechnen');
+  if(alleRichtig){
+    fb.className='feedback zeig ok';
+    fb.textContent='✅ Alle Ergebnisse stimmen!';
+    document.getElementById('leerenRechnen').style.display='none';
+    document.getElementById('tippsRechnen').classList.remove('zeig');
+  }else{
+    fb.className='feedback zeig nok';
+    fb.textContent='❌ Mindestens ein Ergebnis stimmt noch nicht. Rechne mit dem Grafikrechner noch einmal nach und prüfe die rot markierten Felder.';
+    document.getElementById('leerenRechnen').style.display='inline-block';
+    document.getElementById('tippsRechnen').classList.add('zeig');
+  }
+  state.k4.rechnenRichtig=alleRichtig;
+  aktualisiereK4Fortschritt();
+}
+function leereRechnen(){
+  RECHEN_AUFGABEN.forEach(a=>{
+    document.getElementById(a.id).value='';
+    document.getElementById(a.statusId).textContent='';
+  });
+  document.getElementById('fbRechnen').className='feedback';
+  document.getElementById('leerenRechnen').style.display='none';
+  state.k4.rechnenRichtig=false;
+  aktualisiereK4Fortschritt();
+}
+function aktualisiereK4Fortschritt(){
+  state.k4.erledigt = !!(state.k4.mcRichtig && state.k4.rechnenRichtig);
+  pruefeFortschritt();
+}
+
+/* ===== T-Rex ===== */
+const trex=document.getElementById('trex');
+trex.addEventListener('click',()=>{
+  trex.classList.add('zeig');
+  setTimeout(()=>trex.classList.remove('zeig'),1800);
+});
+
+pruefeFortschritt();
+</script>
+</body>
+</html>
