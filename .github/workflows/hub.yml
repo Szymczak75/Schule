@@ -36,19 +36,40 @@ jobs:
           # Repo-Wurzel IST der Schule-Ordner (Repo heißt "Schule").
           python build_hub.py --root . --out dino_hub.html
 
-      - name: Änderungen committen (nur bei echten Inhaltsänderungen)
+      - name: Änderungen committen (Hub + Ordner-Übersichten)
         run: |
           git config user.name  "dino-hub-bot"
           git config user.email "actions@github.com"
-          # Vergleich ohne die Datumszeile: nur wenn sich echte Inhalte ändern,
-          # wird committet – sonst bleibt es still (kein täglicher Leer-Commit).
-          OLD=$(git show HEAD:dino_hub.html 2>/dev/null | grep -v 'aktualisiert [0-9]' || true)
-          NEW=$(grep -v 'aktualisiert [0-9]' dino_hub.html || true)
-          if [ "$OLD" = "$NEW" ]; then
-            echo "Keine inhaltliche Änderung – Datum allein löst keinen Commit aus."
-            git checkout -- dino_hub.html 2>/dev/null || true
-          else
-            git add dino_hub.html
-            git commit -m "Auto: dino_hub.html aktualisiert [skip ci]"
-            git push
+
+          # Alle vom Generator erzeugten/aktualisierten Dateien vormerken:
+          #  - dino_hub.html (die große Startseite)
+          #  - jede _*.html (die per linking.txt erzeugten Ordner-Übersichten)
+          git add dino_hub.html 2>/dev/null || true
+          git add '*_*.html' 2>/dev/null || true
+          # Sicherheitshalber auch _-Dateien in Unterordnern erfassen:
+          find . -name '_*.html' -not -path './.git/*' -print0 2>/dev/null \
+            | xargs -0 -r git add 2>/dev/null || true
+
+          # Steht überhaupt etwas Gestagetes an?
+          if git diff --cached --quiet; then
+            echo "Keine Änderungen an Hub oder Übersichten."
+            exit 0
           fi
+
+          # Wenn NUR dino_hub.html geändert ist und dort ausschließlich die
+          # Datumszeile differiert, nicht committen (kein täglicher Leer-Commit).
+          CHANGED=$(git diff --cached --name-only)
+          if [ "$CHANGED" = "dino_hub.html" ]; then
+            REAL=$(git diff --cached -U0 -- dino_hub.html \
+                   | grep -E '^[+-]' | grep -vE '^(\+\+\+|---)' \
+                   | grep -v 'aktualisiert [0-9]' || true)
+            if [ -z "$REAL" ]; then
+              echo "Nur Datum geändert – kein Commit."
+              git reset -- dino_hub.html >/dev/null 2>&1 || true
+              git checkout -- dino_hub.html >/dev/null 2>&1 || true
+              exit 0
+            fi
+          fi
+
+          git commit -m "Auto: Hub & Übersichten aktualisiert [skip ci]"
+          git push
