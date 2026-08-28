@@ -59,6 +59,7 @@ THEMA_EMOJI = {
     "koerper": "📦", "grundlagen": "📐", "sachaufgaben": "📝",
     "teilbarkeit_primzahlen": "🔍", "rechengesetze": "⚙️",
     "differentialrechnung": "📉", "cybergrooming": "🛡️",
+    "taschenrechner": "🖩", "gtr": "🖩", "cas": "🖩", "geogebra_tool": "🖥️",
 }
 # Kachel-Emoji-Fallback (letzter Ordner) – nutzt dieselbe Tabelle, sonst 📂
 KACHEL_EMOJI_FALLBACK = "📂"
@@ -121,13 +122,23 @@ def parse_path(rel):
             break
     alt = any(seg in ALT_ORDNER for seg in parts)
     kachel_dir = parts[-2] if len(parts) >= 2 else fach
+
+    # Einheit auf Klassenebene: ein Ordner direkt unter einem Fach, der KEIN
+    # klasseNN ist und NICHT zur alten Struktur gehört. Wird wie eine Klasse
+    # (aufklappbarer Button) dargestellt, aber unter eigenem Namen, ganz unten.
+    einheit = ""
+    if main in FACH_MAIN and not kl and not alt and len(parts) >= 2:
+        seg1 = parts[1]
+        if not re.match(r"klasse(\d{2}|EF)$", seg1) and seg1 not in ALT_ORDNER:
+            einheit = seg1
+
     # thema = Segment direkt nach klasseNN (neue Struktur), sonst kachel_dir
     thema_seg = ""
     for i, seg in enumerate(parts):
         if re.match(r"klasse(\d{2}|EF)$", seg) and i + 1 < len(parts) - 1:
             thema_seg = parts[i + 1]
             break
-    return main, fach, kl, alt, kachel_dir, thema_seg
+    return main, fach, kl, alt, kachel_dir, thema_seg, einheit
 
 def prettify(name):
     name = name.replace("_", " ").replace("-", " ").strip()
@@ -230,6 +241,10 @@ def klasse_sortkey(k):
     except ValueError:
         return 100
 
+def klasse_sortkey_str(k):
+    # Einheiten (#name) alphabetisch untereinander
+    return k.lstrip("#").lower()
+
 def build(root, out):
     root = os.path.abspath(root)
     files = []
@@ -258,8 +273,9 @@ def build(root, out):
     search_index = OrderedDict()   # rel -> {...}
     tooltip_index = OrderedDict()  # fname -> {typ,desc}
 
+    einheit_namen = {}  # main -> {einheit_key -> ordnername}
     for rel, fn, full in files:
-        main, fach, kl, alt, kdir, thema = parse_path(rel)
+        main, fach, kl, alt, kdir, thema, einheit = parse_path(rel)
         info = metas[rel]
         # Such-/Tooltip-Index
         typ = info.get("typ") or ""
@@ -280,6 +296,15 @@ def build(root, out):
             # ordner = welches der drei
             ordner = next((s for s in rel.split("/") if s in ALT_ORDNER), "lernseiten")
             alt_tree[fach][kl][ordner].append((rel, fn))
+        elif einheit:
+            # Einheit auf Klassenebene: Pseudo-Klasse "#<einheit>" (sortiert zuletzt).
+            # Innere Ebene = zweites Pfadsegment nach der Einheit (wörtlich),
+            # z. B. "7_Klasse", "EF". Kachel = letzter Ordner wie üblich.
+            ekey = "#" + einheit
+            einheit_namen.setdefault(main, {})[ekey] = einheit
+            parts = rel.split("/")
+            inner = parts[2] if len(parts) > 3 else einheit  # Gruppierungsebene
+            tree[main][ekey][inner][kdir].append((rel, fn))
         else:
             tree[main][kl][thema or kdir][kdir].append((rel, fn))
 
@@ -300,7 +325,7 @@ def build(root, out):
             continue
         if fach not in tree and fach not in alt_tree:
             continue
-        cards.append(build_fach_card(fach, tree.get(fach, {}), alt_tree.get(fach, {}), metas))
+        cards.append(build_fach_card(fach, tree.get(fach, {}), alt_tree.get(fach, {}), metas, einheit_namen.get(fach, {})))
 
     card_area = '<div class="card-area" id="cardArea">\n\n' + "\n\n".join(cards) + "\n\n</div>"
 
@@ -335,7 +360,13 @@ def build(root, out):
     # ── Teilbaum-Übersichten aus linking.txt ──
     uebersichten = build_linking_overviews(root, heute)
 
-    return len(files), out, uebersichten
+    # Liste erkannter Einheiten (für Kontroll-Hinweis im Log)
+    erkannte_einheiten = []
+    for f, emap in einheit_namen.items():
+        for ekey, name in emap.items():
+            erkannte_einheiten.append(f"{f}/{name}")
+
+    return len(files), out, uebersichten, erkannte_einheiten
 
 
 def build_linking_overviews(root, heute):
@@ -343,10 +374,14 @@ def build_linking_overviews(root, heute):
     Ordner-Übersicht über den Teilbaum ab diesem Ordner."""
     gebaut = []
     for dirpath, _, fnames in os.walk(root):
-        if "linking.txt" not in [f.lower() for f in fnames]:
+        # Trigger-Datei: 'linking.txt' – toleriert auch die von Windows erzeugte
+        # Doppel-Endung 'linking.txt.txt'.
+        trigger = next((f for f in fnames
+                        if f.lower() in ("linking.txt", "linking.txt.txt")), None)
+        if not trigger:
             continue
         # Ausgabenamen bestimmen: erste nichtleere Zeile
-        lp = os.path.join(dirpath, next(f for f in fnames if f.lower() == "linking.txt"))
+        lp = os.path.join(dirpath, trigger)
         outname = ""
         try:
             with open(lp, encoding="utf-8") as f:
@@ -487,7 +522,8 @@ function ovFilter(q){{
 </html>"""
 
 
-def build_fach_card(fach, klassen, alt_klassen, metas):
+def build_fach_card(fach, klassen, alt_klassen, metas, einheiten=None):
+    einheiten = einheiten or {}
     label = FACH_LABEL[fach].split(" ", 1)[1]
     icon = FACH_ICON[fach]
     parts = [
@@ -497,20 +533,36 @@ def build_fach_card(fach, klassen, alt_klassen, metas):
         f'    <span class="card-title">{label}</span>',
         '  </div>',
     ]
-    for kl in sorted(klassen.keys(), key=klasse_sortkey):
+
+    def sortkey(k):
+        # Einheiten (#...) immer nach allen Klassen einsortieren
+        if k.startswith("#"):
+            return (1, klasse_sortkey_str(k))
+        return (0, klasse_sortkey(k))
+
+    for kl in sorted(klassen.keys(), key=sortkey):
         themen = klassen[kl]
         n_files = sum(len(kd) for th in themen.values() for kd in th.values())
-        klabel = "EF" if kl == "EF" else f"Klasse {kl}"
+        if kl.startswith("#"):
+            ordnername = einheiten.get(kl, kl[1:])
+            em = thema_emoji(ordnername) or KACHEL_EMOJI_FALLBACK
+            klabel = f"{em} {prettify(ordnername)}"
+            btn_icon = ""            # Emoji steckt schon im Label
+        else:
+            klabel = "EF" if kl == "EF" else f"Klasse {kl}"
+            btn_icon = "📚 "
         parts.append('  <div class="klasse-wrap">')
         parts.append(f'    <button class="klasse-btn" aria-expanded="false" onclick="toggleKlasse(this)">')
-        parts.append(f'      <span class="klasse-label">📚 {klabel}</span><span class="klasse-count">{n_files}</span><span class="klasse-arrow">▼</span>')
+        parts.append(f'      <span class="klasse-label">{btn_icon}{esc(klabel)}</span><span class="klasse-count">{n_files}</span><span class="klasse-arrow">▼</span>')
         parts.append('    </button>')
         parts.append('    <div class="klasse-panel">')
         parts.append('      <div class="themen-bereich">')
         for thema in themen:
             em = thema_emoji(thema) or KACHEL_EMOJI_FALLBACK
+            # Bei Einheiten bleiben innere Ordnernamen wörtlich stehen
+            thema_title = thema if kl.startswith("#") else prettify(thema)
             parts.append('        <div class="thema-block">')
-            parts.append(f'          <div class="thema-header"><span class="thema-icon">{em}</span><span class="thema-title">{esc(prettify(thema))}</span></div>')
+            parts.append(f'          <div class="thema-header"><span class="thema-icon">{em}</span><span class="thema-title">{esc(thema_title)}</span></div>')
             parts.append('          <div class="kachel-grid">')
             for kdir, flist in themen[thema].items():
                 parts.append(build_kachel(kdir, flist, metas))
@@ -1146,8 +1198,12 @@ if __name__ == "__main__":
     ap.add_argument("--out", default=None)
     args = ap.parse_args()
     out = args.out or os.path.join(args.root, "dino_hub.html")
-    n, path, uebersichten = build(args.root, out)
+    n, path, uebersichten, einheiten = build(args.root, out)
     print(f"OK – {n} Dateien verarbeitet → {path}")
+    if einheiten:
+        print(f"Einheiten auf Klassenebene ({len(einheiten)}) – bitte prüfen, ob gewollt:")
+        for e in einheiten:
+            print(f"  • {e}")
     if uebersichten:
         print(f"Ordner-Übersichten ({len(uebersichten)}):")
         for ordner, name, cnt in uebersichten:
