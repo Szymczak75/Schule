@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stundenplan-Generator Q1/Q2</title>
+<style>
+  :root{
+    --ink:#1a2634;
+    --paper:#fbfaf7;
+    --line:#c7cdd4;
+    --line-soft:#e3e7ec;
+    --accent:#2f5d7c;
+    --accent-soft:#dce8f0;
+    --uw:#3a7ca5;
+    --gw:#8a5a3b;
+    --cond:#6b7a52;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:"Segoe UI",system-ui,-apple-system,sans-serif;
+    color:var(--ink);
+    background:#eef1f4;
+    line-height:1.5;
+  }
+  .wrap{max-width:1080px;margin:0 auto;padding:32px 24px 80px;}
+  header.masthead{
+    border-bottom:3px solid var(--ink);
+    padding-bottom:16px;margin-bottom:8px;
+  }
+  header.masthead h1{
+    font-size:1.9rem;margin:0;letter-spacing:-.02em;font-weight:700;
+  }
+  header.masthead p{margin:4px 0 0;color:#5a6672;font-size:.95rem;}
+
+  .step-label{
+    font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--accent);font-weight:700;margin:36px 0 4px;
+  }
+  h2{font-size:1.25rem;margin:0 0 6px;font-weight:650;}
+  .hint{color:#5a6672;font-size:.9rem;margin:0 0 18px;max-width:70ch;}
+
+  /* ---- Eingabemaske ---- */
+  table.entry{border-collapse:collapse;width:100%;}
+  table.entry th{
+    text-align:left;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;
+    color:#5a6672;font-weight:600;padding:6px 10px;border-bottom:2px solid var(--line);
+  }
+  table.entry td{padding:5px 10px;border-bottom:1px solid var(--line-soft);vertical-align:middle;}
+  table.entry tr:hover td{background:#f4f7fa;}
+  .kursname{font-weight:700;white-space:nowrap;}
+  .kurspos{font-size:.78rem;color:#7a8896;white-space:nowrap;}
+  select,input[type=text]{
+    font:inherit;padding:5px 8px;border:1px solid var(--line);border-radius:5px;
+    background:#fff;width:100%;max-width:200px;
+  }
+  input.raum{max-width:110px;}
+  select:focus,input:focus{outline:2px solid var(--accent);outline-offset:-1px;border-color:var(--accent);}
+  .row-11b td{background:#fdf6ec;}
+  .row-11b:hover td{background:#faeed8;}
+
+  .actions{margin:28px 0 0;display:flex;gap:12px;flex-wrap:wrap;}
+  button{
+    font:inherit;font-weight:600;cursor:pointer;border-radius:6px;
+    padding:11px 22px;border:1px solid var(--accent);
+  }
+  button.primary{background:var(--accent);color:#fff;}
+  button.primary:hover{background:#254a63;}
+  button.ghost{background:#fff;color:var(--accent);}
+  button.ghost:hover{background:var(--accent-soft);}
+
+  /* ---- Stundenplan ---- */
+  #plan-area{margin-top:36px;padding-top:24px;border-top:2px solid var(--line);}
+  .plan-empty{
+    color:#7a8896;font-size:.95rem;font-style:italic;
+    padding:28px 16px;text-align:center;
+    border:1px dashed var(--line);border-radius:8px;background:#fafbfc;
+  }
+  .plan-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;flex-wrap:wrap;gap:8px;}
+  .plan-head h2{margin:0;}
+  .legend{font-size:.8rem;color:#5a6672;display:flex;gap:16px;flex-wrap:wrap;}
+  .legend span{display:inline-flex;align-items:center;gap:5px;}
+  .swatch{width:12px;height:12px;border-radius:2px;display:inline-block;}
+
+  table.grid{border-collapse:collapse;width:100%;table-layout:fixed;}
+  table.grid th,table.grid td{border:1px solid var(--line);padding:0;text-align:center;vertical-align:middle;height:0;}
+  table.grid thead th{
+    background:var(--ink);color:#fff;font-size:.85rem;font-weight:600;padding:7px 4px;
+  }
+  table.grid th.hour{
+    background:#f0f2f5;color:var(--ink);font-weight:700;width:52px;font-size:.85rem;padding:4px;
+  }
+  /* einheitliche Zeilenhöhe für alle Rasterzeilen */
+  table.grid tbody tr{height:64px;}
+  .cell{height:100%;display:flex;flex-direction:column;justify-content:center;gap:1px;padding:4px;font-size:.85rem;}
+  .cell .line-fach{font-weight:700;font-size:.95rem;line-height:1.15;min-height:1.1em;}
+  .cell .line-fach.fs-sm{font-size:.82rem;}
+  .cell .line-fach.fs-xs{font-size:.72rem;}
+  .cell .line-lehrer,.cell .line-raum{font-size:.75rem;color:#48555f;line-height:1.15;min-height:1.05em;}
+  .cell.empty{background:repeating-linear-gradient(45deg,#fff,#fff 6px,#f6f7f9 6px,#f6f7f9 12px);}
+  .cell .badge{
+    display:inline-block;font-size:.62rem;font-weight:700;letter-spacing:.04em;
+    padding:1px 5px;border-radius:3px;margin-top:3px;color:#fff;
+  }
+  .badge.uw{background:var(--uw);}
+  .badge.gw{background:var(--gw);}
+  .badge.cond{background:var(--cond);}
+  .wechsel{display:flex;flex-direction:column;height:100%;}
+  .wechsel > div{flex:1;display:flex;flex-direction:column;justify-content:center;padding:2px 4px;gap:0;}
+  .wechsel > div:first-child{border-bottom:1px dashed var(--line);}
+  .wechsel .wline{font-size:.7rem;line-height:1.15;}
+  .wechsel .wline.wf{font-weight:700;font-size:.8rem;}
+
+  .sep-note{font-size:.85rem;color:#5a6672;margin-top:4px;}
+
+  /* 11B Sonderblock */
+  .b11-block{
+    margin-top:22px;border:2px solid var(--gw);border-radius:8px;
+    padding:14px 18px;background:#fdf6ec;
+  }
+  .b11-block h3{margin:0 0 4px;font-size:1rem;}
+  .b11-block .b11-row{display:flex;gap:24px;flex-wrap:wrap;align-items:baseline;}
+  .b11-block .b11-field{font-size:.95rem;}
+  .b11-block .b11-field b{font-weight:700;}
+  .termin-line{margin-top:8px;font-size:.9rem;color:#5a6672;}
+  .termin-blank{display:inline-block;border-bottom:1.5px solid var(--ink);min-width:240px;height:1.1em;}
+
+  .hidden{display:none;}
+  .warn{color:#a23a2e;font-size:.85rem;margin-top:8px;}
+  #validation-warn{
+    border:1px solid #e2b8b2;background:#fbecea;border-radius:6px;
+    padding:10px 14px;line-height:1.6;
+  }
+
+  @media print{
+    body{background:#fff;}
+    .wrap{max-width:none;padding:0;}
+    .no-print{display:none !important;}
+    header.masthead{display:none;}
+    #plan-area{margin-top:0;padding-top:0;border-top:none;}
+    table.grid th,table.grid td{border-color:#333;}
+    @page{size:landscape;margin:12mm;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="masthead">
+    <h1>Stundenplan-Generator · Qualifikationsphase Q1/Q2</h1>
+    <p>Kurswahl eintragen, Stundenplan erzeugen, als PDF speichern.</p>
+  </header>
+
+  <!-- EINGABE -->
+  <section class="no-print" id="entry-section">
+    <div class="step-label">Kurswahl</div>
+    <h2>Kurse eintragen</h2>
+    <p class="hint">
+      Trag für jeden deiner Kurse das Fachkürzel und den Namen der Lehrkraft ein. Den Raum kannst du eintragen, sobald er feststeht.
+      Kurse, die du nicht belegst, lässt du einfach leer. Der Stundenplan unten aktualisiert sich automatisch bei jeder Änderung.
+      LKs sind fünfstündig, GKs dreistündig. Neu einsetzende Fremdsprachen (die 0er-Kürzel F0, I0, L0, N0, S0) sind vierstündig –
+      der Plan berücksichtigt das automatisch: Liegt eine solche Sprache im GK1 (Di 8./9.) oder GK3 (Mi 8./9.), findet der Kurs
+      wöchentlich statt der halben Wochen statt. Länger laufende Sprachen wie E5 oder L7 bleiben dreistündig.
+    </p>
+
+    <table class="entry">
+      <thead>
+        <tr><th style="width:96px">Kurs</th><th style="width:190px">Lage</th><th>Fachkürzel</th><th>Lehrkraft</th><th>Raum</th></tr>
+      </thead>
+      <tbody id="entry-body"><!-- gefüllt per JS --></tbody>
+    </table>
+
+    <div class="actions">
+      <button class="ghost" onclick="resetAll()">Zurücksetzen</button>
+    </div>
+    <p class="warn hidden" id="empty-warn">Bitte trag mindestens einen Kurs ein.</p>
+    <div class="warn hidden" id="validation-warn"></div>
+  </section>
+
+  <!-- STUNDENPLAN -->
+  <section id="plan-area">
+    <div class="plan-head">
+      <h2>Stundenplan</h2>
+      <div class="legend">
+        <span><span class="swatch" style="background:var(--uw)"></span>uW = ungerade Woche</span>
+        <span><span class="swatch" style="background:var(--gw)"></span>gW = gerade Woche</span>
+      </div>
+    </div>
+
+    <div id="plan-empty" class="plan-empty">Trag oben mindestens einen Kurs ein – der Stundenplan erscheint dann hier.</div>
+
+    <div id="plan-inner" class="hidden">
+    <table class="grid">
+      <thead>
+        <tr>
+          <th class="hour">Std.</th>
+          <th>Montag</th><th>Dienstag</th><th>Mittwoch</th><th>Donnerstag</th><th>Freitag</th>
+        </tr>
+      </thead>
+      <tbody id="grid-body"></tbody>
+    </table>
+
+    <div class="b11-block" id="sport-block">
+      <h3>Sportkurs (außerhalb der Schienen)</h3>
+      <div class="b11-row" id="sport-content"></div>
+      <div class="termin-line">Termin: <span class="termin-blank"></span> &nbsp;(eintragen, sobald er feststeht)</div>
+    </div>
+
+    <div class="actions no-print">
+      <button class="primary" onclick="window.print()">Als PDF speichern / drucken</button>
+    </div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+/* ---------- Fachkürzel (aus der Kürzelliste) ---------- */
+const KUERZEL = [
+  "D","E5","L7","F7","F0","I0","L0","N0","S0",
+  "MU","KU","LI","PL","PA","PS","RK","SW","GE","GZ","SZ","EK","ER","KR",
+  "M","IF","TC","PH","CH","BI","SP","VK_M","VK_D","VK_E"
+].sort((a,b)=> a.localeCompare(b,"de"));
+
+/* Ausgeschriebene Fachbezeichnungen für den Stundenplan (Kürzel bleibt in der Maske) */
+const FACHNAME = {
+  "D":"Deutsch","E5":"Englisch","L7":"Latein","F7":"Französisch",
+  "F0":"Französisch","I0":"Italienisch","L0":"Latein","N0":"Niederländisch","S0":"Spanisch",
+  "MU":"Musik","KU":"Kunst","LI":"Literatur",
+  "PL":"Philosophie","PA":"Pädagogik","PS":"Psychologie",
+  "RK":"Rechtskunde","SW":"SoWi",
+  "GE":"Geschichte","GZ":"Geschichte (ZK)","SZ":"SoWi (ZK)",
+  "EK":"Erdkunde","ER":"Religion (ev.)","KR":"Religion (kath.)",
+  "M":"Mathematik","IF":"Informatik","TC":"Technik",
+  "PH":"Physik","CH":"Chemie","BI":"Biologie","SP":"Sport",
+  "VK_M":"VK-Mathe","VK_D":"VK-Deutsch","VK_E":"VK-Englisch"
+};
+/* liefert die Anzeige eines Fachs; hängt bei LK-Schienen " LK" an */
+function anzeigeFach(kuerzel, kursId){
+  let name = FACHNAME[kuerzel] || kuerzel;
+  if(typeof kursId === "string" && kursId.startsWith("LK")) name += " LK";
+  return name;
+}
+
+/* Neu einsetzende Fremdsprachen (vierstündig) */
+const NEUE_FREMDSPRACHEN = ["F0","I0","L0","N0","S0"];
+
+/* Schienen, die einen vierstündigen Kurs aufnehmen können (Q1/Q2) */
+const FS_SCHIENEN = ["GK1","GK3"];
+
+/* Vertiefungskurse – insgesamt darf nur einer gewählt werden */
+const VK_KUERZEL = ["VK_M","VK_D","VK_E"];
+
+/* ---------- Kurse LK1, LK2, GK1–GK8 ---------- */
+const KURSE = [
+  {id:"LK1", pos:"Di 3./4. · Fr 3./4. · Do 8./9. (uW)"},
+  {id:"LK2", pos:"Di 1./2. · Mi 3./4. · Do 8./9. (gW)"},
+  {id:"GK1", pos:"Do 1./2. · Di 8./9. (uW)"},
+  {id:"GK2", pos:"Fr 5./6. · Mo 1./2. (gW)"},
+  {id:"GK3", pos:"Mo 3./4. · Mi 8./9. (uW)"},
+  {id:"GK4", pos:"Mi 1./2. · Mo 5./6."},
+  {id:"GK5", pos:"Do 5./6. · Mo 1./2. (uW)"},
+  {id:"GK6", pos:"Di 5. · Do 3./4."},
+  {id:"GK7", pos:"Di 6. · Fr 1./2."},
+  {id:"GK8", pos:"Mi 5./6. · Mo 8./9. (gW)"}
+];
+
+/* ---------- Rasterdefinition ----------
+   Jede Stunde/Tag zeigt entweder einen Kurs, einen Wechselblock (uW/gW),
+   einen bedingten Kurs, oder ist leer.
+   Zellenformat: {kurs:"GK4"} | {wechsel:{uw:"GK5",gw:"GK2"}} | {kurs:"GK3",cond:true} | null
+------------------------------------------------------------------ */
+const TAGE = ["Mo","Di","Mi","Do","Fr"];
+const STUNDEN = [1,2,3,4,5,6,7,8,9,10,11,12];
+
+/* raster[stunde][tag] */
+const R = {};
+STUNDEN.forEach(s=>{ R[s] = {Mo:null,Di:null,Mi:null,Do:null,Fr:null}; });
+
+/* Doppelstunden als zwei identische Einträge (Std 1+2 etc.) */
+function setBlock(tag, von, bis, val){ for(let s=von;s<=bis;s++) R[s][tag]=val; }
+
+/* Montag */
+setBlock("Mo",1,2,{wechsel:{uw:"GK5",gw:"GK2"}});
+setBlock("Mo",3,4,{kurs:"GK3"});
+setBlock("Mo",5,6,{kurs:"GK4"});
+setBlock("Mo",8,9,{kurs:"GK8", woche:"gW"});
+/* Dienstag */
+setBlock("Di",1,2,{kurs:"LK2"});
+setBlock("Di",3,4,{kurs:"LK1"});
+setBlock("Di",5,5,{kurs:"GK6"});
+setBlock("Di",6,6,{kurs:"GK7"});
+setBlock("Di",8,9,{kurs:"GK1", woche:"uW"});
+/* Mittwoch */
+setBlock("Mi",1,2,{kurs:"GK4"});
+setBlock("Mi",3,4,{kurs:"LK2"});
+setBlock("Mi",5,6,{kurs:"GK8"});
+setBlock("Mi",8,9,{kurs:"GK3", woche:"uW", fsWeekly:true});
+/* Donnerstag */
+setBlock("Do",1,2,{kurs:"GK1"});
+setBlock("Do",3,4,{kurs:"GK6"});
+setBlock("Do",5,6,{kurs:"GK5"});
+setBlock("Do",8,9,{wechsel:{uw:"LK1",gw:"LK2"}});
+/* Freitag */
+setBlock("Fr",1,2,{kurs:"GK7"});
+setBlock("Fr",3,4,{kurs:"LK1"});
+setBlock("Fr",5,6,{kurs:"GK2"});
+
+/* höchste belegte Stunde für kompakte Darstellung */
+const MAX_STUNDE = 9;
+
+/* ---------- Eingabemaske aufbauen ---------- */
+function optionsHTML(){
+  let o = '<option value="">–</option>';
+  KUERZEL.forEach(k=> o += `<option value="${k}">${k}</option>`);
+  return o;
+}
+function buildEntryForm(){
+  const body = document.getElementById("entry-body");
+  let html = "";
+  KURSE.forEach(k=>{
+    html += `<tr>
+      <td class="kursname">${k.id}</td>
+      <td class="kurspos">${k.pos}</td>
+      <td><select data-fach="${k.id}">${optionsHTML()}</select></td>
+      <td><input type="text" data-lehrer="${k.id}" placeholder="Lehrkraft" maxlength="24"></td>
+      <td><input type="text" class="raum" data-raum="${k.id}" placeholder="Raum" maxlength="10"></td>
+    </tr>`;
+  });
+  /* Sportkurs separat */
+  html += `<tr class="row-11b">
+      <td class="kursname">Sport</td>
+      <td class="kurspos">außerhalb der Schienen</td>
+      <td><select data-fach="SPORT">${optionsHTML()}</select></td>
+      <td><input type="text" data-lehrer="SPORT" placeholder="Lehrkraft" maxlength="24"></td>
+      <td><input type="text" class="raum" data-raum="SPORT" placeholder="Halle" maxlength="10"></td>
+    </tr>`;
+  body.innerHTML = html;
+  const sp = document.querySelector('[data-fach="SPORT"]');
+  if(sp) sp.value = "SP";
+}
+
+/* ---------- Daten einlesen ---------- */
+function readEntries(){
+  const data = {};
+  document.querySelectorAll("[data-fach]").forEach(sel=>{
+    const id = sel.getAttribute("data-fach");
+    data[id] = data[id]||{};
+    data[id].fach = sel.value.trim();
+  });
+  document.querySelectorAll("[data-lehrer]").forEach(inp=>{
+    const id = inp.getAttribute("data-lehrer");
+    data[id] = data[id]||{};
+    data[id].lehrer = inp.value.trim();
+  });
+  document.querySelectorAll("[data-raum]").forEach(inp=>{
+    const id = inp.getAttribute("data-raum");
+    data[id] = data[id]||{};
+    data[id].raum = inp.value.trim();
+  });
+  return data;
+}
+
+/* ---------- Zellinhalt rendern ---------- */
+/* CSS-Klasse je nach Länge des Anzeigenamens, damit lange Namen nicht umbrechen */
+function fachSizeClass(text){
+  const n = text.length;
+  if(n >= 18) return " fs-xs";
+  if(n >= 13) return " fs-sm";
+  return "";
+}
+function fachLabel(entry, kursId){
+  if(!entry || !entry.fach) return null;
+  const anzeige = anzeigeFach(entry.fach, kursId);
+  const fach   = escapeHtml(anzeige);
+  const lehrer = entry.lehrer ? escapeHtml(entry.lehrer) : "&nbsp;";
+  const raum   = entry.raum   ? escapeHtml(entry.raum)   : "&nbsp;";
+  return `<div class="line-fach${fachSizeClass(anzeige)}">${fach}</div>`+
+         `<div class="line-lehrer">${lehrer}</div>`+
+         `<div class="line-raum">${raum}</div>`;
+}
+function escapeHtml(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+function renderCell(def, data, hasNeueFS){
+  /* leere Zelle */
+  if(!def) return `<td><div class="cell empty"></div></td>`;
+
+  /* Wechselblock uW/gW */
+  if(def.wechsel){
+    const uw = data[def.wechsel.uw];
+    const gw = data[def.wechsel.gw];
+    const uwFilled = uw && uw.fach;
+    const gwFilled = gw && gw.fach;
+    if(!uwFilled && !gwFilled) return `<td><div class="cell empty"></div></td>`;
+    const half = (entry, wk, cls, kursId)=>{
+      if(!entry || !entry.fach) return `<div><span class="badge ${cls}">${wk} frei</span></div>`;
+      const sub = [entry.lehrer, entry.raum].filter(Boolean).map(escapeHtml).join(" · ");
+      const anzeige = anzeigeFach(entry.fach, kursId);
+      return `<div>`+
+        `<div class="wline wf">${escapeHtml(anzeige)} <span class="badge ${cls}">${wk}</span></div>`+
+        (sub?`<div class="wline">${sub}</div>`:"")+
+      `</div>`;
+    };
+    return `<td><div class="cell wechsel">${half(uw,"uW","uw",def.wechsel.uw)}${half(gw,"gW","gw",def.wechsel.gw)}</div></td>`;
+  }
+
+  /* normaler Kurs (evtl. mit Wochen-Badge) */
+  const e = data[def.kurs];
+  if(!e || !e.fach) return `<td><div class="cell empty"></div></td>`;
+  let badge = "";
+  if(def.woche==="uW") badge = ` <span class="badge uw">uW</span>`;
+  if(def.woche==="gW") badge = ` <span class="badge gw">gW</span>`;
+  const anzeige = anzeigeFach(e.fach, def.kurs);
+  const lehrer = e.lehrer ? escapeHtml(e.lehrer) : "&nbsp;";
+  const raum   = e.raum   ? escapeHtml(e.raum)   : "&nbsp;";
+  return `<td><div class="cell">`+
+    `<div class="line-fach${fachSizeClass(anzeige)}">${escapeHtml(anzeige)}${badge}</div>`+
+    `<div class="line-lehrer">${lehrer}</div>`+
+    `<div class="line-raum">${raum}</div>`+
+  `</div></td>`;
+}
+
+/* ---------- Validierung ---------- */
+/* lesbarer Name einer Schiene für Meldungen */
+function kursLabel(id){
+  if(id==="SPORT") return "Sport";
+  return id;
+}
+/* prüft doppelte Fächer, VK-Mehrfachwahl und Fremdsprachen auf falscher Schiene.
+   Gibt ein Array von Fehlermeldungen zurück (leer = ok). */
+function validate(data){
+  const fehler = [];
+
+  /* (a) kein Fach doppelt (Schiene -> Fach); VK zählt gesondert unten */
+  const proFach = {};
+  Object.keys(data).forEach(id=>{
+    const f = data[id].fach;
+    if(!f) return;
+    if(VK_KUERZEL.includes(f)) return; /* VK separat behandeln */
+    (proFach[f] = proFach[f] || []).push(id);
+  });
+  Object.keys(proFach).forEach(f=>{
+    if(proFach[f].length > 1){
+      const wo = proFach[f].map(kursLabel).join(", ");
+      fehler.push(`Das Fach „${f}" ist mehrfach gewählt (${wo}). Jedes Fach darf nur einmal vorkommen.`);
+    }
+  });
+
+  /* (b) insgesamt nur ein Vertiefungskurs */
+  const vkStellen = Object.keys(data).filter(id=> VK_KUERZEL.includes(data[id].fach));
+  if(vkStellen.length > 1){
+    const wo = vkStellen.map(id=> `${kursLabel(id)}=${data[id].fach}`).join(", ");
+    fehler.push(`Es ist nur ein Vertiefungskurs erlaubt, gewählt wurden aber mehrere (${wo}).`);
+  }
+
+  /* (c) neu einsetzende Fremdsprache nur auf vierstündig-fähiger Schiene */
+  Object.keys(data).forEach(id=>{
+    const f = data[id].fach;
+    if(f && NEUE_FREMDSPRACHEN.includes(f) && !FS_SCHIENEN.includes(id)){
+      fehler.push(`„${f}" ist eine neu einsetzende (vierstündige) Fremdsprache und kann nicht in ${kursLabel(id)} liegen. Möglich sind nur: ${FS_SCHIENEN.join(", ")}.`);
+    }
+  });
+
+  return fehler;
+}
+function showValidation(fehler){
+  const box = document.getElementById("validation-warn");
+  if(!fehler.length){ box.classList.add("hidden"); box.innerHTML=""; return false; }
+  box.innerHTML = fehler.map(m=> `• ${m}`).join("<br>");
+  box.classList.remove("hidden");
+  return true;
+}
+
+/* ---------- Plan bauen (läuft live bei jeder Änderung) ---------- */
+function buildPlan(){
+  const data = readEntries();
+  const planInner = document.getElementById("plan-inner");
+  const planEmpty = document.getElementById("plan-empty");
+
+  /* mind. 1 Kurs? */
+  const anyKurs = Object.keys(data).some(id=> id!=="SPORT" && data[id].fach);
+  if(!anyKurs){
+    document.getElementById("empty-warn").classList.add("hidden");
+    document.getElementById("validation-warn").classList.add("hidden");
+    planInner.classList.add("hidden");
+    planEmpty.classList.remove("hidden");
+    return;
+  }
+  document.getElementById("empty-warn").classList.add("hidden");
+
+  /* Validierung: doppelte Fächer, VK-Mehrfachwahl, Fremdsprachen-Schiene */
+  const fehler = validate(data);
+  if(showValidation(fehler)){
+    planInner.classList.add("hidden");
+    planEmpty.classList.add("hidden");
+    return;
+  }
+  planEmpty.classList.add("hidden");
+  planInner.classList.remove("hidden");
+
+  const hasNeueFS = false; // in Q1/Q2 keine bedingte Freitag-Regel
+
+  /* ist ein bestimmter Kurs eine neu einsetzende Fremdsprache (0er-Sprache)? */
+  const isNeueFS = (kursId)=> data[kursId] && NEUE_FREMDSPRACHEN.includes(data[kursId].fach);
+
+  /* dynamisches Raster: Kopie von R, dann Regeln anwenden */
+  const G = {};
+  STUNDEN.forEach(s=>{ G[s] = Object.assign({}, R[s]); });
+
+  /* Regel GK1: wenn neu einsetzende Fremdsprache, findet Di 8./9. wöchentlich statt
+     (uW-Kennzeichnung entfällt -> vierstündig). */
+  if(isNeueFS("GK1")){
+    G[8] = Object.assign({}, G[8]);
+    G[9] = Object.assign({}, G[9]);
+    G[8].Di = {kurs:"GK1"};
+    G[9].Di = {kurs:"GK1"};
+  }
+
+  /* Regel GK3: Mi 8./9. liegt normalerweise ungerade Woche.
+     Ist das GK3-Fach eine neu einsetzende Fremdsprache, findet es zusätzlich in der
+     geraden Woche statt -> wöchentlich (vierstündig). */
+  if(isNeueFS("GK3")){
+    G[8] = Object.assign({}, G[8]);
+    G[9] = Object.assign({}, G[9]);
+    G[8].Mi = {kurs:"GK3"};
+    G[9].Mi = {kurs:"GK3"};
+  }
+
+  /* Grid rendern */
+  const gb = document.getElementById("grid-body");
+  let rows = "";
+  for(let s=1; s<=MAX_STUNDE; s++){
+    let tds = "";
+    TAGE.forEach(t=> tds += renderCell(G[s][t], data, hasNeueFS));
+    rows += `<tr><th class="hour">${s}.</th>${tds}</tr>`;
+  }
+  gb.innerHTML = rows;
+
+  /* separater Block-Renderer (11B, Sport) */
+  function renderSideBlock(entry, wrapId, contentId){
+    const wrap = document.getElementById(wrapId);
+    const content = document.getElementById(contentId);
+    if(entry && entry.fach){
+      content.innerHTML =
+        `<div class="b11-field"><b>Fach:</b> ${escapeHtml(anzeigeFach(entry.fach))}</div>` +
+        `<div class="b11-field"><b>Lehrkraft:</b> ${entry.lehrer? escapeHtml(entry.lehrer):"—"}</div>` +
+        `<div class="b11-field"><b>Raum:</b> ${entry.raum? escapeHtml(entry.raum):"—"}</div>`;
+      wrap.classList.remove("hidden");
+    } else {
+      wrap.classList.add("hidden");
+    }
+  }
+  renderSideBlock(data["SPORT"], "sport-block", "sport-content");
+}
+
+function resetAll(){
+  document.querySelectorAll("[data-fach]").forEach(s=> s.value="");
+  document.querySelectorAll("[data-lehrer]").forEach(i=> i.value="");
+  document.querySelectorAll("[data-raum]").forEach(i=> i.value="");
+  const sp = document.querySelector('[data-fach="SPORT"]');
+  if(sp) sp.value = "SP";
+  document.getElementById("empty-warn").classList.add("hidden");
+  const vw = document.getElementById("validation-warn");
+  vw.classList.add("hidden"); vw.innerHTML="";
+  buildPlan();
+}
+
+buildEntryForm();
+/* Live: bei jeder Eingabe den Plan neu erzeugen */
+document.getElementById("entry-body").addEventListener("input", buildPlan);
+document.getElementById("entry-body").addEventListener("change", buildPlan);
+buildPlan();
+</script>
+</body>
+</html>
