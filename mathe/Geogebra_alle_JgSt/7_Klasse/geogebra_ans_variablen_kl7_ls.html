@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Weiterrechnen mit ANS und Variablen – Lernseite Klasse 7</title>
+<meta name="description" content="Erarbeitungsseite für Klasse 7: automatisch vergebene Variablennamen im GeoGebra-Grafikrechner nutzen, eigene Namen vergeben und mehrschrittige Prozent- und Zinsaufgaben ohne Abtippen rechnen.">
+<meta name="keywords" content="GeoGebra, Grafikrechner, Variablen, ANS, Zwischenergebnis, Prozentrechnung, Zinsen, Klasse 7">
+<meta name="typ" content="Lernseite">
+<meta name="klasse" content="7">
+<meta name="fach" content="mathe">
+<meta name="oberthema" content="GeoGebra Grafikrechner">
+<meta name="thema" content="ANS und Variablen">
+<script>
+  MathJax = {
+    tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+    svg: { fontCache: 'global' }
+  };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+  :root{
+    --ink:#22303f;--card:#ffffff;--green:#1e7d32;--red:#c1272d;
+    --amber:#b8860b;--amber-light:#fdf3d9;--amber-dark:#96690a;
+    --orange:#c97a2e;--orange-dark:#a5611e;--orange-light:#fbeee0;
+    --bg:#faf7f2;--line:#e4dcd0;--blue:#2f5fa6;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);color:var(--ink);
+    font-family:'Segoe UI',Verdana,'Helvetica Neue',sans-serif;
+    font-size:1.05rem;line-height:1.55;padding-bottom:5rem;
+  }
+  header{
+    background:linear-gradient(135deg,var(--orange),var(--orange-dark));
+    color:#fff;padding:1.3rem 1.2rem;box-shadow:0 3px 10px rgba(0,0,0,.12);
+  }
+  header .typ{
+    display:inline-block;background:rgba(255,255,255,.25);
+    padding:.2rem .7rem;border-radius:1rem;font-size:.85rem;
+    font-weight:700;letter-spacing:.04em;margin-bottom:.5rem;
+  }
+  header h1{margin:0;font-size:1.55rem;line-height:1.25;}
+  header p{margin:.4rem 0 0;font-size:1rem;opacity:.95;}
+  header .serie{margin-top:.6rem;font-size:.9rem;opacity:.9;}
+
+  .tabs{display:flex;flex-wrap:wrap;gap:.5rem;padding:1rem 1rem 0;max-width:1024px;margin:0 auto;}
+  .tab{
+    flex:1 1 auto;min-width:7.5rem;min-height:44px;
+    border:2px solid var(--line);background:#fff;color:var(--ink);
+    font-size:.95rem;font-weight:600;border-radius:.7rem .7rem 0 0;
+    padding:.6rem .5rem;cursor:pointer;
+    transition:background .15s,border-color .15s,transform .05s;
+  }
+  .tab:active{transform:scale(.97);}
+  .tab.aktiv{background:var(--orange);color:#fff;border-color:var(--orange-dark);}
+  .tab .done{margin-left:.3rem;}
+
+  main{max-width:1024px;margin:0 auto;padding:0 1rem;}
+  .karte{
+    display:none;background:var(--card);border:2px solid var(--line);
+    border-radius:0 .9rem .9rem .9rem;padding:1.3rem 1.2rem;margin-top:-2px;
+    box-shadow:0 2px 8px rgba(0,0,0,.05);animation:einblenden .25s ease;
+  }
+  .karte.aktiv{display:block;}
+  @keyframes einblenden{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .karte h2{margin-top:0;font-size:1.3rem;color:var(--orange-dark);}
+  .frage{font-weight:700;margin:1rem 0 .6rem;}
+
+  .merk{
+    background:var(--orange-light);border-left:5px solid var(--orange);
+    padding:.8rem 1rem;border-radius:.4rem;margin:1rem 0;
+  }
+  .merk-warn{background:#fbe4e4;border-left-color:var(--red);}
+  code{
+    background:#eee3d4;border-radius:.3rem;padding:.05rem .4rem;
+    font-family:'Courier New',monospace;font-size:.95em;
+  }
+
+  .bauen{
+    border:3px solid var(--blue);border-radius:.7rem;background:#f4f8fd;
+    padding:1rem 1.1rem;margin:1.2rem 0;
+  }
+  .bauen h3{margin:0 0 .6rem;font-size:1.08rem;color:var(--blue);display:flex;align-items:center;gap:.5rem;}
+  .bauen ol{margin:.4rem 0 0;padding-left:1.4rem;}
+  .bauen li{margin-bottom:.45rem;}
+  .bauen li:last-child{margin-bottom:0;}
+
+  .tipp-box{border:2px solid var(--amber);border-radius:.6rem;margin:1rem 0;overflow:hidden;}
+  .tipp-kopf{
+    width:100%;min-height:44px;background:var(--amber-light);color:var(--amber-dark);
+    border:none;font-weight:700;font-size:1rem;padding:.6rem .9rem;text-align:left;cursor:pointer;
+    display:flex;justify-content:space-between;align-items:center;gap:.5rem;
+  }
+  .tipp-inhalt{display:none;padding:.9rem 1rem;background:var(--amber-light);color:var(--ink);}
+  .tipp-box.offen .tipp-inhalt{display:block;}
+  .tipp-box.offen .tipp-pfeil{transform:rotate(180deg);}
+  .tipp-pfeil{transition:transform .2s;flex-shrink:0;}
+
+  button{font-family:inherit;}
+  .btn{
+    min-height:44px;border:none;border-radius:.6rem;padding:.6rem 1.1rem;
+    font-size:1rem;font-weight:700;cursor:pointer;transition:transform .05s,filter .15s;
+  }
+  .btn:active{transform:scale(.97);}
+  .btn-pruefen{background:#3a6ea5;color:#fff;}
+  .btn-leeren{background:#8a7e6a;color:#fff;margin-left:.5rem;}
+
+  .feedback{margin:.8rem 0;padding:.8rem 1rem;border-radius:.5rem;font-weight:700;display:none;}
+  .feedback.zeig{display:block;}
+  .feedback.ok{background:var(--green);color:#fff;}
+  .feedback.nok{background:var(--red);color:#fff;}
+
+  .demo-liste{margin:1rem 0;display:flex;flex-direction:column;gap:.5rem;}
+  .demo-zeile{
+    display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;
+    background:#fff;border:2px solid var(--line);border-radius:.5rem;padding:.6rem .9rem;
+  }
+  .demo-tipp{font-size:.85rem;color:#6b6354;font-weight:600;}
+  .demo-pfeil{font-weight:800;color:var(--orange);}
+  .demo-ergebnis{font-weight:700;font-size:1.05rem;}
+  .demo-falsch{border-color:var(--red);background:#fdf2f2;}
+  .demo-richtig{border-color:var(--green);background:#f2faf4;}
+
+  .kontrollbild{
+    border:2px dashed var(--line);border-radius:.7rem;background:#fff;
+    padding:.8rem;margin:1rem auto;max-width:23rem;text-align:center;
+  }
+  .kontrollbild svg{display:block;width:100%;height:auto;}
+  .kontrollbild .bu{display:block;margin-top:.5rem;font-size:.9rem;color:#6b6354;font-weight:600;}
+  .legende{display:flex;flex-wrap:wrap;gap:1rem;justify-content:center;margin-top:.5rem;font-size:.92rem;font-weight:600;}
+  .legende span{display:inline-flex;align-items:center;gap:.35rem;}
+  .legende i{display:inline-block;width:1.5rem;height:.22rem;border-radius:.1rem;}
+
+  .vgl{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.98rem;}
+  .vgl th,.vgl td{border:2px solid var(--line);padding:.55rem .7rem;text-align:left;}
+  .vgl th{background:var(--orange-light);color:var(--orange-dark);}
+  .vgl td:first-child{font-weight:700;}
+
+  .wtab{width:100%;border-collapse:collapse;margin:1rem 0;}
+  .wtab th,.wtab td{border:2px solid var(--line);padding:.5rem .4rem;text-align:center;}
+  .wtab th{background:var(--orange-light);color:var(--orange-dark);}
+  .wtab td:first-child{font-weight:800;background:#faf7f2;}
+  .wtab input[type=text]{width:4.6rem;}
+
+  .mcwahl{display:flex;flex-wrap:wrap;gap:.6rem;margin:.6rem 0;}
+  .mcwahl button{
+    flex:1 1 9rem;min-height:48px;border:2px solid var(--line);background:#fff;color:var(--ink);
+    border-radius:.6rem;font-size:1rem;font-weight:700;cursor:pointer;padding:.5rem .7rem;
+  }
+  .mcwahl button.gewaehlt{background:#dce9f7;border-color:#3a6ea5;}
+  .mcwahl button.richtig{background:var(--green);color:#fff;border-color:var(--green);}
+  .mcwahl button.falsch{background:var(--red);color:#fff;border-color:var(--red);}
+
+  .aussage{border:2px solid var(--line);border-radius:.6rem;padding:.8rem .9rem;margin:.8rem 0;background:#fff;}
+  .wf-buttons{display:flex;gap:.6rem;margin-top:.6rem;}
+  .wf-buttons button{
+    flex:1 1 6rem;min-height:44px;border:2px solid var(--line);background:#fff;color:var(--ink);
+    border-radius:.6rem;font-weight:700;cursor:pointer;
+  }
+  .wf-buttons button.gewaehlt{background:#dce9f7;border-color:#3a6ea5;}
+  .wf-buttons button.richtig{background:var(--green);color:#fff;border-color:var(--green);}
+  .wf-buttons button.falsch{background:var(--red);color:#fff;border-color:var(--red);}
+
+  .aufgabe{border:2px solid var(--line);border-radius:.7rem;padding:1rem;margin:1rem 0;background:#fff;}
+  .aufgabe h4{margin:0 0 .5rem;font-size:1.05rem;color:var(--orange-dark);}
+  .einstellung{
+    display:inline-block;background:var(--orange-light);border:2px solid var(--orange);
+    border-radius:.4rem;padding:.3rem .7rem;margin:.3rem .3rem .5rem 0;
+    font-weight:800;font-family:'Courier New',monospace;
+  }
+
+  .zahltab{width:100%;border-collapse:separate;border-spacing:0 .6rem;}
+  .zahltab td{padding:.3rem .5rem;vertical-align:middle;}
+  .zahltab td:first-child{font-weight:600;min-width:9rem;}
+  input[type=text]{
+    font-family:inherit;font-size:1.05rem;min-height:44px;
+    border:2px solid var(--line);border-radius:.5rem;padding:.4rem .6rem;
+    width:7rem;text-align:center;
+  }
+  input[type=text]:focus{outline:none;border-color:var(--orange);}
+  .feld-status{margin-left:.5rem;font-weight:800;font-size:1.1rem;}
+  .punkt-zeile{display:flex;flex-wrap:wrap;align-items:center;gap:.4rem;margin:.6rem 0;font-weight:600;}
+  .punkt-zeile input{width:6rem;}
+
+  .frac{
+    display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;
+    margin:0 .2em;font-size:1em;line-height:1.15;
+  }
+  .frac > span{display:block;padding:0 .35em;}
+  .frac > span:first-child{border-bottom:1.8px solid currentColor;padding-bottom:.1em;}
+  .frac > span:last-child{padding-top:.1em;}
+  .gemischt{display:inline-flex;align-items:center;gap:.1em;font-weight:inherit;}
+
+  .stufen-tipps{display:none;margin:1rem 0;}
+  .stufen-tipps.zeig{display:block;}
+  .stufen-tipps h4{margin:0 0 .5rem;font-size:1rem;color:var(--amber-dark);}
+  .stufe{border:2px solid var(--amber);border-radius:.6rem;margin-bottom:.5rem;overflow:hidden;}
+  .stufe-kopf{
+    width:100%;min-height:44px;background:var(--amber-light);color:var(--amber-dark);
+    border:none;font-weight:700;font-size:.98rem;padding:.6rem .9rem;text-align:left;cursor:pointer;
+    display:flex;justify-content:space-between;align-items:center;gap:.5rem;
+  }
+  .stufe-inhalt{display:none;padding:.9rem 1rem;background:var(--amber-light);color:var(--ink);}
+  .stufe.offen .stufe-inhalt{display:block;}
+  .stufe.offen .stufe-pfeil{transform:rotate(180deg);}
+  .stufe-pfeil{transition:transform .2s;flex-shrink:0;}
+
+  .check-item{border:2px solid var(--line);border-radius:.6rem;padding:.9rem;margin:.9rem 0;background:#fff;}
+  .check-item h3{margin:0 0 .5rem;font-size:1.02rem;}
+  .zusammenfassung{
+    text-align:center;font-weight:800;font-size:1.1rem;margin-top:1rem;padding:.8rem;
+    border-radius:.6rem;background:var(--orange-light);color:var(--orange-dark);display:none;
+  }
+  .zusammenfassung.zeig{display:block;}
+  .rechnen-titel{margin:1.6rem 0 .3rem;font-size:1.15rem;color:var(--orange-dark);border-top:2px solid var(--line);padding-top:1.2rem;}
+
+  .trex{position:fixed;right:.7rem;bottom:.7rem;font-size:1.8rem;cursor:pointer;z-index:50;user-select:none;}
+  .trex .bubble{
+    position:absolute;right:2.2rem;bottom:.2rem;white-space:nowrap;
+    background:var(--ink);color:#fff;padding:.3rem .6rem;border-radius:.5rem;
+    font-size:.85rem;opacity:0;pointer-events:none;transition:opacity .2s;
+  }
+  .trex.zeig .bubble{opacity:1;}
+</style>
+
+</head>
+<body>
+
+<header>
+  <span class="typ">Erarbeitung · Klasse 7</span>
+  <h1>Weiterrechnen mit ANS und Variablen</h1>
+  <p>Zwischenergebnisse abtippen ist mühsam – und jedes Mal eine Fehlerquelle. GeoGebra merkt sich alle deine Ergebnisse. Hier lernst du, sie zu benutzen.</p>
+  <p class="serie">Lernhappen 4 von 6 zum Thema „Umgang mit dem GeoGebra Grafikrechner" – Klasse 7</p>
+</header>
+
+<nav class="tabs" id="tabs">
+  <button class="tab aktiv" data-ziel="k1">1 · Automatische Namen <span class="done" id="d1"></span></button>
+  <button class="tab" data-ziel="k2">2 · Eigene Namen <span class="done" id="d2"></span></button>
+  <button class="tab" data-ziel="k3">3 · Mehrschrittig rechnen <span class="done" id="d3"></span></button>
+  <button class="tab" data-ziel="k4">4 · Überprüfe dich <span class="done" id="d4"></span></button>
+</nav>
+
+<main>
+  <!-- KARTE 1 -->
+  <section class="karte aktiv" id="k1">
+    <h2>Jede Rechnung bekommt automatisch einen Namen</h2>
+    <p>Das kennst du schon aus dem ersten Lernhappen: Sobald du eine Rechnung mit <b>Enter</b> bestätigst, vergibt GeoGebra von selbst einen Namen dafür – der Reihe nach <code>a</code>, <code>b</code>, <code>c</code> und so weiter. Du musst dafür nichts tun.</p>
+
+    <div class="demo-liste">
+      <div class="demo-zeile"><span class="demo-tipp">Du tippst:</span> <code>13*6</code> <span class="demo-pfeil">→</span> <span class="demo-ergebnis"><code>a = 78</code></span></div>
+      <div class="demo-zeile"><span class="demo-tipp">Danach:</span> <code>a+10</code> <span class="demo-pfeil">→</span> <span class="demo-ergebnis"><code>b = 88</code></span></div>
+    </div>
+
+    <div class="merk">
+      <b>Das ist der eigentliche Trick:</b> In der zweiten Zeile hast du <b>nicht</b> die 78 abgetippt, sondern nur <code>a</code> geschrieben. GeoGebra setzt den Wert selbst ein. Das spart Tipparbeit – und du kannst dich beim Abschreiben nicht mehr vertippen.
+    </div>
+
+    <div class="bauen">
+      <h3>🔧 Probier es in GeoGebra aus</h3>
+      <ol>
+        <li>Tippe <code>13*6</code> und bestätige mit <b>Enter</b>. Schau nach links: Dort steht jetzt <code>a = 78</code>.</li>
+        <li>Tippe in die nächste Zeile <code>a+10</code>. Das Ergebnis heißt <code>b</code>.</li>
+        <li>Tippe <code>a*b</code>. Auch das funktioniert – du rechnest mit beiden gespeicherten Werten weiter.</li>
+        <li>Scrolle im Verlauf nach oben: Alle drei Zeilen stehen noch da. Genau deshalb löscht man sie nicht.</li>
+      </ol>
+    </div>
+
+    <div class="tipp-box" id="tipp1">
+      <button class="tipp-kopf" onclick="toggleTipp('tipp1')">
+        <span>💡 Und was ist ANS?</span>
+        <span class="tipp-pfeil">▾</span>
+      </button>
+      <div class="tipp-inhalt">
+        Von anderen Taschenrechnern kennst du vielleicht die <b>ANS</b>-Taste – sie holt das <b>zuletzt berechnete Ergebnis</b> zurück. In GeoGebra brauchst du sie eigentlich nicht, weil jede Zeile ohnehin einen Namen hat und du damit gezielt auf <i>jedes</i> frühere Ergebnis zugreifen kannst, nicht nur auf das letzte.
+        <br><br>
+        Der Weg über die Namen ist sogar besser: Wenn du drei Zeilen weiter noch einmal auf das Ergebnis von ganz oben zurückgreifen willst, hilft dir ANS nicht mehr – <code>a</code> aber schon.
+      </div>
+    </div>
+
+    <p class="frage">Jetzt du: Rechne der Reihe nach und trage die Ergebnisse ein.</p>
+
+    <table class="zahltab">
+      <tr><td>Tippe <code>24*15</code></td><td><input type="text" id="z1" placeholder="a = ?"><span class="feld-status" id="s1"></span></td></tr>
+      <tr><td>Tippe danach <code>a/9</code></td><td><input type="text" id="z2" placeholder="b = ?"><span class="feld-status" id="s2"></span></td></tr>
+      <tr><td>Tippe danach <code>a-b</code></td><td><input type="text" id="z3" placeholder="c = ?"><span class="feld-status" id="s3"></span></td></tr>
+    </table>
+
+    <button class="btn btn-pruefen" onclick="pruefeK1()">Prüfen</button>
+    <button class="btn btn-leeren" id="leeren1" style="display:none" onclick="leereK1()">Leeren</button>
+    <div class="feedback" id="fb1"></div>
+
+    <div class="stufen-tipps" id="tipps1">
+      <h4>Brauchst du Hilfe? Decke so viel auf, wie du brauchst:</h4>
+      <div class="stufe">
+        <button class="stufe-kopf" onclick="toggleStufe(this)"><span>Tipp 1 – Reihenfolge einhalten</span><span class="stufe-pfeil">▾</span></button>
+        <div class="stufe-inhalt">Die drei Zeilen bauen aufeinander auf. Tippe sie wirklich nacheinander ein – <code>a</code> und <code>b</code> gibt es erst, nachdem die Zeilen davor bestätigt sind.</div>
+      </div>
+      <div class="stufe">
+        <button class="stufe-kopf" onclick="toggleStufe(this)"><span>Tipp 2 – Heißen meine Zeilen anders?</span><span class="stufe-pfeil">▾</span></button>
+        <div class="stufe-inhalt">Wenn du vorher schon etwas gerechnet hast, fängt GeoGebra nicht bei <code>a</code> an. Schau einfach nach, wie deine Zeilen tatsächlich heißen, und benutze diese Namen. Am saubersten: vorher eine neue, leere Datei anlegen.</div>
+      </div>
+      <div class="stufe">
+        <button class="stufe-kopf" onclick="toggleStufe(this)"><span>Tipp 3 – Lösung</span><span class="stufe-pfeil">▾</span></button>
+        <div class="stufe-inhalt"><code>24*15 = 360</code>, &nbsp;<code>360/9 = 40</code>, &nbsp;<code>360-40 = 320</code></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- KARTE 2 -->
+  <section class="karte" id="k2">
+    <h2>Eigene Namen vergeben</h2>
+    <p>Die Buchstaben <code>a</code>, <code>b</code>, <code>c</code> sind praktisch, aber man verliert schnell den Überblick – was war noch mal <code>d</code>? Deshalb kannst du <b>eigene, sprechende Namen</b> vergeben:</p>
+
+    <div class="demo-liste">
+      <div class="demo-zeile"><span class="demo-tipp">Du tippst:</span> <code>preis=250</code> <span class="demo-pfeil">→</span> <span class="demo-ergebnis">der Wert 250 heißt jetzt <code>preis</code></span></div>
+      <div class="demo-zeile"><span class="demo-tipp">Danach:</span> <code>preis*1.19</code> <span class="demo-pfeil">→</span> <span class="demo-ergebnis"><code>297.5</code></span></div>
+    </div>
+
+    <div class="merk">
+      <b>Warum das hilft:</b> In <code>preis*1.19</code> siehst du auf einen Blick, was gerechnet wird – nämlich der Preis plus 19&nbsp;% Mehrwertsteuer. Bei <code>a*1.19</code> müsstest du erst nachschauen, was <code>a</code> war. Bei längeren Aufgaben ist das Gold wert.
+    </div>
+
+    <div class="merk merk-warn">
+      <b>⚠️ Zwei Regeln für eigene Namen:</b>
+      <ul style="margin:.5rem 0 0;padding-left:1.2rem;">
+        <li><b>Keine Leerzeichen.</b> Schreibe <code>grundwert</code>, nicht <code>grund wert</code>.</li>
+        <li><b>Nicht <code>x</code> oder <code>y</code> verwenden.</b> Die braucht GeoGebra für Terme und Graphen – dazu kommst du in den nächsten Lernhappen.</li>
+      </ul>
+    </div>
+
+    <div class="bauen">
+      <h3>🔧 Rechne eine Prozentaufgabe damit</h3>
+      <p style="margin:.2rem 0 .6rem;">Ein Fahrrad kostet 250&nbsp;€ netto. Wie viel kostet es mit 19&nbsp;% Mehrwertsteuer?</p>
+      <ol>
+        <li>Tippe <code>preis=250</code> und bestätige mit Enter.</li>
+        <li>Tippe <code>steuer=preis*0.19</code> – das ist der Steueranteil.</li>
+        <li>Tippe <code>preis+steuer</code> – das ist der Endpreis.</li>
+        <li>Probiere zur Kontrolle auch den kurzen Weg: <code>preis*1.19</code>. Es muss dasselbe herauskommen.</li>
+      </ol>
+    </div>
+
+    <p class="frage">Jetzt du: Trage die drei Werte aus deiner Rechnung ein.</p>
+
+    <table class="zahltab">
+      <tr><td><code>steuer</code></td><td><input type="text" id="w1" placeholder="?"><span class="feld-status" id="ws1"></span></td></tr>
+      <tr><td><code>preis+steuer</code></td><td><input type="text" id="w2" placeholder="?"><span class="feld-status" id="ws2"></span></td></tr>
+      <tr><td><code>preis*1.19</code></td><td><input type="text" id="w3" placeholder="?"><span class="feld-status" id="ws3"></span></td></tr>
+    </table>
+
+    <button class="btn btn-pruefen" onclick="pruefeK2()">Prüfen</button>
+    <button class="btn btn-leeren" id="leeren2" style="display:none" onclick="leereK2()">Leeren</button>
+    <div class="feedback" id="fb2"></div>
+
+    <div class="stufen-tipps" id="tipps2">
+      <h4>Brauchst du Hilfe? Decke so viel auf, wie du brauchst:</h4>
+      <div class="stufe">
+        <button class="stufe-kopf" onclick="toggleStufe(this)"><span>Tipp 1 – Prozent als Dezimalzahl</span><span class="stufe-pfeil">▾</span></button>
+        <div class="stufe-inhalt">19&nbsp;% bedeutet 19 von 100, also <code>0.19</code>. Denk an den <b>Punkt</b> statt Komma. Ein Prozentzeichen brauchst du nicht einzutippen.</div>
+      </div>
+      <div class="stufe">
+        <button class="stufe-kopf" onclick="toggleStufe(this)"><span>Tipp 2 – Warum 1.19?</span><span class="stufe-pfeil">▾</span></button>
+        <div class="stufe-inhalt">Der Endpreis ist der ganze Preis (100&nbsp;%) plus die Steuer (19&nbsp;%), zusammen also 119&nbsp;% – als Faktor <code>1.19</code>. Deshalb führen beide Wege zum selben Ergebnis.</div>
+      </div>
+      <div class="stufe">
+        <button class="stufe-kopf" onclick="toggleStufe(this)"><span>Tipp 3 – Lösung</span><span class="stufe-pfeil">▾</span></button>
+        <div class="stufe-inhalt"><code>steuer = 47.5</code>, &nbsp;<code>preis+steuer = 297.5</code>, &nbsp;<code>preis*1.19 = 297.5</code></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- KARTE 3 -->
+  <section class="karte" id="k3">
+    <h2>Mehrschrittig rechnen ohne Abtippen</h2>
+    <p>Richtig stark wird die Sache bei Aufgaben, die über mehrere Schritte gehen – zum Beispiel bei Zinsen. Hier musst du das Zwischenergebnis <b>weiterverwenden</b>, und genau da passieren beim Abtippen die meisten Fehler.</p>
+
+    <div class="bauen">
+      <h3>🔧 Zinsaufgabe in GeoGebra</h3>
+      <p style="margin:.2rem 0 .6rem;">Du legst 1200&nbsp;€ zu 2,5&nbsp;% Zinsen pro Jahr an. Wie viel Geld hast du nach einem Jahr?</p>
+      <ol>
+        <li><code>kapital=1200</code></li>
+        <li><code>zinssatz=0.025</code></li>
+        <li><code>zinsen=kapital*zinssatz</code></li>
+        <li><code>kapital+zinsen</code></li>
+      </ol>
+    </div>
+
+    <div class="merk">
+      <b>Der große Vorteil:</b> Willst du jetzt wissen, wie es mit 2000&nbsp;€ statt 1200&nbsp;€ aussieht, tippst du einfach <code>kapital=2000</code> in eine neue Zeile. <b>Alle</b> darauf aufbauenden Zeilen rechnen sich sofort neu – du musst nichts noch einmal eingeben.
+      <br><br>
+      Probier das ruhig aus und schau zu, wie sich die Zahlen in den Zeilen darunter von selbst ändern.
+    </div>
+
+    <div class="aufgabe">
+      <h4>Aufgabe 1: Ein Jahr Zinsen</h4>
+      <p>Lena legt <b>1200 €</b> zu <b>2,5 % Zinsen pro Jahr</b> an. Baue die vier Zeilen aus der Anleitung oben in GeoGebra auf und lies die beiden Ergebnisse ab. Runde auf zwei Nachkommastellen.</p>
+      <table class="zahltab">
+        <tr><td>Wie viel <b>Zinsen</b> bekommt Lena im ersten Jahr?</td><td><input type="text" id="v1" placeholder="? €"><span class="feld-status" id="vs1"></span></td></tr>
+        <tr><td>Wie viel <b>Geld</b> hat sie nach diesem einen Jahr insgesamt?</td><td><input type="text" id="v2" placeholder="? €"><span class="feld-status" id="vs2"></span></td></tr>
+      </table>
+    </div>
+
+    <div class="aufgabe">
+      <h4>Aufgabe 2: Lena legt mehr Geld an</h4>
+      <p>Lena entscheidet sich um und legt <b>1500 €</b> an statt 1200 €. Der Zinssatz bleibt gleich.</p>
+      <p><b>Ändere nur eine einzige Zeile:</b> Tippe <code>kapital=1500</code> neu ein – alles andere lässt du stehen. GeoGebra rechnet die Zeilen darunter von selbst neu.</p>
+      <table class="zahltab">
+        <tr><td>Wie viel Geld hat Lena jetzt nach einem Jahr?</td><td><input type="text" id="v3" placeholder="? €"><span class="feld-status" id="vs3"></span></td></tr>
+      </table>
+    </div>
+
+    <div class="aufgabe">
+      <h4>Aufgabe 3: Drei Jahre liegen lassen</h4>
+      <p>Stelle zuerst wieder <code>kapital=1200</code> ein.</p>
+      <p>Lena lässt das Geld nun <b>drei Jahre</b> liegen und hebt die Zinsen nicht ab. Die Zinsen werden also im nächsten Jahr <b>mitverzinst</b>: Nach jedem Jahr ist das <b>1,025-fache</b> des Vorjahres da.</p>
+      <p>Rechne <b>Jahr für Jahr</b> weiter und benutze dabei jedes Mal das Ergebnis der Zeile davor – genau darum geht es auf dieser Karte. Die erste Zeile sieht so aus:</p>
+      <p style="margin:.4rem 0 .6rem;"><code>jahr1=kapital*1.025</code></p>
+      <p>Schreib dir die beiden weiteren Zeilen selbst dazu.</p>
+      <table class="zahltab">
+        <tr><td>Wie viel Geld hat Lena nach <b>drei</b> Jahren?</td><td><input type="text" id="v4" placeholder="? €"><span class="feld-status" id="vs4"></span></td></tr>
+      </table>
+    </div>
+
+    <button class="btn btn-pruefen" onclick="pruefeK3()">Alle prüfen</button>
+    <button class="btn btn-leeren" id="leeren3" style="display:none" onclick="leereK3()">Leeren</button>
+    <div class="feedback" id="fb3"></div>
+
+    <div class="tipp-box" id="tipp3">
+      <button class="tipp-kopf" onclick="toggleTipp('tipp3')">
+        <span>💡 Erst nach Aufgabe 3 aufklappen: Es geht auch in einer Zeile</span>
+        <span class="tipp-pfeil">▾</span>
+      </button>
+      <div class="tipp-inhalt">
+        Du hast dreimal mit 1,025 multipliziert. Dreimal denselben Faktor – dafür gibt es die <b>Hochzahl</b>:
+        <br><br>
+        <code>kapital*1.025^3</code>
+        <br><br>
+        Eine einzige Zeile, dasselbe Ergebnis. Denk daran, nach der Hochzahl mit der <b>Pfeiltaste →</b> wieder herauszuspringen, sonst rutscht der Rest mit nach oben.
+        <br><br>
+        Für 10 Jahre schreibst du dann einfach <code>kapital*1.025^10</code> – so weit würdest du Zeile für Zeile nicht kommen wollen.
+      </div>
+    </div>
+
+    <div class="stufen-tipps" id="tipps3">
+      <h4>Brauchst du Hilfe? Decke so viel auf, wie du brauchst:</h4>
+      <div class="stufe">
+        <button class="stufe-kopf" onclick="toggleStufe(this)"><span>Tipp 1 – Der Aufbau</span><span class="stufe-pfeil">▾</span></button>
+        <div class="stufe-inhalt">Gib die vier Zeilen aus der Bauanleitung oben der Reihe nach ein. Die dritte Zeile <code>zinsen=kapital*zinssatz</code> ist der eigentliche Rechenschritt.</div>
+      </div>
+      <div class="stufe">
+        <button class="stufe-kopf" onclick="toggleStufe(this)"><span>Tipp 2 – Kapital ändern</span><span class="stufe-pfeil">▾</span></button>
+        <div class="stufe-inhalt">Bei Aufgabe 2 tippst du <code>kapital=1500</code> einfach in eine <b>neue Zeile</b> – du musst die alte nicht suchen und ändern. GeoGebra rechnet alles Weitere von selbst neu. Für Aufgabe 3 stellst du danach genauso mit <code>kapital=1200</code> zurück.</div>
+      </div>
+      <div class="stufe">
+        <button class="stufe-kopf" onclick="toggleStufe(this)"><span>Tipp 3 – Die drei Jahre</span><span class="stufe-pfeil">▾</span></button>
+        <div class="stufe-inhalt">
+          Jede Zeile baut auf der Zeile davor auf – genau wie bei <code>zinsen=kapital*zinssatz</code>:
+          <br><br>
+          <code>jahr1=kapital*1.025</code><br>
+          <code>jahr2=jahr1*1.025</code><br>
+          <code>jahr3=jahr2*1.025</code>
+          <br><br>
+          Das Ergebnis steht dann in der Zeile <code>jahr3</code>.
+        </div>
+      </div>
+      <div class="stufe">
+        <button class="stufe-kopf" onclick="toggleStufe(this)"><span>Tipp 4 – Lösung</span><span class="stufe-pfeil">▾</span></button>
+        <div class="stufe-inhalt">
+          Aufgabe 1: <code>zinsen = 30</code> € und nach einem Jahr <code>1230</code> €.<br>
+          Aufgabe 2: mit 1500 € sind es <code>1537.50</code> €.<br>
+          Aufgabe 3: <code>1230</code> → <code>1260.75</code> → <code>1292.27</code> € (gerundet).
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- KARTE 4 -->
+  <section class="karte" id="k4">
+    <h2>Überprüfe dich</h2>
+    <p>Erst ein paar Fragen, danach eine Prozentaufgabe mit dem Grafikrechner.</p>
+
+    <div class="check-item">
+      <h3>1. Du tippst <code>7*8</code> und danach <code>a+4</code>. Was kommt heraus?</h3>
+      <div class="mcwahl" id="c1-wahl"></div>
+    </div>
+    <div class="check-item">
+      <h3>2. Warum vergibt man eigene Namen wie <code>preis</code>?</h3>
+      <div class="mcwahl" id="c2-wahl"></div>
+    </div>
+    <div class="check-item">
+      <h3>3. Welcher Name ist als eigene Variable <b>ungeeignet</b>?</h3>
+      <div class="mcwahl" id="c3-wahl"></div>
+    </div>
+    <div class="check-item">
+      <h3>4. Du änderst <code>kapital=1200</code> zu <code>kapital=1500</code>. Was passiert mit den Zeilen darunter?</h3>
+      <div class="mcwahl" id="c4-wahl"></div>
+    </div>
+
+    <button class="btn btn-pruefen" onclick="pruefeCheck()">Alle prüfen</button>
+    <div class="zusammenfassung" id="zsf"></div>
+
+    <h3 class="rechnen-titel">Jetzt rechnen! (mit dem Grafikrechner)</h3>
+    <p>Eine Jacke kostet 480&nbsp;€ und wird um 15&nbsp;% reduziert. Baue die Rechnung mit eigenen Namen auf und beantworte die Fragen.</p>
+
+    <table class="zahltab">
+      <tr><td>Wie viel € Rabatt?</td><td><input type="text" id="r1" placeholder="?"><span class="feld-status" id="rs1"></span></td></tr>
+      <tr><td>Neuer Preis</td><td><input type="text" id="r2" placeholder="?"><span class="feld-status" id="rs2"></span></td></tr>
+      <tr><td>850 € plus 7 % Aufschlag</td><td><input type="text" id="r3" placeholder="?"><span class="feld-status" id="rs3"></span></td></tr>
+      <tr><td>2000 € zu 3 % für 2 Jahre</td><td><input type="text" id="r4" placeholder="?"><span class="feld-status" id="rs4"></span></td></tr>
+    </table>
+
+    <button class="btn btn-pruefen" onclick="pruefeRechnen()">Ergebnisse prüfen</button>
+    <button class="btn btn-leeren" id="leerenRechnen" style="display:none" onclick="leereRechnen()">Leeren</button>
+    <div class="feedback" id="fbRechnen"></div>
+
+    <div class="stufen-tipps" id="tippsRechnen">
+      <h4>Brauchst du Hilfe? Decke so viel auf, wie du brauchst:</h4>
+      <div class="stufe">
+        <button class="stufe-kopf" onclick="toggleStufe(this)"><span>Tipp 1 – Aufbau mit Namen</span><span class="stufe-pfeil">▾</span></button>
+        <div class="stufe-inhalt">Beginne mit <code>alt=480</code>. Dann <code>rabatt=alt*0.15</code> und schließlich <code>alt-rabatt</code>. So siehst du in jeder Zeile, was gerade passiert.</div>
+      </div>
+      <div class="stufe">
+        <button class="stufe-kopf" onclick="toggleStufe(this)"><span>Tipp 2 – Aufschlag und Zinseszins</span><span class="stufe-pfeil">▾</span></button>
+        <div class="stufe-inhalt">Ein Aufschlag von 7&nbsp;% bedeutet den Faktor <code>1.07</code>. Bei zwei Jahren zu 3&nbsp;% rechnest du <code>2000*1.03^2</code> – nach der Hochzahl mit der <b>Pfeiltaste →</b> heraus.</div>
+      </div>
+      <div class="stufe">
+        <button class="stufe-kopf" onclick="toggleStufe(this)"><span>Tipp 3 – Lösung</span><span class="stufe-pfeil">▾</span></button>
+        <div class="stufe-inhalt">
+          Rabatt: <code>480*0.15 = 72</code><br>
+          Neuer Preis: <code>480-72 = 408</code><br>
+          <code>850*1.07 = 909.50</code><br>
+          <code>2000*1.03^2 = 2121.80</code>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="trex" id="trex">🦖<span class="bubble">Made by ASzym</span></div>
+<script>
+
+const state = {
+  k1:{geprueft:false, erledigt:false},
+  k2:{geprueft:false, erledigt:false},
+  k3:{geprueft:false, erledigt:false},
+  k4:{wahlen:{0:null,1:null,2:null,3:null}, geprueft:false, mcRichtig:false, rechnenRichtig:false, erledigt:false}
+};
+
+const G1=[{statusId:'s1',felder:[{id:'z1',erwartet:360}]},
+          {statusId:'s2',felder:[{id:'z2',erwartet:40}]},
+          {statusId:'s3',felder:[{id:'z3',erwartet:320}]}];
+function pruefeK1(){ karteAuswerten('k1',G1,{fb:'fb1',leeren:'leeren1',tipps:'tipps1'},
+  '✅ Alle drei stimmen. Du hast mit a und b weitergerechnet, ohne eine Zahl abzutippen.',
+  '❌ Mindestens ein Ergebnis stimmt noch nicht. Gib die Zeilen wirklich nacheinander ein – a und b entstehen erst durch die Zeilen davor.'); }
+function leereK1(){ karteLeeren('k1',G1,{fb:'fb1',leeren:'leeren1'}); }
+
+const G2=[{statusId:'ws1',felder:[{id:'w1',erwartet:47.5}]},
+          {statusId:'ws2',felder:[{id:'w2',erwartet:297.5}]},
+          {statusId:'ws3',felder:[{id:'w3',erwartet:297.5}]}];
+function pruefeK2(){ karteAuswerten('k2',G2,{fb:'fb2',leeren:'leeren2',tipps:'tipps2'},
+  '✅ Alles richtig. Beide Wege führen zum selben Endpreis – der kurze über den Faktor 1.19 spart einen Schritt.',
+  '❌ Mindestens ein Ergebnis stimmt noch nicht. 19 % schreibst du als 0.19 – mit Punkt, nicht mit Komma.'); }
+function leereK2(){ karteLeeren('k2',G2,{fb:'fb2',leeren:'leeren2'}); }
+
+const G3=[{statusId:'vs1',felder:[{id:'v1',erwartet:30}]},
+          {statusId:'vs2',felder:[{id:'v2',erwartet:1230}]},
+          {statusId:'vs3',felder:[{id:'v3',erwartet:1537.5}]},
+          {statusId:'vs4',felder:[{id:'v4',erwartet:1292.27,tol:0.01}]}];
+function pruefeK3(){ karteAuswerten('k3',G3,{fb:'fb3',leeren:'leeren3',tipps:'tipps3'},
+  '✅ Alle vier stimmen. Beachte: Nach 3 Jahren sind es mehr als dreimal 30 € – die Zinsen bringen selbst wieder Zinsen.',
+  '❌ Mindestens ein Ergebnis stimmt noch nicht. Prüfe, ob kapital gerade auf dem richtigen Wert steht, und runde auf zwei Nachkommastellen.'); }
+function leereK3(){ karteLeeren('k3',G3,{fb:'fb3',leeren:'leeren3'}); }
+
+const CHECK_FRAGEN=[
+  {optionen: mische([
+    {t:'60', korrekt:true},
+    {t:'11', korrekt:false},
+    {t:'eine Fehlermeldung', korrekt:false}
+  ])},
+  {optionen: mische([
+    {t:'Damit man in jeder Zeile sieht, was gerechnet wird', korrekt:true},
+    {t:'Weil GeoGebra sonst nicht rechnet', korrekt:false},
+    {t:'Damit die Zeilen bunt werden', korrekt:false}
+  ])},
+  {optionen: mische([
+    {t:'x', korrekt:true},
+    {t:'preis', korrekt:false},
+    {t:'kapital', korrekt:false}
+  ])},
+  {optionen: mische([
+    {t:'Sie rechnen sich automatisch neu', korrekt:true},
+    {t:'Sie behalten die alten Werte', korrekt:false},
+    {t:'Sie werden gelöscht', korrekt:false}
+  ])}
+];
+CHECK_FRAGEN.forEach((f,idx)=>baueMC('c'+(idx+1)+'-wahl', f.optionen, 'k4', idx));
+function pruefeCheck(){
+  if(Object.values(state.k4.wahlen).some(v=>v===null)) return;
+  state.k4.geprueft=true;
+  let richtig=0;
+  CHECK_FRAGEN.forEach((f,idx)=>{ if(mcAuswerten('c'+(idx+1)+'-wahl', f.optionen, state.k4.wahlen[idx])) richtig++; });
+  const zsf=document.getElementById('zsf');
+  zsf.classList.add('zeig');
+  zsf.textContent='Du hast '+richtig+' von '+CHECK_FRAGEN.length+' richtig beantwortet.'
+    + (richtig===CHECK_FRAGEN.length ? ' Stark!' : ' Schau dir die roten Antworten an und probiere sie in GeoGebra noch einmal aus.');
+  state.k4.mcRichtig=(richtig===CHECK_FRAGEN.length);
+  aktualisiereK4();
+}
+const GR=[{statusId:'rs1',felder:[{id:'r1',erwartet:72}]},
+          {statusId:'rs2',felder:[{id:'r2',erwartet:408}]},
+          {statusId:'rs3',felder:[{id:'r3',erwartet:909.5}]},
+          {statusId:'rs4',felder:[{id:'r4',erwartet:2121.8,tol:0.01}]}];
+function pruefeRechnen(){
+  const ok=pruefeGruppen(GR);
+  const fb=document.getElementById('fbRechnen');
+  if(ok){
+    fb.className='feedback zeig ok'; fb.textContent='✅ Alle Ergebnisse stimmen!';
+    document.getElementById('leerenRechnen').style.display='none';
+    document.getElementById('tippsRechnen').classList.remove('zeig');
+  }else{
+    fb.className='feedback zeig nok';
+    fb.textContent='❌ Mindestens ein Ergebnis stimmt noch nicht. Prozentsätze als Dezimalzahl mit Punkt eingeben, z. B. 0.15 statt 15 %.';
+    document.getElementById('leerenRechnen').style.display='inline-block';
+    document.getElementById('tippsRechnen').classList.add('zeig');
+  }
+  state.k4.rechnenRichtig=ok;
+  aktualisiereK4();
+}
+function leereRechnen(){
+  leereGruppen(GR);
+  document.getElementById('fbRechnen').className='feedback';
+  document.getElementById('leerenRechnen').style.display='none';
+  state.k4.rechnenRichtig=false;
+  aktualisiereK4();
+}
+function aktualisiereK4(){
+  state.k4.erledigt = !!(state.k4.mcRichtig && state.k4.rechnenRichtig);
+  pruefeFortschritt();
+}
+
+function mische(arr){
+  const a=arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+document.querySelectorAll('.tab').forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('aktiv'));
+    document.querySelectorAll('.karte').forEach(k=>k.classList.remove('aktiv'));
+    tab.classList.add('aktiv');
+    document.getElementById(tab.dataset.ziel).classList.add('aktiv');
+  });
+});
+function toggleTipp(id){ document.getElementById(id).classList.toggle('offen'); }
+function toggleStufe(btn){ btn.parentElement.classList.toggle('offen'); }
+function pruefeFortschritt(){
+  [['k1','d1'],['k2','d2'],['k3','d3'],['k4','d4']].forEach(([k,d])=>{
+    const e=document.getElementById(d);
+    if(e) e.textContent = state[k] && state[k].erledigt ? '✅' : '';
+  });
+}
+function parseZahlOderBruch(s){
+  s=String(s).trim().replace(',', '.');
+  if(s==='') return NaN;
+  const bruch=s.match(/^(-?\d+(?:\.\d+)?)\s*\/\s*(-?\d+(?:\.\d+)?)$/);
+  if(bruch){
+    const z=parseFloat(bruch[1]), n=parseFloat(bruch[2]);
+    return n!==0 ? z/n : NaN;
+  }
+  return parseFloat(s);
+}
+function feldStimmt(id, erwartet, tol){
+  const roh=document.getElementById(id).value;
+  const wert=parseZahlOderBruch(roh);
+  return roh.trim()!=='' && !isNaN(wert) && Math.abs(wert-erwartet)<=(tol!==undefined?tol:0.0001);
+}
+function pruefeGruppen(gruppen){
+  let alleRichtig=true;
+  gruppen.forEach(gr=>{
+    const ok=gr.felder.every(f=>feldStimmt(f.id,f.erwartet,f.tol));
+    const status=document.getElementById(gr.statusId);
+    status.textContent = ok ? '✅' : '❌';
+    status.style.color = ok ? 'var(--green)' : 'var(--red)';
+    if(!ok) alleRichtig=false;
+  });
+  return alleRichtig;
+}
+function leereGruppen(gruppen){
+  gruppen.forEach(gr=>{
+    gr.felder.forEach(f=>{ document.getElementById(f.id).value=''; });
+    document.getElementById(gr.statusId).textContent='';
+  });
+}
+/* Standard-Auswertung für eine Eingabe-Karte */
+function karteAuswerten(kartenKey, gruppen, ids, textOk, textNok){
+  const ok=pruefeGruppen(gruppen);
+  state[kartenKey].geprueft=true;
+  const fb=document.getElementById(ids.fb);
+  if(ok){
+    fb.className='feedback zeig ok'; fb.textContent=textOk;
+    state[kartenKey].erledigt=true;
+    if(ids.leeren) document.getElementById(ids.leeren).style.display='none';
+    if(ids.tipps) document.getElementById(ids.tipps).classList.remove('zeig');
+  }else{
+    fb.className='feedback zeig nok'; fb.textContent=textNok;
+    if(ids.leeren) document.getElementById(ids.leeren).style.display='inline-block';
+    if(ids.tipps) document.getElementById(ids.tipps).classList.add('zeig');
+  }
+  pruefeFortschritt();
+  return ok;
+}
+function karteLeeren(kartenKey, gruppen, ids){
+  leereGruppen(gruppen);
+  document.getElementById(ids.fb).className='feedback';
+  if(ids.leeren) document.getElementById(ids.leeren).style.display='none';
+  state[kartenKey].geprueft=false; state[kartenKey].erledigt=false;
+  pruefeFortschritt();
+}
+/* Multiple-Choice-Block aufbauen */
+function baueMC(wrapId, optionen, kartenKey, wahlFeld){
+  const wrap=document.getElementById(wrapId);
+  optionen.forEach((o,i)=>{
+    const b=document.createElement('button');
+    b.textContent=o.t; b.dataset.i=i;
+    b.addEventListener('click',()=>{
+      if(state[kartenKey].geprueft) return;
+      wrap.querySelectorAll('button').forEach(x=>x.classList.remove('gewaehlt'));
+      b.classList.add('gewaehlt');
+      if(wahlFeld===undefined) state[kartenKey].mcWahl=i;
+      else state[kartenKey].wahlen[wahlFeld]=i;
+    });
+    wrap.appendChild(b);
+  });
+}
+function mcAuswerten(wrapId, optionen, wahl){
+  const wrap=document.getElementById(wrapId);
+  wrap.querySelectorAll('button').forEach((b,i)=>{
+    if(optionen[i].korrekt) b.classList.add('richtig');
+    else if(i===wahl) b.classList.add('falsch');
+  });
+  return optionen[wahl].korrekt;
+}
+/* Wahr/Falsch-Block */
+function baueWF(kartenKey, scope){
+  document.querySelectorAll(scope+' [data-aussage]').forEach((box,i)=>{
+    box.querySelectorAll('.wf-buttons button').forEach(b=>{
+      b.addEventListener('click',()=>{
+        if(state[kartenKey].geprueft) return;
+        box.querySelectorAll('.wf-buttons button').forEach(x=>x.classList.remove('gewaehlt'));
+        b.classList.add('gewaehlt');
+        state[kartenKey].wahlen[i]=b.dataset.w;
+      });
+    });
+  });
+}
+function wfAuswerten(kartenKey, scope, fbId){
+  const boxen=document.querySelectorAll(scope+' [data-aussage]');
+  if(Object.values(state[kartenKey].wahlen).some(v=>v===null)) return false;
+  state[kartenKey].geprueft=true;
+  let richtig=0;
+  boxen.forEach((box,i)=>{
+    const soll=box.dataset.richtig;
+    box.querySelectorAll('.wf-buttons button').forEach(b=>{
+      if(b.dataset.w===soll) b.classList.add('richtig');
+      else if(b.dataset.w===state[kartenKey].wahlen[i]) b.classList.add('falsch');
+    });
+    if(state[kartenKey].wahlen[i]===soll) richtig++;
+  });
+  const fb=document.getElementById(fbId);
+  if(richtig===boxen.length){
+    fb.className='feedback zeig ok';
+    fb.textContent='✅ Alle Aussagen richtig eingeschätzt.';
+    state[kartenKey].erledigt=true;
+  }else{
+    fb.className='feedback zeig nok';
+    fb.textContent='❌ '+richtig+' von '+boxen.length+' richtig. Grün zeigt jeweils die korrekte Antwort.';
+  }
+  pruefeFortschritt();
+  return richtig===boxen.length;
+}
+const trex=document.getElementById('trex');
+if(trex) trex.addEventListener('click',()=>{
+  trex.classList.add('zeig');
+  setTimeout(()=>trex.classList.remove('zeig'),1800);
+});
+
+pruefeFortschritt();
+</script>
+</body>
+</html>
