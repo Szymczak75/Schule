@@ -430,47 +430,62 @@ def build_linking_overviews(root, heute):
 
 
 def render_overview(dirpath, root, sub, heute):
-    """Baut eine schlanke Übersicht im Dino-Hub-Stil über den Teilbaum.
-    Gruppierung nach dem jeweils ersten Unterordner-Segment (soweit vorhanden),
+    """Baut eine Übersicht im Dino-Hub-Kachelstil über den Teilbaum.
+    Ebenen werden automatisch erkannt: <thema>/<kachel>/datei, wobei
+    fehlende Ebenen zusammenfallen. Kacheln zeigen ihre Links offen.
     Links relativ zum Ordner."""
     metas = {rel: read_meta(full) for rel, fn, full in sub}
     ordner_name = os.path.basename(dirpath.rstrip(os.sep)) or "Übersicht"
 
-    # Gruppieren nach erstem Segment des relativen Pfads (Unterordner);
-    # Dateien direkt im Ordner kommen in Gruppe "" (oben, ohne Überschrift).
-    groups = defaultdict(list)
+    # Gruppierung: thema (vorletzte Verzeichnisebene relativ) → kachel (letzte).
+    # Für jede Datei den relativen Pfad in Segmente zerlegen:
+    #   [] direkt im Ordner                → thema="", kachel="(direkt)"
+    #   [a]/datei                          → thema="",  kachel=a
+    #   [a,b,...]/datei                    → thema=a,   kachel=(letzter Ordner)
+    themen = defaultdict(lambda: defaultdict(list))  # thema -> kachel_dir -> [(rel,fn)]
     for rel, fn, full in sub:
-        seg = rel.split("/")[0] if "/" in rel else ""
-        groups[seg].append((rel, fn))
+        segs = rel.split("/")[:-1]  # Ordnersegmente ohne Dateiname
+        if not segs:
+            thema, kdir = "", "(direkt)"
+        elif len(segs) == 1:
+            thema, kdir = "", segs[0]
+        else:
+            thema, kdir = segs[0], segs[-1]
+        themen[thema][kdir].append((rel, fn))
 
-    def link_row(rel, fn):
-        info = metas[rel]
-        typ = info.get("typ", "")
-        icon = link_icon(typ)
-        title = link_title(info, fn)
-        desc = info.get("description") or info.get("title") or ""
-        cls = ' class="lehrer-link"' if typ == "Lehrer" else ""
-        label = title if typ == "Lehrer" else f"{icon} {title}"
-        tip = f' title="{esc(desc)}"' if desc else ""
-        return f'      <a href="{esc(rel)}"{cls}{tip} target="_blank" rel="noopener">{esc(label)}</a>'
-
-    blocks = []
-    # direkte Dateien zuerst
-    if groups.get(""):
-        rows = "\n".join(link_row(r, f) for r, f in sorted(groups[""], key=lambda x: x[1]))
-        blocks.append(f'    <div class="ov-group">\n{rows}\n    </div>')
     def seg_label(seg):
         m = re.match(r"klasse(\d{2}|EF)$", seg)
         if m:
             return "EF" if m.group(1) == "EF" else f"Klasse {int(m.group(1))}"
         return prettify(seg)
-    for seg in sorted(k for k in groups if k):
-        em = thema_emoji(seg) or KACHEL_EMOJI_FALLBACK
-        rows = "\n".join(link_row(r, f) for r, f in sorted(groups[seg], key=lambda x: x[1]))
-        blocks.append(
-            f'    <div class="ov-group">\n'
-            f'      <h2>{em} {esc(seg_label(seg))}</h2>\n{rows}\n    </div>'
-        )
+
+    # Kacheln über den vorhandenen Baustein bauen (offen dargestellt).
+    def kachel_html(kdir, files):
+        # build_kachel liefert die Hub-Kachel; wir zeigen die Links offen,
+        # indem wir style="display:none" entfernen und 'open' setzen.
+        h = build_kachel(kdir if kdir != "(direkt)" else ordner_name, files, metas)
+        h = h.replace('style="display:none"', "")
+        h = h.replace('class="kachel"', 'class="kachel open"')
+        return h
+
+    blocks = []
+    # Reihenfolge: erst direkte/kachel-only (thema=""), dann Themen sortiert
+    for thema in [""] + sorted(k for k in themen if k):
+        kacheln = themen[thema]
+        grid = "\n".join(kachel_html(kd, fl) for kd, fl in
+                         sorted(kacheln.items(), key=lambda x: x[0].lower()))
+        if thema:
+            em = thema_emoji(thema) or KACHEL_EMOJI_FALLBACK
+            blocks.append(
+                '  <div class="thema-block">\n'
+                f'    <div class="thema-header"><span class="thema-icon">{em}</span>'
+                f'<span class="thema-title">{esc(seg_label(thema))}</span></div>\n'
+                f'    <div class="kachel-grid">\n{grid}\n    </div>\n'
+                '  </div>'
+            )
+        else:
+            # ohne Thema-Überschrift, aber gleiche Grid-Optik
+            blocks.append(f'  <div class="kachel-grid">\n{grid}\n  </div>')
     body = "\n".join(blocks)
 
     return f"""<!DOCTYPE html>
@@ -481,22 +496,38 @@ def render_overview(dirpath, root, sub, heute):
 <meta name="hubignore" content="1">
 <title>{esc(prettify(ordner_name))} – Übersicht</title>
 <style>
-  :root {{ color-scheme: light; }}
-  body {{ font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-         max-width: 820px; margin: 0 auto; padding: 24px 18px;
-         background: #f6f8fb; color: #1f2a37; }}
-  h1 {{ font-size: 1.5rem; margin: 0 0 4px; }}
-  .ts {{ color: #6b7280; font-size: .85rem; margin-bottom: 20px; }}
-  .ov-group {{ background: #fff; border: 1px solid #e5e9f0; border-radius: 12px;
-              padding: 14px 16px; margin-bottom: 14px; }}
-  .ov-group h2 {{ font-size: 1.05rem; margin: 2px 0 10px; color: #1a5490; }}
-  .ov-group a {{ display: block; padding: 7px 10px; margin: 2px 0; border-radius: 8px;
-                color: #1155cc; text-decoration: none; font-size: .98rem; }}
-  .ov-group a:hover {{ background: #eef4ff; }}
-  .lehrer-link {{ color: #9333ea !important; }}
-  .search {{ width: 100%; padding: 10px 12px; font-size: 1rem; margin-bottom: 18px;
-            border: 1px solid #d1d9e6; border-radius: 10px; box-sizing: border-box; }}
-  .foot {{ color: #9aa4b2; font-size: .8rem; text-align: center; margin-top: 24px; }}
+  :root{{--bg:#f0f2f8;--surface:#fff;--border:#d4daf0;--bl:#e8ecf8;
+    --mathe:#1d4ed8;--ml:#eff6ff;--bio:#15803d;--biol:#f0fdf4;--text:#1f2a37;}}
+  *{{box-sizing:border-box}}
+  body{{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
+    max-width:1000px;margin:0 auto;padding:24px 18px;background:var(--bg);color:var(--text)}}
+  h1{{font-size:1.5rem;margin:0 0 4px}}
+  .ts{{color:#6b7280;font-size:.85rem;margin-bottom:18px}}
+  .search{{width:100%;padding:10px 12px;font-size:1rem;margin-bottom:18px;
+    border:1px solid #d1d9e6;border-radius:10px}}
+  .thema-block{{background:var(--surface);border:1px solid var(--bl);border-radius:14px;
+    overflow:hidden;margin-bottom:14px}}
+  .thema-header{{display:flex;align-items:center;gap:.6rem;padding:.6rem 1rem;
+    border-bottom:1px solid var(--bl);background:var(--ml)}}
+  .thema-title{{font-weight:700;font-size:.95rem;flex:1;color:var(--mathe)}}
+  .kachel-grid{{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
+    gap:.5rem;padding:.6rem;margin-bottom:14px}}
+  .thema-block .kachel-grid{{margin-bottom:0}}
+  .kachel{{background:#f8fafd;border:1px solid var(--bl);border-radius:10px;padding:.55rem .7rem}}
+  .kachel-name{{font-size:.85rem;font-weight:600;color:var(--text);margin-bottom:.35rem;line-height:1.3}}
+  .kachel-badges{{display:flex;gap:.3rem;flex-wrap:wrap}}
+  .kbadge{{font-size:.65rem;padding:.15rem .45rem;border-radius:20px;font-weight:600}}
+  .kbadge.ls{{background:#dbeafe;color:#1d4ed8}}
+  .kbadge.ue{{background:#ccfbf1;color:#0f766e}}
+  .kbadge.test{{background:#fee2e2;color:#b91c1c}}
+  .kbadge.bonus{{background:#ede9fe;color:#6d28d9}}
+  .kbadge.lehrer{{background:#fef3c7;color:#92400e}}
+  .kachel-links{{margin-top:.5rem;border-top:1px solid var(--bl);padding-top:.4rem;
+    display:flex;flex-direction:column;gap:.2rem}}
+  .kachel-links a{{font-size:.82rem;color:var(--mathe);text-decoration:none;padding:.2rem .1rem;display:block}}
+  .kachel-links a:hover{{text-decoration:underline}}
+  .lehrer-link{{color:#92400e !important;font-style:italic}}
+  .foot{{color:#9aa4b2;font-size:.8rem;text-align:center;margin-top:24px}}
 </style>
 </head>
 <body>
@@ -508,13 +539,14 @@ def render_overview(dirpath, root, sub, heute):
 <script>
 function ovFilter(q){{
   q=q.toLowerCase();
-  document.querySelectorAll('.ov-group').forEach(g=>{{
-    let any=false;
-    g.querySelectorAll('a').forEach(a=>{{
-      const t=(a.textContent+' '+(a.getAttribute('title')||'')).toLowerCase();
-      const hit=t.includes(q); a.style.display=hit?'block':'none'; if(hit)any=true;
-    }});
-    g.style.display=any?'block':'none';
+  document.querySelectorAll('.kachel').forEach(k=>{{
+    const t=k.textContent.toLowerCase();
+    k.style.display=t.includes(q)?'':'none';
+  }});
+  // Thema-Blöcke ausblenden, wenn keine Kachel sichtbar
+  document.querySelectorAll('.thema-block').forEach(b=>{{
+    const vis=[...b.querySelectorAll('.kachel')].some(k=>k.style.display!=='none');
+    b.style.display=vis?'':'none';
   }});
 }}
 </script>
