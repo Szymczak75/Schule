@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tangente und lokale Änderungsrate – Lernseite EF</title>
+<meta name="description" content="Erarbeitungsseite für die EF: In GeoGebra die Sekante gegen die Tangente laufen lassen, die Tangente per Befehl erzeugen und ihre Steigung als lokale Änderungsrate bestimmen.">
+<meta name="keywords" content="GeoGebra, Grafikrechner, Tangente, Steigung, lokale Änderungsrate, Grenzprozess, Schrittweite, EF">
+<meta name="typ" content="Lernseite">
+<meta name="klasse" content="EF">
+<meta name="fach" content="mathe">
+<meta name="oberthema" content="GeoGebra Grafikrechner">
+<meta name="thema" content="Tangente und lokale Änderungsrate">
+<script>
+  MathJax = {
+    tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+    svg: { fontCache: 'global' }
+  };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+  :root{
+    --ink:#22303f;--card:#ffffff;--green:#1e7d32;--red:#c1272d;
+    --amber:#b8860b;--amber-light:#fdf3d9;--amber-dark:#96690a;
+    --orange:#c97a2e;--orange-dark:#a5611e;--orange-light:#fbeee0;
+    --bg:#faf7f2;--line:#e4dcd0;--blue:#2f5fa6;--blue-dark:#1f4680;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);color:var(--ink);
+    font-family:'Segoe UI',Verdana,'Helvetica Neue',sans-serif;
+    font-size:1.05rem;line-height:1.55;padding-bottom:5rem;
+  }
+  header{
+    background:linear-gradient(135deg,var(--orange),var(--orange-dark));
+    color:#fff;padding:1.3rem 1.2rem;box-shadow:0 3px 10px rgba(0,0,0,.12);
+  }
+  header .typ{
+    display:inline-block;background:rgba(255,255,255,.25);
+    padding:.2rem .7rem;border-radius:1rem;font-size:.85rem;
+    font-weight:700;letter-spacing:.04em;margin-bottom:.5rem;
+  }
+  header h1{margin:0;font-size:1.55rem;line-height:1.25;}
+  header p{margin:.4rem 0 0;font-size:1rem;opacity:.95;}
+  header .serie{margin-top:.6rem;font-size:.9rem;opacity:.9;}
+
+  .tabs{display:flex;flex-wrap:wrap;gap:.5rem;padding:1rem 1rem 0;max-width:1024px;margin:0 auto;}
+  .tab{
+    flex:1 1 auto;min-width:7.5rem;min-height:44px;
+    border:2px solid var(--line);background:#fff;color:var(--ink);
+    font-size:.95rem;font-weight:600;border-radius:.7rem .7rem 0 0;
+    padding:.6rem .5rem;cursor:pointer;
+    transition:background .15s,border-color .15s,transform .05s;
+  }
+  .tab:active{transform:scale(.97);}
+  .tab.aktiv{background:var(--orange);color:#fff;border-color:var(--orange-dark);}
+  .tab .done{margin-left:.3rem;}
+
+  main{max-width:1024px;margin:0 auto;padding:0 1rem;}
+  .karte{
+    display:none;background:var(--card);border:2px solid var(--line);
+    border-radius:0 .9rem .9rem .9rem;padding:1.3rem 1.2rem;margin-top:-2px;
+    box-shadow:0 2px 8px rgba(0,0,0,.05);animation:einblenden .25s ease;
+  }
+  .karte.aktiv{display:block;}
+  @keyframes einblenden{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .karte h2{margin-top:0;font-size:1.3rem;color:var(--orange-dark);}
+  .frage{font-weight:700;margin:1rem 0 .6rem;}
+
+  .merk{
+    background:var(--orange-light);border-left:5px solid var(--orange);
+    padding:.8rem 1rem;border-radius:.4rem;margin:1rem 0;
+  }
+  code{
+    background:#eee3d4;border-radius:.3rem;padding:.05rem .4rem;
+    font-family:'Courier New',monospace;font-size:.95em;
+  }
+
+  .bauen{
+    border:3px solid var(--blue);border-radius:.7rem;background:#f4f8fd;
+    padding:1rem 1.1rem;margin:1.2rem 0;
+  }
+  .bauen h3{
+    margin:0 0 .6rem;font-size:1.08rem;color:var(--blue);
+    display:flex;align-items:center;gap:.5rem;
+  }
+  .bauen ol{margin:.4rem 0 0;padding-left:1.4rem;}
+  .bauen li{margin-bottom:.45rem;}
+  .bauen li:last-child{margin-bottom:0;}
+
+  /* Alternativer Weg über die Werkzeuge (ohne Befehl) */
+  .werkzeug{
+    border:3px dashed var(--blue-dark);border-radius:.7rem;background:#eef4fc;
+    padding:1rem 1.1rem;margin:1.2rem 0;
+  }
+  .werkzeug h3{
+    margin:0 0 .6rem;font-size:1.08rem;color:var(--blue-dark);line-height:1.35;
+  }
+  .werkzeug ol{margin:.4rem 0 0;padding-left:1.4rem;}
+  .werkzeug li{margin-bottom:.45rem;}
+  .werkzeug li:last-child{margin-bottom:0;}
+  .werkzeug .wz-intro{margin:0 0 .6rem;}
+  .werkzeug .wz-fazit{
+    margin:.8rem 0 0;padding-top:.7rem;border-top:2px solid #c4d5ec;font-size:.97rem;
+  }
+
+  .kennz{display:flex;flex-wrap:wrap;gap:.45rem;margin:.6rem 0 .4rem;}
+  .chip{
+    display:inline-flex;align-items:center;gap:.3rem;
+    font-size:.82rem;font-weight:700;letter-spacing:.01em;
+    border-radius:1rem;padding:.25rem .7rem;border:2px solid;
+  }
+  .chip-hm{background:#e6eefb;color:var(--blue);border-color:var(--blue);}
+  .chip-frei{background:#f1efe9;color:#6b6354;border-color:#a89e8c;}
+  .chip-art{background:var(--amber-light);color:var(--amber-dark);border-color:var(--amber);}
+
+  .tipp-box{border:2px solid var(--amber);border-radius:.6rem;margin:1rem 0;overflow:hidden;}
+  .tipp-kopf{
+    width:100%;min-height:44px;background:var(--amber-light);color:var(--amber-dark);
+    border:none;font-weight:700;font-size:1rem;padding:.6rem .9rem;text-align:left;cursor:pointer;
+    display:flex;justify-content:space-between;align-items:center;gap:.5rem;
+  }
+  .tipp-inhalt{display:none;padding:.9rem 1rem;background:var(--amber-light);color:var(--ink);}
+  .tipp-box.offen .tipp-inhalt{display:block;}
+  .tipp-box.offen .tipp-pfeil{transform:rotate(180deg);}
+  .tipp-pfeil{transition:transform .2s;flex-shrink:0;}
+
+  button{font-family:inherit;}
+  .btn{
+    min-height:44px;border:none;border-radius:.6rem;padding:.6rem 1.1rem;
+    font-size:1rem;font-weight:700;cursor:pointer;transition:transform .05s,filter .15s;
+  }
+  .btn:active{transform:scale(.97);}
+  .btn-pruefen{background:#3a6ea5;color:#fff;}
+  .btn-leeren{background:#8a7e6a;color:#fff;margin-left:.5rem;}
+
+  .feedback{margin:.8rem 0;padding:.8rem 1rem;border-radius:.5rem;font-weight:700;display:none;}
+  .feedback.zeig{display:block;}
+  .feedback.ok{background:var(--green);color:#fff;}
+  .feedback.nok{background:var(--red);color:#fff;}
+
+  .demo-liste{margin:1rem 0;display:flex;flex-direction:column;gap:.5rem;}
+  .demo-zeile{
+    display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;
+    background:#fff;border:2px solid var(--line);border-radius:.5rem;padding:.6rem .9rem;
+  }
+  .demo-tipp{font-size:.85rem;color:#6b6354;font-weight:600;}
+  .demo-pfeil{font-weight:800;color:var(--orange);}
+  .demo-ergebnis{font-weight:700;font-size:1.05rem;}
+
+  .kontrollbild{
+    border:2px dashed var(--line);border-radius:.7rem;background:#fff;
+    padding:.8rem;margin:1rem auto;max-width:23rem;text-align:center;
+  }
+  .kontrollbild svg{display:block;width:100%;height:auto;}
+  .kontrollbild .bu{
+    display:block;margin-top:.5rem;font-size:.9rem;color:#6b6354;font-weight:600;
+  }
+
+  .vgl{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.98rem;}
+  .vgl th,.vgl td{border:2px solid var(--line);padding:.55rem .7rem;text-align:left;}
+  .vgl th{background:var(--orange-light);color:var(--orange-dark);}
+  .vgl td:first-child{font-weight:700;}
+
+  /* Grenzwert-Tabelle mit Eingaben */
+  .grenztab{width:100%;border-collapse:collapse;margin:1rem 0;}
+  .grenztab th,.grenztab td{border:2px solid var(--line);padding:.5rem .6rem;text-align:center;}
+  .grenztab th{background:var(--orange-light);color:var(--orange-dark);}
+  .grenztab td:first-child{font-weight:800;font-family:'Courier New',monospace;background:#faf7f2;}
+  .grenztab input[type=text]{width:6rem;}
+
+  .mcwahl{display:flex;flex-wrap:wrap;gap:.6rem;margin:.6rem 0;}
+  .mcwahl button{
+    flex:1 1 9rem;min-height:48px;border:2px solid var(--line);background:#fff;color:var(--ink);
+    border-radius:.6rem;font-size:1rem;font-weight:700;cursor:pointer;padding:.5rem .7rem;
+  }
+  .mcwahl button.gewaehlt{background:#dce9f7;border-color:#3a6ea5;}
+  .mcwahl button.richtig{background:var(--green);color:#fff;border-color:var(--green);}
+  .mcwahl button.falsch{background:var(--red);color:#fff;border-color:var(--red);}
+
+  .aufgabe{
+    border:2px solid var(--line);border-radius:.7rem;padding:1rem;margin:1rem 0;background:#fff;
+  }
+  .aufgabe h4{margin:0 0 .5rem;font-size:1.05rem;color:var(--orange-dark);}
+  .einstellung{
+    display:inline-block;background:var(--orange-light);border:2px solid var(--orange);
+    border-radius:.4rem;padding:.3rem .7rem;margin:.3rem .3rem .5rem 0;
+    font-weight:800;font-family:'Courier New',monospace;
+  }
+
+  .zahltab{width:100%;border-collapse:separate;border-spacing:0 .6rem;}
+  .zahltab td{padding:.3rem .5rem;vertical-align:middle;}
+  .zahltab td:first-child{font-weight:600;min-width:10rem;}
+  input[type=text]{
+    font-family:inherit;font-size:1.05rem;min-height:44px;
+    border:2px solid var(--line);border-radius:.5rem;padding:.4rem .6rem;
+    width:7rem;text-align:center;
+  }
+  input[type=text]:focus{outline:none;border-color:var(--orange);}
+  .feld-status{margin-left:.5rem;font-weight:800;font-size:1.1rem;}
+
+  .stufen-tipps{display:none;margin:1rem 0;}
+  .stufen-tipps.zeig{display:block;}
+  .stufen-tipps h4{margin:0 0 .5rem;font-size:1rem;color:var(--amber-dark);}
+  .stufe{border:2px solid var(--amber);border-radius:.6rem;margin-bottom:.5rem;overflow:hidden;}
+  .stufe-kopf{
+    width:100%;min-height:44px;background:var(--amber-light);color:var(--amber-dark);
+    border:none;font-weight:700;font-size:.98rem;padding:.6rem .9rem;text-align:left;cursor:pointer;
+    display:flex;justify-content:space-between;align-items:center;gap:.5rem;
+  }
+  .stufe-inhalt{display:none;padding:.9rem 1rem;background:var(--amber-light);color:var(--ink);}
+  .stufe.offen .stufe-inhalt{display:block;}
+  .stufe.offen .stufe-pfeil{transform:rotate(180deg);}
+  .stufe-pfeil{transition:transform .2s;flex-shrink:0;}
+
+  .check-item{border:2px solid var(--line);border-radius:.6rem;padding:.9rem;margin:.9rem 0;background:#fff;}
+  .check-item h3{margin:0 0 .5rem;font-size:1.02rem;}
+  .zusammenfassung{
+    text-align:center;font-weight:800;font-size:1.1rem;margin-top:1rem;padding:.8rem;
+    border-radius:.6rem;background:var(--orange-light);color:var(--orange-dark);display:none;
+  }
+  .zusammenfassung.zeig{display:block;}
+  .rechnen-titel{margin:1.6rem 0 .3rem;font-size:1.15rem;color:var(--orange-dark);border-top:2px solid var(--line);padding-top:1.2rem;}
+
+  .trex{position:fixed;right:.7rem;bottom:.7rem;font-size:1.8rem;cursor:pointer;z-index:50;user-select:none;}
+  .trex .bubble{
+    position:absolute;right:2.2rem;bottom:.2rem;white-space:nowrap;
+    background:var(--ink);color:#fff;padding:.3rem .6rem;border-radius:.5rem;
+    font-size:.85rem;opacity:0;pointer-events:none;transition:opacity .2s;
+  }
+  .trex.zeig .bubble{opacity:1;}
+</style>
+</head>
+<body>
+<header>
+  <span class="typ">Erarbeitung · EF</span>
+  <h1>Tangente und lokale Änderungsrate</h1>
+  <p>Du lässt in GeoGebra die Sekante aus dem letzten Lernhappen immer kürzer werden – bis daraus die Tangente wird. Und lernst den Befehl kennen, der dir das direkt liefert.</p>
+  <p class="serie">Lernhappen 6 der EF-Reihe „GeoGebra Grafikrechner"</p>
+</header>
+
+<nav class="tabs" id="tabs">
+  <button class="tab aktiv" data-ziel="k1">1 · Grenzprozess <span class="done" id="d1"></span></button>
+  <button class="tab" data-ziel="k2">2 · Tangente <span class="done" id="d2"></span></button>
+  <button class="tab" data-ziel="k3">3 · Gezielt einstellen <span class="done" id="d3"></span></button>
+  <button class="tab" data-ziel="k4">4 · Überprüfe dich <span class="done" id="d4"></span></button>
+</nav>
+
+<main>
+  <!-- KARTE 1 -->
+  <section class="karte aktiv" id="k1">
+    <h2>Die Sekante schrumpfen lassen</h2>
+    <p>Du brauchst die Konstruktion aus Lernhappen 5. Falls du sie nicht mehr hast, baue sie schnell neu auf:</p>
+
+    <div class="bauen">
+      <h3>🔧 Ausgangspunkt in GeoGebra</h3>
+      <ol>
+        <li><code>f(x)=x^2</code></li>
+        <li><code>u=1</code> und <code>v=2</code> – beide mit dem <b>Kreis</b> als Regler einblenden</li>
+        <li><code>A=(u,f(u))</code> und <code>B=(v,f(v))</code></li>
+        <li><code>s=Gerade(A,B)</code> und <code>m=Steigung(s)</code></li>
+      </ol>
+    </div>
+
+    <div class="merk">
+      <b>Die Idee:</b> \(A\) bleibt fest bei \(x=1\). Jetzt schiebst du \(B\) immer <b>näher an \(A\) heran</b> und beobachtest, was mit der Steigung \(m\) passiert. Die Sekante wird dabei immer kürzer – und legt sich immer besser an den Graphen an.
+    </div>
+
+    <div class="bauen">
+      <h3>🔧 Die Schrittweite anpassen</h3>
+      <ol>
+        <li>Damit du \(v\) fein einstellen kannst, brauchst du eine kleinere <b>Schrittweite</b>: Menü der Zeile <code>v</code> → Einstellungen → Schieberegler → <b>Schrittweite 0.01</b>.</li>
+        <li>Alternativ – und meist schneller – tippst du den Wert einfach direkt in die Eingabezeile, z. B. <code>v=1.01</code>. Der Regler springt dann exakt dorthin.</li>
+      </ol>
+    </div>
+
+    <p class="frage">Jetzt du: Stelle \(v\) nacheinander auf die Werte in der Tabelle und trage jeweils die Steigung \(m\) ein. \(u\) bleibt dabei immer auf 1.</p>
+    <div class="kennz">
+      <span class="chip chip-hm">🖩 mit GeoGebra</span>
+      <span class="chip chip-art">🎯 bestimmen – Wert m ablesen</span>
+    </div>
+
+    <table class="grenztab">
+      <tr><th>\(v\)</th><th>Steigung \(m\)</th><th></th></tr>
+      <tr><td>2</td><td><input type="text" id="z1" placeholder="?"></td><td><span class="feld-status" id="s1"></span></td></tr>
+      <tr><td>1.5</td><td><input type="text" id="z2" placeholder="?"></td><td><span class="feld-status" id="s2"></span></td></tr>
+      <tr><td>1.1</td><td><input type="text" id="z3" placeholder="?"></td><td><span class="feld-status" id="s3"></span></td></tr>
+      <tr><td>1.01</td><td><input type="text" id="z4" placeholder="?"></td><td><span class="feld-status" id="s4"></span></td></tr>
+    </table>
+
+    <button class="btn btn-pruefen" onclick="pruefeGrenz()">Prüfen</button>
+    <button class="btn btn-leeren" id="leeren1" style="display:none" onclick="leereGrenz()">Leeren</button>
+    <div class="feedback" id="fb1"></div>
+
+    <div class="stufen-tipps" id="tipps1">
+      <h4>Brauchst du Hilfe? Decke so viel auf, wie du brauchst:</h4>
+      <div class="stufe">
+        <button class="stufe-kopf" onclick="toggleStufe(this)"><span>Tipp 1 – Ich komme nicht auf 1.01</span><span class="stufe-pfeil">▾</span></button>
+        <div class="stufe-inhalt">Mit Schrittweite 0.5 triffst du solche Werte nie. Entweder du stellst die Schrittweite auf <code>0.01</code> – oder du tippst <code>v=1.01</code> einfach in die Eingabezeile. Beides funktioniert.</div>
+      </div>
+      <div class="stufe">
+        <button class="stufe-kopf" onclick="toggleStufe(this)"><span>Tipp 2 – Wo steht m?</span><span class="stufe-pfeil">▾</span></button>
+        <div class="stufe-inhalt">In der Algebra-Ansicht in der Zeile <code>m=Steigung(s)</code>. Zeigt GeoGebra dort zu wenige Nachkommastellen, kannst du die Anzeigegenauigkeit im Haupt-Menü unter <b>Einstellungen → Runden</b> erhöhen.</div>
+      </div>
+      <div class="stufe">
+        <button class="stufe-kopf" onclick="toggleStufe(this)"><span>Tipp 3 – Lösung</span><span class="stufe-pfeil">▾</span></button>
+        <div class="stufe-inhalt">\(v=2 \rightarrow m=3\), &nbsp;\(v=1{,}5 \rightarrow m=2{,}5\), &nbsp;\(v=1{,}1 \rightarrow m=2{,}1\), &nbsp;\(v=1{,}01 \rightarrow m=2{,}01\).</div>
+      </div>
+    </div>
+
+    <div class="merk">
+      <b>Was du gerade gesehen hast:</b> Je näher \(v\) an 1 heranrückt, desto näher kommt \(m\) an den Wert <b>2</b>. Diesen Grenzwert nennt man die <b>lokale Änderungsrate</b> von \(f\) an der Stelle 1 – also die Steigung <i>genau in diesem einen Punkt</i>.
+    </div>
+
+    <div class="merk" style="border-left-color:var(--red);background:#fbe4e4;">
+      <b>⚠️ Probier ruhig aus, was bei \(v=1\) passiert:</b> GeoGebra kann dann keine Gerade mehr zeichnen, \(m\) verschwindet oder wird undefiniert. Kein Fehler von dir – bei \(v=u\) fallen \(A\) und \(B\) zusammen, und durch <b>einen</b> Punkt gehen unendlich viele Geraden. Genau deshalb braucht man den Grenzwert.
+    </div>
+  </section>
+
+  <!-- KARTE 2 -->
+  <section class="karte" id="k2">
+    <h2>Die Tangente direkt erzeugen</h2>
+    <p>Den Grenzwert musst du nicht jedes Mal von Hand annähern. GeoGebra zeichnet dir die Tangente auf einen Befehl hin:</p>
+
+    <div class="demo-liste">
+      <div class="demo-zeile"><span class="demo-tipp">Du tippst:</span> <code>t=Tangente(A,f)</code> <span class="demo-pfeil">→</span> <span class="demo-ergebnis">die Tangente an \(f\) im Punkt \(A\)</span></div>
+      <div class="demo-zeile"><span class="demo-tipp">Du tippst:</span> <code>Steigung(t)</code> <span class="demo-pfeil">→</span> <span class="demo-ergebnis">ihre Steigung – bei \(u=1\) genau <code>2</code></span></div>
+    </div>
+
+    <div class="bauen">
+      <h3>🔧 Ergänze deine Konstruktion</h3>
+      <ol>
+        <li>Stelle <code>u=1</code> ein.</li>
+        <li>Tippe <code>t=Tangente(A,f)</code> – die Tangente erscheint und berührt den Graphen in \(A\).</li>
+        <li>Tippe <code>k=Steigung(t)</code>. Vergleiche <code>k</code> mit dem Grenzwert aus Karte 1.</li>
+        <li>Zieh jetzt an <code>u</code>: Die Tangente <b>rutscht am Graphen entlang</b> und \(k\) ändert sich laufend mit.</li>
+      </ol>
+    </div>
+
+    <div class="werkzeug">
+      <h3>&#128070; Auch ohne Befehl: das Werkzeug „Tangenten"</h3>
+      <p class="wz-intro">Nicht alles muss über die Eingabezeile laufen: Neben <b>Algebra</b> gibt es den Reiter <b>Werkzeuge</b>. Dort liegen dieselben Objekte als antippbare Werkzeuge bereit – oft der schnellere und anschaulichere Einstieg.</p>
+      <ol>
+        <li><b>Werkzeuge</b> → Gruppe <b>Konstruieren</b> → <b>Tangenten</b>.</li>
+        <li>Erst auf den Punkt <b>A</b> tippen, dann auf den <b>Graphen</b> – die Tangente ist gezeichnet.</li>
+        <li><b>Werkzeuge</b> → Gruppe <b>Messen</b> → <b>Steigung</b>, dann auf die Tangente tippen. GeoGebra schreibt die Steigung in die Grafik und zeichnet das <b>Steigungsdreieck</b> dazu.</li>
+        <li>Danach wieder auf <b>Bewegen</b> umschalten – sonst setzt jeder weitere Tipp ein neues Objekt.</li>
+      </ol>
+      <p class="wz-fazit"><b>Wann welcher Weg?</b> Zwei Tipps – und du siehst die Tangente. Genau das macht diesen Weg zum idealen Einstieg, wenn du erst einmal <b>verstehen</b> willst, was eine Tangente ist. Für diese Seite brauchst du danach trotzdem <code>t=Tangente(A,f)</code> und <code>k=Steigung(t)</code>: Nur mit selbst vergebenen Namen kannst du \(k\) weiterverwenden – und nur der getippte Befehl <b>rechnet automatisch neu</b>, wenn du \(u\) am Regler ziehst. Und wie immer gilt: Nach dem Antippen steht die Tangente mit ihrer Gleichung in der <b>Algebra-Ansicht</b> – du kannst also mit dem Werkzeug anfangen und den Befehl dort nachlesen.</p>
+    </div>
+
+    <div class="kontrollbild">
+      <svg id="svgKontrolle" viewBox="0 0 320 260" role="img" aria-label="Kontrollbild: Parabel mit Tangente im Punkt A"></svg>
+      <span class="bu">Kontrollbild bei <b>u = 1</b>: Die Tangente berührt die Parabel in \(A(1|1)\) und hat die Steigung <b>k = 2</b>.</span>
+    </div>
+
+    <div class="merk">
+      <b>Sekante und Tangente im Vergleich:</b>
+      <table class="vgl" style="margin:.6rem 0 0;">
+        <tr><th></th><th>Sekante</th><th>Tangente</th></tr>
+        <tr><td>Punkte</td><td><b>zwei</b> Punkte des Graphen</td><td><b>ein</b> Berührpunkt</td></tr>
+        <tr><td>Befehl</td><td><code>Gerade(A,B)</code></td><td><code>Tangente(A,f)</code></td></tr>
+        <tr><td>Steigung heißt</td><td><b>mittlere</b> Änderungsrate</td><td><b>lokale</b> Änderungsrate</td></tr>
+        <tr><td>Gilt für</td><td>ein ganzes Intervall</td><td>eine einzelne Stelle</td></tr>
+      </table>
+    </div>
+
+    <div class="tipp-box" id="tipp2">
+      <button class="tipp-kopf" onclick="toggleTipp('tipp2')">
+        <span>💡 Der Befehl meckert – woran liegt's?</span>
+        <span class="tipp-pfeil">▾</span>
+      </button>
+      <div class="tipp-inhalt">
+        Achte auf die <b>Reihenfolge</b>: erst der Punkt, dann die Funktion – also <code>Tangente(A,f)</code>. Und \(f\) ohne Klammern: nicht <code>Tangente(A,f(x))</code>.
+        <br><br>
+        Sobald du <code>Tangente(</code> tippst, blendet GeoGebra dir die möglichen Varianten des Befehls ein. Ein Blick dorthin lohnt sich immer, wenn etwas nicht funktioniert.
+      </div>
+    </div>
+
+    <p class="frage">Zwischenfrage: Was ist der Unterschied zwischen \(m\) (Sekante) und \(k\) (Tangente)?</p>
+    <div class="kennz">
+      <span class="chip chip-frei">✏️ ohne Hilfsmittel</span>
+      <span class="chip chip-art">💭 begründen – nicht rechnen</span>
+    </div>
+    <div class="mcwahl" id="mc2-wahl"></div>
+    <button class="btn btn-pruefen" onclick="pruefeMC2()">Prüfen</button>
+    <div class="feedback" id="fb2"></div>
+  </section>
+
+  <!-- KARTE 3 -->
+  <section class="karte" id="k3">
+    <h2>Gezielt einstellen</h2>
+    <p>Wie gehabt drehen wir die Aufgabe um: Die <b>Tangentensteigung ist vorgegeben</b>, du suchst die passende Stelle. Du arbeitest weiter mit \(f(x)=x^{2}\) und dem Regler \(u\).</p>
+
+    <div class="kennz">
+      <span class="chip chip-hm">🖩 mit GeoGebra – Regler einstellen</span>
+      <span class="chip chip-art">🎯 bestimmen – Wert k ablesen</span>
+    </div>
+
+    <div class="aufgabe">
+      <h4>Aufgabe 1</h4>
+      <p>Verschiebe \(u\), bis die Tangente die Steigung <b>\(k=6\)</b> hat. An welcher Stelle berührt sie dann?</p>
+      <table class="zahltab">
+        <tr><td>\(u =\)</td><td><input type="text" id="w1" placeholder="?"><span class="feld-status" id="ws1"></span></td></tr>
+      </table>
+    </div>
+
+    <div class="aufgabe">
+      <h4>Aufgabe 2</h4>
+      <p>Verschiebe \(u\), bis die Tangente <b>waagerecht</b> verläuft, also \(k=0\) gilt.</p>
+      <table class="zahltab">
+        <tr><td>\(u =\)</td><td><input type="text" id="w2" placeholder="?"><span class="feld-status" id="ws2"></span></td></tr>
+      </table>
+    </div>
+
+    <div class="aufgabe">
+      <h4>Aufgabe 3</h4>
+      <p>Verschiebe \(u\), bis die Tangente die Steigung <b>\(k=-4\)</b> hat.</p>
+      <table class="zahltab">
+        <tr><td>\(u =\)</td><td><input type="text" id="w3" placeholder="?"><span class="feld-status" id="ws3"></span></td></tr>
+      </table>
+    </div>
+
+    <button class="btn btn-pruefen" onclick="pruefeZiele()">Alle prüfen</button>
+    <button class="btn btn-leeren" id="leeren3" style="display:none" onclick="leereZiele()">Leeren</button>
+    <div class="feedback" id="fb3"></div>
+
+    <div class="stufen-tipps" id="tipps3">
+      <h4>Brauchst du Hilfe? Decke so viel auf, wie du brauchst:</h4>
+      <div class="stufe">
+        <button class="stufe-kopf" onclick="toggleStufe(this)"><span>Tipp 1 – Vorgehen</span><span class="stufe-pfeil">▾</span></button>
+        <div class="stufe-inhalt">Zieh langsam an <code>u</code> und behalte die Zeile <code>k=Steigung(t)</code> im Blick. Stelle die Schrittweite von <code>u</code> zurück auf <code>0.5</code> oder <code>1</code> – dann triffst du die gesuchten Werte genau.</div>
+      </div>
+      <div class="stufe">
+        <button class="stufe-kopf" onclick="toggleStufe(this)"><span>Tipp 2 – Bei Aufgabe 2 genau hinschauen</span><span class="stufe-pfeil">▾</span></button>
+        <div class="stufe-inhalt">Eine waagerechte Tangente liegt dort, wo der Graph weder steigt noch fällt. Bei einer nach oben geöffneten Parabel gibt es genau eine solche Stelle – schau dir den tiefsten Punkt an.</div>
+      </div>
+      <div class="stufe">
+        <button class="stufe-kopf" onclick="toggleStufe(this)"><span>Tipp 3 – Lösung</span><span class="stufe-pfeil">▾</span></button>
+        <div class="stufe-inhalt">
+          <b>1)</b> \(u=3\) &nbsp; <b>2)</b> \(u=0\) &nbsp; <b>3)</b> \(u=-2\)
+          <br><br>
+          Fällt dir das Muster auf? Bei \(f(x)=x^{2}\) ist die Tangentensteigung an der Stelle \(u\) immer <b>\(2u\)</b>. Diesen Zusammenhang schaust du dir im nächsten Lernhappen genauer an – dort wird daraus die <b>Ableitungsfunktion</b>.
+        </div>
+      </div>
+    </div>
+
+    <div class="merk">
+      <b>Nebenbei entdeckt:</b> Die Stelle mit waagerechter Tangente aus Aufgabe 2 ist genau der <b>tiefste Punkt</b> der Parabel. Dass Extrempunkte und waagerechte Tangenten zusammengehören, ist der Schlüssel für die späteren Lernhappen zu Extrem- und Wendepunkten.
+    </div>
+  </section>
+
+  <!-- KARTE 4 -->
+  <section class="karte" id="k4">
+    <h2>Überprüfe dich</h2>
+    <p>Erst ein paar Fragen zur Bedienung, danach Aufgaben am Grafikrechner.</p>
+
+    <div class="check-item">
+      <h3>1. Welcher Befehl erzeugt die Tangente an \(f\) im Punkt \(A\)?</h3>
+      <div class="mcwahl" id="c1-wahl"></div>
+    </div>
+    <div class="check-item">
+      <h3>2. Du willst \(v=1{,}01\) einstellen, der Regler springt aber in Halbschritten. Was tust du?</h3>
+      <div class="mcwahl" id="c2-wahl"></div>
+    </div>
+    <div class="check-item">
+      <h3>3. Bei \(v=u\) verschwindet die Sekante. Warum?</h3>
+      <div class="mcwahl" id="c3-wahl"></div>
+    </div>
+    <div class="check-item">
+      <h3>4. Was beschreibt die Steigung der Tangente an der Stelle \(x=1\)?</h3>
+      <div class="mcwahl" id="c4-wahl"></div>
+    </div>
+
+    <button class="btn btn-pruefen" onclick="pruefeCheck()">Alle prüfen</button>
+    <div class="zusammenfassung" id="zsf"></div>
+
+    <h3 class="rechnen-titel">Jetzt rechnen! (mit dem Grafikrechner)</h3>
+    <p>Ändere die Funktion zu <code>f(x)=x^3-3x</code>. Punkt \(A\), Tangente \(t\) und Steigung \(k\) rechnen sich automatisch neu.</p>
+    <div class="kennz">
+      <span class="chip chip-hm">🖩 mit GeoGebra</span>
+      <span class="chip chip-art">🎯 bestimmen</span>
+    </div>
+
+    <p style="margin-bottom:.2rem;"><b>a)</b> Bestimme die Tangentensteigung \(k\) an diesen Stellen:</p>
+    <table class="zahltab">
+      <tr><td>bei \(x=2\)</td><td><input type="text" id="r1" placeholder="?"><span class="feld-status" id="rs1"></span></td></tr>
+      <tr><td>bei \(x=0\)</td><td><input type="text" id="r2" placeholder="?"><span class="feld-status" id="rs2"></span></td></tr>
+    </table>
+
+    <p style="margin:.9rem 0 .2rem;"><b>b)</b> Es gibt <b>zwei</b> Stellen, an denen die Tangente waagerecht verläuft (\(k=0\)). Finde beide.</p>
+    <table class="zahltab">
+      <tr><td>linke Stelle</td><td><input type="text" id="r3" placeholder="?"><span class="feld-status" id="rs3"></span></td></tr>
+      <tr><td>rechte Stelle</td><td><input type="text" id="r4" placeholder="?"><span class="feld-status" id="rs4"></span></td></tr>
+    </table>
+
+    <button class="btn btn-pruefen" onclick="pruefeRechnen()">Ergebnisse prüfen</button>
+    <button class="btn btn-leeren" id="leerenRechnen" style="display:none" onclick="leereRechnen()">Leeren</button>
+    <div class="feedback" id="fbRechnen"></div>
+
+    <div class="stufen-tipps" id="tippsRechnen">
+      <h4>Brauchst du Hilfe? Decke so viel auf, wie du brauchst:</h4>
+      <div class="stufe">
+        <button class="stufe-kopf" onclick="toggleStufe(this)"><span>Tipp 1 – Funktion austauschen</span><span class="stufe-pfeil">▾</span></button>
+        <div class="stufe-inhalt">Tippe <code>f(x)=x^3-3x</code> neu ein (nach <code>^3</code> mit <b>→</b> heraus). Weil \(A\) mit <code>(u,f(u))</code> definiert ist, wandert der Punkt automatisch auf den neuen Graphen – Tangente und Steigung ebenfalls.</div>
+      </div>
+      <div class="stufe">
+        <button class="stufe-kopf" onclick="toggleStufe(this)"><span>Tipp 2 – Zwei waagerechte Tangenten finden</span><span class="stufe-pfeil">▾</span></button>
+        <div class="stufe-inhalt">Der neue Graph hat einen Hochpunkt <b>und</b> einen Tiefpunkt. Zieh <code>u</code> einmal langsam von −3 bis 3 und achte darauf, wann <code>k</code> das Vorzeichen wechselt – dort ist \(k=0\). Beide gesuchten Stellen sind ganze Zahlen.</div>
+      </div>
+      <div class="stufe">
+        <button class="stufe-kopf" onclick="toggleStufe(this)"><span>Tipp 3 – Lösung</span><span class="stufe-pfeil">▾</span></button>
+        <div class="stufe-inhalt">
+          a) Bei \(x=2\) ist \(k=9\), bei \(x=0\) ist \(k=-3\).<br>
+          b) Waagerechte Tangenten bei \(x=-1\) und \(x=1\) – dort liegen Hoch- und Tiefpunkt.
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="trex" id="trex">🦖<span class="bubble">Made by ASzym</span></div>
+
+<script>
+const state = {
+  k1:{geprueft:false, erledigt:false},
+  k2:{mcWahl:null, geprueft:false, erledigt:false},
+  k3:{geprueft:false, erledigt:false},
+  k4:{wahlen:{0:null,1:null,2:null,3:null}, geprueft:false, mcRichtig:false, rechnenRichtig:false, erledigt:false}
+};
+
+function mische(arr){
+  const a=arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+document.querySelectorAll('.tab').forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('aktiv'));
+    document.querySelectorAll('.karte').forEach(k=>k.classList.remove('aktiv'));
+    tab.classList.add('aktiv');
+    document.getElementById(tab.dataset.ziel).classList.add('aktiv');
+  });
+});
+
+function toggleTipp(id){ document.getElementById(id).classList.toggle('offen'); }
+function toggleStufe(btn){ btn.parentElement.classList.toggle('offen'); }
+
+function pruefeFortschritt(){
+  [['k1','d1'],['k2','d2'],['k3','d3'],['k4','d4']].forEach(([k,d])=>{
+    document.getElementById(d).textContent = state[k].erledigt ? '✅' : '';
+  });
+}
+
+function parseZahlOderBruch(s){
+  s=String(s).trim().replace(',', '.');
+  if(s==='') return NaN;
+  const bruch=s.match(/^(-?\d+(?:\.\d+)?)\s*\/\s*(-?\d+(?:\.\d+)?)$/);
+  if(bruch){
+    const z=parseFloat(bruch[1]), n=parseFloat(bruch[2]);
+    return n!==0 ? z/n : NaN;
+  }
+  return parseFloat(s);
+}
+function feldStimmt(id, erwartet, tol){
+  const roh=document.getElementById(id).value;
+  const wert=parseZahlOderBruch(roh);
+  return roh.trim()!=='' && !isNaN(wert) && Math.abs(wert-erwartet)<=(tol!==undefined?tol:0.0001);
+}
+function pruefeGruppen(gruppen){
+  let alleRichtig=true;
+  gruppen.forEach(gr=>{
+    const ok=gr.felder.every(f=>feldStimmt(f.id,f.erwartet,f.tol));
+    const status=document.getElementById(gr.statusId);
+    status.textContent = ok ? '✅' : '❌';
+    status.style.color = ok ? 'var(--green)' : 'var(--red)';
+    if(!ok) alleRichtig=false;
+  });
+  return alleRichtig;
+}
+function leereGruppen(gruppen){
+  gruppen.forEach(gr=>{
+    gr.felder.forEach(f=>{ document.getElementById(f.id).value=''; });
+    document.getElementById(gr.statusId).textContent='';
+  });
+}
+
+/* ===== Statisches Kontrollbild ===== */
+const NS='http://www.w3.org/2000/svg';
+const GEO={W:320,H:260,pad:30,xmin:-2,xmax:3,ymin:-2,ymax:8};
+function sx(v){ return GEO.pad + (v-GEO.xmin)/(GEO.xmax-GEO.xmin)*(GEO.W-2*GEO.pad); }
+function sy(v){ return GEO.H-GEO.pad - (v-GEO.ymin)/(GEO.ymax-GEO.ymin)*(GEO.H-2*GEO.pad); }
+function el(name, attrs){
+  const e=document.createElementNS(NS,name);
+  for(const k in attrs) e.setAttribute(k, attrs[k]);
+  return e;
+}
+function zeichneAchsen(svg){
+  const y0=sy(0), x0=sx(0);
+  for(let v=Math.ceil(GEO.xmin);v<=GEO.xmax;v++){
+    if(v===0) continue;
+    svg.appendChild(el('line',{x1:sx(v),y1:GEO.pad-8,x2:sx(v),y2:GEO.H-GEO.pad+8,stroke:'#eee7dc','stroke-width':1}));
+  }
+  for(let v=Math.ceil(GEO.ymin);v<=GEO.ymax;v+=2){
+    if(v===0) continue;
+    svg.appendChild(el('line',{x1:GEO.pad-8,y1:sy(v),x2:GEO.W-GEO.pad+8,y2:sy(v),stroke:'#eee7dc','stroke-width':1}));
+  }
+  svg.appendChild(el('line',{x1:12,y1:y0,x2:GEO.W-8,y2:y0,stroke:'#22303f','stroke-width':1.6}));
+  svg.appendChild(el('polygon',{points:(GEO.W-8)+','+y0+' '+(GEO.W-17)+','+(y0-4)+' '+(GEO.W-17)+','+(y0+4),fill:'#22303f'}));
+  svg.appendChild(el('line',{x1:x0,y1:GEO.H-10,x2:x0,y2:10,stroke:'#22303f','stroke-width':1.6}));
+  svg.appendChild(el('polygon',{points:x0+',10 '+(x0-4)+',19 '+(x0+4)+',19',fill:'#22303f'}));
+  [-1,1,2,3].forEach(v=>{
+    svg.appendChild(el('line',{x1:sx(v),y1:y0-4,x2:sx(v),y2:y0+4,stroke:'#22303f','stroke-width':1.6}));
+    const t=el('text',{x:sx(v),y:y0+16,'font-size':10,fill:'#22303f','text-anchor':'middle'});
+    t.textContent=v; svg.appendChild(t);
+  });
+  [2,4,6,8].forEach(v=>{
+    svg.appendChild(el('line',{x1:x0-4,y1:sy(v),x2:x0+4,y2:sy(v),stroke:'#22303f','stroke-width':1.6}));
+    const t=el('text',{x:x0-8,y:sy(v)+3.5,'font-size':10,fill:'#22303f','text-anchor':'end'});
+    t.textContent=v; svg.appendChild(t);
+  });
+  const tx=el('text',{x:GEO.W-14,y:y0-8,'font-size':12,'font-style':'italic',fill:'#22303f','text-anchor':'end'});
+  tx.textContent='x'; svg.appendChild(tx);
+  const ty=el('text',{x:x0+8,y:20,'font-size':12,'font-style':'italic',fill:'#22303f'});
+  ty.textContent='y'; svg.appendChild(ty);
+}
+function zeichneKurve(svg, fn, farbe, breite){
+  const teile=[]; let akt=[];
+  for(let i=0;i<=240;i++){
+    const x=GEO.xmin+(GEO.xmax-GEO.xmin)*i/240;
+    const y=fn(x);
+    if(isFinite(y) && y>=GEO.ymin && y<=GEO.ymax){
+      akt.push(sx(x).toFixed(1)+','+sy(y).toFixed(1));
+    }else if(akt.length){ teile.push(akt); akt=[]; }
+  }
+  if(akt.length) teile.push(akt);
+  teile.forEach(teil=>{
+    if(teil.length<2) return;
+    svg.appendChild(el('polyline',{points:teil.join(' '),fill:'none',stroke:farbe,'stroke-width':breite,'stroke-linecap':'round'}));
+  });
+}
+function zeichneKontrollbild(){
+  const svg=document.getElementById('svgKontrolle');
+  svg.innerHTML='';
+  zeichneAchsen(svg);
+  zeichneKurve(svg, x=>x*x, '#c97a2e', 2.6);
+  zeichneKurve(svg, x=>2*x-1, '#2f5fa6', 2.4);
+  svg.appendChild(el('circle',{cx:sx(1),cy:sy(1),r:5.5,fill:'#2f5fa6',stroke:'#fff','stroke-width':2}));
+  const t=el('text',{x:sx(1)+9,y:sy(1)+4,'font-size':12,'font-weight':'bold',fill:'#2f5fa6'});
+  t.textContent='A'; svg.appendChild(t);
+}
+
+/* ===== KARTE 1: Grenzprozess ===== */
+const GRENZ_GRUPPEN=[
+  {statusId:'s1', felder:[{id:'z1',erwartet:3}]},
+  {statusId:'s2', felder:[{id:'z2',erwartet:2.5}]},
+  {statusId:'s3', felder:[{id:'z3',erwartet:2.1}]},
+  {statusId:'s4', felder:[{id:'z4',erwartet:2.01,tol:0.0005}]}
+];
+function pruefeGrenz(){
+  const ok=pruefeGruppen(GRENZ_GRUPPEN);
+  state.k1.geprueft=true;
+  const fb=document.getElementById('fb1');
+  if(ok){
+    fb.className='feedback zeig ok';
+    fb.textContent='✅ Alle vier Werte stimmen. Erkennst du es? Die Steigungen nähern sich immer weiter dem Wert 2 an.';
+    state.k1.erledigt=true;
+    document.getElementById('leeren1').style.display='none';
+    document.getElementById('tipps1').classList.remove('zeig');
+  }else{
+    fb.className='feedback zeig nok';
+    fb.textContent='❌ Mindestens ein Wert stimmt noch nicht. Prüfe, ob u wirklich auf 1 steht – und ob du v genau treffen konntest.';
+    document.getElementById('leeren1').style.display='inline-block';
+    document.getElementById('tipps1').classList.add('zeig');
+  }
+  pruefeFortschritt();
+}
+function leereGrenz(){
+  leereGruppen(GRENZ_GRUPPEN);
+  document.getElementById('fb1').className='feedback';
+  document.getElementById('leeren1').style.display='none';
+  state.k1={geprueft:false, erledigt:false};
+  pruefeFortschritt();
+}
+
+/* ===== KARTE 2 ===== */
+const MC2_OPTIONEN=mische([
+  {t:'m gilt für ein ganzes Intervall, k nur für eine einzelne Stelle', korrekt:true},
+  {t:'m und k sind immer gleich groß', korrekt:false},
+  {t:'k gilt für ein Intervall, m für eine einzelne Stelle', korrekt:false}
+]);
+const mc2wahl=document.getElementById('mc2-wahl');
+MC2_OPTIONEN.forEach((o,i)=>{
+  const b=document.createElement('button');
+  b.textContent=o.t; b.dataset.i=i;
+  b.addEventListener('click',()=>{
+    if(state.k2.geprueft) return;
+    mc2wahl.querySelectorAll('button').forEach(x=>x.classList.remove('gewaehlt'));
+    b.classList.add('gewaehlt');
+    state.k2.mcWahl=i;
+  });
+  mc2wahl.appendChild(b);
+});
+function pruefeMC2(){
+  if(state.k2.mcWahl===null) return;
+  state.k2.geprueft=true;
+  const fb=document.getElementById('fb2');
+  mc2wahl.querySelectorAll('button').forEach((b,i)=>{
+    if(MC2_OPTIONEN[i].korrekt) b.classList.add('richtig');
+    else if(i===state.k2.mcWahl) b.classList.add('falsch');
+  });
+  if(MC2_OPTIONEN[state.k2.mcWahl].korrekt){
+    fb.className='feedback zeig ok';
+    fb.textContent='✅ Richtig! Die Sekante mittelt über ein Intervall, die Tangente beschreibt eine einzelne Stelle.';
+    state.k2.erledigt=true;
+  }else{
+    fb.className='feedback zeig nok';
+    fb.textContent='❌ Nicht ganz. Die Sekante braucht zwei Punkte – sie beschreibt ein Intervall. Die Tangente berührt nur an einer Stelle.';
+  }
+  pruefeFortschritt();
+}
+
+/* ===== KARTE 3 ===== */
+const ZIEL_GRUPPEN=[
+  {statusId:'ws1', felder:[{id:'w1',erwartet:3}]},
+  {statusId:'ws2', felder:[{id:'w2',erwartet:0}]},
+  {statusId:'ws3', felder:[{id:'w3',erwartet:-2}]}
+];
+function pruefeZiele(){
+  const ok=pruefeGruppen(ZIEL_GRUPPEN);
+  state.k3.geprueft=true;
+  const fb=document.getElementById('fb3');
+  if(ok){
+    fb.className='feedback zeig ok';
+    fb.textContent='✅ Alle drei Stellen stimmen. Fällt dir auf, dass k immer genau das Doppelte von u ist?';
+    state.k3.erledigt=true;
+    document.getElementById('leeren3').style.display='none';
+    document.getElementById('tipps3').classList.remove('zeig');
+  }else{
+    fb.className='feedback zeig nok';
+    fb.textContent='❌ Mindestens ein Wert stimmt noch nicht. Zieh langsam an u und behalte die Zeile mit k im Blick.';
+    document.getElementById('leeren3').style.display='inline-block';
+    document.getElementById('tipps3').classList.add('zeig');
+  }
+  pruefeFortschritt();
+}
+function leereZiele(){
+  leereGruppen(ZIEL_GRUPPEN);
+  document.getElementById('fb3').className='feedback';
+  document.getElementById('leeren3').style.display='none';
+  state.k3={geprueft:false, erledigt:false};
+  pruefeFortschritt();
+}
+
+/* ===== KARTE 4 ===== */
+const CHECK_FRAGEN=[
+  {optionen: mische([
+    {t:'Tangente(A,f)', korrekt:true},
+    {t:'Gerade(A,f)', korrekt:false},
+    {t:'Steigung(A,f)', korrekt:false}
+  ])},
+  {optionen: mische([
+    {t:'Schrittweite verkleinern oder v=1.01 direkt eintippen', korrekt:true},
+    {t:'Das Sichtfenster vergrößern', korrekt:false},
+    {t:'Den Maximalwert des Reglers erhöhen', korrekt:false}
+  ])},
+  {optionen: mische([
+    {t:'A und B fallen zusammen – durch einen Punkt gibt es keine eindeutige Gerade', korrekt:true},
+    {t:'Die Funktion ist dort nicht definiert', korrekt:false},
+    {t:'Die Steigung wird unendlich groß', korrekt:false}
+  ])},
+  {optionen: mische([
+    {t:'Die lokale Änderungsrate an dieser Stelle', korrekt:true},
+    {t:'Die mittlere Änderungsrate von 0 bis 1', korrekt:false},
+    {t:'Den Funktionswert an der Stelle 1', korrekt:false}
+  ])}
+];
+CHECK_FRAGEN.forEach((f,idx)=>{
+  const wrap=document.getElementById('c'+(idx+1)+'-wahl');
+  f.optionen.forEach((o,i)=>{
+    const b=document.createElement('button');
+    b.textContent=o.t; b.dataset.i=i;
+    b.addEventListener('click',()=>{
+      if(state.k4.geprueft) return;
+      wrap.querySelectorAll('button').forEach(x=>x.classList.remove('gewaehlt'));
+      b.classList.add('gewaehlt');
+      state.k4.wahlen[idx]=i;
+    });
+    wrap.appendChild(b);
+  });
+});
+function pruefeCheck(){
+  if(Object.values(state.k4.wahlen).some(v=>v===null)) return;
+  state.k4.geprueft=true;
+  let richtig=0;
+  CHECK_FRAGEN.forEach((f,idx)=>{
+    const wrap=document.getElementById('c'+(idx+1)+'-wahl');
+    wrap.querySelectorAll('button').forEach((b,i)=>{
+      if(f.optionen[i].korrekt) b.classList.add('richtig');
+      else if(i===state.k4.wahlen[idx]) b.classList.add('falsch');
+    });
+    if(f.optionen[state.k4.wahlen[idx]].korrekt) richtig++;
+  });
+  const zsf=document.getElementById('zsf');
+  zsf.classList.add('zeig');
+  zsf.textContent='Du hast '+richtig+' von '+CHECK_FRAGEN.length+' richtig beantwortet.'
+    + (richtig===CHECK_FRAGEN.length ? ' Stark!' : ' Schau dir die roten Antworten an und probiere sie in GeoGebra noch einmal aus.');
+  state.k4.mcRichtig=(richtig===CHECK_FRAGEN.length);
+  aktualisiereK4Fortschritt();
+}
+
+const RECHEN_GRUPPEN=[
+  {statusId:'rs1', felder:[{id:'r1',erwartet:9}]},
+  {statusId:'rs2', felder:[{id:'r2',erwartet:-3}]},
+  {statusId:'rs3', felder:[{id:'r3',erwartet:-1}]},
+  {statusId:'rs4', felder:[{id:'r4',erwartet:1}]}
+];
+function pruefeRechnen(){
+  const ok=pruefeGruppen(RECHEN_GRUPPEN);
+  const fb=document.getElementById('fbRechnen');
+  if(ok){
+    fb.className='feedback zeig ok';
+    fb.textContent='✅ Alle Ergebnisse stimmen! Die beiden Stellen aus b) sind genau Hoch- und Tiefpunkt des Graphen.';
+    document.getElementById('leerenRechnen').style.display='none';
+    document.getElementById('tippsRechnen').classList.remove('zeig');
+  }else{
+    fb.className='feedback zeig nok';
+    fb.textContent='❌ Mindestens ein Ergebnis stimmt noch nicht. Prüfe, ob du die Funktion wirklich auf x^3-3x geändert hast.';
+    document.getElementById('leerenRechnen').style.display='inline-block';
+    document.getElementById('tippsRechnen').classList.add('zeig');
+  }
+  state.k4.rechnenRichtig=ok;
+  aktualisiereK4Fortschritt();
+}
+function leereRechnen(){
+  leereGruppen(RECHEN_GRUPPEN);
+  document.getElementById('fbRechnen').className='feedback';
+  document.getElementById('leerenRechnen').style.display='none';
+  state.k4.rechnenRichtig=false;
+  aktualisiereK4Fortschritt();
+}
+function aktualisiereK4Fortschritt(){
+  state.k4.erledigt = !!(state.k4.mcRichtig && state.k4.rechnenRichtig);
+  pruefeFortschritt();
+}
+
+const trex=document.getElementById('trex');
+trex.addEventListener('click',()=>{
+  trex.classList.add('zeig');
+  setTimeout(()=>trex.classList.remove('zeig'),1800);
+});
+
+zeichneKontrollbild();
+pruefeFortschritt();
+</script>
+</body>
+</html>
