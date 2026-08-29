@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Parameter und Schieberegler – Lernseite EF</title>
-<meta name="description" content="Erarbeitungsseite für die EF: Schieberegler im GeoGebra-Grafikrechner selbst anlegen, eine Funktionenschar aufbauen und Parameter gezielt so einstellen, dass vorgegebene Nullstellen oder Punkte getroffen werden.">
-<meta name="keywords" content="GeoGebra, Grafikrechner, Schieberegler, Parameter, Funktionenschar, Schrittweite, Nullstellen, EF">
+<title>Sekante und mittlere Änderungsrate – Lernseite EF</title>
+<meta name="description" content="Erarbeitungsseite für die EF: In GeoGebra Punkte auf einen Graphen legen, eine Sekante durch sie zeichnen und ihre Steigung als mittlere Änderungsrate bestimmen.">
+<meta name="keywords" content="GeoGebra, Grafikrechner, Sekante, Steigung, mittlere Änderungsrate, Differenzenquotient, Gerade, EF">
 <meta name="typ" content="Lernseite">
 <meta name="klasse" content="EF">
 <meta name="fach" content="mathe">
 <meta name="oberthema" content="GeoGebra Grafikrechner">
-<meta name="thema" content="Parameter und Schieberegler">
+<meta name="thema" content="Sekante und mittlere Änderungsrate">
 <script>
   MathJax = {
     tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
@@ -77,7 +77,6 @@
     font-family:'Courier New',monospace;font-size:.95em;
   }
 
-  /* Bauanleitung */
   .bauen{
     border:3px solid var(--blue);border-radius:.7rem;background:#f4f8fd;
     padding:1rem 1.1rem;margin:1.2rem 0;
@@ -151,7 +150,6 @@
   .demo-pfeil{font-weight:800;color:var(--orange);}
   .demo-ergebnis{font-weight:700;font-size:1.05rem;}
 
-  /* Kontrollbild (statisch, nur zum Vergleichen) */
   .kontrollbild{
     border:2px dashed var(--line);border-radius:.7rem;background:#fff;
     padding:.8rem;margin:1rem auto;max-width:23rem;text-align:center;
@@ -161,27 +159,10 @@
     display:block;margin-top:.5rem;font-size:.9rem;color:#6b6354;font-weight:600;
   }
 
-  /* Paare verbinden */
-  .zuordnen-wrap{display:flex;flex-wrap:wrap;gap:1.2rem;margin:1rem 0;}
-  .zuordnen-spalte{flex:1 1 12rem;}
-  .zuordnen-spalte h3{font-size:1rem;margin:.2rem 0 .6rem;color:var(--orange-dark);}
-  .zitem{
-    min-height:44px;border:2px solid var(--line);background:#fff;border-radius:.6rem;
-    padding:.5rem .8rem;margin-bottom:.5rem;font-weight:600;cursor:pointer;
-    display:flex;align-items:center;
-    transition:background .12s,border-color .12s,transform .05s;
+  .formel{
+    text-align:center;font-size:1.15rem;background:var(--orange-light);
+    border:2px solid var(--orange);border-radius:.5rem;padding:.9rem;margin:1rem 0;
   }
-  .zitem:active{transform:scale(.98);}
-  .zitem.gewaehlt{background:#dce9f7;border-color:#3a6ea5;}
-  .zitem.verbunden{background:#e6f4ea;border-color:var(--green);color:var(--green);cursor:default;}
-  .zitem.falsch-markiert{background:#fbe4e4;border-color:var(--red);}
-  .zitem-inhalt{flex:1;}
-  .paar-badge{
-    display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;
-    min-width:1.6rem;height:1.6rem;border-radius:50%;margin-right:.7rem;
-    background:#3a6ea5;color:#fff;font-size:.85rem;font-weight:800;
-  }
-  .paar-badge.unsichtbar{background:transparent;color:transparent;}
 
   .vgl{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.98rem;}
   .vgl th,.vgl td{border:2px solid var(--line);padding:.55rem .7rem;text-align:left;}
@@ -197,7 +178,6 @@
   .mcwahl button.richtig{background:var(--green);color:#fff;border-color:var(--green);}
   .mcwahl button.falsch{background:var(--red);color:#fff;border-color:var(--red);}
 
-  /* Aufgabenblock mit Vorgabe-Einstellung */
   .aufgabe{
     border:2px solid var(--line);border-radius:.7rem;padding:1rem;margin:1rem 0;background:#fff;
   }
@@ -218,8 +198,14 @@
   }
   input[type=text]:focus{outline:none;border-color:var(--orange);}
   .feld-status{margin-left:.5rem;font-weight:800;font-size:1.1rem;}
-  .punkt-zeile{display:flex;flex-wrap:wrap;align-items:center;gap:.4rem;margin:.6rem 0;font-weight:600;}
-  .punkt-zeile input{width:6rem;}
+
+  .frac{
+    display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;
+    margin:0 .2em;font-size:1em;line-height:1.15;
+  }
+  .frac span{display:block;padding:0 .35em;}
+  .frac span:first-child{border-bottom:1.8px solid currentColor;padding-bottom:.1em;}
+  .frac span:last-child{padding-top:.1em;}
 
   .stufen-tipps{display:none;margin:1rem 0;}
   .stufen-tipps.zeig{display:block;}
@@ -256,14 +242,14 @@
 <body>
 <header>
   <span class="typ">Erarbeitung · EF</span>
-  <h1>Parameter und Schieberegler</h1>
-  <p>Auf dieser Seite arbeitest du die ganze Zeit <b>in GeoGebra</b>. Du baust dir selbst eine Funktion mit drei Reglern und stellst sie dann gezielt so ein, dass vorgegebene Ergebnisse herauskommen.</p>
-  <p class="serie">Lernhappen 4 der EF-Reihe „GeoGebra Grafikrechner"</p>
+  <h1>Sekante und mittlere Änderungsrate</h1>
+  <p>Du baust dir in GeoGebra eine Sekante, die du über Regler verschieben kannst – und liest ihre Steigung direkt ab. Das ist das Werkzeug, mit dem später die Tangente kommt.</p>
+  <p class="serie">Lernhappen 5 der EF-Reihe „GeoGebra Grafikrechner"</p>
 </header>
 
 <nav class="tabs" id="tabs">
-  <button class="tab aktiv" data-ziel="k1">1 · Regler anlegen <span class="done" id="d1"></span></button>
-  <button class="tab" data-ziel="k2">2 · Schar bauen <span class="done" id="d2"></span></button>
+  <button class="tab aktiv" data-ziel="k1">1 · Punkte setzen <span class="done" id="d1"></span></button>
+  <button class="tab" data-ziel="k2">2 · Sekante bauen <span class="done" id="d2"></span></button>
   <button class="tab" data-ziel="k3">3 · Gezielt einstellen <span class="done" id="d3"></span></button>
   <button class="tab" data-ziel="k4">4 · Überprüfe dich <span class="done" id="d4"></span></button>
 </nav>
@@ -271,52 +257,43 @@
 <main>
   <!-- KARTE 1 -->
   <section class="karte aktiv" id="k1">
-    <h2>Einen Schieberegler anlegen</h2>
-    <p>Bisher hast du feste Funktionen eingegeben. Jetzt kommt ein <b>Parameter</b> dazu – ein Buchstabe, der für eine Zahl steht, die du verändern kannst.</p>
+    <h2>Punkte auf den Graphen setzen</h2>
+    <p>Für eine Sekante brauchst du zwei Punkte, die <b>wirklich auf dem Graphen liegen</b>. Tippst du einen Punkt einfach als Zahlenpaar ein, liegt er irgendwo – und rutscht vom Graphen, sobald sich die Funktion ändert. Der Trick: Die \(y\)-Koordinate <b>ausrechnen lassen</b>.</p>
+
+    <div class="demo-liste">
+      <div class="demo-zeile"><span class="demo-tipp">Fest:</span> <code>A=(1,1)</code> <span class="demo-pfeil">→</span> <span class="demo-ergebnis">Punkt bei \((1|1)\) – zufällig auf dem Graphen</span></div>
+      <div class="demo-zeile"><span class="demo-tipp">Besser:</span> <code>A=(1,f(1))</code> <span class="demo-pfeil">→</span> <span class="demo-ergebnis">Punkt <b>immer</b> auf dem Graphen</span></div>
+    </div>
+
+    <div class="merk">
+      <b>Warum das der bessere Weg ist:</b> Bei <code>A=(1,f(1))</code> holt sich GeoGebra die Höhe direkt aus der Funktion. Änderst du später den Funktionsterm, wandert der Punkt automatisch mit. Bei festen Zahlen bliebe er stehen – und die Sekante wäre plötzlich falsch.
+    </div>
 
     <div class="bauen">
-      <h3>🔧 In GeoGebra ausprobieren</h3>
+      <h3>🔧 Baue das in GeoGebra auf</h3>
       <ol>
-        <li>Tippe <code>a=1</code> und bestätige mit <b>Enter</b>. GeoGebra legt die Zahl \(a\) an.</li>
-        <li>Links vor dieser Zeile siehst du einen kleinen <b>Kreis</b>. Tippe ihn an – jetzt erscheint \(a\) als <b>Schieberegler</b> in der Grafik-Ansicht.</li>
-        <li>Tippe <code>f(x)=a*x^2</code> ein (nach dem Exponenten mit <b>→</b> heraus).</li>
-        <li>Zieh am Regler und beobachte, wie sich der Graph sofort mitverändert.</li>
+        <li>Gib die Funktion ein: <code>f(x)=x^2</code></li>
+        <li>Lege zwei Regler an und blende beide mit dem <b>Kreis</b> ein:<br>
+          <code>u=1</code> &nbsp;·&nbsp; <code>v=3</code></li>
+        <li>Stelle bei beiden die <b>Schrittweite auf 0.5</b>, Bereich <b>Min −5 / Max 5</b>.</li>
+        <li>Setze die beiden Punkte auf den Graphen:<br>
+          <code>A=(u,f(u))</code> &nbsp;·&nbsp; <code>B=(v,f(v))</code></li>
+        <li>Zieh am Regler <code>u</code> – der Punkt \(A\) muss dabei <b>am Graphen entlangwandern</b>.</li>
       </ol>
     </div>
 
     <div class="werkzeug">
-      <h3>👆 Auch ohne Befehl: das Werkzeug „Schieberegler"</h3>
+      <h3>👆 Auch ohne Befehl: Punkte antippen statt eintippen</h3>
       <p class="wz-intro">Nicht alles muss über die Eingabezeile laufen: Neben <b>Algebra</b> gibt es den Reiter <b>Werkzeuge</b>. Dort liegen dieselben Objekte als antippbare Werkzeuge bereit – oft der schnellere und anschaulichere Einstieg.</p>
       <ol>
-        <li><b>Werkzeuge</b> → Gruppe <b>Einfache Werkzeuge</b> → <b>Schieberegler</b>.</li>
-        <li>Auf eine <b>freie Stelle</b> der Zeichenfläche tippen.</li>
-        <li>Im Dialog trägst du gleich <b>Name</b>, <b>Min</b>, <b>Max</b> und <b>Schrittweite</b> ein – der Regler ist damit sofort fertig eingestellt <b>und sichtbar</b>.</li>
-        <li>Wieder auf <b>Bewegen</b> umschalten, dann kannst du ziehen.</li>
+        <li><b>Werkzeuge</b> → Gruppe <b>Punkte</b> → <b>Punkt auf Objekt</b>.</li>
+        <li>Zweimal auf den Graphen tippen – fertig sind zwei Punkte, die beide <b>an der Kurve kleben</b>.</li>
+        <li>Wieder auf <b>Bewegen</b> umschalten; jetzt lassen sie sich am Graphen entlangziehen.</li>
       </ol>
-      <p class="wz-fazit"><b>Wann welcher Weg?</b> Dieses Werkzeug spart genau die zwei Schritte, die oben am häufigsten schiefgehen: den Kreis antippen, damit der Regler überhaupt erscheint, und das Nachjustieren von Bereich und Schrittweite über die Einstellungen. Am besten kombinierst du: den <b>Regler mit dem Werkzeug</b> anlegen, die <b>Funktion</b> <code>f(x)=a*x^2</code> wie gewohnt in die <b>Eingabezeile</b> tippen. Der Regler steuert sie trotzdem – denn beide Wege erzeugen dasselbe Objekt \(a\).</p>
+      <p class="wz-fazit"><b>Wann welcher Weg?</b> Das ist der schnellste Einstieg und sehr anschaulich – probier es ruhig zuerst so aus. Für diese Seite brauchst du danach trotzdem die getippte Variante <code>A=(u,f(u))</code>: Nur damit triffst du die Stellen \(u=1\) und \(v=3\) <b>exakt</b> und kannst \(v\) später auf \(1{,}01\) stellen. Mit dem Finger gezogene Punkte landen bei \(1{,}03\) oder \(0{,}97\) – zum Erkunden gut, zum Rechnen zu ungenau.</p>
     </div>
 
-    <div class="merk">
-      <b>Der entscheidende Schritt ist Nummer 2.</b> Ohne das Antippen des Kreises existiert \(a\) zwar, ist aber <b>nicht sichtbar</b> – und du hast nichts zum Ziehen. Das ist der häufigste Grund, warum „der Regler nicht kommt".
-    </div>
-
-    <div class="tipp-box" id="tipp1">
-      <button class="tipp-kopf" onclick="toggleTipp('tipp1')">
-        <span>💡 Bereich und Schrittweite des Reglers einstellen</span>
-        <span class="tipp-pfeil">▾</span>
-      </button>
-      <div class="tipp-inhalt">
-        Standardmäßig läuft ein Regler von \(-5\) bis \(5\). Über das Menü-Symbol der Zeile → <b>Einstellungen</b> kommst du zum Reiter <b>Schieberegler</b>. Dort stellst du <b>Min</b>, <b>Max</b> und die <b>Schrittweite</b> ein.
-        <br><br>
-        Die Schrittweite ist wichtiger, als sie aussieht: Mit <code>0.1</code> wird es fein, mit <code>0.5</code> oder <code>1</code> springt der Regler auf runde Werte. Willst du gezielt \(a=2\) treffen statt \(a=1{,}97\), stell die Schrittweite passend ein – sonst suchst du dich krumm.
-      </div>
-    </div>
-
-    <div class="merk">
-      <b>Warum sich das lohnt:</b> Ohne Parameter müsstest du \(f(x)=x^{2}\), \(f(x)=2x^{2}\), \(f(x)=3x^{2}\) … alle einzeln eintippen. Mit einem Regler siehst du die ganze <b>Funktionenschar</b> in einer einzigen Bewegung.
-    </div>
-
-    <p class="frage">Zwischenfrage: Du hast <code>a=1</code> eingegeben, aber es erscheint kein Regler in der Grafik-Ansicht. Woran liegt es?</p>
+    <p class="frage">Zwischenfrage: Warum schreibt man \(A=(u,f(u))\) statt \(A=(u,1)\)?</p>
     <div class="kennz">
       <span class="chip chip-hm">🖩 mit GeoGebra</span>
       <span class="chip chip-art">📋 Bedienung – keine Rechnung nötig</span>
@@ -328,103 +305,136 @@
 
   <!-- KARTE 2 -->
   <section class="karte" id="k2">
-    <h2>Die Funktionenschar bauen</h2>
-    <p>Jetzt baust du dir das Werkzeug, mit dem du auf der nächsten Karte arbeitest: eine Parabel mit <b>drei</b> Reglern.</p>
+    <h2>Die Sekante bauen und ihre Steigung ablesen</h2>
+    <p>Eine <b>Sekante</b> ist die Gerade durch zwei Punkte des Graphen. In GeoGebra brauchst du dafür genau einen Befehl:</p>
+
+    <div class="demo-liste">
+      <div class="demo-zeile"><span class="demo-tipp">Du tippst:</span> <code>s=Gerade(A,B)</code> <span class="demo-pfeil">→</span> <span class="demo-ergebnis">die Sekante durch \(A\) und \(B\)</span></div>
+      <div class="demo-zeile"><span class="demo-tipp">Du tippst:</span> <code>Steigung(s)</code> <span class="demo-pfeil">→</span> <span class="demo-ergebnis">ihre Steigung als Zahl</span></div>
+    </div>
 
     <div class="bauen">
-      <h3>🔧 Baue das in GeoGebra auf</h3>
+      <h3>🔧 Ergänze deine Konstruktion</h3>
       <ol>
-        <li>Lege drei Zahlen an und blende jede mit dem <b>Kreis</b> als Regler ein:<br>
-          <code>a=1</code> &nbsp;·&nbsp; <code>c=0</code> &nbsp;·&nbsp; <code>d=0</code></li>
-        <li>Stelle bei allen drei Reglern die <b>Schrittweite auf 0.5</b> und den Bereich auf <b>Min −5 / Max 5</b> (Menü der Zeile → Einstellungen → Schieberegler).</li>
-        <li>Gib die Vergleichsfunktion ein: <code>g(x)=x^2</code></li>
-        <li>Gib die Schar ein: <code>f(x)=a*(x-c)^2+d</code><br>
-          <span style="font-size:.93rem;color:#6b6354;">Achtung: Nach <code>^2</code> erst mit <b>→</b> aus dem Exponenten heraus, dann <code>+d</code> tippen.</span></li>
+        <li>Tippe <code>s=Gerade(A,B)</code> – die Sekante erscheint.</li>
+        <li>Tippe <code>m=Steigung(s)</code> – GeoGebra gibt die Steigung als Zahl aus.</li>
+        <li>Stelle <code>u=1</code> und <code>v=3</code> ein. Vergleiche mit dem Kontrollbild unten.</li>
+        <li>Zieh nun an <code>v</code> und beobachte, wie sich <b>m</b> dabei laufend ändert.</li>
       </ol>
+    </div>
+
+    <div class="werkzeug">
+      <h3>👆 Auch ohne Befehl: Gerade und Steigung als Werkzeug</h3>
+      <p class="wz-intro">Nicht alles muss über die Eingabezeile laufen – im Reiter <b>Werkzeuge</b> (neben <b>Algebra</b>) geht das hier auch mit dem Finger.</p>
+      <ol>
+        <li><b>Werkzeuge</b> → Gruppe <b>Linien</b> → <b>Gerade</b>. Dann nacheinander auf <b>A</b> und <b>B</b> tippen – die Sekante ist gezogen.</li>
+        <li><b>Werkzeuge</b> → Gruppe <b>Messen</b> → <b>Steigung</b>. Auf die Gerade tippen – GeoGebra schreibt die Steigung als Zahl in die Grafik und zeichnet dazu das <b>Steigungsdreieck</b>.</li>
+        <li>Danach wieder auf <b>Bewegen</b> umschalten – sonst setzt jeder weitere Tipp ein neues Objekt.</li>
+      </ol>
+      <p class="wz-fazit"><b>Warum sich das hier besonders lohnt:</b> Das <b>Steigungsdreieck</b> macht sichtbar, was die Zahl \(m\) überhaupt bedeutet – wie weit man nach rechts geht und wie viel es dabei nach oben geht. Das siehst du beim getippten Befehl nicht. <b>Und der schönste Nebeneffekt:</b> Nach dem Antippen steht die Gerade mit ihrer Gleichung in der <b>Algebra-Ansicht</b> (GeoGebra vergibt dafür selbst einen Namen, den du im Menü der Zeile ändern kannst) – genau so, als hättest du <code>Gerade(A,B)</code> getippt. Du kannst also mit dem Werkzeug anfangen und den <b>Befehl danach in der Algebra-Ansicht ablesen</b>. Für diese Seite brauchst du am Ende trotzdem <code>s=Gerade(A,B)</code> und <code>m=Steigung(s)</code>: Nur mit eigenen Namen kannst du \(m\) später weiterverwenden.</p>
     </div>
 
     <div class="kontrollbild">
-      <svg id="svgKontrolle" viewBox="0 0 320 260" role="img" aria-label="Kontrollbild: Normalparabel im Koordinatensystem"></svg>
-      <span class="bu">Kontrollbild: So muss es bei dir aussehen, solange <b>a = 1, c = 0, d = 0</b> eingestellt ist – die orange Schar liegt genau auf der grauen Vergleichsparabel.</span>
+      <svg id="svgKontrolle" viewBox="0 0 320 260" role="img" aria-label="Kontrollbild: Parabel mit Sekante durch die Punkte A und B"></svg>
+      <span class="bu">Kontrollbild bei <b>u = 1</b> und <b>v = 3</b>: Die Sekante schneidet die Parabel in \(A(1|1)\) und \(B(3|9)\). GeoGebra zeigt <b>m = 4</b>.</span>
     </div>
 
-    <div class="bauen">
-      <h3>🔧 Jetzt probier die Regler aus</h3>
-      <ol>
-        <li>Zieh <b>nur</b> an <code>d</code> und beobachte, wohin sich der Graph bewegt. Danach zurück auf 0.</li>
-        <li>Zieh <b>nur</b> an <code>c</code>. Achte genau auf die <b>Richtung</b> – die überrascht viele. Danach zurück auf 0.</li>
-        <li>Zieh <b>nur</b> an <code>a</code>, auch in den negativen Bereich. Danach zurück auf 1.</li>
-      </ol>
+    <div class="merk">
+      <b>Was diese Steigung bedeutet:</b> Sie sagt, wie stark sich die Funktionswerte <b>im Durchschnitt</b> ändern, wenn man von \(x=1\) bis \(x=3\) geht. Deshalb heißt sie <b>mittlere Änderungsrate</b>. Zwischendurch ist der Graph mal flacher, mal steiler – die Sekante mittelt das aus.
     </div>
 
-    <p class="frage">Jetzt du: Verbinde jeden Parameter mit dem, was du in GeoGebra beobachtet hast. Tippe zuerst links an, dann rechts.</p>
+    <div class="tipp-box" id="tipp2">
+      <button class="tipp-kopf" onclick="toggleTipp('tipp2')">
+        <span>💡 Was, wenn <code>Steigung</code> keine Zahl ausgibt?</span>
+        <span class="tipp-pfeil">▾</span>
+      </button>
+      <div class="tipp-inhalt">
+        Zwei häufige Ursachen:
+        <ul style="margin:.4rem 0 0;padding-left:1.2rem;">
+          <li><b>\(A\) und \(B\) liegen aufeinander</b> (also <code>u=v</code>). Dann gibt es keine eindeutige Gerade – schieb einen Regler weg.</li>
+          <li>Du hast <code>Steigung(A,B)</code> statt <code>Steigung(s)</code> getippt. Der Befehl braucht die <b>Gerade</b>, nicht die beiden Punkte.</li>
+        </ul>
+        Übrigens: Wenn du <code>m=Steigung(s)</code> schreibst, kannst du den Wert später weiterverwenden – genau wie bei den Variablen aus Lernhappen 1.
+      </div>
+    </div>
+
+    <p class="frage">Jetzt du: Stelle die Regler wie angegeben ein und lies jeweils <code>m</code> ab.</p>
     <div class="kennz">
-      <span class="chip chip-hm">🖩 in GeoGebra beobachten</span>
-      <span class="chip chip-art">💭 beschreiben – nicht rechnen</span>
+      <span class="chip chip-hm">🖩 mit GeoGebra</span>
+      <span class="chip chip-art">🎯 bestimmen – Befehl erlaubt</span>
     </div>
 
-    <div class="zuordnen-wrap">
-      <div class="zuordnen-spalte">
-        <h3>Parameter</h3>
-        <div id="p-links"></div>
-      </div>
-      <div class="zuordnen-spalte">
-        <h3>Wirkung auf den Graphen</h3>
-        <div id="p-rechts"></div>
-      </div>
-    </div>
-    <button class="btn btn-pruefen" onclick="pruefePaare()">Prüfen</button>
-    <button class="btn btn-leeren" id="leeren2" style="display:none" onclick="leerePaare()">Leeren</button>
+    <table class="zahltab">
+      <tr><td><span class="einstellung">u = 1</span> <span class="einstellung">v = 2</span></td><td><input type="text" id="z1" placeholder="m = ?"><span class="feld-status" id="s1"></span></td></tr>
+      <tr><td><span class="einstellung">u = 2</span> <span class="einstellung">v = 4</span></td><td><input type="text" id="z2" placeholder="m = ?"><span class="feld-status" id="s2"></span></td></tr>
+      <tr><td><span class="einstellung">u = −1</span> <span class="einstellung">v = 2</span></td><td><input type="text" id="z3" placeholder="m = ?"><span class="feld-status" id="s3"></span></td></tr>
+    </table>
+
+    <button class="btn btn-pruefen" onclick="pruefeSteigungen()">Prüfen</button>
+    <button class="btn btn-leeren" id="leeren2" style="display:none" onclick="leereSteigungen()">Leeren</button>
     <div class="feedback" id="fb2"></div>
 
-    <div class="merk" style="border-left-color:var(--red);background:#fbe4e4;">
-      <b>⚠️ Falls dich \(c\) überrascht hat:</b> \(f(x)=(x-2)^{2}\) verschiebt <b>nach rechts</b>, obwohl im Term ein Minus steht. Stell es in GeoGebra ein und schau selbst: Bei \(c=2\) liegt der tiefste Punkt bei \(x=2\).
+    <div class="stufen-tipps" id="tipps2">
+      <h4>Brauchst du Hilfe? Decke so viel auf, wie du brauchst:</h4>
+      <div class="stufe">
+        <button class="stufe-kopf" onclick="toggleStufe(this)"><span>Tipp 1 – Regler genau treffen</span><span class="stufe-pfeil">▾</span></button>
+        <div class="stufe-inhalt">Wenn du einen Wert am Regler nicht genau triffst, tippe ihn einfach neu in die Eingabezeile: <code>u=-1</code> setzt den Regler exakt auf −1.</div>
+      </div>
+      <div class="stufe">
+        <button class="stufe-kopf" onclick="toggleStufe(this)"><span>Tipp 2 – Wo lese ich m ab?</span><span class="stufe-pfeil">▾</span></button>
+        <div class="stufe-inhalt">In der Algebra-Ansicht steht die Zeile <code>m=Steigung(s)</code> mit dem aktuellen Zahlenwert. Der ändert sich sofort mit, sobald du einen Regler bewegst – du musst nichts neu eintippen.</div>
+      </div>
+      <div class="stufe">
+        <button class="stufe-kopf" onclick="toggleStufe(this)"><span>Tipp 3 – Lösung</span><span class="stufe-pfeil">▾</span></button>
+        <div class="stufe-inhalt">Von 1 bis 2: \(m=3\). &nbsp; Von 2 bis 4: \(m=6\). &nbsp; Von −1 bis 2: \(m=1\).</div>
+      </div>
     </div>
   </section>
 
   <!-- KARTE 3 -->
   <section class="karte" id="k3">
     <h2>Gezielt einstellen</h2>
-    <p>Jetzt wird es ernst: Du bekommst ein <b>Ziel</b> vorgegeben und musst die Regler in GeoGebra so einstellen, dass es erreicht wird. Danach trägst du den gesuchten Wert hier ein.</p>
-    <p>Du arbeitest weiter mit <b>\(f(x)=a\cdot(x-c)^{2}+d\)</b> von Karte 2.</p>
+    <p>Bisher hast du eingestellt und abgelesen. Jetzt drehen wir es um: Du bekommst die <b>Steigung vorgegeben</b> und musst den Regler so einstellen, dass sie herauskommt.</p>
+
+    <div class="formel">
+      \(m = \) <span class="frac"><span>\(f(v)-f(u)\)</span><span>\(v-u\)</span></span>
+    </div>
+
+    <div class="merk">
+      <b>Das kannst du in GeoGebra auch direkt eintippen</b> – ganz ohne Punkte und Gerade:
+      <div class="demo-liste" style="margin:.6rem 0 0;">
+        <div class="demo-zeile"><span class="demo-tipp">Du tippst:</span> <code>(f(3)-f(1))/(3-1)</code> <span class="demo-pfeil">→</span> <span class="demo-ergebnis"><code>4</code></span></div>
+      </div>
+      <p style="margin:.6rem 0 0;">Beide Wege führen zum selben Ergebnis. Die Konstruktion mit Reglern zeigt dir <b>zusätzlich das Bild</b> dazu – und darum geht es hier.</p>
+    </div>
 
     <div class="kennz">
       <span class="chip chip-hm">🖩 mit GeoGebra – Regler einstellen</span>
-      <span class="chip chip-art">🎯 bestimmen – am Graphen bzw. mit Befehl prüfen</span>
+      <span class="chip chip-art">🎯 bestimmen – am Wert m ablesen</span>
     </div>
 
     <div class="aufgabe">
       <h4>Aufgabe 1</h4>
-      <p>Stelle ein: <span class="einstellung">a = 1</span> <span class="einstellung">c = 3</span></p>
-      <p>Verändere nun <b>nur \(d\)</b> so lange, bis die Nullstellen bei \(x=1\) und \(x=5\) liegen. Kontrolliere mit <code>Nullstelle(f)</code>.</p>
+      <p>Lass \(A\) fest: <span class="einstellung">u = 1</span></p>
+      <p>Verschiebe nun <b>nur \(v\)</b>, bis die Sekante die Steigung <b>\(m=5\)</b> hat. Bei welchem \(x\)-Wert liegt \(B\) dann, also welchen Wert hat \(v\)?</p>
       <table class="zahltab">
-        <tr><td>\(d =\)</td><td><input type="text" id="z1" placeholder="?"><span class="feld-status" id="s1"></span></td></tr>
+        <tr><td>\(v =\)</td><td><input type="text" id="w1" placeholder="?"><span class="feld-status" id="ws1"></span></td></tr>
       </table>
     </div>
 
     <div class="aufgabe">
       <h4>Aufgabe 2</h4>
-      <p>Lass die Einstellung aus Aufgabe 1 stehen. An welcher Stelle schneidet der Graph jetzt die <b>\(y\)-Achse</b>? Tippe dazu <code>f(0)</code> ein.</p>
+      <p>Wieder <span class="einstellung">u = 1</span>. Stelle \(v\) so ein, dass \(m=3\) herauskommt.</p>
       <table class="zahltab">
-        <tr><td>\(y\)-Achsenabschnitt</td><td><input type="text" id="z2" placeholder="?"><span class="feld-status" id="s2"></span></td></tr>
+        <tr><td>\(v =\)</td><td><input type="text" id="w2" placeholder="?"><span class="feld-status" id="ws2"></span></td></tr>
       </table>
     </div>
 
     <div class="aufgabe">
       <h4>Aufgabe 3</h4>
-      <p>Stelle ein: <span class="einstellung">a = 1</span> <span class="einstellung">d = 0</span></p>
-      <p>Verändere nun <b>nur \(c\)</b> so, dass der Graph die \(x\)-Achse genau bei \(x=-2\) berührt.</p>
+      <p>Wieder <span class="einstellung">u = 1</span>. Stelle \(v\) so ein, dass die Sekante <b>waagerecht</b> verläuft, also \(m=0\) gilt.</p>
       <table class="zahltab">
-        <tr><td>\(c =\)</td><td><input type="text" id="z3" placeholder="?"><span class="feld-status" id="s3"></span></td></tr>
-      </table>
-    </div>
-
-    <div class="aufgabe">
-      <h4>Aufgabe 4</h4>
-      <p>Stelle ein: <span class="einstellung">c = −2</span> <span class="einstellung">d = 0</span></p>
-      <p>Verändere nun <b>nur \(a\)</b> so, dass der Graph durch den Punkt \(P(0|8)\) verläuft. Kontrolliere mit <code>f(0)</code>.</p>
-      <table class="zahltab">
-        <tr><td>\(a =\)</td><td><input type="text" id="z4" placeholder="?"><span class="feld-status" id="s4"></span></td></tr>
+        <tr><td>\(v =\)</td><td><input type="text" id="w3" placeholder="?"><span class="feld-status" id="ws3"></span></td></tr>
       </table>
     </div>
 
@@ -436,26 +446,18 @@
       <h4>Brauchst du Hilfe? Decke so viel auf, wie du brauchst:</h4>
       <div class="stufe">
         <button class="stufe-kopf" onclick="toggleStufe(this)"><span>Tipp 1 – Wie gehe ich vor?</span><span class="stufe-pfeil">▾</span></button>
-        <div class="stufe-inhalt">Stelle immer <b>zuerst</b> die vorgegebenen Regler ein und fasse sie danach nicht mehr an. Dann ziehst du langsam am gesuchten Regler und beobachtest, wann das Ziel erreicht ist. Mit Schrittweite <code>0.5</code> triffst du alle gesuchten Werte genau.</div>
+        <div class="stufe-inhalt">Stelle zuerst <code>u=1</code> ein und fass diesen Regler nicht mehr an. Dann zieh langsam an <code>v</code> und beobachte dabei die Zeile mit <code>m</code> in der Algebra-Ansicht, bis der gesuchte Wert dasteht.</div>
       </div>
       <div class="stufe">
-        <button class="stufe-kopf" onclick="toggleStufe(this)"><span>Tipp 2 – Womit kontrolliere ich?</span><span class="stufe-pfeil">▾</span></button>
-        <div class="stufe-inhalt">
-          Nicht raten, sondern nachsehen:
-          <ul style="margin:.4rem 0 0;padding-left:1.2rem;">
-            <li>Nullstellen: <code>Nullstelle(f)</code> – gibt die Punkte aus, x-Koordinate ablesen.</li>
-            <li>\(y\)-Achsenabschnitt: einfach <code>f(0)</code> eintippen.</li>
-            <li>Punkt \(P(0|8)\) treffen: ebenfalls <code>f(0)</code> – der Wert muss 8 werden.</li>
-          </ul>
-        </div>
+        <button class="stufe-kopf" onclick="toggleStufe(this)"><span>Tipp 2 – Bei Aufgabe 3 gut hinschauen</span><span class="stufe-pfeil">▾</span></button>
+        <div class="stufe-inhalt">Waagerecht heißt: \(A\) und \(B\) liegen <b>gleich hoch</b>. Such also die zweite Stelle, an der die Parabel denselben Funktionswert hat wie bei \(x=1\). Tipp: Schau dir die Parabel links von der \(y\)-Achse an.</div>
       </div>
       <div class="stufe">
         <button class="stufe-kopf" onclick="toggleStufe(this)"><span>Tipp 3 – Lösung</span><span class="stufe-pfeil">▾</span></button>
         <div class="stufe-inhalt">
-          <b>1)</b> \(d=-4\) – der Scheitel liegt bei \(x=3\), und die Nullstellen sollen 2 Einheiten links und rechts davon liegen.<br>
-          <b>2)</b> \(f(0)=(0-3)^{2}-4=9-4=5\)<br>
-          <b>3)</b> \(c=-2\) – der Scheitel liegt bei \(x=c\), und bei \(d=0\) berührt er die \(x\)-Achse.<br>
-          <b>4)</b> \(a=2\) – denn \(f(0)=a\cdot(0+2)^{2}=4a\), und \(4a=8\) ergibt \(a=2\).
+          <b>1)</b> \(v=4\) &nbsp; <b>2)</b> \(v=2\) &nbsp; <b>3)</b> \(v=-1\)
+          <br><br>
+          Zum Nachdenken: Bei \(f(x)=x^{2}\) und \(u=1\) gilt immer \(m=v+1\). Deshalb sind die Antworten so glatt – und bei \(m=0\) landet man bei \(v=-1\), wo \(f(-1)=f(1)=1\) ist.
         </div>
       </div>
     </div>
@@ -464,22 +466,22 @@
   <!-- KARTE 4 -->
   <section class="karte" id="k4">
     <h2>Überprüfe dich</h2>
-    <p>Zuerst ein paar Fragen zur Bedienung, danach zwei Aufgaben am Grafikrechner.</p>
+    <p>Erst ein paar Fragen zur Bedienung, danach Aufgaben am Grafikrechner.</p>
 
     <div class="check-item">
-      <h3>1. Du hast <code>c=0</code> eingegeben, aber kein Regler erscheint. Was tust du?</h3>
+      <h3>1. Welcher Befehl liefert die Steigung der Sekante \(s\)?</h3>
       <div class="mcwahl" id="c1-wahl"></div>
     </div>
     <div class="check-item">
-      <h3>2. Der Regler springt auf 1,97 statt genau auf 2. Was stellst du um?</h3>
+      <h3>2. Warum setzt man \(A=(u,f(u))\) statt fester Zahlen?</h3>
       <div class="mcwahl" id="c2-wahl"></div>
     </div>
     <div class="check-item">
-      <h3>3. Wie prüfst du in GeoGebra am schnellsten, ob ein Graph durch \(P(0|8)\) geht?</h3>
+      <h3>3. <code>Steigung(s)</code> gibt nichts aus. Was ist am wahrscheinlichsten?</h3>
       <div class="mcwahl" id="c3-wahl"></div>
     </div>
     <div class="check-item">
-      <h3>4. Wozu legt man überhaupt einen Parameter statt fester Zahlen an?</h3>
+      <h3>4. Was beschreibt die Steigung der Sekante zwischen \(x=1\) und \(x=3\)?</h3>
       <div class="mcwahl" id="c4-wahl"></div>
     </div>
 
@@ -487,33 +489,18 @@
     <div class="zusammenfassung" id="zsf"></div>
 
     <h3 class="rechnen-titel">Jetzt rechnen! (mit dem Grafikrechner)</h3>
-    <p>Stelle die Regler wie angegeben ein und bestimme die gefragten Werte. Dezimalzahlen mit <b>Punkt</b>.</p>
+    <p>Ändere in deiner Konstruktion die Funktion zu <code>f(x)=x^3-4x</code>. Alles andere – Punkte, Sekante, Steigung – passt sich automatisch an, weil du \(A\) und \(B\) mit \(f\) definiert hast.</p>
     <div class="kennz">
       <span class="chip chip-hm">🖩 mit GeoGebra</span>
       <span class="chip chip-art">🎯 bestimmen</span>
     </div>
 
-    <div class="aufgabe">
-      <h4>a)</h4>
-      <p>Stelle ein: <span class="einstellung">a = −2</span> <span class="einstellung">c = −3</span> <span class="einstellung">d = 5</span></p>
-      <div class="punkt-zeile">
-        Scheitelpunkt \(S\)( <input type="text" id="r1" placeholder="x"> | <input type="text" id="r2" placeholder="y"> )
-        <span class="feld-status" id="rs1"></span>
-      </div>
-      <table class="zahltab">
-        <tr><td>\(f(1) =\)</td><td><input type="text" id="r3" placeholder="?"><span class="feld-status" id="rs2"></span></td></tr>
-      </table>
-    </div>
-
-    <div class="aufgabe">
-      <h4>b)</h4>
-      <p>Stelle ein: <span class="einstellung">a = 0.5</span> <span class="einstellung">c = 4</span> <span class="einstellung">d = −3</span></p>
-      <p>Bestimme die beiden Nullstellen mit <code>Nullstelle(f)</code>, auf drei Nachkommastellen gerundet.</p>
-      <table class="zahltab">
-        <tr><td>kleinere Nullstelle</td><td><input type="text" id="r4" placeholder="?"><span class="feld-status" id="rs3"></span></td></tr>
-        <tr><td>größere Nullstelle</td><td><input type="text" id="r5" placeholder="?"><span class="feld-status" id="rs4"></span></td></tr>
-      </table>
-    </div>
+    <p style="margin-bottom:.2rem;">Bestimme die mittlere Änderungsrate von \(f(x)=x^{3}-4x\) in diesen Intervallen:</p>
+    <table class="zahltab">
+      <tr><td>von \(x=0\) bis \(x=2\)</td><td><input type="text" id="r1" placeholder="?"><span class="feld-status" id="rs1"></span></td></tr>
+      <tr><td>von \(x=1\) bis \(x=3\)</td><td><input type="text" id="r2" placeholder="?"><span class="feld-status" id="rs2"></span></td></tr>
+      <tr><td>von \(x=-2\) bis \(x=1\)</td><td><input type="text" id="r3" placeholder="?"><span class="feld-status" id="rs3"></span></td></tr>
+    </table>
 
     <button class="btn btn-pruefen" onclick="pruefeRechnen()">Ergebnisse prüfen</button>
     <button class="btn btn-leeren" id="leerenRechnen" style="display:none" onclick="leereRechnen()">Leeren</button>
@@ -522,16 +509,20 @@
     <div class="stufen-tipps" id="tippsRechnen">
       <h4>Brauchst du Hilfe? Decke so viel auf, wie du brauchst:</h4>
       <div class="stufe">
-        <button class="stufe-kopf" onclick="toggleStufe(this)"><span>Tipp 1 – Regler auf krumme Werte</span><span class="stufe-pfeil">▾</span></button>
-        <div class="stufe-inhalt">Für <code>a = 0.5</code> brauchst du die Schrittweite <code>0.5</code> oder feiner. Alternativ kannst du den Wert auch direkt eintippen: Tippe einfach <code>a=0.5</code> erneut in die Eingabezeile – der Regler springt dann auf diesen Wert.</div>
+        <button class="stufe-kopf" onclick="toggleStufe(this)"><span>Tipp 1 – Funktion austauschen</span><span class="stufe-pfeil">▾</span></button>
+        <div class="stufe-inhalt">Tippe einfach <code>f(x)=x^3-4x</code> neu in die Eingabezeile (nach <code>^3</code> mit <b>→</b> heraus). GeoGebra ersetzt die alte Funktion; \(A\), \(B\), \(s\) und \(m\) rechnen sich sofort neu.</div>
       </div>
       <div class="stufe">
-        <button class="stufe-kopf" onclick="toggleStufe(this)"><span>Tipp 2 – Scheitelpunkt und Nullstellen</span><span class="stufe-pfeil">▾</span></button>
-        <div class="stufe-inhalt">Der Scheitelpunkt ist bei dieser Schar immer \(S(c|d)\) – du kannst ihn also direkt an deinen Reglern ablesen. Die Nullstellen holst du dir mit <code>Nullstelle(f)</code>; achte darauf, die <b>x</b>-Koordinate der ausgegebenen Punkte einzutragen.</div>
+        <button class="stufe-kopf" onclick="toggleStufe(this)"><span>Tipp 2 – Zwei mögliche Wege</span><span class="stufe-pfeil">▾</span></button>
+        <div class="stufe-inhalt">Entweder du stellst die Regler auf die beiden Intervallgrenzen und liest <code>m</code> ab – oder du tippst den Bruch direkt ein, z. B. <code>(f(2)-f(0))/(2-0)</code>. Nimm ruhig beide und vergleiche: Es muss dasselbe herauskommen.</div>
       </div>
       <div class="stufe">
         <button class="stufe-kopf" onclick="toggleStufe(this)"><span>Tipp 3 – Lösung</span><span class="stufe-pfeil">▾</span></button>
-        <div class="stufe-inhalt">a) \(S(-3|5)\) und \(f(1)=-2\cdot(1+3)^{2}+5=-2\cdot16+5=-27\).<br>b) Die Nullstellen liegen bei \(x=4\pm\sqrt{6}\), also \(x_1\approx 1{,}551\) und \(x_2\approx 6{,}449\).</div>
+        <div class="stufe-inhalt">
+          Von 0 bis 2: \(m=0\) – denn \(f(0)=0\) und \(f(2)=0\), beide Punkte liegen gleich hoch.<br>
+          Von 1 bis 3: \(m=9\) – aus \(f(1)=-3\) und \(f(3)=15\).<br>
+          Von −2 bis 1: \(m=-1\) – aus \(f(-2)=0\) und \(f(1)=-3\).
+        </div>
       </div>
     </div>
   </section>
@@ -542,7 +533,7 @@
 <script>
 const state = {
   k1:{mcWahl:null, geprueft:false, erledigt:false},
-  k2:{ausgewaehlt:null, verbunden:{}, geprueft:false, erledigt:false},
+  k2:{geprueft:false, erledigt:false},
   k3:{geprueft:false, erledigt:false},
   k4:{wahlen:{0:null,1:null,2:null,3:null}, geprueft:false, mcRichtig:false, rechnenRichtig:false, erledigt:false}
 };
@@ -607,9 +598,9 @@ function leereGruppen(gruppen){
   });
 }
 
-/* ===== Statisches Kontrollbild (nur zum Vergleichen, nicht interaktiv) ===== */
+/* ===== Statisches Kontrollbild ===== */
 const NS='http://www.w3.org/2000/svg';
-const GEO={W:320,H:260,pad:28,xmin:-4,xmax:4,ymin:-3,ymax:7};
+const GEO={W:320,H:260,pad:30,xmin:-1,xmax:4,ymin:-2,ymax:10};
 function sx(v){ return GEO.pad + (v-GEO.xmin)/(GEO.xmax-GEO.xmin)*(GEO.W-2*GEO.pad); }
 function sy(v){ return GEO.H-GEO.pad - (v-GEO.ymin)/(GEO.ymax-GEO.ymin)*(GEO.H-2*GEO.pad); }
 function el(name, attrs){
@@ -619,24 +610,24 @@ function el(name, attrs){
 }
 function zeichneAchsen(svg){
   const y0=sy(0), x0=sx(0);
-  for(let v=-4;v<=4;v++){
+  for(let v=Math.ceil(GEO.xmin);v<=GEO.xmax;v++){
     if(v===0) continue;
-    svg.appendChild(el('line',{x1:sx(v),y1:GEO.pad-6,x2:sx(v),y2:GEO.H-GEO.pad+6,stroke:'#eee7dc','stroke-width':1}));
+    svg.appendChild(el('line',{x1:sx(v),y1:GEO.pad-8,x2:sx(v),y2:GEO.H-GEO.pad+8,stroke:'#eee7dc','stroke-width':1}));
   }
-  for(let v=-3;v<=7;v++){
+  for(let v=Math.ceil(GEO.ymin);v<=GEO.ymax;v+=2){
     if(v===0) continue;
-    svg.appendChild(el('line',{x1:GEO.pad-6,y1:sy(v),x2:GEO.W-GEO.pad+6,y2:sy(v),stroke:'#eee7dc','stroke-width':1}));
+    svg.appendChild(el('line',{x1:GEO.pad-8,y1:sy(v),x2:GEO.W-GEO.pad+8,y2:sy(v),stroke:'#eee7dc','stroke-width':1}));
   }
   svg.appendChild(el('line',{x1:12,y1:y0,x2:GEO.W-8,y2:y0,stroke:'#22303f','stroke-width':1.6}));
   svg.appendChild(el('polygon',{points:(GEO.W-8)+','+y0+' '+(GEO.W-17)+','+(y0-4)+' '+(GEO.W-17)+','+(y0+4),fill:'#22303f'}));
   svg.appendChild(el('line',{x1:x0,y1:GEO.H-10,x2:x0,y2:10,stroke:'#22303f','stroke-width':1.6}));
   svg.appendChild(el('polygon',{points:x0+',10 '+(x0-4)+',19 '+(x0+4)+',19',fill:'#22303f'}));
-  [-3,-2,-1,1,2,3].forEach(v=>{
+  [1,2,3].forEach(v=>{
     svg.appendChild(el('line',{x1:sx(v),y1:y0-4,x2:sx(v),y2:y0+4,stroke:'#22303f','stroke-width':1.6}));
     const t=el('text',{x:sx(v),y:y0+16,'font-size':10,fill:'#22303f','text-anchor':'middle'});
     t.textContent=v; svg.appendChild(t);
   });
-  [-2,2,4,6].forEach(v=>{
+  [2,4,6,8].forEach(v=>{
     svg.appendChild(el('line',{x1:x0-4,y1:sy(v),x2:x0+4,y2:sy(v),stroke:'#22303f','stroke-width':1.6}));
     const t=el('text',{x:x0-8,y:sy(v)+3.5,'font-size':10,fill:'#22303f','text-anchor':'end'});
     t.textContent=v; svg.appendChild(t);
@@ -648,8 +639,8 @@ function zeichneAchsen(svg){
 }
 function zeichneKurve(svg, fn, farbe, breite, gestrichelt){
   const teile=[]; let akt=[];
-  for(let i=0;i<=200;i++){
-    const x=GEO.xmin+(GEO.xmax-GEO.xmin)*i/200;
+  for(let i=0;i<=240;i++){
+    const x=GEO.xmin+(GEO.xmax-GEO.xmin)*i/240;
     const y=fn(x);
     if(isFinite(y) && y>=GEO.ymin && y<=GEO.ymax){
       akt.push(sx(x).toFixed(1)+','+sy(y).toFixed(1));
@@ -667,16 +658,21 @@ function zeichneKontrollbild(){
   const svg=document.getElementById('svgKontrolle');
   svg.innerHTML='';
   zeichneAchsen(svg);
-  zeichneKurve(svg, x=>x*x, '#a89e8c', 3.4, true);
-  zeichneKurve(svg, x=>x*x, '#c97a2e', 2.2, false);
-  svg.appendChild(el('circle',{cx:sx(0),cy:sy(0),r:5,fill:'#c97a2e',stroke:'#fff','stroke-width':2}));
+  zeichneKurve(svg, x=>x*x, '#c97a2e', 2.6, false);
+  zeichneKurve(svg, x=>4*x-3, '#2f5fa6', 2.4, false);
+  // Punkte A und B
+  [[1,1,'A'],[3,9,'B']].forEach(([px,py,name])=>{
+    svg.appendChild(el('circle',{cx:sx(px),cy:sy(py),r:5.5,fill:'#2f5fa6',stroke:'#fff','stroke-width':2}));
+    const t=el('text',{x:sx(px)+9,y:sy(py)+4,'font-size':12,'font-weight':'bold',fill:'#2f5fa6'});
+    t.textContent=name; svg.appendChild(t);
+  });
 }
 
 /* ===== KARTE 1 ===== */
 const MC1_OPTIONEN=mische([
-  {t:'a ist noch nicht eingeblendet – den Kreis vor der Zeile antippen', korrekt:true},
-  {t:'a muss zuerst in einer Funktion vorkommen', korrekt:false},
-  {t:'Schieberegler gibt es nur im CAS-Rechner', korrekt:false}
+  {t:'Damit A auch dann auf dem Graphen bleibt, wenn sich f ändert', korrekt:true},
+  {t:'Weil GeoGebra Punkte nur so zeichnen kann', korrekt:false},
+  {t:'Damit der Punkt eine andere Farbe bekommt', korrekt:false}
 ]);
 const mc1wahl=document.getElementById('mc1-wahl');
 MC1_OPTIONEN.forEach((o,i)=>{
@@ -700,119 +696,52 @@ function pruefeMC1(){
   });
   if(MC1_OPTIONEN[state.k1.mcWahl].korrekt){
     fb.className='feedback zeig ok';
-    fb.textContent='✅ Richtig! Der Kreis vor der Zeile schaltet die Anzeige des Reglers ein.';
+    fb.textContent='✅ Richtig! Die y-Koordinate wird aus f berechnet – der Punkt klebt am Graphen.';
     state.k1.erledigt=true;
   }else{
     fb.className='feedback zeig nok';
-    fb.textContent='❌ Nicht ganz. Die Zahl a existiert bereits – sie wird nur noch nicht angezeigt. Tippe den Kreis links vor der Zeile an.';
+    fb.textContent='❌ Nicht ganz. Der Punkt soll am Graphen kleben bleiben, auch wenn du die Funktion später austauschst.';
   }
   pruefeFortschritt();
 }
 
-/* ===== KARTE 2: Paare verbinden ===== */
-const PAARE=[
-  {id:'0', links:'a', rechtsHTML:'streckt, staucht oder spiegelt die Parabel'},
-  {id:'1', links:'c', rechtsHTML:'verschiebt nach links oder rechts'},
-  {id:'2', links:'d', rechtsHTML:'verschiebt nach oben oder unten'}
+/* ===== KARTE 2 ===== */
+const STEIG_GRUPPEN=[
+  {statusId:'s1', felder:[{id:'z1',erwartet:3}]},
+  {statusId:'s2', felder:[{id:'z2',erwartet:6}]},
+  {statusId:'s3', felder:[{id:'z3',erwartet:1}]}
 ];
-const LINKS_ANORDNUNG=mische(PAARE.map(p=>p.id));
-const RECHTS_ANORDNUNG=mische(PAARE.map(p=>p.id));
-const pLinksWrap=document.getElementById('p-links');
-const pRechtsWrap=document.getElementById('p-rechts');
-LINKS_ANORDNUNG.forEach((id,idx)=>{
-  const p=PAARE.find(x=>x.id===id);
-  const d=document.createElement('div');
-  d.className='zitem'; d.dataset.id=id;
-  d.innerHTML='<span class="paar-badge">'+(idx+1)+'</span><span class="zitem-inhalt"><code>'+p.links+'</code></span>';
-  pLinksWrap.appendChild(d);
-});
-RECHTS_ANORDNUNG.forEach(id=>{
-  const p=PAARE.find(x=>x.id===id);
-  const d=document.createElement('div');
-  d.className='zitem'; d.dataset.id=id;
-  d.innerHTML='<span class="paar-badge unsichtbar" data-badge></span><span class="zitem-inhalt">'+p.rechtsHTML+'</span>';
-  pRechtsWrap.appendChild(d);
-});
-function aktualisierePaareAnzeige(){
-  document.querySelectorAll('#p-links .zitem').forEach(d=>{
-    const id=d.dataset.id;
-    d.classList.toggle('gewaehlt', state.k2.ausgewaehlt===id);
-    d.classList.toggle('verbunden', state.k2.verbunden[id]!==undefined);
-  });
-  document.querySelectorAll('#p-rechts .zitem').forEach(d=>{
-    const id=d.dataset.id;
-    const linksId=Object.keys(state.k2.verbunden).find(l=>state.k2.verbunden[l]===id);
-    const badge=d.querySelector('[data-badge]');
-    if(linksId!==undefined){
-      badge.textContent=(LINKS_ANORDNUNG.indexOf(linksId)+1);
-      badge.classList.remove('unsichtbar');
-    }else{
-      badge.textContent=''; badge.classList.add('unsichtbar');
-    }
-    d.classList.toggle('verbunden', linksId!==undefined);
-  });
-}
-pLinksWrap.addEventListener('click',e=>{
-  const d=e.target.closest('.zitem');
-  if(!d||state.k2.geprueft) return;
-  const id=d.dataset.id;
-  if(state.k2.verbunden[id]!==undefined){
-    delete state.k2.verbunden[id];
-    state.k2.ausgewaehlt=null;
-  }else{
-    state.k2.ausgewaehlt=(state.k2.ausgewaehlt===id)?null:id;
-  }
-  aktualisierePaareAnzeige();
-});
-pRechtsWrap.addEventListener('click',e=>{
-  const d=e.target.closest('.zitem');
-  if(!d||state.k2.geprueft||state.k2.ausgewaehlt===null) return;
-  const id=d.dataset.id;
-  if(Object.values(state.k2.verbunden).includes(id)) return;
-  state.k2.verbunden[state.k2.ausgewaehlt]=id;
-  state.k2.ausgewaehlt=null;
-  aktualisierePaareAnzeige();
-  if(Object.keys(state.k2.verbunden).length===PAARE.length){
-    document.getElementById('leeren2').style.display='inline-block';
-  }
-});
-function pruefePaare(){
-  if(Object.keys(state.k2.verbunden).length<PAARE.length) return;
+function pruefeSteigungen(){
+  const ok=pruefeGruppen(STEIG_GRUPPEN);
   state.k2.geprueft=true;
-  let richtig=0;
-  document.querySelectorAll('#p-links .zitem').forEach(d=>{
-    const id=d.dataset.id;
-    if(state.k2.verbunden[id]===id) richtig++;
-    else d.classList.add('falsch-markiert');
-  });
   const fb=document.getElementById('fb2');
-  if(richtig===PAARE.length){
+  if(ok){
     fb.className='feedback zeig ok';
-    fb.textContent='✅ Alle Paare richtig verbunden!';
+    fb.textContent='✅ Alle drei Steigungen stimmen.';
     state.k2.erledigt=true;
     document.getElementById('leeren2').style.display='none';
+    document.getElementById('tipps2').classList.remove('zeig');
   }else{
     fb.className='feedback zeig nok';
-    fb.textContent='❌ '+richtig+' von '+PAARE.length+' richtig. Zieh den strittigen Regler in GeoGebra noch einmal und schau genau hin.';
+    fb.textContent='❌ Mindestens ein Wert stimmt noch nicht. Prüfe, ob beide Regler wirklich auf den angegebenen Werten stehen.';
     document.getElementById('leeren2').style.display='inline-block';
+    document.getElementById('tipps2').classList.add('zeig');
   }
   pruefeFortschritt();
 }
-function leerePaare(){
-  state.k2={ausgewaehlt:null, verbunden:{}, geprueft:false, erledigt:false};
-  document.querySelectorAll('#p-links .zitem, #p-rechts .zitem').forEach(d=>d.classList.remove('gewaehlt','verbunden','falsch-markiert'));
-  document.querySelectorAll('#p-rechts [data-badge]').forEach(b=>{ b.textContent=''; b.classList.add('unsichtbar'); });
+function leereSteigungen(){
+  leereGruppen(STEIG_GRUPPEN);
   document.getElementById('fb2').className='feedback';
   document.getElementById('leeren2').style.display='none';
+  state.k2={geprueft:false, erledigt:false};
   pruefeFortschritt();
 }
 
-/* ===== KARTE 3: Ziel-Aufgaben ===== */
+/* ===== KARTE 3 ===== */
 const ZIEL_GRUPPEN=[
-  {statusId:'s1', felder:[{id:'z1',erwartet:-4}]},
-  {statusId:'s2', felder:[{id:'z2',erwartet:5}]},
-  {statusId:'s3', felder:[{id:'z3',erwartet:-2}]},
-  {statusId:'s4', felder:[{id:'z4',erwartet:2}]}
+  {statusId:'ws1', felder:[{id:'w1',erwartet:4}]},
+  {statusId:'ws2', felder:[{id:'w2',erwartet:2}]},
+  {statusId:'ws3', felder:[{id:'w3',erwartet:-1}]}
 ];
 function pruefeZiele(){
   const ok=pruefeGruppen(ZIEL_GRUPPEN);
@@ -820,13 +749,13 @@ function pruefeZiele(){
   const fb=document.getElementById('fb3');
   if(ok){
     fb.className='feedback zeig ok';
-    fb.textContent='✅ Alle vier Einstellungen stimmen. Du kannst die Regler jetzt gezielt steuern – genau darum ging es.';
+    fb.textContent='✅ Alle drei Einstellungen stimmen. Du kannst die Sekante jetzt gezielt auf eine vorgegebene Steigung bringen.';
     state.k3.erledigt=true;
     document.getElementById('leeren3').style.display='none';
     document.getElementById('tipps3').classList.remove('zeig');
   }else{
     fb.className='feedback zeig nok';
-    fb.textContent='❌ Mindestens ein Wert stimmt noch nicht. Stelle die vorgegebenen Regler neu ein und prüfe mit Nullstelle(f) bzw. f(0) nach.';
+    fb.textContent='❌ Mindestens ein Wert stimmt noch nicht. Achte darauf, dass u wirklich auf 1 steht, und beobachte m beim Ziehen von v.';
     document.getElementById('leeren3').style.display='inline-block';
     document.getElementById('tipps3').classList.add('zeig');
   }
@@ -843,24 +772,24 @@ function leereZiele(){
 /* ===== KARTE 4 ===== */
 const CHECK_FRAGEN=[
   {optionen: mische([
-    {t:'Den Kreis links vor der Zeile antippen', korrekt:true},
-    {t:'c noch einmal neu eingeben', korrekt:false},
-    {t:'Die Grafik-Ansicht neu laden', korrekt:false}
+    {t:'Steigung(s)', korrekt:true},
+    {t:'Gerade(A,B)', korrekt:false},
+    {t:'Nullstelle(s)', korrekt:false}
   ])},
   {optionen: mische([
-    {t:'Die Schrittweite des Reglers', korrekt:true},
-    {t:'Den Maximalwert des Reglers', korrekt:false},
-    {t:'Das Sichtfenster der Grafik', korrekt:false}
+    {t:'Damit der Punkt immer auf dem Graphen liegt', korrekt:true},
+    {t:'Damit man ihn verschieben kann', korrekt:false},
+    {t:'Damit GeoGebra ihn beschriftet', korrekt:false}
   ])},
   {optionen: mische([
-    {t:'f(0) eintippen und prüfen, ob 8 herauskommt', korrekt:true},
-    {t:'Am Graphen abschätzen', korrekt:false},
-    {t:'Nullstelle(f) eintippen', korrekt:false}
+    {t:'A und B liegen aufeinander (u = v)', korrekt:true},
+    {t:'Die Funktion ist keine Parabel', korrekt:false},
+    {t:'Das Sichtfenster ist zu klein', korrekt:false}
   ])},
   {optionen: mische([
-    {t:'Um viele Funktionen auf einmal untersuchen zu können', korrekt:true},
-    {t:'Weil GeoGebra sonst keinen Graphen zeichnet', korrekt:false},
-    {t:'Damit der Graph bunter wird', korrekt:false}
+    {t:'Die mittlere Änderungsrate in diesem Intervall', korrekt:true},
+    {t:'Die Steigung im Punkt x = 1', korrekt:false},
+    {t:'Den Funktionswert an der Stelle 3', korrekt:false}
   ])}
 ];
 CHECK_FRAGEN.forEach((f,idx)=>{
@@ -898,22 +827,21 @@ function pruefeCheck(){
 }
 
 const RECHEN_GRUPPEN=[
-  {statusId:'rs1', felder:[{id:'r1',erwartet:-3},{id:'r2',erwartet:5}]},
-  {statusId:'rs2', felder:[{id:'r3',erwartet:-27}]},
-  {statusId:'rs3', felder:[{id:'r4',erwartet:4-Math.sqrt(6),tol:0.001}]},
-  {statusId:'rs4', felder:[{id:'r5',erwartet:4+Math.sqrt(6),tol:0.001}]}
+  {statusId:'rs1', felder:[{id:'r1',erwartet:0}]},
+  {statusId:'rs2', felder:[{id:'r2',erwartet:9}]},
+  {statusId:'rs3', felder:[{id:'r3',erwartet:-1}]}
 ];
 function pruefeRechnen(){
   const ok=pruefeGruppen(RECHEN_GRUPPEN);
   const fb=document.getElementById('fbRechnen');
   if(ok){
     fb.className='feedback zeig ok';
-    fb.textContent='✅ Alle Ergebnisse stimmen!';
+    fb.textContent='✅ Alle Ergebnisse stimmen! Beachte das erste: Die mittlere Änderungsrate ist 0, obwohl die Funktion dazwischen alles andere als konstant ist.';
     document.getElementById('leerenRechnen').style.display='none';
     document.getElementById('tippsRechnen').classList.remove('zeig');
   }else{
     fb.className='feedback zeig nok';
-    fb.textContent='❌ Mindestens ein Ergebnis stimmt noch nicht. Prüfe, ob die Regler wirklich auf den vorgegebenen Werten stehen – und runde bei b) auf drei Nachkommastellen.';
+    fb.textContent='❌ Mindestens ein Ergebnis stimmt noch nicht. Prüfe, ob du die Funktion wirklich auf x^3-4x geändert hast.';
     document.getElementById('leerenRechnen').style.display='inline-block';
     document.getElementById('tippsRechnen').classList.add('zeig');
   }
