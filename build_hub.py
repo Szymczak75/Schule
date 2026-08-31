@@ -109,33 +109,67 @@ def read_meta(fp):
 #  Pfad-Analyse
 # ──────────────────────────────────────────────────────────────────────────────
 
+# Zentrale Klassen-Erkennung. Erlaubte Ordnernamen:
+#   klasse05 … klasse10   → "5" … "10"
+#   klasseEF              → "EF"
+#   klasseQ1, klasseQ2    → "Q1", "Q2"
+#   klasseQ1_Q2           → "Q1_Q2"   (Anzeige: "Q1/Q2")
+KLASSE_RE = re.compile(r"klasse(\d{2}|EF|Q1_Q2|Q1|Q2)$")
+
+def klasse_key(seg):
+    """Gibt den normalisierten Klassen-Schlüssel zurück oder None."""
+    m = KLASSE_RE.match(seg)
+    if not m:
+        return None
+    g = m.group(1)
+    if g.isdigit():
+        return str(int(g))
+    return g  # EF, Q1, Q2, Q1_Q2
+
+def klasse_label(key):
+    """Anzeigename für einen Klassen-Schlüssel."""
+    if key in ("EF", "Q1", "Q2"):
+        return key
+    if key == "Q1_Q2":
+        return "Q1/Q2"
+    return f"Klasse {key}"
+
+def klasse_sortkey(key):
+    """Sortierung: Zahlenklassen zuerst, dann EF, Q1, Q2, Q1_Q2."""
+    order = {"EF": 99, "Q1": 101, "Q2": 102, "Q1_Q2": 103}
+    if key in order:
+        return order[key]
+    try:
+        return int(key)
+    except (ValueError, TypeError):
+        return 200
+
 def parse_path(rel):
     parts = rel.split("/")
     fach = parts[0]
     main = fach if fach in FACH_MAIN else "sonst"
     kl = ""
     for seg in parts:
-        mm = re.match(r"klasse(\d{2}|EF)$", seg)
-        if mm:
-            kl = mm.group(1)
-            kl = "EF" if kl == "EF" else str(int(kl))
+        k = klasse_key(seg)
+        if k:
+            kl = k
             break
     alt = any(seg in ALT_ORDNER for seg in parts)
     kachel_dir = parts[-2] if len(parts) >= 2 else fach
 
-    # Einheit auf Klassenebene: ein Ordner direkt unter einem Fach, der KEIN
-    # klasseNN ist und NICHT zur alten Struktur gehört. Wird wie eine Klasse
+    # Einheit auf Klassenebene: ein Ordner direkt unter einem Fach, der KEINE
+    # Klasse ist und NICHT zur alten Struktur gehört. Wird wie eine Klasse
     # (aufklappbarer Button) dargestellt, aber unter eigenem Namen, ganz unten.
     einheit = ""
     if main in FACH_MAIN and not kl and not alt and len(parts) >= 2:
         seg1 = parts[1]
-        if not re.match(r"klasse(\d{2}|EF)$", seg1) and seg1 not in ALT_ORDNER:
+        if not klasse_key(seg1) and seg1 not in ALT_ORDNER:
             einheit = seg1
 
     # thema = Segment direkt nach klasseNN (neue Struktur), sonst kachel_dir
     thema_seg = ""
     for i, seg in enumerate(parts):
-        if re.match(r"klasse(\d{2}|EF)$", seg) and i + 1 < len(parts) - 1:
+        if klasse_key(seg) and i + 1 < len(parts) - 1:
             thema_seg = parts[i + 1]
             break
     return main, fach, kl, alt, kachel_dir, thema_seg, einheit
@@ -232,14 +266,6 @@ def build_kachel(kachel_dir, files, metas):
 # ──────────────────────────────────────────────────────────────────────────────
 #  Hauptaufbau
 # ──────────────────────────────────────────────────────────────────────────────
-
-def klasse_sortkey(k):
-    if k == "EF":
-        return 99
-    try:
-        return int(k)
-    except ValueError:
-        return 100
 
 def klasse_sortkey_str(k):
     # Einheiten (#name) alphabetisch untereinander
@@ -454,9 +480,9 @@ def render_overview(dirpath, root, sub, heute):
         themen[thema][kdir].append((rel, fn))
 
     def seg_label(seg):
-        m = re.match(r"klasse(\d{2}|EF)$", seg)
-        if m:
-            return "EF" if m.group(1) == "EF" else f"Klasse {int(m.group(1))}"
+        k = klasse_key(seg)
+        if k:
+            return klasse_label(k)
         return prettify(seg)
 
     # Kacheln über den vorhandenen Baustein bauen (offen dargestellt).
@@ -581,7 +607,7 @@ def build_fach_card(fach, klassen, alt_klassen, metas, einheiten=None):
             klabel = f"{em} {prettify(ordnername)}"
             btn_icon = ""            # Emoji steckt schon im Label
         else:
-            klabel = "EF" if kl == "EF" else f"Klasse {kl}"
+            klabel = klasse_label(kl)
             btn_icon = "📚 "
         parts.append('  <div class="klasse-wrap">')
         parts.append(f'    <button class="klasse-btn" aria-expanded="false" onclick="toggleKlasse(this)">')
@@ -617,7 +643,7 @@ def build_fach_card(fach, klassen, alt_klassen, metas, einheiten=None):
         for kl in sorted(alt_klassen.keys(), key=klasse_sortkey):
             ordner = alt_klassen[kl]
             n = sum(len(v) for v in ordner.values())
-            klabel = "EF" if kl == "EF" else f"Klasse {kl}"
+            klabel = klasse_label(kl)
             parts.append('      <div class="jgst">')
             parts.append('        <button class="jgst-toggle" aria-expanded="false" onclick="toggleJgst(this)">')
             parts.append(f'          <span class="jgst-label">{klabel} – alt</span><span class="jgst-count">{n}</span><span class="jgst-arrow">▼</span>')
