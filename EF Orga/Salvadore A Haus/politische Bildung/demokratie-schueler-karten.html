@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Demokratie-Workshop – Schülermaterial</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #1a1a2e;
+  --paper: #f5f0e8;
+  --red: #b5341b;
+  --teal: #1a6b5e;
+  --gold: #c8900a;
+  --blue: #1a3a6b;
+  --border: rgba(26,26,46,0.18);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body { height:100%; }
+body { background:var(--ink); font-family:'DM Sans',sans-serif; display:flex; flex-direction:column; align-items:center; min-height:100vh; }
+
+/* ── TOP BAR ── */
+.topbar { width:100%; background:rgba(255,255,255,0.06); border-bottom:1px solid rgba(255,255,255,0.1); padding:0.6rem 1.25rem; display:flex; align-items:center; justify-content:space-between; flex-shrink:0; gap:0.75rem; }
+.topbar-title { font-family:'Playfair Display',serif; font-size:1rem; font-weight:700; color:#fff; letter-spacing:-0.02em; white-space:nowrap; }
+.topbar-title span { color:#c8c06a; }
+
+/* ── NUMBERED DOTS ── */
+.dots { display:flex; gap:0.35rem; align-items:center; flex-wrap:wrap; justify-content:center; }
+.dot {
+  width:28px; height:28px; border-radius:50%;
+  background:rgba(255,255,255,0.12); border:1.5px solid rgba(255,255,255,0.2);
+  color:rgba(255,255,255,0.4); font-size:0.72rem; font-weight:700;
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer; transition:all 0.25s; flex-shrink:0;
+}
+.dot.active { background:#c8c06a; border-color:#c8c06a; color:var(--ink); transform:scale(1.15); }
+.dot.done   { background:rgba(255,255,255,0.35); border-color:rgba(255,255,255,0.35); color:rgba(255,255,255,0.8); }
+
+.card-counter { font-size:0.7rem; color:rgba(255,255,255,0.4); font-weight:600; letter-spacing:0.07em; text-transform:uppercase; white-space:nowrap; text-align:right; min-width:80px; }
+
+/* ── STAGE ── */
+.stage { flex:1; display:flex; align-items:center; justify-content:center; width:100%; padding:1rem 1rem 0; }
+
+/* ── CARD ── */
+.card { background:#fff; border-radius:8px; width:100%; max-width:720px; display:none; flex-direction:column; box-shadow:0 20px 60px rgba(0,0,0,0.4); overflow:hidden; animation:cardIn 0.3s ease; max-height:calc(100vh - 120px); }
+.card.active { display:flex; }
+@keyframes cardIn { from{opacity:0;transform:translateY(8px) scale(0.98)} to{opacity:1;transform:none} }
+
+/* ── CARD HEADER ── */
+.card-header { padding:0.9rem 1.4rem 0.75rem; border-bottom:2px solid var(--border); display:flex; align-items:center; gap:0.9rem; flex-shrink:0; }
+.card-num { font-family:'Playfair Display',serif; font-size:2.2rem; font-weight:900; line-height:1; flex-shrink:0; }
+.card-header-text h2 { font-family:'Playfair Display',serif; font-size:1.2rem; font-weight:700; line-height:1.2; margin-bottom:0.15rem; }
+.card-header-text .subtitle { font-size:0.68rem; font-weight:600; letter-spacing:0.07em; text-transform:uppercase; opacity:0.42; }
+.header-gold { color:var(--gold); }
+.header-red  { color:var(--red); }
+.header-blue { color:var(--blue); }
+
+/* ── CARD BODY ── */
+.card-body { padding:1rem 1.4rem 1.1rem; flex:1; overflow-y:auto; }
+
+/* ── TIMER BLOCK ── */
+.timer-block { background:var(--ink); color:#fff; border-radius:6px; padding:0.8rem 1rem; margin-bottom:0.9rem; display:flex; align-items:center; gap:1rem; flex-shrink:0; }
+.timer-display { font-family:'Playfair Display',serif; font-size:1.9rem; font-weight:900; line-height:1; min-width:72px; letter-spacing:-1px; }
+.timer-display.running { color:#c8c06a; }
+.timer-display.done    { color:#6bcc7a; }
+.timer-display.urgent  { color:#e05540; animation:pulse 0.6s infinite alternate; }
+@keyframes pulse { from{opacity:1} to{opacity:0.5} }
+.timer-label { font-size:0.68rem; opacity:0.5; margin-top:0.2rem; }
+.timer-controls { display:flex; gap:0.35rem; flex-wrap:wrap; }
+.tbtn { padding:0.38rem 0.8rem; font-family:'DM Sans',sans-serif; font-size:0.76rem; font-weight:700; border:1.5px solid rgba(255,255,255,0.3); background:transparent; color:#fff; border-radius:4px; cursor:pointer; transition:all 0.15s; letter-spacing:0.04em; }
+.tbtn:hover { background:rgba(255,255,255,0.12); }
+.tbtn.start { background:var(--teal); border-color:var(--teal); }
+.tbtn.start:hover { background:#14574c; }
+.tbtn.pause { background:var(--gold); border-color:var(--gold); color:var(--ink); }
+.tbtn.blue  { background:#1a3a6b; border-color:#1a3a6b; }
+.tbtn.dark  { background:#2a2a4a; border-color:#2a2a4a; }
+
+/* ── TWO TIMERS ── */
+.dual-timer { display:grid; grid-template-columns:1fr 1fr; gap:0.6rem; margin-bottom:0.9rem; }
+.timer-mini { background:var(--ink); color:#fff; border-radius:6px; padding:0.7rem 0.9rem; display:flex; align-items:center; gap:0.75rem; }
+.timer-mini .timer-display { font-size:1.5rem; min-width:58px; }
+
+/* ── SECTIONS ── */
+.section { margin-bottom:0.85rem; }
+.section-title { font-size:0.65rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:#888; margin-bottom:0.45rem; padding-bottom:0.3rem; border-bottom:1px solid #eee; }
+.section p, .section li { font-size:0.86rem; line-height:1.62; color:#2a2a3a; }
+.section ul, .section ol { padding-left:1.1rem; }
+.section li { margin-bottom:0.22rem; }
+
+/* ── HIGHLIGHT BOX ── */
+.hbox { border-radius:5px; padding:0.7rem 0.9rem; margin-bottom:0.55rem; font-size:0.86rem; line-height:1.58; }
+.hbox-gold { background:#fdf5e0; border-left:4px solid var(--gold); }
+.hbox-red  { background:#fdf0ed; border-left:4px solid var(--red); }
+.hbox-teal { background:#eef8f5; border-left:4px solid var(--teal); }
+.hbox-blue { background:#eef2fc; border-left:4px solid var(--blue); }
+
+/* ── INVENTION GRID ── */
+.inv-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(100px,1fr)); gap:0.35rem; margin-top:0.4rem; }
+.inv-item { border:1.5px solid var(--border); border-radius:4px; padding:0.42rem 0.35rem; text-align:center; font-size:0.76rem; font-weight:600; color:#333; background:#fafaf8; }
+.inv-item .ii { font-size:1.15rem; display:block; margin-bottom:0.1rem; }
+
+/* ── PITCH STEPS ── */
+.pitch-steps { display:flex; flex-direction:column; gap:0.35rem; margin-top:0.35rem; }
+.ps { display:flex; align-items:center; gap:0.6rem; background:#f5f5f5; border-radius:4px; padding:0.5rem 0.75rem; }
+.ps-time { font-weight:700; font-size:0.7rem; background:var(--ink); color:#fff; padding:0.16rem 0.45rem; border-radius:100px; white-space:nowrap; flex-shrink:0; }
+.ps-text { font-size:0.82rem; line-height:1.45; }
+
+/* ── ROLE GRID ── */
+.role-grid { display:grid; grid-template-columns:1fr 1fr; gap:0.45rem; margin-top:0.35rem; }
+.role-card { border:1.5px solid var(--border); border-radius:4px; padding:0.65rem; background:#fafaf8; }
+.role-card .rc-icon  { font-size:1.1rem; margin-bottom:0.15rem; }
+.role-card .rc-name  { font-weight:700; font-size:0.82rem; margin-bottom:0.08rem; }
+.role-card .rc-count { font-size:0.7rem; font-weight:700; color:var(--red); margin-bottom:0.18rem; }
+.role-card .rc-desc  { font-size:0.73rem; color:#555; line-height:1.42; }
+
+/* ── DEBATE FLOW ── */
+.debate-flow { display:flex; flex-direction:column; gap:0.3rem; margin-top:0.35rem; }
+.df-row { display:grid; grid-template-columns:90px 1fr; border-radius:4px; overflow:hidden; border:1.5px solid var(--border); }
+.df-label { padding:0.42rem 0.45rem; font-size:0.67rem; font-weight:700; color:#fff; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; line-height:1.25; }
+.df-label .df-time { font-size:0.62rem; opacity:0.75; margin-top:0.08rem; font-weight:400; }
+.df-content { padding:0.42rem 0.65rem; font-size:0.78rem; line-height:1.45; background:#fff; display:flex; align-items:center; }
+
+/* ── TWO COLUMNS ── */
+.two-col { display:grid; grid-template-columns:1fr 1fr; gap:0.9rem; }
+
+/* ── RULES LIST – PROMINENT ── */
+.rules-list { list-style:none; padding:0; margin-top:0.35rem; }
+.rules-list li {
+  padding:0.48rem 0.5rem 0.48rem 2rem;
+  position:relative;
+  border-bottom:1px solid #eee;
+  font-size:0.83rem;
+  line-height:1.5;
+  background:#fff;
+}
+.rules-list li:last-child { border-bottom:none; }
+.rules-list li::before {
+  content:'▸';
+  position:absolute; left:0.55rem;
+  color:var(--red); font-size:0.82rem; top:0.5rem;
+}
+/* prominent rules card */
+.rules-box {
+  background:#fff8f8;
+  border:2px solid var(--red);
+  border-radius:6px;
+  overflow:hidden;
+  margin-top:0.35rem;
+}
+.rules-box-header {
+  background:var(--red);
+  color:#fff;
+  font-size:0.68rem;
+  font-weight:700;
+  letter-spacing:0.1em;
+  text-transform:uppercase;
+  padding:0.35rem 0.75rem;
+}
+
+/* ── HIDDEN REVEAL ── */
+.reveal-block { display:none; margin-top:0.85rem; border-top:2px dashed var(--border); padding-top:0.85rem; animation:fadeIn 0.4s ease; }
+.reveal-block.visible { display:block; }
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
+.reveal-btn { width:100%; padding:0.6rem; background:var(--ink); color:#fff; border:none; border-radius:5px; font-family:'DM Sans',sans-serif; font-size:0.8rem; font-weight:700; cursor:pointer; margin-top:0.85rem; letter-spacing:0.04em; transition:background 0.15s; }
+.reveal-btn:hover { background:var(--teal); }
+.reveal-btn.hidden-btn { display:none; }
+
+/* ── SCENARIO ── */
+.scenario { background:#fdf3e0; border:1.5px solid #e8c870; border-radius:5px; padding:0.8rem 0.95rem; font-size:0.85rem; line-height:1.65; color:#2a2a1a; margin-bottom:0.6rem; }
+
+/* ── CARD DIVIDER ── */
+.card-divider { border:none; border-top:2px dashed rgba(26,26,46,0.11); margin:0.8rem 0; }
+
+/* ── BOTTOM NAV ── */
+.bottom-nav { width:100%; max-width:720px; display:flex; justify-content:space-between; align-items:center; padding:0.6rem 0 0.9rem; gap:0.75rem; }
+.nav-btn { padding:0.6rem 1.3rem; font-family:'DM Sans',sans-serif; font-weight:700; font-size:0.8rem; letter-spacing:0.05em; text-transform:uppercase; border-radius:5px; cursor:pointer; border:2px solid rgba(255,255,255,0.25); transition:all 0.15s; }
+.nav-prev { background:transparent; color:rgba(255,255,255,0.5); }
+.nav-prev:hover { background:rgba(255,255,255,0.08); color:#fff; }
+.nav-next { background:#fff; color:var(--ink); border-color:#fff; }
+.nav-next:hover { background:#c8c06a; border-color:#c8c06a; }
+.nav-btn:disabled { opacity:0.25; cursor:default; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-title">Demokratie<span>bildung</span></div>
+  <div class="dots" id="dots"></div>
+  <div class="card-counter" id="counter"></div>
+</div>
+
+<div class="stage">
+
+  <!-- ══════════════════════════════════════════════
+       KARTE 1: MODUL 02 – Vorbereitung + Pitch + Timer
+  ══════════════════════════════════════════════ -->
+  <div class="card active" id="card-0">
+    <div class="card-header">
+      <div class="card-num header-gold">02</div>
+      <div class="card-header-text">
+        <h2>Die beste Erfindung der Menschheit</h2>
+        <div class="subtitle">Modul 02 · Einzelarbeit · 5 Min. Vorbereitung + Pitches</div>
+      </div>
+    </div>
+    <div class="card-body">
+
+      <!-- ZWEI TIMER nebeneinander -->
+      <div class="dual-timer">
+        <div class="timer-mini">
+          <div>
+            <div class="timer-display" id="t1a-display">5:00</div>
+            <div class="timer-label">Vorbereitung</div>
+          </div>
+          <div class="timer-controls" style="flex-direction:column;gap:0.3rem;">
+            <button class="tbtn start" onclick="startTimer('t1a',300)">▶ Start</button>
+            <div style="display:flex;gap:0.3rem;">
+              <button class="tbtn pause" onclick="pauseTimer('t1a')">⏸</button>
+              <button class="tbtn" onclick="resetTimer('t1a',300)">↺</button>
+            </div>
+          </div>
+        </div>
+        <div class="timer-mini">
+          <div>
+            <div class="timer-display" id="t1b-display">1:00</div>
+            <div class="timer-label">Pitch je Person</div>
+          </div>
+          <div class="timer-controls" style="flex-direction:column;gap:0.3rem;">
+            <button class="tbtn start" onclick="startTimer('t1b',60)">▶ Start</button>
+            <div style="display:flex;gap:0.3rem;">
+              <button class="tbtn pause" onclick="pauseTimer('t1b')">⏸</button>
+              <button class="tbtn" onclick="resetTimer('t1b',60)">↺</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Aufgabe -->
+      <div class="hbox hbox-gold">
+        <strong>Deine Aufgabe:</strong> Wähle <strong>eine</strong> Erfindung und bereite einen <strong>60-Sekunden-Pitch</strong> vor. Überzeuge die Klasse: Warum ist das die wichtigste Erfindung der Menschheit?
+      </div>
+
+      <!-- Erfindungen -->
+      <div class="section">
+        <div class="section-title">Vorschläge – eigene Ideen ausdrücklich erwünscht!</div>
+        <div class="inv-grid">
+          <div class="inv-item"><span class="ii">🖨️</span>Buchdruck</div>
+          <div class="inv-item"><span class="ii">💉</span>Impfstoff</div>
+          <div class="inv-item"><span class="ii">🌐</span>Internet</div>
+          <div class="inv-item"><span class="ii">⚡</span>Elektrizität</div>
+          <div class="inv-item"><span class="ii">🚜</span>Pflug</div>
+          <div class="inv-item"><span class="ii">🔥</span>Feuer</div>
+          <div class="inv-item"><span class="ii">🛞</span>Rad</div>
+          <div class="inv-item"><span class="ii">🧬</span>Antibiotika</div>
+          <div class="inv-item"><span class="ii">📱</span>Smartphone</div>
+          <div class="inv-item"><span class="ii">✈️</span>Flugzeug</div>
+          <div class="inv-item"><span class="ii">🏛️</span>Demokratie</div>
+          <div class="inv-item"><span class="ii">✍️</span>Schrift</div>
+        </div>
+      </div>
+
+      <hr class="card-divider">
+
+      <!-- Pitch-Struktur -->
+      <div class="section">
+        <div class="section-title">Pitch-Struktur (60 Sekunden)</div>
+        <div class="pitch-steps">
+          <div class="ps"><span class="ps-time">Hook · 10 Sek.</span><span class="ps-text">Überraschende Behauptung oder Frage – Aufmerksamkeit wecken.</span></div>
+          <div class="ps"><span class="ps-time">Argument · 30 Sek.</span><span class="ps-text">Warum ist deine Erfindung die wichtigste? Ein konkretes Beispiel.</span></div>
+          <div class="ps"><span class="ps-time">Schluss · 20 Sek.</span><span class="ps-text">Was wäre die Welt ohne sie? Emotionaler Schlusssatz.</span></div>
+        </div>
+      </div>
+      <div class="hbox hbox-teal">💡 Schreib dir 3 Stichworte auf – sprich aber <em>frei</em>, nicht vom Zettel!</div>
+
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       KARTE 2: MODUL 03 – Rollen
+  ══════════════════════════════════════════════ -->
+  <div class="card" id="card-1">
+    <div class="card-header">
+      <div class="card-num header-red">03</div>
+      <div class="card-header-text">
+        <h2>Die Debatte – Rollenverteilung</h2>
+        <div class="subtitle">Modul 03 · Strukturierte Debatte</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="hbox hbox-red">
+        Die Lehrperson vergibt die Rollen. Schau, welche Rolle du bekommst – und lies dir deine Aufgabe genau durch.
+      </div>
+      <div class="section">
+        <div class="section-title">Rollen &amp; Anzahl</div>
+        <div class="role-grid">
+          <div class="role-card">
+            <div class="rc-icon">🎙️</div>
+            <div class="rc-name">Redner*in</div>
+            <div class="rc-count">4–6 Personen</div>
+            <div class="rc-desc">Vertrittst <em>eine</em> Erfindung. 90 Sek. Eröffnungsrede + 30 Sek. Schlussstatement.</div>
+          </div>
+          <div class="role-card">
+            <div class="rc-icon">⚖️</div>
+            <div class="rc-name">Moderation</div>
+            <div class="rc-count">1–2 Personen</div>
+            <div class="rc-desc">Erteilt das Wort, stoppt Zeit, sorgt für Fairness. Bei 2: eine leitet, eine stoppt Zeit.</div>
+          </div>
+          <div class="role-card">
+            <div class="rc-icon">📝</div>
+            <div class="rc-name">Protokollant*in</div>
+            <div class="rc-count">2 Personen</div>
+            <div class="rc-desc">Eine notiert stärkste Pro-Argumente, eine Gegenargumente. Lesen am Ende vor.</div>
+          </div>
+          <div class="role-card">
+            <div class="rc-icon">🗳️</div>
+            <div class="rc-name">Publikum</div>
+            <div class="rc-count">alle Übrigen</div>
+            <div class="rc-desc">Hört aktiv zu. Fragen nur per Handzeichen über die Moderation. Stimmt geheim ab.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       KARTE 3: MODUL 03 – Ablauf + Regeln + Timer
+  ══════════════════════════════════════════════ -->
+  <div class="card" id="card-2">
+    <div class="card-header">
+      <div class="card-num header-red">03</div>
+      <div class="card-header-text">
+        <h2>Debattenablauf &amp; Regeln</h2>
+        <div class="subtitle">Modul 03 · Timer · Ablauf · Regeln</div>
+      </div>
+    </div>
+    <div class="card-body">
+
+      <!-- TIMER -->
+      <div class="timer-block">
+        <div>
+          <div class="timer-display" id="t2-display">5:00</div>
+          <div class="timer-label" id="t2-label">Vorbereitung Redner*innen</div>
+        </div>
+        <div class="timer-controls">
+          <button class="tbtn start" onclick="setAndStart('t2',300,'Vorbereitung Redner*innen')">▶ 5 Min. Vorbereitung</button>
+          <button class="tbtn blue"  onclick="setAndStart('t2',90,'Eröffnungsrede je Redner*in')">▶ 90 Sek. Rede</button>
+          <button class="tbtn dark"  onclick="setAndStart('t2',300,'Freie Debatte')">▶ 5 Min. Debatte</button>
+          <button class="tbtn dark"  onclick="setAndStart('t2',30,'Schlussstatement je Redner*in')">▶ 30 Sek.</button>
+          <button class="tbtn pause" onclick="pauseTimer('t2')">⏸</button>
+          <button class="tbtn"       onclick="resetTimer('t2',300)">↺</button>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <!-- Ablauf -->
+        <div>
+          <div class="section-title">Ablauf Schritt für Schritt</div>
+          <div class="debate-flow">
+            <div class="df-row">
+              <div class="df-label" style="background:#b5341b;">Eröffnung<span class="df-time">~2 Min.</span></div>
+              <div class="df-content">Moderation begrüßt &amp; liest Regeln vor.</div>
+            </div>
+            <div class="df-row">
+              <div class="df-label" style="background:#c8900a;">Eröffnungs&shy;reden<span class="df-time">je 90 Sek.</span></div>
+              <div class="df-content">Jede*r Redner*in stellt ihre Erfindung vor. Kein Unterbrechen.</div>
+            </div>
+            <div class="df-row">
+              <div class="df-label" style="background:#1a6b5e;">Freie Debatte<span class="df-time">~5 Min.</span></div>
+              <div class="df-content">Handzeichen → Wort. Publikum: 1–2 Fragen. Je 30 Sek.</div>
+            </div>
+            <div class="df-row">
+              <div class="df-label" style="background:#1a1a2e;">Schluss&shy;statement<span class="df-time">je 30 Sek.</span></div>
+              <div class="df-content">Ein letzter Satz pro Redner*in.</div>
+            </div>
+            <div class="df-row">
+              <div class="df-label" style="background:#1a6b5e;">Abstimmung<span class="df-time">~2 Min.</span></div>
+              <div class="df-content">Geheim auf Zettel. Protokollant*innen zählen aus.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Regeln prominent -->
+        <div>
+          <div class="section-title">Regeln</div>
+          <div class="rules-box">
+            <div class="rules-box-header">📜 Debattenregeln – für alle!</div>
+            <ul class="rules-list">
+              <li><strong>90 Sek.</strong> Eröffnungsrede – Moderation stoppt Zeit.</li>
+              <li>Wortmeldung: <strong>Handzeichen</strong>, max. <strong>30 Sek.</strong></li>
+              <li>Nur Argumente angreifen, <strong>nie Personen</strong>.</li>
+              <li>Publikum: <strong>kein Reinrufen</strong> – nur über Moderation.</li>
+              <li>Schlussstatement: <strong>ein Satz</strong>, kein neues Argument.</li>
+              <li>Abstimmung: <strong>geheim auf Zettel</strong>.</li>
+              <li>Minderheit akzeptiert – darf aber sagen, was unbefriedigend war.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       KARTE 4: MODUL 04 – Szenario + Timer + Hintergrundinfo
+  ══════════════════════════════════════════════ -->
+  <div class="card" id="card-3">
+    <div class="card-header">
+      <div class="card-num header-blue">04</div>
+      <div class="card-header-text">
+        <h2>Das Schweigen der Mehrheit</h2>
+        <div class="subtitle">Modul 04 · Kleingruppenarbeit · 8 Minuten</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="timer-block">
+        <div>
+          <div class="timer-display" id="t3-display">8:00</div>
+          <div class="timer-label">Gruppenarbeit</div>
+        </div>
+        <div class="timer-controls">
+          <button class="tbtn start" onclick="startTimer('t3',480,'reveal-info')">▶ Start</button>
+          <button class="tbtn pause" onclick="pauseTimer('t3')">⏸ Pause</button>
+          <button class="tbtn" onclick="resetTimer('t3',480)">↺ Reset</button>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Das Szenario</div>
+        <div class="scenario">
+          Eure Klasse stimmt über das Ziel der nächsten Klassenfahrt ab. Drei Optionen: <strong>Berlin</strong> (Politik), <strong>Paris</strong> (Kultur), <strong>Ostsee</strong> (Erholung). Eine kleine, aber laute Gruppe von 5 Schüler*innen kämpft lautstark für Berlin. Die meisten anderen finden Ostsee schöner – trauen sich aber nicht, das zu sagen.<br><br>
+          Ergebnis: <strong>Berlin gewinnt mit 6 Stimmen</strong> (5 + 1 Unsichere*r). Ostsee erhält nur 4 Stimmen – obwohl im Nachhinein klar wird: <strong>18 von 28</strong> wären lieber dorthin gefahren.
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Eure Aufgabe in der Gruppe (8 Min.)</div>
+        <ol style="padding-left:1.1rem;">
+          <li style="margin-bottom:0.3rem;font-size:0.86rem;line-height:1.6;">Wer trägt die Verantwortung für dieses Ergebnis?</li>
+          <li style="margin-bottom:0.3rem;font-size:0.86rem;line-height:1.6;">War das demokratisch?</li>
+          <li style="font-size:0.86rem;line-height:1.6;">Was hätten die Schweigenden tun können?</li>
+        </ol>
+      </div>
+
+      <div class="reveal-block" id="reveal-info">
+        <div class="section-title">⏱ Zeit abgelaufen – Hintergrundinfo</div>
+        <div class="hbox hbox-blue">
+          <strong>Die Schweigespirale</strong> (Elisabeth Noelle-Neumann, 1974): Menschen verschweigen ihre Meinung, wenn sie glauben, in der Minderheit zu sein – aus Angst vor sozialer Isolation. Je mehr schweigen, desto größer wirkt die laute Mehrheit, desto mehr schweigen andere. Eine laute Minderheit setzt sich durch.<br><br>
+          <strong>→ Was bedeutet das für Social Media? Für Stammtische? Für Abstimmungen in eurer Klasse?</strong>
+        </div>
+      </div>
+      <button class="reveal-btn" id="reveal-btn-info" onclick="revealNow('reveal-info','reveal-btn-info')">🔓 Hintergrundinfo jetzt einblenden</button>
+
+    </div>
+  </div>
+
+</div><!-- /stage -->
+
+<div class="bottom-nav">
+  <button class="nav-btn nav-prev" id="btn-prev" onclick="navigate(-1)" disabled>← Zurück</button>
+  <button class="nav-btn nav-next" id="btn-next" onclick="navigate(1)">Weiter →</button>
+</div>
+
+<script>
+const TOTAL = 4;
+let current = 0;
+const labels = ['02 · Erfindungen & Pitch','03 · Rollen','03 · Ablauf & Regeln','04 · Szenario'];
+
+// numbered dots
+const dotsEl = document.getElementById('dots');
+for (let i = 0; i < TOTAL; i++) {
+  const d = document.createElement('div');
+  d.className = 'dot' + (i === 0 ? ' active' : '');
+  d.textContent = i + 1;
+  d.title = labels[i];
+  d.onclick = () => goTo(i);
+  dotsEl.appendChild(d);
+}
+
+function updateUI() {
+  document.querySelectorAll('.card').forEach((c,i) => c.classList.toggle('active', i === current));
+  document.querySelectorAll('.dot').forEach((d,i) => {
+    d.className = 'dot' + (i === current ? ' active' : i < current ? ' done' : '');
+  });
+  document.getElementById('counter').textContent = labels[current];
+  document.getElementById('btn-prev').disabled = current === 0;
+  document.getElementById('btn-next').textContent = current === TOTAL-1 ? '✓ Fertig' : 'Weiter →';
+  document.getElementById('btn-next').disabled = false;
+}
+
+function navigate(dir) { const n = current + dir; if (n >= 0 && n < TOTAL) goTo(n); }
+function goTo(i) { current = i; updateUI(); window.scrollTo({top:0,behavior:'smooth'}); }
+
+// ── TIMER ENGINE ──
+const timers = {};
+
+function startTimer(id, seconds, revealId) {
+  if (timers[id]?.running) return;
+  if (!timers[id]) timers[id] = { remaining: seconds };
+  timers[id].running = true;
+  const disp = document.getElementById(id + '-display');
+  timers[id].interval = setInterval(() => {
+    timers[id].remaining--;
+    const r = timers[id].remaining;
+    const m = Math.floor(r / 60), s = r % 60;
+    disp.textContent = m + ':' + String(s).padStart(2,'0');
+    disp.className = 'timer-display ' + (r <= 0 ? 'done' : r <= 10 ? 'urgent' : 'running');
+    if (r <= 0) {
+      clearInterval(timers[id].interval);
+      timers[id].running = false;
+      if (revealId) {
+        document.getElementById(revealId).classList.add('visible');
+        const btn = document.getElementById('reveal-btn-' + revealId.replace('reveal-',''));
+        if (btn) btn.classList.add('hidden-btn');
+      }
+    }
+  }, 1000);
+}
+
+function setAndStart(id, seconds, label) {
+  if (timers[id]) { clearInterval(timers[id].interval); timers[id] = null; }
+  const disp = document.getElementById(id + '-display');
+  const lbl  = document.getElementById(id + '-label');
+  disp.textContent = Math.floor(seconds/60) + ':' + String(seconds%60).padStart(2,'0');
+  disp.className = 'timer-display';
+  if (lbl && label) lbl.textContent = label;
+  startTimer(id, seconds, null);
+}
+
+function pauseTimer(id) {
+  if (!timers[id]) return;
+  if (timers[id].running) { clearInterval(timers[id].interval); timers[id].running = false; }
+  else { startTimer(id, timers[id].remaining, null); }
+}
+
+function resetTimer(id, seconds) {
+  if (timers[id]) { clearInterval(timers[id].interval); timers[id] = null; }
+  const disp = document.getElementById(id + '-display');
+  disp.textContent = Math.floor(seconds/60) + ':' + String(seconds%60).padStart(2,'0');
+  disp.className = 'timer-display';
+}
+
+function revealNow(blockId, btnId) {
+  document.getElementById(blockId).classList.add('visible');
+  document.getElementById(btnId).classList.add('hidden-btn');
+}
+</script>
+</body>
+</html>
