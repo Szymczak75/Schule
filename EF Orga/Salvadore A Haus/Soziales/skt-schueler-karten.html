@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sozialkompetenztraining – Schülermaterial</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@700;900&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #1c1c2e;
+  --red:    #b5341b;
+  --teal:   #1a6b5e;
+  --gold:   #c8900a;
+  --blue:   #1a3a6b;
+  --purple: #5b2d8e;
+  --green:  #1a6b2a;
+  --border: rgba(28,28,46,0.16);
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body { height:100%; }
+body { background:var(--ink); font-family:'DM Sans',sans-serif; display:flex; flex-direction:column; align-items:center; min-height:100vh; }
+
+/* ── TOP BAR ── */
+.topbar { width:100%; background:#1c1c2e; border-bottom:1px solid rgba(255,255,255,0.12); flex-shrink:0; }
+.topbar-row1 { display:flex; align-items:center; justify-content:space-between; padding:0.55rem 1.25rem 0.4rem; gap:0.5rem; background:#1c1c2e; }
+.topbar-title { font-family:'Fraunces',serif; font-size:1rem; font-weight:900; color:#fff; white-space:nowrap; }
+.topbar-title span { color:#c8c06a; }
+.card-counter { font-size:0.66rem; color:rgba(255,255,255,0.38); font-weight:600; letter-spacing:0.06em; text-transform:uppercase; white-space:nowrap; }
+
+/* ── NUMBERED DOTS ── */
+.dots-row { width:100%; padding:0.35rem 0.75rem 0.5rem; border-top:1px solid rgba(255,255,255,0.12); background:#1c1c2e; display:flex; align-items:center; justify-content:center; gap:0.3rem; overflow-x:auto; }
+.dot { width:30px; height:30px; border-radius:50%; background:rgba(255,255,255,0.15); border:2px solid rgba(255,255,255,0.7); color:#fff; font-size:0.72rem; font-weight:700; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all 0.25s; flex-shrink:0; }
+.dot.active { background:#c8c06a; border-color:#c8c06a; color:var(--ink); transform:scale(1.15); }
+.dot.done   { background:rgba(255,255,255,0.35); border-color:#fff; color:#fff; }
+
+/* ── STUNDE BADGE ── */
+.stunde-badge { display:inline-flex; align-items:center; gap:0.35rem; font-size:0.65rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; padding:0.18rem 0.6rem; border-radius:100px; margin-bottom:0.3rem; }
+
+/* ── STAGE ── */
+.stage { flex:1; display:flex; align-items:center; justify-content:center; width:100%; padding:1rem 1rem 0; }
+
+/* ── CARD ── */
+.card { background:#fff; border-radius:8px; width:100%; max-width:700px; display:none; flex-direction:column; box-shadow:0 20px 60px rgba(0,0,0,0.4); overflow:hidden; animation:cardIn 0.3s ease; max-height:calc(100vh - 145px); }
+.card.active { display:flex; }
+@keyframes cardIn { from{opacity:0;transform:translateY(8px) scale(0.98)} to{opacity:1;transform:none} }
+
+/* ── CARD HEADER ── */
+.card-header { padding:0.9rem 1.4rem 0.75rem; border-bottom:2px solid var(--border); display:flex; align-items:center; gap:0.9rem; flex-shrink:0; }
+.card-num { font-family:'Fraunces',serif; font-size:2.2rem; font-weight:900; line-height:1; flex-shrink:0; }
+.card-header-text h2 { font-family:'Fraunces',serif; font-size:1.2rem; font-weight:700; line-height:1.2; margin-bottom:0.1rem; }
+.card-header-text .subtitle { font-size:0.67rem; font-weight:600; letter-spacing:0.07em; text-transform:uppercase; opacity:0.4; }
+
+/* ── CARD BODY ── */
+.card-body { padding:1rem 1.4rem 1.1rem; flex:1; overflow-y:auto; }
+
+/* ── TIMER BLOCK ── */
+.timer-block { border-radius:6px; padding:0.8rem 1rem; margin-bottom:0.9rem; display:flex; align-items:center; gap:1rem; flex-shrink:0; }
+.timer-block-dark { background:var(--ink); color:#fff; }
+.timer-display { font-family:'Fraunces',serif; font-size:1.9rem; font-weight:900; line-height:1; min-width:72px; letter-spacing:-1px; }
+.timer-display.running { color:#c8c06a; }
+.timer-display.done    { color:#6bcc7a; }
+.timer-display.urgent  { color:#e05540; animation:pulse 0.6s infinite alternate; }
+@keyframes pulse { from{opacity:1} to{opacity:0.5} }
+.timer-label { font-size:0.67rem; opacity:0.5; margin-top:0.18rem; }
+.timer-controls { display:flex; gap:0.35rem; flex-wrap:wrap; }
+.tbtn { padding:0.38rem 0.8rem; font-family:'DM Sans',sans-serif; font-size:0.75rem; font-weight:700; border:1.5px solid rgba(255,255,255,0.28); background:transparent; color:#fff; border-radius:4px; cursor:pointer; transition:all 0.15s; letter-spacing:0.04em; }
+.tbtn:hover { background:rgba(255,255,255,0.12); }
+.tbtn.go   { border-color:var(--teal); background:var(--teal); }
+.tbtn.go:hover { background:#14574c; }
+.tbtn.pau  { background:var(--gold); border-color:var(--gold); color:var(--ink); }
+
+/* ── SECTIONS ── */
+.section { margin-bottom:0.85rem; }
+.section-title { font-size:0.64rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:#888; margin-bottom:0.45rem; padding-bottom:0.3rem; border-bottom:1px solid #eee; }
+.section p, .section li { font-size:0.87rem; line-height:1.65; color:#2a2a3a; }
+.section ul, .section ol { padding-left:1.1rem; }
+.section li { margin-bottom:0.25rem; }
+
+/* ── HBOX ── */
+.hbox { border-radius:5px; padding:0.72rem 0.9rem; margin-bottom:0.55rem; font-size:0.87rem; line-height:1.58; }
+.hbox-gold   { background:#fdf5e0; border-left:4px solid var(--gold); }
+.hbox-red    { background:#fdf0ed; border-left:4px solid var(--red); }
+.hbox-teal   { background:#eef8f5; border-left:4px solid var(--teal); }
+.hbox-blue   { background:#eef2fc; border-left:4px solid var(--blue); }
+.hbox-purple { background:#f5f0fc; border-left:4px solid var(--purple); }
+.hbox-green  { background:#eef8f0; border-left:4px solid var(--green); }
+
+/* ── ROLE CHIPS ── */
+.role-row { display:flex; gap:0.4rem; flex-wrap:wrap; margin-top:0.4rem; }
+.role-chip { border-radius:4px; padding:0.45rem 0.75rem; font-size:0.78rem; font-weight:700; border:1.5px solid var(--border); background:#fafaf8; display:flex; align-items:center; gap:0.35rem; }
+
+/* ── DIVIDER ── */
+.divider { border:none; border-top:2px dashed rgba(28,28,46,0.1); margin:0.85rem 0; }
+
+/* ── QUESTION LIST ── */
+.q-list { list-style:none; padding:0; }
+.q-list li { padding:0.5rem 0.5rem 0.5rem 1.9rem; position:relative; border-bottom:1px solid #eee; font-size:0.87rem; line-height:1.58; }
+.q-list li:last-child { border-bottom:none; }
+.q-list li::before { position:absolute; left:0.4rem; font-weight:700; font-size:0.8rem; }
+.q-list.numbered li:nth-child(1)::before { content:'1.'; }
+.q-list.numbered li:nth-child(2)::before { content:'2.'; }
+.q-list.numbered li:nth-child(3)::before { content:'3.'; }
+.q-list.numbered li:nth-child(4)::before { content:'4.'; }
+.q-list.numbered li:nth-child(5)::before { content:'5.'; }
+.q-list.arrow li::before { content:'→'; color:var(--teal); }
+
+/* ── WRITE LINES ── */
+.writelines { margin-top:0.4rem; }
+.wline { border-bottom:1.5px solid #d0d0d0; height:2.1rem; margin-bottom:0.2rem; }
+
+/* ── FORMULA BOX ── */
+.formula { background:var(--ink); color:#c8c06a; font-family:'Fraunces',serif; font-size:1rem; font-weight:700; padding:0.75rem 1.1rem; border-radius:5px; text-align:center; margin:0.6rem 0; line-height:1.5; }
+
+/* ── DU→ICH TABLE ── */
+.transform-list { display:flex; flex-direction:column; gap:0.4rem; margin-top:0.4rem; }
+.trow { display:grid; grid-template-columns:1fr 1fr; gap:0.4rem; }
+.tcell { border-radius:4px; padding:0.5rem 0.7rem; font-size:0.82rem; line-height:1.45; }
+.tcell-du  { background:#fdf0ed; border-left:3px solid var(--red); }
+.tcell-ich { background:#eef8f5; border-left:3px solid var(--teal); font-style:italic; color:#555; }
+
+/* ── ROLE CARD GRID ── */
+.role-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:0.45rem; margin-top:0.4rem; }
+.role-card { border:1.5px solid var(--border); border-radius:5px; padding:0.65rem 0.6rem; text-align:center; background:#fafaf8; }
+.role-card .ri { font-size:1.3rem; margin-bottom:0.2rem; }
+.role-card .rn { font-weight:700; font-size:0.8rem; margin-bottom:0.1rem; }
+.role-card .rd { font-size:0.72rem; color:#666; line-height:1.4; }
+
+/* ── SCENARIO BOX ── */
+.scenario { background:#fdf3e0; border:1.5px solid #e8c870; border-radius:6px; padding:0.85rem 1rem; font-size:0.87rem; line-height:1.65; color:#2a2a1a; margin-bottom:0.65rem; }
+
+/* ── HIDDEN REVEAL ── */
+.reveal-block { display:none; margin-top:0.85rem; border-top:2px dashed var(--border); padding-top:0.85rem; animation:fadeIn 0.4s ease; }
+.reveal-block.visible { display:block; }
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
+.reveal-btn { width:100%; padding:0.6rem; background:var(--ink); color:#fff; border:none; border-radius:5px; font-family:'DM Sans',sans-serif; font-size:0.8rem; font-weight:700; cursor:pointer; margin-top:0.85rem; letter-spacing:0.04em; transition:background 0.15s; }
+.reveal-btn:hover { background:var(--teal); }
+.reveal-btn.hidden-btn { display:none; }
+
+/* ── PROMISE CARD ── */
+.promise-card { border:2px solid var(--ink); border-radius:6px; padding:1.1rem 1.2rem; margin-top:0.65rem; min-height:90px; }
+.promise-card .pc-label { font-size:0.68rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:#888; margin-bottom:0.5rem; border-bottom:1px solid #eee; padding-bottom:0.3rem; }
+.promise-card .pc-prompt { font-size:0.95rem; font-style:italic; color:#555; margin-bottom:0.5rem; }
+.promise-card .wline { border-bottom:1.5px solid #d0d0d0; height:2.1rem; margin-bottom:0.2rem; }
+
+/* ── BOTTOM NAV ── */
+.bottom-nav { width:100%; max-width:700px; display:flex; justify-content:space-between; align-items:center; padding:0.6rem 0 0.9rem; gap:0.75rem; }
+.nav-btn { padding:0.6rem 1.3rem; font-family:'DM Sans',sans-serif; font-weight:700; font-size:0.8rem; letter-spacing:0.05em; text-transform:uppercase; border-radius:5px; cursor:pointer; border:2px solid rgba(255,255,255,0.25); transition:all 0.15s; }
+.nav-prev { background:transparent; color:rgba(255,255,255,0.5); }
+.nav-prev:hover { background:rgba(255,255,255,0.08); color:#fff; }
+.nav-next { background:#fff; color:var(--ink); border-color:#fff; }
+.nav-next:hover { background:#c8c06a; border-color:#c8c06a; }
+.nav-btn:disabled { opacity:0.25; cursor:default; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-row1">
+    <div class="topbar-title">Sozial<span>kompetenz</span></div>
+    <div class="card-counter" id="counter"></div>
+  </div>
+  <div class="dots-row" id="dots"></div>
+</div>
+
+<div class="stage">
+
+<!-- ══════════════════════════════════════════════
+     KARTE 1 · Stunde 1 – Selbstportrait
+══════════════════════════════════════════════ -->
+<div class="card active" id="card-0">
+  <div class="card-header">
+    <div class="card-num" style="color:var(--red)">1</div>
+    <div class="card-header-text">
+      <div class="stunde-badge" style="background:#fdf0ed;color:var(--red);">Stunde 1</div>
+      <h2>Mein Selbstportrait</h2>
+      <div class="subtitle">Einzelarbeit · 8 Minuten</div>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="timer-block timer-block-dark">
+      <div><div class="timer-display" id="t0-display">8:00</div><div class="timer-label">Einzelarbeit</div></div>
+      <div class="timer-controls">
+        <button class="tbtn go" onclick="startTimer('t0',480)">▶ Start</button>
+        <button class="tbtn pau" onclick="pauseTimer('t0')">⏸</button>
+        <button class="tbtn" onclick="resetTimer('t0',480)">↺</button>
+      </div>
+    </div>
+    <div class="hbox hbox-gold">
+      <strong>Aufgabe:</strong> Schreib in 8 Minuten dein persönliches Selbstportrait in Worten. Kein Aufsatz – Stichworte reichen.
+    </div>
+    <div class="section">
+      <div class="section-title">Was gehört rein?</div>
+      <ul class="q-list arrow">
+        <li><strong>5 Stärken</strong>, die du an dir selbst siehst</li>
+        <li><strong>1 Schwäche</strong>, die du offen benennen kannst</li>
+        <li>Vervollständige: <em>„Was mich ausmacht, ist …"</em></li>
+      </ul>
+    </div>
+    <hr class="divider">
+    <div class="section">
+      <div class="section-title">Meine Notizen</div>
+      <div class="writelines"><div class="wline"></div><div class="wline"></div><div class="wline"></div><div class="wline"></div><div class="wline"></div><div class="wline"></div></div>
+    </div>
+    <div class="hbox hbox-teal">💡 Das Blatt bleibt bei dir – niemand liest es ohne deine Erlaubnis.</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     KARTE 2 · Stunde 1 – Partner-Interview
+══════════════════════════════════════════════ -->
+<div class="card" id="card-1">
+  <div class="card-header">
+    <div class="card-num" style="color:var(--red)">2</div>
+    <div class="card-header-text">
+      <div class="stunde-badge" style="background:#fdf0ed;color:var(--red);">Stunde 1</div>
+      <h2>Das Partner-Interview</h2>
+      <div class="subtitle">Paararbeit · je 5–6 Min. pro Person</div>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="timer-block timer-block-dark">
+      <div><div class="timer-display" id="t1-display">6:00</div><div class="timer-label">Je Person – dann tauschen!</div></div>
+      <div class="timer-controls">
+        <button class="tbtn go" onclick="startTimer('t1',360)">▶ Start</button>
+        <button class="tbtn pau" onclick="pauseTimer('t1')">⏸</button>
+        <button class="tbtn" onclick="resetTimer('t1',360)">↺</button>
+      </div>
+    </div>
+    <div class="hbox hbox-red">
+      Person A interviewt Person B – dann Rollentausch. <strong>Aktives Zuhören:</strong> kein Unterbrechen, Blickkontakt halten. Nachfragen erlaubt, Bewerten verboten.
+    </div>
+    <div class="section">
+      <div class="section-title">Leitfragen</div>
+      <ul class="q-list numbered">
+        <li>Was machst du gerne in deiner Freizeit – und warum?</li>
+        <li>Was ist dir im Umgang mit anderen Menschen besonders wichtig?</li>
+        <li>In welcher Situation fühlst du dich wirklich wohl in einer Gruppe?</li>
+        <li>Was schätzt du an dir selbst – und was würdest du gerne verändern?</li>
+        <li>Was bedeutet für dich „eine gute Klassenkamerad*in sein"?</li>
+      </ul>
+    </div>
+    <hr class="divider">
+    <div class="section">
+      <div class="section-title">Meine Notizen zu meiner Gesprächspartner*in</div>
+      <div class="writelines"><div class="wline"></div><div class="wline"></div><div class="wline"></div></div>
+      <p style="font-size:0.8rem;color:#888;margin-top:0.5rem;">Danach: Schreib 3 Dinge auf einen Zettel, die dir an der anderen Person aufgefallen sind – und überreiche ihn.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     KARTE 3 · Stunde 2 – Ich-Botschaften
+══════════════════════════════════════════════ -->
+<div class="card" id="card-2">
+  <div class="card-header">
+    <div class="card-num" style="color:var(--teal)">3</div>
+    <div class="card-header-text">
+      <div class="stunde-badge" style="background:#eef8f5;color:var(--teal);">Stunde 2</div>
+      <h2>Ich-Botschaften üben</h2>
+      <div class="subtitle">3er-Gruppe · 10 Minuten</div>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="timer-block timer-block-dark">
+      <div><div class="timer-display" id="t2-display">10:00</div><div class="timer-label">Gruppenarbeit</div></div>
+      <div class="timer-controls">
+        <button class="tbtn go" onclick="startTimer('t2',600)">▶ Start</button>
+        <button class="tbtn pau" onclick="pauseTimer('t2')">⏸</button>
+        <button class="tbtn" onclick="resetTimer('t2',600)">↺</button>
+      </div>
+    </div>
+    <div class="formula">„Wenn [Situation] … fühle ich [Gefühl] … weil [Bedürfnis]. Ich wünsche mir [Wunsch]."</div>
+    <div class="section">
+      <div class="section-title">Wandle diese Du-Botschaften um</div>
+      <div class="transform-list">
+        <div class="trow">
+          <div class="tcell tcell-du">„Du unterbrichst mich immer!"</div>
+          <div class="tcell tcell-ich">Wenn du mich unterbrichst, fühle ich mich … weil …</div>
+        </div>
+        <div class="trow">
+          <div class="tcell tcell-du">„Du hörst mir nie zu!"</div>
+          <div class="tcell tcell-ich">Ich wünsche mir, dass …</div>
+        </div>
+        <div class="trow">
+          <div class="tcell tcell-du">„Du bist immer so unzuverlässig!"</div>
+          <div class="tcell tcell-ich">Es macht mir etwas aus, wenn …</div>
+        </div>
+        <div class="trow">
+          <div class="tcell tcell-du">„Du machst immer alles alleine!"</div>
+          <div class="tcell tcell-ich">Ich hätte gerne …</div>
+        </div>
+        <div class="trow">
+          <div class="tcell tcell-du">„Du nimmst auf niemanden Rücksicht!"</div>
+          <div class="tcell tcell-ich">Ich bemerke, dass ich …</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     KARTE 4 · Stunde 2 – Heißer Stuhl (WWW)
+══════════════════════════════════════════════ -->
+<div class="card" id="card-3">
+  <div class="card-header">
+    <div class="card-num" style="color:var(--teal)">4</div>
+    <div class="card-header-text">
+      <div class="stunde-badge" style="background:#eef8f5;color:var(--teal);">Stunde 2</div>
+      <h2>Der heiße Stuhl</h2>
+      <div class="subtitle">3er-Gruppe · je 4 Min. pro Person</div>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="timer-block timer-block-dark">
+      <div><div class="timer-display" id="t3-display">4:00</div><div class="timer-label">Je Person – dann rotieren</div></div>
+      <div class="timer-controls">
+        <button class="tbtn go" onclick="startTimer('t3',240)">▶ Start</button>
+        <button class="tbtn pau" onclick="pauseTimer('t3')">⏸</button>
+        <button class="tbtn" onclick="resetTimer('t3',240)">↺</button>
+      </div>
+    </div>
+    <div class="hbox hbox-teal">
+      Eine Person sitzt auf dem „heißen Stuhl" und hört nur zu. Die anderen zwei geben Feedback – immer nach dem <strong>WWW-Schema</strong>.
+    </div>
+    <div class="section">
+      <div class="section-title">Das WWW-Schema – in dieser Reihenfolge</div>
+      <ul class="q-list arrow">
+        <li><strong>Was</strong> mir an dir auffällt / was ich an dir schätze:<br><em style="font-size:0.8rem;color:#888;">„Mir fällt auf, dass du …"</em></li>
+        <li><strong>Was</strong> ich mir von dir (noch mehr) wünsche:<br><em style="font-size:0.8rem;color:#888;">„Ich würde mir wünschen, dass du …"</em></li>
+        <li><strong>Was</strong> ich dir mitgeben möchte:<br><em style="font-size:0.8rem;color:#888;">„Was ich dir auf den Weg geben möchte, ist …"</em></li>
+      </ul>
+    </div>
+    <div class="hbox hbox-gold">
+      <strong>Regeln:</strong> Nur Ich-Botschaften · Kein „Aber" · Person auf dem Stuhl hört nur zu – keine Rechtfertigung.
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     KARTE 5 · Stunde 2 – Konfliktszenario
+══════════════════════════════════════════════ -->
+<div class="card" id="card-4">
+  <div class="card-header">
+    <div class="card-num" style="color:var(--teal)">5</div>
+    <div class="card-header-text">
+      <div class="stunde-badge" style="background:#eef8f5;color:var(--teal);">Stunde 2</div>
+      <h2>Das Konfliktszenario</h2>
+      <div class="subtitle">3er-Gruppe · 3 Min. spielen + Feedback</div>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="timer-block timer-block-dark">
+      <div><div class="timer-display" id="t4-display">3:00</div><div class="timer-label">Rollenspiel</div></div>
+      <div class="timer-controls">
+        <button class="tbtn go" onclick="startTimer('t4',180)">▶ 3 Min. spielen</button>
+        <button class="tbtn pau" onclick="pauseTimer('t4')">⏸</button>
+        <button class="tbtn" onclick="resetTimer('t4',180)">↺</button>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-title">Rollen</div>
+      <div class="role-row">
+        <div class="role-chip">🎭 Person A</div>
+        <div class="role-chip">🎭 Person B</div>
+        <div class="role-chip">👁 Beobachter*in</div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-title">Eure Karte (von der Lehrkraft)</div>
+      <div class="scenario">
+        Lest euer Szenario durch. Person A und B spielen die Situation 3 Minuten lang. Die Beobachter*in notiert: Werden Ich-Botschaften genutzt? Wie reagiert die andere Person? Wird eine Lösung gefunden?
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-title">Feedback der Beobachter*in danach</div>
+      <ul class="q-list arrow">
+        <li>Beginne mit: <em>„Ich habe wahrgenommen, dass …"</em></li>
+        <li>Wurden Ich-Botschaften eingesetzt?</li>
+        <li>Wie hat sich die Atmosphäre entwickelt?</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     KARTE 6 · Stunde 3 – Das Floß
+══════════════════════════════════════════════ -->
+<div class="card" id="card-5">
+  <div class="card-header">
+    <div class="card-num" style="color:var(--gold)">6</div>
+    <div class="card-header-text">
+      <div class="stunde-badge" style="background:#fdf5e0;color:var(--gold);">Stunde 3</div>
+      <h2>Das Floß</h2>
+      <div class="subtitle">5er-Gruppe · 12 Minuten</div>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="timer-block timer-block-dark">
+      <div><div class="timer-display" id="t5-display">12:00</div><div class="timer-label">Gruppenentscheidung</div></div>
+      <div class="timer-controls">
+        <button class="tbtn go" onclick="startTimer('t5',720)">▶ Start</button>
+        <button class="tbtn pau" onclick="pauseTimer('t5')">⏸</button>
+        <button class="tbtn" onclick="resetTimer('t5',720)">↺</button>
+      </div>
+    </div>
+    <div class="scenario">
+      <strong>Situation:</strong> Euer Floß sinkt. Ein Rettungsboot ist in der Nähe – aber es hat nur Platz für <strong>3 von euch 5 Personen</strong>. Ihr habt 12 Minuten.<br><br>
+      Entscheidet als Gruppe: <em>Wer fährt? Nach welchem Prinzip? Wie trefft ihr die Entscheidung?</em>
+    </div>
+    <div class="section">
+      <div class="section-title">Regeln</div>
+      <ul class="q-list arrow">
+        <li>Alle müssen sich äußern – niemand darf schweigen.</li>
+        <li>Eine Person übernimmt die <strong>Beobachterrolle</strong> und nimmt <em>nicht</em> an der Entscheidung teil.</li>
+        <li>Wie ihr entscheidet, ist wichtiger als wer.</li>
+      </ul>
+    </div>
+    <div class="section">
+      <div class="section-title">Mögliche Entscheidungsverfahren</div>
+      <div class="role-row">
+        <div class="role-chip">🗳 Abstimmung</div>
+        <div class="role-chip">🎲 Losentscheid</div>
+        <div class="role-chip">🤝 Konsens</div>
+        <div class="role-chip">✋ Freiwillig</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     KARTE 6b · Stunde 3 – Konfliktlösungsstrategien
+══════════════════════════════════════════════ -->
+<div class="card" id="card-5b">
+  <div class="card-header">
+    <div class="card-num" style="color:var(--gold);font-size:1.6rem;">6 ½</div>
+    <div class="card-header-text">
+      <div class="stunde-badge" style="background:#fdf5e0;color:var(--gold);">Stunde 3</div>
+      <h2>Konfliktlösungsstrategien</h2>
+      <div class="subtitle">Stunde 3 · Transfer nach dem Floß</div>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="hbox hbox-gold">
+      Welche dieser Strategien habt ihr beim Floß eingesetzt – ohne es zu wissen? Welche wollt ihr häufiger nutzen?
+    </div>
+    <div class="section" style="margin-top:0.5rem;">
+      <div class="section-title">Die 6 Strategien</div>
+      <div style="display:flex;flex-direction:column;gap:0.4rem;margin-top:0.4rem;">
+        <div style="display:grid;grid-template-columns:30px 1fr;gap:0.5rem;align-items:start;background:#f9f9f7;border-radius:4px;padding:0.55rem 0.75rem;border-left:4px solid var(--ink);">
+          <div style="font-size:1.1rem;">🤝</div>
+          <div><div style="font-weight:700;font-size:0.86rem;margin-bottom:0.1rem;">Kooperieren</div><div style="font-size:0.8rem;color:#555;line-height:1.45;">Beide Seiten gewinnen – aufwendig, aber nachhaltig. Die beste Lösung, wenn Zeit da ist.</div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:30px 1fr;gap:0.5rem;align-items:start;background:#f9f9f7;border-radius:4px;padding:0.55rem 0.75rem;border-left:4px solid #888;">
+          <div style="font-size:1.1rem;">⚖️</div>
+          <div><div style="font-weight:700;font-size:0.86rem;margin-bottom:0.1rem;">Kompromiss</div><div style="font-size:0.8rem;color:#555;line-height:1.45;">Beide geben etwas ab – schnell, aber nicht immer befriedigend.</div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:30px 1fr;gap:0.5rem;align-items:start;background:#f9f9f7;border-radius:4px;padding:0.55rem 0.75rem;border-left:4px solid #888;">
+          <div style="font-size:1.1rem;">🙋</div>
+          <div><div style="font-weight:700;font-size:0.86rem;margin-bottom:0.1rem;">Nachgeben</div><div style="font-size:0.8rem;color:#555;line-height:1.45;">Eine Seite gibt nach – erhält die Beziehung, kostet Eigeninteressen.</div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:30px 1fr;gap:0.5rem;align-items:start;background:#f9f9f7;border-radius:4px;padding:0.55rem 0.75rem;border-left:4px solid #888;">
+          <div style="font-size:1.1rem;">🗳️</div>
+          <div><div style="font-weight:700;font-size:0.86rem;margin-bottom:0.1rem;">Abstimmen</div><div style="font-size:0.8rem;color:#555;line-height:1.45;">Mehrheit entscheidet – schnell, aber die Minderheit verliert.</div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:30px 1fr;gap:0.5rem;align-items:start;background:#f9f9f7;border-radius:4px;padding:0.55rem 0.75rem;border-left:4px solid #888;">
+          <div style="font-size:1.1rem;">🎲</div>
+          <div><div style="font-weight:700;font-size:0.86rem;margin-bottom:0.1rem;">Losentscheid</div><div style="font-size:0.8rem;color:#555;line-height:1.45;">Zufallsentscheidung – fair, aber sachlich schwach.</div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:30px 1fr;gap:0.5rem;align-items:start;background:#f9f9f7;border-radius:4px;padding:0.55rem 0.75rem;border-left:4px solid #bbb;">
+          <div style="font-size:1.1rem;">⏸️</div>
+          <div><div style="font-weight:700;font-size:0.86rem;margin-bottom:0.1rem;">Vertagen</div><div style="font-size:0.8rem;color:#555;line-height:1.45;">Thema kurz zurückstellen – nur sinnvoll als kurzfristige Pause, kein Dauerlösung.</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="hbox hbox-teal" style="margin-top:0.75rem;">
+      <strong>Transfer:</strong> Nennt einen Konflikt aus dem Schulalltag – welche Strategie würde dort helfen?
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     KARTE 7 · Stunde 3 – Beobachtungskarte
+══════════════════════════════════════════════ -->
+<div class="card" id="card-6">
+  <div class="card-header">
+    <div class="card-num" style="color:var(--gold)">7</div>
+    <div class="card-header-text">
+      <div class="stunde-badge" style="background:#fdf5e0;color:var(--gold);">Stunde 3</div>
+      <h2>Beobachtungskarte: Gruppenrollen</h2>
+      <div class="subtitle">Beobachter*in · Während des Floß-Szenarios</div>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="hbox hbox-gold">
+      Du beobachtest still und nimmst nicht an der Entscheidung teil. Notiere, wer welche Rolle einnimmt – <strong>keine Wertung</strong>, alle Rollen sind nützlich.
+    </div>
+    <div class="section">
+      <div class="section-title">Gruppenrollen</div>
+      <div class="role-grid">
+        <div class="role-card"><div class="ri">👑</div><div class="rn">Anführer*in</div><div class="rd">übernimmt Führung, strukturiert</div></div>
+        <div class="role-card"><div class="ri">🕊</div><div class="rn">Vermittler*in</div><div class="rd">gleicht aus, sucht Kompromisse</div></div>
+        <div class="role-card"><div class="ri">❓</div><div class="rn">Kritiker*in</div><div class="rd">hinterfragt, bremst</div></div>
+        <div class="role-card"><div class="ri">👥</div><div class="rn">Mitläufer*in</div><div class="rd">stimmt zu, wenig eigene Impulse</div></div>
+        <div class="role-card"><div class="ri">🤫</div><div class="rn">Stille*r</div><div class="rd">schweigt, äußert sich kaum</div></div>
+        <div class="role-card"><div class="ri">😄</div><div class="rn">Auflöser*in</div><div class="rd">bricht Spannung, lenkt ab</div></div>
+      </div>
+    </div>
+    <hr class="divider">
+    <div class="section">
+      <div class="section-title">Meine Beobachtungen</div>
+      <p style="font-size:0.82rem;color:#888;margin-bottom:0.4rem;">Wer hat welche Rolle eingenommen?</p>
+      <div class="writelines"><div class="wline"></div><div class="wline"></div></div>
+      <p style="font-size:0.82rem;color:#888;margin:0.5rem 0 0.4rem;">Wie wurde entschieden?</p>
+      <div class="writelines"><div class="wline"></div><div class="wline"></div></div>
+      <p style="font-size:0.82rem;color:#888;margin:0.5rem 0 0.4rem;">Was fiel mir besonders auf?</p>
+      <div class="writelines"><div class="wline"></div><div class="wline"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     KARTE 8 · Stunde 4 – Klassenskulptur
+══════════════════════════════════════════════ -->
+<div class="card" id="card-7">
+  <div class="card-header">
+    <div class="card-num" style="color:var(--purple)">8</div>
+    <div class="card-header-text">
+      <div class="stunde-badge" style="background:#f5f0fc;color:var(--purple);">Stunde 4</div>
+      <h2>Die Klassenskulptur</h2>
+      <div class="subtitle">Plenum · 10 Minuten</div>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="timer-block timer-block-dark">
+      <div><div class="timer-display" id="t7-display">10:00</div><div class="timer-label">Positionierung im Raum</div></div>
+      <div class="timer-controls">
+        <button class="tbtn go" onclick="startTimer('t7',600)">▶ Start</button>
+        <button class="tbtn pau" onclick="pauseTimer('t7')">⏸</button>
+        <button class="tbtn" onclick="resetTimer('t7',600)">↺</button>
+      </div>
+    </div>
+    <div class="hbox hbox-purple">
+      Die Lehrkraft liest eine Aussage vor. Positioniere dich im Raum: <strong>vorne = stimme zu · hinten = stimme nicht zu · Mitte = teils/teils</strong>. Kein Kommentar – das Bild spricht für sich.
+    </div>
+    <div class="section">
+      <div class="section-title">Die Aussagen</div>
+      <ul class="q-list numbered">
+        <li>„In unserem Kurs herrscht ein gutes Miteinander."</li>
+        <li>„Ich fühle mich in der Klasse gehört und ernst genommen."</li>
+        <li>„Wenn jemand unfair behandelt wird, greife ich ein."</li>
+        <li>„Ich übernehme aktiv Verantwortung für das Klima in unserem Kurs."</li>
+        <li>„Ich traue mich, meine Meinung zu sagen – auch wenn sie unpopulär ist."</li>
+      </ul>
+    </div>
+    <div class="hbox hbox-teal" style="margin-top:0.5rem;">
+      Nach der letzten Aussage: Wer stand am weitesten von dir entfernt? Das ist deine Gesprächspartner*in für die nächste Übung.
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     KARTE 9 · Stunde 4 – Klassenvertrag
+══════════════════════════════════════════════ -->
+<div class="card" id="card-8">
+  <div class="card-header">
+    <div class="card-num" style="color:var(--purple)">9</div>
+    <div class="card-header-text">
+      <div class="stunde-badge" style="background:#f5f0fc;color:var(--purple);">Stunde 4</div>
+      <h2>Unser Klassenvertrag</h2>
+      <div class="subtitle">4er-Gruppen &middot; 11 Minuten</div>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="timer-block timer-block-dark">
+      <div><div class="timer-display" id="t8b-display">11:00</div><div class="timer-label">Gruppenarbeit</div></div>
+      <div class="timer-controls">
+        <button class="tbtn go" onclick="startTimer('t8b',660)">&#9658; Start</button>
+        <button class="tbtn pau" onclick="pauseTimer('t8b')">&#9208;</button>
+        <button class="tbtn" onclick="resetTimer('t8b',660)">&#8634;</button>
+      </div>
+    </div>
+    <div class="hbox hbox-purple">
+      Entwickelt gemeinsam <strong>3 konkrete Vereinbarungen</strong> f&uuml;r euren Kurs. Positiv formulieren, realistisch halten &ndash; keine Verbote, sondern Versprechen.
+    </div>
+    <div class="section">
+      <div class="section-title">So geht ihr vor</div>
+      <ul class="q-list arrow">
+        <li>Sammelt zuerst Ideen &ndash; jede*r nennt 1&ndash;2 Vorschl&auml;ge.</li>
+        <li>Einigt euch auf die <strong>3 wichtigsten</strong> &ndash; per Diskussion oder Handzeichen.</li>
+        <li>Formuliert sie konkret: Was genau soll passieren?</li>
+      </ul>
+    </div>
+    <div style="border:2px solid var(--purple);border-radius:6px;overflow:hidden;margin-top:0.6rem;">
+      <div style="background:var(--purple);color:#fff;font-size:0.67rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;padding:0.35rem 0.75rem;">Unser Klassenvertrag &middot; Gruppe ___</div>
+      <div style="padding:0.8rem 1rem;">
+        <p style="font-size:0.87rem;margin-bottom:0.65rem;color:#555;">In unserem Kurs wollen wir &hellip;</p>
+        <div style="margin-bottom:0.5rem;">
+          <div style="font-size:0.75rem;font-weight:700;color:var(--purple);margin-bottom:0.2rem;">1.</div>
+          <div class="wline"></div><div class="wline"></div>
+        </div>
+        <div style="margin-bottom:0.5rem;">
+          <div style="font-size:0.75rem;font-weight:700;color:var(--purple);margin-bottom:0.2rem;">2.</div>
+          <div class="wline"></div><div class="wline"></div>
+        </div>
+        <div style="margin-bottom:0.5rem;">
+          <div style="font-size:0.75rem;font-weight:700;color:var(--purple);margin-bottom:0.2rem;">3.</div>
+          <div class="wline"></div><div class="wline"></div>
+        </div>
+        <p style="font-size:0.75rem;color:#888;border-top:1px solid #eee;padding-top:0.5rem;margin-top:0.25rem;">Wir &uuml;bernehmen gemeinsam Verantwortung daf&uuml;r, dass diese Vereinbarungen gelebt werden.</p>
+      </div>
+    </div>
+    <div class="hbox hbox-teal" style="margin-top:0.75rem;">
+      Die Ergebnisse aller Gruppen werden im Plenum zusammengef&uuml;hrt &ndash; Doppelungen werden markiert, ein gemeinsamer Vertrag entsteht.
+    </div>
+  </div>
+</div>
+
+</div>
+
+</div><!-- /stage -->
+
+<div class="bottom-nav">
+  <button class="nav-btn nav-prev" id="btn-prev" onclick="navigate(-1)" disabled>← Zurück</button>
+  <button class="nav-btn nav-next" id="btn-next" onclick="navigate(1)">Weiter →</button>
+</div>
+
+<script>
+const TOTAL = 10;
+let current = 0;
+const labels = [
+  'Std. 1 · Selbstportrait',
+  'Std. 1 · Partner-Interview',
+  'Std. 2 · Ich-Botschaften',
+  'Std. 2 · Heißer Stuhl',
+  'Std. 2 · Konfliktszenario',
+  'Std. 3 · Das Floß',
+  'Std. 3 · Konfliktlösungsstrategien',
+  'Std. 3 · Beobachtungskarte',
+  'Std. 4 · Klassenskulptur',
+  'Std. 4 · Klassenvertrag',
+];
+
+// numbered dots
+const dotsEl = document.getElementById('dots');
+for (let i = 0; i < TOTAL; i++) {
+  const d = document.createElement('div');
+  d.className = 'dot' + (i === 0 ? ' active' : '');
+  d.textContent = i + 1;
+  d.title = labels[i];
+  d.onclick = () => goTo(i);
+  dotsEl.appendChild(d);
+}
+
+function updateUI() {
+  document.querySelectorAll('.card').forEach((c,i) => c.classList.toggle('active', i === current));
+  document.querySelectorAll('.dot').forEach((d,i) => {
+    d.className = 'dot' + (i === current ? ' active' : i < current ? ' done' : '');
+  });
+  document.getElementById('counter').textContent = labels[current];
+  document.getElementById('btn-prev').disabled = current === 0;
+  document.getElementById('btn-next').textContent = current === TOTAL-1 ? '✓ Fertig' : 'Weiter →';
+  document.getElementById('btn-next').disabled = false;
+}
+
+function navigate(dir) { const n = current + dir; if (n >= 0 && n < TOTAL) goTo(n); }
+function goTo(i) { current = i; updateUI(); window.scrollTo({top:0,behavior:'smooth'}); }
+
+// ── TIMER ENGINE ──
+const timers = {};
+
+function startTimer(id, seconds, revealId) {
+  if (timers[id]?.running) return;
+  if (!timers[id]) timers[id] = { remaining: seconds };
+  timers[id].running = true;
+  const disp = document.getElementById(id + '-display');
+  timers[id].interval = setInterval(() => {
+    timers[id].remaining--;
+    const r = timers[id].remaining;
+    disp.textContent = Math.floor(r/60) + ':' + String(r%60).padStart(2,'0');
+    disp.className = 'timer-display ' + (r <= 0 ? 'done' : r <= 10 ? 'urgent' : 'running');
+    if (r <= 0) {
+      clearInterval(timers[id].interval);
+      timers[id].running = false;
+      if (revealId) {
+        document.getElementById(revealId).classList.add('visible');
+        const btn = document.getElementById('reveal-btn-' + revealId.replace('reveal-',''));
+        if (btn) btn.classList.add('hidden-btn');
+      }
+    }
+  }, 1000);
+}
+
+function pauseTimer(id) {
+  if (!timers[id]) return;
+  if (timers[id].running) { clearInterval(timers[id].interval); timers[id].running = false; }
+  else startTimer(id, timers[id].remaining, null);
+}
+
+function resetTimer(id, seconds) {
+  if (timers[id]) { clearInterval(timers[id].interval); timers[id] = null; }
+  const disp = document.getElementById(id + '-display');
+  disp.textContent = Math.floor(seconds/60) + ':' + String(seconds%60).padStart(2,'0');
+  disp.className = 'timer-display';
+}
+</script>
+</body>
+</html>
