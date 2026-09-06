@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wissenstest: der Grafikrechner vor der EF</title>
+<meta name="description" content="Wissenstest zum Start der EF: Funktionswerte abrufen, Nullstellen, Scheitelpunkt und Schnittstellen bestimmen, Gleichungen und exponentielles Wachstum mit dem Löse-Befehl bearbeiten – ohne Hilfen, mit Auswertung und Lösungswegen am Ende.">
+<meta name="keywords" content="GeoGebra, Grafikrechner, Wissenstest, EF, Nullstelle, Extremum, Schneide, Löse, Wachstum, Klammern">
+<meta name="typ" content="Test">
+<meta name="klasse" content="EF">
+<meta name="fach" content="mathe">
+<meta name="oberthema" content="GeoGebra Grafikrechner">
+<meta name="thema" content="Test Grafikrechner">
+<script>
+  MathJax = {
+    tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+    svg: { fontCache: 'global' }
+  };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+  :root{
+    --ink:#22303f;--card:#ffffff;--green:#1e7d32;--red:#c1272d;
+    --amber:#b8860b;--amber-light:#fdf3d9;--amber-dark:#96690a;
+    --blue:#2f5fa6;--blue-dark:#1f4680;--blue-light:#e6eefb;
+    --grey:#6b7686;--grey-light:#eef0f3;--border-blue:#1f4680;
+    --akzent:#6b7686;--akzent-dark:#1f4680;--akzent-light:#eef0f3;
+    --bg:#f7f8fa;--line:#e2e6ec;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);color:var(--ink);
+    font-family:'Segoe UI',Verdana,'Helvetica Neue',sans-serif;
+    font-size:1.05rem;line-height:1.55;padding-bottom:5rem;
+  }
+  header{background:#eef0f3;color:#22303f;padding:1.3rem 1.2rem;border-bottom:5px solid #1f4680;}
+  header .typ{
+    display:inline-block;background:#fff;color:#1f4680;
+    padding:.2rem .7rem;border-radius:1rem;font-size:.85rem;
+    font-weight:700;letter-spacing:.04em;margin-bottom:.5rem;
+  }
+  header h1{margin:0;font-size:1.55rem;line-height:1.25;}
+  header p{margin:.4rem 0 0;font-size:1rem;}
+  header .serie{margin-top:.6rem;font-size:.9rem;}
+
+  .tabs{display:flex;flex-wrap:wrap;gap:.5rem;padding:1rem 1rem 0;max-width:1024px;margin:0 auto;}
+  .tab{
+    flex:1 1 auto;min-width:7rem;min-height:44px;
+    border:2px solid var(--line);background:#fff;color:var(--ink);
+    font-size:.95rem;font-weight:600;border-radius:.7rem .7rem 0 0;
+    padding:.6rem .5rem;cursor:pointer;transition:background .15s,border-color .15s,transform .05s;
+  }
+  .tab:active{transform:scale(.97);}
+  .tab.aktiv{background:var(--akzent);color:#fff;border-color:var(--akzent-dark);}
+  .tab .done{margin-left:.3rem;}
+
+  main{max-width:1024px;margin:0 auto;padding:0 1rem;}
+  .karte{
+    display:none;background:var(--card);border:2px solid var(--line);
+    border-radius:0 .9rem .9rem .9rem;padding:1.3rem 1.2rem;margin-top:-2px;
+    box-shadow:0 2px 8px rgba(0,0,0,.05);animation:einblenden .25s ease;
+  }
+  .karte.aktiv{display:block;}
+  @keyframes einblenden{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .karte h2{margin-top:0;font-size:1.3rem;color:var(--akzent-dark);}
+  .frage{font-weight:700;margin:1rem 0 .6rem;}
+
+  .merk{
+    background:var(--akzent-light);border-left:5px solid var(--akzent);
+    padding:.8rem 1rem;border-radius:.4rem;margin:1rem 0;
+  }
+  .merk-warn{background:#fbe4e4;border-left-color:var(--red);}
+  code{
+    background:#e7ebf2;border-radius:.3rem;padding:.05rem .4rem;
+    font-family:'Courier New',monospace;font-size:.95em;
+  }
+
+  .kennz{display:flex;flex-wrap:wrap;gap:.45rem;margin:.6rem 0 .4rem;}
+  .chip{
+    display:inline-flex;align-items:center;gap:.3rem;
+    font-size:.82rem;font-weight:700;letter-spacing:.01em;
+    border-radius:1rem;padding:.25rem .7rem;border:2px solid;
+  }
+  .chip-hm{background:var(--blue-light);color:var(--blue);border-color:var(--blue);}
+  .chip-frei{background:#f1efe9;color:#6b6354;border-color:#a89e8c;}
+  .chip-art{background:var(--amber-light);color:var(--amber-dark);border-color:var(--amber);}
+
+  button{font-family:inherit;}
+  .btn{
+    min-height:44px;border:none;border-radius:.6rem;padding:.6rem 1.1rem;
+    font-size:1rem;font-weight:700;cursor:pointer;transition:transform .05s,filter .15s;
+  }
+  .btn:active{transform:scale(.97);}
+  .btn-pruefen{background:var(--akzent-dark);color:#fff;}
+  .btn-leeren{background:#8a8578;color:#fff;margin-left:.5rem;}
+  .btn-gross{width:100%;margin-top:.6rem;font-size:1.05rem;}
+
+  .feedback{margin:.8rem 0;padding:.8rem 1rem;border-radius:.5rem;font-weight:700;display:none;}
+  .feedback.zeig{display:block;}
+  .feedback.ok{background:var(--green);color:#fff;}
+  .feedback.nok{background:var(--red);color:#fff;}
+  .feedback.neutral{background:var(--grey-light);color:var(--ink);border:2px solid var(--border-blue);}
+
+  .aufgabe{border:2px solid var(--line);border-radius:.7rem;padding:1rem;margin:1rem 0;background:#fff;}
+  .aufgabe h4{margin:0 0 .5rem;font-size:1.05rem;color:var(--akzent-dark);}
+
+  .zahltab{width:100%;border-collapse:separate;border-spacing:0 .6rem;}
+  .zahltab td{padding:.3rem .5rem;vertical-align:middle;}
+  .zahltab td:first-child{font-weight:600;min-width:9rem;}
+  input[type=text]{
+    font-family:inherit;font-size:1.05rem;min-height:44px;
+    border:2px solid var(--line);border-radius:.5rem;padding:.4rem .6rem;
+    width:7rem;text-align:center;background:#fff;color:var(--ink);
+  }
+  input[type=text]:focus{outline:none;border-color:var(--akzent);}
+  input[type=text][readonly]{background:#f2f3f5;color:#4a5461;border-style:dashed;}
+  .feld-status{margin-left:.5rem;font-weight:800;font-size:1.1rem;}
+
+  .mcwahl{display:flex;flex-wrap:wrap;gap:.6rem;margin:.6rem 0;}
+  .mcwahl button{
+    flex:1 1 9rem;min-height:48px;border:2px solid var(--line);background:#fff;color:var(--ink);
+    border-radius:.6rem;font-size:1rem;font-weight:700;cursor:pointer;padding:.5rem .7rem;
+  }
+  .mcwahl button.gewaehlt{background:var(--akzent-light);border-color:var(--akzent);}
+  .mcwahl button.richtig{background:var(--green);color:#fff;border-color:var(--green);}
+  .mcwahl button.falsch{background:var(--red);color:#fff;border-color:var(--red);}
+
+  .aussage{border:2px solid var(--line);border-radius:.6rem;padding:.8rem .9rem;margin:.8rem 0;background:#fff;}
+  .wf-buttons{display:flex;gap:.6rem;margin-top:.6rem;}
+  .wf-buttons button{
+    flex:1 1 6rem;min-height:44px;border:2px solid var(--line);background:#fff;color:var(--ink);
+    border-radius:.6rem;font-weight:700;cursor:pointer;
+  }
+  .wf-buttons button.gewaehlt{background:var(--akzent-light);border-color:var(--akzent);}
+  .wf-buttons button.richtig{background:var(--green);color:#fff;border-color:var(--green);}
+  .wf-buttons button.falsch{background:var(--red);color:#fff;border-color:var(--red);}
+
+  /* Niveaustufen */
+  .stufen-wahl{display:flex;flex-wrap:wrap;gap:.5rem;margin:.9rem 0 1.1rem;}
+  .stufe-btn{
+    flex:1 1 8rem;min-height:44px;border:2px solid var(--akzent);
+    background:#fff;color:var(--akzent-dark);border-radius:.6rem;
+    font-size:.98rem;font-weight:700;cursor:pointer;padding:.5rem .6rem;
+  }
+  .stufe-btn.aktiv{background:var(--akzent);color:#fff;}
+  .stufe-block{display:none;}
+  .stufe-block.aktiv{display:block;}
+  .stufe-marke{
+    display:inline-block;background:var(--akzent-light);color:var(--akzent-dark);
+    border:2px solid var(--akzent);border-radius:1rem;padding:.15rem .7rem;
+    font-size:.82rem;font-weight:700;margin-bottom:.6rem;
+  }
+
+  /* Aufklappbares (Tipps, Musterlösung) – immer Bernstein */
+  .stufen-tipps{display:none;margin:1rem 0;}
+  .stufen-tipps.zeig{display:block;}
+  .stufen-tipps h4{margin:0 0 .5rem;font-size:1rem;color:var(--amber-dark);}
+  .stufe{border:2px solid var(--amber);border-radius:.6rem;margin-bottom:.5rem;overflow:hidden;}
+  .stufe-kopf{
+    width:100%;min-height:44px;background:var(--amber-light);color:var(--amber-dark);
+    border:none;font-weight:700;font-size:.98rem;padding:.6rem .9rem;text-align:left;cursor:pointer;
+    display:flex;justify-content:space-between;align-items:center;gap:.5rem;
+  }
+  .stufe-inhalt{display:none;padding:.9rem 1rem;background:var(--amber-light);color:var(--ink);}
+  .stufe.offen .stufe-inhalt{display:block;}
+  .stufe.offen .stufe-pfeil{transform:rotate(180deg);}
+  .stufe-pfeil{transition:transform .2s;flex-shrink:0;}
+
+  /* Orientierungstimer */
+  .timerleiste{max-width:1024px;margin:1rem auto 0;padding:0 1rem;}
+  .timerbox{
+    border:3px solid var(--border-blue);border-radius:.8rem;background:var(--grey-light);
+    padding:.9rem 1rem;
+  }
+  .timerzeile{display:flex;flex-wrap:wrap;align-items:center;gap:.7rem;}
+  .timeruhr{
+    font-family:'Courier New',monospace;font-size:2rem;font-weight:800;
+    color:var(--border-blue);min-width:5.5rem;letter-spacing:.05em;
+  }
+  .timerbox.abgelaufen .timeruhr{color:var(--amber-dark);}
+  .timer-btn{
+    min-height:44px;min-width:44px;border:2px solid var(--border-blue);background:#fff;
+    color:var(--border-blue);border-radius:.6rem;font-weight:700;font-size:.98rem;
+    padding:.4rem .9rem;cursor:pointer;
+  }
+  .timer-btn.laeuft{background:var(--border-blue);color:#fff;}
+  .timer-hinweis{flex:1 1 12rem;font-size:.92rem;font-weight:600;color:#4a5461;}
+
+  /* Statusliste in der Auswertung */
+  .statusliste{list-style:none;margin:1rem 0;padding:0;}
+  .statusliste li{
+    border:2px solid var(--line);border-radius:.6rem;background:#fff;
+    padding:.7rem .9rem;margin-bottom:.6rem;
+  }
+  .statusliste .st-kopf{font-weight:700;}
+  .statusliste .st-hinweis{font-size:.93rem;color:#4a5461;margin-top:.25rem;}
+  .st-ok{border-color:var(--green);}
+  .st-offen{border-color:#b9c0cb;}
+
+  .zusammenfassung{
+    text-align:center;font-weight:800;font-size:1.1rem;margin-top:1rem;padding:.8rem;
+    border-radius:.6rem;background:var(--akzent-light);color:var(--akzent-dark);display:none;
+  }
+  .zusammenfassung.zeig{display:block;}
+
+  .vgl{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.98rem;}
+  .vgl th,.vgl td{border:2px solid var(--line);padding:.55rem .7rem;text-align:left;}
+  .vgl th{background:var(--akzent-light);color:var(--akzent-dark);}
+  .vgl td:first-child{font-weight:700;}
+
+  .frac{
+    display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;
+    margin:0 .2em;font-size:1em;line-height:1.15;
+  }
+  .frac > span{display:block;padding:0 .35em;}
+  .frac > span:first-child{border-bottom:1.8px solid currentColor;padding-bottom:.1em;}
+  .frac > span:last-child{padding-top:.1em;}
+
+  .trex{position:fixed;right:.7rem;bottom:.7rem;font-size:1.8rem;cursor:pointer;z-index:50;user-select:none;}
+  .trex .bubble{
+    position:absolute;right:2.2rem;bottom:.2rem;white-space:nowrap;
+    background:var(--ink);color:#fff;padding:.3rem .6rem;border-radius:.5rem;
+    font-size:.85rem;opacity:0;pointer-events:none;transition:opacity .2s;
+  }
+  .trex.zeig .bubble{opacity:1;}
+</style>
+</head>
+<body>
+<header>
+  <span class="typ">Wissenstest</span>
+  <h1>Wissenstest: der Grafikrechner vor der EF</h1>
+  <p>Was du aus Klasse 7 bis 10 an Bedienung mitbringst – ohne Hilfen, Auswertung am Ende</p>
+  <p class="serie">GeoGebra-Grafikrechner · Start der EF · Wissenstest · Richtzeit 32 Minuten</p>
+</header>
+<div class="timerleiste">
+  <div class="timerbox" id="timerbox">
+    <div class="timerzeile">
+      <span class="timeruhr" id="uhr">--:--</span>
+      <button class="timer-btn" id="btnStart" onclick="timerStart()">▶ Start</button>
+      <button class="timer-btn" onclick="timerReset()">↺ Zurücksetzen</button>
+      <span class="timer-hinweis">Dient nur der Orientierung – wenn die Zeit abgelaufen ist, passiert nichts.</span>
+    </div>
+    <div class="stufen-tipps zeig" style="margin:.8rem 0 0;">
+      <div class="stufe">
+        <button class="stufe-kopf" onclick="toggleStufe(this)"><span>Was hat es mit der Zeit auf sich?</span><span class="stufe-pfeil">▾</span></button>
+        <div class="stufe-inhalt">Die Zeit ist eine Empfehlung, kein Muss. Nach Ablauf kannst du normal weiterarbeiten – es wird nichts gesperrt, nichts abgeschickt und nichts ausgewertet. Der Timer soll dir nur helfen einzuschätzen, ob du im Tempo liegst. Starte ihn, wenn du wirklich anfängst.</div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="tabs">
+  <button class="tab aktiv" data-ziel="k1">1 · Eingeben<span class="done" id="d1"></span></button>
+  <button class="tab" data-ziel="k2">2 · Punkte finden<span class="done" id="d2"></span></button>
+  <button class="tab" data-ziel="k3">3 · Gleichungen<span class="done" id="d3"></span></button>
+  <button class="tab" data-ziel="k4">4 · Wiederholung<span class="done" id="d4"></span></button>
+  <button class="tab" data-ziel="k5">5 · Auswertung<span class="done" id="d5"></span></button>
+</div>
+<main>
+  <section class="karte aktiv" id="k1">
+    <h2>Eingeben und anzeigen</h2>
+
+    <div class="merk">
+      <b>So läuft dieser Test:</b> Du bearbeitest die Karten 1 bis 4 und speicherst jede Karte mit dem Knopf darunter. Während der Bearbeitung bekommst du <b>keine</b> Rückmeldung, ob etwas stimmt – das kommt erst auf Karte 5. Ein <b>●</b> am Reiter heißt nur „gespeichert", nicht „richtig". Solange du den Test nicht auswertest, kannst du jede Karte wieder freigeben und ändern.
+    </div>
+
+    <div class="aufgabe">
+      <h4>Aufgabe 1: Funktionswerte</h4>
+    <div class="kennz">
+      <span class="chip chip-hm">📱 mit GeoGebra</span>
+      <span class="chip chip-art">🔢 mit GeoGebra-Funktionen bestimmen</span>
+    </div>
+      <p>Gib \(f(x) = x^2 + 3x - 4\) in den Grafikrechner ein und rufe die drei Werte ab.</p>
+      <table class="zahltab">
+        <tr><td><code>f(2)</code></td><td><input type="text" id="t1a" placeholder="?"><span class="feld-status" id="s1a"></span></td></tr>
+        <tr><td><code>f(-3)</code></td><td><input type="text" id="t1b" placeholder="?"><span class="feld-status" id="s1b"></span></td></tr>
+        <tr><td><code>f(1)</code></td><td><input type="text" id="t1c" placeholder="?"><span class="feld-status" id="s1c"></span></td></tr>
+      </table>
+    </div>
+
+    <div class="aufgabe">
+      <h4>Aufgabe 2: Zwei Fragen zur Bedienung</h4>
+    <div class="kennz">
+      <span class="chip chip-frei">✏️ ohne Hilfsmittel</span>
+      <span class="chip chip-art">💭 begründen – nicht rechnen</span>
+    </div>
+      <p>Du hast <code>x^2</code> getippt und willst danach <code>+3*x</code> schreiben. Was musst du vorher tun?</p>
+      <div class="mcwahl" id="mc1a"></div>
+      <p class="frage">Der Graph ist im Fenster nur als steile Linie zu sehen. Was ist der richtige Griff?</p>
+      <div class="mcwahl" id="mc1b"></div>
+      <button class="btn btn-pruefen" onclick="speichern('k1')">Antworten speichern</button>
+      <button class="btn btn-leeren" id="aendern_k1" style="display:none" onclick="freigeben('k1')">Antworten ändern</button>
+      <div class="feedback" id="fb_k1"></div>
+    </div>
+  </section>
+
+  <section class="karte" id="k2">
+    <h2>Besondere Punkte finden</h2>
+
+    <div class="aufgabe">
+      <h4>Aufgabe 3: Nullstellen und Scheitelpunkt</h4>
+    <div class="kennz">
+      <span class="chip chip-hm">📱 mit GeoGebra</span>
+      <span class="chip chip-art">🔢 mit GeoGebra-Funktionen bestimmen</span>
+    </div>
+      <p>Gib \(g(x) = x^2 - 2x - 8\) ein. Bestimme die Nullstellen und den Scheitelpunkt mit den passenden Befehlen.</p>
+      <table class="zahltab">
+        <tr><td>kleinere Nullstelle</td><td><input type="text" id="t2a" placeholder="?"><span class="feld-status" id="s2a"></span></td></tr>
+        <tr><td>größere Nullstelle</td><td><input type="text" id="t2b" placeholder="?"><span class="feld-status" id="s2b"></span></td></tr>
+        <tr><td>Scheitelpunkt: \(x\)</td><td><input type="text" id="t2c" placeholder="?"><span class="feld-status" id="s2c"></span></td></tr>
+        <tr><td>Scheitelpunkt: \(y\)</td><td><input type="text" id="t2d" placeholder="?"><span class="feld-status" id="s2d"></span></td></tr>
+      </table>
+    </div>
+
+    <div class="aufgabe">
+      <h4>Aufgabe 4: Schnittstellen</h4>
+    <div class="kennz">
+      <span class="chip chip-hm">📱 mit GeoGebra</span>
+      <span class="chip chip-art">🧮 rechnerisch – Gleichung aufschreiben, lösen lassen</span>
+    </div>
+      <p>Gib zusätzlich \(h(x) = x + 2\) ein. Schreib die Gleichung, mit der man die Schnittstellen bekommt, in dein Heft und bestimme dann die beiden Stellen.</p>
+      <table class="zahltab">
+        <tr><td>linke Schnittstelle \(x\)</td><td><input type="text" id="t2e" placeholder="?"><span class="feld-status" id="s2e"></span></td></tr>
+        <tr><td>rechte Schnittstelle \(x\)</td><td><input type="text" id="t2f" placeholder="?"><span class="feld-status" id="s2f"></span></td></tr>
+      </table>
+      <p class="frage">Welcher Befehl liefert die Schnittpunkte zweier Funktionen direkt als Punkte?</p>
+      <div class="mcwahl" id="mc2a"></div>
+      <button class="btn btn-pruefen" onclick="speichern('k2')">Antworten speichern</button>
+      <button class="btn btn-leeren" id="aendern_k2" style="display:none" onclick="freigeben('k2')">Antworten ändern</button>
+      <div class="feedback" id="fb_k2"></div>
+    </div>
+  </section>
+
+  <section class="karte" id="k3">
+    <h2>Gleichungen lösen</h2>
+
+    <div class="aufgabe">
+      <h4>Aufgabe 5: Zwei Gleichungen</h4>
+    <div class="kennz">
+      <span class="chip chip-hm">📱 mit GeoGebra</span>
+      <span class="chip chip-art">🧮 rechnerisch – Gleichung aufschreiben, lösen lassen</span>
+    </div>
+      <p>Schreib beide Gleichungen ins Heft und lass sie dann lösen. Krumme Werte auf <b>zwei Nachkommastellen</b> runden.</p>
+      <table class="zahltab">
+        <tr><td>\(5x - 8 = 17\)</td><td><input type="text" id="t3a" placeholder="x = ?"><span class="feld-status" id="s3a"></span></td></tr>
+        <tr><td>\(x^2 - 6x + 4 = 0\), kleinere Lösung</td><td><input type="text" id="t3b" placeholder="?"><span class="feld-status" id="s3b"></span></td></tr>
+        <tr><td>\(x^2 - 6x + 4 = 0\), größere Lösung</td><td><input type="text" id="t3c" placeholder="?"><span class="feld-status" id="s3c"></span></td></tr>
+      </table>
+    </div>
+
+    <div class="aufgabe">
+      <h4>Aufgabe 6: Wachstum</h4>
+    <div class="kennz">
+      <span class="chip chip-hm">📱 mit GeoGebra</span>
+      <span class="chip chip-art">🧮 rechnerisch – Gleichung aufschreiben, lösen lassen</span>
+    </div>
+      <p>Eine Population startet mit 150 Tieren und wächst pro Jahr um 8 %. Lege dazu eine Funktion im Grafikrechner an. Runde auf <b>zwei Nachkommastellen</b>.</p>
+      <table class="zahltab">
+        <tr><td>Bestand nach 5 Jahren</td><td><input type="text" id="t3d" placeholder="?"><span class="feld-status" id="s3d"></span></td></tr>
+        <tr><td>Nach wie vielen Jahren sind es 300?</td><td><input type="text" id="t3e" placeholder="?"><span class="feld-status" id="s3e"></span></td></tr>
+      </table>
+      <p class="frage">In der Gleichung für die zweite Zeile steht der Buchstabe für die Zeit. Was musst du beim Befehl beachten?</p>
+      <div class="mcwahl" id="mc3a"></div>
+      <button class="btn btn-pruefen" onclick="speichern('k3')">Antworten speichern</button>
+      <button class="btn btn-leeren" id="aendern_k3" style="display:none" onclick="freigeben('k3')">Antworten ändern</button>
+      <div class="feedback" id="fb_k3"></div>
+    </div>
+  </section>
+
+  <section class="karte" id="k4">
+    <h2>Wiederholung: Klammern und Brüche eintippen</h2>
+
+    <div class="merk">
+      <b>Rückgriff auf Klasse 7.</b> Diese Karte prüft nicht neuen Stoff, sondern das, was in der EF am häufigsten schiefgeht: wie GeoGebra eine getippte Zeile liest.
+    </div>
+
+    <div class="aufgabe">
+      <h4>Aufgabe 7: Vier Eingaben</h4>
+    <div class="kennz">
+      <span class="chip chip-hm">📱 mit GeoGebra</span>
+      <span class="chip chip-art">🔢 mit GeoGebra-Funktionen bestimmen</span>
+    </div>
+      <p>Tippe jede Zeile genau so ein und trage das Ergebnis ein.</p>
+      <table class="zahltab">
+        <tr><td><code>20/4+1</code></td><td><input type="text" id="t4a" placeholder="?"><span class="feld-status" id="s4a"></span></td></tr>
+        <tr><td><code>20/(4+1)</code></td><td><input type="text" id="t4b" placeholder="?"><span class="feld-status" id="s4b"></span></td></tr>
+        <tr><td><code>sqrt(9+16)</code></td><td><input type="text" id="t4c" placeholder="?"><span class="feld-status" id="s4c"></span></td></tr>
+        <tr><td><code>sqrt(9)+16</code></td><td><input type="text" id="t4d" placeholder="?"><span class="feld-status" id="s4d"></span></td></tr>
+      </table>
+      <p class="frage">Du tippst einen Bruch und willst danach weiterrechnen. Wie kommst du aus dem Nenner heraus?</p>
+      <div class="mcwahl" id="mc4a"></div>
+      <button class="btn btn-pruefen" onclick="speichern('k4')">Antworten speichern</button>
+      <button class="btn btn-leeren" id="aendern_k4" style="display:none" onclick="freigeben('k4')">Antworten ändern</button>
+      <div class="feedback" id="fb_k4"></div>
+    </div>
+  </section>
+
+  <section class="karte" id="k5">
+    <h2>Auswertung</h2>
+    <p>Wenn du mit allen vier Karten fertig bist, wertest du hier aus. Danach sind die Antworten festgeschrieben – du siehst zu jeder Zeile, ob sie stimmt, und bei Aufgaben mit mehreren Schritten kannst du den vollständigen Lösungsweg aufklappen.</p>
+
+    <div class="merk merk-warn">
+      <b>⚠️ Einmalig.</b> Nach dem Auswerten lassen sich die Antworten nicht mehr ändern. Geh vorher noch einmal durch die Karten.
+    </div>
+
+    <button class="btn btn-pruefen btn-gross" onclick="testAuswerten()">Test auswerten</button>
+    <div class="zusammenfassung" id="zsf"></div>
+    <ul class="statusliste" id="statusliste"></ul>
+
+    <div class="stufen-tipps" id="lw_k1">
+      <h4>Lösungsweg zu Karte 1</h4>
+      <div class="stufe">
+        <button class="stufe-kopf" onclick="toggleStufe(this)"><span>Funktionswerte – Schritt für Schritt</span><span class="stufe-pfeil">▾</span></button>
+        <div class="stufe-inhalt">
+          <p><b>Eingabe:</b> <code>f(x)=x^2+3*x-4</code>. Nach der Hochzahl <code>2</code> einmal die Pfeiltaste nach rechts, sonst rutscht <code>+3*x</code> mit in den Exponenten – dann rechnet GeoGebra etwas völlig anderes.</p>
+          <p><b>Abrufen:</b> jeden Wert in einer eigenen neuen Zeile, z. B. <code>f(2)</code>.</p>
+          <p><b>Kontrolle im Kopf:</b> Setz die Zahl in den Term ein – erst quadrieren, dann das Dreifache der Zahl addieren, dann 4 abziehen. <code>f(2)</code>: \(4 + 6 - 4 = 6\). &nbsp; <code>f(-3)</code>: \(9 - 9 - 4 = -4\). &nbsp; <code>f(1)</code>: \(1 + 3 - 4 = 0\).</p>
+          <p><b>Zur zweiten Frage:</b> Wenn der Graph nur als steile Linie erscheint, stimmt der Ausschnitt nicht – das Sichtfenster vergrößern (zoomen oder die Achsenbereiche direkt eintragen), nicht die Funktion ändern.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="stufen-tipps" id="lw_k2">
+      <h4>Lösungsweg zu Karte 2</h4>
+      <div class="stufe">
+        <button class="stufe-kopf" onclick="toggleStufe(this)"><span>Nullstellen, Scheitelpunkt und Schnittstellen</span><span class="stufe-pfeil">▾</span></button>
+        <div class="stufe-inhalt">
+          <p><b>Nullstellen:</b> <code>Nullstelle(g)</code>. GeoGebra setzt zwei Punkte; gefragt ist jeweils nur der \(x\)-Wert. Kontrolle: Der Term lässt sich als \((x+2)(x-4)\) schreiben, ein Produkt ist null, wenn ein Faktor null ist – also \(x = -2\) und \(x = 4\).</p>
+          <p><b>Scheitelpunkt:</b> <code>Extremum(g)</code> liefert den Punkt direkt. Kontrolle über die Symmetrie: Der Scheitel liegt genau in der Mitte zwischen den Nullstellen, also bei \(x = 1\); Einsetzen ergibt \(1 - 2 - 8 = -9\), also \(S(1|-9)\).</p>
+          <p><b>Schnittstellen:</b> Der Ansatz, der ins Heft gehört, ist \(g(x) = h(x)\), also \(x^2 - 2x - 8 = x + 2\). Alles auf eine Seite: \(x^2 - 3x - 10 = 0\). Lösen lassen – oder faktorisiert \((x+2)(x-5)=0\) – ergibt \(x = -2\) und \(x = 5\).</p>
+          <p><b>Kurzer Weg im Bild:</b> <code>Schneide(g,h)</code> setzt beide Punkte direkt; ohne Befehl geht es mit dem Schnittpunkt-Werkzeug, indem man nacheinander beide Kurven antippt.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="stufen-tipps" id="lw_k3">
+      <h4>Lösungsweg zu Karte 3</h4>
+      <div class="stufe">
+        <button class="stufe-kopf" onclick="toggleStufe(this)"><span>Gleichungen und Wachstum</span><span class="stufe-pfeil">▾</span></button>
+        <div class="stufe-inhalt">
+          <p><b>Lineare Gleichung:</b> <code>Löse(5*x-8=17)</code>. Von Hand: 8 addieren, durch 5 teilen – \(x = 5\).</p>
+          <p><b>Quadratische Gleichung:</b> <code>Löse(x^2-6*x+4=0)</code>. GeoGebra zeigt die exakte Form \(3 \pm \sqrt{5}\); gerundet sind das \(0{,}76\) und \(5{,}24\). Kontrolle: Setz beide Werte ein, es muss jeweils 0 herauskommen.</p>
+          <p><b>Wachstum:</b> 8 % Zuwachs bedeutet den Faktor \(1{,}08\) pro Jahr, also <code>B(t)=150*1.08^t</code>. Nach dem <code>t</code> die Pfeiltaste nach rechts, sonst steht der Rest im Exponenten.</p>
+          <p><b>Bestand nach 5 Jahren:</b> reines Einsetzen, <code>B(5)</code> – gerundet \(220{,}40\).</p>
+          <p><b>Zeitpunkt für 300:</b> Der Ansatz ist die Gleichung \(150 \cdot 1{,}08^t = 300\). Da zwei Buchstaben vorkommen könnten, gehört die gesuchte Variable hinter das Komma: <code>Löse(B(t)=300, t)</code>. Ergebnis gerundet \(9{,}01\) Jahre – dass es keine ganze Zahl ist, ist richtig so, denn der Bestand wächst laufend.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="stufen-tipps" id="lw_k4">
+      <h4>Lösungsweg zu Karte 4</h4>
+      <div class="stufe">
+        <button class="stufe-kopf" onclick="toggleStufe(this)"><span>Wie GeoGebra die vier Zeilen liest</span><span class="stufe-pfeil">▾</span></button>
+        <div class="stufe-inhalt">
+          <p><b>Der Bruch:</b> Sobald du <code>/</code> tippst, springt der Cursor in den Nenner und bleibt dort. Bei <code>20/4+1</code> muss man nach der <code>4</code> mit der Pfeiltaste nach rechts heraus – dann steht nur die 4 unter dem Strich, und es ergibt \(5 + 1 = 6\). Bei <code>20/(4+1)</code> steht die ganze Klammer im Nenner, das ergibt \(20 : 5 = 4\).</p>
+          <p><b>Die Wurzel:</b> Was in der Klammer steht, liegt unter dem Wurzelzeichen. <code>sqrt(9+16)</code> ist die Wurzel aus 25, also 5. Bei <code>sqrt(9)+16</code> steht nur die 9 unter der Wurzel, das ergibt \(3 + 16 = 19\).</p>
+          <p><b>Merksatz:</b> Vor dem Rechnen in die Algebra-Ansicht schauen. Dort siehst du gesetzt, was tatsächlich unter dem Bruchstrich bzw. unter der Wurzel gelandet ist.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="trex" id="trex">🦖<span class="bubble">Made by ASzym</span></div>
+<script>
+
+/* Richtzeit des Orientierungstimers – hier anpassen: */
+const TESTZEIT_MIN = 32;
+
+const MARKE = '●';
+const FORTSCHRITT = { d1:['k1'], d2:['k2'], d3:['k3'], d4:['k4'], d5:['k5'] };
+const state = {};
+['k1','k2','k3','k4','k5'].forEach(k=>{ state[k]={geprueft:false, erledigt:false, wahlen:{}}; });
+state.k1.wahlen={0:null,1:null};
+state.k2.wahlen={0:null};
+state.k3.wahlen={0:null};
+state.k4.wahlen={0:null};
+let ausgewertet = false;
+
+/* ---------- Orientierungstimer ---------- */
+let restSek = TESTZEIT_MIN*60, ticker = null;
+function uhrZeigen(){
+  const m = Math.floor(restSek/60), s = restSek%60;
+  document.getElementById('uhr').textContent =
+    String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+}
+function timerStart(){
+  const b = document.getElementById('btnStart');
+  if(ticker){ clearInterval(ticker); ticker=null; b.textContent='▶ Weiter'; b.classList.remove('laeuft'); return; }
+  b.textContent='❚❚ Pause'; b.classList.add('laeuft');
+  ticker = setInterval(()=>{
+    if(restSek>0){ restSek--; uhrZeigen(); }
+    if(restSek===0){
+      clearInterval(ticker); ticker=null;
+      document.getElementById('timerbox').classList.add('abgelaufen');
+      b.textContent='▶ Start'; b.classList.remove('laeuft');
+    }
+  },1000);
+}
+function timerReset(){
+  if(ticker){ clearInterval(ticker); ticker=null; }
+  restSek = TESTZEIT_MIN*60;
+  document.getElementById('timerbox').classList.remove('abgelaufen');
+  const b=document.getElementById('btnStart');
+  b.textContent='▶ Start'; b.classList.remove('laeuft');
+  uhrZeigen();
+}
+uhrZeigen();
+
+/* ---------- Multiple Choice ---------- */
+const MC = {
+  'mc1a':{key:'k1', feld:0, opt: mische([
+    {t:'Einmal die Pfeiltaste nach rechts drücken', korrekt:true},
+    {t:'Die Leertaste drücken', korrekt:false},
+    {t:'Eine Klammer um die Hochzahl setzen', korrekt:false}])},
+  'mc1b':{key:'k1', feld:1, opt: mische([
+    {t:'Das Sichtfenster vergrößern – zoomen oder die Achsenbereiche eintragen', korrekt:true},
+    {t:'Die Funktion mit kleineren Zahlen neu eingeben', korrekt:false},
+    {t:'Mehr Nachkommastellen anzeigen lassen', korrekt:false}])},
+  'mc2a':{key:'k2', feld:0, opt: mische([
+    {t:'Schneide mit beiden Funktionsnamen in der Klammer', korrekt:true},
+    {t:'Nullstelle mit beiden Funktionsnamen in der Klammer', korrekt:false},
+    {t:'Extremum mit beiden Funktionsnamen in der Klammer', korrekt:false}])},
+  'mc3a':{key:'k3', feld:0, opt: mische([
+    {t:'Die gesuchte Variable muss als zweites Argument hinter das Komma', korrekt:true},
+    {t:'Die Variable muss vorher als Schieberegler angelegt werden', korrekt:false},
+    {t:'Der Buchstabe muss in x umbenannt werden', korrekt:false}])},
+  'mc4a':{key:'k4', feld:0, opt: mische([
+    {t:'Mit der Pfeiltaste nach rechts aus dem Nenner herausgehen', korrekt:true},
+    {t:'Ein Leerzeichen tippen', korrekt:false},
+    {t:'Noch einmal den Schrägstrich tippen', korrekt:false}])}
+};
+Object.keys(MC).forEach(w=>baueMC(w, MC[w].opt, MC[w].key, MC[w].feld));
+
+/* ---------- Felder ---------- */
+const G = {
+  k1:[{statusId:'s1a',felder:[{id:'t1a',erwartet:6}]},
+      {statusId:'s1b',felder:[{id:'t1b',erwartet:-4}]},
+      {statusId:'s1c',felder:[{id:'t1c',erwartet:0}]}],
+  k2:[{statusId:'s2a',felder:[{id:'t2a',erwartet:-2}]},
+      {statusId:'s2b',felder:[{id:'t2b',erwartet:4}]},
+      {statusId:'s2c',felder:[{id:'t2c',erwartet:1}]},
+      {statusId:'s2d',felder:[{id:'t2d',erwartet:-9}]},
+      {statusId:'s2e',felder:[{id:'t2e',erwartet:-2}]},
+      {statusId:'s2f',felder:[{id:'t2f',erwartet:5}]}],
+  k3:[{statusId:'s3a',felder:[{id:'t3a',erwartet:5}]},
+      {statusId:'s3b',felder:[{id:'t3b',erwartet:0.76,tol:0.01}]},
+      {statusId:'s3c',felder:[{id:'t3c',erwartet:5.24,tol:0.01}]},
+      {statusId:'s3d',felder:[{id:'t3d',erwartet:220.40,tol:0.01}]},
+      {statusId:'s3e',felder:[{id:'t3e',erwartet:9.01,tol:0.01}]}],
+  k4:[{statusId:'s4a',felder:[{id:'t4a',erwartet:6}]},
+      {statusId:'s4b',felder:[{id:'t4b',erwartet:4}]},
+      {statusId:'s4c',felder:[{id:'t4c',erwartet:5}]},
+      {statusId:'s4d',felder:[{id:'t4d',erwartet:19}]}]
+};
+const MC_JE_KARTE = { k1:['mc1a','mc1b'], k2:['mc2a'], k3:['mc3a'], k4:['mc4a'] };
+const TITEL = { k1:'Karte 1 – Eingeben und anzeigen', k2:'Karte 2 – Besondere Punkte finden',
+                k3:'Karte 3 – Gleichungen lösen', k4:'Karte 4 – Klammern und Brüche' };
+
+function sperren(key, an){
+  G[key].forEach(gr=>gr.felder.forEach(f=>{ document.getElementById(f.id).readOnly = an; }));
+}
+function speichern(key){
+  if(ausgewertet) return;
+  state[key].geprueft = true;
+  sperren(key, true);
+  const fb=document.getElementById('fb_'+key);
+  fb.className='feedback zeig neutral';
+  fb.textContent='Gespeichert. Ob es stimmt, siehst du auf Karte 5 – bis dahin kannst du hier noch etwas ändern.';
+  document.getElementById('aendern_'+key).style.display='inline-block';
+  state[key].erledigt = true;
+  pruefeFortschritt();
+}
+function freigeben(key){
+  if(ausgewertet) return;
+  state[key].geprueft = false;
+  sperren(key, false);
+  document.getElementById('fb_'+key).className='feedback';
+  document.getElementById('aendern_'+key).style.display='none';
+  state[key].erledigt = false;
+  pruefeFortschritt();
+}
+
+/* ---------- Auswertung ---------- */
+function testAuswerten(){
+  if(ausgewertet) return;
+  ausgewertet = true;
+  let punkte=0, moeglich=0;
+  const liste=document.getElementById('statusliste');
+  liste.innerHTML='';
+  ['k1','k2','k3','k4'].forEach(key=>{
+    state[key].geprueft = true;
+    sperren(key, true);
+    document.getElementById('aendern_'+key).style.display='none';
+    let richtigK=0, gesamtK=0, fehler=false;
+    G[key].forEach(gr=>{
+      gesamtK++;
+      const ok=gr.felder.every(f=>feldStimmt(f.id,f.erwartet,f.tol));
+      const st=document.getElementById(gr.statusId);
+      st.textContent = ok ? '✅' : '❌';
+      st.style.color = ok ? 'var(--green)' : 'var(--red)';
+      if(ok) richtigK++; else fehler=true;
+    });
+    MC_JE_KARTE[key].forEach(w=>{
+      gesamtK++;
+      const ok=mcAuswerten(w, MC[w].opt, state[key].wahlen[MC[w].feld]);
+      if(ok) richtigK++; else fehler=true;
+    });
+    punkte+=richtigK; moeglich+=gesamtK;
+    const li=document.createElement('li');
+    li.className = fehler ? 'st-offen' : 'st-ok';
+    const kopf=document.createElement('div');
+    kopf.className='st-kopf';
+    kopf.textContent=(fehler?'❌ ':'✅ ')+TITEL[key]+': '+richtigK+' von '+gesamtK+' richtig';
+    const hin=document.createElement('div');
+    hin.className='st-hinweis';
+    hin.textContent = fehler
+      ? 'Der vollständige Lösungsweg steht unten zum Aufklappen bereit.'
+      : 'Vollständig richtig.';
+    li.appendChild(kopf); li.appendChild(hin);
+    liste.appendChild(li);
+    const lw=document.getElementById('lw_'+key);
+    if(lw && fehler) lw.classList.add('zeig');
+  });
+  const z=document.getElementById('zsf');
+  z.classList.add('zeig');
+  z.textContent = 'Ergebnis: '+punkte+' von '+moeglich+' Teilaufgaben richtig.';
+  state.k5.erledigt = true;
+  pruefeFortschritt();
+  document.querySelectorAll('.karte .btn-pruefen').forEach(b=>{
+    if(b.getAttribute('onclick')!=='testAuswerten()') b.disabled=true;
+  });
+}
+if(window.MathJax && window.MathJax.typesetPromise){ try{ MathJax.typesetPromise(); }catch(e){} }
+
+
+function mische(arr){
+  const a=arr.slice();
+  for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+  return a;
+}
+document.querySelectorAll('.tab').forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('aktiv'));
+    document.querySelectorAll('.karte').forEach(k=>k.classList.remove('aktiv'));
+    tab.classList.add('aktiv');
+    document.getElementById(tab.dataset.ziel).classList.add('aktiv');
+    window.scrollTo({top:0,behavior:'smooth'});
+  });
+});
+document.querySelectorAll('.stufen-wahl').forEach(w=>{
+  w.querySelectorAll('.stufe-btn').forEach(b=>{
+    b.addEventListener('click',()=>{
+      const k=w.dataset.karte, s=b.dataset.s;
+      w.querySelectorAll('.stufe-btn').forEach(x=>x.classList.remove('aktiv'));
+      b.classList.add('aktiv');
+      document.querySelectorAll('.stufe-block[data-karte="'+k+'"]').forEach(bl=>{
+        bl.classList.toggle('aktiv', bl.dataset.s===s);
+      });
+    });
+  });
+});
+function toggleStufe(btn){ btn.parentElement.classList.toggle('offen'); }
+function pruefeFortschritt(){
+  Object.keys(FORTSCHRITT).forEach(d=>{
+    const e=document.getElementById(d);
+    if(!e) return;
+    const fertig=FORTSCHRITT[d].some(k=>state[k] && state[k].erledigt);
+    e.textContent = fertig ? MARKE : '';
+  });
+}
+function parseZahlOderBruch(s){
+  s=String(s).trim().replace(',', '.');
+  if(s==='') return NaN;
+  const bruch=s.match(/^(-?\d+(?:\.\d+)?)\s*\/\s*(-?\d+(?:\.\d+)?)$/);
+  if(bruch){ const z=parseFloat(bruch[1]), n=parseFloat(bruch[2]); return n!==0 ? z/n : NaN; }
+  return parseFloat(s);
+}
+function feldStimmt(id, erwartet, tol){
+  const el=document.getElementById(id);
+  if(!el) return false;
+  const wert=parseZahlOderBruch(el.value);
+  return el.value.trim()!=='' && !isNaN(wert) && Math.abs(wert-erwartet)<=(tol!==undefined?tol:0.0001);
+}
+function pruefeGruppen(gruppen, stumm){
+  let alle=true;
+  gruppen.forEach(gr=>{
+    const ok=gr.felder.every(f=>feldStimmt(f.id,f.erwartet,f.tol));
+    if(!stumm){
+      const st=document.getElementById(gr.statusId);
+      if(st){ st.textContent = ok ? '✅' : '❌'; st.style.color = ok ? 'var(--green)' : 'var(--red)'; }
+    }
+    if(!ok) alle=false;
+  });
+  return alle;
+}
+function leereGruppen(gruppen){
+  gruppen.forEach(gr=>{
+    gr.felder.forEach(f=>{ const e=document.getElementById(f.id); if(e){ e.value=''; e.readOnly=false; } });
+    const st=document.getElementById(gr.statusId); if(st) st.textContent='';
+  });
+}
+function baueMC(wrapId, optionen, key, feld){
+  const wrap=document.getElementById(wrapId);
+  if(!wrap) return;
+  optionen.forEach((o,i)=>{
+    const b=document.createElement('button');
+    b.textContent=o.t; b.dataset.i=i;
+    b.addEventListener('click',()=>{
+      if(state[key].geprueft) return;
+      wrap.querySelectorAll('button').forEach(x=>x.classList.remove('gewaehlt'));
+      b.classList.add('gewaehlt');
+      state[key].wahlen[feld]=i;
+    });
+    wrap.appendChild(b);
+  });
+}
+function mcAuswerten(wrapId, optionen, wahl){
+  const wrap=document.getElementById(wrapId);
+  wrap.querySelectorAll('button').forEach((b,i)=>{
+    if(optionen[i].korrekt) b.classList.add('richtig');
+    else if(i===wahl) b.classList.add('falsch');
+  });
+  return wahl!==null && wahl!==undefined && optionen[wahl] && optionen[wahl].korrekt;
+}
+function mcLeeren(wrapId){
+  const wrap=document.getElementById(wrapId);
+  if(wrap) wrap.querySelectorAll('button').forEach(b=>b.classList.remove('richtig','falsch','gewaehlt'));
+}
+const trex=document.getElementById('trex');
+if(trex) trex.addEventListener('click',()=>{
+  trex.classList.add('zeig');
+  setTimeout(()=>trex.classList.remove('zeig'),1800);
+});
+
+pruefeFortschritt();
+
+/* =============================================================================
+   Notfall-Anzeige für Formeln (MATHJAX-FALLBACK)
+   Lädt MathJax nicht (Schul-WLAN, Vorschau, Offline-Kopie), blieben sonst
+   \( ... \) als Rohtext mit Backslashes stehen. Dann werden die TeX-Ausdrücke
+   hier in lesbares HTML gewandelt: √ mit Klammer, Brüche als .frac-Konstrukt
+   (kein Schrägstrich!), Hoch-/Tiefstellungen als sup/sub, Sonderzeichen direkt.
+   Ist MathJax da, passiert nichts.
+   ========================================================================== */
+(function(){
+  var AUF = '\u0001', ZU = '\u0002';   /* Platzhalter fuer { } aus \left\{ */
+
+  function leseGruppe(t, i){
+    if (t.charAt(i) !== '{') return null;
+    var tiefe = 0;
+    for (var j = i; j < t.length; j++){
+      if (t.charAt(j) === '{') tiefe++;
+      else if (t.charAt(j) === '}'){ tiefe--; if (tiefe === 0) return [t.slice(i+1, j), j+1]; }
+    }
+    return null;
+  }
+
+  function strukturen(t){
+    var aus = '', i = 0;
+    while (i < t.length){
+      var m = /^\\(dfrac|tfrac|frac|sqrt)/.exec(t.slice(i));
+      if (m){
+        var a = leseGruppe(t, i + m[0].length);
+        if (a){
+          if (m[1] === 'sqrt'){
+            var inn = strukturen(a[0]);
+            aus += /^[0-9A-Za-z]+$/.test(a[0]) ? '√' + inn : '√(' + inn + ')';
+            i = a[1]; continue;
+          }
+          var b = leseGruppe(t, a[1]);
+          if (b){
+            aus += '<span class="frac"><span>' + strukturen(a[0]) + '</span><span>'
+                 + strukturen(b[0]) + '</span></span>';
+            i = b[1]; continue;
+          }
+        }
+      }
+      aus += t.charAt(i); i++;
+    }
+    return aus;
+  }
+
+  function texHtml(t){
+    t = t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    t = t.replace(/\\rightarrow/g, '→').replace(/\\leftarrow/g, '←')
+         .replace(/\\Rightarrow/g, '⇒').replace(/\\Leftarrow/g, '⇐')
+         .replace(/\\left\\\{/g, AUF).replace(/\\right\\\}/g, ZU)
+         .replace(/\\left(?![a-zA-Z])/g, '').replace(/\\right(?![a-zA-Z])/g, '')
+         .replace(/\\\{/g, AUF).replace(/\\\}/g, ZU);
+    t = t.replace(/\\cdot/g, '·').replace(/\\times/g, '·')
+         .replace(/\\approx/g, '≈').replace(/\\neq/g, '≠')
+         .replace(/\\leq/g, '≤').replace(/\\le\b/g, '≤')
+         .replace(/\\geq/g, '≥').replace(/\\ge\b/g, '≥')
+         .replace(/\\pm/g, '±').replace(/\\mp/g, '∓')
+         .replace(/\\ldots/g, '…').replace(/\\dots/g, '…')
+         .replace(/\\to\b/g, '→')
+         .replace(/\\infty/g, '∞')
+         .replace(/\\pi/g, 'π').replace(/\\alpha/g, 'α')
+         .replace(/\\beta/g, 'β').replace(/\\gamma/g, 'γ')
+         .replace(/\\Delta/g, 'Δ').replace(/\\delta/g, 'δ')
+         .replace(/\\min/g, 'min').replace(/\\max/g, 'max')
+         .replace(/\\text\{([^{}]*)\}/g, '$1')
+         .replace(/\\mathrm\{([^{}]*)\}/g, '$1');
+    t = strukturen(t);
+    t = t.replace(/\^\{([^{}]*)\}/g, '<sup>$1</sup>')
+         .replace(/\^(-?[0-9A-Za-z])/g, '<sup>$1</sup>')
+         .replace(/_\{([^{}]*)\}/g, '<sub>$1</sub>')
+         .replace(/_(-?[0-9A-Za-z])/g, '<sub>$1</sub>');
+    t = t.replace(/\{,\}/g, ',').replace(/\\,/g, ' ').replace(/\\;/g, ' ')
+         .replace(/\\ /g, ' ').replace(/[{}]/g, '')
+         .replace(new RegExp(AUF, 'g'), '{').replace(new RegExp(ZU, 'g'), '}');
+    return t;
+  }
+
+  function mathNotfall(){
+    if (window.MathJax && window.MathJax.typesetPromise) return;  /* MathJax ist da */
+    var lauf = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
+      acceptNode: function(n){
+        var tag = n.parentNode && n.parentNode.nodeName;
+        if (tag === 'SCRIPT' || tag === 'STYLE') return NodeFilter.FILTER_REJECT;
+        return n.nodeValue.indexOf('\\(') > -1 ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP;
+      }
+    });
+    var treffer = [], n;
+    while ((n = lauf.nextNode())) treffer.push(n);
+    treffer.forEach(function(k){
+      var teile = k.nodeValue.split(/\\\(([\s\S]+?)\\\)/);
+      if (teile.length < 2) return;
+      var html = '';
+      for (var i = 0; i < teile.length; i++){
+        html += (i % 2)
+          ? '<span class="tex-ersatz">' + texHtml(teile[i]) + '</span>'
+          : teile[i].replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      }
+      var huelle = document.createElement('span');
+      huelle.innerHTML = html;
+      var frag = document.createDocumentFragment();
+      while (huelle.firstChild) frag.appendChild(huelle.firstChild);
+      k.parentNode.replaceChild(frag, k);
+    });
+  }
+  window.addEventListener('load', function(){ setTimeout(mathNotfall, 3500); });
+})();
+</script>
+</body>
+</html>
