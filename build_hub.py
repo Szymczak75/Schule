@@ -18,6 +18,9 @@ Konventionen (Pfad 3 – Politur lebt in den Metatags):
 - Suche: title + description + keywords.
 - Kachel = letzter Ordner. Kachelname aus Ordnername (übersteuerbar per
   <meta name="kachel">). Emoji aus Lookup, Fallback 📂.
+- Reihenfolge: Blöcke und Kacheln werden immer sortiert – jahrgangsartige
+  Namen (7_Klasse, 10 Klasse, EF, Q1, Q2) numerisch/schulisch, alles
+  andere alphabetisch. Siehe block_sortkey().
 """
 
 import os, re, sys, json, argparse, html
@@ -42,6 +45,8 @@ TYP_ICON = {
 ICON_NEUTRAL = "📄"
 
 # Emoji-Lookup für Themen (oberthema / Ordnername, lower, ohne Umlaute-Sonderfälle)
+# Hinweis: Der Lookup greift auch, wenn der Ordnername zusätzliche Wörter
+# enthält (z. B. "Geogebra alle JgSt" → Treffer über das Wort "geogebra").
 THEMA_EMOJI = {
     "rechnen": "🔢", "geometrie": "📐", "brueche": "➗", "brueche_rechnen": "➗",
     "muster": "🔵", "muster_figuren": "🔵", "rationale_zahlen": "🔢",
@@ -52,14 +57,14 @@ THEMA_EMOJI = {
     "kreise_dreiecke": "⭕", "quadratische_gleichungen": "🧮",
     "analysis": "📈", "funktionen": "🔄", "potenzfunktionen": "📈",
     "transformationen": "🔀", "ganzrationale_funktionen": "📉",
-    "geogebra": "🖥️", "lineare_algebra": "📐", "vektorrechnung": "📐",
+    "geogebra": "🧮", "lineare_algebra": "📐", "vektorrechnung": "📐",
     "herz": "❤️", "herz_kreislauf": "❤️", "sexualerziehung": "🌱",
     "blutzucker": "🍬", "blutzucker_hormone": "🍬", "hormone": "🍬",
     "immunsystem": "🦠", "fortpflanzung": "👶",
     "koerper": "📦", "grundlagen": "📐", "sachaufgaben": "📝",
     "teilbarkeit_primzahlen": "🔍", "rechengesetze": "⚙️",
     "differentialrechnung": "📉", "cybergrooming": "🛡️",
-    "taschenrechner": "🖩", "gtr": "🖩", "cas": "🖩", "geogebra_tool": "🖥️",
+    "taschenrechner": "🧮", "gtr": "🧮", "cas": "🧮", "geogebra_tool": "🧮",
 }
 # Kachel-Emoji-Fallback (letzter Ordner) – nutzt dieselbe Tabelle, sonst 📂
 KACHEL_EMOJI_FALLBACK = "📂"
@@ -144,6 +149,47 @@ def klasse_sortkey(key):
     except (ValueError, TypeError):
         return 200
 
+# ──────────────────────────────────────────────────────────────────────────────
+#  Sortierung von Block- und Kachelnamen (wörtliche Ordnernamen)
+# ──────────────────────────────────────────────────────────────────────────────
+
+# Oberstufen-Kürzel in wörtlichen Ordnernamen (nach klassen_sortkey-Logik)
+JGST_ORDER = {"ef": 99, "q1": 101, "q2": 102, "q1_q2": 103, "q12": 103}
+
+def _norm_key(s):
+    """Klein, ohne Umlaute, alles Nicht-Alphanumerische zu '_'."""
+    s = (s or "").lower()
+    for a, b in (("ä", "ae"), ("ö", "oe"), ("ü", "ue"), ("ß", "ss")):
+        s = s.replace(a, b)
+    return re.sub(r"[^a-z0-9]+", "_", s).strip("_")
+
+def _jahrgang_num(n):
+    """Erkennt jahrgangsartige Namen: '7', '7_klasse', 'klasse_7', '10 Klasse'…"""
+    m = re.match(r"^(\d{1,2})$", n)
+    if m:
+        return int(m.group(1))
+    m = re.match(r"^(\d{1,2})_?(klasse|kl|jgst|jg)", n)
+    if m:
+        return int(m.group(1))
+    m = re.match(r"^(klasse|kl|jgst|jg)_?(\d{1,2})", n)
+    if m:
+        return int(m.group(2))
+    return None
+
+def block_sortkey(name):
+    """Sortierschlüssel für wörtliche Ordnernamen (Blöcke & Kacheln).
+
+    Jahrgangsartige Namen zuerst und schulisch geordnet
+    (5 … 10, EF, Q1, Q2, Q1/Q2), alles andere danach alphabetisch.
+    """
+    n = _norm_key(name)
+    num = _jahrgang_num(n)
+    if num is not None:
+        return (0, num, n)
+    if n in JGST_ORDER:
+        return (0, JGST_ORDER[n], n)
+    return (1, 0, n)
+
 def parse_path(rel):
     parts = rel.split("/")
     fach = parts[0]
@@ -182,7 +228,24 @@ def prettify(name):
     return name[0].upper() + name[1:]
 
 def thema_emoji(key):
-    return THEMA_EMOJI.get(key.lower(), None)
+    """Emoji für einen Themen-/Ordnernamen.
+
+    Erst exakter Treffer in THEMA_EMOJI, danach Wort-Treffer innerhalb des
+    Namens ("Geogebra alle JgSt" → 'geogebra'). Mehrwort-Schlüssel
+    (z. B. 'lineare_funktionen') greifen als Teilzeichenkette. Kein Treffer
+    → None (Aufrufer setzt den Fallback 📂).
+    """
+    if not key:
+        return None
+    k = _norm_key(key)
+    if k in THEMA_EMOJI:
+        return THEMA_EMOJI[k]
+    woerter = set(k.split("_"))
+    treffer = [w for w in THEMA_EMOJI
+               if (w in woerter) or ("_" in w and w in k)]
+    if treffer:
+        return THEMA_EMOJI[max(treffer, key=len)]
+    return None
 
 # ──────────────────────────────────────────────────────────────────────────────
 #  Icons / Link-Titel
@@ -496,10 +559,11 @@ def render_overview(dirpath, root, sub, heute):
 
     blocks = []
     # Reihenfolge: erst direkte/kachel-only (thema=""), dann Themen sortiert
-    for thema in [""] + sorted(k for k in themen if k):
+    # (jahrgangsartig 7_Klasse … EF vor alphabetisch – siehe block_sortkey)
+    for thema in [""] + sorted((k for k in themen if k), key=block_sortkey):
         kacheln = themen[thema]
         grid = "\n".join(kachel_html(kd, fl) for kd, fl in
-                         sorted(kacheln.items(), key=lambda x: x[0].lower()))
+                         sorted(kacheln.items(), key=lambda x: block_sortkey(x[0])))
         if thema:
             em = thema_emoji(thema) or KACHEL_EMOJI_FALLBACK
             blocks.append(
@@ -615,14 +679,16 @@ def build_fach_card(fach, klassen, alt_klassen, metas, einheiten=None):
         parts.append('    </button>')
         parts.append('    <div class="klasse-panel">')
         parts.append('      <div class="themen-bereich">')
-        for thema in themen:
+        # Themen-/Jahrgangsblöcke sortiert: 7_Klasse … 10_Klasse, EF, Q1, Q2,
+        # danach alles Übrige alphabetisch (siehe block_sortkey).
+        for thema in sorted(themen.keys(), key=block_sortkey):
             em = thema_emoji(thema) or KACHEL_EMOJI_FALLBACK
             # Bei Einheiten bleiben innere Ordnernamen wörtlich stehen
             thema_title = thema if kl.startswith("#") else prettify(thema)
             parts.append('        <div class="thema-block">')
             parts.append(f'          <div class="thema-header"><span class="thema-icon">{em}</span><span class="thema-title">{esc(thema_title)}</span></div>')
             parts.append('          <div class="kachel-grid">')
-            for kdir, flist in themen[thema].items():
+            for kdir, flist in sorted(themen[thema].items(), key=lambda x: block_sortkey(x[0])):
                 parts.append(build_kachel(kdir, flist, metas))
             parts.append('          </div>')
             parts.append('        </div>')
@@ -681,7 +747,7 @@ def build_sonst_card(sonst, metas):
         '    <div class="thema-block">',
         '      <div class="kachel-grid">',
     ]
-    for kdir, flist in sonst.items():
+    for kdir, flist in sorted(sonst.items(), key=lambda x: block_sortkey(x[0])):
         parts.append(build_kachel(kdir, flist, metas))
     parts.append('      </div>')
     parts.append('    </div>')
