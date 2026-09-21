@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reaktionstest &ndash; wie schnell verarbeitet dein Gehirn?</title>
+<meta name="description" content="Interaktiver Reaktionstest in fünf Szenarien mit steigender Schwierigkeit – vom einfachen Antippen bis zur Zahl-oder-Farbe-Aufgabe. Die Messwerte werden mit dem Linealversuch verglichen und ausgewertet.">
+<meta name="keywords" content="Reaktionszeit, Reaktionstest, bewusste Reaktion, Linealversuch, Informationsverarbeitung, Gehirn, Ablenkung, Stroop-Effekt">
+<meta name="typ" content="Lernseite">
+<meta name="klasse" content="10">
+<meta name="fach" content="bio">
+<meta name="oberthema" content="Neurobiologie">
+<meta name="thema" content="Reaktionszeit messen">
+<script>
+  MathJax = {
+    tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+    svg: { fontCache: 'global' }
+  };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+:root{
+  --ink:#22303f;
+  --card:#ffffff;
+  --green:#1e7d32;
+  --red:#c1272d;
+  --amber:#b8860b;
+  --amber-light:#fdf3d9;
+  --amber-dark:#96690a;
+  --orange:#c97a2e;
+  --orange-dark:#a5611e;
+  --orange-light:#fbeee0;
+  --bg:#faf7f2;
+  --line:#e4dcd0;
+  /* Reizfarben fuer Szenario 5 – ausschliesslich aus dem verbindlichen Schema */
+  --reiz-rot:#c1272d;
+  --reiz-blau:#2f5fa6;
+  --reiz-gold:#b8860b;
+  --reiz-grau:#6b7686;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  font-size:1.05rem;line-height:1.6;
+  -webkit-tap-highlight-color:transparent;
+}
+.wrap{max-width:1000px;margin:0 auto;padding:12px 14px 80px}
+h1,h2,h3,h4{line-height:1.3}
+p{margin:0 0 10px}
+
+.kopf{background:var(--orange-light);border:2px solid var(--orange);border-radius:14px;padding:14px 16px;margin-bottom:12px}
+.kopf h1{margin:0 0 6px;font-size:1.5rem;color:var(--orange-dark)}
+.kopf .sub{margin:0;font-size:1rem}
+.kopf .stufe{display:inline-block;margin-top:8px;background:#fff;border:2px solid var(--orange);color:var(--orange-dark);border-radius:999px;padding:4px 12px;font-size:1rem;font-weight:700}
+
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.tab{flex:1 1 180px;min-height:52px;padding:10px 12px;font-size:1rem;font-weight:700;font-family:inherit;
+  border:2px solid var(--orange);background:#fff;color:var(--orange-dark);border-radius:10px;cursor:pointer}
+.tab.aktiv{background:var(--orange);color:#fff}
+
+.karte{background:var(--card);border:1px solid var(--line);border-left:7px solid var(--orange);
+  border-radius:12px;padding:16px;margin-bottom:14px;display:none}
+.karte.aktiv{display:block}
+.karte h2{margin:0 0 10px;font-size:1.3rem;color:var(--orange-dark)}
+.karte h3{margin:18px 0 8px;font-size:1.12rem}
+.info{background:var(--orange-light);border:1px solid var(--orange);border-radius:10px;padding:12px 14px;margin:12px 0}
+.info ol,.info ul{margin:4px 0 0;padding-left:22px}
+.info li{margin-bottom:4px}
+
+.btn{min-height:48px;padding:12px 18px;font-size:1rem;font-weight:700;font-family:inherit;
+  border-radius:10px;border:2px solid var(--orange-dark);background:var(--orange);color:#fff;cursor:pointer}
+.btn.sek{background:#fff;color:var(--orange-dark)}
+.btn:disabled{opacity:.5;cursor:default}
+.btn.leeren{display:none;background:#fff;color:var(--orange-dark)}
+.btn.leeren.zeig{display:inline-block}
+.btnzeile{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+
+.fb{display:none;margin-top:12px;padding:12px 14px;border-radius:10px;font-size:1rem;font-weight:600;color:#fff}
+.fb.ok{display:block;background:var(--green)}
+.fb.bad{display:block;background:var(--red)}
+
+.hilfe{display:none;margin-top:12px}
+.hilfe.frei{display:block}
+details.amber{background:var(--amber-light);border:2px solid var(--amber);border-radius:10px;padding:4px 12px;margin-top:10px}
+details.amber summary{cursor:pointer;font-weight:700;color:var(--amber-dark);font-size:1rem;padding:12px 2px;list-style:none}
+details.amber summary::-webkit-details-marker{display:none}
+details.amber .inhalt{padding:0 2px 10px;font-size:1rem}
+details.amber .inhalt ul{margin:6px 0 0;padding-left:22px}
+details.amber .inhalt li{margin-bottom:6px}
+
+textarea{width:100%;min-height:100px;font-size:1rem;font-family:inherit;color:var(--ink);
+  border:2px solid var(--line);border-radius:10px;padding:10px;background:#fff;resize:vertical}
+input[type=text]{font-size:1rem;font-family:inherit;color:var(--ink);border:2px solid var(--line);
+  border-radius:8px;padding:8px 10px;min-height:48px;background:#fff;width:120px}
+
+/* Auswahlknoepfe */
+.auswahl{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 4px}
+.wahl{flex:1 1 150px;min-height:52px;padding:8px 10px;font-size:1rem;font-weight:700;font-family:inherit;
+  border:2px solid var(--orange);background:#fff;color:var(--orange-dark);border-radius:10px;cursor:pointer}
+.wahl.aktiv{background:var(--orange);color:#fff}
+.wahl.klein{flex:0 0 80px}
+.wahl:disabled{opacity:.5;cursor:default}
+
+/* Testfeld */
+.beschreibung{min-height:52px}
+.cue{min-height:80px;text-align:center;font-size:2.4rem;font-weight:800;line-height:1.3;
+  padding:12px;border-radius:12px;background:var(--orange-light);border:2px solid var(--orange);margin:12px 0 10px;color:var(--ink)}
+.cue .regel{font-size:1rem;font-weight:600;display:block}
+.status{margin:0 0 10px;min-height:48px}
+.status .fb{margin-top:0}
+.status .neutral{padding:12px 14px;border-radius:10px;font-size:1rem;font-weight:600;background:#fff;border:2px dashed var(--line)}
+.arena{position:relative;height:420px;background:#fff;border:3px solid var(--line);border-radius:14px;overflow:hidden;
+  touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.arena.warten{background:#f3eee6}
+.arena-text{position:absolute;left:0;right:0;top:50%;-webkit-transform:translateY(-50%);transform:translateY(-50%);
+  text-align:center;font-size:1.25rem;font-weight:700;color:var(--ink);pointer-events:none;padding:0 16px}
+.zielkreis{position:absolute;width:100px;height:100px;border-radius:50%;background:var(--orange);
+  border:5px solid var(--orange-dark);padding:0;cursor:pointer}
+.koeder{position:absolute;width:100px;height:100px;border-radius:50%;background:var(--reiz-grau);pointer-events:none}
+.raster{position:absolute;top:0;left:0;right:0;bottom:0;display:grid;grid-template-columns:repeat(3,1fr);
+  gap:14px;padding:22px;align-content:center}
+.raster.vier{grid-template-columns:repeat(2,1fr);padding:22px 12%}
+.kachel{min-height:110px;border:3px solid var(--line);border-radius:14px;background:#fff;font-family:inherit;
+  font-size:3.2rem;font-weight:800;color:var(--ink);cursor:pointer;padding:0}
+.kachel.wackel{-webkit-animation:wackel .6s ease-in-out infinite alternate;animation:wackel .6s ease-in-out infinite alternate}
+@-webkit-keyframes wackel{from{-webkit-transform:rotate(-7deg)}to{-webkit-transform:rotate(7deg)}}
+@keyframes wackel{from{transform:rotate(-7deg)}to{transform:rotate(7deg)}}
+.blase{position:absolute;border-radius:50%;pointer-events:none;z-index:2;opacity:.8;
+  -webkit-animation:schwebe 2.4s ease-in-out infinite alternate;animation:schwebe 2.4s ease-in-out infinite alternate}
+@-webkit-keyframes schwebe{from{-webkit-transform:translate(0,0)}to{-webkit-transform:translate(var(--dx),var(--dy))}}
+@keyframes schwebe{from{transform:translate(0,0)}to{transform:translate(var(--dx),var(--dy))}}
+.zeitenliste{margin-top:10px;font-size:1rem}
+
+/* Ergebnisse */
+.tabwrap{overflow-x:auto}
+table.erg{border-collapse:collapse;width:100%;font-size:1rem;background:#fff}
+table.erg th,table.erg td{border:1px solid var(--line);padding:10px 8px;text-align:left}
+table.erg th{background:var(--orange-light)}
+.diagramm{margin:14px 0}
+.diagramm svg{width:100%;height:auto;display:block}
+.formel{margin:8px 0}
+
+/* Wahr/Falsch */
+.wf{display:grid;gap:12px}
+.wfblock{border:1px solid var(--line);border-radius:10px;padding:12px;background:#fff}
+.wftext{margin:0 0 10px}
+.wfbtns{display:flex;flex-wrap:wrap;gap:10px}
+.wfbtn{min-height:48px;min-width:110px;padding:10px 16px;font-size:1rem;font-weight:700;font-family:inherit;
+  border:2px solid var(--orange-dark);background:#fff;color:var(--ink);border-radius:10px;cursor:pointer}
+.wfbtn.sel{background:var(--orange);color:#fff}
+.wfbtn.ok{background:var(--green);color:#fff;border-color:var(--green)}
+.wfbtn.bad{background:var(--red);color:#fff;border-color:var(--red)}
+.wfbtn:disabled{cursor:default;opacity:1}
+
+.trex{position:fixed;right:12px;bottom:12px;width:54px;height:54px;border-radius:50%;
+  background:#fff;border:2px solid var(--line);cursor:pointer;font-size:1.6rem;line-height:1;padding:0;z-index:20}
+.trex .sig{display:none;position:absolute;right:60px;bottom:8px;white-space:nowrap;
+  background:var(--ink);color:#fff;border-radius:8px;padding:8px 12px;font-size:1rem;font-weight:600}
+.trex:hover .sig,.trex.zeig .sig{display:block}
+footer{margin-top:20px;font-size:1rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="kopf">
+  <h1>Reaktionstest &ndash; wie schnell verarbeitet dein Gehirn?</h1>
+  <p class="sub">F&uuml;nf Szenarien, jedes ein bisschen schwerer. Miss deine Reaktionszeit und finde heraus, was dein Gehirn langsamer macht.</p>
+  <p class="stufe">Erarbeitung &middot; Biologie &middot; Klasse 10</p>
+</header>
+
+<nav class="tabs" id="tabs">
+  <button type="button" class="tab aktiv" data-ziel="k1">1 &middot; So geht's</button>
+  <button type="button" class="tab" data-ziel="k2">2 &middot; Der Test</button>
+  <button type="button" class="tab" data-ziel="k3">3 &middot; Deine Ergebnisse</button>
+  <button type="button" class="tab" data-ziel="k4">4 &middot; Auswerten</button>
+</nav>
+
+<main>
+
+<!-- ================= KARTE 1 ================= -->
+<section class="karte aktiv" id="k1">
+  <h2>1 &middot; So funktioniert der Reaktionstest</h2>
+  <p>Beim Linealversuch hast du deine Reaktionszeit schon gemessen. Jetzt misst du sie auf dem iPad &ndash; und zwar in
+     f&uuml;nf Szenarien, bei denen dein Gehirn jedes Mal <b>mehr verarbeiten</b> muss, bevor dein Finger losgeht.</p>
+
+  <div class="info">
+    <p><b>Wichtig:</b> Auch wenn es schnell geht &ndash; das hier ist <b>kein Reflex</b>. Du siehst das Signal, die Erregung l&auml;uft
+       bis ins <b>Gehirn</b>, dort wird entschieden, und erst dann geht ein Befehl an deinen Fingermuskel.
+       Es ist also immer eine <b>bewusste Reaktion</b>.</p>
+  </div>
+
+  <h3>Die f&uuml;nf Szenarien</h3>
+  <div class="info">
+    <ol>
+      <li><b>Antippen:</b> Ein Kreis erscheint immer an derselben Stelle.</li>
+      <li><b>Ort wechselt:</b> Der Kreis erscheint jedes Mal woanders.</li>
+      <li><b>Zahl suchen:</b> Oben steht eine Zahl &ndash; tippe genau diese Zahl im Feld an.</li>
+      <li><b>Mit Ablenkung:</b> wie 3, aber es wackelt, schwebt und blitzt.</li>
+      <li><b>Zahl oder Farbe:</b> Steht oben eine schwarze Zahl, tippst du diese Zahl. Steht oben ein Farbwort wie ROT,
+          tippst du die Zahl in dieser Farbe.</li>
+    </ol>
+  </div>
+
+  <h3>So misst du fair</h3>
+  <div class="info">
+    <ul>
+      <li>Leg das iPad flach auf den Tisch.</li>
+      <li>Tippe immer mit <b>demselben Finger</b> und lass ihn &uuml;ber dem Bildschirm schweben.</li>
+      <li>Das Signal kommt nach einer <b>zuf&auml;lligen Wartezeit</b>. Wer vorher tippt, hat einen Fr&uuml;hstart &ndash; der Durchgang wird wiederholt.</li>
+      <li>Vergleiche deine Szenarien untereinander. Werte von <b>verschiedenen iPads</b> kann man kaum vergleichen:
+          Jeder Bildschirm reagiert ein paar Hundertstelsekunden anders.</li>
+      <li>Wenn du Schwierigkeiten hast, Farben zu unterscheiden, kannst du Szenario&nbsp;5 auslassen.</li>
+    </ul>
+  </div>
+
+  <h3>Deine Vermutung</h3>
+  <p>In welchem Szenario wirst du am langsamsten sein &ndash; und warum? Schreibe deine Vermutung auf, bevor du startest.</p>
+  <textarea id="k1-vermutung" placeholder="Ich vermute, dass &hellip;"></textarea>
+  <div class="btnzeile">
+    <button type="button" class="btn" id="k1-los">Zum Test</button>
+  </div>
+</section>
+
+<!-- ================= KARTE 2 ================= -->
+<section class="karte" id="k2">
+  <h2>2 &middot; Der Test</h2>
+
+  <p><b>Durchg&auml;nge pro Szenario:</b></p>
+  <div class="auswahl" id="anzahl">
+    <button type="button" class="wahl klein aktiv" data-n="5">5</button>
+    <button type="button" class="wahl klein" data-n="7">7</button>
+    <button type="button" class="wahl klein" data-n="10">10</button>
+  </div>
+
+  <p style="margin-top:12px"><b>Szenario w&auml;hlen:</b></p>
+  <div class="auswahl" id="szenarien">
+    <button type="button" class="wahl aktiv" data-sz="1">1 &middot; Antippen</button>
+    <button type="button" class="wahl" data-sz="2">2 &middot; Ort wechselt</button>
+    <button type="button" class="wahl" data-sz="3">3 &middot; Zahl suchen</button>
+    <button type="button" class="wahl" data-sz="4">4 &middot; Mit Ablenkung</button>
+    <button type="button" class="wahl" data-sz="5">5 &middot; Zahl oder Farbe</button>
+  </div>
+
+  <h3 id="sz-titel">Szenario 1 &middot; Antippen</h3>
+  <p class="beschreibung" id="sz-text"></p>
+
+  <div class="cue" id="cue">&nbsp;</div>
+  <div class="status" id="status"><div class="neutral">Tippe auf &bdquo;Start&ldquo;, wenn du bereit bist.</div></div>
+
+  <div class="arena" id="arena"><div class="arena-text">Bereit?</div></div>
+
+  <div class="btnzeile">
+    <button type="button" class="btn" id="btn-start">Start</button>
+    <button type="button" class="btn sek" id="btn-neu">Szenario neu starten</button>
+    <button type="button" class="btn sek" id="btn-weiter" style="display:none">Weiter</button>
+  </div>
+  <p class="zeitenliste" id="zeitenliste"></p>
+</section>
+
+<!-- ================= KARTE 3 ================= -->
+<section class="karte" id="k3">
+  <h2>3 &middot; Deine Ergebnisse</h2>
+  <p>Gewertet wird der <b>Median</b>: die mittlere deiner Zeiten, wenn man sie der Gr&ouml;&szlig;e nach ordnet.
+     So verf&auml;lscht ein einzelner Ausrei&szlig;er das Ergebnis nicht.</p>
+  <div class="tabwrap"><table class="erg" id="tabelle"></table></div>
+  <div class="diagramm" id="diagramm"></div>
+
+  <h3>Vergleich mit dem Linealversuch</h3>
+  <p>Trage die Fallstrecke ein, die du beim Linealversuch gemessen hast (Mittelwert deiner Versuche). Die Seite rechnet sie mit der
+     Formel f&uuml;r den freien Fall in eine Zeit um und zeigt sie im Diagramm als eigenen Balken.</p>
+  <p class="formel">\(t = \sqrt{\dfrac{2 \cdot s}{g}}\) mit \(g \approx 9{,}81\) Meter pro Quadratsekunde</p>
+  <p>
+    <label for="lineal-s"><b>Fallstrecke:</b></label>
+    <input type="text" id="lineal-s" inputmode="decimal" aria-label="Fallstrecke in Zentimetern"> cm
+  </p>
+  <div class="btnzeile">
+    <button type="button" class="btn" id="btn-lineal">Umrechnen</button>
+  </div>
+  <div class="fb" id="lineal-fb"></div>
+
+  <div class="info" style="margin-top:16px">
+    <p style="margin-bottom:0">Schreibe die Tabelle in dein Heft oder mache ein Foto davon. Deine Messwerte werden <b>nicht gespeichert</b>
+      &ndash; wenn du die Seite neu l&auml;dst, sind sie weg.</p>
+  </div>
+</section>
+
+<!-- ================= KARTE 4 ================= -->
+<section class="karte" id="k4">
+  <h2>4 &middot; Auswerten</h2>
+
+  <h3>Aufgabe 1: Erkl&auml;re deine Messwerte</h3>
+  <p>Erkl&auml;re mithilfe deiner Messwerte, warum die Reaktionszeit von Szenario&nbsp;1 bis Szenario&nbsp;5 zunimmt.
+     Vergleiche auch mit deiner Vermutung von Karte&nbsp;1.</p>
+  <textarea id="k4-text" placeholder="Die Reaktionszeit nimmt zu, weil &hellip;"></textarea>
+  <div class="btnzeile">
+    <button type="button" class="btn" id="k4-btn">Erkl&auml;rung fertig &ndash; Vergleichstext anzeigen</button>
+  </div>
+  <div class="fb" id="k4-fb"></div>
+  <div class="hilfe" id="k4-hilfe">
+    <details class="amber">
+      <summary>&#128161; Vergleichstext &ndash; erst nach deiner eigenen Erkl&auml;rung &ouml;ffnen</summary>
+      <div class="inhalt">
+        <p>Bei jeder Szene l&auml;uft die Erregung vom Auge &uuml;ber den Sehnerv ins Gehirn und von dort zum Fingermuskel. Der Unterschied liegt
+           darin, <b>wie viel das Gehirn dazwischen verarbeiten muss</b>:</p>
+        <ul>
+          <li><b>Szenario 1:</b> nur erkennen &bdquo;Da ist das Signal&ldquo;.</li>
+          <li><b>Szenario 2:</b> zus&auml;tzlich suchen, <i>wo</i> es ist.</li>
+          <li><b>Szenario 3:</b> zus&auml;tzlich die Zahl lesen und mit der gesuchten vergleichen.</li>
+          <li><b>Szenario 4:</b> zus&auml;tzlich Ablenkungen ausblenden und nicht auf falsche Signale reagieren.</li>
+          <li><b>Szenario 5:</b> zus&auml;tzlich erst die Regel erkennen (Zahl oder Farbe?) und zwischen zwei Regeln umschalten.</li>
+        </ul>
+        <p>Jeder zus&auml;tzliche Verarbeitungsschritt im Gehirn kostet Zeit. Bei einem Reflex fallen diese Schritte weg,
+           weil schon im R&uuml;ckenmark umgeschaltet wird &ndash; deshalb ist ein Reflex schneller als jedes dieser Szenarien.</p>
+      </div>
+    </details>
+  </div>
+
+  <h3>Aufgabe 2: Wahr oder falsch?</h3>
+  <div id="wf4">
+    <div class="wf"></div>
+    <div class="btnzeile">
+      <button type="button" class="btn btn-pruefen">Aussagen pr&uuml;fen</button>
+      <button type="button" class="btn leeren btn-leeren">Leeren und neu versuchen</button>
+    </div>
+    <div class="fb"></div>
+    <div class="hilfe">
+      <details class="amber">
+        <summary>&#128161; Begr&uuml;ndungen zu allen Aussagen anzeigen</summary>
+        <div class="inhalt" id="wf4-begr"></div>
+      </details>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <p>Biologie Klasse 10 &middot; Neurobiologie &middot; Reaktionstest als Erg&auml;nzung zum Linealversuch.</p>
+</footer>
+</div>
+
+<button type="button" class="trex" id="trex" aria-label="Signatur anzeigen">&#129430;<span class="sig">Made by ASzym</span></button>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ================= Hilfsfunktionen ================= */
+  function shuffle(a){
+    for(var i=a.length-1;i>0;i--){
+      var j=Math.floor(Math.random()*(i+1));
+      var t=a[i];a[i]=a[j];a[j]=t;
+    }
+    return a;
+  }
+  function zufall(min,max){ return min+Math.random()*(max-min); }
+  function setFb(el,ok,html){
+    el.className='fb '+(ok?'ok':'bad');
+    el.innerHTML=html;
+    if(window.MathJax && MathJax.typesetPromise){ MathJax.typesetPromise([el]); }
+  }
+  function median(a){
+    if(!a.length) return null;
+    var s=a.slice().sort(function(x,y){return x-y;});
+    var m=Math.floor(s.length/2);
+    return s.length%2 ? s[m] : (s[m-1]+s[m])/2;
+  }
+
+  /* ================= Szenarien ================= */
+  var SZ={
+    1:{titel:'Szenario 1 &middot; Antippen',
+       text:'Sobald der orange Kreis in der Mitte erscheint, tippst du ihn so schnell wie m&ouml;glich an. Er erscheint immer an derselben Stelle.'},
+    2:{titel:'Szenario 2 &middot; Ort wechselt',
+       text:'Der orange Kreis erscheint jedes Mal an einer anderen Stelle. Tippe ihn so schnell wie m&ouml;glich an.'},
+    3:{titel:'Szenario 3 &middot; Zahl suchen',
+       text:'Oben erscheint eine Zahl, gleichzeitig ein Feld mit sechs Zahlen. Tippe genau die gesuchte Zahl an.'},
+    4:{titel:'Szenario 4 &middot; Mit Ablenkung',
+       text:'Wie Szenario 3 &ndash; aber es schwebt, wackelt und blitzt. Achtung: Ein grauer Blitz ist <b>kein</b> Signal. Wer dann tippt, hat einen Fr&uuml;hstart.'},
+    5:{titel:'Szenario 5 &middot; Zahl oder Farbe',
+       text:'Steht oben eine <b>schwarze Zahl</b>, tippst du diese Zahl. Steht oben ein <b>Farbwort</b> (z.&nbsp;B. ROT), tippst du die Zahl in dieser Farbe.'}
+  };
+  var FARBEN=[
+    {name:'ROT', wert:'#c1272d'},
+    {name:'BLAU', wert:'#2f5fa6'},
+    {name:'GOLD', wert:'#b8860b'},
+    {name:'GRAU', wert:'#6b7686'}
+  ];
+
+  var N=5;                 // Durchgaenge pro Szenario
+  var aktiv=1;             // gewaehltes Szenario
+  var ergebnis={};         // fertige Ergebnisse je Szenario
+  var laeufe={};           // laufende (ggf. pausierte) Durchlaeufe je Szenario
+  var linealMs=null;
+
+  var arena=document.getElementById('arena');
+  var cue=document.getElementById('cue');
+  var status=document.getElementById('status');
+  var btnStart=document.getElementById('btn-start');
+  var btnNeu=document.getElementById('btn-neu');
+  var btnWeiter=document.getElementById('btn-weiter');
+  var zeitenliste=document.getElementById('zeitenliste');
+
+  function statusText(art,html){
+    if(art==='neutral'){ status.innerHTML='<div class="neutral">'+html+'</div>'; return; }
+    status.innerHTML='<div class="fb '+(art==='ok'?'ok':'bad')+'">'+html+'</div>';
+  }
+  function arenaText(t){
+    arena.innerHTML='<div class="arena-text">'+t+'</div>';
+  }
+  function timerStopp(l){
+    if(!l) return;
+    if(l.timer){ clearTimeout(l.timer); l.timer=null; }
+    for(var i=0;i<l.koeder.length;i++){ clearTimeout(l.koeder[i]); }
+    l.koeder=[];
+  }
+  function lauf(){ return laeufe[aktiv]||null; }
+
+  function zeigeZeiten(){
+    var l=lauf();
+    var z=l ? l.zeiten : (ergebnis[aktiv] ? ergebnis[aktiv].zeiten : []);
+    if(!z.length){ zeitenliste.innerHTML=''; return; }
+    zeitenliste.innerHTML='<b>Deine Zeiten:</b> '+z.map(function(x){return Math.round(x)+'&nbsp;ms';}).join(' &middot; ');
+  }
+  function aktualisiereKnoepfe(){
+    var l=lauf();
+    if(l && l.phase!=='pause'){
+      btnStart.disabled=true; btnStart.textContent='Läuft …';
+    } else if(l && l.phase==='pause'){
+      btnStart.disabled=false; btnStart.textContent='Fortsetzen';
+    } else {
+      btnStart.disabled=false; btnStart.textContent=ergebnis[aktiv]?'Szenario wiederholen':'Start';
+    }
+    var laeuftIrgendwo=false;
+    for(var k in laeufe){ if(laeufe[k] && laeufe[k].phase!=='pause') laeuftIrgendwo=true; }
+    var an=document.querySelectorAll('#anzahl .wahl');
+    for(var i=0;i<an.length;i++){ an[i].disabled=laeuftIrgendwo; }
+    var sz=document.querySelectorAll('#szenarien .wahl');
+    for(var j=0;j<sz.length;j++){
+      var n=sz[j].getAttribute('data-sz');
+      var basis=sz[j].getAttribute('data-basis');
+      if(!basis){ basis=sz[j].innerHTML; sz[j].setAttribute('data-basis',basis); }
+      sz[j].innerHTML=basis+(ergebnis[n]?' &#10004;':'');
+      sz[j].classList.toggle('aktiv',String(aktiv)===n);
+    }
+  }
+
+  function waehleSzenario(n){
+    var alt=lauf();
+    if(alt && alt.phase!=='pause') pausiere();
+    aktiv=n;
+    document.getElementById('sz-titel').innerHTML=SZ[n].titel;
+    document.getElementById('sz-text').innerHTML=SZ[n].text;
+    cue.innerHTML='&nbsp;';
+    btnWeiter.style.display='none';
+    var l=lauf();
+    arena.className='arena';
+    if(l && l.phase==='pause'){
+      arenaText('Pausiert &ndash; tippe auf &bdquo;Fortsetzen&ldquo;.');
+      statusText('neutral','Durchgang '+(l.zeiten.length+1)+' von '+l.n+' &ndash; pausiert.');
+    } else if(ergebnis[n]){
+      arenaText('Fertig! Du kannst das Szenario wiederholen.');
+      statusText('ok','&#10004; Schon erledigt &ndash; Median: '+Math.round(median(ergebnis[n].zeiten))+'&nbsp;ms.');
+    } else {
+      arenaText('Bereit?');
+      statusText('neutral','Tippe auf &bdquo;Start&ldquo;, wenn du bereit bist.');
+    }
+    zeigeZeiten();
+    aktualisiereKnoepfe();
+  }
+
+  /* ---------- Ablauf eines Durchlaufs ---------- */
+  function starte(){
+    var l=lauf();
+    if(l && l.phase==='pause'){ naechster(); return; }
+    laeufe[aktiv]={sz:aktiv,n:N,zeiten:[],fehler:0,frueh:0,phase:'idle',timer:null,koeder:[],t0:0};
+    btnWeiter.style.display='none';
+    // Hinweisfeld und Testfeld gemeinsam ins Bild holen
+    if(cue.scrollIntoView){ cue.scrollIntoView({block:'start',behavior:'smooth'}); }
+    naechster();
+  }
+
+  function naechster(){
+    var l=lauf();
+    if(!l) return;
+    timerStopp(l);
+    if(l.zeiten.length>=l.n){ fertig(); return; }
+    l.phase='warten';
+    cue.innerHTML=(l.sz>=3)?'&hellip;':'&nbsp;';
+    arena.className='arena warten';
+    arenaText('Warte auf das Signal &hellip;');
+    if(l.sz===4) blasenAn();
+    statusText('neutral','Durchgang '+(l.zeiten.length+1)+' von '+l.n);
+    aktualisiereKnoepfe();
+    var warte=zufall(1500,4000);
+    if(l.sz===4){
+      // Koeder-Blitze waehrend der Wartezeit
+      var anzahl=Math.random()<0.5?1:2;
+      for(var i=0;i<anzahl;i++){
+        (function(){
+          var zeitpunkt=zufall(400,warte-500);
+          if(zeitpunkt<300) return;
+          l.koeder.push(setTimeout(function(){ koederBlitz(); },zeitpunkt));
+        })();
+      }
+    }
+    l.timer=setTimeout(reizZeigen,warte);
+  }
+
+  function blasenAn(){
+    var farben=['#fbeee0','#e4dcd0','#eef0f3','#fdf3d9'];
+    for(var i=0;i<6;i++){
+      var b=document.createElement('div');
+      b.className='blase';
+      var g=Math.round(zufall(50,110));
+      b.style.width=g+'px'; b.style.height=g+'px';
+      b.style.left=Math.round(zufall(0,80))+'%';
+      b.style.top=Math.round(zufall(0,75))+'%';
+      b.style.background=farben[i%farben.length];
+      b.style.setProperty('--dx',Math.round(zufall(-140,140))+'px');
+      b.style.setProperty('--dy',Math.round(zufall(-90,90))+'px');
+      b.style.animationDuration=zufall(1.4,3.2).toFixed(1)+'s';
+      b.style.webkitAnimationDuration=b.style.animationDuration;
+      arena.appendChild(b);
+    }
+  }
+  function koederBlitz(){
+    var l=lauf();
+    if(!l || l.phase!=='warten') return;
+    var k=document.createElement('div');
+    k.className='koeder';
+    var bb=arena.getBoundingClientRect();
+    k.style.left=Math.round(zufall(10,Math.max(20,bb.width-120)))+'px';
+    k.style.top=Math.round(zufall(10,Math.max(20,bb.height-120)))+'px';
+    arena.appendChild(k);
+    setTimeout(function(){ if(k.parentNode) k.parentNode.removeChild(k); },260);
+  }
+
+  function reizZeigen(){
+    var l=lauf();
+    if(!l || l.phase!=='warten') return;
+    timerStopp(l);
+    arena.className='arena';
+    // Blasen in Szenario 4 bleiben, sonst leeren
+    var blasen=[];
+    if(l.sz===4){ blasen=Array.prototype.slice.call(arena.querySelectorAll('.blase')); }
+    arena.innerHTML='';
+    for(var b=0;b<blasen.length;b++){ arena.appendChild(blasen[b]); }
+
+    if(l.sz===1 || l.sz===2){
+      var k=document.createElement('button');
+      k.type='button'; k.className='zielkreis';
+      k.setAttribute('data-treffer','1');
+      k.setAttribute('aria-label','Signal');
+      var w=arena.clientWidth, h=arena.clientHeight;
+      var x,y;
+      if(l.sz===1){ x=(w-100)/2; y=(h-100)/2; }
+      else { x=zufall(10,w-110); y=zufall(10,h-110); }
+      k.style.left=Math.round(x)+'px'; k.style.top=Math.round(y)+'px';
+      arena.appendChild(k);
+    } else if(l.sz===3 || l.sz===4){
+      var pool=[1,2,3,4,5,6,7,8,9];
+      if(l.sz===4){
+        // Verwechslungsgefahr: 6/9 bzw. 1/7 kommen gemeinsam vor
+        pool=shuffle([[6,9],[1,7]])[0].concat(shuffle([2,3,4,5,8]).slice(0,4));
+      } else {
+        pool=shuffle(pool).slice(0,6);
+      }
+      pool=shuffle(pool);
+      var gesucht=pool[Math.floor(Math.random()*pool.length)];
+      var raster=document.createElement('div');
+      raster.className='raster';
+      for(var i=0;i<pool.length;i++){
+        var t=document.createElement('button');
+        t.type='button'; t.className='kachel';
+        t.textContent=pool[i];
+        t.setAttribute('data-treffer',pool[i]===gesucht?'1':'0');
+        if(l.sz===4){
+          if(Math.random()<0.5) t.classList.add('wackel');
+          else t.style.transform='rotate('+Math.round(zufall(-14,14))+'deg)';
+        }
+        raster.appendChild(t);
+      }
+      arena.appendChild(raster);
+      cue.innerHTML='Tippe die '+gesucht;
+    } else {
+      var farben=shuffle(FARBEN.slice());
+      var ziffern=shuffle([1,2,3,4,5,6,7,8,9]).slice(0,4);
+      var regelZahl=Math.random()<0.5;
+      var zielIndex=Math.floor(Math.random()*4);
+      var raster5=document.createElement('div');
+      raster5.className='raster vier';
+      for(var j=0;j<4;j++){
+        var t5=document.createElement('button');
+        t5.type='button'; t5.className='kachel';
+        t5.textContent=ziffern[j];
+        t5.style.color=farben[j].wert;
+        t5.setAttribute('data-treffer',j===zielIndex?'1':'0');
+        raster5.appendChild(t5);
+      }
+      arena.appendChild(raster5);
+      if(regelZahl){
+        cue.innerHTML=String(ziffern[zielIndex])+'<span class="regel">schwarze Zahl &rarr; diese Zahl antippen</span>';
+      } else {
+        cue.innerHTML=farben[zielIndex].name+'<span class="regel">Farbwort &rarr; die Zahl in dieser Farbe antippen</span>';
+      }
+    }
+    l.phase='reiz';
+    l.t0=performance.now();
+    // Startzeit auf den Moment legen, in dem der Reiz tatsaechlich gezeichnet ist
+    requestAnimationFrame(function(){
+      requestAnimationFrame(function(){
+        if(l.phase==='reiz' && !l.getippt) l.t0=performance.now();
+      });
+    });
+    l.getippt=false;
+  }
+
+  function zeitVon(e){
+    var jetzt=performance.now();
+    var t=e.timeStamp;
+    if(!t || Math.abs(t-jetzt)>1000) t=jetzt;
+    return t;
+  }
+
+  arena.addEventListener('pointerdown',function(e){
+    var l=lauf();
+    if(!l) return;
+    if(l.phase==='warten'){ e.preventDefault(); fruehstart(); return; }
+    if(l.phase!=='reiz') return;
+    var el=e.target.closest ? e.target.closest('[data-treffer]') : null;
+    if(!el) return; // Tippen auf leere Flaeche wird ignoriert
+    e.preventDefault();
+    l.getippt=true;
+    var ts=zeitVon(e);
+    if(el.getAttribute('data-treffer')==='1') treffer(ts-l.t0);
+    else fehlgriff(el);
+  });
+
+  function treffer(rt){
+    var l=lauf();
+    if(rt<100){ fruehstart('Unter 100&nbsp;ms kann niemand reagieren &ndash; das war geraten. Nochmal!'); return; }
+    l.zeiten.push(rt);
+    l.phase='feedback';
+    var blasenRest=Array.prototype.slice.call(arena.querySelectorAll('.blase'));
+    arenaText(Math.round(rt)+'&nbsp;ms');
+    for(var b=0;b<blasenRest.length;b++){ arena.appendChild(blasenRest[b]); }
+    statusText('ok','&#10004; '+Math.round(rt)+'&nbsp;ms &ndash; Durchgang '+l.zeiten.length+' von '+l.n);
+    zeigeZeiten();
+    l.timer=setTimeout(naechster,900);
+  }
+  function fehlgriff(el){
+    var l=lauf();
+    l.fehler++;
+    l.phase='feedback';
+    el.style.borderColor='#c1272d';
+    statusText('bad','&#10007; Falsches Feld &ndash; dieser Durchgang z&auml;hlt nicht und wird wiederholt.');
+    l.timer=setTimeout(naechster,1300);
+  }
+  function fruehstart(text){
+    var l=lauf();
+    timerStopp(l);
+    l.frueh++;
+    l.phase='feedback';
+    arena.className='arena';
+    arenaText('Zu fr&uuml;h!');
+    cue.innerHTML=(l.sz>=3)?'&hellip;':'&nbsp;';
+    statusText('bad','&#10007; '+(text||'Fr&uuml;hstart! Warte auf das echte Signal. Der Durchgang wird wiederholt.'));
+    l.timer=setTimeout(naechster,1300);
+  }
+  function pausiere(){
+    var l=lauf();
+    if(!l) return;
+    timerStopp(l);
+    l.phase='pause';
+    arena.className='arena';
+    arenaText('Pausiert &ndash; tippe auf &bdquo;Fortsetzen&ldquo;.');
+    cue.innerHTML='&nbsp;';
+    statusText('neutral','Durchgang '+(l.zeiten.length+1)+' von '+l.n+' &ndash; pausiert.');
+    aktualisiereKnoepfe();
+  }
+  function fertig(){
+    var l=lauf();
+    ergebnis[l.sz]={zeiten:l.zeiten.slice(),fehler:l.fehler,frueh:l.frueh};
+    laeufe[l.sz]=null;
+    arena.className='arena';
+    arenaText('Geschafft!');
+    cue.innerHTML='&nbsp;';
+    statusText('ok','&#10004; Szenario '+l.sz+' fertig! Median: '+Math.round(median(l.zeiten))+'&nbsp;ms.');
+    if(l.sz<5){
+      btnWeiter.textContent='Weiter zu Szenario '+(l.sz+1);
+      btnWeiter.setAttribute('data-ziel','sz');
+    } else {
+      btnWeiter.textContent='Zu deinen Ergebnissen';
+      btnWeiter.setAttribute('data-ziel','k3');
+    }
+    btnWeiter.style.display='inline-block';
+    zeigeZeiten();
+    aktualisiereKnoepfe();
+    zeigeErgebnisse();
+  }
+
+  btnStart.addEventListener('click',starte);
+  btnNeu.addEventListener('click',function(){
+    var l=lauf();
+    if(l) timerStopp(l);
+    laeufe[aktiv]=null;
+    delete ergebnis[aktiv];
+    waehleSzenario(aktiv);
+    zeigeErgebnisse();
+  });
+  btnWeiter.addEventListener('click',function(){
+    if(btnWeiter.getAttribute('data-ziel')==='k3') zeigeKarte('k3');
+    else waehleSzenario(aktiv+1);
+  });
+
+  var szKnoepfe=document.querySelectorAll('#szenarien .wahl');
+  for(var s=0;s<szKnoepfe.length;s++){
+    (function(b){
+      b.addEventListener('click',function(){ waehleSzenario(parseInt(b.getAttribute('data-sz'),10)); });
+    })(szKnoepfe[s]);
+  }
+  var anKnoepfe=document.querySelectorAll('#anzahl .wahl');
+  for(var a=0;a<anKnoepfe.length;a++){
+    (function(b){
+      b.addEventListener('click',function(){
+        N=parseInt(b.getAttribute('data-n'),10);
+        for(var c=0;c<anKnoepfe.length;c++){ anKnoepfe[c].classList.remove('aktiv'); }
+        b.classList.add('aktiv');
+      });
+    })(anKnoepfe[a]);
+  }
+
+  /* ================= Ergebnisse ================= */
+  function zeigeErgebnisse(){
+    var tab=document.getElementById('tabelle');
+    var html='<tr><th>Szenario</th><th>Median</th><th>Schnellste Zeit</th><th>Falsches Feld</th><th>Fr&uuml;hstarts</th></tr>';
+    for(var i=1;i<=5;i++){
+      var e=ergebnis[i];
+      var name=SZ[i].titel.replace(/^Szenario /,'');
+      if(e){
+        html+='<tr><td>'+name+'</td><td><b>'+Math.round(median(e.zeiten))+'&nbsp;ms</b></td><td>'+
+          Math.round(Math.min.apply(null,e.zeiten))+'&nbsp;ms</td><td>'+e.fehler+'</td><td>'+e.frueh+'</td></tr>';
+      } else {
+        html+='<tr><td>'+name+'</td><td colspan="4">noch nicht gemessen</td></tr>';
+      }
+    }
+    if(linealMs!==null){
+      html+='<tr><td>Linealversuch</td><td><b>'+Math.round(linealMs)+'&nbsp;ms</b></td><td colspan="3">aus der Fallstrecke berechnet</td></tr>';
+    }
+    tab.innerHTML=html;
+    zeichneDiagramm();
+  }
+
+  function zeichneDiagramm(){
+    var box=document.getElementById('diagramm');
+    var werte=[];
+    for(var i=1;i<=5;i++){
+      werte.push({label:String(i),wert:ergebnis[i]?median(ergebnis[i].zeiten):null,farbe:'#c97a2e'});
+    }
+    werte.push({label:'Lineal',wert:linealMs,farbe:'#22303f'});
+    var maxW=0;
+    for(var w=0;w<werte.length;w++){ if(werte[w].wert!==null && werte[w].wert>maxW) maxW=werte[w].wert; }
+    if(maxW===0){ box.innerHTML='<p>Sobald du ein Szenario abgeschlossen hast, erscheint hier dein Diagramm.</p>'; return; }
+    var oben=Math.max(500,Math.ceil(maxW*1.15/100)*100);
+    var schritt=oben<=800?100:200;
+    var L=90,R=620,T=40,B=290; // Plotbereich
+    var hoehe=B-T;
+    var s='<svg viewBox="0 0 660 360" role="img" aria-label="Balkendiagramm der Reaktionszeiten">';
+    s+='<defs><marker id="achspfeil" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0,0 L10,4 L0,8 z" fill="#22303f"></path></marker></defs>';
+    // Gitterlinien und y-Beschriftung
+    for(var v=0;v<=oben;v+=schritt){
+      var y=B-v/oben*hoehe;
+      s+='<line x1="'+L+'" y1="'+y+'" x2="'+R+'" y2="'+y+'" stroke="#e4dcd0" stroke-width="1"></line>';
+      s+='<line x1="'+(L-6)+'" y1="'+y+'" x2="'+L+'" y2="'+y+'" stroke="#22303f" stroke-width="2"></line>';
+      s+='<text x="'+(L-10)+'" y="'+(y+6)+'" text-anchor="end" font-size="17" fill="#22303f">'+v+'</text>';
+    }
+    // Balken
+    var breite=(R-L)/werte.length;
+    for(var k=0;k<werte.length;k++){
+      var cx=L+breite*k+breite/2;
+      if(werte[k].wert!==null){
+        var bh=werte[k].wert/oben*hoehe;
+        s+='<rect x="'+(cx-breite*0.3)+'" y="'+(B-bh)+'" width="'+(breite*0.6)+'" height="'+bh+'" rx="4" fill="'+werte[k].farbe+'"></rect>';
+        s+='<text x="'+cx+'" y="'+(B-bh-8)+'" text-anchor="middle" font-size="17" font-weight="700" fill="#22303f">'+Math.round(werte[k].wert)+'</text>';
+      } else {
+        s+='<text x="'+cx+'" y="'+(B-10)+'" text-anchor="middle" font-size="17" fill="#6b7686">&#8211;</text>';
+      }
+      s+='<text x="'+cx+'" y="'+(B+26)+'" text-anchor="middle" font-size="17" fill="#22303f">'+werte[k].label+'</text>';
+    }
+    // Achsen mit Pfeilspitzen
+    s+='<line x1="'+L+'" y1="'+B+'" x2="'+(R+28)+'" y2="'+B+'" stroke="#22303f" stroke-width="2" marker-end="url(#achspfeil)"></line>';
+    s+='<line x1="'+L+'" y1="'+B+'" x2="'+L+'" y2="'+(T-28)+'" stroke="#22303f" stroke-width="2" marker-end="url(#achspfeil)"></line>';
+    // Achsenbeschriftungen
+    s+='<text x="'+((L+R)/2)+'" y="'+(B+58)+'" text-anchor="middle" font-size="18" font-weight="700" fill="#22303f">Szenario</text>';
+    s+='<text x="24" y="'+((T+B)/2)+'" text-anchor="middle" font-size="18" font-weight="700" fill="#22303f" transform="rotate(-90 24 '+((T+B)/2)+')">Reaktionszeit in ms</text>';
+    s+='</svg>';
+    box.innerHTML=s;
+  }
+
+  document.getElementById('btn-lineal').addEventListener('click',function(){
+    var fb=document.getElementById('lineal-fb');
+    var roh=document.getElementById('lineal-s').value.trim().replace(',','.');
+    var sCm=parseFloat(roh);
+    if(roh==='' || isNaN(sCm)){
+      setFb(fb,false,'&#10007; Trage zuerst eine Fallstrecke in Zentimetern ein, z.&nbsp;B. aus deiner Messtabelle.');
+      return;
+    }
+    if(sCm<=0 || sCm>100){
+      setFb(fb,false,'&#10007; Die Fallstrecke sollte zwischen 0 und 100&nbsp;cm liegen. Pr&uuml;fe deinen Wert.');
+      return;
+    }
+    linealMs=Math.sqrt(2*(sCm/100)/9.81)*1000;
+    setFb(fb,true,'&#10004; Fallstrecke '+String(sCm).replace('.',',')+'&nbsp;cm entspricht etwa <b>'+Math.round(linealMs)+'&nbsp;ms</b>. Der Wert steht jetzt in Tabelle und Diagramm.');
+    zeigeErgebnisse();
+  });
+
+  /* ================= Tabs ================= */
+  var tabs=document.querySelectorAll('#tabs .tab');
+  function zeigeKarte(id){
+    var l=lauf();
+    if(id!=='k2' && l && l.phase!=='pause') pausiere();
+    for(var j=0;j<tabs.length;j++){ tabs[j].classList.toggle('aktiv',tabs[j].getAttribute('data-ziel')===id); }
+    var karten=document.querySelectorAll('.karte');
+    for(var k=0;k<karten.length;k++){ karten[k].classList.remove('aktiv'); }
+    document.getElementById(id).classList.add('aktiv');
+    if(id==='k3') zeigeErgebnisse();
+    window.scrollTo(0,0);
+  }
+  for(var i=0;i<tabs.length;i++){
+    (function(btn){
+      btn.addEventListener('click',function(){ zeigeKarte(btn.getAttribute('data-ziel')); });
+    })(tabs[i]);
+  }
+  document.getElementById('k1-los').addEventListener('click',function(){ zeigeKarte('k2'); });
+
+  /* ================= Karte 4: Erklaerung ================= */
+  document.getElementById('k4-btn').addEventListener('click',function(){
+    var fb=document.getElementById('k4-fb');
+    var t=document.getElementById('k4-text').value.replace(/\s/g,'');
+    if(t.length<25){
+      setFb(fb,false,'&#10007; Schreibe zuerst eine eigene Erkl&auml;rung (mindestens ein bis zwei S&auml;tze). Danach wird der Vergleichstext freigegeben.');
+      return;
+    }
+    setFb(fb,true,'&#10004; Gut. Vergleiche deine Erkl&auml;rung jetzt mit dem Text unten und erg&auml;nze, was dir fehlt.');
+    document.getElementById('k4-hilfe').classList.add('frei');
+  });
+
+  /* ================= Karte 4: Wahr/Falsch ================= */
+  var aussagen=[
+    {text:'Der Reaktionstest auf dem iPad misst einen Reflex.', wahr:false,
+     begr:'Falsch. Du siehst das Signal, im Gehirn wird entschieden, erst dann bewegt sich der Finger. Das ist eine bewusste Reaktion.'},
+    {text:'Je mehr Informationen das Gehirn vor der Bewegung verarbeiten muss, desto l&auml;nger dauert die Reaktion.', wahr:true,
+     begr:'Richtig. Suchen, Vergleichen, Ablenkung ausblenden und Regeln anwenden sind zus&auml;tzliche Verarbeitungsschritte &ndash; jeder kostet Zeit.'},
+    {text:'In Szenario 5 muss das Gehirn zuerst erkennen, ob die Zahl oder die Farbe gilt. Das kostet zus&auml;tzlich Zeit.', wahr:true,
+     begr:'Richtig. Das Umschalten zwischen zwei Regeln verlangsamt die Reaktion. Au&szlig;erdem lenkt die jeweils &bdquo;falsche&ldquo; Information ab.'},
+    {text:'Mit einem neueren iPad werden deine Nervenzellen schneller.', wahr:false,
+     begr:'Falsch. Das Ger&auml;t ver&auml;ndert nur die Messverz&ouml;gerung des Bildschirms. Deshalb vergleicht man die Szenarien auf demselben Ger&auml;t.'},
+    {text:'Beim Linealversuch l&auml;uft die Erregung ebenfalls &uuml;ber das Gehirn.', wahr:true,
+     begr:'Richtig. Du musst sehen, dass das Lineal f&auml;llt, und dann bewusst zugreifen. Auch das ist eine bewusste Reaktion, kein Reflex.'}
+  ];
+  (function(){
+    var root=document.getElementById('wf4');
+    var box=root.querySelector('.wf');
+    var fb=root.querySelector('.fb');
+    var hilfe=root.querySelector('.hilfe');
+    var btnP=root.querySelector('.btn-pruefen');
+    var btnL=root.querySelector('.btn-leeren');
+    var begr=document.getElementById('wf4-begr');
+    var gesperrt=false;
+    var liste=shuffle(aussagen.slice());
+    for(var i=0;i<liste.length;i++){
+      (function(a,nr){
+        var block=document.createElement('div');
+        block.className='wfblock';
+        var p=document.createElement('p');
+        p.className='wftext';
+        p.innerHTML='<b>'+nr+'.</b> '+a.text;
+        var zeile=document.createElement('div');
+        zeile.className='wfbtns';
+        var bw=document.createElement('button');
+        bw.type='button'; bw.className='wfbtn'; bw.textContent='wahr';
+        bw.setAttribute('data-ok',a.wahr?'1':'0');
+        var bf=document.createElement('button');
+        bf.type='button'; bf.className='wfbtn'; bf.textContent='falsch';
+        bf.setAttribute('data-ok',a.wahr?'0':'1');
+        function waehle(b){
+          if(gesperrt) return;
+          bw.classList.remove('sel'); bf.classList.remove('sel');
+          b.classList.add('sel');
+        }
+        bw.addEventListener('click',function(){ waehle(bw); });
+        bf.addEventListener('click',function(){ waehle(bf); });
+        zeile.appendChild(bw); zeile.appendChild(bf);
+        block.appendChild(p); block.appendChild(zeile);
+        box.appendChild(block);
+        var bp=document.createElement('p');
+        bp.innerHTML='<b>'+nr+'.</b> '+a.begr;
+        begr.appendChild(bp);
+      })(liste[i],i+1);
+    }
+    btnP.addEventListener('click',function(){
+      if(gesperrt) return;
+      var bloecke=box.querySelectorAll('.wfblock');
+      for(var i=0;i<bloecke.length;i++){
+        if(!bloecke[i].querySelector('.wfbtn.sel')){
+          setFb(fb,false,'&#10007; Entscheide dich zuerst bei <b>jeder</b> Aussage f&uuml;r wahr oder falsch.');
+          return;
+        }
+      }
+      var richtig=0;
+      for(var b=0;b<bloecke.length;b++){
+        var g=bloecke[b].querySelector('.wfbtn.sel');
+        var ok=g.getAttribute('data-ok')==='1';
+        g.classList.add(ok?'ok':'bad');
+        if(ok) richtig++;
+        var alle=bloecke[b].querySelectorAll('.wfbtn');
+        for(var c=0;c<alle.length;c++){ alle[c].disabled=true; }
+      }
+      gesperrt=true;
+      if(richtig===bloecke.length){
+        setFb(fb,true,'&#10004; Alle '+bloecke.length+' Aussagen richtig eingeordnet.');
+      } else {
+        setFb(fb,false,'&#10007; '+richtig+' von '+bloecke.length+' stimmen. Frage dich bei den roten Aussagen: L&auml;uft die Erregung &uuml;ber das Gehirn? Und was h&auml;ngt vom Ger&auml;t ab, was von dir?');
+        btnL.classList.add('zeig');
+      }
+      hilfe.classList.add('frei');
+    });
+    btnL.addEventListener('click',function(){
+      var alle=box.querySelectorAll('.wfbtn');
+      for(var i=0;i<alle.length;i++){ alle[i].classList.remove('ok','bad','sel'); alle[i].disabled=false; }
+      gesperrt=false;
+      fb.className='fb'; fb.innerHTML='';
+      btnL.classList.remove('zeig');
+      var d=root.querySelector('details'); if(d) d.open=false;
+    });
+  })();
+
+  /* ================= T-Rex ================= */
+  var trex=document.getElementById('trex');
+  trex.addEventListener('click',function(){ trex.classList.toggle('zeig'); });
+
+  waehleSzenario(1);
+  zeigeErgebnisse();
+})();
+</script>
+</body>
+</html>
