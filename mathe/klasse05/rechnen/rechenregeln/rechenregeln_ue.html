@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+<meta name="description" content="Interaktive Übung zu den Rechenregeln (Klammern zuerst, Punkt vor Strich, von links nach rechts) für Klasse 5 – mit Rechenbäumen, Textaufgaben und drei Schwierigkeitsstufen.">
+<meta name="keywords" content="Rechenregeln, Punkt vor Strich, Klammern, Rechenbaum, Reihenfolge, natürliche Zahlen, Textaufgaben, Klasse 5">
+<meta name="typ" content="Übung">
+<meta name="klasse" content="5">
+<meta name="fach" content="mathe">
+<meta name="oberthema" content="Rechnen">
+<meta name="thema" content="Rechenregeln">
+
+<title>Rechenregeln – Übung (Klasse 5)</title>
+
+<script>
+  MathJax = {
+    tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+    svg: { fontCache: 'global' }
+  };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --ink:#22303f; --card:#ffffff;
+  --green:#1e7d32; --red:#c1272d;
+  --amber:#b8860b; --amber-light:#fdf3d9; --amber-dark:#96690a;
+  --blue:#2f5fa6; --blue-dark:#1f4680; --blue-light:#e6eefb;
+  --bg:#f6f8fb; --line:#dbe3ee;
+  box-sizing:border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+html{scroll-padding-top: env(safe-area-inset-top, 0px);}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:'Nunito', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-size:1rem; line-height:1.5;
+}
+.wrap{max-width:900px; margin:0 auto; padding:16px 14px 90px;}
+
+header.top{
+  background:var(--blue-light); border:2px solid var(--blue);
+  border-radius:16px; padding:16px 18px; margin-bottom:14px;
+}
+header.top h1{margin:0 0 4px; font-size:1.6rem; color:var(--blue-dark);}
+header.top p{margin:0; font-size:1rem; color:var(--ink);}
+.klassenbadge{
+  display:inline-block; background:var(--blue); color:#fff;
+  font-size:1rem; font-weight:700; padding:2px 12px; border-radius:999px; margin-bottom:6px;
+}
+
+/* Tabs */
+.tabbar{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px;}
+.tab{
+  font-family:inherit; font-size:1rem; font-weight:700;
+  min-height:44px; padding:10px 14px; border-radius:12px;
+  border:2px solid var(--blue); background:#fff; color:var(--blue-dark);
+  cursor:pointer;
+}
+.tab.active{background:var(--blue); color:#fff;}
+
+.panel{display:none;}
+.panel.active{display:block;}
+
+.card{
+  background:var(--card); border:1px solid var(--line);
+  border-radius:16px; padding:18px 16px; margin-bottom:16px;
+  box-shadow:0 2px 8px rgba(31,70,128,.06);
+}
+.card h2{margin:0 0 6px; font-size:1.3rem; color:var(--blue-dark);}
+.card h3{margin:14px 0 6px; font-size:1.15rem; color:var(--blue-dark);}
+.lead{font-size:1rem; margin:0 0 10px;}
+
+.regel{
+  background:var(--blue-light); border-left:6px solid var(--blue);
+  border-radius:10px; padding:12px 14px; margin:10px 0; font-size:1rem;
+}
+.regel b{color:var(--blue-dark);}
+.bsp{font-size:1rem; margin:8px 0;}
+
+/* Niveaustufen */
+.levels{display:flex; flex-wrap:wrap; gap:8px; margin:6px 0 14px;}
+.lvbtn{
+  font-family:inherit; font-size:1rem; font-weight:700;
+  min-height:44px; padding:8px 14px; border-radius:999px;
+  border:2px solid var(--blue); background:#fff; color:var(--blue-dark); cursor:pointer;
+}
+.lvbtn.active{background:var(--blue); color:#fff;}
+.level{display:none;}
+.level.active{display:block;}
+
+/* Aufgabe */
+.aufgabe{border:1px solid var(--line); border-radius:14px; padding:14px; margin:12px 0; background:#fff;}
+.aufgabe .frage{font-size:1.1rem; margin:0 0 10px;}
+.aufgabe .frage .nr{
+  display:inline-block; background:var(--blue); color:#fff; font-weight:800;
+  border-radius:8px; padding:1px 9px; margin-right:8px; font-size:1rem;
+}
+.termbig{font-size:1.25rem; margin:8px 0;}
+
+.eingabe{display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin:10px 0;}
+input.num{
+  font-family:inherit; font-size:1.1rem; font-weight:700; text-align:center;
+  width:120px; min-height:44px; padding:6px 10px;
+  border:2px solid var(--blue); border-radius:10px; color:var(--ink); background:#fff;
+}
+input.num:focus{outline:3px solid var(--blue-light);}
+.fixunit{font-size:1.1rem; font-weight:700; color:var(--ink);}
+
+.btn{
+  font-family:inherit; font-size:1rem; font-weight:700;
+  min-height:44px; padding:10px 16px; border-radius:12px; cursor:pointer; border:2px solid transparent;
+}
+.btn.pruefen{background:var(--blue); color:#fff; border-color:var(--blue-dark);}
+.btn.pruefen:disabled{opacity:.55; cursor:default;}
+.btn.leeren{background:#fff; color:var(--blue-dark); border-color:var(--blue); display:none;}
+
+/* MC */
+.mc{display:flex; flex-direction:column; gap:8px; margin:8px 0;}
+.mcopt{
+  font-family:inherit; font-size:1.1rem; text-align:left;
+  min-height:44px; padding:10px 14px; border-radius:12px;
+  border:2px solid var(--blue); background:#fff; color:var(--ink); cursor:pointer;
+}
+.mcopt.sel{background:var(--blue-light); border-color:var(--blue-dark); font-weight:700;}
+.mcopt.good{background:var(--green); color:#fff; border-color:var(--green);}
+.mcopt.wrongpick{background:var(--red); color:#fff; border-color:var(--red);}
+.mcopt:disabled{cursor:default;}
+
+/* Wahr/Falsch */
+.wf{display:flex; gap:10px; margin:8px 0; flex-wrap:wrap;}
+.wfbtn{
+  font-family:inherit; font-size:1.1rem; font-weight:700;
+  min-height:44px; padding:10px 22px; border-radius:12px;
+  border:2px solid var(--blue); background:#fff; color:var(--blue-dark); cursor:pointer;
+}
+.wfbtn.sel{background:var(--blue); color:#fff;}
+.wfbtn:disabled{cursor:default;}
+
+/* Baum-Eingaben */
+.baumsteps{display:flex; flex-direction:column; gap:10px; margin:10px 0;}
+.baumstep{font-size:1.1rem;}
+.baumstep .bnr{
+  display:inline-block; background:var(--amber); color:#fff; font-weight:800;
+  border-radius:999px; width:26px; height:26px; line-height:26px; text-align:center; margin-right:8px; font-size:1rem;
+}
+input.num.small{width:96px;}
+
+/* Grafik Rechenbaum – klassenbasiert! */
+.baum{margin:10px 0; text-align:center;}
+.baum svg{max-width:100%; height:auto;}
+
+/* Feedback */
+.fb{display:none; margin:10px 0 0; padding:11px 14px; border-radius:12px; font-size:1.05rem; font-weight:700;}
+.fb.show{display:block;}
+.fb.ok{background:var(--green); color:#fff;}
+.fb.bad{background:var(--red); color:#fff;}
+.fb.ask{background:var(--blue-light); color:var(--blue-dark);}
+
+/* Hilfe (Amber) */
+.hilfe{display:none; margin-top:12px;}
+.hilfe details{
+  background:var(--amber-light); border:1px solid var(--amber-dark);
+  border-radius:10px; margin:8px 0; overflow:hidden;
+}
+.hilfe summary{
+  list-style:none; cursor:pointer; font-size:1rem; font-weight:700;
+  color:var(--amber-dark); padding:12px 14px; min-height:44px; display:flex; align-items:center; gap:8px;
+}
+.hilfe summary::-webkit-details-marker{display:none;}
+.hilfe summary::before{content:"💡"; font-size:1.1rem;}
+.hilfe details.loesung summary::before{content:"✅";}
+.hilfe .inner{padding:0 14px 14px; font-size:1rem; color:var(--ink);}
+.hilfe .inner ol{margin:6px 0 0; padding-left:20px;}
+.hilfe .inner li{margin:5px 0;}
+
+/* Auswertung */
+.ausrow{
+  display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:8px;
+  border:1px solid var(--line); border-radius:12px; padding:12px 14px; margin:8px 0; font-size:1.05rem;
+}
+.ausrow .name{font-weight:700; color:var(--blue-dark);}
+.badge{display:inline-block; border-radius:999px; padding:3px 12px; font-weight:800; font-size:1rem; color:#fff;}
+.badge.g{background:var(--green);} .badge.r{background:var(--red);} .badge.o{background:var(--blue);}
+.gesamt{background:var(--blue-light); border:2px solid var(--blue); border-radius:14px; padding:14px; font-size:1.15rem; font-weight:800; color:var(--blue-dark); text-align:center; margin-top:6px;}
+
+/* T-Rex */
+.trex{
+  position:fixed; right:14px; bottom:calc(12px + env(safe-area-inset-bottom, 0px));
+  font-size:1.6rem; cursor:pointer; z-index:50; user-select:none;
+  background:#fff; border:1px solid var(--line); border-radius:999px; padding:4px 8px; box-shadow:0 2px 8px rgba(0,0,0,.12);
+}
+.trex .msg{
+  display:none; position:absolute; right:0; bottom:120%;
+  background:var(--blue-dark); color:#fff; font-size:1rem; font-weight:700;
+  padding:6px 10px; border-radius:8px; white-space:nowrap;
+}
+.trex.open .msg{display:block;}
+
+.hinweis{font-size:1rem; color:var(--blue-dark); background:var(--blue-light); border-radius:10px; padding:10px 12px; margin-top:8px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <span class="klassenbadge">Klasse 5 · Übung</span>
+    <h1>Rechenregeln – in der richtigen Reihenfolge rechnen</h1>
+    <p>Klammern zuerst, dann Punkt vor Strich, sonst von links nach rechts. Mit Rechenbäumen und Textaufgaben.</p>
+  </header>
+
+  <nav class="tabbar" id="tabbar">
+    <button class="tab active" data-tab="p-merke">📘 Merke</button>
+    <button class="tab" data-tab="p-warm">🔥 Aufwärmen</button>
+    <button class="tab" data-tab="p-ueben">✏️ Rechnen üben</button>
+    <button class="tab" data-tab="p-baum">🌳 Rechenbaum</button>
+    <button class="tab" data-tab="p-text">📝 Textaufgaben</button>
+    <button class="tab" data-tab="p-wdh">🔁 Wiederholung</button>
+    <button class="tab" data-tab="p-aus">🎯 Auswertung</button>
+  </nav>
+
+  <!-- ================= MERKE ================= -->
+  <section class="panel active" id="p-merke">
+    <div class="card">
+      <h2>So findest du die richtige Reihenfolge</h2>
+      <p class="lead">Bei einer Rechnung mit mehreren Zeichen gehst du immer in dieser Reihenfolge vor:</p>
+
+      <div class="regel"><b>1. Klammern zuerst.</b> Was in Klammern steht, wird als Erstes ausgerechnet.<br>
+        <span class="bsp">Beispiel: \((2+3)\cdot 4\) — erst \(2+3\), dann \(\cdot 4\).</span></div>
+
+      <div class="regel"><b>2. Punkt vor Strich.</b> Mal \((\cdot)\) und Geteilt \((:)\) rechnest du vor Plus \((+)\) und Minus \((-)\).<br>
+        <span class="bsp">Beispiel: \(4 + 3\cdot 5\) — erst \(3\cdot 5\), dann \(+\,4\).</span></div>
+
+      <div class="regel"><b>3. Sonst von links nach rechts.</b> Sind nur gleichrangige Zeichen da (nur \(+\) und \(-\), oder nur \(\cdot\) und \(:\)), rechnest du der Reihe nach von links.<br>
+        <span class="bsp">Beispiel: \(10 - 4 - 3\) — erst \(10-4=6\), dann \(6-3=3\).</span></div>
+    </div>
+
+    <div class="card">
+      <h2>Was ist ein Rechenbaum? 🌳</h2>
+      <p class="lead">Ein Rechenbaum zeigt, in welcher Reihenfolge gerechnet wird. Unten stehen die <b>Zahlen</b>, an den Knoten die <b>Rechenzeichen</b>. Du rechnest <b>von unten nach oben</b>.</p>
+      <div class="baum" id="merke-baum"></div>
+      <p class="lead">Hier: unten zuerst \(3\cdot 5 = 15\), dann oben \(4 + 15 = 19\). Das ist genau „Punkt vor Strich".</p>
+      <div class="hinweis">Tipp: Tippe oben auf die Reiter, um zwischen den Aufgaben zu wechseln. Deine Eingaben bleiben erhalten.</div>
+    </div>
+  </section>
+
+  <!-- ================= AUFWÄRMEN (Wahr/Falsch) ================= -->
+  <section class="panel" id="p-warm">
+    <div class="card">
+      <h2>Aufwärmen: Stimmt die Rechnung? 🔥</h2>
+      <p class="lead">Entscheide bei jeder Zeile, ob richtig gerechnet wurde. Erst antippen, dann auf <b>Prüfen</b>.</p>
+      <div id="warm-list"></div>
+    </div>
+  </section>
+
+  <!-- ================= RECHNEN ÜBEN ================= -->
+  <section class="panel" id="p-ueben">
+    <div class="card">
+      <h2>Rechnen üben ✏️</h2>
+      <p class="lead">Wähle deine Stufe. Rechne aus und tippe auf <b>Prüfen</b>. Nach einem Fehler bekommst du Tipps und eine Musterlösung.</p>
+      <div class="levels" id="ueben-levels">
+        <button class="lvbtn active" data-lv="g">Grundlagen</button>
+        <button class="lvbtn" data-lv="f">Fortgeschritten</button>
+        <button class="lvbtn" data-lv="p">Profi</button>
+      </div>
+      <div class="level active" data-lv="g" id="ueben-g"></div>
+      <div class="level" data-lv="f" id="ueben-f"></div>
+      <div class="level" data-lv="p" id="ueben-p"></div>
+    </div>
+  </section>
+
+  <!-- ================= RECHENBAUM AUSFÜLLEN ================= -->
+  <section class="panel" id="p-baum">
+    <div class="card">
+      <h2>Rechenbaum ausfüllen 🌳</h2>
+      <p class="lead">Fülle die Knoten von unten nach oben aus. Trage bei jedem Schritt das Ergebnis ein und tippe auf <b>Prüfen</b>.</p>
+      <div id="baum-list"></div>
+    </div>
+  </section>
+
+  <!-- ================= TEXTAUFGABEN ================= -->
+  <section class="panel" id="p-text">
+    <div class="card">
+      <h2>Textaufgaben 📝</h2>
+      <p class="lead">Wähle zuerst den passenden Rechenterm und rechne dann das Ergebnis aus.</p>
+      <div id="text-list"></div>
+    </div>
+  </section>
+
+  <!-- ================= WIEDERHOLUNG ================= -->
+  <section class="panel" id="p-wdh">
+    <div class="card">
+      <h2>Wiederholung: Runden &amp; Überschlag 🔁</h2>
+      <p class="lead">Kurze Auffrischung aus Kapitel „Zahlen und Größen". Wähle deine Stufe.</p>
+      <div class="levels" id="wdh-levels">
+        <button class="lvbtn active" data-lv="g">Grundlagen</button>
+        <button class="lvbtn" data-lv="f">Fortgeschritten</button>
+        <button class="lvbtn" data-lv="p">Profi</button>
+      </div>
+      <div class="level active" data-lv="g" id="wdh-g"></div>
+      <div class="level" data-lv="f" id="wdh-f"></div>
+      <div class="level" data-lv="p" id="wdh-p"></div>
+    </div>
+  </section>
+
+  <!-- ================= AUSWERTUNG ================= -->
+  <section class="panel" id="p-aus">
+    <div class="card">
+      <h2>Auswertung 🎯</h2>
+      <p class="lead">Hier siehst du, wie viel du schon geschafft hast. Es zählen nur die Aufgaben, die du geprüft hast.</p>
+      <div id="aus-body"></div>
+    </div>
+  </section>
+
+</div>
+
+<div class="trex" id="trex" title="Made by ASzym">🦖<span class="msg">Made by ASzym</span></div>
+
+<script>
+/* ============================================================
+   Rechenregeln – Übung · Klasse 5
+   Zustand nur im JS-Speicher (kein localStorage).
+   ============================================================ */
+
+var TASKS = {};      // id -> config (answers etc.)
+var RESULTS = {};    // id -> true/false (nur wenn geprüft)
+var GROUPS = [];     // Auswertungs-Gruppen
+
+function M(x){ return '\\(' + x + '\\)'; }   // MathJax-Inline
+function typeset(el){
+  if (window.MathJax && MathJax.typesetPromise){
+    try { MathJax.typesetPromise(el ? [el] : undefined); } catch(e){}
+  }
+}
+function shuffle(a){ // Fisher-Yates
+  for (var i=a.length-1; i>0; i--){
+    var j = Math.floor(Math.random()*(i+1));
+    var t=a[i]; a[i]=a[j]; a[j]=t;
+  }
+  return a;
+}
+
+/* ---------- Bausteine für Hilfe (Amber) ---------- */
+function tipsHTML(tips){
+  if(!tips || !tips.length) return '';
+  var h='';
+  for(var i=0;i<tips.length;i++){
+    h += '<details><summary>Tipp '+(i+1)+'</summary><div class="inner">'+tips[i]+'</div></details>';
+  }
+  return h;
+}
+function loesungHTML(steps){
+  var li='';
+  for(var i=0;i<steps.length;i++){ li += '<li>'+steps[i]+'</li>'; }
+  return '<details class="loesung"><summary>Musterlösung anzeigen</summary><div class="inner"><ol>'+li+'</ol></div></details>';
+}
+
+/* =========================================================
+   RECHENBAUM-SVG (klassenbasiert über .baum svg)
+   ========================================================= */
+
+/* Baum für  a + b·c   (badges ① am ·-Knoten, ② am +-Knoten) */
+function svgTreeA(a,b,c,showVals){
+  var inner=b*c, res=a+inner;
+  var badge1 = showVals ? String(inner) : '1';
+  var badge2 = showVals ? String(res)   : '2';
+  var b1txt  = showVals ? String(inner) : '\u2460';
+  var b2txt  = showVals ? String(res)   : '\u2461';
+  return ''+
+  '<svg viewBox="0 0 300 215" role="img" aria-label="Rechenbaum">'+
+  '<line x1="150" y1="60" x2="82" y2="104" stroke="#9fb4d6" stroke-width="3"/>'+
+  '<line x1="150" y1="60" x2="218" y2="104" stroke="#9fb4d6" stroke-width="3"/>'+
+  '<line x1="220" y1="140" x2="182" y2="170" stroke="#9fb4d6" stroke-width="3"/>'+
+  '<line x1="220" y1="140" x2="258" y2="170" stroke="#9fb4d6" stroke-width="3"/>'+
+  // + node
+  '<circle cx="150" cy="42" r="20" fill="#e6eefb" stroke="#2f5fa6" stroke-width="3"/>'+
+  '<text x="150" y="50" text-anchor="middle" font-size="24" font-weight="800" fill="#1f4680">+</text>'+
+  '<circle cx="176" cy="24" r="12" fill="#b8860b"/><text x="176" y="29" text-anchor="middle" font-size="15" font-weight="800" fill="#fff">'+b2txt+'</text>'+
+  // leaf a
+  '<rect x="60" y="104" width="44" height="36" rx="8" fill="#fff" stroke="#2f5fa6" stroke-width="2.5"/>'+
+  '<text x="82" y="128" text-anchor="middle" font-size="22" font-weight="800" fill="#22303f">'+a+'</text>'+
+  // · node
+  '<circle cx="220" cy="120" r="20" fill="#e6eefb" stroke="#2f5fa6" stroke-width="3"/>'+
+  '<text x="220" y="128" text-anchor="middle" font-size="24" font-weight="800" fill="#1f4680">\u00b7</text>'+
+  '<circle cx="246" cy="102" r="12" fill="#b8860b"/><text x="246" y="107" text-anchor="middle" font-size="15" font-weight="800" fill="#fff">'+b1txt+'</text>'+
+  // leaf b, c
+  '<rect x="160" y="170" width="44" height="36" rx="8" fill="#fff" stroke="#2f5fa6" stroke-width="2.5"/>'+
+  '<text x="182" y="194" text-anchor="middle" font-size="22" font-weight="800" fill="#22303f">'+b+'</text>'+
+  '<rect x="236" y="170" width="44" height="36" rx="8" fill="#fff" stroke="#2f5fa6" stroke-width="2.5"/>'+
+  '<text x="258" y="194" text-anchor="middle" font-size="22" font-weight="800" fill="#22303f">'+c+'</text>'+
+  '</svg>';
+}
+
+/* Baum für  (a - b)·c + d  (badges ① am −, ② am ·, ③ am +) */
+function svgTreeB(a,b,c,d){
+  return ''+
+  '<svg viewBox="0 0 340 270" role="img" aria-label="Rechenbaum">'+
+  // edges
+  '<line x1="200" y1="58" x2="122" y2="102" stroke="#9fb4d6" stroke-width="3"/>'+
+  '<line x1="200" y1="58" x2="288" y2="102" stroke="#9fb4d6" stroke-width="3"/>'+
+  '<line x1="120" y1="138" x2="72" y2="172" stroke="#9fb4d6" stroke-width="3"/>'+
+  '<line x1="120" y1="138" x2="168" y2="172" stroke="#9fb4d6" stroke-width="3"/>'+
+  '<line x1="70" y1="208" x2="42" y2="236" stroke="#9fb4d6" stroke-width="3"/>'+
+  '<line x1="70" y1="208" x2="98" y2="236" stroke="#9fb4d6" stroke-width="3"/>'+
+  // + node (root)
+  '<circle cx="200" cy="40" r="20" fill="#e6eefb" stroke="#2f5fa6" stroke-width="3"/>'+
+  '<text x="200" y="48" text-anchor="middle" font-size="24" font-weight="800" fill="#1f4680">+</text>'+
+  '<circle cx="226" cy="22" r="12" fill="#b8860b"/><text x="226" y="27" text-anchor="middle" font-size="15" font-weight="800" fill="#fff">\u2462</text>'+
+  // leaf d (right)
+  '<rect x="266" y="102" width="44" height="36" rx="8" fill="#fff" stroke="#2f5fa6" stroke-width="2.5"/>'+
+  '<text x="288" y="126" text-anchor="middle" font-size="22" font-weight="800" fill="#22303f">'+d+'</text>'+
+  // · node
+  '<circle cx="120" cy="120" r="20" fill="#e6eefb" stroke="#2f5fa6" stroke-width="3"/>'+
+  '<text x="120" y="128" text-anchor="middle" font-size="24" font-weight="800" fill="#1f4680">\u00b7</text>'+
+  '<circle cx="146" cy="102" r="12" fill="#b8860b"/><text x="146" y="107" text-anchor="middle" font-size="15" font-weight="800" fill="#fff">\u2461</text>'+
+  // leaf c (right of ·)
+  '<rect x="146" y="172" width="44" height="36" rx="8" fill="#fff" stroke="#2f5fa6" stroke-width="2.5"/>'+
+  '<text x="168" y="196" text-anchor="middle" font-size="22" font-weight="800" fill="#22303f">'+c+'</text>'+
+  // − node
+  '<circle cx="70" cy="190" r="20" fill="#e6eefb" stroke="#2f5fa6" stroke-width="3"/>'+
+  '<text x="70" y="198" text-anchor="middle" font-size="24" font-weight="800" fill="#1f4680">\u2212</text>'+
+  '<circle cx="96" cy="172" r="12" fill="#b8860b"/><text x="96" y="177" text-anchor="middle" font-size="15" font-weight="800" fill="#fff">\u2460</text>'+
+  // leaves a, b
+  '<rect x="20" y="236" width="44" height="34" rx="8" fill="#fff" stroke="#2f5fa6" stroke-width="2.5"/>'+
+  '<text x="42" y="259" text-anchor="middle" font-size="22" font-weight="800" fill="#22303f">'+a+'</text>'+
+  '<rect x="76" y="236" width="44" height="34" rx="8" fill="#fff" stroke="#2f5fa6" stroke-width="2.5"/>'+
+  '<text x="98" y="259" text-anchor="middle" font-size="22" font-weight="800" fill="#22303f">'+b+'</text>'+
+  '</svg>';
+}
+
+/* =========================================================
+   RENDER: numerische Aufgabe (Texteingabe)
+   ========================================================= */
+function renderNum(id, nr, frageHTML, cfg){
+  TASKS[id] = {type:'num', answer:cfg.answer};
+  var unit = cfg.unit ? '<span class="fixunit">'+cfg.unit+'</span>' : '';
+  var hilfe = '<div class="hilfe">'+tipsHTML(cfg.tips)+loesungHTML(cfg.loesung)+'</div>';
+  return '<div class="aufgabe" data-id="'+id+'">'+
+    '<div class="frage"><span class="nr">'+nr+'</span>'+frageHTML+'</div>'+
+    '<div class="eingabe">'+
+      '<input class="num" type="text" inputmode="numeric" placeholder="?" aria-label="Ergebnis">'+unit+
+      '<button class="btn pruefen" data-act="pruefen" data-id="'+id+'">Prüfen</button>'+
+      '<button class="btn leeren" data-act="leeren" data-id="'+id+'">Leeren</button>'+
+    '</div>'+
+    '<div class="fb"></div>'+ hilfe +
+  '</div>';
+}
+
+/* RENDER: Wahr/Falsch */
+function renderWF(id, nr, frageHTML, cfg){
+  TASKS[id] = {type:'wf', correct:cfg.correct};
+  var hilfe = '<div class="hilfe">'+loesungHTML(cfg.loesung)+'</div>';
+  return '<div class="aufgabe" data-id="'+id+'">'+
+    '<div class="frage"><span class="nr">'+nr+'</span>'+frageHTML+'</div>'+
+    '<div class="wf">'+
+      '<button class="wfbtn" data-act="wf" data-id="'+id+'" data-val="1">Wahr</button>'+
+      '<button class="wfbtn" data-act="wf" data-id="'+id+'" data-val="0">Falsch</button>'+
+    '</div>'+
+    '<div class="eingabe">'+
+      '<button class="btn pruefen" data-act="pruefen" data-id="'+id+'">Prüfen</button>'+
+      '<button class="btn leeren" data-act="leeren" data-id="'+id+'">Leeren</button>'+
+    '</div>'+
+    '<div class="fb"></div>'+ hilfe +
+  '</div>';
+}
+
+/* RENDER: Textaufgabe = MC-Term (gemischt) + Zahl */
+function renderMCNum(id, nr, textHTML, cfg){
+  var opts = cfg.options.slice();
+  shuffle(opts);                        // EINMAL beim Laden mischen …
+  TASKS[id] = {type:'mcnum', answer:cfg.answer};
+  var mc = '<div class="mc">';
+  for(var i=0;i<opts.length;i++){       // … danach erst binden
+    mc += '<button class="mcopt" data-act="mc" data-id="'+id+'" data-ok="'+(opts[i].ok?'1':'0')+'">'+M(opts[i].tex)+'</button>';
+  }
+  mc += '</div>';
+  var unit = cfg.unit ? '<span class="fixunit">'+cfg.unit+'</span>' : '';
+  var hilfe = '<div class="hilfe">'+tipsHTML(cfg.tips)+loesungHTML(cfg.loesung)+'</div>';
+  return '<div class="aufgabe" data-id="'+id+'">'+
+    '<div class="frage"><span class="nr">'+nr+'</span>'+textHTML+'</div>'+
+    '<h3>Welcher Term passt?</h3>'+ mc +
+    '<h3>Und wie lautet das Ergebnis?</h3>'+
+    '<div class="eingabe">'+
+      '<input class="num" type="text" inputmode="numeric" placeholder="?" aria-label="Ergebnis">'+unit+
+      '<button class="btn pruefen" data-act="pruefen" data-id="'+id+'">Prüfen</button>'+
+      '<button class="btn leeren" data-act="leeren" data-id="'+id+'">Leeren</button>'+
+    '</div>'+
+    '<div class="fb"></div>'+ hilfe +
+  '</div>';
+}
+
+/* RENDER: Rechenbaum ausfüllen (mehrere Schritt-Eingaben) */
+function renderBaum(id, nr, term, svg, steps, loesung){
+  var answers = [];
+  var rows = '';
+  for(var i=0;i<steps.length;i++){
+    answers.push(steps[i].answer);
+    rows += '<div class="baumstep"><span class="bnr">'+(i+1)+'</span>'+steps[i].label+
+            ' <input class="num small" type="text" inputmode="numeric" placeholder="?" aria-label="Schritt '+(i+1)+'" data-idx="'+i+'"></div>';
+  }
+  TASKS[id] = {type:'baum', answers:answers};
+  var hilfe = '<div class="hilfe">'+loesungHTML(loesung)+'</div>';
+  return '<div class="aufgabe" data-id="'+id+'">'+
+    '<div class="frage"><span class="nr">'+nr+'</span>Term: <span class="termbig">'+M(term)+'</span></div>'+
+    '<div class="baum">'+svg+'</div>'+
+    '<div class="baumsteps">'+rows+'</div>'+
+    '<div class="eingabe">'+
+      '<button class="btn pruefen" data-act="pruefen" data-id="'+id+'">Prüfen</button>'+
+      '<button class="btn leeren" data-act="leeren" data-id="'+id+'">Leeren</button>'+
+    '</div>'+
+    '<div class="fb"></div>'+ hilfe +
+  '</div>';
+}
+
+/* =========================================================
+   HILFSFUNKTIONEN Auswertung / Feedback
+   ========================================================= */
+function parseNum(s){
+  if(s===null||s===undefined) return NaN;
+  s = String(s).replace(/\s/g,'').replace(',','.');
+  if(s==='') return NaN;
+  return Number(s);
+}
+function setFB(task, kind, html){
+  var fb = task.querySelector('.fb');
+  fb.className = 'fb show '+kind;
+  fb.innerHTML = html;
+  typeset(fb);
+}
+function showHelp(task){ task.querySelector('.hilfe').style.display='block'; }
+function hideHelp(task){
+  var h=task.querySelector('.hilfe'); h.style.display='none';
+  var ds=h.querySelectorAll('details'); for(var i=0;i<ds.length;i++){ ds[i].open=false; }
+}
+function showLeeren(task){ var b=task.querySelector('.btn.leeren'); if(b) b.style.display='inline-block'; }
+function lockTask(task){
+  task.querySelectorAll('input, .btn.pruefen, .mcopt, .wfbtn').forEach(function(el){
+    if(!el.classList.contains('leeren')) el.disabled = true;
+  });
+}
+function unlockTask(task){
+  task.querySelectorAll('input, .btn.pruefen, .mcopt, .wfbtn').forEach(function(el){ el.disabled = false; });
+}
+
+/* =========================================================
+   PRÜFEN
+   ========================================================= */
+function doPruefen(id){
+  var task = document.querySelector('.aufgabe[data-id="'+id+'"]');
+  var t = TASKS[id];
+  if(!task || !t) return;
+
+  if(t.type==='num'){
+    var v = parseNum(task.querySelector('input.num').value);
+    if(isNaN(v)){ setFB(task,'ask','Bitte gib erst dein Ergebnis ein.'); return; }
+    if(v===t.answer){
+      setFB(task,'ok','✓ Richtig! Super gerechnet.');
+      lockTask(task); RESULTS[id]=true;
+    } else {
+      setFB(task,'bad','✗ Das stimmt noch nicht. Schau dir die Reihenfolge noch einmal an.');
+      showHelp(task); showLeeren(task); lockTask(task); RESULTS[id]=false;
+    }
+  }
+
+  else if(t.type==='wf'){
+    var selBtn = task.querySelector('.wfbtn.sel');
+    if(!selBtn){ setFB(task,'ask','Tippe erst auf „Wahr" oder „Falsch".'); return; }
+    var pick = selBtn.getAttribute('data-val')==='1';
+    if(pick===t.correct){
+      setFB(task,'ok','✓ Richtig erkannt!');
+      lockTask(task); RESULTS[id]=true;
+    } else {
+      setFB(task,'bad','✗ Das passt noch nicht. Rechne selbst Schritt für Schritt nach.');
+      showHelp(task); showLeeren(task); lockTask(task); RESULTS[id]=false;
+    }
+  }
+
+  else if(t.type==='mcnum'){
+    var picked = task.querySelector('.mcopt.sel');
+    var vv = parseNum(task.querySelector('input.num').value);
+    if(!picked && isNaN(vv)){ setFB(task,'ask','Wähle einen Term und trage dein Ergebnis ein.'); return; }
+    if(!picked){ setFB(task,'ask','Wähle zuerst den passenden Term aus.'); return; }
+    if(isNaN(vv)){ setFB(task,'ask','Trage noch dein Ergebnis ein.'); return; }
+    var termOK = picked.getAttribute('data-ok')==='1';
+    var numOK  = (vv===t.answer);
+    if(termOK && numOK){
+      picked.classList.add('good');
+      setFB(task,'ok','✓ Richtig! Term und Ergebnis stimmen.');
+      lockTask(task); RESULTS[id]=true;
+    } else {
+      if(!termOK){ picked.classList.add('wrongpick'); }
+      var msg;
+      if(!termOK && !numOK){ msg='✗ Term und Ergebnis stimmen noch nicht.'; }
+      else if(!termOK){ msg='✗ Der Term passt noch nicht zur Aufgabe.'; }
+      else { msg='✗ Der Term stimmt – aber rechne das Ergebnis noch einmal nach.'; }
+      setFB(task,'bad',msg);
+      showHelp(task); showLeeren(task); lockTask(task); RESULTS[id]=false;
+    }
+  }
+
+  else if(t.type==='baum'){
+    var inps = task.querySelectorAll('input.num');
+    var anyEmpty=false, allOK=true;
+    for(var i=0;i<inps.length;i++){
+      var val = parseNum(inps[i].value);
+      if(isNaN(val)){ anyEmpty=true; }
+      else if(val!==t.answers[i]){ allOK=false; }
+    }
+    if(anyEmpty){ setFB(task,'ask','Fülle bitte alle Schritte aus.'); return; }
+    if(allOK){
+      setFB(task,'ok','✓ Richtig! Du hast den Baum von unten nach oben gelöst.');
+      lockTask(task); RESULTS[id]=true;
+    } else {
+      setFB(task,'bad','✗ Ein Schritt stimmt noch nicht. Prüfe von unten nach oben.');
+      showHelp(task); showLeeren(task); lockTask(task); RESULTS[id]=false;
+    }
+  }
+
+  updateAuswertung();
+}
+
+function doLeeren(id){
+  var task = document.querySelector('.aufgabe[data-id="'+id+'"]');
+  if(!task) return;
+  unlockTask(task);
+  task.querySelectorAll('input.num').forEach(function(i){ i.value=''; });
+  task.querySelectorAll('.mcopt').forEach(function(b){ b.classList.remove('sel','good','wrongpick'); });
+  task.querySelectorAll('.wfbtn').forEach(function(b){ b.classList.remove('sel'); });
+  var fb=task.querySelector('.fb'); fb.className='fb'; fb.innerHTML='';
+  hideHelp(task);
+  var lb=task.querySelector('.btn.leeren'); if(lb) lb.style.display='none';
+  delete RESULTS[id];
+  updateAuswertung();
+}
+
+/* =========================================================
+   EVENT-DELEGATION
+   ========================================================= */
+document.addEventListener('click', function(e){
+  var el = e.target.closest('[data-act]');
+  if(!el) return;
+  var act = el.getAttribute('data-act');
+  var id  = el.getAttribute('data-id');
+
+  if(act==='pruefen'){ doPruefen(id); }
+  else if(act==='leeren'){ doLeeren(id); }
+  else if(act==='wf'){
+    if(el.disabled) return;
+    var task = el.closest('.aufgabe');
+    task.querySelectorAll('.wfbtn').forEach(function(b){ b.classList.remove('sel'); });
+    el.classList.add('sel');
+  }
+  else if(act==='mc'){
+    if(el.disabled) return;
+    var task2 = el.closest('.aufgabe');
+    task2.querySelectorAll('.mcopt').forEach(function(b){ b.classList.remove('sel'); });
+    el.classList.add('sel');
+  }
+});
+
+/* =========================================================
+   TABS & LEVELS
+   ========================================================= */
+function initTabs(){
+  document.getElementById('tabbar').addEventListener('click', function(e){
+    var b=e.target.closest('.tab'); if(!b) return;
+    document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });
+    document.querySelectorAll('.panel').forEach(function(p){ p.classList.remove('active'); });
+    b.classList.add('active');
+    var pan=document.getElementById(b.getAttribute('data-tab'));
+    pan.classList.add('active');
+    if(b.getAttribute('data-tab')==='p-aus'){ updateAuswertung(); }
+  });
+}
+function initLevels(barId){
+  var bar=document.getElementById(barId);
+  bar.addEventListener('click', function(e){
+    var b=e.target.closest('.lvbtn'); if(!b) return;
+    var lv=b.getAttribute('data-lv');
+    var card=bar.closest('.card');
+    card.querySelectorAll('.lvbtn').forEach(function(x){ x.classList.remove('active'); });
+    b.classList.add('active');
+    card.querySelectorAll('.level').forEach(function(x){ x.classList.toggle('active', x.getAttribute('data-lv')===lv); });
+  });
+}
+
+/* =========================================================
+   AUSWERTUNG
+   ========================================================= */
+function updateAuswertung(){
+  var body=document.getElementById('aus-body');
+  if(!body) return;
+  var html='';
+  var totalDone=0, totalRight=0, totalAll=0;
+  for(var g=0; g<GROUPS.length; g++){
+    var grp=GROUPS[g], done=0, right=0;
+    for(var i=0;i<grp.ids.length;i++){
+      var id=grp.ids[i];
+      if(RESULTS.hasOwnProperty(id)){ done++; if(RESULTS[id]) right++; }
+    }
+    var offen=grp.ids.length-done, wrong=done-right;
+    totalDone+=done; totalRight+=right; totalAll+=grp.ids.length;
+    html += '<div class="ausrow"><span class="name">'+grp.name+'</span><span>'+
+            '<span class="badge g">'+right+' richtig</span> '+
+            '<span class="badge r">'+wrong+' falsch</span> '+
+            '<span class="badge o">'+offen+' offen</span></span></div>';
+  }
+  var msg;
+  if(totalDone===0){ msg='Noch nichts geprüft – leg los und komm dann hierher zurück!'; }
+  else if(totalRight===totalAll){ msg='🏆 Perfekt! Alle '+totalAll+' Aufgaben richtig gelöst!'; }
+  else { msg='Bisher '+totalRight+' von '+totalAll+' Aufgaben richtig – bleib dran!'; }
+  html += '<div class="gesamt">'+msg+'</div>';
+  body.innerHTML=html;
+}
+
+/* =========================================================
+   INHALTE AUFBAUEN
+   ========================================================= */
+function build(){
+
+  /* ---- Merke-Baum (Beispiel mit Werten) ---- */
+  document.getElementById('merke-baum').innerHTML = svgTreeA(4,3,5,true);
+
+  /* ---- AUFWÄRMEN (Wahr/Falsch) ---- */
+  var warm='';
+  warm += renderWF('w1','1', 'Stimmt das? '+M('6 + 2\\cdot 3 = 24'), {
+    correct:false,
+    loesung:['Punkt vor Strich: erst '+M('2\\cdot 3 = 6')+'.','Dann '+M('6 + 6 = 12')+'.','Richtig ist also '+M('12')+', nicht '+M('24')+'.']
+  });
+  warm += renderWF('w2','2', 'Stimmt das? '+M('20 - 12 : 4 = 17'), {
+    correct:true,
+    loesung:['Punkt vor Strich: erst '+M('12 : 4 = 3')+'.','Dann '+M('20 - 3 = 17')+'.','Die Rechnung ist richtig.']
+  });
+  warm += renderWF('w3','3', 'Stimmt das? '+M('10 - 4 - 3 = 9'), {
+    correct:false,
+    loesung:['Nur Minus: von links nach rechts.','Erst '+M('10 - 4 = 6')+', dann '+M('6 - 3 = 3')+'.','Richtig ist '+M('3')+', nicht '+M('9')+'.']
+  });
+  document.getElementById('warm-list').innerHTML = warm;
+  GROUPS.push({key:'warm', name:'Aufwärmen', ids:['w1','w2','w3']});
+
+  /* ---- RECHNEN ÜBEN ---- */
+  // Grundlagen
+  var g='';
+  g += renderNum('g1','1','Rechne aus: <span class="termbig">'+M('4 + 3\\cdot 5')+'</span>', {
+    answer:19,
+    tips:['Hier gilt „Punkt vor Strich": Welche Rechnung musst du zuerst machen?','Rechne zuerst den Mal-Teil, danach kommt das Plus dazu.'],
+    loesung:['„Punkt vor Strich": erst '+M('3\\cdot 5 = 15')+'.','Dann '+M('4 + 15 = 19')+'.',
+             'Als Rechenbaum: <div class="baum">'+svgTreeA(4,3,5,true)+'</div>']
+  });
+  g += renderNum('g2','2','Rechne aus: <span class="termbig">'+M('18 - 2\\cdot 6')+'</span>', {
+    answer:6,
+    tips:['„Punkt vor Strich": Welcher Teil ist ein Mal?','Rechne zuerst '+M('2\\cdot 6')+' aus, dann das Minus.'],
+    loesung:['Erst '+M('2\\cdot 6 = 12')+'.','Dann '+M('18 - 12 = 6')+'.']
+  });
+  g += renderNum('g3','3','Rechne aus: <span class="termbig">'+M('24 : 6 + 5')+'</span>', {
+    answer:9,
+    tips:['Geteilt gehört auch zu „Punkt".','Rechne zuerst '+M('24 : 6')+', dann das Plus.'],
+    loesung:['Erst '+M('24 : 6 = 4')+'.','Dann '+M('4 + 5 = 9')+'.']
+  });
+  document.getElementById('ueben-g').innerHTML = g;
+
+  // Fortgeschritten
+  var f='';
+  f += renderNum('f1','1','Rechne aus: <span class="termbig">'+M('(4 + 3)\\cdot 5')+'</span>', {
+    answer:35,
+    tips:['Was steht in der Klammer? Das kommt zuerst.','Rechne zuerst die Klammer, dann das Mal.'],
+    loesung:['Klammer zuerst: '+M('4 + 3 = 7')+'.','Dann '+M('7\\cdot 5 = 35')+'.']
+  });
+  f += renderNum('f2','2','Rechne aus: <span class="termbig">'+M('24 : (2 + 4)')+'</span>', {
+    answer:4,
+    tips:['Die Klammer wird zuerst ausgerechnet.','Rechne '+M('2 + 4')+' und teile dann '+M('24')+' durch das Ergebnis.'],
+    loesung:['Klammer zuerst: '+M('2 + 4 = 6')+'.','Dann '+M('24 : 6 = 4')+'.']
+  });
+  f += renderNum('f3','3','Rechne aus: <span class="termbig">'+M('30 - (2 + 3)\\cdot 4')+'</span>', {
+    answer:10,
+    tips:['Zuerst die Klammer, dann Punkt vor Strich, dann das Minus.','Rechne '+M('(2+3)')+', danach mal '+M('4')+', ganz zum Schluss das Minus.'],
+    loesung:['Klammer: '+M('2 + 3 = 5')+'.','Punkt vor Strich: '+M('5\\cdot 4 = 20')+'.','Dann '+M('30 - 20 = 10')+'.']
+  });
+  document.getElementById('ueben-f').innerHTML = f;
+
+  // Profi
+  var p='';
+  p += renderNum('p1','1','Rechne aus: <span class="termbig">'+M('5\\cdot(8 - 3) + 12 : 4')+'</span>', {
+    answer:28,
+    tips:['Zuerst die Klammer. Dann alle „Punkt"-Rechnungen. Erst danach das Plus.','Rechne die Klammer, dann '+M('5\\cdot\\ldots')+' und '+M('12 : 4')+' getrennt, dann addiere.'],
+    loesung:['Klammer: '+M('8 - 3 = 5')+'.','Punkt vor Strich: '+M('5\\cdot 5 = 25')+' und '+M('12 : 4 = 3')+'.','Dann '+M('25 + 3 = 28')+'.']
+  });
+  p += renderNum('p2','2','Rechne aus: <span class="termbig">'+M('(18 - 6) : 3 + 2\\cdot 7')+'</span>', {
+    answer:18,
+    tips:['Zuerst die Klammer, dann die beiden „Punkt"-Teile.','Rechne '+M('(18-6)')+' und teile durch '+M('3')+'; rechne getrennt '+M('2\\cdot 7')+'; dann addiere.'],
+    loesung:['Klammer: '+M('18 - 6 = 12')+'.','Punkt: '+M('12 : 3 = 4')+' und '+M('2\\cdot 7 = 14')+'.','Dann '+M('4 + 14 = 18')+'.']
+  });
+  p += renderNum('p3','3','Rechne aus: <span class="termbig">'+M('100 - 6\\cdot(3 + 2\\cdot 4)')+'</span>', {
+    answer:34,
+    tips:['In der Klammer gilt auch „Punkt vor Strich".','Rechne in der Klammer zuerst '+M('2\\cdot 4')+', dann '+M('3 + \\ldots')+'; danach mal '+M('6')+', zum Schluss das Minus.'],
+    loesung:['In der Klammer zuerst '+M('2\\cdot 4 = 8')+', dann '+M('3 + 8 = 11')+'.','Punkt vor Strich: '+M('6\\cdot 11 = 66')+'.','Dann '+M('100 - 66 = 34')+'.']
+  });
+  document.getElementById('ueben-p').innerHTML = p;
+
+  GROUPS.push({key:'ueben', name:'Rechnen üben', ids:['g1','g2','g3','f1','f2','f3','p1','p2','p3']});
+
+  /* ---- RECHENBAUM AUSFÜLLEN ---- */
+  var bl='';
+  bl += renderBaum('b1','1','3 + 4\\cdot 5', svgTreeA(3,4,5,false), [
+    {label:M('4\\cdot 5 =')+' (Knoten \u2460)', answer:20},
+    {label:M('3 + ')+' \u2460 '+M('=')+' (Knoten \u2461)', answer:23}
+  ], ['Unten zuerst: '+M('4\\cdot 5 = 20')+' (Knoten \u2460).','Dann oben: '+M('3 + 20 = 23')+' (Knoten \u2461).']);
+
+  bl += renderBaum('b2','2','(8 - 2)\\cdot 3 + 4', svgTreeB(8,2,3,4), [
+    {label:M('8 - 2 =')+' (Knoten \u2460)', answer:6},
+    {label:'\u2460 '+M('\\cdot 3 =')+' (Knoten \u2461)', answer:18},
+    {label:'\u2461 '+M('+ 4 =')+' (Knoten \u2462)', answer:22}
+  ], ['Unten zuerst die Klammer: '+M('8 - 2 = 6')+' (Knoten \u2460).','Dann '+M('6\\cdot 3 = 18')+' (Knoten \u2461).','Dann oben '+M('18 + 4 = 22')+' (Knoten \u2462).']);
+
+  document.getElementById('baum-list').innerHTML = bl;
+  GROUPS.push({key:'baum', name:'Rechenbäume', ids:['b1','b2']});
+
+  /* ---- TEXTAUFGABEN ---- */
+  var tl='';
+  tl += renderMCNum('t1','1',
+    'In einem Bus sitzen 12 Personen. An der Haltestelle steigen 3 Gruppen mit je 4 Personen zu. Wie viele Personen sind jetzt im Bus?',
+    { answer:24,
+      options:[{tex:'12 + 3\\cdot 4', ok:true},{tex:'(12 + 3)\\cdot 4', ok:false},{tex:'12\\cdot 3 + 4', ok:false}],
+      tips:['3 Gruppen mit je 4 Personen sind ein Mal-Teil.','Erst die zusteigenden Personen ausrechnen, dann zu den 12 dazuzählen.'],
+      loesung:['Zusteigende: '+M('3\\cdot 4 = 12')+'.','Zusammen: '+M('12 + 12 = 24')+' Personen.']
+    });
+  tl += renderMCNum('t2','2',
+    'Ein Kino hat 8 Reihen mit je 15 Plätzen. 5 Plätze sind kaputt. Wie viele Plätze kann man nutzen?',
+    { answer:115,
+      options:[{tex:'8\\cdot 15 - 5', ok:true},{tex:'8\\cdot(15 - 5)', ok:false},{tex:'8 + 15\\cdot 5', ok:false}],
+      tips:['Zuerst alle Plätze, dann die kaputten abziehen.','Rechne '+M('8\\cdot 15')+' und ziehe erst danach die 5 ab.'],
+      loesung:['Alle Plätze: '+M('8\\cdot 15 = 120')+'.','Nutzbar: '+M('120 - 5 = 115')+'.']
+    });
+  tl += renderMCNum('t3','3',
+    'Ein Film dauert 90 Minuten. Danach kommen 2 Werbeblöcke mit je 5 Minuten. Wie lange läuft die Sendung insgesamt?',
+    { answer:100, unit:'Min',
+      options:[{tex:'90 + 2\\cdot 5', ok:true},{tex:'(90 + 2)\\cdot 5', ok:false},{tex:'90\\cdot 2 + 5', ok:false}],
+      tips:['2 Werbeblöcke mit je 5 Minuten sind ein Mal-Teil.','Erst die Werbezeit ausrechnen, dann zu den 90 Minuten addieren.'],
+      loesung:['Werbung: '+M('2\\cdot 5 = 10')+' Minuten.','Zusammen: '+M('90 + 10 = 100')+' Minuten.']
+    });
+  document.getElementById('text-list').innerHTML = tl;
+  GROUPS.push({key:'text', name:'Textaufgaben', ids:['t1','t2','t3']});
+
+  /* ---- WIEDERHOLUNG: Runden & Überschlag ---- */
+  var wg='';
+  wg += renderNum('r1','1','Runde auf Zehner: '+M('47'), {
+    answer:50,
+    tips:['Schau auf die Einerziffer.','Ist sie 5 oder größer, wird aufgerundet, sonst abgerundet.'],
+    loesung:['Einerziffer ist '+M('7')+' (größer als 5) '+String.fromCharCode(8594)+' aufrunden.',M('47 \\approx 50')+'.']
+  });
+  wg += renderNum('r2','2','Runde auf Zehner: '+M('83'), {
+    answer:80,
+    tips:['Schau auf die Einerziffer.','Ist sie kleiner als 5, wird abgerundet.'],
+    loesung:['Einerziffer ist '+M('3')+' (kleiner als 5) '+String.fromCharCode(8594)+' abrunden.',M('83 \\approx 80')+'.']
+  });
+  document.getElementById('wdh-g').innerHTML = wg;
+
+  var wf2='';
+  wf2 += renderNum('r3','1','Runde auf Hunderter: '+M('2384'), {
+    answer:2400,
+    tips:['Schau auf die Zehnerziffer.','Ist sie 5 oder größer, wird der Hunderter aufgerundet.'],
+    loesung:['Zehnerziffer ist '+M('8')+' '+String.fromCharCode(8594)+' aufrunden.',M('2384 \\approx 2400')+'.']
+  });
+  wf2 += renderNum('r4','2','Runde auf Tausender: '+M('6712'), {
+    answer:7000,
+    tips:['Schau auf die Hunderterziffer.','Ist sie 5 oder größer, wird der Tausender aufgerundet.'],
+    loesung:['Hunderterziffer ist '+M('7')+' '+String.fromCharCode(8594)+' aufrunden.',M('6712 \\approx 7000')+'.']
+  });
+  document.getElementById('wdh-f').innerHTML = wf2;
+
+  var wp='';
+  wp += renderNum('r5','1','Überschlag: Runde beide Zahlen auf Hunderter und rechne: '+M('297 + 412'), {
+    answer:700,
+    tips:['Runde jede Zahl zuerst auf Hunderter.','Rechne dann mit den runden Zahlen.'],
+    loesung:[M('297 \\approx 300')+' und '+M('412 \\approx 400')+'.','Überschlag: '+M('300 + 400 = 700')+'.']
+  });
+  wp += renderNum('r6','2','Überschlag: Runde beide Zahlen und rechne: '+M('61\\cdot 39'), {
+    answer:2400,
+    tips:['Runde jede Zahl auf Zehner.','Rechne dann mit den runden Zahlen.'],
+    loesung:[M('61 \\approx 60')+' und '+M('39 \\approx 40')+'.','Überschlag: '+M('60\\cdot 40 = 2400')+'.']
+  });
+  document.getElementById('wdh-p').innerHTML = wp;
+
+  GROUPS.push({key:'wdh', name:'Wiederholung: Runden & Überschlag', ids:['r1','r2','r3','r4','r5','r6']});
+}
+
+/* ---- T-Rex ---- */
+function initTrex(){
+  var t=document.getElementById('trex');
+  t.addEventListener('click', function(){ t.classList.toggle('open'); });
+}
+
+/* ---- Start ---- */
+document.addEventListener('DOMContentLoaded', function(){
+  build();
+  initTabs();
+  initLevels('ueben-levels');
+  initLevels('wdh-levels');
+  initTrex();
+  updateAuswertung();
+  typeset();  // alles einmal setzen (auch versteckte Hilfen sind im DOM)
+});
+</script>
+</body>
+</html>
