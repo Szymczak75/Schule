@@ -58,9 +58,12 @@
   .btn{min-height:44px;border:none;border-radius:.6rem;padding:.6rem 1.1rem;font-size:1rem;font-weight:700;cursor:pointer;transition:transform .05s,filter .15s;}
   .btn:active{transform:scale(.97);}
   .btn-pruefen{background:var(--blue);color:#fff;}
-  .btn-leeren{background:#7d8896;color:#fff;margin-left:.5rem;}
+  .btn-leeren{background:#6b7686;color:#fff;margin-left:.5rem;}
   input[type=number],input[type=text]{font-family:inherit;font-size:1.1rem;min-height:44px;border:2px solid var(--line);border-radius:.5rem;padding:.4rem .6rem;width:6rem;text-align:center;}
-  input:focus{outline:none;border-color:var(--blue);}
+  input:focus,select:focus{outline:none;border-color:var(--blue);}
+  select.einheit{font-family:inherit;font-size:1.1rem;min-height:44px;border:2px solid var(--line);border-radius:.5rem;padding:.4rem .5rem;background:#fff;color:var(--ink);}
+  input:disabled,select:disabled{background:#f1f4f8;color:var(--ink);opacity:1;}
+  .amber-box + .amber-box{margin-top:.5rem;}
   .eingabezeile{display:flex;flex-wrap:wrap;align-items:center;gap:.6rem;margin:.5rem 0;}
   .wahl{display:flex;flex-wrap:wrap;gap:.5rem;margin:.5rem 0;}
   .wahl button{flex:1 1 7rem;min-height:46px;border:2px solid var(--line);background:#fff;color:var(--ink);border-radius:.6rem;font-size:1.02rem;font-weight:700;cursor:pointer;}
@@ -72,6 +75,7 @@
   .feedback.zeig{display:block;}
   .feedback.ok{background:var(--green);color:#fff;}
   .feedback.nok{background:var(--red);color:#fff;}
+  .feedback.info{background:var(--blue-dark);color:#fff;}
   .amber-box{display:none;background:var(--amber-light);border:2px solid var(--amber);border-radius:.6rem;margin:.6rem 0 0;overflow:hidden;}
   .amber-kopf{display:flex;align-items:center;justify-content:space-between;gap:.6rem;min-height:44px;padding:.5rem .9rem;cursor:pointer;font-weight:700;color:var(--amber-dark);font-size:1rem;}
   .amber-inhalt{display:none;padding:.2rem .9rem .7rem;font-size:1rem;line-height:1.55;}
@@ -110,7 +114,7 @@
     <div class="hinweis">Reihe: mm² – cm² – dm² – m² – a – ha – km². Je Stufe · 100 bzw. : 100. Beim Addieren zuerst gleichnamig machen.</div>
     <div class="stufen" data-stufen="k1"></div><div class="fortschritt-mini" id="k1-mini"></div><div id="k1-liste"></div></section>
   <section class="karte" id="k2"><h2>Flächeninhalt &amp; Umfang</h2>
-    <div class="formelbox">Rechteck: A = Länge · Breite, U = 2 · (Länge + Breite)<br>Rechtwinkliges Dreieck: A = (Kathete · Kathete) : 2<br>Zusammengesetzt: in Rechtecke zerlegen und addieren.</div>
+    <div class="formelbox">Rechteck: A = Länge · Breite, U = 2 · (Länge + Breite)<br>Rechtwinkliges Dreieck: A = (Kathete · Kathete) : 2<br>Zusammengesetzt: in Rechtecke zerlegen und addieren (oder ergänzen und abziehen).</div>
     <div class="stufen" data-stufen="k2"></div><div class="fortschritt-mini" id="k2-mini"></div><div id="k2-liste"></div></section>
   <section class="karte" id="k3"><h2>Grundkörper benennen</h2>
     <div class="hinweis">Erkenne die Grundkörper: Würfel, Quader, Zylinder, Kegel, Kugel, Pyramide – auch als Teile zusammengesetzter Körper.</div>
@@ -157,10 +161,12 @@
     {pts:[[0,0,0],[1,0,0],[1,0,1],[0,0,1]], n:[0,-1,0], shade:-40}
   ];
 
+  const ROT={}; // Drehzustand je Figur im JS-Speicher
   function makeRotatable(elId, boxes, opt){
     opt=opt||{};
     const el=document.getElementById(elId);
-    const st={yaw:opt.yaw!==undefined?opt.yaw:-0.62, pitch:opt.pitch!==undefined?opt.pitch:0.5};
+    if(!ROT[elId]) ROT[elId]={yaw:opt.yaw!==undefined?opt.yaw:-0.62, pitch:opt.pitch!==undefined?opt.pitch:0.5};
+    const st=ROT[elId];
     const labels=opt.labels||[];
     const grid=!!opt.grid;
     const S0=(opt.scale||1)*26;
@@ -218,7 +224,8 @@
       labels.forEach(L=>{
         const b=boxes[L.box];
         let p1,p2;
-        if(L.edge==='w'){ p1=[b.x, b.y, b.z+b.d]; p2=[b.x+b.w, b.y, b.z+b.d]; }
+        if(L.p1){ p1=L.p1; p2=L.p2; }
+        else if(L.edge==='w'){ p1=[b.x, b.y, b.z+b.d]; p2=[b.x+b.w, b.y, b.z+b.d]; }
         else if(L.edge==='h'){ p1=[b.x+b.w, b.y, b.z+b.d]; p2=[b.x+b.w, b.y+b.h, b.z+b.d]; }
         else { p1=[b.x+b.w, b.y, b.z]; p2=[b.x+b.w, b.y, b.z+b.d]; }
         const a=proj(p1), c=proj(p2);
@@ -282,14 +289,14 @@
         });
       })();
       // Positionen ins finale SVG-Koordinatensystem bringen
-      labelDraw.forEach(L=>{ L.px=L.x+OX; L.py=L.y+OY; L.apx=L.ax+OX; L.apy=L.ay+OY; L.wpx=L.text.length*8.8+14; });
+      labelDraw.forEach(L=>{ L.px=L.x+OX; L.py=L.y+OY; L.apx=L.ax+OX; L.apy=L.ay+OY; L.wpx=L.text.length*10+14; });
       // Überlappungen auflösen: Labels, die sich zu nahe kommen, auseinanderschieben
       // (bevorzugt in die Richtung, in der weniger Überlappung besteht).
       for(let iter=0;iter<14;iter++){
         let moved=false;
         for(let a=0;a<labelDraw.length;a++)for(let b2=a+1;b2<labelDraw.length;b2++){
           const A=labelDraw[a], B=labelDraw[b2];
-          const minDx=(A.wpx+B.wpx)/2 + 3, minDy=25;
+          const minDx=(A.wpx+B.wpx)/2 + 3, minDy=28;
           const dx=B.px-A.px, dy=B.py-A.py;
           const ox=minDx-Math.abs(dx), oy=minDy-Math.abs(dy);
           if(ox>0 && oy>0){
@@ -312,14 +319,14 @@
       });
       labelDraw.forEach(L=>{
         const tx=L.px, ty=L.py, wpx=L.wpx;
-        inner+='<rect x="'+(tx-wpx/2).toFixed(1)+'" y="'+(ty-12).toFixed(1)+'" width="'+wpx.toFixed(1)+'" height="23" rx="6" fill="#ffffff" stroke="#a5611e" stroke-width="1.4"/>';
-        inner+='<text x="'+tx.toFixed(1)+'" y="'+(ty+4).toFixed(1)+'" text-anchor="middle" font-size="14" font-weight="700" fill="#a5611e">'+L.text+'</text>';
+        inner+='<rect x="'+(tx-wpx/2).toFixed(1)+'" y="'+(ty-13).toFixed(1)+'" width="'+wpx.toFixed(1)+'" height="26" rx="6" fill="#ffffff" stroke="#a5611e" stroke-width="1.4"/>';
+        inner+='<text x="'+tx.toFixed(1)+'" y="'+(ty+5).toFixed(1)+'" text-anchor="middle" font-size="16" font-weight="700" fill="#a5611e">'+L.text+'</text>';
       });
       // viewBox so weit fassen, dass alle (ggf. verschobenen) Labels vollständig sichtbar sind
       let vMinX=0, vMinY=0, vMaxX=w, vMaxY=h;
       labelDraw.forEach(L=>{
         vMinX=Math.min(vMinX, L.px-L.wpx/2-4); vMaxX=Math.max(vMaxX, L.px+L.wpx/2+4);
-        vMinY=Math.min(vMinY, L.py-14); vMaxY=Math.max(vMaxY, L.py+14);
+        vMinY=Math.min(vMinY, L.py-15); vMaxY=Math.max(vMaxY, L.py+15);
       });
       const vbX=vMinX, vbY=vMinY, vbW=vMaxX-vMinX, vbH=vMaxY-vMinY;
       el.innerHTML='<svg viewBox="'+vbX.toFixed(1)+' '+vbY.toFixed(1)+' '+vbW.toFixed(1)+' '+vbH.toFixed(1)+'" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">'+inner+'</svg>';
@@ -350,43 +357,56 @@
   /* ===== 2D-Flächenfiguren als SVG-String ===== */
   const AREA_FILL='#e6eefb', AREA_STROKE='#2f5fa6';
   function svgWrap(w,h,inner){return '<svg viewBox="0 0 '+w+' '+h+'" width="'+w+'" height="'+h+'" xmlns="http://www.w3.org/2000/svg">'+inner+'</svg>';}
-  function txt(x,y,t,anchor){return '<text x="'+x+'" y="'+y+'" text-anchor="'+(anchor||'middle')+'" font-size="15" font-weight="700" fill="#1f4680">'+t+'</text>';}
-  function labelBox(x,y,t){const wpx=t.length*8.2+10;return '<rect x="'+(x-wpx/2)+'" y="'+(y-12)+'" width="'+wpx+'" height="21" rx="5" fill="#fff" stroke="#2f5fa6" stroke-width="1"/>'+'<text x="'+x+'" y="'+(y+3)+'" text-anchor="middle" font-size="14" font-weight="700" fill="#1f4680">'+t+'</text>';}
+  // Beschriftungs-Box (Schrift 16px, Breite passend zum Text)
+  function labelW(t){return t.length*9.4+14;}
+  function labelBox(x,y,t){const wpx=labelW(t);return '<rect x="'+(x-wpx/2).toFixed(1)+'" y="'+(y-13).toFixed(1)+'" width="'+wpx.toFixed(1)+'" height="25" rx="5" fill="#fff" stroke="#2f5fa6" stroke-width="1"/>'+'<text x="'+x.toFixed(1)+'" y="'+(y+5).toFixed(1)+'" text-anchor="middle" font-size="16" font-weight="700" fill="#1f4680">'+t+'</text>';}
 
-  // Rechteck L×B (Pixel skaliert), Labels unten (L) und rechts (B)
+  // Rechteck L×B (Pixel skaliert), Labels unten (L) und rechts (B) – vollständig im Bild
   function rechteckSvg(L,B,labL,labB){
     const sc=Math.min(26, Math.max(12, Math.round(180/Math.max(L,B))));
-    const pad=40, w=L*sc+2*pad, h=B*sc+2*pad;
-    const x0=pad, y0=pad;
+    const padL=20, padR=labelW(labB)+16, padT=20, padB=44;
+    const w=L*sc+padL+padR, h=B*sc+padT+padB, x0=padL, y0=padT;
     let inner='<rect x="'+x0+'" y="'+y0+'" width="'+(L*sc)+'" height="'+(B*sc)+'" fill="'+AREA_FILL+'" stroke="'+AREA_STROKE+'" stroke-width="2"/>';
-    inner+=labelBox(x0+L*sc/2, y0+B*sc+20, labL);   // unten: Länge
-    inner+=labelBox(x0+L*sc+22, y0+B*sc/2, labB);    // rechts: Breite
+    inner+=labelBox(x0+L*sc/2, y0+B*sc+22, labL);                 // unten: Länge
+    inner+=labelBox(x0+L*sc+8+labelW(labB)/2, y0+B*sc/2, labB);    // rechts: Breite
     return svgWrap(w,h,inner);
   }
-  // Rechtwinkliges Dreieck mit Katheten a (waagerecht) und b (senkrecht), rechter Winkel unten links
-  function dreieckSvg(a,b,labA,labB){
+  // Rechtwinkliges Dreieck: Katheten a (waagerecht) und b (senkrecht), rechter Winkel unten links,
+  // Hypotenuse c oben rechts beschriftet
+  function dreieckSvg(a,b,labA,labB,labC){
     const sc=Math.min(26, Math.max(12, Math.round(170/Math.max(a,b))));
-    const pad=34, w=a*sc+2*pad, h=b*sc+2*pad;
-    const x0=pad, y0=pad+b*sc; // rechter Winkel unten links
+    const padL=labelW(labB)+16, padR=labelW(labC||'')/2+40, padT=44, padB=44;
+    const w=a*sc+padL+padR, h=b*sc+padT+padB;
+    const x0=padL, y0=padT+b*sc; // rechter Winkel unten links
     const p1=[x0,y0], p2=[x0+a*sc,y0], p3=[x0,y0-b*sc];
     let inner='<polygon points="'+p1.join(',')+' '+p2.join(',')+' '+p3.join(',')+'" fill="'+AREA_FILL+'" stroke="'+AREA_STROKE+'" stroke-width="2"/>';
     // rechter-Winkel-Markierung
     inner+='<rect x="'+x0+'" y="'+(y0-12)+'" width="12" height="12" fill="none" stroke="'+AREA_STROKE+'" stroke-width="1.3"/>';
-    inner+=labelBox(x0+a*sc/2, y0+20, labA);           // Kathete a unten
-    inner+=labelBox(x0-18, y0-b*sc/2, labB);           // Kathete b links
+    inner+=labelBox(x0+a*sc/2, y0+22, labA);                    // Kathete a unten
+    inner+=labelBox(x0-8-labelW(labB)/2, y0-b*sc/2, labB);       // Kathete b links
+    if(labC){                                                    // Hypotenuse: nach außen versetzt
+      const len=Math.hypot(a,b), nx=b/len, ny=-a/len;
+      inner+=labelBox(x0+a*sc/2+nx*26, y0-b*sc/2+ny*26, labC);
+    }
     return svgWrap(w,h,inner);
   }
-  // L-Form (zusammengesetzte Fläche): außen Breite W, Höhe H; ausgeschnitten oben-rechts cutW×cutH
+  // L-Form (zusammengesetzte Fläche): außen Breite W, Höhe H; ausgeschnitten oben-rechts cutW×cutH.
+  // Die fehlende Ecke wird gestrichelt angedeutet und mit ihren beiden Maßen beschriftet.
   function lformSvg(W,H,cutW,cutH,labels){
-    const sc=Math.min(24, Math.max(11, Math.round(170/Math.max(W,H))));
-    const pad=34, w=W*sc+2*pad, h=H*sc+2*pad, ox=pad, oy=pad;
-    // Polygon: von unten-links im Uhrzeigersinn, Ecke oben-rechts ausgespart
+    const sc=Math.min(26, Math.max(14, Math.round(190/Math.max(W,H))));
+    const lab=labels||{};
+    const padL=labelW(lab.H||'')+16, padR=labelW(lab.cutH||'')+16, padT=34, padB=44;
+    const w=W*sc+padL+padR, h=H*sc+padT+padB, ox=padL, oy=padT;
     const pts=[
       [ox, oy+H*sc], [ox, oy], [ox+(W-cutW)*sc, oy], [ox+(W-cutW)*sc, oy+cutH*sc],
       [ox+W*sc, oy+cutH*sc], [ox+W*sc, oy+H*sc]
     ];
-    let inner='<polygon points="'+pts.map(p=>p.join(',')).join(' ')+'" fill="'+AREA_FILL+'" stroke="'+AREA_STROKE+'" stroke-width="2"/>';
-    (labels||[]).forEach(L=>{ inner+=labelBox(ox+L.x*sc, oy+L.y*sc, L.t); });
+    let inner='<rect x="'+(ox+(W-cutW)*sc)+'" y="'+oy+'" width="'+(cutW*sc)+'" height="'+(cutH*sc)+'" fill="none" stroke="'+AREA_STROKE+'" stroke-width="1.3" stroke-dasharray="5 4"/>';
+    inner+='<polygon points="'+pts.map(p=>p.join(',')).join(' ')+'" fill="'+AREA_FILL+'" stroke="'+AREA_STROKE+'" stroke-width="2"/>';
+    if(lab.W)    inner+=labelBox(ox+W*sc/2, oy+H*sc+22, lab.W);                          // unten
+    if(lab.H)    inner+=labelBox(ox-8-labelW(lab.H)/2, oy+H*sc/2, lab.H);                 // links
+    if(lab.cutW) inner+=labelBox(ox+(W-cutW/2)*sc, oy-17, lab.cutW);                      // über der Ecke
+    if(lab.cutH) inner+=labelBox(ox+W*sc+8+labelW(lab.cutH)/2, oy+cutH*sc/2, lab.cutH);   // rechts der Ecke
     return svgWrap(w,h,inner);
   }
 
@@ -402,13 +422,17 @@
   const STUFENNAME=['Grundlagen','Fortgeschritten','Profi'];
 
   // Figur-HTML je nach Typ
-  function figHtml(fig){
-    if(!fig) return '';
+  // Akzeptiert sowohl Aufgaben mit verschachteltem fig:{fig2d:…} (Karte 2) als auch
+  // Aufgaben mit direktem figgk (Karte 3). Vorher wurde d.fig nie ausgewertet –
+  // deshalb fehlten auf Karte 2 alle Figuren samt Maßen.
+  function figHtml(d){
+    if(!d) return '';
+    const fig=d.fig||d;
     if(fig.fig2d){
       const f=fig.fig2d;
       let svg='';
       if(f.kind==='rechteck') svg=rechteckSvg(f.L,f.B,f.labL,f.labB);
-      else if(f.kind==='dreieck') svg=dreieckSvg(f.a,f.b,f.labA,f.labB);
+      else if(f.kind==='dreieck') svg=dreieckSvg(f.a,f.b,f.labA,f.labB,f.labC);
       else if(f.kind==='lform') svg=lformSvg(f.W,f.H,f.cutW,f.cutH,f.labels);
       return '<div class="figwrap"><div class="fig2d">'+svg+'</div></div>';
     }
@@ -424,22 +448,22 @@
         {frage:'Rechne um.',vor:'2 dm² =',einheit:'cm²',loes:200,tipp:'dm² → cm² ist · 100.',ml:'dm² → cm² ist · 100. 2 · 100 = 200 cm².'} ],
       [ {frage:'Rechne um.',vor:'4 ha =',einheit:'a',loes:400,tipp:'ha → a ist · 100.',ml:'1 ha = 100 a. 4 · 100 = 400 a.'},
         {frage:'Über zwei Stufen.',vor:'2 m² =',einheit:'cm²',loes:20000,tipp:'m² → dm² → cm², zweimal · 100.',ml:'2 m² = 200 dm² = 20 000 cm².'},
-        {frage:'Erst gleichnamig: 3 dm² + 200 cm² =',vor:'=',einheit:'cm²',loes:500,tipp:'3 dm² = 300 cm², dann addieren.',ml:'3 dm² = 300 cm². 300 + 200 = 500 cm².'} ],
+        {frage:'Erst gleichnamig: 3 dm² + 200 cm² =',vor:'=',einheit:'cm²',loes:500,tipp:'Wandle zuerst 3 dm² in cm² um, dann addieren.',ml:'3 dm² = 300 cm². 300 + 200 = 500 cm².'} ],
       [ {frage:'Über zwei Stufen.',vor:'5 m² =',einheit:'cm²',loes:50000,tipp:'m² → dm² → cm².',ml:'5 m² = 500 dm² = 50 000 cm².'},
-        {frage:'Erst gleichnamig: 1 m² − 2000 cm² =',vor:'=',einheit:'cm²',loes:8000,tipp:'1 m² = 10 000 cm², dann subtrahieren.',ml:'1 m² = 10 000 cm². 10 000 − 2000 = 8000 cm².'},
+        {frage:'Erst gleichnamig: 1 m² − 2000 cm² =',vor:'=',einheit:'cm²',loes:8000,tipp:'Wandle zuerst 1 m² in cm² um (zwei Stufen), dann subtrahieren.',ml:'1 m² = 10 000 cm². 10 000 − 2000 = 8000 cm².'},
         {frage:'Rechne um.',vor:'3 km² =',einheit:'ha',loes:300,tipp:'km² → ha ist · 100.',ml:'1 km² = 100 ha. 3 · 100 = 300 ha.'} ]
     ]},
     /* ===== 2) Flächeninhalt & Umfang ===== */
     k2:{typ:'zahl',stufen:[
       [ {frage:'Berechne den Flächeninhalt des Rechtecks.',fig:{fig2d:{kind:'rechteck',L:5,B:3,labL:'5 cm',labB:'3 cm'}},einheit:'cm²',loes:15,tipp:'A = Länge · Breite = 5 · 3.',ml:'A = 5 cm · 3 cm = 15 cm².'},
         {frage:'Berechne den Umfang desselben Rechtecks (5 cm lang, 3 cm breit).',fig:{fig2d:{kind:'rechteck',L:5,B:3,labL:'5 cm',labB:'3 cm'}},einheit:'cm',loes:16,tipp:'U = 2 · (Länge + Breite) = 2 · (5 + 3).',ml:'U = 2 · (5 cm + 3 cm) = 2 · 8 cm = 16 cm.'},
-        {frage:'Berechne den Flächeninhalt des rechtwinkligen Dreiecks.',fig:{fig2d:{kind:'dreieck',a:4,b:3,labA:'4 cm',labB:'3 cm'}},einheit:'cm²',loes:6,tipp:'A = (Kathete · Kathete) : 2 = (4 · 3) : 2.',ml:'A = (4 cm · 3 cm) : 2 = 12 : 2 = 6 cm².'} ],
+        {frage:'Berechne den Flächeninhalt des rechtwinkligen Dreiecks.',fig:{fig2d:{kind:'dreieck',a:4,b:3,labA:'4 cm',labB:'3 cm',labC:'5 cm'}},einheit:'cm²',loes:6,tipp:'A = (Kathete · Kathete) : 2. Die Katheten sind die beiden Seiten am rechten Winkel.',ml:'Katheten: 4 cm und 3 cm (die 5 cm sind die Hypotenuse und werden nicht gebraucht). A = (4 cm · 3 cm) : 2 = 12 cm² : 2 = 6 cm².'} ],
       [ {frage:'Berechne den Flächeninhalt des Rechtecks.',fig:{fig2d:{kind:'rechteck',L:8,B:6,labL:'8 cm',labB:'6 cm'}},einheit:'cm²',loes:48,tipp:'A = 8 · 6.',ml:'A = 8 cm · 6 cm = 48 cm².'},
-        {frage:'Berechne den Flächeninhalt des rechtwinkligen Dreiecks.',fig:{fig2d:{kind:'dreieck',a:6,b:5,labA:'6 cm',labB:'5 cm'}},einheit:'cm²',loes:15,tipp:'A = (6 · 5) : 2.',ml:'A = (6 cm · 5 cm) : 2 = 30 : 2 = 15 cm².'},
-        {frage:'Zusammengesetzte Fläche: Berechne den Flächeninhalt.',fig:{fig2d:{kind:'lform',W:6,H:4,cutW:2,cutH:2,labels:[{x:3,y:4.7,t:'6 cm'},{x:-0.6,y:2,t:'4 cm'},{x:5,y:1,t:'2 cm'}]}},einheit:'cm²',loes:20,tipp:'Großes Rechteck 6·4 minus Ecke 2·2.',ml:'6 · 4 = 24 cm², Ecke 2 · 2 = 4 cm². Rest 24 − 4 = 20 cm².'} ],
+        {frage:'Berechne den Flächeninhalt des rechtwinkligen Dreiecks.',fig:{fig2d:{kind:'dreieck',a:8,b:6,labA:'8 cm',labB:'6 cm',labC:'10 cm'}},einheit:'cm²',loes:24,tipp:'Nimm nur die beiden Seiten am rechten Winkel (Katheten), multipliziere sie und teile durch 2.',ml:'Katheten: 8 cm und 6 cm (die 10 cm sind die Hypotenuse). A = (8 cm · 6 cm) : 2 = 48 cm² : 2 = 24 cm².'},
+        {frage:'Zusammengesetzte Fläche: Berechne den Flächeninhalt.',fig:{fig2d:{kind:'lform',W:6,H:4,cutW:2,cutH:2,labels:{W:'6 cm',H:'4 cm',cutW:'2 cm',cutH:'2 cm'}}},einheit:'cm²',loes:20,tipp:'Großes Rechteck 6·4 minus Ecke 2·2.',ml:'Großes Rechteck: 6 cm · 4 cm = 24 cm². Fehlende Ecke: 2 cm · 2 cm = 4 cm². Rest: 24 cm² − 4 cm² = 20 cm².'} ],
       [ {frage:'Berechne den Umfang des Rechtecks (12 cm lang, 7 cm breit).',fig:{fig2d:{kind:'rechteck',L:12,B:7,labL:'12 cm',labB:'7 cm'}},einheit:'cm',loes:38,tipp:'U = 2 · (12 + 7).',ml:'U = 2 · (12 cm + 7 cm) = 2 · 19 cm = 38 cm.'},
-        {frage:'Berechne den Flächeninhalt des rechtwinkligen Dreiecks.',fig:{fig2d:{kind:'dreieck',a:8,b:7,labA:'8 cm',labB:'7 cm'}},einheit:'cm²',loes:28,tipp:'A = (8 · 7) : 2.',ml:'A = (8 cm · 7 cm) : 2 = 56 : 2 = 28 cm².'},
-        {frage:'Zusammengesetzte Fläche (L-Form): Berechne den Flächeninhalt.',fig:{fig2d:{kind:'lform',W:8,H:5,cutW:3,cutH:2,labels:[{x:4,y:5.7,t:'8 cm'},{x:-0.6,y:2.5,t:'5 cm'},{x:6.5,y:1,t:'3 cm'}]}},einheit:'cm²',loes:34,tipp:'Großes Rechteck 8·5 minus Ecke 3·2.',ml:'8 · 5 = 40 cm², Ecke 3 · 2 = 6 cm². Rest 40 − 6 = 34 cm².'} ]
+        {frage:'Berechne den Flächeninhalt des rechtwinkligen Dreiecks.',fig:{fig2d:{kind:'dreieck',a:12,b:5,labA:'12 cm',labB:'5 cm',labC:'13 cm'}},einheit:'cm²',loes:30,tipp:'Welche zwei Seiten bilden den rechten Winkel? Nur diese brauchst du.',ml:'Katheten: 12 cm und 5 cm (die 13 cm sind die Hypotenuse). A = (12 cm · 5 cm) : 2 = 60 cm² : 2 = 30 cm².'},
+        {frage:'Zusammengesetzte Fläche (L-Form): Berechne den Flächeninhalt.',fig:{fig2d:{kind:'lform',W:8,H:5,cutW:3,cutH:2,labels:{W:'8 cm',H:'5 cm',cutW:'3 cm',cutH:'2 cm'}}},einheit:'cm²',loes:34,tipp:'Großes Rechteck 8·5 minus Ecke 3·2.',ml:'Großes Rechteck: 8 cm · 5 cm = 40 cm². Fehlende Ecke: 3 cm · 2 cm = 6 cm². Rest: 40 cm² − 6 cm² = 34 cm².'} ]
     ]},
     /* ===== 3) Grundkörper benennen ===== */
     k3:{typ:'wahl',stufen:[
@@ -449,9 +473,9 @@
       [ {frage:'Wie heißt dieser Grundkörper?',figgk:'Kegel',opt:['Zylinder','Pyramide','Kegel'],ok:['Kegel'],ml:'Runde Grundfläche, läuft zu einer Spitze: ein Kegel.'},
         {frage:'Wie heißt dieser Grundkörper?',figgk:'Pyramide',opt:['Pyramide','Kegel','Quader'],ok:['Pyramide'],ml:'Eckige Grundfläche, Dreiecksflächen zu einer Spitze: eine Pyramide.'},
         {frage:'Wie heißt dieser Grundkörper?',figgk:'Quader',opt:['Würfel','Quader','Zylinder'],ok:['Quader'],ml:'Sechs rechteckige Flächen, nicht alle Kanten gleich: ein Quader.'} ],
-      [ {frage:'Ein Getränkedose hat welche Grundkörperform?',figgk:'Zylinder',opt:['Zylinder','Kegel','Pyramide'],ok:['Zylinder'],ml:'Eine Dose ist ein Zylinder.'},
-        {frage:'Ein Zelt (Spitzdach, quadratischer Boden) hat oben welche Form?',figgk:'Pyramide',opt:['Kegel','Pyramide','Zylinder'],ok:['Pyramide'],ml:'Eckige Grundfläche mit Spitze: eine Pyramide.'},
-        {frage:'Ein Eishörnchen (die Waffel) hat welche Form?',figgk:'Kegel',opt:['Zylinder','Kegel','Kugel'],ok:['Kegel'],ml:'Runde Öffnung, läuft zur Spitze: ein Kegel.'} ]
+      [ {frage:'Eine Getränkedose hat welche Grundkörperform?',opt:['Zylinder','Kegel','Pyramide'],ok:['Zylinder'],ml:'Eine Dose ist ein Zylinder.'},
+        {frage:'Ein Zelt (Spitzdach, quadratischer Boden) hat welche Form?',opt:['Kegel','Pyramide','Zylinder'],ok:['Pyramide'],ml:'Eckige Grundfläche mit Spitze: eine Pyramide.'},
+        {frage:'Ein Eishörnchen (die Waffel) hat welche Form?',opt:['Zylinder','Kegel','Kugel'],ok:['Kegel'],ml:'Runde Öffnung, läuft zur Spitze: ein Kegel.'} ]
     ]},
     /* ===== 4) Volumeneinheiten ===== */
     k4:{typ:'zahl',stufen:[
@@ -459,10 +483,10 @@
         {frage:'Rechne um.',vor:'5000 cm³ =',einheit:'dm³',loes:5,tipp:'cm³ → dm³ ist : 1000.',ml:'5000 : 1000 = 5 dm³.'},
         {frage:'Rechne um.',vor:'2 dm³ =',einheit:'l',loes:2,tipp:'1 dm³ = 1 l.',ml:'1 dm³ = 1 l. Also 2 dm³ = 2 l.'} ],
       [ {frage:'Rechne um.',vor:'4 m³ =',einheit:'dm³',loes:4000,tipp:'m³ → dm³ ist · 1000.',ml:'4 · 1000 = 4000 dm³.'},
-        {frage:'Erst gleichnamig: 2 dm³ + 500 cm³ =',vor:'=',einheit:'cm³',loes:2500,tipp:'2 dm³ = 2000 cm³, dann addieren.',ml:'2 dm³ = 2000 cm³. 2000 + 500 = 2500 cm³.'},
+        {frage:'Erst gleichnamig: 2 dm³ + 500 cm³ =',vor:'=',einheit:'cm³',loes:2500,tipp:'Wandle zuerst 2 dm³ in cm³ um, dann addieren.',ml:'2 dm³ = 2000 cm³. 2000 + 500 = 2500 cm³.'},
         {frage:'Rechne um.',vor:'3 l =',einheit:'ml',loes:3000,tipp:'1 l = 1000 ml.',ml:'3 · 1000 = 3000 ml.'} ],
       [ {frage:'Über zwei Stufen.',vor:'2 m³ =',einheit:'cm³',loes:2000000,tipp:'m³ → dm³ → cm³.',ml:'2 m³ = 2000 dm³ = 2 000 000 cm³.'},
-        {frage:'Erst gleichnamig: 1 dm³ − 400 cm³ =',vor:'=',einheit:'cm³',loes:600,tipp:'1 dm³ = 1000 cm³, dann subtrahieren.',ml:'1 dm³ = 1000 cm³. 1000 − 400 = 600 cm³.'},
+        {frage:'Erst gleichnamig: 1 dm³ − 400 cm³ =',vor:'=',einheit:'cm³',loes:600,tipp:'Wandle zuerst 1 dm³ in cm³ um, dann subtrahieren.',ml:'1 dm³ = 1000 cm³. 1000 − 400 = 600 cm³.'},
         {frage:'Rechne um.',vor:'4500 ml =',einheit:'l',loes:4.5,tipp:'1000 ml = 1 l, also : 1000.',ml:'4500 : 1000 = 4,5 l.'} ]
     ]},
     /* ===== 5) Volumen (Quader + zusammengesetzt) ===== */
@@ -470,12 +494,12 @@
       [ {frage:'Ein Quader ist 4 cm lang, 3 cm breit und 2 cm hoch. Berechne das Volumen.',einheit:'cm³',loes:24,tipp:'V = 4 · 3 · 2.',ml:'V = 4 cm · 3 cm · 2 cm = 24 cm³.'},
         {frage:'Ein Würfel hat 3 cm Kantenlänge. Berechne das Volumen.',einheit:'cm³',loes:27,tipp:'Würfel: 3 · 3 · 3.',ml:'V = 3 cm · 3 cm · 3 cm = 27 cm³.'},
         {frage:'Ein Quader ist 5 cm lang, 2 cm breit und 3 cm hoch. Berechne das Volumen.',einheit:'cm³',loes:30,tipp:'V = 5 · 2 · 3.',ml:'V = 5 cm · 2 cm · 3 cm = 30 cm³.'} ],
-      [ {frage:'Zusammengesetzter Körper (drehbar): berechne das Volumen.',fig3d:{boxes:[{x:0,y:0,z:0,w:4,d:2,h:1,farbe:F_QUADER},{x:0,y:1,z:0,w:2,d:2,h:2,farbe:F_QUADER}],labels:[{box:0,edge:'w',text:'4 cm'},{box:0,edge:'d',text:'2 cm'},{box:0,edge:'h',text:'1 cm'},{box:1,edge:'h',text:'2 cm'}]},einheit:'cm³',loes:16,tipp:'Unten 4·2·1, oben 2·2·2, addieren.',ml:'Unten 4 cm · 2 cm · 1 cm = 8 cm³, oben 2 cm · 2 cm · 2 cm = 8 cm³. Zusammen 8 cm³ + 8 cm³ = 16 cm³.'},
+      [ {frage:'Zusammengesetzter Körper (drehbar): berechne das Volumen.',fig3d:{boxes:[{x:0,y:0,z:0,w:4,d:2,h:1,farbe:F_QUADER},{x:0,y:1,z:0,w:2,d:2,h:2,farbe:F_QUADER}],labels:[{box:0,edge:'w',text:'4 cm'},{box:0,edge:'d',text:'2 cm'},{box:0,edge:'h',text:'1 cm'},{box:1,edge:'w',text:'2 cm'},{box:1,edge:'h',text:'2 cm'}]},einheit:'cm³',loes:16,tipp:'Unten 4·2·1, oben 2·2·2, addieren.',ml:'Unten 4 cm · 2 cm · 1 cm = 8 cm³, oben 2 cm · 2 cm · 2 cm = 8 cm³. Zusammen 8 cm³ + 8 cm³ = 16 cm³.'},
         {frage:'Zusammengesetzter Körper (drehbar): berechne das Volumen.',fig3d:{boxes:[{x:0,y:0,z:0,w:5,d:3,h:2,farbe:F_QUADER},{x:0,y:2,z:0,w:2,d:3,h:2,farbe:F_QUADER}],labels:[{box:0,edge:'w',text:'5 cm'},{box:0,edge:'d',text:'3 cm'},{box:0,edge:'h',text:'2 cm'},{box:1,edge:'w',text:'2 cm'},{box:1,edge:'h',text:'2 cm'}],scale:0.85},einheit:'cm³',loes:42,tipp:'Unten 5·3·2, oben 2·3·2.',ml:'Unten 5 cm · 3 cm · 2 cm = 30 cm³, oben 2 cm · 3 cm · 2 cm = 12 cm³. Zusammen 30 cm³ + 12 cm³ = 42 cm³.'},
-        {frage:'Zusammengesetzter Körper (drehbar): berechne das Volumen.',fig3d:{boxes:[{x:0,y:0,z:0,w:6,d:2,h:1,farbe:F_QUADER},{x:0,y:1,z:0,w:3,d:2,h:1,farbe:F_QUADER},{x:0,y:2,z:0,w:1,d:2,h:1,farbe:F_QUADER}],labels:[{box:0,edge:'w',text:'6 cm'},{box:0,edge:'d',text:'2 cm'},{box:1,edge:'w',text:'3 cm'},{box:2,edge:'w',text:'1 cm'}]},einheit:'cm³',loes:20,tipp:'Drei Schichten: 6·2·1, 3·2·1, 1·2·1.',ml:'6·2·1 = 12 cm³, 3·2·1 = 6 cm³, 1·2·1 = 2 cm³. Zusammen 12 cm³ + 6 cm³ + 2 cm³ = 20 cm³.'} ],
+        {frage:'Zusammengesetzter Körper (drehbar): Jede Stufe ist 1 cm hoch. Berechne das Volumen.',fig3d:{boxes:[{x:0,y:0,z:0,w:6,d:2,h:1,farbe:F_QUADER},{x:0,y:1,z:0,w:3,d:2,h:1,farbe:F_QUADER},{x:0,y:2,z:0,w:1,d:2,h:1,farbe:F_QUADER}],labels:[{box:0,edge:'w',text:'6 cm'},{box:0,edge:'d',text:'2 cm'},{box:1,edge:'w',text:'3 cm'},{box:2,edge:'w',text:'1 cm'}]},einheit:'cm³',loes:20,tipp:'Drei Schichten: 6·2·1, 3·2·1, 1·2·1.',ml:'6·2·1 = 12 cm³, 3·2·1 = 6 cm³, 1·2·1 = 2 cm³. Zusammen 12 cm³ + 6 cm³ + 2 cm³ = 20 cm³.'} ],
       [ {frage:'Berechne das Volumen des dargestellten Körpers (Schrägbild).',fig3d:{statisch:true,boxes:[{x:0,y:0,z:0,w:5,d:3,h:2,farbe:F_QUADER},{x:0,y:2,z:0,w:2,d:3,h:3,farbe:F_QUADER}],labels:[{box:0,edge:'w',text:'5 cm'},{box:0,edge:'d',text:'3 cm'},{box:0,edge:'h',text:'2 cm'},{box:1,edge:'w',text:'2 cm'},{box:1,edge:'h',text:'3 cm'}],scale:0.85},einheit:'cm³',loes:48,tipp:'Zerlege in zwei Quader: 5·3·2 und 2·3·3.',ml:'Unten 5 cm · 3 cm · 2 cm = 30 cm³, oben 2 cm · 3 cm · 3 cm = 18 cm³. Zusammen 30 cm³ + 18 cm³ = 48 cm³.'},
         {frage:'Berechne das Volumen des dargestellten Körpers (Schrägbild).',fig3d:{statisch:true,boxes:[{x:0,y:0,z:0,w:6,d:4,h:2,farbe:F_QUADER},{x:0,y:2,z:0,w:6,d:2,h:2,farbe:F_QUADER}],labels:[{box:0,edge:'w',text:'6 cm'},{box:0,edge:'d',text:'4 cm'},{box:0,edge:'h',text:'2 cm'},{box:1,edge:'d',text:'2 cm'},{box:1,edge:'h',text:'2 cm'}],scale:0.75},einheit:'cm³',loes:72,tipp:'Unten 6·4·2, oben 6·2·2.',ml:'Unten 6 cm · 4 cm · 2 cm = 48 cm³, oben 6 cm · 2 cm · 2 cm = 24 cm³. Zusammen 48 cm³ + 24 cm³ = 72 cm³.'},
-        {frage:'Berechne das Volumen des Rests. Aus dem großen Quader ist eine Ecke herausgeschnitten (Schrägbild).',fig3d:{statisch:true,boxes:[{x:0,y:0,z:0,w:5,d:4,h:3,farbe:F_QUADER},{x:3,y:0,z:0,w:2,d:2,h:3,cut:true}],labels:[{box:0,edge:'w',text:'5 cm'},{box:0,edge:'d',text:'4 cm'},{box:0,edge:'h',text:'3 cm'}],scale:0.75},einheit:'cm³',loes:48,tipp:'Voller Quader 5·4·3 minus Ecke 2·2·3.',ml:'Voll 5 cm · 4 cm · 3 cm = 60 cm³, Ecke 2 cm · 2 cm · 3 cm = 12 cm³. Rest 60 cm³ − 12 cm³ = 48 cm³.'} ]
+        {frage:'Berechne das Volumen des Rests. Aus dem großen Quader ist eine Ecke herausgeschnitten (Schrägbild).',fig3d:{statisch:true,boxes:[{x:0,y:0,z:0,w:5,d:4,h:3,farbe:F_QUADER},{x:3,y:0,z:0,w:2,d:2,h:3,cut:true}],labels:[{box:0,edge:'w',text:'5 cm'},{box:0,edge:'d',text:'4 cm'},{box:0,edge:'h',text:'3 cm'},{p1:[3,3,2],p2:[5,3,2],text:'2 cm'},{p1:[3,3,0],p2:[3,3,2],text:'2 cm'}],scale:0.75},einheit:'cm³',loes:48,tipp:'Voller Quader 5·4·3 minus Ecke 2·2·3.',ml:'Voll 5 cm · 4 cm · 3 cm = 60 cm³, Ecke 2 cm · 2 cm · 3 cm = 12 cm³. Rest 60 cm³ − 12 cm³ = 48 cm³.'} ]
     ]},
     /* ===== 6) Oberfläche Quader ===== */
     k6:{typ:'zahl',stufen:[
@@ -494,7 +518,7 @@
   const state={};
   Object.keys(DATEN).forEach(k=>{
     state[k]={stufe:0,erledigt:false,perStufe:DATEN[k].stufen.map(arr=>({items:arr.map(()=>{
-      return DATEN[k].typ==='wahl'?{wahl:null,geprueft:false,geloest:false,optMix:null}:{e:'',geprueft:false,geloest:false};
+      return DATEN[k].typ==='wahl'?{wahl:null,geprueft:false,geloest:false,optMix:null,mlAuf:false}:{e:'',u:'',geprueft:false,geloest:false,fehler:null,tippAuf:false,mlAuf:false};
     })}))};
   });
   function mische(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
@@ -509,7 +533,6 @@
       if(tab.dataset.ziel==='ka') zeigeAuswertung();
     });
   });
-  function toggleAmberEl(el){el.classList.toggle('auf');}
   document.querySelectorAll('.stufen').forEach(box=>{
     const k=box.dataset.stufen;
     STUFENNAME.forEach((name,si)=>{
@@ -519,6 +542,17 @@
       box.appendChild(b);
     });
   });
+
+  /* Einheiten-Dropdown (TEIL 4.5): bei Rechenaufgaben ohne feste Zieleinheit.
+     Reine Umrechnungen ("3 m² = ? dm²") behalten die feste Einheit als begründete Ausnahme. */
+  const EINHEITEN={'cm²':['cm','mm²','cm²','dm²'],'cm':['mm','cm','dm','cm²'],'cm³':['cm','cm²','cm³','dm³']};
+  function mitEinheitWahl(d){return !d.vor && !!EINHEITEN[d.einheit];}
+  function groesse(e){return /²$/.test(e)?'flaeche':(/³$/.test(e)?'volumen':'laenge');}
+  const GR_TEXT={flaeche:'Ein Flächeninhalt braucht eine Flächeneinheit (mit ²).',volumen:'Ein Volumen braucht eine Volumeneinheit (mit ³).',laenge:'Ein Umfang ist eine Länge – er braucht eine Längeneinheit (ohne ² oder ³).'};
+
+  function amberBox(k,i,art,titel,inhalt){
+    return '<div class="amber-box" id="'+k+'_'+i+'_'+art+'"><div class="amber-kopf" data-act="'+art+'" data-k="'+k+'" data-i="'+i+'"><span>'+titel+'</span><span>▾</span></div><div class="amber-inhalt">'+inhalt+'</div></div>';
+  }
 
   function rendern(k){
     const stufe=state[k].stufe, arr=DATEN[k].stufen[stufe], ps=state[k].perStufe[stufe], typ=DATEN[k].typ;
@@ -531,24 +565,35 @@
       if(d.fig3d) inner+='<div class="figwrap"><div class="buehne" id="'+k+'_'+i+'_fig"></div></div>'+(d.fig3d.statisch?'<p class="dreh-hint">Schrägbild</p>':'<p class="dreh-hint">↻ drehbar</p>');
       if(typ==='zahl'){
         const vor=d.vor?('<span>'+d.vor+'</span>'):'<span>=</span>';
-        inner+='<div class="eingabezeile">'+vor+'<input type="text" inputmode="numeric" id="'+k+'_'+i+'_in" placeholder="?"><span>'+(d.einheit||'')+'</span></div>';
+        let einheit='<span>'+(d.einheit||'')+'</span>';
+        if(mitEinheitWahl(d)){
+          einheit='<select class="einheit" id="'+k+'_'+i+'_u" aria-label="Einheit"><option value="">Einheit …</option>'
+            +EINHEITEN[d.einheit].map(e=>'<option value="'+e+'">'+e+'</option>').join('')+'</select>';
+        }
+        inner+='<div class="eingabezeile">'+vor+'<input type="text" inputmode="decimal" autocomplete="off" id="'+k+'_'+i+'_in" placeholder="?">'+einheit+'</div>';
       } else {
         inner+='<div class="wahl" id="'+k+'_'+i+'_wahl"></div>';
       }
-      inner+='<button class="btn btn-pruefen" data-act="pruefe" data-k="'+k+'" data-i="'+i+'">Prüfen</button>'
+      inner+='<button class="btn btn-pruefen" id="'+k+'_'+i+'_pr" data-act="pruefe" data-k="'+k+'" data-i="'+i+'">Prüfen</button>'
         +'<button class="btn btn-leeren" id="'+k+'_'+i+'_leer" style="display:none" data-act="leere" data-k="'+k+'" data-i="'+i+'">Leeren</button>'
         +'<div class="feedback" id="'+k+'_'+i+'_fb"></div>'
-        +'<div class="amber-box" id="'+k+'_'+i+'_ml"><div class="amber-kopf" data-act="amber" data-k="'+k+'" data-i="'+i+'"><span>💡 Musterlösung</span><span>▾</span></div><div class="amber-inhalt">'+d.ml+'</div></div>';
+        +(d.tipp?amberBox(k,i,'tipp','💡 Tipp',d.tipp):'')
+        +amberBox(k,i,'ml','📘 Musterlösung',d.ml);
       block.innerHTML=inner; liste.appendChild(block);
       if(d.fig3d) makeRotatable(k+'_'+i+'_fig', d.fig3d.boxes, {labels:d.fig3d.labels, scale:d.fig3d.scale, statisch:d.fig3d.statisch});
       if(typ==='zahl'){
-        const inp=document.getElementById(k+'_'+i+'_in'); inp.value=it.e; inp.addEventListener('input',e=>{it.e=e.target.value;});
+        const inp=document.getElementById(k+'_'+i+'_in'); inp.value=it.e; inp.disabled=it.geprueft;
+        inp.addEventListener('input',e=>{it.e=e.target.value;});
+        inp.addEventListener('keydown',e=>{if(e.key==='Enter')pruefe(k,i);});
+        const sel=document.getElementById(k+'_'+i+'_u');
+        if(sel){sel.value=it.u; sel.disabled=it.geprueft; sel.addEventListener('change',e=>{it.u=e.target.value;});}
       } else {
         const wrap=document.getElementById(k+'_'+i+'_wahl');
         it.optMix.forEach(o=>{
           const btn=document.createElement('button'); btn.textContent=o; btn.dataset.ok=d.ok.includes(o)?'1':'0';
           if(it.wahl===o)btn.classList.add('gewaehlt');
-          if(it.geprueft){btn.classList.add('gesperrt');if(d.ok.includes(o))btn.classList.add('richtig');else if(o===it.wahl)btn.classList.add('falsch');}
+          // Nach dem Prüfen nur die eigene Wahl grün/rot markieren – die richtige Antwort wird nicht verraten
+          if(it.geprueft){btn.classList.add('gesperrt');if(o===it.wahl)btn.classList.add(btn.dataset.ok==='1'?'richtig':'falsch');}
           btn.addEventListener('click',()=>{if(it.geprueft)return;it.wahl=o;rendern(k);});
           wrap.appendChild(btn);
         });
@@ -557,31 +602,62 @@
     });
     liste.querySelectorAll('[data-act]').forEach(b=>{
       b.addEventListener('click',()=>{const kk=b.dataset.k,ii=parseInt(b.dataset.i,10),act=b.dataset.act;
-        if(act==='pruefe')pruefe(kk,ii);else if(act==='leere')leere(kk,ii);else if(act==='amber')toggleAmberEl(document.getElementById(kk+'_'+ii+'_ml'));});
+        if(act==='pruefe')pruefe(kk,ii);else if(act==='leere')leere(kk,ii);
+        else{const it2=state[kk].perStufe[state[kk].stufe].items[ii];const f=act+'Auf';it2[f]=!it2[f];document.getElementById(kk+'_'+ii+'_'+act).classList.toggle('auf',it2[f]);}});
     });
     aktualisiereMini(k);
   }
+  function fehlerText(d,it){
+    if(DATEN_TYP(d)==='wahl') return '❌ Das ist noch nicht der richtige Körper. Schau dir die Form genau an.';
+    if(it.fehler==='zahl') return '❌ Die Zahl stimmt noch nicht. Rechne noch einmal nach.';
+    if(it.fehler==='einheit') return '❌ Die Zahl stimmt, aber die Einheit nicht. '+(groesse(it.u)!==groesse(d.einheit)?GR_TEXT[groesse(d.einheit)]:'Die Einheit muss zu den Maßen in der Aufgabe passen.');
+    return '❌ Zahl und Einheit stimmen noch nicht. '+GR_TEXT[groesse(d.einheit)];
+  }
+  function DATEN_TYP(d){return d.opt?'wahl':'zahl';}
   function zeigeFb(k,i){
     const d=DATEN[k].stufen[state[k].stufe][i], it=state[k].perStufe[state[k].stufe].items[i];
-    const fb=document.getElementById(k+'_'+i+'_fb'), leer=document.getElementById(k+'_'+i+'_leer'), ml=document.getElementById(k+'_'+i+'_ml');
+    const fb=document.getElementById(k+'_'+i+'_fb'), leer=document.getElementById(k+'_'+i+'_leer'), pr=document.getElementById(k+'_'+i+'_pr');
+    const tipp=document.getElementById(k+'_'+i+'_tipp'), ml=document.getElementById(k+'_'+i+'_ml');
     if(!fb||!leer)return;
-    if(!it.geprueft){fb.className='feedback';leer.style.display='none';if(ml)ml.style.display='none';return;}
-    if(it.geloest){fb.className='feedback zeig ok';fb.textContent='✅ Richtig!';leer.style.display='none';if(ml)ml.style.display='none';}
-    else{fb.className='feedback zeig nok';fb.textContent='❌ '+(d.tipp||'Schau in die Musterlösung.')+' Schau sonst in die Musterlösung.';leer.style.display='inline-block';if(ml)ml.style.display='block';}
+    [tipp,ml].forEach(x=>{if(x){x.style.display='none';}});
+    if(tipp)tipp.classList.toggle('auf',!!it.tippAuf);
+    if(ml)ml.classList.toggle('auf',!!it.mlAuf);
+    if(!it.geprueft){fb.className='feedback';fb.textContent='';leer.style.display='none';pr.style.display='';return;}
+    pr.style.display='none';
+    if(it.geloest){fb.className='feedback zeig ok';fb.textContent='✅ Richtig!';leer.style.display='none';}
+    else{fb.className='feedback zeig nok';fb.textContent=fehlerText(d,it);leer.style.display='inline-block';leer.style.marginLeft='0';
+      if(tipp)tipp.style.display='block'; if(ml)ml.style.display='block';}
   }
+  function zeigeHinweis(k,i,text){const fb=document.getElementById(k+'_'+i+'_fb');fb.className='feedback zeig info';fb.textContent='ℹ️ '+text;}
   function aktualisiereMini(k){
     const arr=DATEN[k].stufen[state[k].stufe], ps=state[k].perStufe[state[k].stufe];
     document.getElementById(k+'-mini').textContent='Gelöst: '+ps.items.filter(x=>x.geloest).length+' von '+arr.length+' (Stufe: '+STUFENNAME[state[k].stufe]+')';
   }
   function markErledigt(k){state[k].erledigt=state[k].perStufe.some(ps=>ps.items.every(it=>it.geloest));}
-  function parseZahl(s){s=(s||'').replace(',','.').trim();if(s==='')return NaN;return parseFloat(s);}
+  // Akzeptiert "20000", "20 000", "20.000" (Tausenderpunkte) und "4,5" (Dezimalkomma)
+  function parseZahl(s){
+    s=(s||'').replace(/[\s  ]/g,'');
+    if(s==='')return NaN;
+    if(/^\d{1,3}(\.\d{3})+(,\d+)?$/.test(s)) s=s.replace(/\./g,'');
+    s=s.replace(',','.');
+    return /^-?\d+(\.\d+)?$/.test(s)?parseFloat(s):NaN;
+  }
   function pruefe(k,i){
     const d=DATEN[k].stufen[state[k].stufe][i], it=state[k].perStufe[state[k].stufe].items[i];
-    if(DATEN[k].typ==='zahl'){const v=parseZahl(it.e);if(isNaN(v))return;it.geprueft=true;it.geloest=(v===d.loes);}
-    else {if(it.wahl===null)return;it.geprueft=true;it.geloest=d.ok.includes(it.wahl);}
+    if(it.geprueft)return;
+    if(DATEN[k].typ==='zahl'){
+      const v=parseZahl(it.e);
+      if(isNaN(v)){zeigeHinweis(k,i,'Gib zuerst eine Zahl ein (nur Ziffern, Komma erlaubt).');return;}
+      const mitU=mitEinheitWahl(d);
+      if(mitU&&!it.u){zeigeHinweis(k,i,'Wähle noch die passende Einheit aus.');return;}
+      const zOk=Math.abs(v-d.loes)<1e-9, uOk=!mitU||it.u===d.einheit;
+      it.geprueft=true; it.geloest=zOk&&uOk;
+      it.fehler=it.geloest?null:(!zOk&&!uOk?'beides':(!zOk?'zahl':'einheit'));
+    }
+    else {if(it.wahl===null){zeigeHinweis(k,i,'Tippe zuerst eine Antwort an.');return;}it.geprueft=true;it.geloest=d.ok.includes(it.wahl);}
     markErledigt(k);rendern(k);pruefeFortschritt();
   }
-  function leere(k,i){const it=state[k].perStufe[state[k].stufe].items[i];if(DATEN[k].typ==='zahl')it.e='';else it.wahl=null;it.geprueft=false;it.geloest=false;markErledigt(k);rendern(k);pruefeFortschritt();}
+  function leere(k,i){const it=state[k].perStufe[state[k].stufe].items[i];if(DATEN[k].typ==='zahl'){it.e='';it.u='';it.fehler=null;}else it.wahl=null;it.geprueft=false;it.geloest=false;it.tippAuf=false;it.mlAuf=false;markErledigt(k);rendern(k);pruefeFortschritt();}
   function pruefeFortschritt(){
     const map={k1:'d1',k2:'d2',k3:'d3',k4:'d4',k5:'d5',k6:'d6'};let alle=true;
     Object.keys(map).forEach(k=>{document.getElementById(map[k]).textContent=state[k].erledigt?'✅':'';if(!state[k].erledigt)alle=false;});
