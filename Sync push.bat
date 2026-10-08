@@ -1,4 +1,5 @@
 @echo off
+set GIT_ASK_YESNO=false
 D:
 cd "%~dp0"
 git pull --no-edit

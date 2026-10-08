@@ -1,0 +1,1221 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Potenzfunktionen mit Schiebereglern – Lernseite EF</title>
+<meta name="description" content="Erarbeitungsseite EF zur Bedienung des GeoGebra-Grafikrechners: f(x)=a*x^n mit zwei Schiebereglern anlegen (Min, Max, Schrittweite), Messzeilen beobachten, Regler auf vorgegebene Punkte einstellen.">
+<meta name="keywords" content="GeoGebra, Grafikrechner, Potenzfunktion, Schieberegler, Parameter, Schrittweite, EF">
+<meta name="typ" content="Lernseite">
+<meta name="klasse" content="EF">
+<meta name="fach" content="mathe">
+<meta name="oberthema" content="GeoGebra Suite">
+<meta name="thema" content="Potenzfunktionen">
+<script>
+  MathJax = {
+    tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+    svg: { fontCache: 'global' }
+  };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+  :root{
+    --ink:#22303f;--card:#ffffff;--green:#1e7d32;--red:#c1272d;
+    --amber:#b8860b;--amber-light:#fdf3d9;--amber-dark:#96690a;
+    --blue:#2f5fa6;--blue-dark:#1f4680;--blue-light:#e6eefb;
+    --grey:#6b7686;--grey-light:#eef0f3;--border-blue:#1f4680;
+    --orange:#c97a2e;--orange-dark:#a5611e;--orange-light:#fbeee0;
+    --akzent:#c97a2e;--akzent-dark:#a5611e;--akzent-light:#fbeee0;
+    --bg:#faf7f2;--line:#e4dcd0;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);color:var(--ink);
+    font-family:'Segoe UI',Verdana,'Helvetica Neue',sans-serif;
+    font-size:1.05rem;line-height:1.55;padding-bottom:5rem;
+  }
+  header{background:linear-gradient(135deg,#c97a2e,#a5611e);color:#fff;padding:1.3rem 1.2rem;box-shadow:0 3px 10px rgba(0,0,0,.12);}
+  header .typ{
+    display:inline-block;background:rgba(255,255,255,.25);color:#fff;
+    padding:.2rem .7rem;border-radius:1rem;font-size:1rem;
+    font-weight:700;letter-spacing:.04em;margin-bottom:.5rem;
+  }
+  header h1{margin:0;font-size:1.55rem;line-height:1.25;}
+  header p{margin:.4rem 0 0;font-size:1rem;}
+  header .serie{margin-top:.6rem;font-size:1rem;}
+
+  .tabs{display:flex;flex-wrap:wrap;gap:.5rem;padding:1rem 1rem 0;max-width:1024px;margin:0 auto;}
+  .tab{
+    flex:1 1 auto;min-width:7rem;min-height:44px;
+    border:2px solid var(--line);background:#fff;color:var(--ink);
+    font-size:1rem;font-weight:600;border-radius:.7rem .7rem 0 0;
+    padding:.6rem .5rem;cursor:pointer;transition:background .15s,border-color .15s,transform .05s;
+  }
+  .tab:active{transform:scale(.97);}
+  .tab.aktiv{background:var(--akzent);color:#fff;border-color:var(--akzent-dark);}
+  .tab .done{margin-left:.3rem;}
+
+  main{max-width:1024px;margin:0 auto;padding:0 1rem;}
+  .karte{
+    display:none;background:var(--card);border:2px solid var(--line);
+    border-radius:0 .9rem .9rem .9rem;padding:1.3rem 1.2rem;margin-top:-2px;
+    box-shadow:0 2px 8px rgba(0,0,0,.05);animation:einblenden .25s ease;
+  }
+  .karte.aktiv{display:block;}
+  @keyframes einblenden{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .karte h2{margin-top:0;font-size:1.3rem;color:var(--akzent-dark);}
+  .frage{font-weight:700;margin:1rem 0 .6rem;}
+
+  .merk{
+    background:var(--akzent-light);border-left:5px solid var(--akzent);
+    padding:.8rem 1rem;border-radius:.4rem;margin:1rem 0;
+  }
+  .merk-warn{background:#fbe4e4;border-left-color:var(--red);}
+  code{
+    background:var(--orange-light);border-radius:.3rem;padding:.05rem .4rem;
+    font-family:'Courier New',monospace;font-size:.95em;
+  }
+
+  .kennz{display:flex;flex-wrap:wrap;gap:.45rem;margin:.6rem 0 .4rem;}
+  .chip{
+    display:inline-flex;align-items:center;gap:.3rem;
+    font-size:1rem;font-weight:700;letter-spacing:.01em;
+    border-radius:1rem;padding:.25rem .7rem;border:2px solid;
+  }
+  .chip-hm{background:var(--blue-light);color:var(--blue);border-color:var(--blue);}
+  .chip-frei{background:#f1efe9;color:#6b6354;border-color:#a89e8c;}
+  .chip-art{background:var(--amber-light);color:var(--amber-dark);border-color:var(--amber);}
+
+  button{font-family:inherit;}
+  .btn{
+    min-height:44px;border:none;border-radius:.6rem;padding:.6rem 1.1rem;
+    font-size:1rem;font-weight:700;cursor:pointer;transition:transform .05s,filter .15s;
+  }
+  .btn:active{transform:scale(.97);}
+  .btn-pruefen{background:var(--akzent-dark);color:#fff;}
+  .btn-leeren{background:#8a8578;color:#fff;margin-left:.5rem;}
+  .btn-gross{width:100%;margin-top:.6rem;font-size:1.05rem;}
+
+  .feedback{margin:.8rem 0;padding:.8rem 1rem;border-radius:.5rem;font-weight:700;display:none;}
+  .feedback.zeig{display:block;}
+  .feedback.ok{background:var(--green);color:#fff;}
+  .feedback.nok{background:var(--red);color:#fff;}
+  .feedback.neutral{background:var(--grey-light);color:var(--ink);border:2px solid var(--border-blue);}
+
+  .aufgabe{border:2px solid var(--line);border-radius:.7rem;padding:1rem;margin:1rem 0;background:#fff;}
+  .aufgabe h4{margin:0 0 .5rem;font-size:1.05rem;color:var(--akzent-dark);}
+
+  .zahltab{width:100%;border-collapse:separate;border-spacing:0 .6rem;}
+  .zahltab td{padding:.3rem .5rem;vertical-align:middle;}
+  .zahltab td:first-child{font-weight:600;min-width:9rem;}
+  input[type=text]{
+    font-family:inherit;font-size:1.05rem;min-height:44px;
+    border:2px solid var(--line);border-radius:.5rem;padding:.4rem .6rem;
+    width:7rem;text-align:center;background:#fff;color:var(--ink);
+  }
+  input[type=text]:focus{outline:none;border-color:var(--akzent);}
+  input[type=text][readonly]{background:#f2f3f5;color:#4a5461;border-style:dashed;}
+  .feld-status{margin-left:.5rem;font-weight:800;font-size:1.1rem;}
+
+  .mcwahl{display:flex;flex-wrap:wrap;gap:.6rem;margin:.6rem 0;}
+  .mcwahl button{
+    flex:1 1 9rem;min-height:48px;border:2px solid var(--line);background:#fff;color:var(--ink);
+    border-radius:.6rem;font-size:1rem;font-weight:700;cursor:pointer;padding:.5rem .7rem;
+  }
+  .mcwahl button.gewaehlt{background:var(--akzent-light);border-color:var(--akzent);}
+  .mcwahl button.richtig{background:var(--green);color:#fff;border-color:var(--green);}
+  .mcwahl button.falsch{background:var(--red);color:#fff;border-color:var(--red);}
+
+  .aussage{border:2px solid var(--line);border-radius:.6rem;padding:.8rem .9rem;margin:.8rem 0;background:#fff;}
+  .wf-buttons{display:flex;gap:.6rem;margin-top:.6rem;}
+  .wf-buttons button{
+    flex:1 1 6rem;min-height:44px;border:2px solid var(--line);background:#fff;color:var(--ink);
+    border-radius:.6rem;font-weight:700;cursor:pointer;
+  }
+  .wf-buttons button.gewaehlt{background:var(--akzent-light);border-color:var(--akzent);}
+  .wf-buttons button.richtig{background:var(--green);color:#fff;border-color:var(--green);}
+  .wf-buttons button.falsch{background:var(--red);color:#fff;border-color:var(--red);}
+
+  /* Niveaustufen */
+  .stufen-wahl{display:flex;flex-wrap:wrap;gap:.5rem;margin:.9rem 0 1.1rem;}
+  .stufe-btn{
+    flex:1 1 8rem;min-height:44px;border:2px solid var(--akzent);
+    background:#fff;color:var(--akzent-dark);border-radius:.6rem;
+    font-size:1rem;font-weight:700;cursor:pointer;padding:.5rem .6rem;
+  }
+  .stufe-btn.aktiv{background:var(--akzent);color:#fff;}
+  .stufe-block{display:none;}
+  .stufe-block.aktiv{display:block;}
+  .stufe-marke{
+    display:inline-block;background:var(--akzent-light);color:var(--akzent-dark);
+    border:2px solid var(--akzent);border-radius:1rem;padding:.15rem .7rem;
+    font-size:1rem;font-weight:700;margin-bottom:.6rem;
+  }
+
+  /* Aufklappbares (Tipps, Musterlösung) – immer Bernstein */
+  .stufen-tipps{display:none;margin:1rem 0;}
+  .stufen-tipps.zeig{display:block;}
+  .stufen-tipps h4{margin:0 0 .5rem;font-size:1rem;color:var(--amber-dark);}
+  .stufe{border:2px solid var(--amber);border-radius:.6rem;margin-bottom:.5rem;overflow:hidden;}
+  .stufe-kopf{
+    width:100%;min-height:44px;background:var(--amber-light);color:var(--amber-dark);
+    border:none;font-weight:700;font-size:1rem;padding:.6rem .9rem;text-align:left;cursor:pointer;
+    display:flex;justify-content:space-between;align-items:center;gap:.5rem;
+  }
+  .stufe-inhalt{display:none;padding:.9rem 1rem;background:var(--amber-light);color:var(--ink);}
+  .stufe.offen .stufe-inhalt{display:block;}
+  .stufe.offen .stufe-pfeil{transform:rotate(180deg);}
+  .stufe-pfeil{transition:transform .2s;flex-shrink:0;}
+
+  /* Orientierungstimer */
+  .timerleiste{max-width:1024px;margin:1rem auto 0;padding:0 1rem;}
+  .timerbox{
+    border:3px solid var(--border-blue);border-radius:.8rem;background:var(--grey-light);
+    padding:.9rem 1rem;
+  }
+  .timerzeile{display:flex;flex-wrap:wrap;align-items:center;gap:.7rem;}
+  .timeruhr{
+    font-family:'Courier New',monospace;font-size:2rem;font-weight:800;
+    color:var(--border-blue);min-width:5.5rem;letter-spacing:.05em;
+  }
+  .timerbox.abgelaufen .timeruhr{color:var(--amber-dark);}
+  .timer-btn{
+    min-height:44px;min-width:44px;border:2px solid var(--border-blue);background:#fff;
+    color:var(--border-blue);border-radius:.6rem;font-weight:700;font-size:1rem;
+    padding:.4rem .9rem;cursor:pointer;
+  }
+  .timer-btn.laeuft{background:var(--border-blue);color:#fff;}
+  .timer-hinweis{flex:1 1 12rem;font-size:1rem;font-weight:600;color:#4a5461;}
+
+  /* Statusliste in der Auswertung */
+  .statusliste{list-style:none;margin:1rem 0;padding:0;}
+  .statusliste li{
+    border:2px solid var(--line);border-radius:.6rem;background:#fff;
+    padding:.7rem .9rem;margin-bottom:.6rem;
+  }
+  .statusliste .st-kopf{font-weight:700;}
+  .statusliste .st-hinweis{font-size:1rem;color:#4a5461;margin-top:.25rem;}
+  .st-ok{border-color:var(--green);}
+  .st-offen{border-color:#b9c0cb;}
+
+  .zusammenfassung{
+    text-align:center;font-weight:800;font-size:1.1rem;margin-top:1rem;padding:.8rem;
+    border-radius:.6rem;background:var(--akzent-light);color:var(--akzent-dark);display:none;
+  }
+  .zusammenfassung.zeig{display:block;}
+
+  .vgl{width:100%;border-collapse:collapse;margin:1rem 0;font-size:1rem;}
+  .vgl th,.vgl td{border:2px solid var(--line);padding:.55rem .7rem;text-align:left;}
+  .vgl th{background:var(--akzent-light);color:var(--akzent-dark);}
+  .vgl td:first-child{font-weight:700;}
+
+  .frac{
+    display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;
+    margin:0 .2em;font-size:1em;line-height:1.15;
+  }
+  .frac > span{display:block;padding:0 .35em;}
+  .frac > span:first-child{border-bottom:1.8px solid currentColor;padding-bottom:.1em;}
+  .frac > span:last-child{padding-top:.1em;}
+
+  .trex{position:fixed;right:.7rem;bottom:.7rem;font-size:1.8rem;cursor:pointer;z-index:50;user-select:none;}
+  .trex .bubble{
+    position:absolute;right:2.2rem;bottom:.2rem;white-space:nowrap;
+    background:var(--ink);color:#fff;padding:.3rem .6rem;border-radius:.5rem;
+    font-size:1rem;opacity:0;pointer-events:none;transition:opacity .2s;
+  }
+  .trex.zeig .bubble{opacity:1;}
+
+  /* ---------- Bausteine der Erarbeitungsseiten ---------- */
+
+  .bauen{
+    border:3px solid var(--blue);border-radius:.7rem;background:var(--blue-light);
+    padding:1rem 1.1rem;margin:1.2rem 0;
+  }
+  .bauen h3{margin:0 0 .6rem;font-size:1.08rem;color:var(--blue);display:flex;align-items:center;gap:.5rem;}
+  .bauen ol{margin:.4rem 0 0;padding-left:1.4rem;}
+  .bauen li{margin-bottom:.45rem;}
+  .bauen li:last-child{margin-bottom:0;}
+
+  .tipp-box{border:2px solid var(--amber);border-radius:.6rem;margin:1rem 0;overflow:hidden;}
+  .tipp-kopf{
+    width:100%;min-height:44px;background:var(--amber-light);color:var(--amber-dark);
+    border:none;font-weight:700;font-size:1rem;padding:.6rem .9rem;text-align:left;cursor:pointer;
+    display:flex;justify-content:space-between;align-items:center;gap:.5rem;
+  }
+  .tipp-inhalt{display:none;padding:.9rem 1rem;background:var(--amber-light);color:var(--ink);}
+  .tipp-box.offen .tipp-inhalt{display:block;}
+  .tipp-box.offen .tipp-pfeil{transform:rotate(180deg);}
+  .tipp-pfeil{transition:transform .2s;flex-shrink:0;}
+
+  .demo-liste{margin:1rem 0;display:flex;flex-direction:column;gap:.5rem;}
+  .demo-zeile{
+    display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;
+    background:#fff;border:2px solid var(--line);border-radius:.5rem;padding:.6rem .9rem;
+  }
+  .demo-tipp{font-size:1rem;color:#6b6354;font-weight:600;}
+  .demo-pfeil{font-weight:800;color:var(--orange);}
+  .demo-ergebnis{font-weight:700;font-size:1.05rem;}
+  .demo-falsch{border-color:var(--red);background:#fdf2f2;}
+  .demo-richtig{border-color:var(--green);background:#f2faf4;}
+
+  .kontrollbild{
+    border:2px dashed var(--line);border-radius:.7rem;background:#fff;
+    padding:.8rem;margin:1rem auto;max-width:23rem;text-align:center;
+  }
+  .kontrollbild > svg{display:block;width:100%;height:auto;}
+  .kontrollbild .bu{display:block;margin-top:.5rem;font-size:1rem;color:#6b6354;font-weight:600;}
+  .legende{display:flex;flex-wrap:wrap;gap:1rem;justify-content:center;margin-top:.5rem;font-size:1rem;font-weight:600;}
+  .legende span{display:inline-flex;align-items:center;gap:.35rem;}
+  .legende i{display:inline-block;width:1.5rem;height:.22rem;border-radius:.1rem;}
+
+  .wtab{width:100%;border-collapse:collapse;margin:1rem 0;}
+  .wtab th,.wtab td{border:2px solid var(--line);padding:.5rem .4rem;text-align:center;}
+  .wtab th{background:var(--orange-light);color:var(--orange-dark);}
+  .wtab td:first-child{font-weight:800;background:#faf7f2;}
+  .wtab input[type=text]{width:4.6rem;}
+  /* Kasten für eine Einstellung in der App (Menü, Runden, Sichtfenster …) */
+  .einstellung{
+    background:var(--orange-light);border:2px solid var(--orange);
+    border-radius:.6rem;padding:.9rem 1.1rem;margin:1.1rem 0;
+  }
+  .einstellung h3{margin:0 0 .5rem;font-size:1.08rem;color:var(--orange-dark);}
+  .einstellung p{margin:.4rem 0;}
+  .einstellung p:last-child{margin-bottom:0;}
+  /* einzelner Einstellungswert zum Abtippen, inline */
+  .einstellung-wert{
+    display:inline-block;background:var(--orange-light);border:2px solid var(--orange);
+    border-radius:.4rem;padding:.3rem .7rem;margin:.3rem .3rem .5rem 0;
+    font-weight:800;font-family:'Courier New',monospace;
+  }
+  .punkt-zeile{display:flex;flex-wrap:wrap;align-items:center;gap:.4rem;margin:.6rem 0;font-weight:600;}
+  .punkt-zeile input{width:6rem;}
+  .gemischt{display:inline-flex;align-items:center;gap:.1em;font-weight:inherit;}
+
+  .check-item{border:2px solid var(--line);border-radius:.6rem;padding:.9rem;margin:.9rem 0;background:#fff;}
+  .check-item h3{margin:0 0 .5rem;font-size:1.02rem;}
+  .rechnen-titel{margin:1.6rem 0 .3rem;font-size:1.15rem;color:var(--orange-dark);border-top:2px solid var(--line);padding-top:1.2rem;}
+  .werkzeug{
+    border:3px dashed var(--blue-dark);border-radius:.7rem;background:var(--blue-light);
+    padding:1rem 1.1rem;margin:1.2rem 0;
+  }
+  .werkzeug h3{margin:0 0 .6rem;font-size:1.08rem;color:var(--blue-dark);line-height:1.35;}
+  .werkzeug ol{margin:.4rem 0 0;padding-left:1.4rem;}
+  .werkzeug li{margin-bottom:.45rem;}
+  .werkzeug li:last-child{margin-bottom:0;}
+  .werkzeug .wz-intro{margin:0 0 .6rem;}
+  .werkzeug .wz-fazit{margin:.8rem 0 0;padding-top:.7rem;border-top:2px solid var(--blue);font-size:1rem;}
+  .werkzeug.wz-fak{padding:0;overflow:hidden;}
+  .wz-kopf{
+    width:100%;min-height:44px;box-sizing:border-box;
+    display:flex;align-items:center;justify-content:space-between;gap:.6rem;
+    background:none;border:0;cursor:pointer;text-align:left;font-family:inherit;
+    font-size:1.05rem;font-weight:700;color:var(--blue-dark);line-height:1.35;
+    padding:.85rem 1.1rem;-webkit-tap-highlight-color:transparent;
+  }
+  .wz-kopf:active{background:var(--blue-light);}
+  .wz-pfeil{flex:none;transition:transform .2s;}
+  .werkzeug.offen .wz-pfeil{transform:rotate(180deg);}
+  .wz-inhalt{display:none;padding:0 1.1rem 1rem;}
+  .werkzeug.offen .wz-inhalt{display:block;}
+  .wz-fak-hinweis{margin:0 0 .7rem;font-size:1rem;color:#4a5a6b;font-style:italic;}
+  .glegende{display:flex;flex-wrap:wrap;gap:.8rem;margin:.6rem 0;font-size:1rem;}
+  .glegende span{display:inline-flex;align-items:center;gap:.35rem;}
+  .glegende i{width:1.6rem;height:.28rem;border-radius:.15rem;display:inline-block;}
+
+  .bildreihe{display:flex;flex-wrap:wrap;gap:.8rem;margin:1rem 0;justify-content:center;}
+  .bildreihe .kontrollbild{flex:1 1 15rem;max-width:19rem;margin:0;}
+
+  /* ---------- Vergleichstabelle Text -> Bedingung ---------- */
+  .uebers{width:100%;border-collapse:collapse;margin:1rem 0;font-size:1rem;}
+  .uebers th,.uebers td{border:2px solid var(--line);padding:.55rem .7rem;text-align:left;vertical-align:top;}
+  .uebers th{background:var(--akzent-light);color:var(--akzent-dark);}
+  .uebers td:last-child{font-family:'Courier New',monospace;font-weight:700;white-space:nowrap;}
+</style>
+</head>
+<body>
+<header>
+  <span class="typ">Lernseite · Erarbeitung</span>
+  <h1>Potenzfunktionen mit Schiebereglern untersuchen</h1>
+  <p>Zwei Regler für \(f(x)=a\cdot x^n\) anlegen, beobachten, Ziele treffen</p>
+  <p class="serie">GeoGebra-Suite · Grafikrechner · EF · ca. 25 Minuten</p>
+</header>
+<div class="tabs">
+  <button class="tab aktiv" data-ziel="k1">1 · Zwei Regler<span class="done" id="d1"></span></button>
+  <button class="tab" data-ziel="k2">2 · Beobachten<span class="done" id="d2"></span></button>
+  <button class="tab" data-ziel="k3">3 · Ziele treffen<span class="done" id="d3"></span></button>
+  <button class="tab" data-ziel="k4">4 · Überprüfe dich<span class="done" id="d4"></span></button>
+</div>
+<main>
+  <section class="karte aktiv" id="k1">
+    <h2>Zwei Regler für a und n anlegen</h2>
+    <div class="merk">
+      <b>Wo wir gerade stehen:</b> Schieberegler kennst du schon von Geraden und Parabeln. Neu ist hier: Die Funktion \(f(x)=a\cdot x^n\) hat <b>zwei</b> Regler, und einer davon steht <b>in der Hochzahl</b>. Damit dabei echte Potenzfunktionen herauskommen, darf \(n\) nur die Werte 1, 2, 3, … annehmen. Genau das stellst du auf dieser Karte ein.
+    </div>
+
+    <div class="bauen">
+      <h3>🔧 Funktion und Regler eingeben</h3>
+      <ol>
+        <li>Öffne den <b>Grafikrechner</b> und tippe in die Eingabezeile <code>f(x)=a*x^n</code>. Das Malzeichen <code>*</code> zwischen <code>a</code> und <code>x</code> nicht vergessen.</li>
+        <li>Bestätige mit Enter. Weil <code>a</code> und <code>n</code> freie Buchstaben sind, bietet GeoGebra an, für beide einen <b>Schieberegler</b> zu erzeugen. Nimm das Angebot an.</li>
+        <li>Gehe in die Zeile von <code>n</code>, tippe auf die <b>drei Punkte am rechten Zeilenrand</b> und öffne die Einstellungen. Stelle dort ein: Min&nbsp;1, Max&nbsp;6, <b>Schrittweite&nbsp;1</b>.</li>
+        <li>Genauso für <code>a</code>: Min&nbsp;−3, Max&nbsp;3, Schrittweite&nbsp;0.5.</li>
+        <li>Schiebe beide Regler einmal hin und her. Der Graph muss sich dabei sofort mitbewegen.</li>
+      </ol>
+    </div>
+
+    <div class="merk merk-warn">
+      <b>⚠️ Kreis links oder drei Punkte rechts?</b> Der <b>Kreis links</b> vor einer Zeile blendet den Graphen nur ein und aus. Min, Max und Schrittweite findest du ausschließlich über die <b>drei Punkte am rechten Rand</b>. Kommt beim Bestätigen kein Angebot für Regler, tippe zuerst <code>a=1</code> und <code>n=1</code> in eigene Zeilen und schalte dann über die drei Punkte den Regler ein.
+    </div>
+
+    <div class="einstellung">
+      <h3>⚙️ Schneller: Regler per Befehl anlegen</h3>
+      <p>Du kannst einen Regler auch direkt mit seinen Grenzen eintippen – <b>bevor</b> du <code>f(x)=a*x^n</code> eingibst. Der Befehl lautet <code>Schieberegler( &lt;Min&gt;, &lt;Max&gt;, &lt;Schrittweite&gt; )</code>.</p>
+      <p>Beispiel für einen ganz anderen Regler: <code>k=Schieberegler(0, 10, 2)</code> läuft von 0 bis 10 in Zweierschritten. Lässt du die Schrittweite weg, nimmt GeoGebra 0.1 – laut Handbuch ist das der Standardwert.</p>
+    </div>
+
+    <div class="werkzeug">
+      <h3>👆 Werkzeug-Weg: Regler mit dem Werkzeug Schieberegler</h3>
+        <p class="wz-intro">Statt über die Eingabezeile kannst du die beiden Regler auch über die Werkzeugleiste anlegen.</p>
+        <ol>
+        <li>Wechsle vom Reiter <b>Algebra</b> zum Reiter <b>Werkzeuge</b>.</li>
+        <li>Wähle in der Gruppe <i>Einfache Werkzeuge</i> das Werkzeug <b>Schieberegler</b>.</li>
+        <li>Tippe auf eine freie Stelle im Grafikfenster. Im Dialog gibst du Name, Min, Max und Schrittweite gleich ein – einmal für <code>a</code>, einmal für <code>n</code>.</li>
+        <li>Danach <code>f(x)=a*x^n</code> eintippen. Jetzt kommt kein Angebot mehr, weil es <code>a</code> und <code>n</code> schon gibt.</li>
+        <li>Wieder auf <b>Bewegen</b> umschalten, sonst setzt jeder Tipp einen neuen Regler.</li>
+        </ol>
+        <p class="wz-fazit"><b>Wann welcher Weg?</b> Das Werkzeug ist anschaulich, weil du alle Einstellungen auf einen Blick siehst. Der Befehl <code>Schieberegler(…)</code> ist schneller, wenn du genau weißt, welche Grenzen du willst – und er steht hinterher als Zeile da.</p>
+    </div>
+
+    <div class="kontrollbild">
+      <svg viewBox="0 0 340 260" role="img" aria-label="Kontrollbild: Graph für a gleich 1,5 und n gleich 2">
+      <line x1="16.0" y1="244.0" x2="16.0" y2="16.0" stroke="#e8e2d8" stroke-width="1"/>
+      <line x1="67.3" y1="244.0" x2="67.3" y2="16.0" stroke="#e8e2d8" stroke-width="1"/>
+      <line x1="118.7" y1="244.0" x2="118.7" y2="16.0" stroke="#e8e2d8" stroke-width="1"/>
+      <line x1="221.3" y1="244.0" x2="221.3" y2="16.0" stroke="#e8e2d8" stroke-width="1"/>
+      <line x1="272.7" y1="244.0" x2="272.7" y2="16.0" stroke="#e8e2d8" stroke-width="1"/>
+      <line x1="324.0" y1="244.0" x2="324.0" y2="16.0" stroke="#e8e2d8" stroke-width="1"/>
+      <line x1="16.0" y1="244.0" x2="324.0" y2="244.0" stroke="#e8e2d8" stroke-width="1"/>
+      <line x1="16.0" y1="152.8" x2="324.0" y2="152.8" stroke="#e8e2d8" stroke-width="1"/>
+      <line x1="16.0" y1="107.2" x2="324.0" y2="107.2" stroke="#e8e2d8" stroke-width="1"/>
+      <line x1="16.0" y1="61.6" x2="324.0" y2="61.6" stroke="#e8e2d8" stroke-width="1"/>
+      <line x1="16.0" y1="16.0" x2="324.0" y2="16.0" stroke="#e8e2d8" stroke-width="1"/>
+      <polyline fill="none" stroke="#c97a2e" stroke-width="2.8" stroke-linecap="round" points="52.2,18.3 53.0,20.6 53.7,22.9 54.5,25.3 55.3,27.6 56.0,29.8 56.8,32.1 57.6,34.4 58.4,36.6 59.1,38.8 59.9,41.0 60.7,43.2 61.4,45.4 62.2,47.6 63.0,49.7 63.7,51.9 64.5,54.0 65.3,56.1 66.1,58.2 66.8,60.2 67.6,62.3 68.4,64.3 69.1,66.3 69.9,68.4 70.7,70.3 71.4,72.3 72.2,74.3 73.0,76.2 73.8,78.2 74.5,80.1 75.3,82.0 76.1,83.9 76.8,85.7 77.6,87.6 78.4,89.4 79.1,91.3 79.9,93.1 80.7,94.9 81.5,96.6 82.2,98.4 83.0,100.1 83.8,101.9 84.5,103.6 85.3,105.3 86.1,107.0 86.8,108.6 87.6,110.3 88.4,111.9 89.2,113.6 89.9,115.2 90.7,116.8 91.5,118.3 92.2,119.9 93.0,121.5 93.8,123.0 94.5,124.5 95.3,126.0 96.1,127.5 96.9,129.0 97.6,130.4 98.4,131.8 99.2,133.3 99.9,134.7 100.7,136.1 101.5,137.4 102.2,138.8 103.0,140.2 103.8,141.5 104.6,142.8 105.3,144.1 106.1,145.4 106.9,146.7 107.6,147.9 108.4,149.2 109.2,150.4 109.9,151.6 110.7,152.8 111.5,154.0 112.2,155.1 113.0,156.3 113.8,157.4 114.6,158.5 115.3,159.6 116.1,160.7 116.9,161.8 117.6,162.8 118.4,163.9 119.2,164.9 119.9,165.9 120.7,166.9 121.5,167.9 122.3,168.8 123.0,169.8 123.8,170.7 124.6,171.6 125.3,172.5 126.1,173.4 126.9,174.3 127.6,175.1 128.4,176.0 129.2,176.8 130.0,177.6 130.7,178.4 131.5,179.2 132.3,179.9 133.0,180.7 133.8,181.4 134.6,182.1 135.4,182.8 136.1,183.5 136.9,184.2 137.7,184.8 138.4,185.5 139.2,186.1 140.0,186.7 140.7,187.3 141.5,187.9 142.3,188.4 143.1,189.0 143.8,189.5 144.6,190.0 145.4,190.5 146.1,191.0 146.9,191.5 147.7,191.9 148.4,192.4 149.2,192.8 150.0,193.2 150.8,193.6 151.5,194.0 152.3,194.3 153.1,194.7 153.8,195.0 154.6,195.3 155.4,195.6 156.1,195.9 156.9,196.2 157.7,196.4 158.4,196.7 159.2,196.9 160.0,197.1 160.8,197.3 161.5,197.5 162.3,197.6 163.1,197.8 163.8,197.9 164.6,198.0 165.4,198.1 166.2,198.2 166.9,198.3 167.7,198.3 168.5,198.4 169.2,198.4 170.0,198.4 170.8,198.4 171.5,198.4 172.3,198.3 173.1,198.3 173.9,198.2 174.6,198.1 175.4,198.0 176.2,197.9 176.9,197.8 177.7,197.6 178.5,197.5 179.2,197.3 180.0,197.1 180.8,196.9 181.5,196.7 182.3,196.4 183.1,196.2 183.9,195.9 184.6,195.6 185.4,195.3 186.2,195.0 186.9,194.7 187.7,194.3 188.5,194.0 189.2,193.6 190.0,193.2 190.8,192.8 191.6,192.4 192.3,191.9 193.1,191.5 193.9,191.0 194.6,190.5 195.4,190.0 196.2,189.5 197.0,189.0 197.7,188.4 198.5,187.9 199.3,187.3 200.0,186.7 200.8,186.1 201.6,185.5 202.3,184.8 203.1,184.2 203.9,183.5 204.6,182.8 205.4,182.1 206.2,181.4 207.0,180.7 207.7,179.9 208.5,179.2 209.3,178.4 210.0,177.6 210.8,176.8 211.6,176.0 212.4,175.1 213.1,174.3 213.9,173.4 214.7,172.5 215.4,171.6 216.2,170.7 217.0,169.8 217.7,168.8 218.5,167.9 219.3,166.9 220.0,165.9 220.8,164.9 221.6,163.9 222.4,162.8 223.1,161.8 223.9,160.7 224.7,159.6 225.4,158.5 226.2,157.4 227.0,156.3 227.8,155.1 228.5,154.0 229.3,152.8 230.1,151.6 230.8,150.4 231.6,149.2 232.4,147.9 233.1,146.7 233.9,145.4 234.7,144.1 235.5,142.8 236.2,141.5 237.0,140.2 237.8,138.8 238.5,137.4 239.3,136.1 240.1,134.7 240.8,133.3 241.6,131.8 242.4,130.4 243.1,129.0 243.9,127.5 244.7,126.0 245.5,124.5 246.2,123.0 247.0,121.5 247.8,119.9 248.5,118.3 249.3,116.8 250.1,115.2 250.9,113.6 251.6,111.9 252.4,110.3 253.2,108.6 253.9,107.0 254.7,105.3 255.5,103.6 256.2,101.9 257.0,100.1 257.8,98.4 258.5,96.6 259.3,94.9 260.1,93.1 260.9,91.3 261.6,89.4 262.4,87.6 263.2,85.7 263.9,83.9 264.7,82.0 265.5,80.1 266.2,78.2 267.0,76.2 267.8,74.3 268.6,72.3 269.3,70.3 270.1,68.4 270.9,66.3 271.6,64.3 272.4,62.3 273.2,60.2 273.9,58.2 274.7,56.1 275.5,54.0 276.3,51.9 277.0,49.7 277.8,47.6 278.6,45.4 279.3,43.2 280.1,41.0 280.9,38.8 281.6,36.6 282.4,34.4 283.2,32.1 284.0,29.8 284.7,27.6 285.5,25.3 286.3,22.9 287.0,20.6 287.8,18.3"/>
+      <line x1="16.0" y1="198.4" x2="330.0" y2="198.4" stroke="#22303f" stroke-width="1.7"/>
+      <polygon points="336.0,198.4 327.0,194.4 327.0,202.4" fill="#22303f"/>
+      <line x1="170.0" y1="244.0" x2="170.0" y2="10.0" stroke="#22303f" stroke-width="1.7"/>
+      <polygon points="170.0,4.0 166.0,13.0 174.0,13.0" fill="#22303f"/>
+      <line x1="16.0" y1="194.4" x2="16.0" y2="202.4" stroke="#22303f" stroke-width="1.6"/>
+      <text x="16.0" y="214.4" font-size="11" fill="#22303f" text-anchor="middle">−3</text>
+      <line x1="67.3" y1="194.4" x2="67.3" y2="202.4" stroke="#22303f" stroke-width="1.6"/>
+      <text x="67.3" y="214.4" font-size="11" fill="#22303f" text-anchor="middle">−2</text>
+      <line x1="118.7" y1="194.4" x2="118.7" y2="202.4" stroke="#22303f" stroke-width="1.6"/>
+      <text x="118.7" y="214.4" font-size="11" fill="#22303f" text-anchor="middle">−1</text>
+      <line x1="221.3" y1="194.4" x2="221.3" y2="202.4" stroke="#22303f" stroke-width="1.6"/>
+      <text x="221.3" y="214.4" font-size="11" fill="#22303f" text-anchor="middle">1</text>
+      <line x1="272.7" y1="194.4" x2="272.7" y2="202.4" stroke="#22303f" stroke-width="1.6"/>
+      <text x="272.7" y="214.4" font-size="11" fill="#22303f" text-anchor="middle">2</text>
+      <line x1="324.0" y1="194.4" x2="324.0" y2="202.4" stroke="#22303f" stroke-width="1.6"/>
+      <text x="324.0" y="214.4" font-size="11" fill="#22303f" text-anchor="middle">3</text>
+      <line x1="166.0" y1="244.0" x2="174.0" y2="244.0" stroke="#22303f" stroke-width="1.6"/>
+      <text x="163.0" y="248.0" font-size="11" fill="#22303f" text-anchor="end">−2</text>
+      <line x1="166.0" y1="152.8" x2="174.0" y2="152.8" stroke="#22303f" stroke-width="1.6"/>
+      <text x="163.0" y="156.8" font-size="11" fill="#22303f" text-anchor="end">2</text>
+      <line x1="166.0" y1="107.2" x2="174.0" y2="107.2" stroke="#22303f" stroke-width="1.6"/>
+      <text x="163.0" y="111.2" font-size="11" fill="#22303f" text-anchor="end">4</text>
+      <line x1="166.0" y1="61.6" x2="174.0" y2="61.6" stroke="#22303f" stroke-width="1.6"/>
+      <text x="163.0" y="65.6" font-size="11" fill="#22303f" text-anchor="end">6</text>
+      <line x1="166.0" y1="16.0" x2="174.0" y2="16.0" stroke="#22303f" stroke-width="1.6"/>
+      <text x="163.0" y="20.0" font-size="11" fill="#22303f" text-anchor="end">8</text>
+      <text x="326.0" y="190.4" font-size="12" font-style="italic" fill="#22303f">x</text>
+      <text x="178.0" y="8.0" font-size="12" font-style="italic" fill="#22303f">y</text>
+      
+      </svg>
+      <span class="bu">Kontrollbild: So sieht dein Fenster aus, wenn a = 1.5 und n = 2 eingestellt ist.</span>
+    </div>
+
+    <div class="aufgabe">
+      <h4>Aufgabe 1: Funktionswerte bei eingestellten Reglern</h4>
+    <div class="kennz">
+      <span class="chip chip-hm">📱 mit GeoGebra</span>
+      <span class="chip chip-art">bestimmen mit f(…)</span>
+    </div>
+      <p>Stelle die Regler auf \(a=-1{,}5\) und \(n=5\). Lass den Graphen stehen und tippe
+      die beiden Funktionswerte als eigene Zeilen ein – also den Funktionsnamen mit der Stelle in
+      Klammern, so wie du es von <code>f(2)</code> kennst. Runde auf <b>zwei Nachkommastellen</b>.</p>
+      <table class="zahltab">
+        <tr><td>Welchen Wert hat \(f(1{,}2)\)?</td><td><input type="text" id="z1" inputmode="decimal" autocomplete="off"><span class="feld-status" id="s1"></span></td></tr>
+        <tr><td>Welchen Wert hat \(f(-0{,}8)\)?</td><td><input type="text" id="z2" inputmode="decimal" autocomplete="off"><span class="feld-status" id="s2"></span></td></tr>
+      </table>
+      <button class="btn btn-pruefen" onclick="pruefeK1()">Prüfen</button>
+      <button class="btn btn-leeren" id="leeren1" style="display:none" onclick="leereK1()">Leeren</button>
+      <div class="feedback" id="fb1"></div>
+    <div class="stufen-tipps" id="tipps1">
+      <h4>Brauchst du Hilfe? Decke so viel auf, wie du brauchst:</h4>
+      <div class="stufe">
+        <button class="stufe-kopf" onclick="toggleStufe(this)"><span>Tipp 1: Stehen die Regler richtig?</span><span class="stufe-pfeil">▾</span></button>
+        <div class="stufe-inhalt">Schau in die Zeilen von <code>a</code> und <code>n</code>. Steht dort genau der verlangte Wert? Mit Schrittweite 0.5 für <code>a</code> kannst du die Kommazahl genau treffen.</div>
+      </div>
+      <div class="stufe">
+        <button class="stufe-kopf" onclick="toggleStufe(this)"><span>Tipp 2: Typische Stolperstellen</span><span class="stufe-pfeil">▾</span></button>
+        <div class="stufe-inhalt">Dezimalzahlen tippst du in GeoGebra mit <b>Punkt</b>, nicht mit Komma – ein Komma trennt Argumente. Und das Minuszeichen gehört mit in die Klammer.</div>
+      </div>
+      <div class="stufe">
+        <button class="stufe-kopf" onclick="toggleStufe(this)"><span>Lösungsweg</span><span class="stufe-pfeil">▾</span></button>
+        <div class="stufe-inhalt">Regler <code>a</code> und <code>n</code> auf die Werte aus der Aufgabe stellen. Dann in eine neue Zeile den Funktionsnamen und die Stelle in Klammern tippen, die Kommazahl mit Punkt geschrieben. GeoGebra zeigt den Wert in der Algebra-Ansicht; diesen auf zwei Nachkommastellen runden und eintragen. Für die zweite Stelle genauso.</div>
+      </div>
+    </div>
+    </div>
+  </section>
+
+  <section class="karte" id="k2">
+    <h2>Beobachten: Was ändert sich, wenn du schiebst?</h2>
+    <div class="merk">
+      <b>Wo wir gerade stehen:</b> Du hast \(f(x)=a\cdot x^n\) mit zwei Reglern: \(n\) läuft von 1 bis 6 in Einerschritten, \(a\) von −3 bis 3. Jetzt nutzt du die Regler zum <b>Erkunden</b>: Du schiebst und notierst, was du in GeoGebra siehst. Die Begründungen dazu kommen im Unterricht.
+    </div>
+
+    <div class="einstellung">
+      <h3>⚙️ Einen Regler genau setzen</h3>
+      <p>Du musst nicht schieben, um einen bestimmten Wert zu treffen: Tippe in die Zeile des Reglers und überschreibe den Wert, zum Beispiel <code>a=2</code>. Der Regler springt sofort dorthin.</p>
+    </div>
+
+    <div class="bauen">
+      <h3>🔧 Messzeilen anlegen</h3>
+      <ol>
+        <li>Setze den Regler <code>a</code> auf 1.</li>
+        <li>Tippe in drei eigene Zeilen <code>f(1)</code>, <code>f(-1)</code> und <code>f(0)</code>. GeoGebra gibt jeder Zeile von selbst einen Namen – das ist in Ordnung.</li>
+        <li>Schiebe jetzt <code>n</code> langsam von 1 bis 6. Achte auf zwei Dinge gleichzeitig: den <b>Graphen</b> und die <b>drei Zahlen</b> in der Algebra-Ansicht.</li>
+        <li>Schiebe danach <code>a</code> einmal von positiv nach negativ und beobachte den Graphen.</li>
+      </ol>
+    </div>
+
+    <div class="merk">
+      <b>Das ist der Trick dieser Karte:</b> Die Zeilen <code>f(1)</code>, <code>f(-1)</code> und <code>f(0)</code> rechnen sich bei jeder Reglerbewegung <b>von selbst neu</b>. Du musst nichts erneut eintippen – du liest einfach ab, welche Zahl sich ändert und welche gleich bleibt.
+    </div>
+
+    <div class="aufgabe">
+      <h4>Aufgabe 2a: Gemeinsame Punkte – was zeigen die Messzeilen?</h4>
+    <div class="kennz">
+      <span class="chip chip-hm">📱 mit GeoGebra</span>
+      <span class="chip chip-art">grafisch erkunden</span>
+    </div>
+      <p>Lass \(a=1\) stehen und schiebe \(n\) durch alle Werte von 1 bis 6.</p>
+      <table class="zahltab">
+        <tr><td>Welchen Wert zeigt \(f(1)\) – egal, welches \(n\)?</td><td><input type="text" id="b1" inputmode="decimal" autocomplete="off"><span class="feld-status" id="sb1"></span></td></tr>
+        <tr><td>Welchen Wert zeigt \(f(-1)\), wenn \(n\) gerade ist?</td><td><input type="text" id="b2" inputmode="decimal" autocomplete="off"><span class="feld-status" id="sb2"></span></td></tr>
+        <tr><td>Welchen Wert zeigt \(f(-1)\), wenn \(n\) ungerade ist?</td><td><input type="text" id="b3" inputmode="decimal" autocomplete="off"><span class="feld-status" id="sb3"></span></td></tr>
+        <tr><td>Welchen Wert zeigt \(f(0)\) – egal, welches \(n\)?</td><td><input type="text" id="b4" inputmode="decimal" autocomplete="off"><span class="feld-status" id="sb4"></span></td></tr>
+      </table>
+    </div>
+    <div class="aufgabe">
+      <h4>Aufgabe 2b: Was siehst du am Graphen?</h4>
+    <div class="kennz">
+      <span class="chip chip-hm">📱 mit GeoGebra</span>
+      <span class="chip chip-art">grafisch erkunden</span>
+    </div>
+      <p class="frage">Frage 1: Bei welchen Werten von \(n\) liegt der Graph (mit \(a=1\)) symmetrisch zur y-Achse?</p>
+      <div class="mcwahl" id="m21"></div>
+      <p class="frage">Frage 2: Stelle \(a=1\) und ein ungerades \(n\) ein. Wie verläuft der Graph?</p>
+      <div class="mcwahl" id="m22"></div>
+      <p class="frage">Frage 3: Was passiert mit dem Graphen, wenn du \(a\) von 2 auf −2 stellst?</p>
+      <div class="mcwahl" id="m23"></div>
+      <button class="btn btn-pruefen" onclick="pruefeK2()">Prüfen</button>
+      <button class="btn btn-leeren" id="leeren2" style="display:none" onclick="leereK2()">Leeren</button>
+      <div class="feedback" id="fb2"></div>
+    <div class="stufen-tipps" id="tipps2">
+      <h4>Brauchst du Hilfe? Decke so viel auf, wie du brauchst:</h4>
+      <div class="stufe">
+        <button class="stufe-kopf" onclick="toggleStufe(this)"><span>Tipp 1: Siehst du überhaupt etwas?</span><span class="stufe-pfeil">▾</span></button>
+        <div class="stufe-inhalt">Wird der Graph bei großem \(n\) sehr steil, verschiebe das Fenster mit dem Finger oder zoome mit zwei Fingern heraus. Für die Messzeilen spielt das Fenster keine Rolle.</div>
+      </div>
+      <div class="stufe">
+        <button class="stufe-kopf" onclick="toggleStufe(this)"><span>Tipp 2: Gerade und ungerade sauber trennen</span><span class="stufe-pfeil">▾</span></button>
+        <div class="stufe-inhalt">Gerade sind 2, 4 und 6, ungerade 1, 3 und 5. Bleib bei jeder Stellung kurz stehen und lies erst dann ab. Für Frage 3 den Wert von <code>a</code> direkt in die Reglerzeile tippen.</div>
+      </div>
+      <div class="stufe">
+        <button class="stufe-kopf" onclick="toggleStufe(this)"><span>Lösungsweg</span><span class="stufe-pfeil">▾</span></button>
+        <div class="stufe-inhalt">Regler <code>a</code> auf 1 setzen, die drei Messzeilen anlegen und <code>n</code> Schritt für Schritt durchgehen. Die Zahl, die sich nie ändert, ist jeweils die Antwort für „egal, welches n“. Bei <code>f(-1)</code> getrennt notieren, was bei geraden und was bei ungeraden Werten erscheint. Für die Fragen den Graphen bei jeder Stellung ansehen und beim Umstellen von <code>a</code> auf die Lage gegenüber der x-Achse achten.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="karte" id="k3">
+    <h2>Ziele treffen: Regler so stellen, dass der Graph passt</h2>
+    <div class="merk">
+      <b>Wo wir gerade stehen:</b> Du kannst \(a\) und \(n\) einstellen und weißt, wie man einen Regler genau setzt. Jetzt drehst du die Frage um: Zwei Punkte sind vorgegeben, und du suchst die Reglerstellung, bei der der Graph durch <b>beide</b> Punkte geht.
+    </div>
+
+    <div class="bauen">
+      <h3>🔧 Punkte eintragen und Regler suchen</h3>
+      <ol>
+        <li>Tippe die beiden Punkte eines Ziels ein, zum Beispiel für Ziel A: <code>P=(2,-4)</code> und <code>Q=(-1,-1)</code>. Punkte heißen in GeoGebra immer mit <b>Großbuchstaben</b>.</li>
+        <li>Verändere <code>n</code> und <code>a</code>, bis der Graph durch beide Punkte läuft. Probiere ruhig: Erst <code>n</code> grob wählen, dann <code>a</code> anpassen.</li>
+        <li>Kontrolliere mit Befehlen statt mit dem Auge: Tippe <code>f(2)</code> – zeigt GeoGebra genau die y-Koordinate von \(P\)? Dann dasselbe für die Stelle von \(Q\).</li>
+        <li>Für das nächste Ziel musst du nichts löschen: Tippe in die Zeile von <code>P</code> die neuen Koordinaten, ebenso bei <code>Q</code>. Die Kontrollzeilen änderst du genauso.</li>
+      </ol>
+    </div>
+
+    <div class="kontrollbild">
+      <svg viewBox="0 0 340 260" role="img" aria-label="Kontrollbild: Punkte P und Q von Ziel A">
+      <line x1="16.0" y1="244.0" x2="16.0" y2="16.0" stroke="#e8e2d8" stroke-width="1"/>
+      <line x1="67.3" y1="244.0" x2="67.3" y2="16.0" stroke="#e8e2d8" stroke-width="1"/>
+      <line x1="118.7" y1="244.0" x2="118.7" y2="16.0" stroke="#e8e2d8" stroke-width="1"/>
+      <line x1="221.3" y1="244.0" x2="221.3" y2="16.0" stroke="#e8e2d8" stroke-width="1"/>
+      <line x1="272.7" y1="244.0" x2="272.7" y2="16.0" stroke="#e8e2d8" stroke-width="1"/>
+      <line x1="324.0" y1="244.0" x2="324.0" y2="16.0" stroke="#e8e2d8" stroke-width="1"/>
+      <line x1="16.0" y1="244.0" x2="324.0" y2="244.0" stroke="#e8e2d8" stroke-width="1"/>
+      <line x1="16.0" y1="187.0" x2="324.0" y2="187.0" stroke="#e8e2d8" stroke-width="1"/>
+      <line x1="16.0" y1="130.0" x2="324.0" y2="130.0" stroke="#e8e2d8" stroke-width="1"/>
+      <line x1="16.0" y1="16.0" x2="324.0" y2="16.0" stroke="#e8e2d8" stroke-width="1"/>
+      <line x1="16.0" y1="73.0" x2="330.0" y2="73.0" stroke="#22303f" stroke-width="1.7"/>
+      <polygon points="336.0,73.0 327.0,69.0 327.0,77.0" fill="#22303f"/>
+      <line x1="170.0" y1="244.0" x2="170.0" y2="10.0" stroke="#22303f" stroke-width="1.7"/>
+      <polygon points="170.0,4.0 166.0,13.0 174.0,13.0" fill="#22303f"/>
+      <line x1="16.0" y1="69.0" x2="16.0" y2="77.0" stroke="#22303f" stroke-width="1.6"/>
+      <text x="16.0" y="89.0" font-size="11" fill="#22303f" text-anchor="middle">−3</text>
+      <line x1="67.3" y1="69.0" x2="67.3" y2="77.0" stroke="#22303f" stroke-width="1.6"/>
+      <text x="67.3" y="89.0" font-size="11" fill="#22303f" text-anchor="middle">−2</text>
+      <line x1="118.7" y1="69.0" x2="118.7" y2="77.0" stroke="#22303f" stroke-width="1.6"/>
+      <text x="118.7" y="89.0" font-size="11" fill="#22303f" text-anchor="middle">−1</text>
+      <line x1="221.3" y1="69.0" x2="221.3" y2="77.0" stroke="#22303f" stroke-width="1.6"/>
+      <text x="221.3" y="89.0" font-size="11" fill="#22303f" text-anchor="middle">1</text>
+      <line x1="272.7" y1="69.0" x2="272.7" y2="77.0" stroke="#22303f" stroke-width="1.6"/>
+      <text x="272.7" y="89.0" font-size="11" fill="#22303f" text-anchor="middle">2</text>
+      <line x1="324.0" y1="69.0" x2="324.0" y2="77.0" stroke="#22303f" stroke-width="1.6"/>
+      <text x="324.0" y="89.0" font-size="11" fill="#22303f" text-anchor="middle">3</text>
+      <line x1="166.0" y1="244.0" x2="174.0" y2="244.0" stroke="#22303f" stroke-width="1.6"/>
+      <text x="163.0" y="248.0" font-size="11" fill="#22303f" text-anchor="end">−6</text>
+      <line x1="166.0" y1="187.0" x2="174.0" y2="187.0" stroke="#22303f" stroke-width="1.6"/>
+      <text x="163.0" y="191.0" font-size="11" fill="#22303f" text-anchor="end">−4</text>
+      <line x1="166.0" y1="130.0" x2="174.0" y2="130.0" stroke="#22303f" stroke-width="1.6"/>
+      <text x="163.0" y="134.0" font-size="11" fill="#22303f" text-anchor="end">−2</text>
+      <line x1="166.0" y1="16.0" x2="174.0" y2="16.0" stroke="#22303f" stroke-width="1.6"/>
+      <text x="163.0" y="20.0" font-size="11" fill="#22303f" text-anchor="end">2</text>
+      <text x="326.0" y="65.0" font-size="12" font-style="italic" fill="#22303f">x</text>
+      <text x="178.0" y="8.0" font-size="12" font-style="italic" fill="#22303f">y</text>
+      <circle cx="272.7" cy="187.0" r="4.6" fill="#2f5fa6" stroke="#fff" stroke-width="1.6"/>
+      <text x="272.7" y="177.0" font-size="12" font-weight="700" fill="#2f5fa6" text-anchor="middle">P</text>
+      <circle cx="118.7" cy="101.5" r="4.6" fill="#2f5fa6" stroke="#fff" stroke-width="1.6"/>
+      <text x="118.7" y="91.5" font-size="12" font-weight="700" fill="#2f5fa6" text-anchor="middle">Q</text>
+      
+      </svg>
+      <span class="bu">Kontrollbild: So liegen die beiden Punkte von Ziel A in deinem Fenster – den passenden Graphen stellst du selbst ein.</span>
+    </div>
+
+    <div class="merk merk-warn">
+      <b>⚠️ Nur mit dem Auge reicht nicht.</b> Ein Graph kann knapp neben einem Punkt vorbeilaufen, ohne dass man es sieht. Erst wenn <code>f(…)</code> an beiden Stellen <b>genau</b> die y-Koordinaten der Punkte zeigt, hast du das Ziel getroffen.
+    </div>
+
+    <div class="aufgabe">
+      <h4>Aufgabe 3: Drei Ziele</h4>
+    <div class="kennz">
+      <span class="chip chip-hm">📱 mit GeoGebra</span>
+      <span class="chip chip-art">Regler einstellen und mit f(…) prüfen</span>
+    </div>
+      <p>Finde für jedes Ziel die Reglerstellung, bei der der Graph von \(f(x)=a\cdot x^n\)
+      durch beide Punkte geht. Es gibt jeweils genau eine passende Stellung.</p>
+      <p><b>Ziel A:</b> \(P(2\,|\,-4)\) und \(Q(-1\,|\,-1)\)<br>
+      <b>Ziel B:</b> \(P(1\,|\,2)\) und \(Q(-2\,|\,-16)\)<br>
+      <b>Ziel C:</b> \(P(2\,|\,8)\) und \(Q(-1\,|\,0{,}5)\)</p>
+      <table class="zahltab">
+        <tr><td>Ziel A: Auf welchen Wert hast du \(a\) gestellt?</td><td><input type="text" id="aA" inputmode="decimal" autocomplete="off"><span class="feld-status" id="saA"></span></td></tr>
+        <tr><td>Ziel A: Auf welchen Wert hast du \(n\) gestellt?</td><td><input type="text" id="nA" inputmode="decimal" autocomplete="off"><span class="feld-status" id="snA"></span></td></tr>
+        <tr><td>Ziel B: Auf welchen Wert hast du \(a\) gestellt?</td><td><input type="text" id="aB" inputmode="decimal" autocomplete="off"><span class="feld-status" id="saB"></span></td></tr>
+        <tr><td>Ziel B: Auf welchen Wert hast du \(n\) gestellt?</td><td><input type="text" id="nB" inputmode="decimal" autocomplete="off"><span class="feld-status" id="snB"></span></td></tr>
+        <tr><td>Ziel C: Auf welchen Wert hast du \(a\) gestellt?</td><td><input type="text" id="aC" inputmode="decimal" autocomplete="off"><span class="feld-status" id="saC"></span></td></tr>
+        <tr><td>Ziel C: Auf welchen Wert hast du \(n\) gestellt?</td><td><input type="text" id="nC" inputmode="decimal" autocomplete="off"><span class="feld-status" id="snC"></span></td></tr>
+      </table>
+      <button class="btn btn-pruefen" onclick="pruefeK3()">Prüfen</button>
+      <button class="btn btn-leeren" id="leeren3" style="display:none" onclick="leereK3()">Leeren</button>
+      <div class="feedback" id="fb3"></div>
+    <div class="stufen-tipps" id="tipps3">
+      <h4>Brauchst du Hilfe? Decke so viel auf, wie du brauchst:</h4>
+      <div class="stufe">
+        <button class="stufe-kopf" onclick="toggleStufe(this)"><span>Tipp 1: Wo anfangen?</span><span class="stufe-pfeil">▾</span></button>
+        <div class="stufe-inhalt">Schau zuerst auf den Punkt mit \(x=1\) oder \(x=-1\), falls es einen gibt. Lege die Kontrollzeile für diese Stelle an und beobachte sie, während du <code>a</code> schiebst.</div>
+      </div>
+      <div class="stufe">
+        <button class="stufe-kopf" onclick="toggleStufe(this)"><span>Tipp 2: Gerade oder ungerade?</span><span class="stufe-pfeil">▾</span></button>
+        <div class="stufe-inhalt">Liegen beide Punkte auf derselben Seite der x-Achse, oder einer oben und einer unten? Das grenzt ein, welche Werte von <code>n</code> überhaupt in Frage kommen – denk an Karte 2.</div>
+      </div>
+      <div class="stufe">
+        <button class="stufe-kopf" onclick="toggleStufe(this)"><span>Lösungsweg</span><span class="stufe-pfeil">▾</span></button>
+        <div class="stufe-inhalt">Beide Punkte eintippen und für beide Stellen eine Kontrollzeile <code>f(…)</code> anlegen. Dann <code>n</code> der Reihe nach durchgehen und bei jedem <code>n</code> den Regler <code>a</code> so verändern, dass die erste Kontrollzeile stimmt. Passt dann auch die zweite Kontrollzeile, ist die Stellung gefunden; sonst das nächste <code>n</code> probieren. Die beiden Reglerwerte ablesen und eintragen.</div>
+      </div>
+    </div>
+    </div>
+  </section>
+
+  <section class="karte" id="k4">
+    <h2>Überprüfe dich</h2>
+    <div class="merk">
+      <b>Wo wir gerade stehen:</b> Du hast zwei Regler angelegt und eingestellt, Messzeilen genutzt, die sich selbst aktualisieren, und Regler gezielt auf Punkte eingestellt. Hier prüfst du alles noch einmal – erst die Bedienung, dann eine neue Aufgabe in GeoGebra.
+    </div>
+
+    <div class="kennz">
+      <span class="chip chip-hm">📱 mit GeoGebra</span>
+      <span class="chip chip-art">Bedienwissen</span>
+    </div>
+    <div class="check-item">
+      <h3>1. Du willst, dass der Regler \(n\) nur ganze Zahlen annimmt. Wo stellst du das ein?</h3>
+      <div class="mcwahl" id="c1-wahl"></div>
+    </div>
+    <div class="check-item">
+      <h3>2. Welche Eingabe legt einen Regler an, der von 1 bis 6 in Einerschritten läuft?</h3>
+      <div class="mcwahl" id="c2-wahl"></div>
+    </div>
+    <div class="check-item">
+      <h3>3. Du hast <code>f(2)</code> in eine eigene Zeile getippt und verschiebst danach den Regler <code>a</code>. Was passiert mit dem Wert?</h3>
+      <div class="mcwahl" id="c3-wahl"></div>
+    </div>
+    <div class="check-item">
+      <h3>4. Du stellst den Regler auf \(a=0\). Was zeigt GeoGebra?</h3>
+      <div class="mcwahl" id="c4-wahl"></div>
+    </div>
+    <button class="btn btn-pruefen btn-gross" onclick="pruefeCheck()">Antworten prüfen</button>
+    <button class="btn btn-leeren" id="leerenCheck" style="display:none" onclick="leereCheck()">Leeren</button>
+    <div class="zusammenfassung" id="zsf"></div>
+    <h3 class="rechnen-titel">Jetzt in GeoGebra</h3>
+    <div class="aufgabe">
+      <h4>Aufgabe 4a: Ein Funktionswert</h4>
+    <div class="kennz">
+      <span class="chip chip-hm">📱 mit GeoGebra</span>
+      <span class="chip chip-art">bestimmen mit f(…)</span>
+    </div>
+      <p>Stelle die Regler auf \(a=-0{,}5\) und \(n=6\). Bestimme den Funktionswert an der
+      Stelle 1,5 und runde auf <b>zwei Nachkommastellen</b>.</p>
+      <table class="zahltab">
+        <tr><td>Welchen Wert hat \(f(1{,}5)\)?</td><td><input type="text" id="r1" inputmode="decimal" autocomplete="off"><span class="feld-status" id="sr1"></span></td></tr>
+      </table>
+    </div>
+    <div class="aufgabe">
+      <h4>Aufgabe 4b: Ein neues Ziel</h4>
+    <div class="kennz">
+      <span class="chip chip-hm">📱 mit GeoGebra</span>
+      <span class="chip chip-art">Regler einstellen und mit f(…) prüfen</span>
+    </div>
+      <p>Der Graph soll durch \(P(-2\,|\,24)\) und \(Q(1\,|\,-3)\) gehen. Stelle die Regler
+      so ein und prüfe mit Kontrollzeilen.</p>
+      <table class="zahltab">
+        <tr><td>Auf welchen Wert hast du \(a\) gestellt?</td><td><input type="text" id="r2" inputmode="decimal" autocomplete="off"><span class="feld-status" id="sr2"></span></td></tr>
+        <tr><td>Auf welchen Wert hast du \(n\) gestellt?</td><td><input type="text" id="r3" inputmode="decimal" autocomplete="off"><span class="feld-status" id="sr3"></span></td></tr>
+      </table>
+      <button class="btn btn-pruefen" onclick="pruefeRechnen()">Prüfen</button>
+      <button class="btn btn-leeren" id="leerenRechnen" style="display:none" onclick="rechnenLeeren(G4)">Leeren</button>
+      <div class="feedback" id="fbRechnen"></div>
+    <div class="stufen-tipps" id="tippsRechnen">
+      <h4>Brauchst du Hilfe? Decke so viel auf, wie du brauchst:</h4>
+      <div class="stufe">
+        <button class="stufe-kopf" onclick="toggleStufe(this)"><span>Tipp 1: Funktionswert</span><span class="stufe-pfeil">▾</span></button>
+        <div class="stufe-inhalt">Werte direkt in die Reglerzeilen tippen, dann eine Zeile mit Funktionsname und Stelle anlegen. Kommazahl mit Punkt.</div>
+      </div>
+      <div class="stufe">
+        <button class="stufe-kopf" onclick="toggleStufe(this)"><span>Tipp 2: Ziel</span><span class="stufe-pfeil">▾</span></button>
+        <div class="stufe-inhalt">Wie auf Karte 3: Punkte eintippen, Kontrollzeilen anlegen. Überleg mit Karte 2, ob ein gerades oder ungerades <code>n</code> passt.</div>
+      </div>
+      <div class="stufe">
+        <button class="stufe-kopf" onclick="toggleStufe(this)"><span>Lösungsweg</span><span class="stufe-pfeil">▾</span></button>
+        <div class="stufe-inhalt">Für 4a beide Reglerwerte eintippen, den Funktionswert in einer eigenen Zeile bestimmen und runden. Für 4b die Punkte und zwei Kontrollzeilen anlegen, zuerst <code>a</code> über die Kontrollzeile an der Stelle mit \(x=1\) einstellen, dann <code>n</code> durchgehen, bis auch die zweite Kontrollzeile stimmt.</div>
+      </div>
+    </div>
+    </div>
+  </section>
+
+</main>
+
+<div class="trex" id="trex">🦖<span class="bubble">Made by ASzym</span></div>
+<script>
+var MARKE = '✅';
+var FORTSCHRITT = {d1:['k1'], d2:['k2'], d3:['k3'], d4:['k4']};
+
+const state = {
+  k1:{geprueft:false, erledigt:false},
+  k2:{geprueft:false, erledigt:false, wahlen:{0:null,1:null,2:null}},
+  k3:{geprueft:false, erledigt:false},
+  k4:{geprueft:false, erledigt:false, wahlen:{0:null,1:null,2:null,3:null},
+      mcRichtig:false, rechnenOk:false}
+};
+
+/* ---------- Karte 1 ---------- */
+const G1 = [
+  {statusId:'s1', felder:[{id:'z1', erwartet:-3.73, tol:0.01}]},
+  {statusId:'s2', felder:[{id:'z2', erwartet:0.49, tol:0.01}]}
+];
+const IDS1 = {fb:'fb1', leeren:'leeren1', tipps:'tipps1'};
+function pruefeK1(){
+  karteAuswerten('k1', G1, IDS1,
+    '✅ Beide Werte stimmen. Deine Regler stehen richtig.',
+    '❌ Noch nicht. Schau bei den roten Kreuzen nach – die Tipps unten helfen.');
+}
+function leereK1(){ karteLeeren('k1', G1, IDS1); document.getElementById('tipps1').classList.remove('zeig'); }
+
+/* ---------- Karte 2 ---------- */
+const G2 = [
+  {statusId:'sb1', felder:[{id:'b1', erwartet:1}]},
+  {statusId:'sb2', felder:[{id:'b2', erwartet:1}]},
+  {statusId:'sb3', felder:[{id:'b3', erwartet:-1}]},
+  {statusId:'sb4', felder:[{id:'b4', erwartet:0}]}
+];
+const OPT21 = mische([
+  {t:'n = 2, 4, 6', korrekt:true},
+  {t:'n = 1, 3, 5', korrekt:false},
+  {t:'für alle n von 1 bis 6', korrekt:false},
+  {t:'für kein n', korrekt:false}]);
+const OPT22 = mische([
+  {t:'von links unten nach rechts oben', korrekt:true},
+  {t:'von links oben nach rechts oben', korrekt:false},
+  {t:'von links oben nach rechts unten', korrekt:false},
+  {t:'von links unten nach rechts unten', korrekt:false}]);
+const OPT23 = mische([
+  {t:'Er klappt an der x-Achse um', korrekt:true},
+  {t:'Er klappt an der y-Achse um', korrekt:false},
+  {t:'Er rutscht um 4 nach unten', korrekt:false},
+  {t:'Er bleibt unverändert', korrekt:false}]);
+const MC2 = [['m21',OPT21],['m22',OPT22],['m23',OPT23]];
+MC2.forEach(([w,o],i)=>baueMC(w, o, 'k2', i));
+function pruefeK2(){
+  const fb=document.getElementById('fb2');
+  if(Object.values(state.k2.wahlen).some(v=>v===null)){
+    fb.className='feedback zeig neutral';
+    fb.textContent='Bitte beantworte zuerst alle drei Fragen in Aufgabe 2b.';
+    return;
+  }
+  const okZ = pruefeGruppen(G2);
+  state.k2.geprueft = true;
+  let okM = true;
+  MC2.forEach(([w,o],i)=>{ if(!mcAuswerten(w, o, state.k2.wahlen[i])) okM=false; });
+  const ok = okZ && okM;
+  fb.className='feedback zeig '+(ok?'ok':'nok');
+  fb.textContent = ok ? '✅ Alles richtig beobachtet.'
+                      : '❌ Noch nicht alles. Rote Kreuze und rote Antworten zeigen, wo du noch einmal schieben solltest.';
+  document.getElementById('leeren2').style.display = ok ? 'none' : 'inline-block';
+  document.getElementById('tipps2').classList.toggle('zeig', !ok);
+  state.k2.erledigt = ok;
+  pruefeFortschritt();
+}
+function leereK2(){
+  leereGruppen(G2);
+  MC2.forEach(([w])=>mcLeeren(w));
+  state.k2.wahlen={0:null,1:null,2:null};
+  state.k2.geprueft=false; state.k2.erledigt=false;
+  document.getElementById('fb2').className='feedback';
+  document.getElementById('leeren2').style.display='none';
+  document.getElementById('tipps2').classList.remove('zeig');
+  pruefeFortschritt();
+}
+
+/* ---------- Karte 3 ---------- */
+const G3 = [
+  {statusId:'saA', felder:[{id:'aA', erwartet:-1}]},
+  {statusId:'snA', felder:[{id:'nA', erwartet:2}]},
+  {statusId:'saB', felder:[{id:'aB', erwartet:2}]},
+  {statusId:'snB', felder:[{id:'nB', erwartet:3}]},
+  {statusId:'saC', felder:[{id:'aC', erwartet:0.5}]},
+  {statusId:'snC', felder:[{id:'nC', erwartet:4}]}
+];
+const IDS3 = {fb:'fb3', leeren:'leeren3', tipps:'tipps3'};
+function pruefeK3(){
+  karteAuswerten('k3', G3, IDS3,
+    '✅ Alle drei Ziele getroffen.',
+    '❌ Mindestens ein Ziel passt noch nicht. Prüfe die Stellung mit deinen Kontrollzeilen f(…).');
+}
+function leereK3(){ karteLeeren('k3', G3, IDS3); document.getElementById('tipps3').classList.remove('zeig'); }
+
+/* ---------- Karte 4 ---------- */
+const FRAGEN = [
+  {optionen: mische([
+    {t:'Drei Punkte am Zeilenende → Einstellungen → Schrittweite 1', korrekt:true},
+    {t:'Kreis links vor der Zeile antippen', korrekt:false},
+    {t:'Im Menü ☰ die Nachkommastellen auf 0 stellen', korrekt:false},
+    {t:'Gar nicht – GeoGebra rundet n von selbst', korrekt:false}])},
+  {optionen: mische([
+    {t:'n=Schieberegler(1, 6, 1)', korrekt:true},
+    {t:'n=Schieberegler(1, 1, 6)', korrekt:false},
+    {t:'n=Schieberegler(6, 1, 1)', korrekt:false},
+    {t:'n=Schieberegler(1, 6)', korrekt:false}])},
+  {optionen: mische([
+    {t:'Er rechnet sich sofort neu', korrekt:true},
+    {t:'Er bleibt, bis du f(2) neu eintippst', korrekt:false},
+    {t:'Die Zeile wird gelöscht', korrekt:false},
+    {t:'GeoGebra meldet einen Fehler', korrekt:false}])},
+  {optionen: mische([
+    {t:'Der Graph liegt genau auf der x-Achse', korrekt:true},
+    {t:'Gar keinen Graphen, nur eine Fehlermeldung', korrekt:false},
+    {t:'Die Normalparabel', korrekt:false},
+    {t:'Eine senkrechte Gerade', korrekt:false}])}
+];
+FRAGEN.forEach((f,i)=>baueMC('c'+(i+1)+'-wahl', f.optionen, 'k4', i));
+function pruefeCheck(){
+  if(Object.values(state.k4.wahlen).some(v=>v===null)){
+    const z=document.getElementById('zsf'); z.classList.add('zeig');
+    z.textContent='Bitte beantworte zuerst alle vier Fragen.'; return;
+  }
+  checkAuswerten(FRAGEN, 'zsf');
+  document.getElementById('leerenCheck').style.display = state.k4.mcRichtig ? 'none' : 'inline-block';
+}
+function leereCheck(){
+  FRAGEN.forEach((f,i)=>mcLeeren('c'+(i+1)+'-wahl'));
+  state.k4.wahlen={0:null,1:null,2:null,3:null};
+  state.k4.geprueft=false; state.k4.mcRichtig=false;
+  const z=document.getElementById('zsf'); z.classList.remove('zeig'); z.textContent='';
+  document.getElementById('leerenCheck').style.display='none';
+  k4Status();
+}
+const G4 = [
+  {statusId:'sr1', felder:[{id:'r1', erwartet:-5.70, tol:0.01}]},
+  {statusId:'sr2', felder:[{id:'r2', erwartet:-3}]},
+  {statusId:'sr3', felder:[{id:'r3', erwartet:3}]}
+];
+function pruefeRechnen(){
+  rechnenAuswerten(G4, '✅ Funktionswert und Ziel stimmen.',
+    '❌ Noch nicht. Rote Kreuze zeigen, welcher Wert noch nicht passt.');
+}
+
+
+function mische(arr){
+  const a=arr.slice();
+  for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+  return a;
+}
+document.querySelectorAll('.tab').forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('aktiv'));
+    document.querySelectorAll('.karte').forEach(k=>k.classList.remove('aktiv'));
+    tab.classList.add('aktiv');
+    document.getElementById(tab.dataset.ziel).classList.add('aktiv');
+    window.scrollTo({top:0,behavior:'smooth'});
+  });
+});
+document.querySelectorAll('.stufen-wahl').forEach(w=>{
+  w.querySelectorAll('.stufe-btn').forEach(b=>{
+    b.addEventListener('click',()=>{
+      const k=w.dataset.karte, s=b.dataset.s;
+      w.querySelectorAll('.stufe-btn').forEach(x=>x.classList.remove('aktiv'));
+      b.classList.add('aktiv');
+      document.querySelectorAll('.stufe-block[data-karte="'+k+'"]').forEach(bl=>{
+        bl.classList.toggle('aktiv', bl.dataset.s===s);
+      });
+    });
+  });
+});
+function toggleStufe(btn){ btn.parentElement.classList.toggle('offen'); }
+function pruefeFortschritt(){
+  Object.keys(FORTSCHRITT).forEach(d=>{
+    const e=document.getElementById(d);
+    if(!e) return;
+    const fertig=FORTSCHRITT[d].some(k=>state[k] && state[k].erledigt);
+    e.textContent = fertig ? MARKE : '';
+  });
+}
+function parseZahlOderBruch(s){
+  s=String(s).trim().replace(',', '.');
+  if(s==='') return NaN;
+  const bruch=s.match(/^(-?\d+(?:\.\d+)?)\s*\/\s*(-?\d+(?:\.\d+)?)$/);
+  if(bruch){ const z=parseFloat(bruch[1]), n=parseFloat(bruch[2]); return n!==0 ? z/n : NaN; }
+  return parseFloat(s);
+}
+function feldStimmt(id, erwartet, tol){
+  const el=document.getElementById(id);
+  if(!el) return false;
+  const wert=parseZahlOderBruch(el.value);
+  return el.value.trim()!=='' && !isNaN(wert) && Math.abs(wert-erwartet)<=(tol!==undefined?tol:0.0001);
+}
+function pruefeGruppen(gruppen, stumm){
+  let alle=true;
+  gruppen.forEach(gr=>{
+    const ok=gr.felder.every(f=>feldStimmt(f.id,f.erwartet,f.tol));
+    if(!stumm){
+      const st=document.getElementById(gr.statusId);
+      if(st){ st.textContent = ok ? '✅' : '❌'; st.style.color = ok ? 'var(--green)' : 'var(--red)'; }
+    }
+    if(!ok) alle=false;
+  });
+  return alle;
+}
+function leereGruppen(gruppen){
+  gruppen.forEach(gr=>{
+    gr.felder.forEach(f=>{ const e=document.getElementById(f.id); if(e){ e.value=''; e.readOnly=false; } });
+    const st=document.getElementById(gr.statusId); if(st) st.textContent='';
+  });
+}
+function baueMC(wrapId, optionen, key, feld){
+  const wrap=document.getElementById(wrapId);
+  if(!wrap) return;
+  optionen.forEach((o,i)=>{
+    const b=document.createElement('button');
+    b.textContent=o.t; b.dataset.i=i;
+    b.addEventListener('click',()=>{
+      if(state[key].geprueft) return;
+      wrap.querySelectorAll('button').forEach(x=>x.classList.remove('gewaehlt'));
+      b.classList.add('gewaehlt');
+      state[key].wahlen[feld]=i;
+    });
+    wrap.appendChild(b);
+  });
+}
+function mcAuswerten(wrapId, optionen, wahl){
+  const wrap=document.getElementById(wrapId);
+  wrap.querySelectorAll('button').forEach((b,i)=>{
+    if(optionen[i].korrekt) b.classList.add('richtig');
+    else if(i===wahl) b.classList.add('falsch');
+  });
+  return wahl!==null && wahl!==undefined && optionen[wahl] && optionen[wahl].korrekt;
+}
+function mcLeeren(wrapId){
+  const wrap=document.getElementById(wrapId);
+  if(wrap) wrap.querySelectorAll('button').forEach(b=>b.classList.remove('richtig','falsch','gewaehlt'));
+}
+const trex=document.getElementById('trex');
+if(trex) trex.addEventListener('click',()=>{
+  trex.classList.add('zeig');
+  setTimeout(()=>trex.classList.remove('zeig'),1800);
+});
+
+/* ---------- weitere Helfer (Erarbeitungsseiten) ---------- */
+function toggleWz(id){ document.getElementById(id).classList.toggle('offen'); }
+function toggleTipp(id){ document.getElementById(id).classList.toggle('offen'); }
+function toggleStufe(btn){ btn.parentElement.classList.toggle('offen'); }
+function pruefeFortschritt(){
+  [['k1','d1'],['k2','d2'],['k3','d3'],['k4','d4']].forEach(([k,d])=>{
+    const e=document.getElementById(d);
+    if(e) e.textContent = state[k] && state[k].erledigt ? '✅' : '';
+  });
+}
+function toggleTipp(id){ document.getElementById(id).classList.toggle('offen'); }
+function toggleStufe(btn){ btn.parentElement.classList.toggle('offen'); }
+function pruefeFortschritt(){
+  [['k1','d1'],['k2','d2'],['k3','d3'],['k4','d4']].forEach(([k,d])=>{
+    const e=document.getElementById(d);
+    if(e) e.textContent = state[k] && state[k].erledigt ? '✅' : '';
+  });
+}
+function karteAuswerten(kartenKey, gruppen, ids, textOk, textNok){
+  const ok=pruefeGruppen(gruppen);
+  state[kartenKey].geprueft=true;
+  const fb=document.getElementById(ids.fb);
+  if(ok){
+    fb.className='feedback zeig ok'; fb.textContent=textOk;
+    state[kartenKey].erledigt=true;
+    if(ids.leeren) document.getElementById(ids.leeren).style.display='none';
+    if(ids.tipps) document.getElementById(ids.tipps).classList.remove('zeig');
+  }else{
+    fb.className='feedback zeig nok'; fb.textContent=textNok;
+    if(ids.leeren) document.getElementById(ids.leeren).style.display='inline-block';
+    if(ids.tipps) document.getElementById(ids.tipps).classList.add('zeig');
+  }
+  pruefeFortschritt();
+  return ok;
+}
+function karteLeeren(kartenKey, gruppen, ids){
+  leereGruppen(gruppen);
+  document.getElementById(ids.fb).className='feedback';
+  if(ids.leeren) document.getElementById(ids.leeren).style.display='none';
+  state[kartenKey].geprueft=false; state[kartenKey].erledigt=false;
+  pruefeFortschritt();
+}
+function baueWF(kartenKey, scope){
+  document.querySelectorAll(scope+' [data-aussage]').forEach((box,i)=>{
+    box.querySelectorAll('.wf-buttons button').forEach(b=>{
+      b.addEventListener('click',()=>{
+        if(state[kartenKey].geprueft) return;
+        box.querySelectorAll('.wf-buttons button').forEach(x=>x.classList.remove('gewaehlt'));
+        b.classList.add('gewaehlt');
+        state[kartenKey].wahlen[i]=b.dataset.w;
+      });
+    });
+  });
+}
+function wfAuswerten(kartenKey, scope, fbId){
+  const boxen=document.querySelectorAll(scope+' [data-aussage]');
+  if(Object.values(state[kartenKey].wahlen).some(v=>v===null)) return false;
+  state[kartenKey].geprueft=true;
+  let richtig=0;
+  boxen.forEach((box,i)=>{
+    const soll=box.dataset.richtig;
+    box.querySelectorAll('.wf-buttons button').forEach(b=>{
+      if(b.dataset.w===soll) b.classList.add('richtig');
+      else if(b.dataset.w===state[kartenKey].wahlen[i]) b.classList.add('falsch');
+    });
+    if(state[kartenKey].wahlen[i]===soll) richtig++;
+  });
+  const fb=document.getElementById(fbId);
+  if(richtig===boxen.length){
+    fb.className='feedback zeig ok';
+    fb.textContent='✅ Alle Aussagen richtig eingeschätzt.';
+    state[kartenKey].erledigt=true;
+  }else{
+    fb.className='feedback zeig nok';
+    fb.textContent='❌ '+richtig+' von '+boxen.length+' richtig. Grün zeigt jeweils die korrekte Antwort.';
+  }
+  pruefeFortschritt();
+  return richtig===boxen.length;
+}
+function mitMC(key, gruppen, opt, wrapId, ids, textOk, textNok){
+  if(state[key].wahlen[0]===null) return;
+  const okZahlen = pruefeGruppen(gruppen);
+  state[key].geprueft = true;
+  const okMC = mcAuswerten(wrapId, opt, state[key].wahlen[0]);
+  const ok = okZahlen && okMC;
+  const fb = document.getElementById(ids.fb);
+  fb.className = 'feedback zeig ' + (ok ? 'ok' : 'nok');
+  fb.textContent = ok ? textOk : textNok;
+  document.getElementById(ids.leeren).style.display = ok ? 'none' : 'inline-block';
+  if(ids.tipps) document.getElementById(ids.tipps).classList.toggle('zeig', !ok);
+  state[key].erledigt = ok;
+  pruefeFortschritt();
+}
+function mitMCleeren(key, gruppen, opt, wrapId, ids){
+  leereGruppen(gruppen);
+  document.getElementById(ids.fb).className='feedback';
+  document.getElementById(ids.leeren).style.display='none';
+  document.querySelectorAll('#'+wrapId+' button').forEach(b=>b.classList.remove('richtig','falsch','gewaehlt'));
+  state[key].wahlen={0:null};
+  state[key].geprueft=false; state[key].erledigt=false;
+  pruefeFortschritt();
+}
+function checkAuswerten(fragen, zsfId){
+  if(Object.values(state.k4.wahlen).some(v=>v===null)) return;
+  state.k4.geprueft=true;
+  let richtig=0;
+  fragen.forEach((f,idx)=>{ if(mcAuswerten('c'+(idx+1)+'-wahl', f.optionen, state.k4.wahlen[idx])) richtig++; });
+  const zsf=document.getElementById(zsfId);
+  zsf.classList.add('zeig');
+  zsf.textContent='Du hast '+richtig+' von '+fragen.length+' richtig beantwortet.'
+    + (richtig===fragen.length ? ' Stark!' : ' Schau dir die roten Antworten an und blättere auf die passende Karte zurück.');
+  state.k4.mcRichtig=(richtig===fragen.length);
+  k4Status();
+}
+function rechnenAuswerten(gruppen, textOk, textNok){
+  const ok=pruefeGruppen(gruppen);
+  const fb=document.getElementById('fbRechnen');
+  fb.className='feedback zeig '+(ok?'ok':'nok');
+  fb.textContent = ok ? textOk : textNok;
+  document.getElementById('leerenRechnen').style.display = ok ? 'none' : 'inline-block';
+  const t=document.getElementById('tippsRechnen');
+  if(t) t.classList.toggle('zeig', !ok);
+  state.k4.rechnenOk=ok;
+  k4Status();
+}
+function rechnenLeeren(gruppen){
+  leereGruppen(gruppen);
+  document.getElementById('fbRechnen').className='feedback';
+  document.getElementById('leerenRechnen').style.display='none';
+  state.k4.rechnenOk=false; k4Status();
+}
+function k4Status(){
+  state.k4.erledigt = state.k4.mcRichtig && state.k4.rechnenOk;
+  pruefeFortschritt();
+}
+
+/* =============================================================================
+   Notfall-Anzeige für Formeln (MATHJAX-FALLBACK)
+   Lädt MathJax nicht (Schul-WLAN, Vorschau, Offline-Kopie), blieben sonst
+   \( ... \) als Rohtext mit Backslashes stehen. Dann werden die TeX-Ausdrücke
+   hier in lesbares HTML gewandelt: √ mit Klammer, Brüche als .frac-Konstrukt
+   (kein Schrägstrich!), Hoch-/Tiefstellungen als sup/sub, Sonderzeichen direkt.
+   Ist MathJax da, passiert nichts.
+   ========================================================================== */
+(function(){
+  var AUF = '\u0001', ZU = '\u0002';   /* Platzhalter fuer { } aus \left\{ */
+
+  function leseGruppe(t, i){
+    if (t.charAt(i) !== '{') return null;
+    var tiefe = 0;
+    for (var j = i; j < t.length; j++){
+      if (t.charAt(j) === '{') tiefe++;
+      else if (t.charAt(j) === '}'){ tiefe--; if (tiefe === 0) return [t.slice(i+1, j), j+1]; }
+    }
+    return null;
+  }
+
+  function strukturen(t){
+    var aus = '', i = 0;
+    while (i < t.length){
+      var m = /^\\(dfrac|tfrac|frac|sqrt)/.exec(t.slice(i));
+      if (m){
+        var a = leseGruppe(t, i + m[0].length);
+        if (a){
+          if (m[1] === 'sqrt'){
+            var inn = strukturen(a[0]);
+            aus += /^[0-9A-Za-z]+$/.test(a[0]) ? '√' + inn : '√(' + inn + ')';
+            i = a[1]; continue;
+          }
+          var b = leseGruppe(t, a[1]);
+          if (b){
+            aus += '<span class="frac"><span>' + strukturen(a[0]) + '</span><span>'
+                 + strukturen(b[0]) + '</span></span>';
+            i = b[1]; continue;
+          }
+        }
+      }
+      aus += t.charAt(i); i++;
+    }
+    return aus;
+  }
+
+  function texHtml(t){
+    t = t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    t = t.replace(/\\rightarrow/g, '→').replace(/\\leftarrow/g, '←')
+         .replace(/\\Rightarrow/g, '⇒').replace(/\\Leftarrow/g, '⇐')
+         .replace(/\\left\\\{/g, AUF).replace(/\\right\\\}/g, ZU)
+         .replace(/\\left(?![a-zA-Z])/g, '').replace(/\\right(?![a-zA-Z])/g, '')
+         .replace(/\\\{/g, AUF).replace(/\\\}/g, ZU);
+    t = t.replace(/\\cdot/g, '·').replace(/\\times/g, '·')
+         .replace(/\\approx/g, '≈').replace(/\\neq/g, '≠')
+         .replace(/\\leq/g, '≤').replace(/\\le\b/g, '≤')
+         .replace(/\\geq/g, '≥').replace(/\\ge\b/g, '≥')
+         .replace(/\\pm/g, '±').replace(/\\mp/g, '∓')
+         .replace(/\\ldots/g, '…').replace(/\\dots/g, '…')
+         .replace(/\\to\b/g, '→')
+         .replace(/\\infty/g, '∞')
+         .replace(/\\pi/g, 'π').replace(/\\alpha/g, 'α')
+         .replace(/\\beta/g, 'β').replace(/\\gamma/g, 'γ')
+         .replace(/\\Delta/g, 'Δ').replace(/\\delta/g, 'δ')
+         .replace(/\\min/g, 'min').replace(/\\max/g, 'max')
+         .replace(/\\text\{([^{}]*)\}/g, '$1')
+         .replace(/\\mathrm\{([^{}]*)\}/g, '$1');
+    t = strukturen(t);
+    t = t.replace(/\^\{([^{}]*)\}/g, '<sup>$1</sup>')
+         .replace(/\^(-?[0-9A-Za-z])/g, '<sup>$1</sup>')
+         .replace(/_\{([^{}]*)\}/g, '<sub>$1</sub>')
+         .replace(/_(-?[0-9A-Za-z])/g, '<sub>$1</sub>');
+    t = t.replace(/\{,\}/g, ',').replace(/\\,/g, ' ').replace(/\\;/g, ' ')
+         .replace(/\\ /g, ' ').replace(/[{}]/g, '')
+         .replace(new RegExp(AUF, 'g'), '{').replace(new RegExp(ZU, 'g'), '}');
+    return t;
+  }
+
+  function mathNotfall(){
+    if (window.MathJax && window.MathJax.typesetPromise) return;  /* MathJax ist da */
+    var lauf = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
+      acceptNode: function(n){
+        var tag = n.parentNode && n.parentNode.nodeName;
+        if (tag === 'SCRIPT' || tag === 'STYLE') return NodeFilter.FILTER_REJECT;
+        return n.nodeValue.indexOf('\\(') > -1 ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP;
+      }
+    });
+    var treffer = [], n;
+    while ((n = lauf.nextNode())) treffer.push(n);
+    treffer.forEach(function(k){
+      var teile = k.nodeValue.split(/\\\(([\s\S]+?)\\\)/);
+      if (teile.length < 2) return;
+      var html = '';
+      for (var i = 0; i < teile.length; i++){
+        html += (i % 2)
+          ? '<span class="tex-ersatz">' + texHtml(teile[i]) + '</span>'
+          : teile[i].replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      }
+      var huelle = document.createElement('span');
+      huelle.innerHTML = html;
+      var frag = document.createDocumentFragment();
+      while (huelle.firstChild) frag.appendChild(huelle.firstChild);
+      k.parentNode.replaceChild(frag, k);
+    });
+  }
+  window.addEventListener('load', function(){ setTimeout(mathNotfall, 3500); });
+})();
+
+pruefeFortschritt();
+</script>
+</body>
+</html>
