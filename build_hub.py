@@ -21,6 +21,11 @@ Konventionen (Pfad 3 – Politur lebt in den Metatags):
 - Reihenfolge: Blöcke und Kacheln werden immer sortiert – jahrgangsartige
   Namen (7_Klasse, 10 Klasse, EF, Q1, Q2) numerisch/schulisch, alles
   andere alphabetisch. Siehe block_sortkey().
+- Aufgeklappte Kachel: volle Zeilenbreite, Spalten Lernseite | Übung |
+  Wissenstest (| Sonstiges). Zusammengehörige Seiten stehen in EINER Zeile.
+  Zusammengehörig = gleicher <meta name="gruppe">, sonst gleicher
+  Dateinamen-Stamm (ohne _ls/_ue/_test/_bonus/_lehrer). Siehe
+  gruppen_schluessel().
 """
 
 import os, re, sys, json, argparse, html
@@ -43,6 +48,16 @@ TYP_ICON = {
     "Lehrer":    ("👨‍🏫", "lehrer", "👨‍🏫"),
 }
 ICON_NEUTRAL = "📄"
+
+# Spalten der aufgeklappten Kachel: (Schlüssel, Überschrift, CSS-Klasse)
+KACHEL_SPALTEN = [
+    ("ls",   "📖 Lernseite",   "lernen"),
+    ("ue",   "✏️ Übung",       "uebung"),
+    ("test", "🔍 Wissenstest", "test"),
+]
+# Vierte Spalte nur, wenn die Kachel Bonus-/Lehrer-/typlose Seiten enthält
+SPALTE_SONST = ("sonst", "📎 Sonstiges", "sonstig")
+TYP_SPALTE = {"Lernseite": "ls", "Übung": "ue", "Test": "test"}
 
 # Emoji-Lookup für Themen (oberthema / Ordnername, lower, ohne Umlaute-Sonderfälle)
 # Hinweis: Der Lookup greift auch, wenn der Ordnername zusätzliche Wörter
@@ -108,6 +123,7 @@ def read_meta(fp):
         "oberthema": m("oberthema"),
         "thema": m("thema"),
         "kachel": m("kachel"),
+        "gruppe": m("gruppe"),
     }
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -265,9 +281,91 @@ def link_title(info, fname):
 def esc(s):
     return html.escape(s, quote=True)
 
+def gruppen_schluessel(info, fname):
+    """Bestimmt, welche Seiten einer Kachel in dieselbe Zeile gehören.
+
+    1. <meta name="gruppe" content="…"> gewinnt (normalisiert).
+    2. Sonst der Dateinamen-Stamm ohne Typ-Suffix:
+       gewinn_ls.html / gewinn_ue.html / gewinn_ue2.html / gewinn_test.html
+       → alle 'gewinn'.
+    Beide Varianten landen im selben Namensraum: Ein Metatag
+    'gewinn' fasst also auch mit der Datei gewinn_ue.html (ohne Tag) zusammen.
+    """
+    g = (info.get("gruppe") or "").strip()
+    if g:
+        return _norm_key(g)
+    base = re.sub(r"\.html?$", "", fname, flags=re.I).strip()
+    base = re.sub(r"[_\-\s](ls|ue|test|bonus|lehrer)\d*$", "", base, flags=re.I)
+    return _norm_key(base)
+
 # ──────────────────────────────────────────────────────────────────────────────
 #  Kachel bauen
 # ──────────────────────────────────────────────────────────────────────────────
+
+def build_kachel_tabelle(files, metas):
+    """Links einer Kachel als Spalten-Raster.
+
+    Spalten: Lernseite | Übung | Wissenstest (| Sonstiges).
+    Zeilen:  zusammengehörige Seiten (siehe gruppen_schluessel).
+    Mehrere Seiten gleichen Typs in einer Gruppe stehen untereinander
+    in derselben Zelle.
+    """
+    def sortkey(item):
+        rel, fname = item
+        typ = metas[rel].get("typ", "")
+        order = {"Lernseite": 0, "Übung": 1, "Test": 2, "Bonus": 3}.get(typ, 4)
+        return (order, fname.lower())
+
+    # Zeilen in der Reihenfolge ihres ersten Auftretens: Gruppen mit
+    # Lernseite zuerst, dann solche, die mit einer Übung beginnen, usw.
+    zeilen = OrderedDict()
+    for rel, fname in sorted(files, key=sortkey):
+        info = metas[rel]
+        key = gruppen_schluessel(info, fname)
+        spalte = TYP_SPALTE.get(info.get("typ", ""), "sonst")
+        zeilen.setdefault(key, defaultdict(list))[spalte].append((rel, fname))
+
+    sonst_eintraege = [metas[rel].get("typ", "")
+                       for z in zeilen.values() for rel, _ in z.get("sonst", [])]
+    spalten = list(KACHEL_SPALTEN)
+    if sonst_eintraege:
+        spalten.append(SPALTE_SONST)
+    # Sonstiges-Spalte enthält nur Lehrerseiten → für Schüler ausblenden
+    sonst_nur_lehrer = bool(sonst_eintraege) and all(t == "Lehrer" for t in sonst_eintraege)
+
+    def link_html(rel, fname, mit_icon):
+        info = metas[rel]
+        typ = info.get("typ", "")
+        title = link_title(info, fname)
+        if typ == "Lehrer":
+            return (f'<a href="{esc(rel)}" class="lehrer-link" target="_blank" '
+                    f'rel="noopener">{esc(title)}</a>')
+        label = f"{link_icon(typ)} {title}" if mit_icon else title
+        return f'<a href="{esc(rel)}" target="_blank" rel="noopener">{esc(label)}</a>'
+
+    ind = "                  "
+    kt_cls = "kt sonst-lehrer" if sonst_nur_lehrer else "kt"
+    out = [f'                <div class="{kt_cls}" style="--kt-cols:{len(spalten)}">']
+    # Kopfzeile
+    out.append(ind + '<div class="kt-row kt-head">' + "".join(
+        f'<div class="kt-cell {css} spalte-{key}">{esc(head)}</div>'
+        for key, head, css in spalten) + '</div>')
+    # Datenzeilen
+    for key, zeile in zeilen.items():
+        alle_typen = [metas[rel].get("typ", "") for cell in zeile.values() for rel, _ in cell]
+        row_cls = "kt-row nur-lehrer" if all(t == "Lehrer" for t in alle_typen) else "kt-row"
+        cells = []
+        for skey, _, _ in spalten:
+            eintraege = zeile.get(skey, [])
+            if eintraege:
+                inner = "".join(link_html(rel, fn, skey == "sonst") for rel, fn in eintraege)
+            else:
+                inner = '<span class="kt-leer">–</span>'
+            cells.append(f'<div class="kt-cell spalte-{skey}">{inner}</div>')
+        out.append(ind + f'<div class="{row_cls}">' + "".join(cells) + '</div>')
+    out.append('                </div>')
+    return "\n".join(out)
+
 
 def build_kachel(kachel_dir, files, metas):
     """files: Liste (rel, fname); metas: dict rel->info"""
@@ -298,30 +396,13 @@ def build_kachel(kachel_dir, files, metas):
         badge_parts.append(f'<span class="kbadge">{ICON_NEUTRAL} {cnt["_neutral"]}</span>')
     badges = "".join(badge_parts)
 
-    # Links (ls-Einträge zuerst grob, damit Pairing im JS greift)
-    def sortkey(item):
-        rel, fname = item
-        typ = metas[rel].get("typ", "")
-        order = {"Lernseite": 0, "Übung": 1, "Test": 2, "Bonus": 3}.get(typ, 4)
-        return (order, fname)
-    links = []
-    for rel, fname in sorted(files, key=sortkey):
-        info = metas[rel]
-        typ = info.get("typ", "")
-        icon = link_icon(typ)
-        title = link_title(info, fname)
-        cls = ' class="lehrer-link"' if typ == "Lehrer" else ""
-        label = title if typ == "Lehrer" else f"{icon} {title}"
-        links.append(
-            f'                <a href="{esc(rel)}"{cls} target="_blank" rel="noopener">{esc(label)}</a>'
-        )
-    links_html = "\n".join(links)
+    tabelle = build_kachel_tabelle(files, metas)
     return (
         '            <div class="kachel" onclick="toggleKachel(this, event)">\n'
         f'              <div class="kachel-name">{esc(name)}</div>\n'
         f'              <div class="kachel-badges">{badges}</div>\n'
         '              <div class="kachel-links" style="display:none">\n'
-        f'{links_html}\n'
+        f'{tabelle}\n'
         '              </div>\n'
         '            </div>'
     )
@@ -604,6 +685,7 @@ def render_overview(dirpath, root, sub, heute):
     gap:.5rem;padding:.6rem;margin-bottom:14px}}
   .thema-block .kachel-grid{{margin-bottom:0}}
   .kachel{{background:#f8fafd;border:1px solid var(--bl);border-radius:10px;padding:.55rem .7rem}}
+  .kachel.open{{grid-column:1/-1}}
   .kachel-name{{font-size:.85rem;font-weight:600;color:var(--text);margin-bottom:.35rem;line-height:1.3}}
   .kachel-badges{{display:flex;gap:.3rem;flex-wrap:wrap}}
   .kbadge{{font-size:.65rem;padding:.15rem .45rem;border-radius:20px;font-weight:600}}
@@ -617,6 +699,19 @@ def render_overview(dirpath, root, sub, heute):
   .kachel-links a{{font-size:.82rem;color:var(--mathe);text-decoration:none;padding:.2rem .1rem;display:block}}
   .kachel-links a:hover{{text-decoration:underline}}
   .lehrer-link{{color:#92400e !important;font-style:italic}}
+  /* Spalten Lernseite / Übung / Wissenstest */
+  .kt{{display:flex;flex-direction:column;border:1px solid var(--bl);border-radius:8px;overflow:hidden;background:#fff}}
+  .kt-row{{display:grid;grid-template-columns:repeat(var(--kt-cols,3),minmax(0,1fr));border-top:1px solid var(--bl)}}
+  .kt-row:first-child{{border-top:none}}
+  .kt-cell{{padding:.3rem .5rem;border-left:1px solid var(--bl);min-width:0;display:flex;flex-direction:column;gap:.1rem}}
+  .kt-cell:first-child{{border-left:none}}
+  .kt-head .kt-cell{{font-size:.62rem;text-transform:uppercase;letter-spacing:.08em;font-weight:700;border-bottom:2px solid}}
+  .kt-head .lernen{{color:#1d4ed8;background:#eff6ff;border-bottom-color:#1d4ed8}}
+  .kt-head .uebung{{color:#0f766e;background:#f0fdfa;border-bottom-color:#0f766e}}
+  .kt-head .test{{color:#b91c1c;background:#fff1f2;border-bottom-color:#b91c1c}}
+  .kt-head .sonstig{{color:#7c3aed;background:#f5f3ff;border-bottom-color:#7c3aed}}
+  .kt a{{overflow-wrap:break-word;-webkit-hyphens:auto;hyphens:auto}}
+  .kt-leer{{color:#cbd5e1;font-size:.8rem;padding:.2rem .1rem}}
   .foot{{color:#9aa4b2;font-size:.8rem;text-align:center;margin-top:24px}}
 </style>
 </head>
@@ -886,7 +981,7 @@ TPL_HEAD = r"""<!DOCTYPE html>
   .kachel-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:.5rem;padding:.6rem}
   .kachel{position:relative;background:#f8fafd;border:1px solid var(--bl);border-radius:10px;padding:.55rem .7rem;cursor:pointer;transition:background .12s,border-color .12s;-webkit-tap-highlight-color:transparent}
   .kachel:not(.kachel-leer):hover{background:var(--ml);border-color:#93c5fd}
-  .kachel.open{background:var(--ml);border-color:#93c5fd}
+  .kachel.open{background:var(--ml);border-color:#93c5fd;grid-column:1/-1}
   .kachel-leer{opacity:.4;cursor:default}
   .kachel-name{font-size:.82rem;font-weight:600;color:var(--text);margin-bottom:.35rem;line-height:1.3}
   .kachel-badges{display:flex;gap:.3rem;flex-wrap:wrap}
@@ -901,24 +996,39 @@ TPL_HEAD = r"""<!DOCTYPE html>
   .kbadge.lehrer{background:#fef3c7;color:#92400e;display:none}
   .kbadge.rbka{background:#fef3c7;color:#b45309}
   body.lehrer-mode .kbadge.lehrer{display:inline-block}
-  /* ── Paar-Darstellung ls+ue ── */
-  .kachel-links{margin-top:.5rem;border-top:1px solid var(--bl);padding-top:.4rem;display:flex;flex-direction:column;gap:.2rem}
+  .kachel-links{margin-top:.5rem;border-top:1px solid var(--bl);padding-top:.5rem;display:flex;flex-direction:column;gap:.2rem;cursor:default}
   .kachel-links a{font-size:.78rem;color:var(--mathe);text-decoration:none;padding:.2rem .1rem;display:block}
   .kachel-links a:hover{text-decoration:underline}
   .card[data-fach="bio"] .kachel-links a{color:var(--bio)}
-  .link-pair{display:grid;grid-template-columns:1fr 1fr;gap:.3rem;background:#f0f7ff;border-radius:6px;padding:.2rem .3rem}
-  .card[data-fach="bio"] .link-pair{background:#f0fdf4}
-  .link-pair a{font-size:.75rem;padding:.15rem .2rem}
-  .link-pair a:first-child{border-right:1px solid var(--bl)}
-  .link-single{display:block}
+
+  /* ── Aufgeklappte Kachel: Spalten Lernseite / Übung / Wissenstest ── */
+  .kt{display:flex;flex-direction:column;border:1px solid var(--bl);border-radius:8px;overflow:hidden;background:#fff}
+  .kt-row{display:grid;grid-template-columns:repeat(var(--kt-cols,3),minmax(0,1fr));border-top:1px solid var(--bl)}
+  .kt-row:first-child{border-top:none}
+  .kt-row:not(.kt-head):hover{background:#f8fafd}
+  .kt-cell{padding:.3rem .55rem;border-left:1px solid var(--bl);min-width:0;display:flex;flex-direction:column;gap:.1rem}
+  .kt-cell:first-child{border-left:none}
+  .kt-head .kt-cell{font-size:.64rem;text-transform:uppercase;letter-spacing:.1em;font-weight:700;padding:.4rem .55rem;border-bottom:2px solid}
+  .kt-head .lernen{color:#1d4ed8;background:#eff6ff;border-bottom-color:#1d4ed8}
+  .kt-head .uebung{color:#0f766e;background:#f0fdfa;border-bottom-color:#0f766e}
+  .kt-head .test{color:#b91c1c;background:#fff1f2;border-bottom-color:#b91c1c}
+  .kt-head .sonstig{color:#7c3aed;background:#f5f3ff;border-bottom-color:#7c3aed}
+  .kt a{overflow-wrap:break-word;-webkit-hyphens:auto;hyphens:auto;line-height:1.3}
+  .kt-leer{color:#cbd5e1;font-size:.8rem;padding:.2rem .1rem}
+  /* Zeilen nur aus Lehrerseiten: nur im Lehrermodus */
+  .kt-row.nur-lehrer{display:none}
+  body.lehrer-mode .kt-row.nur-lehrer{display:grid}
+  /* Sonstiges-Spalte, die nur Lehrerseiten enthält: für Schüler ausblenden */
+  body:not(.lehrer-mode) .kt.sonst-lehrer{--kt-cols:3 !important}
+  body:not(.lehrer-mode) .kt.sonst-lehrer .spalte-sonst{display:none}
 
   /* ── Tooltip / Long-Press Info ── */
-  .kachel-tooltip{display:none;position:absolute;top:0;left:100%;margin-left:.5rem;width:200px;max-width:60vw;padding:.5rem .65rem;background:#1e293b;color:#e2e8f0;border-radius:8px;font-size:.72rem;line-height:1.4;box-shadow:0 8px 24px rgba(15,23,42,.35);z-index:30}
-  .kachel-tooltip.tt-left{left:auto;right:100%;margin-left:0;margin-right:.5rem}
+  .kachel-tooltip{display:none;position:absolute;top:0;left:0;width:220px;max-width:60vw;padding:.5rem .65rem;background:#1e293b;color:#e2e8f0;border-radius:8px;font-size:.72rem;line-height:1.4;box-shadow:0 8px 24px rgba(15,23,42,.35);z-index:30}
   .kachel-tooltip .tt-typ{font-weight:700;color:#94a3b8;font-size:.65rem;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.15rem}
   .kachel-tooltip .tt-desc{color:#cbd5e1}
   .kachel-tooltip .tt-path{color:#475569;font-size:.62rem;margin-top:.2rem;word-break:break-all}
   .kachel.tooltip-open .kachel-tooltip{display:block}
+  @media (hover:hover){.kachel-tooltip{pointer-events:none}}
 
   /* Long-press highlight */
   .kachel.pressing{outline:2px solid #f59e0b;outline-offset:2px}
@@ -978,6 +1088,11 @@ TPL_HEAD = r"""<!DOCTYPE html>
     .col-group{border-right:none;border-bottom:1px solid var(--bl)}
     .col-group:last-child{border-bottom:none}
     .kachel-grid{grid-template-columns:repeat(2,1fr)}
+    /* Spalten bleiben, werden nur kompakter */
+    .kachel.open{padding:.5rem .4rem}
+    .kt-cell{padding:.25rem .3rem}
+    .kt-head .kt-cell{font-size:.55rem;letter-spacing:.02em;padding:.35rem .3rem}
+    .kt a{font-size:.7rem}
   }
 
   /* Dino */
@@ -1047,7 +1162,10 @@ TPL_HEAD = r"""<!DOCTYPE html>
 
 """
 
-TPL_JS_HEAD = r"""<script>
+TPL_JS_HEAD = r"""<div id="dino" onclick="dinoClick()">🦖</div>
+<div id="dino-tip">Made by Mathedino 🦖</div>
+
+<script>
 // ── Lehrermodus ──────────────────────────────────────────────────────────────
 let dinoClicks = 0, dinoTimer;
 function dinoClick() {
@@ -1117,66 +1235,15 @@ function toggleJgst(btn){const p=btn.nextElementSibling;const open=p.classList.t
 function toggleAlt(btn){const p=btn.nextElementSibling;const open=p.classList.toggle('open');btn.setAttribute('aria-expanded',open);}
 function toggleKachel(k, event){
   if(k.classList.contains('kachel-leer'))return;
-  // Klick auf einen Link soll die Kachel NICHT schließen
-  if(event && event.target.closest('a')) return;
+  // Klick auf einen Link oder in die Spalten-Tabelle soll die Kachel NICHT schließen
+  if(event && (event.target.closest('a') || event.target.closest('.kt'))) return;
   const l=k.querySelector('.kachel-links');if(!l)return;
   const open=l.style.display!=='none';
   l.style.display=open?'none':'flex';
   k.classList.toggle('open',!open);
-  // Build pairs on first open
-  if(!open && !l.dataset.paired){
-    pairLinks(l);
-    l.dataset.paired='1';
-  }
-}
-
-// ── Paar-Gruppierung ────────────────────────────────────────────────────────
-function pairLinks(container){
-  const links = Array.from(container.querySelectorAll('a'));
-  if(!links.length) return;
-
-  // Stem: remove _ls / _ue / _ls2 / _ue2 suffix before .html
-  function stem(href){
-    return href.replace(/_(ls|ue)\d*\.html$/,'').replace(/_(ls|ue)\d*$/,'');
-  }
-
-  const paired = new Set();
-  const result = [];
-
-  links.forEach((a, i) => {
-    if(paired.has(i)) return;
-    const isLS = /_(ls)\d*\.html$/.test(a.href);
-    if(!isLS){ result.push({type:'single', a}); return; }
-
-    // Look for matching _ue
-    const s = stem(a.href);
-    const partner = links.findIndex((b, j) => j > i && !paired.has(j) && /_(ue)\d*\.html$/.test(b.href) && stem(b.href) === s);
-    if(partner !== -1){
-      paired.add(i); paired.add(partner);
-      result.push({type:'pair', ls:a, ue:links[partner]});
-    } else {
-      result.push({type:'single', a});
-    }
-  });
-  // Add singles that were partners
-  links.forEach((a,i)=>{ if(paired.has(i) && !result.find(r=>r.ue===a||r.ls===a)) result.push({type:'single',a}); });
-
-  // Rebuild DOM
-  container.innerHTML='';
-  result.forEach(r=>{
-    if(r.type==='pair'){
-      const div=document.createElement('div');
-      div.className='link-pair';
-      div.appendChild(r.ls.cloneNode(true));
-      div.appendChild(r.ue.cloneNode(true));
-      container.appendChild(div);
-    } else {
-      const wrap=document.createElement('div');
-      wrap.className='link-single';
-      wrap.appendChild(r.a.cloneNode(true));
-      container.appendChild(wrap);
-    }
-  });
+  hideTooltip(k);
+  // Aufgeklappte Kachel (volle Breite) ins Blickfeld holen
+  if(!open) setTimeout(()=>k.scrollIntoView({block:'nearest',behavior:'smooth'}),30);
 }
 
 // ── Long-Press / Mouseover Info ─────────────────────────────────────────────
@@ -1186,16 +1253,15 @@ TPL_JS_MID = r"""
 
 function getInfo(href){
   const file = href.split('/').pop();
-  return META_INFO[file] || null;
+  return META_INFO[file] || META_INFO[decodeURIComponent(file)] || null;
 }
 
-function showTooltip(kachel, href){
+function showTooltip(kachel, href, link){
   // Remove old tooltip
   const old = kachel.querySelector('.kachel-tooltip');
   if(old) old.remove();
   const info = getInfo(href);
   const file = href.split('/').pop();
-  const path = href.replace('mathe/','').replace('bio/','').replace('kompass/','');
   const div = document.createElement('div');
   div.className = 'kachel-tooltip';
   div.innerHTML = `<div class="tt-typ">${info ? info.typ : 'Datei'}</div>
@@ -1203,15 +1269,23 @@ function showTooltip(kachel, href){
     <div class="tt-path">📄 ${file}</div>`;
   kachel.appendChild(div);
   kachel.classList.add('tooltip-open');
-  // Seitlich rechts als Standard; bei Platzmangel am Bildschirmrand nach links ausweichen
-  const rect = kachel.getBoundingClientRect();
-  const tooltipWidth = Math.min(200, window.innerWidth * 0.6);
-  if(rect.right + tooltipWidth + 24 > window.innerWidth){
-    div.classList.add('tt-left');
-  }
+  // Unter dem Link anzeigen (Kachel ist aufgeklappt volle Breite);
+  // reicht der Platz im Themenblock nicht, über dem Link.
+  const kr = kachel.getBoundingClientRect();
+  const lr = (link || kachel).getBoundingClientRect();
+  const w = div.offsetWidth, h = div.offsetHeight;
+  let left = lr.left - kr.left;
+  left = Math.max(0, Math.min(left, kr.width - w));
+  const block = kachel.closest('.thema-block') || kachel;
+  const br = block.getBoundingClientRect();
+  let top = lr.bottom - kr.top + 4;
+  if(lr.bottom + 4 + h > br.bottom) top = lr.top - kr.top - h - 4;
+  div.style.left = left + 'px';
+  div.style.top = top + 'px';
 }
 
 function hideTooltip(kachel){
+  if(!kachel) return;
   kachel.classList.remove('tooltip-open');
   const t = kachel.querySelector('.kachel-tooltip');
   if(t) t.remove();
@@ -1228,7 +1302,7 @@ document.addEventListener('pointerdown', e=>{
   pressHref = link.getAttribute('href');
   kachel.classList.add('pressing');
   pressTimer = setTimeout(()=>{
-    showTooltip(kachel, pressHref);
+    showTooltip(kachel, pressHref, link);
     kachel.classList.remove('pressing');
   }, 600);
 }, {passive:true});
@@ -1249,7 +1323,7 @@ document.addEventListener('mouseover', e=>{
   if(!link) return;
   const kachel = link.closest('.kachel');
   if(!kachel) return;
-  showTooltip(kachel, link.getAttribute('href'));
+  showTooltip(kachel, link.getAttribute('href'), link);
 });
 
 document.addEventListener('mouseout', e=>{
@@ -1258,7 +1332,7 @@ document.addEventListener('mouseout', e=>{
   const related = e.relatedTarget;
   const kachel = link.closest('.kachel');
   if(!kachel) return;
-  if(!kachel.contains(related)) hideTooltip(kachel);
+  if(!related || !related.closest || !related.closest('.kachel-links a')) hideTooltip(kachel);
 });
 
 // Klick auf Tooltip schließt ihn
