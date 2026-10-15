@@ -36,6 +36,7 @@
     border-radius:14px; padding:1.1rem 1.25rem; margin-bottom:1rem;}
   header.kopf h1{margin:0 0 .3rem; font-size:1.6rem; color:var(--blue-dark);}
   header.kopf p{margin:0; font-size:1.0625rem;}
+  header.kopf p + p{margin-top:.4rem;}
 
   .tabs{display:flex; flex-wrap:wrap; gap:.5rem; margin-bottom:1rem;}
   .tab{min-height:44px; min-width:44px; padding:.55rem 1rem; font-size:1rem; font-weight:600;
@@ -121,6 +122,49 @@
   .kos .lbl{font-size:20px; font-style:italic; fill:var(--ink);}
   .kos .tick{font-size:16px; fill:var(--ink);}
 
+
+  /* ---------- Selbsteinschätzung & Fragen ---------- */
+  .reflex{margin-top:.9rem; padding:.7rem .9rem; border:2px dashed var(--line); border-radius:12px; background:var(--bg);}
+  .reflex .rf-titel{margin:0 0 .3rem; font-weight:600;}
+  .sterne{display:flex; flex-wrap:wrap; align-items:center; gap:.15rem;}
+  .stern{min-width:44px; min-height:44px; font-size:1.7rem; line-height:1; padding:0; background:none; border:none;
+    color:var(--amber); cursor:pointer;}
+  .stern:active{transform:scale(.9);}
+  .stern-null{min-width:44px; min-height:44px; padding:0 .8rem; margin-right:.3rem; font-size:1rem; font-weight:600;
+    border:2px solid var(--line); border-radius:10px; background:var(--card); color:var(--ink); cursor:pointer;}
+  .stern-null.aktiv{border-color:var(--amber); background:var(--amber-light); color:var(--amber-dark);}
+  .rf-wert{font-size:1rem; margin-left:.5rem;}
+  .btn-frage{min-height:44px; padding:.5rem 1rem; margin-top:.5rem; font-size:1rem; font-weight:600; cursor:pointer;
+    border:2px solid var(--blue); background:var(--card); color:var(--blue-dark); border-radius:10px;}
+  .btn-frage.hat{background:var(--blue-light);}
+  .frage-box{display:none; margin-top:.5rem;}
+  .frage-box textarea{display:block; width:100%; min-height:5.5rem; font-size:1.0625rem; font-family:inherit; line-height:1.45;
+    padding:.5rem .7rem; border:2px solid var(--line); border-radius:8px; color:var(--ink); background:var(--card); resize:vertical;}
+  .frage-box textarea:focus{outline:none; border-color:var(--blue);}
+  .frage-box .hinweis{margin:.3rem 0 0;}
+
+  /* ---------- Zusammenfassung ---------- */
+  .tab.tab-zs{border-style:dashed;}
+  .zs-stats{display:flex; flex-wrap:wrap; gap:.8rem; margin:.6rem 0;}
+  .zs-stat{flex:1 1 180px; border:2px solid var(--line); border-radius:12px; padding:.6rem .9rem; background:var(--bg);}
+  .zs-zahl{display:block; font-size:1.6rem; font-weight:700; color:var(--blue-dark);}
+  .zs-label{display:block; font-size:1rem;}
+  .zs-offen{border:3px solid var(--red); border-radius:12px; padding:.6rem 1rem; margin:.8rem 0;}
+  .zs-offen.leer{border-color:var(--green);}
+  .zs-offen h3{margin-top:.2rem;}
+  .frage-item{border-top:1px solid var(--line); padding:.6rem 0;}
+  .frage-item:first-of-type{border-top:none;}
+  .frage-text{white-space:pre-wrap; background:var(--blue-light); border-radius:8px; padding:.5rem .8rem; margin:.4rem 0;}
+  .frage-item.geklaert .frage-text{background:var(--bg); text-decoration:line-through;}
+  .badge{display:inline-block; font-size:1rem; font-weight:700; padding:.1rem .6rem; border-radius:6px; white-space:nowrap;}
+  .badge.ok{background:var(--green); color:var(--card);}
+  .badge.falsch{background:var(--red); color:var(--card);}
+  .badge.offen{background:var(--blue-light); color:var(--blue-dark);}
+  .zs-sterne{color:var(--amber); font-size:1.25rem; white-space:nowrap;}
+  .zs-link{min-height:44px; padding:.3rem 0; font-size:1rem; font-weight:600; text-align:left; cursor:pointer;
+    background:none; border:none; color:var(--blue-dark); text-decoration:underline;}
+  .krit td.zs-mitte{white-space:nowrap;}
+
   .dino{position:fixed; right:14px; bottom:12px; font-size:1.6rem; cursor:pointer;
     min-width:44px; min-height:44px; display:flex; align-items:center; justify-content:center; opacity:.75;}
   .dino-info{position:fixed; right:14px; bottom:62px; background:var(--ink); color:var(--card);
@@ -134,6 +178,7 @@
 <header class="kopf">
   <h1>Fehler aus der Klausur</h1>
   <p>Jede Karte nimmt einen echten Fehler aus der Klausur unter die Lupe: Was ist passiert? Warum ist das falsch? Wie geht es richtig? Danach übst du selbst.</p>
+  <p>Bei jeder Aufgabe schätzt du mit 0 bis 5 Sternen ein, wie gut du sie jetzt verstanden hast, und kannst Fragen notieren. Alles sammelt sich im Tab „Zusammenfassung“.</p>
 </header>
 
 <nav class="tabs" role="tablist">
@@ -142,6 +187,7 @@
   <button class="tab" data-tab="f3">Fehler 3: Notwendig ≠ hinreichend</button>
   <button class="tab" data-tab="f4">Fehler 4: V′(x) = 0 lösen</button>
   <button class="tab" data-tab="f5">Fehler 5: Graph von f′ deuten</button>
+  <button class="tab tab-zs" data-tab="zs">📋 Zusammenfassung</button>
 </nav>
 
 <!-- ============ FEHLER 1 ============ -->
@@ -1145,6 +1191,16 @@
   </div>
 </section>
 
+<!-- ============ ZUSAMMENFASSUNG ============ -->
+<section class="panel" id="zs">
+  <div class="card">
+    <h2>Zusammenfassung</h2>
+    <p>Hier siehst du alle Aufgaben auf einen Blick: ob du sie gelöst hast, wie gut du sie verstanden hast und welche Fragen noch offen sind. Tippe auf eine Aufgabe, um direkt zu ihr zu springen.</p>
+    <div id="zsInhalt"></div>
+    <p><b>Gut zu wissen:</b> Deine Eingaben, Sterne und Fragen bleiben erhalten, wenn du die Seite neu lädst. Schließt du den Tab, ist alles gelöscht. Schreib dir offene Fragen also rechtzeitig ins Heft.</p>
+  </div>
+</section>
+
 </div>
 
 <div class="dino" id="dino" aria-label="Made by ASzym">🦖</div>
@@ -1153,7 +1209,11 @@
 <script>
 (function(){
   // ---------- Hilfsfunktionen ----------
-  function typeset(el){ if(window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise([el]); }
+  function typeset(el){
+    if(!window.MathJax) return;
+    var los = function(){ if(MathJax.typesetPromise) MathJax.typesetPromise([el]).catch(function(){}); };
+    if(MathJax.startup && MathJax.startup.promise) MathJax.startup.promise.then(los); else los();
+  }
   function setFb(el, art, html){
     el.className = 'fb ' + art;
     el.innerHTML = html;
@@ -1169,30 +1229,63 @@
     for(let i = a.length - 1; i > 0; i--){ const j = Math.floor(Math.random()*(i+1)); [a[i], a[j]] = [a[j], a[i]]; }
     return a;
   }
+  function esc(t){
+    return String(t).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; });
+  }
 
-  // ---------- Zustand (nur JS-Speicher) ----------
-  const state = {};
-  function S(task){ return state[task.id] || (state[task.id] = {locked:false, selected:null, tipps:0, hilfe:false}); }
+  // ---------- Zustand: JS-Speicher, gesichert in sessionStorage ----------
+  // Neuladen behält den Stand, Schließen des Tabs leert ihn. Kein dauerhafter Speicher, nichts auf einem Server.
+  const SPEICHER_KEY = 'aszym:klausur_fehler_rbka:v1';
+  let G = null;
+  try { G = JSON.parse(sessionStorage.getItem(SPEICHER_KEY)); } catch(e){ G = null; }
+  if(!G || typeof G !== 'object') G = {};
+  G.order = G.order || {}; G.tasks = G.tasks || {}; G.tab = G.tab || 'f1';
+  function save(){ try { sessionStorage.setItem(SPEICHER_KEY, JSON.stringify(G)); } catch(e){} }
+  function S(task){
+    return G.tasks[task.id] || (G.tasks[task.id] = {locked:false, sel:null, vals:[], tipps:0, hilfe:false, muster:false,
+      rating:null, frage:'', frageAuf:false, geklaert:false});
+  }
 
-  // ---------- 1. MC-Optionen einmal mischen (VOR allen Bindungen) ----------
-  document.querySelectorAll('.mc-opts').forEach(function(box){
-    shuffle(Array.from(box.children)).forEach(function(c){ box.appendChild(c); });
+  // Titel der Aufgaben merken, bevor MathJax sie umschreibt
+  const tabName = {};
+  document.querySelectorAll('.tab').forEach(function(t){ tabName[t.dataset.tab] = t.textContent; });
+  const tasks = Array.from(document.querySelectorAll('.task'));
+  tasks.forEach(function(task){
+    task.dataset.titel = task.querySelector('h3').innerHTML;
+    task.dataset.gruppe = task.closest('.panel').id;
   });
 
+  // ---------- 1. MC-Optionen einmal mischen (VOR allen Bindungen), Reihenfolge stabil ----------
+  document.querySelectorAll('.mc-opts').forEach(function(box, b){
+    const kinder = Array.from(box.children);
+    kinder.forEach(function(c, i){ c.dataset.i = i; });
+    const alt = G.order[b];
+    let reihe;
+    if(Array.isArray(alt) && alt.length === kinder.length) reihe = alt.map(function(i){ return kinder[i]; });
+    else { reihe = shuffle(kinder.slice()); G.order[b] = reihe.map(function(c){ return Number(c.dataset.i); }); }
+    reihe.forEach(function(c){ box.appendChild(c); });
+  });
+  save();
+
   // ---------- 2. Tabs ----------
+  function zeigeTab(id){
+    if(!document.getElementById(id)) id = 'f1';
+    document.querySelectorAll('.tab').forEach(function(x){ x.classList.toggle('aktiv', x.dataset.tab === id); });
+    document.querySelectorAll('.panel').forEach(function(p){ p.classList.toggle('aktiv', p.id === id); });
+    G.tab = id; save();
+    if(id === 'zs') renderZusammenfassung();
+  }
   document.querySelectorAll('.tab').forEach(function(t){
-    t.addEventListener('click', function(){
-      document.querySelectorAll('.tab').forEach(function(x){ x.classList.toggle('aktiv', x === t); });
-      document.querySelectorAll('.panel').forEach(function(p){ p.classList.toggle('aktiv', p.id === t.dataset.tab); });
-    });
+    t.addEventListener('click', function(){ zeigeTab(t.dataset.tab); });
   });
 
   // ---------- 3. Aufgaben binden ----------
-  document.querySelectorAll('.task').forEach(function(task){
+  tasks.forEach(function(task){
     const fb = task.querySelector('.fb');
     const btnP = task.querySelector('.btn-pruefen');
     const btnL = task.querySelector('.btn-leeren');
     const hilfe = task.querySelector('.hilfe');
+    let pruefen = null;
 
     function hilfeFreigeben(){
       if(!hilfe) return;
@@ -1202,36 +1295,50 @@
 
     if(task.dataset.kind === 'mc'){
       const opts = Array.from(task.querySelectorAll('.opt'));
+      const gewaehlt = function(){ const st = S(task); return opts.find(function(x){ return x.dataset.i === String(st.sel); }) || null; };
       opts.forEach(function(o){
         o.addEventListener('click', function(){
           const st = S(task); if(st.locked) return;
           opts.forEach(function(x){ x.classList.toggle('gewaehlt', x === o); });
-          st.selected = o;
+          st.sel = Number(o.dataset.i); save();
         });
       });
-      btnP.addEventListener('click', function(){
+      pruefen = function(){
         const st = S(task); if(st.locked) return;
-        if(!st.selected){ setFb(fb, 'info', 'Wähle zuerst eine Option aus.'); return; }
+        const o = gewaehlt();
+        if(!o){ setFb(fb, 'info', 'Wähle zuerst eine Option aus.'); return; }
         st.locked = true;
         opts.forEach(function(x){ x.disabled = true; });
-        const richtig = st.selected.dataset.ok === '1';
-        st.selected.classList.remove('gewaehlt');
-        st.selected.classList.add(richtig ? 'ok' : 'falsch');
-        setFb(fb, richtig ? 'gut' : 'schlecht', (richtig ? '✅ ' : '❌ ') + st.selected.dataset.hint);
+        const richtig = o.dataset.ok === '1';
+        st.richtig = richtig;
+        o.classList.remove('gewaehlt');
+        o.classList.add(richtig ? 'ok' : 'falsch');
+        setFb(fb, richtig ? 'gut' : 'schlecht', (richtig ? '✅ ' : '❌ ') + o.dataset.hint);
         btnL.style.display = richtig ? 'none' : 'inline-block';
-      });
+        save();
+      };
+      btnP.addEventListener('click', pruefen);
       btnL.addEventListener('click', function(){
         const st = S(task);
-        st.locked = false; st.selected = null;
+        st.locked = false; st.sel = null; st.richtig = undefined;
         opts.forEach(function(x){ x.disabled = false; x.classList.remove('ok','falsch','gewaehlt'); });
         fb.style.display = 'none'; btnL.style.display = 'none';
+        save();
       });
+      // Stand wiederherstellen
+      const st0 = S(task);
+      const o0 = gewaehlt();
+      if(o0) o0.classList.add('gewaehlt');
+      if(st0.locked){ st0.locked = false; pruefen(); }
     }
 
     if(task.dataset.kind === 'num'){
       const inputs = Array.from(task.querySelectorAll('.ans'));
       const loesung = task.dataset.sol.split(';').map(Number);
-      btnP.addEventListener('click', function(){
+      inputs.forEach(function(inp, k){
+        inp.addEventListener('input', function(){ const st = S(task); st.vals[k] = inp.value; save(); });
+      });
+      pruefen = function(){
         const st = S(task); if(st.locked) return;
         const werte = inputs.map(function(i){ return parseNum(i.value); });
         if(werte.some(function(v){ return v === null; })){
@@ -1246,9 +1353,11 @@
         st.locked = true;
         inputs.forEach(function(i){ i.disabled = true; });
         if(treffer === loesung.length){
+          st.richtig = true;
           setFb(fb, 'gut', loesung.length === 1 ? '✅ Richtig!' : (loesung.length === 2 ? '✅ Richtig! Beide Lösungen stimmen.' : '✅ Richtig! Alle Lösungen stimmen.'));
           btnL.style.display = 'none';
         } else {
+          st.richtig = false;
           let msg = treffer > 0 ? task.dataset.partial : task.dataset.wrong;
           if(task.dataset.trap){
             const fallen = task.dataset.trap.split(';').map(Number);
@@ -1258,12 +1367,19 @@
           btnL.style.display = 'inline-block';
           hilfeFreigeben();
         }
-      });
+        save();
+      };
+      btnP.addEventListener('click', pruefen);
       btnL.addEventListener('click', function(){
-        const st = S(task); st.locked = false;
+        const st = S(task); st.locked = false; st.vals = []; st.richtig = undefined;
         inputs.forEach(function(i){ i.disabled = false; i.value = ''; i.classList.remove('ok','falsch'); });
         fb.style.display = 'none'; btnL.style.display = 'none';
+        save();
       });
+      // Stand wiederherstellen
+      const st0 = S(task);
+      inputs.forEach(function(inp, k){ if(st0.vals[k] != null) inp.value = st0.vals[k]; });
+      if(st0.locked){ st0.locked = false; pruefen(); }
     }
 
     // Gestufte Tipps + Musterlösung (erst nach Fehler sichtbar)
@@ -1272,22 +1388,174 @@
       const btnT = hilfe.querySelector('.btn-tipp');
       const btnM = hilfe.querySelector('.btn-muster');
       const muster = hilfe.querySelector('.muster');
+      function tippKnopf(){
+        const st = S(task);
+        if(st.tipps >= tipps.length) btnT.style.display = 'none';
+        else btnT.textContent = '💡 Tipp ' + (st.tipps + 1) + ' von ' + tipps.length + ' zeigen';
+      }
       btnT.addEventListener('click', function(){
         const st = S(task);
         if(st.tipps < tipps.length){
           tipps[st.tipps].style.display = 'block'; typeset(tipps[st.tipps]); st.tipps++;
         }
-        if(st.tipps >= tipps.length) btnT.style.display = 'none';
-        else btnT.textContent = '💡 Tipp ' + (st.tipps + 1) + ' von ' + tipps.length + ' zeigen';
+        tippKnopf(); save();
       });
+      function musterZeigen(offen){
+        muster.style.display = offen ? 'block' : 'none';
+        btnM.textContent = offen ? '📝 Musterlösung ausblenden' : '📝 Musterlösung zeigen';
+        if(offen) typeset(muster);
+      }
       btnM.addEventListener('click', function(){
-        const offen = muster.style.display === 'block';
-        muster.style.display = offen ? 'none' : 'block';
-        btnM.textContent = offen ? '📝 Musterlösung zeigen' : '📝 Musterlösung ausblenden';
-        if(!offen) typeset(muster);
+        const st = S(task); st.muster = !st.muster; musterZeigen(st.muster); save();
+      });
+      // Stand wiederherstellen
+      const st0 = S(task);
+      if(st0.hilfe){
+        hilfe.style.display = 'block';
+        for(let k = 0; k < Math.min(st0.tipps, tipps.length); k++) tipps[k].style.display = 'block';
+        tippKnopf();
+        if(st0.muster) musterZeigen(true);
+      }
+    }
+
+    // ---------- Selbsteinschätzung (0–5 Sterne) & Frage notieren ----------
+    const rf = document.createElement('div');
+    rf.className = 'reflex';
+    let sterneHtml = '<button type="button" class="stern-null" data-w="0" aria-label="0 Sterne">0</button>';
+    for(let k = 1; k <= 5; k++) sterneHtml += '<button type="button" class="stern" data-w="' + k + '" aria-label="' + k + ' von 5 Sternen">☆</button>';
+    rf.innerHTML =
+      '<p class="rf-titel">Wie gut hast du das jetzt verstanden?</p>' +
+      '<div class="sterne">' + sterneHtml + '<span class="rf-wert"></span></div>' +
+      '<button type="button" class="btn-frage">❓ Frage notieren</button>' +
+      '<div class="frage-box"><textarea placeholder="Was ist dir hier noch unklar?" aria-label="Deine Frage zu dieser Aufgabe"></textarea>' +
+      '<p class="hinweis">Deine Frage erscheint in der Zusammenfassung.</p></div>';
+    task.appendChild(rf);
+    const sBtns = Array.from(rf.querySelectorAll('.stern'));
+    const nullBtn = rf.querySelector('.stern-null');
+    const wert = rf.querySelector('.rf-wert');
+    const btnF = rf.querySelector('.btn-frage');
+    const fBox = rf.querySelector('.frage-box');
+    const ta = rf.querySelector('textarea');
+    function sterneZeigen(){
+      const r = S(task).rating;
+      sBtns.forEach(function(b){ b.textContent = (r != null && Number(b.dataset.w) <= r) ? '★' : '☆'; });
+      nullBtn.classList.toggle('aktiv', r === 0);
+      wert.textContent = r == null ? 'noch nicht bewertet' : r + ' von 5';
+    }
+    function frageKnopf(){
+      const st = S(task);
+      const hat = st.frage.trim() !== '';
+      btnF.classList.toggle('hat', hat);
+      btnF.textContent = st.frageAuf ? '❓ Frage einklappen' : (hat ? '❓ Deine Frage ansehen' : '❓ Frage notieren');
+      fBox.style.display = st.frageAuf ? 'block' : 'none';
+    }
+    sBtns.concat([nullBtn]).forEach(function(b){
+      b.addEventListener('click', function(){ S(task).rating = Number(b.dataset.w); sterneZeigen(); save(); });
+    });
+    btnF.addEventListener('click', function(){
+      const st = S(task); st.frageAuf = !st.frageAuf; frageKnopf(); save();
+      if(st.frageAuf) ta.focus();
+    });
+    ta.addEventListener('input', function(){
+      const st = S(task); st.frage = ta.value;
+      if(st.frage.trim() === '') st.geklaert = false;
+      btnF.classList.toggle('hat', st.frage.trim() !== ''); save();
+    });
+    ta.value = S(task).frage;
+    sterneZeigen(); frageKnopf();
+    task.frageOeffnen = function(){ S(task).frageAuf = true; frageKnopf(); save(); };
+  });
+
+  // ---------- 4. Zusammenfassung ----------
+  function sterneText(r){
+    if(r == null) return '<span class="badge offen">nicht bewertet</span>';
+    return '<span class="zs-sterne" aria-label="' + r + ' von 5 Sternen">' + '★'.repeat(r) + '☆'.repeat(5 - r) + '</span>';
+  }
+  function ergebnis(st){
+    if(st.locked && st.richtig === true) return '<span class="badge ok">✓ richtig</span>';
+    if(st.locked && st.richtig === false) return '<span class="badge falsch">✗ noch falsch</span>';
+    return '<span class="badge offen">offen</span>';
+  }
+  function renderZusammenfassung(){
+    const box = document.getElementById('zsInhalt');
+    let richtig = 0, bewertet = 0, summe = 0;
+    const fragen = [], schwach = [];
+    tasks.forEach(function(t){
+      const st = S(t);
+      if(st.locked && st.richtig === true) richtig++;
+      if(st.rating != null){ bewertet++; summe += st.rating; if(st.rating <= 2) schwach.push(t); }
+      if(st.frage.trim() !== '') fragen.push(t);
+    });
+    const offen = fragen.filter(function(t){ return !S(t).geklaert; });
+    let h = '';
+    h += '<div class="zs-stats">' +
+      '<div class="zs-stat"><span class="zs-zahl">' + richtig + ' / ' + tasks.length + '</span><span class="zs-label">Aufgaben richtig gelöst</span></div>' +
+      '<div class="zs-stat"><span class="zs-zahl">' + (bewertet ? (summe / bewertet).toFixed(1).replace('.', ',') + ' ★' : '–') + '</span><span class="zs-label">Verständnis im Schnitt (' + bewertet + ' von ' + tasks.length + ' bewertet)</span></div>' +
+      '<div class="zs-stat"><span class="zs-zahl">' + offen.length + '</span><span class="zs-label">offene Fragen</span></div>' +
+      '</div>';
+
+    // Offene Fragen
+    h += '<div class="zs-offen' + (offen.length ? '' : ' leer') + '">';
+    if(fragen.length === 0){
+      h += '<h3>✅ Keine Fragen notiert</h3><p>Wenn dir bei einer Aufgabe etwas unklar ist, tippe dort auf „❓ Frage notieren“.</p>';
+    } else {
+      h += offen.length
+        ? '<h3>❓ ' + (offen.length === 1 ? 'Eine Frage ist' : offen.length + ' Fragen sind') + ' noch offen</h3><p>Kläre sie mit deiner Lehrkraft oder deinem Lernpartner. Danach kannst du sie als geklärt markieren.</p>'
+        : '<h3>✅ Alle notierten Fragen sind geklärt</h3>';
+      fragen.forEach(function(t){
+        const st = S(t);
+        h += '<div class="frage-item' + (st.geklaert ? ' geklaert' : '') + '">' +
+          '<button type="button" class="zs-link" data-goto="' + t.id + '">' + esc(tabName[t.dataset.gruppe]) + ' – ' + t.dataset.titel + '</button>' +
+          '<div class="frage-text tex2jax_ignore">' + esc(st.frage.trim()) + '</div>' +
+          '<button type="button" class="btn ' + (st.geklaert ? 'btn-leeren' : 'btn-pruefen') + '" style="display:inline-block" data-klaer="' + t.id + '">' +
+          (st.geklaert ? '↩ wieder offen' : '✓ geklärt') + '</button></div>';
       });
     }
-  });
+    h += '</div>';
+
+    // Wenig verstanden
+    if(schwach.length){
+      h += '<h3>Noch einmal anschauen (2 Sterne oder weniger)</h3><ul>';
+      schwach.forEach(function(t){
+        h += '<li><button type="button" class="zs-link" data-goto="' + t.id + '">' + esc(tabName[t.dataset.gruppe]) + ' – ' + t.dataset.titel + '</button></li>';
+      });
+      h += '</ul>';
+    }
+
+    // Alle Aufgaben je Fehler
+    h += '<h3>Alle Aufgaben</h3>';
+    const gruppen = [];
+    tasks.forEach(function(t){ if(gruppen.indexOf(t.dataset.gruppe) < 0) gruppen.push(t.dataset.gruppe); });
+    gruppen.forEach(function(g){
+      h += '<p><b>' + esc(tabName[g]) + '</b></p><div class="krit-wrap"><table class="krit"><thead><tr><th>Aufgabe</th><th>Ergebnis</th><th>Verständnis</th><th>Frage</th></tr></thead><tbody>';
+      tasks.filter(function(t){ return t.dataset.gruppe === g; }).forEach(function(t){
+        const st = S(t);
+        const fr = st.frage.trim() === '' ? '–' : (st.geklaert ? '✓ geklärt' : '❓ offen');
+        h += '<tr><td><button type="button" class="zs-link" data-goto="' + t.id + '">' + t.dataset.titel + '</button></td>' +
+          '<td class="zs-mitte">' + ergebnis(st) + '</td><td class="zs-mitte">' + sterneText(st.rating) + '</td><td class="zs-mitte">' + fr + '</td></tr>';
+      });
+      h += '</tbody></table></div>';
+    });
+
+    box.innerHTML = h;
+    box.querySelectorAll('[data-goto]').forEach(function(b){
+      b.addEventListener('click', function(){
+        const t = document.getElementById(b.dataset.goto);
+        zeigeTab(t.dataset.gruppe);
+        if(S(t).frage.trim() !== '') t.frageOeffnen();
+        t.scrollIntoView({behavior:'smooth', block:'start'});
+      });
+    });
+    box.querySelectorAll('[data-klaer]').forEach(function(b){
+      b.addEventListener('click', function(){
+        const st = S(document.getElementById(b.dataset.klaer));
+        st.geklaert = !st.geklaert; save(); renderZusammenfassung();
+      });
+    });
+    typeset(box);
+  }
+
+  zeigeTab(G.tab);
 
   // ---------- T-Rex ----------
   const dino = document.getElementById('dino'), info = document.getElementById('dinoInfo');
