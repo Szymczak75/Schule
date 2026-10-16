@@ -18,6 +18,7 @@ Die Projekte holen sich die Dateien über die GitHub-Synchronisation von claude.
 | `geogebra/` | Baukasten (`css.txt`, `helfer.js`, `bauer.py`, `koord.py`, `test.js`, `LIESMICH.md`) und `anweisung_geogebra_projekt.md`, `geogebra_befehle_geprueft.md`, `geogebra_roadmap.md`, `projekt_aufbau.md` |
 | `plan/` | laufende Planung (`plan_navigation_impressum.md`) und Entwürfe |
 | `PROJEKT-LANDKARTE.md` | welche Datei in welches Projekt gehört |
+| `anweisung_wartung_projekt.md` | Text für das Feld „Anweisungen" des Wartungs-Projekts |
 
 ## Welches Projekt synchronisiert welche Ordner?
 
