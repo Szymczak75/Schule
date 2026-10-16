@@ -142,7 +142,9 @@ Ordner-Übersichten `_*.html` über `linking.txt`). Änderungen an der Startseit
   `https://szymczak75.github.io/Schule/dino_hub.html`. Zusätzlich schwebender
   **🏠-Knopf unten links**.
 - Impressum: **Andreas Szymczak, Frankenweg 249, 45665 Recklinghausen**,
-  Kontakt aszymczak@my-mcg.de (als Text, kein `mailto:`-Link). Lizenz: noch offen.
+  Kontakt aszymczak@my-mcg.de (als Text, kein `mailto:`-Link).
+  **Lizenz entschieden (16.10.2026): CC BY-SA 4.0** (nutzen/anpassen/weitergeben mit
+  Namensnennung „Andreas Szymczak / Mathedino", Weitergabe unter gleicher Lizenz).
 - **Feedback-Knopf „✉️ Feedback zu dieser Seite"** (Variante 1): Popup mit Fehler/Idee/Lob
   und Textfeld → öffnet Mailprogramm. Seitentitel und Seitenadresse automatisch in
   Betreff/Text, Betreff beginnt mit `[Dino-Feedback]`. Adresse per JS zusammengesetzt,
@@ -183,26 +185,40 @@ Ordner-Übersichten `_*.html` über `linking.txt`). Änderungen an der Startseit
   `anweisung_geogebra_projekt.md`; `test.js` startet Chromium im neuen Headless-Modus)
   → ebenfalls PR #2. Im echten Browser mit Neuladen getestet.
 
-**Als Nächstes:**
-1. Schritt 3 (Nachrüst-Skript, PR mit Prüfbericht). **Befund aus Schritt 2 (Lauf über
-   442 Seiten):** 421 ohne Leiste (`NAV`); **183 Seiten binden Google Fonts ein** → das
-   Skript entfernt den `<link>` (und `preconnect`/`@import`) – die `font-family`-Angaben
-   fallen dann auf ihre Ersatzschrift zurück, Stichprobe im Browser ansehen. **Auch die
-   Startseite** lädt Google Fonts (`build_hub.py`, Playfair Display/Source Sans 3) → dort
-   von Hand auf Systemschriften umstellen. **6 Seiten sind nicht UTF-8** (`blutzucker_kl9_
-   erarbeitung`, fünf Winkel-Seiten Klasse 7) → Skript muss die Kodierung erkennen und
-   als UTF-8 zurückschreiben, sonst überspringen und melden. Leiste immer vor dem T-Rex
-   einsetzen, nie in `<main>`. **Neu (Entscheidung 16.10.2026):** Das
-   Skript setzt zusätzlich einen einheitlichen **Neulade-Schutz Stufe 1** in alle bestehenden
-   Seiten (ca. 344 interaktive von 430): Feldwerte, Auswahllisten, Häkchen und die offene Karte
-   im `sessionStorage`, Schlüssel `aszym:<datei>:v1`, try/catch. Prüfergebnisse,
-   MC-Markierungen und Zuordnungen kommen damit nicht zurück (dann erneut „Prüfen"). Seiten,
-   die schon `sessionStorage` nutzen (2), werden übersprungen. Leeren-Knöpfe der Seiten
-   müssen das Feld auch im Speicher leeren (Baustein hört auf Eingabe-Ereignisse; Leeren per
-   Skript setzt nur `value` → Baustein speichert zusätzlich bei jedem Klick).
-   **Stufe 2** (voller Schutz wie im Baukasten) nach und nach für die Seiten, die gerade im
-   Unterricht laufen, bzw. beim nächsten Überarbeiten (Debugging-Regel).
-2. Schritt 4 (Impressum-Seite, Lizenz klären).
+**Erledigt (Fortsetzung, 16.10.2026):**
+- **Schritt 3a** (sicherer Teil) → **PR #5** (Branch `nachruesten-leiste-fonts`):
+  - Nachrüst-Skript `_wartung/allgemein/nachruesten.py` (idempotent, Trockenlauf/`--apply`):
+    Navigationsleiste in 427 Seiten, Google Fonts aus 183 Seiten entfernt.
+  - 6 beschädigte Seiten per `repariere_bytes.py` repariert (3. Byte in 3-Byte-UTF-8-
+    Sequenzen war `0x3f`): `–  →  ⇒  −  ✓  ❌  ⏱  ⊕  ⊖  ▸  ₂  ●  ⟳`, u. a. Zellatmungs-
+    gleichung O₂/CO₂. (Die 6 waren schon beschädigt im Repo – blindes Umkodieren wäre
+    falsch, das Nachrüst-Skript kodiert daher NICHT um, sondern meldet nur.)
+  - 36 GeoGebra-Seiten `oberthema` „Grafikrechner" → „GeoGebra Suite".
+  - Verifiziert: `pruefe.py` NAV 5→0, EXTERN 4→0, sonst unverändert.
+- **Schritt 3b** (Neulade-Schutz Stufe 1) → **PR #6** (Branch `neuladeschutz-stufe1`):
+  - `baustein_neuladeschutz.html` (v1) in 338 interaktive Seiten via
+    `nachruesten_neuladeschutz.py`. Feldwerte/Häkchen/offene Karte überstehen Neuladen;
+    Bewertungen bewusst nicht (dann erneut „Prüfen"). Im Browser getestet (Playwright).
+- **Schritt 4** (Impressum & Datenschutz) → **PR #7** (Branch `impressum-datenschutz`):
+  - Neue Seite `impressum.html` im Repo-Root (feste Adresse
+    `…/Schule/impressum.html`, `hubignore`, Dino-Look): Impressum § 18 MStV
+    (Name + Anschrift + Schul-Mail als Text), Datenschutz (nur `sessionStorage` lokal,
+    GitHub Pages sieht IP, MathJax vom jsDelivr-CDN sieht IP), **Lizenz CC BY-SA 4.0**,
+    „Fehler gefunden?". Eigener 🏠-Knopf + Zurück-Button + T-Rex.
+  - Navigations-Baustein **v4**: Impressum-Link freigeschaltet; Leiste auf allen Seiten
+    v3→v4 ersetzt. `pruefe.py` `NAV_VERSION`→v4. Nachrüst-Skript schließt jetzt
+    `dino_hub.html` aus (wird von `build_hub.py` erzeugt).
+
+**Noch offen:**
+1. **`build_hub.py` / `dino_hub.html`:** Startseite lädt noch Google Fonts
+   (Playfair Display / Source Sans 3) → in `build_hub.py` auf Systemschriften umstellen
+   (Datenschutz). Betrifft nur die Startseite.
+2. **Neulade-Schutz Stufe 2** (voller Schutz inkl. Bewertungen, wie im Baukasten) nach und
+   nach für Seiten im laufenden Unterricht bzw. beim nächsten Überarbeiten.
+3. **Echte Seiten-Bugs** (kein GeoGebra): `handyordnung_ls`, `hausordnung_ls`,
+   `schulregeln_test` – mehrfach definierte Funktionen (`DOPPELT`) und `localStorage`
+   (`STORAGE`). Brauchen inhaltliche Prüfung.
+4. Optional: `pruefe.py`-Regel „Neulade-Schutz vorhanden?" + Anweisung nachziehen.
 
 ---
 
