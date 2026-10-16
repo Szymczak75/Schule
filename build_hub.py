@@ -892,7 +892,6 @@ TPL_HEAD = r"""<!DOCTYPE html>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>🦖 Mathedino Hub</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Source+Sans+3:wght@300;400;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
     --bg:#f0f2f8;--surface:#fff;--border:#d4daf0;--bl:#e8ecf8;
@@ -902,18 +901,18 @@ TPL_HEAD = r"""<!DOCTYPE html>
     --shadow:0 4px 12px rgba(15,23,42,.10),0 12px 40px rgba(15,23,42,.08);
   }
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-  body{background:var(--bg);color:var(--text);font-family:'Source Sans 3',sans-serif;font-weight:400;min-height:100vh;padding:0 0 6rem;overflow-x:hidden}
+  body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;font-weight:400;min-height:100vh;padding:0 0 6rem;overflow-x:hidden}
 
   /* topbar */
   .topbar{background:#0f1f0f;padding:1rem 1.5rem .9rem;position:sticky;top:0;z-index:50;box-shadow:0 2px 12px rgba(15,23,42,.4);border-bottom:3px solid #22c55e}
   .topbar-inner{max-width:960px;margin:0 auto}
-  .topbar h1{font-family:'Playfair Display',serif;font-size:1rem;color:#e2e8f0;margin-bottom:.7rem;display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
-  .topbar h1 .ts{margin-left:auto;font-size:.7rem;opacity:.5;font-family:'Source Sans 3',sans-serif;font-weight:400}
+  .topbar h1{font-family:Georgia,'Times New Roman',serif;font-size:1rem;color:#e2e8f0;margin-bottom:.7rem;display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
+  .topbar h1 .ts{margin-left:auto;font-size:.7rem;opacity:.5;font-family:system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;font-weight:400}
   .lehrer-badge{background:#f59e0b;color:#0f172a;font-size:.7rem;font-weight:700;padding:.2rem .6rem;border-radius:20px;display:none}
   .lehrer-badge.visible{display:inline-block}
   .tabs{display:flex;gap:.5rem;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
   .tabs::-webkit-scrollbar{display:none}
-  .tab-btn{display:flex;align-items:center;gap:.45rem;padding:.52rem 1rem;border-radius:10px;border:1.5px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:#94a3b8;font-family:'Source Sans 3',sans-serif;font-size:.82rem;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .18s;-webkit-tap-highlight-color:transparent;min-height:40px}
+  .tab-btn{display:flex;align-items:center;gap:.45rem;padding:.52rem 1rem;border-radius:10px;border:1.5px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:#94a3b8;font-family:system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;font-size:.82rem;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .18s;-webkit-tap-highlight-color:transparent;min-height:40px}
   .tab-btn:hover{background:rgba(255,255,255,.12);color:#e2e8f0}
   .tab-btn.active[data-fach="mathe"]{background:var(--mathe);color:#fff;border-color:var(--mathe)}
   .tab-btn.active[data-fach="bio"]{background:var(--bio);color:#fff;border-color:var(--bio)}
@@ -932,7 +931,7 @@ TPL_HEAD = r"""<!DOCTYPE html>
   .search-bar{max-width:960px;margin:1.25rem auto 0;padding:0 1.25rem;display:none}
   .search-bar.visible{display:block}
   .search-row{display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:.75rem 1rem;box-shadow:var(--shadow);margin-bottom:.75rem}
-  .search-input{flex:1;min-width:180px;border:none;outline:none;font-family:'Source Sans 3',sans-serif;font-size:.95rem;color:var(--text);background:transparent}
+  .search-input{flex:1;min-width:180px;border:none;outline:none;font-family:system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;font-size:.95rem;color:var(--text);background:transparent}
   .search-input::placeholder{color:var(--muted)}
   .filter-group{display:flex;gap:.4rem;flex-wrap:wrap}
   .filter-btn{padding:.3rem .7rem;border-radius:20px;border:1.5px solid var(--border);background:#f8fafd;color:var(--muted);font-size:.75rem;font-weight:600;cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent}
@@ -981,7 +980,7 @@ TPL_HEAD = r"""<!DOCTYPE html>
   .card[data-fach="kompass"] .card-header{background:var(--kl)}
   .card[data-fach="sonst"] .card-header{background:var(--sl)}
   .card-icon{font-size:1.5rem}
-  .card-title{font-family:'Playfair Display',serif;font-size:1.3rem;flex:1;font-weight:900}
+  .card-title{font-family:Georgia,'Times New Roman',serif;font-size:1.3rem;flex:1;font-weight:900}
   .card[data-fach="mathe"] .card-title{color:var(--mathe)}
   .card[data-fach="bio"] .card-title{color:var(--bio)}
   .card[data-fach="kompass"] .card-title{color:var(--kompass)}
@@ -991,7 +990,7 @@ TPL_HEAD = r"""<!DOCTYPE html>
   /* klassen */
   .klasse-wrap{border-bottom:1px solid var(--bl)}
   .klasse-wrap:last-child{border-bottom:none}
-  .klasse-btn{width:100%;display:flex;align-items:center;gap:.75rem;padding:.85rem 1.5rem;background:none;border:none;cursor:pointer;text-align:left;font-family:'Source Sans 3',sans-serif;font-size:1rem;font-weight:700;color:var(--text);-webkit-tap-highlight-color:transparent;transition:background .12s;min-height:52px}
+  .klasse-btn{width:100%;display:flex;align-items:center;gap:.75rem;padding:.85rem 1.5rem;background:none;border:none;cursor:pointer;text-align:left;font-family:system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;font-size:1rem;font-weight:700;color:var(--text);-webkit-tap-highlight-color:transparent;transition:background .12s;min-height:52px}
   .klasse-btn:hover{background:#f8fafd}
   .card[data-fach="mathe"] .klasse-btn:hover{background:var(--ml)}
   .card[data-fach="bio"] .klasse-btn:hover{background:var(--biol)}
@@ -1074,7 +1073,7 @@ TPL_HEAD = r"""<!DOCTYPE html>
 
   /* alt */
   .alt-wrap{border-top:2px dashed #cbd5e1}
-  .alt-btn{width:100%;display:flex;align-items:center;gap:.75rem;padding:.75rem 1.5rem;background:#f8fafc;border:none;cursor:pointer;text-align:left;font-family:'Source Sans 3',sans-serif;font-size:.8rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.1em;-webkit-tap-highlight-color:transparent;transition:background .12s;min-height:48px}
+  .alt-btn{width:100%;display:flex;align-items:center;gap:.75rem;padding:.75rem 1.5rem;background:#f8fafc;border:none;cursor:pointer;text-align:left;font-family:system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;font-size:.8rem;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:.1em;-webkit-tap-highlight-color:transparent;transition:background .12s;min-height:48px}
   .alt-btn:hover{background:#f1f5f9}
   .alt-arrow{font-size:.65rem;transition:transform .22s;margin-left:.3rem}
   .alt-btn[aria-expanded="true"] .alt-arrow{transform:rotate(180deg)}
@@ -1084,7 +1083,7 @@ TPL_HEAD = r"""<!DOCTYPE html>
   /* jgst (alte Struktur) */
   .jgst{border-bottom:1px solid var(--bl)}
   .jgst:last-child{border-bottom:none}
-  .jgst-toggle{width:100%;display:flex;align-items:center;gap:.75rem;padding:.85rem 1.5rem;background:none;border:none;cursor:pointer;text-align:left;color:var(--text);font-family:'Source Sans 3',sans-serif;font-size:.92rem;font-weight:700;-webkit-tap-highlight-color:transparent;transition:background .12s;min-height:48px}
+  .jgst-toggle{width:100%;display:flex;align-items:center;gap:.75rem;padding:.85rem 1.5rem;background:none;border:none;cursor:pointer;text-align:left;color:var(--text);font-family:system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;font-size:.92rem;font-weight:700;-webkit-tap-highlight-color:transparent;transition:background .12s;min-height:48px}
   .jgst-toggle:hover{background:#f8fafd}
   .jgst-label{flex:1}
   .jgst-count{font-size:.7rem;font-weight:600;color:#fff;padding:.15rem .5rem;border-radius:12px;background:#94a3b8}
@@ -1139,8 +1138,11 @@ TPL_HEAD = r"""<!DOCTYPE html>
   #dino:hover{transform:scale(1.25) rotate(-10deg)}
   #dino:active{transform:scale(.92) rotate(5deg)}
   body.lehrer-mode #dino{filter:drop-shadow(0 3px 12px rgba(245,158,11,.6))}
-  #dino-tip{position:fixed;bottom:4.8rem;right:1.5rem;background:#0f172a;color:#e2e8f0;font-family:'Source Sans 3',sans-serif;font-size:.78rem;font-weight:600;padding:.45rem .9rem;border-radius:10px;white-space:nowrap;pointer-events:none;opacity:0;transform:translateY(6px);transition:opacity .2s,transform .2s}
+  #dino-tip{position:fixed;bottom:4.8rem;right:1.5rem;background:#0f172a;color:#e2e8f0;font-family:system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;font-size:.78rem;font-weight:600;padding:.45rem .9rem;border-radius:10px;white-space:nowrap;pointer-events:none;opacity:0;transform:translateY(6px);transition:opacity .2s,transform .2s}
   #dino-tip.visible{opacity:1;transform:translateY(0)}
+  .hub-footer{text-align:center;padding:1.5rem 1rem 0.5rem;margin-top:1rem}
+  .hub-footer a{color:var(--muted);font-size:.85rem;font-weight:600;text-decoration:none;border-bottom:1px solid transparent;padding:.3rem .2rem;min-height:44px;display:inline-flex;align-items:center}
+  .hub-footer a:hover{color:var(--text);border-bottom-color:var(--muted)}
   #dino-tip::after{content:'';position:absolute;top:100%;right:1.1rem;border:5px solid transparent;border-top-color:#0f172a}
 </style>
 </head>
@@ -1207,7 +1209,7 @@ TPL_HEAD = r"""<!DOCTYPE html>
 """
 
 TPL_JS_HEAD = r"""<div id="dino" onclick="dinoClick()">🦖</div>
-<div id="dino-tip">Made by Mathedino 🦖</div>
+<div id="dino-tip">Made by ASzym 🦖</div>
 
 <script>
 // ── Lehrermodus ──────────────────────────────────────────────────────────────
@@ -1228,7 +1230,7 @@ function dinoClick() {
 function setLehrerModus(aktiv) {
   document.body.classList.toggle('lehrer-mode', aktiv);
   document.getElementById('lehrerBadge').classList.toggle('visible', aktiv);
-  document.getElementById('dino-tip').textContent = aktiv ? '👨‍🏫 Lehrermodus aktiv!' : 'Made by Mathedino 🦖';
+  document.getElementById('dino-tip').textContent = aktiv ? '👨‍🏫 Lehrermodus aktiv!' : 'Made by ASzym 🦖';
 }
 
 function toggleLehrerModus() {
@@ -1465,6 +1467,9 @@ document.addEventListener('touchend',e=>{
   if(n!==i){const b=document.querySelector(`.tab-btn[data-fach="${allowed[n]}"]`);if(b)showCard(allowed[n],b);}
 },{passive:true});
 </script>
+<footer class="hub-footer">
+  <a href="https://szymczak75.github.io/Schule/impressum.html">Impressum &amp; Datenschutz</a>
+</footer>
 </body>
 </html>
 """
