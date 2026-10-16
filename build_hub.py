@@ -1140,6 +1140,9 @@ TPL_HEAD = r"""<!DOCTYPE html>
   body.lehrer-mode #dino{filter:drop-shadow(0 3px 12px rgba(245,158,11,.6))}
   #dino-tip{position:fixed;bottom:4.8rem;right:1.5rem;background:#0f172a;color:#e2e8f0;font-family:system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;font-size:.78rem;font-weight:600;padding:.45rem .9rem;border-radius:10px;white-space:nowrap;pointer-events:none;opacity:0;transform:translateY(6px);transition:opacity .2s,transform .2s}
   #dino-tip.visible{opacity:1;transform:translateY(0)}
+  .hub-footer{text-align:center;padding:1.5rem 1rem 0.5rem;margin-top:1rem}
+  .hub-footer a{color:var(--muted);font-size:.85rem;font-weight:600;text-decoration:none;border-bottom:1px solid transparent;padding:.3rem .2rem;min-height:44px;display:inline-flex;align-items:center}
+  .hub-footer a:hover{color:var(--text);border-bottom-color:var(--muted)}
   #dino-tip::after{content:'';position:absolute;top:100%;right:1.1rem;border:5px solid transparent;border-top-color:#0f172a}
 </style>
 </head>
@@ -1206,7 +1209,7 @@ TPL_HEAD = r"""<!DOCTYPE html>
 """
 
 TPL_JS_HEAD = r"""<div id="dino" onclick="dinoClick()">🦖</div>
-<div id="dino-tip">Made by Mathedino 🦖</div>
+<div id="dino-tip">Made by ASzym 🦖</div>
 
 <script>
 // ── Lehrermodus ──────────────────────────────────────────────────────────────
@@ -1227,7 +1230,7 @@ function dinoClick() {
 function setLehrerModus(aktiv) {
   document.body.classList.toggle('lehrer-mode', aktiv);
   document.getElementById('lehrerBadge').classList.toggle('visible', aktiv);
-  document.getElementById('dino-tip').textContent = aktiv ? '👨‍🏫 Lehrermodus aktiv!' : 'Made by Mathedino 🦖';
+  document.getElementById('dino-tip').textContent = aktiv ? '👨‍🏫 Lehrermodus aktiv!' : 'Made by ASzym 🦖';
 }
 
 function toggleLehrerModus() {
@@ -1464,6 +1467,9 @@ document.addEventListener('touchend',e=>{
   if(n!==i){const b=document.querySelector(`.tab-btn[data-fach="${allowed[n]}"]`);if(b)showCard(allowed[n],b);}
 },{passive:true});
 </script>
+<footer class="hub-footer">
+  <a href="https://szymczak75.github.io/Schule/impressum.html">Impressum &amp; Datenschutz</a>
+</footer>
 </body>
 </html>
 """
