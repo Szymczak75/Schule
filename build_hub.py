@@ -426,10 +426,17 @@ def klasse_sortkey_str(k):
     # Einheiten (#name) alphabetisch untereinander
     return k.lstrip("#").lower()
 
+# Ordner, die NIE auf der Startseite erscheinen:
+#   intern/   – nicht gelistet (Kollegen bekommen den Link), aber öffentlich erreichbar
+#   _…/       – z. B. _privat/ (per .gitignore gar nicht im Repo)
+def ordner_versteckt(name):
+    return name.lower() == "intern" or name.startswith("_") or name.startswith(".")
+
 def build(root, out):
     root = os.path.abspath(root)
     files = []
-    for dirpath, _, fnames in os.walk(root):
+    for dirpath, dirs, fnames in os.walk(root):
+        dirs[:] = [d for d in dirs if not ordner_versteckt(d)]
         for fn in fnames:
             if not fn.lower().endswith(".html"):
                 continue
@@ -554,7 +561,8 @@ def build_linking_overviews(root, heute):
     """Sucht in allen Ordnern nach 'linking.txt' und baut je eine
     Ordner-Übersicht über den Teilbaum ab diesem Ordner."""
     gebaut = []
-    for dirpath, _, fnames in os.walk(root):
+    for dirpath, dirs, fnames in os.walk(root):
+        dirs[:] = [d for d in dirs if not (d.startswith("_") or d.startswith("."))]
         # Trigger-Datei: 'linking.txt' – toleriert auch die von Windows erzeugte
         # Doppel-Endung 'linking.txt.txt'.
         trigger = next((f for f in fnames
