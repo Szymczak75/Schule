@@ -192,6 +192,17 @@ def _jahrgang_num(n):
         return int(m.group(2))
     return None
 
+def jahrgang_key(name):
+    """Klassen-Schlüssel ("7", "EF", "Q1" …) aus einem wörtlichen Ordnernamen
+    wie '7_Klasse' oder 'EF' – sonst "". Für den Filter ?klasse=… im Hub."""
+    n = _norm_key(name)
+    num = _jahrgang_num(n)
+    if num is not None:
+        return str(num)
+    if n in JGST_ORDER:
+        return {"q12": "Q1_Q2"}.get(n, n.upper())
+    return ""
+
 def block_sortkey(name):
     """Sortierschlüssel für wörtliche Ordnernamen (Blöcke & Kacheln).
 
@@ -768,7 +779,8 @@ def build_fach_card(fach, klassen, alt_klassen, metas, einheiten=None):
         else:
             klabel = klasse_label(kl)
             btn_icon = "📚 "
-        parts.append('  <div class="klasse-wrap">')
+        dk = "" if kl.startswith("#") else kl
+        parts.append(f'  <div class="klasse-wrap" data-klasse="{esc(dk)}">')
         parts.append(f'    <button class="klasse-btn" aria-expanded="false" onclick="toggleKlasse(this)">')
         parts.append(f'      <span class="klasse-label">{btn_icon}{esc(klabel)}</span><span class="klasse-count">{n_files}</span><span class="klasse-arrow">▼</span>')
         parts.append('    </button>')
@@ -780,7 +792,8 @@ def build_fach_card(fach, klassen, alt_klassen, metas, einheiten=None):
             em = thema_emoji(thema) or KACHEL_EMOJI_FALLBACK
             # Bei Einheiten bleiben innere Ordnernamen wörtlich stehen
             thema_title = thema if kl.startswith("#") else prettify(thema)
-            parts.append('        <div class="thema-block">')
+            jk = jahrgang_key(thema) if kl.startswith("#") else ""
+            parts.append(f'        <div class="thema-block" data-klasse="{esc(jk)}">')
             parts.append(f'          <div class="thema-header"><span class="thema-icon">{em}</span><span class="thema-title">{esc(thema_title)}</span></div>')
             parts.append('          <div class="kachel-grid">')
             for kdir, flist in sorted(themen[thema].items(), key=lambda x: block_sortkey(x[0])):
@@ -918,6 +931,10 @@ TPL_HEAD = r"""<!DOCTYPE html>
   .no-results{padding:2rem;text-align:center;color:var(--muted);font-size:.9rem}
 
   /* meta hint */
+  .klassen-filter{max-width:960px;margin:1.25rem auto 0;padding:.8rem 1.25rem;display:flex;flex-wrap:wrap;gap:.6rem;align-items:center;justify-content:space-between;background:#fff;border:2px solid var(--mathe);border-radius:14px;font-size:1.05rem;font-weight:700}
+  .klassen-filter[hidden]{display:none}
+  .klassen-filter a{display:inline-flex;align-items:center;min-height:44px;padding:.4rem 1rem;border-radius:10px;background:var(--mathe);color:#fff;text-decoration:none;font-size:1rem}
+  @media(max-width:1000px){.klassen-filter{margin-left:1.25rem;margin-right:1.25rem}}
   .meta-hinweis{max-width:960px;margin:0 auto 1.5rem;padding:0 1.25rem;display:none}
   .meta-hinweis.visible{display:block}
   .meta-box{background:#fffbeb;border:1.5px solid #f59e0b;border-radius:14px;padding:1rem 1.25rem}
@@ -1153,6 +1170,11 @@ TPL_HEAD = r"""<!DOCTYPE html>
   <div class="search-results" id="searchResults"></div>
 </div>
 
+<div class="klassen-filter" id="klassenFilter" hidden>
+  <span id="klassenFilterText"></span>
+  <a href="dino_hub.html">Alles anzeigen</a>
+</div>
+
 <div class="meta-hinweis" id="metaHinweis">
   <div class="meta-box">
     <h3>🛠️ Vorschlag: Metadaten ergänzen</h3>
@@ -1197,9 +1219,46 @@ const params = new URLSearchParams(window.location.search);
 if (params.get('lehrer') === '1') setLehrerModus(true);
 const fachParam = (params.get('fach') || 'alle').toLowerCase();
 
-// ── Tabs ─────────────────────────────────────────────────────────────────────
+// ── Klassen-Filter ?klasse=… (gesetzt von der Navigationsleiste der Seiten) ──
 const order = ['mathe','bio','kompass','sonst'];
-const allowed = fachParam === 'alle' ? order : fachParam.split(',').map(f=>f.trim()).filter(f=>order.includes(f));
+const klasseParam = (params.get('klasse') || '').trim().toUpperCase().replace('/', '_');
+const istQ = k => k === 'Q1' || k === 'Q2' || k === 'Q1_Q2';
+const passt = k => !!k && (k.toUpperCase() === klasseParam || (istQ(klasseParam) && istQ(k.toUpperCase())));
+let filterFaecher = null;
+if (klasseParam) {
+  filterFaecher = [];
+  order.forEach(f => {
+    const card = document.getElementById('card-' + f);
+    if (!card) return;
+    let treffer = 0;
+    card.querySelectorAll('.klasse-wrap').forEach(w => {
+      let zeigen = passt(w.dataset.klasse);
+      if (!zeigen) {
+        const gute = [...w.querySelectorAll('.thema-block')].filter(b => passt(b.dataset.klasse));
+        if (gute.length) {
+          zeigen = true;
+          w.querySelectorAll('.thema-block').forEach(b => { if (!gute.includes(b)) b.remove(); });
+        }
+      }
+      if (zeigen) {
+        treffer++;
+        w.querySelector('.klasse-btn').setAttribute('aria-expanded', 'true');
+        w.querySelector('.klasse-panel').classList.add('open');
+      } else w.remove();
+    });
+    card.querySelectorAll('.alt-wrap').forEach(a => a.remove());
+    if (treffer) filterFaecher.push(f);
+  });
+  const name = /^\d+$/.test(klasseParam) ? 'Klasse ' + klasseParam : (istQ(klasseParam) ? 'Q1/Q2' : klasseParam);
+  document.getElementById('klassenFilterText').textContent = filterFaecher.length
+    ? '📚 Alles für ' + name
+    : '🦖 Für ' + name + ' gibt es noch keine Seiten.';
+  document.getElementById('klassenFilter').hidden = false;
+}
+
+// ── Tabs ─────────────────────────────────────────────────────────────────────
+const allowed0 = fachParam === 'alle' ? order : fachParam.split(',').map(f=>f.trim()).filter(f=>order.includes(f));
+const allowed = filterFaecher ? allowed0.filter(f => filterFaecher.includes(f)) : allowed0;
 let suchFach = (fachParam !== 'alle' && allowed.length === 1) ? allowed[0] : '';
 
 const tabBar = document.getElementById('tabBar');
