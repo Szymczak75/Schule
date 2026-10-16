@@ -161,7 +161,7 @@ Ordner-Übersichten `_*.html` über `linking.txt`). Änderungen an der Startseit
 - Schritt 1a: Filter `?klasse=…` in `build_hub.py`, `intern/`/`_privat/`, `anzeigename`
   → **PR #1** (Branch `navigation-filter`).
 - Schritt 1b: `baustein_navigation.html` v2 (mit Feedback und 🏠-Knopf) als Entwurf.
-- **Schritt 2** → **PR #__PR__** (Branch `navigation-regeln`):
+- **Schritt 2** → **PR #4** (Branch `navigation-regeln`):
   - Baustein als **v3** nach `_wartung/allgemein/baustein_navigation.html` (Farbe
     `#f2f3f5` → `#eef0f3` aus dem Schema, `width:auto` gegen fremde Button-Regeln).
   - Lernseiten-Anweisung: TEIL 0 Nr. 23 + neuer **TEIL 3.6 Navigationsleiste**, Hinweise in
