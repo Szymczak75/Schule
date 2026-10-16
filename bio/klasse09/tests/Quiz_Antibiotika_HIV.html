@@ -531,5 +531,175 @@ function nextQuestion(ok) {
 // ── Boot ───────────────────────────────────────────────────
 render();
 </script>
+<!-- ============================================================
+     BAUSTEIN: Navigationsleiste  (v3, 16.10.2026)
+     Pflicht auf jeder Lernseite (anweisung_lernseiten.txt, TEIL 3.6).
+     Einfügen: UNVERÄNDERT direkt vor dem T-Rex bzw. vor </body> – nicht in <main>.
+     - 🏠 schwebender Knopf unten links (immer sichtbar, T-Rex bleibt rechts) + Leiste am Seitenende.
+     - 🏠 Startseite: feste Adresse, funktioniert aus jedem Unterordner.
+     - 📚 Alles für …: liest <meta name="klasse"> und hängt ?klasse=… an.
+       Fehlt das Meta-Tag, bleibt der Knopf unsichtbar.
+     - ✉️ Feedback: Fenster mit Art (Fehler/Idee/Lob) und Textfeld.
+       "Mail öffnen" startet das eigene Mailprogramm; Seitentitel und
+       Seitenadresse stehen automatisch drin. Kein fremder Dienst.
+       Empfänger: NUR in FB_NAME/FB_DOMAIN unten ändern.
+     - Impressum-Link folgt, sobald die Seite existiert.
+     - Eigene Klassen mit Präfix "dino-", Systemschrift,
+       kein Speicher, Schrift ≥ 1rem, Tipp-Ziele ≥ 44 px.
+     - Die Kommentarzeilen BAUSTEIN/ENDE BAUSTEIN bleiben stehen –
+       pruefe.py und das Nachrüst-Skript erkennen den Block daran.
+     ============================================================ -->
+<style>
+.dino-nav{max-width:1024px;margin:2.5rem auto 5rem;padding:0 1rem;
+  font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;}
+.dino-nav-innen{display:flex;flex-wrap:wrap;gap:.6rem;justify-content:center;
+  border-top:2px solid #e4dcd0;padding-top:1.1rem;}
+.dino-nav a,.dino-nav button{display:inline-flex;align-items:center;gap:.4rem;
+  min-height:44px;padding:.5rem 1.1rem;border:2px solid #22303f;border-radius:.6rem;
+  background:#fff;color:#22303f;text-decoration:none;cursor:pointer;
+  font-family:inherit;font-size:1rem;font-weight:700;line-height:1.2;
+  width:auto;margin:0;box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;}
+.dino-nav a:active,.dino-nav button:active{transform:scale(.97);}
+.dino-nav a.dino-nav-start{background:#22303f;color:#fff;}
+.dino-nav a[hidden]{display:none;}
+.dino-fb{width:min(32rem,calc(100vw - 2rem));border:2px solid #22303f;border-radius:.9rem;
+  padding:1.2rem;color:#22303f;background:#fff;
+  font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;font-size:1rem;}
+.dino-fb::backdrop{background:rgba(34,48,63,.45);}
+.dino-fb h2{margin:0 0 .3rem;font-size:1.2rem;}
+.dino-fb p{margin:.4rem 0;font-size:1rem;line-height:1.45;}
+.dino-fb-seite{font-weight:700;}
+.dino-fb-arten{display:flex;flex-wrap:wrap;gap:.5rem;margin:.7rem 0;border:0;padding:0;}
+.dino-fb-arten legend{font-weight:700;margin-bottom:.4rem;font-size:1rem;}
+.dino-fb-arten label{display:inline-flex;align-items:center;gap:.35rem;min-height:44px;
+  padding:.4rem .9rem;border:2px solid #e4dcd0;border-radius:.6rem;cursor:pointer;font-size:1rem;}
+.dino-fb-arten input{width:1.1rem;height:1.1rem;margin:0;}
+.dino-fb-arten label:has(input:checked){border-color:#22303f;background:#eef0f3;}
+.dino-fb textarea{width:100%;box-sizing:border-box;min-height:7rem;padding:.6rem;
+  border:2px solid #e4dcd0;border-radius:.6rem;font-family:inherit;font-size:1rem;color:#22303f;}
+.dino-fb textarea:focus{outline:none;border-color:#22303f;}
+.dino-fb-knoepfe{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.8rem;}
+.dino-fb-knoepfe button{min-height:44px;padding:.5rem 1rem;border-radius:.6rem;
+  border:2px solid #22303f;background:#fff;color:#22303f;font-family:inherit;
+  font-size:1rem;font-weight:700;cursor:pointer;width:auto;margin:0;}
+.dino-fb-knoepfe .dino-fb-senden{background:#22303f;color:#fff;}
+.dino-fb-meldung{min-height:1.4rem;font-weight:700;}
+.dino-fb-meldung.ok{color:#1e7d32;}
+.dino-fb-meldung.nok{color:#c1272d;}
+.dino-home{position:fixed;left:.7rem;bottom:.7rem;z-index:49;width:44px;height:44px;
+  display:flex;align-items:center;justify-content:center;border-radius:50%;
+  background:#fff;border:2px solid #22303f;text-decoration:none;font-size:1.3rem;
+  box-shadow:0 2px 6px rgba(34,48,63,.25);-webkit-tap-highlight-color:transparent;}
+.dino-home:active{transform:scale(.93);}
+@media print{.dino-nav,.dino-fb,.dino-home{display:none;}}
+</style>
+<a class="dino-home" href="https://szymczak75.github.io/Schule/dino_hub.html" title="Zur Startseite" aria-label="Zur Startseite">🏠</a>
+<nav class="dino-nav" aria-label="Seitennavigation">
+  <div class="dino-nav-innen">
+    <a class="dino-nav-start" href="https://szymczak75.github.io/Schule/dino_hub.html">🏠 Startseite</a>
+    <a id="dino-nav-klasse" href="https://szymczak75.github.io/Schule/dino_hub.html" hidden>📚 Alles für …</a>
+    <button type="button" id="dino-nav-fb">✉️ Feedback zu dieser Seite</button>
+  </div>
+</nav>
+<dialog class="dino-fb" id="dino-fb" aria-labelledby="dino-fb-titel">
+  <h2 id="dino-fb-titel">✉️ Feedback zu dieser Seite</h2>
+  <p>Seite: <span class="dino-fb-seite" id="dino-fb-seite"></span></p>
+  <fieldset class="dino-fb-arten">
+    <legend>Worum geht es?</legend>
+    <label><input type="radio" name="dino-fb-art" value="Fehler" checked> 🐞 Fehler</label>
+    <label><input type="radio" name="dino-fb-art" value="Idee"> 💡 Idee</label>
+    <label><input type="radio" name="dino-fb-art" value="Lob"> 👍 Lob</label>
+  </fieldset>
+  <textarea id="dino-fb-text" aria-label="Deine Nachricht"
+    placeholder="Was ist dir aufgefallen? Bei Fehlern: Welche Karte, welche Aufgabe?"></textarea>
+  <p>Bitte schreib keine persönlichen Daten hinein.</p>
+  <div class="dino-fb-knoepfe">
+    <button type="button" class="dino-fb-senden" id="dino-fb-senden">✉️ Mail öffnen</button>
+    <button type="button" id="dino-fb-kopieren">📋 Text kopieren</button>
+    <button type="button" id="dino-fb-zu">Schließen</button>
+  </div>
+  <p class="dino-fb-meldung" id="dino-fb-meldung" aria-live="polite"></p>
+  <p>Kein Mailprogramm? Text kopieren und an <b id="dino-fb-adresse"></b> schicken.</p>
+</dialog>
+<script>
+(function(){
+  /* Empfänger – nur hier ändern */
+  var FB_NAME = 'aszymczak', FB_DOMAIN = 'my-mcg.de';
+  var START = 'https://szymczak75.github.io/Schule/dino_hub.html';
+
+  /* 📚 Alles für … */
+  var m = document.querySelector('meta[name="klasse"]');
+  var k = m ? (m.getAttribute('content') || '').trim() : '';
+  var a = document.getElementById('dino-nav-klasse');
+  if (k && a) {
+    a.href = START + '?klasse=' + encodeURIComponent(k);
+    var name = /^\d+$/.test(k) ? 'Klasse ' + parseInt(k, 10) : 'die ' + k.replace('_', '/');
+    a.textContent = '📚 Alles für ' + name;
+    a.hidden = false;
+  }
+
+  /* ✉️ Feedback */
+  var dlg = document.getElementById('dino-fb');
+  var fbBtn = document.getElementById('dino-nav-fb');
+  if (!dlg || !fbBtn) return;
+  var adresse = FB_NAME + '@' + FB_DOMAIN;
+  var titel = (document.title || '').trim() || location.pathname.split('/').pop();
+  var url = location.href.split('#')[0];
+  var text = document.getElementById('dino-fb-text');
+  var meldung = document.getElementById('dino-fb-meldung');
+  document.getElementById('dino-fb-seite').textContent = titel;
+  document.getElementById('dino-fb-adresse').textContent = adresse;
+
+  function art(){
+    var r = dlg.querySelector('input[name="dino-fb-art"]:checked');
+    return r ? r.value : 'Feedback';
+  }
+  function betreff(){ return '[Dino-Feedback] ' + art() + ': ' + titel; }
+  function inhalt(){
+    return 'Seite: ' + titel + '\nAdresse: ' + url + '\nArt: ' + art() +
+           '\n\n' + text.value.trim() + '\n';
+  }
+  function melde(t, ok){ meldung.textContent = t; meldung.className = 'dino-fb-meldung ' + (ok ? 'ok' : 'nok'); }
+  function leer(){
+    if (text.value.trim()) return false;
+    melde('Bitte schreib zuerst etwas in das Feld.', false);
+    text.focus();
+    return true;
+  }
+
+  fbBtn.addEventListener('click', function(){
+    melde('', true);
+    if (typeof dlg.showModal === 'function') dlg.showModal(); else dlg.setAttribute('open', '');
+    text.focus();
+  });
+  document.getElementById('dino-fb-zu').addEventListener('click', function(){
+    if (typeof dlg.close === 'function') dlg.close(); else dlg.removeAttribute('open');
+  });
+  document.getElementById('dino-fb-senden').addEventListener('click', function(){
+    if (leer()) return;
+    location.href = 'mailto:' + adresse + '?subject=' + encodeURIComponent(betreff()) +
+                    '&body=' + encodeURIComponent(inhalt());
+    melde('Dein Mailprogramm öffnet sich. Danke! 🦖', true);
+  });
+  document.getElementById('dino-fb-kopieren').addEventListener('click', function(){
+    if (leer()) return;
+    var ganz = 'Betreff: ' + betreff() + '\n' + inhalt();
+    function ersatz(){
+      var t = document.createElement('textarea');
+      t.value = ganz; document.body.appendChild(t); t.select();
+      var ok = false; try { ok = document.execCommand('copy'); } catch (e) {}
+      document.body.removeChild(t);
+      melde(ok ? 'Kopiert! Jetzt in eine Mail einfügen.' : 'Kopieren ging nicht – bitte Text markieren und kopieren.', ok);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(ganz).then(function(){
+        melde('Kopiert! Jetzt in eine Mail einfügen.', true);
+      }, ersatz);
+    } else ersatz();
+  });
+})();
+</script>
+<!-- ============ ENDE BAUSTEIN Navigationsleiste ============ -->
 </body>
 </html>
