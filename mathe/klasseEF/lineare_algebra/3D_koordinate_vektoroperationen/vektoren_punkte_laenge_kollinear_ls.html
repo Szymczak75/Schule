@@ -1565,6 +1565,118 @@
   updateProgress();
 </script>
 <!-- ============================================================
+     BAUSTEIN: Neulade-Schutz Stufe 1  (v1, 16.10.2026)
+     Lernseiten-Anweisung TEIL 6 (sessionStorage).
+     Für bestehende Seiten, die NICHT mit dem Baukasten (helfer.js)
+     gebaut wurden und noch keinen eigenen sessionStorage-Schutz haben.
+     Einfügen: UNVERÄNDERT vor dem Navigations-Baustein bzw. vor dem T-Rex.
+     Wird vom Nachrüst-Skript am Marker BAUSTEIN/ENDE BAUSTEIN erkannt.
+
+     Leistet NUR Stufe 1: Feldwerte (input/textarea/select), Häkchen
+     (checkbox/radio) und die zuletzt offene Karte/Tab überstehen ein
+     Neuladen. Prüfergebnisse, MC-Markierungen und Zuordnungen kommen
+     NICHT zurück – dann erneut „Prüfen". Voller Schutz = Stufe 2 (Baukasten).
+
+     Eigenständig, greift nicht in die Seitenlogik ein:
+     - speichert bei jedem input/change/click (Leeren-Knöpfe inklusive),
+     - stellt beim Laden wieder her und per MutationObserver auch Felder,
+       die die Seite erst per JavaScript nachträglich erzeugt,
+     - Schlüssel pro Feld: id ODER name ODER data-k, sonst Positions-Index;
+       alle Zugriffe in try/catch; ausschließlich sessionStorage (TEIL 6).
+     ============================================================ -->
+<script>
+(function(){
+  "use strict";
+  var SCHLUESSEL = 'aszym:' +
+    ((location.pathname.split('/').pop() || 'seite').replace(/\.html?$/i, '')) + ':v1';
+
+  function lies(){
+    try { var r = sessionStorage.getItem(SCHLUESSEL); return r ? JSON.parse(r) : {}; }
+    catch (e) { return {}; }
+  }
+  function schreib(d){
+    try { sessionStorage.setItem(SCHLUESSEL, JSON.stringify(d)); } catch (e) {}
+  }
+
+  // Stabiler Schlüssel je Feld. Bevorzugt id/name/data-k; sonst Tag+Position.
+  function feldKey(el, idx){
+    if (el.id) return '#' + el.id;
+    if (el.name) return 'n:' + el.name + ':' + idx;
+    if (el.getAttribute('data-k')) return 'k:' + el.getAttribute('data-k') + ':' + idx;
+    return 't:' + el.tagName + ':' + idx;
+  }
+
+  function alleFelder(){
+    // Felder der Seite – ohne die der Navigationsleiste/Feedback-Box (dino-*).
+    var out = [];
+    var liste = document.querySelectorAll('input, textarea, select');
+    for (var i = 0; i < liste.length; i++){
+      var el = liste[i];
+      if (el.closest && el.closest('.dino-nav, .dino-fb, .dino-home')) continue;
+      if (el.type === 'button' || el.type === 'submit' || el.type === 'file'
+          || el.type === 'hidden') continue;
+      out.push(el);
+    }
+    return out;
+  }
+
+  function sichern(){
+    var d = lies();
+    d.__f = d.__f || {};
+    var felder = alleFelder();
+    for (var i = 0; i < felder.length; i++){
+      var el = felder[i], key = feldKey(el, i);
+      if (el.type === 'checkbox' || el.type === 'radio') d.__f[key] = { c: !!el.checked };
+      else d.__f[key] = { v: el.value };
+    }
+    var aktiv = document.querySelector('.tab.aktiv, [data-ziel].aktiv, .karte.aktiv[id]');
+    if (aktiv) d.__karte = aktiv.id || aktiv.getAttribute('data-ziel') || null;
+    schreib(d);
+  }
+
+  function herstellen(){
+    var d = lies();
+    if (!d.__f) return;
+    var felder = alleFelder();
+    for (var i = 0; i < felder.length; i++){
+      var el = felder[i], s = d.__f[feldKey(el, i)];
+      if (!s) continue;
+      try {
+        if (el.type === 'checkbox' || el.type === 'radio'){
+          if (typeof s.c === 'boolean' && el.checked !== s.c){
+            el.checked = s.c;
+            el.dispatchEvent(new Event('change', { bubbles: true }));
+          }
+        } else if (typeof s.v === 'string' && el.value !== s.v){
+          el.value = s.v;
+          el.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+      } catch (e) {}
+    }
+  }
+
+  // Laufendes Sichern – auch Klicks (Leeren-Knöpfe setzen nur value, feuern kein input).
+  document.addEventListener('input',  sichern, true);
+  document.addEventListener('change', sichern, true);
+  document.addEventListener('click',  function(){ setTimeout(sichern, 0); }, true);
+
+  function start(){
+    herstellen();
+    // Felder, die die Seite erst per JS nachträglich erzeugt, nachziehen.
+    try {
+      var mo = new MutationObserver(function(){ herstellen(); });
+      mo.observe(document.body, { childList: true, subtree: true });
+      // Beobachtung nach kurzer Einschwingzeit beenden (DOM ist dann aufgebaut).
+      setTimeout(function(){ try { mo.disconnect(); } catch (e) {} }, 4000);
+    } catch (e) {}
+  }
+  if (document.readyState === 'loading')
+    document.addEventListener('DOMContentLoaded', start);
+  else start();
+})();
+</script>
+<!-- ============ ENDE BAUSTEIN Neulade-Schutz Stufe 1 ============ -->
+<!-- ============================================================
      BAUSTEIN: Navigationsleiste  (v3, 16.10.2026)
      Pflicht auf jeder Lernseite (anweisung_lernseiten.txt, TEIL 3.6).
      Einfügen: UNVERÄNDERT direkt vor dem T-Rex bzw. vor </body> – nicht in <main>.
