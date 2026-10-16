@@ -166,7 +166,9 @@ geprüft. Das Wichtigste im Überblick:
   wird aus einem `\(r\)` ein bildschirmhohes „r". Auch `.kontrollbild svg{…}` ist
   falsch: Das trifft MathJax-SVGs in der Bildunterschrift mit. Richtig ist
   `.kontrollbild > svg{…}`.
-- **Kein `localStorage`.** Der Stand lebt im JS-Speicher.
+- **Zustand übersteht das Neuladen – nur per `sessionStorage`**, kein `localStorage`.
+  `helfer.js` erledigt das automatisch; MC-Listen dafür mit Schlüssel mischen
+  (`mische(OPT, 'mc1')`), Details in `LIESMICH.md`.
 - **Kennzeichnung ab EF** an jeder Aufgabe: Hilfsmittel und Lösungsart (`kennz(...)`).
 - **T-Rex 🦖** mit „Made by ASzym" auf jeder Seite.
 

@@ -23,7 +23,9 @@ const path = require('path');
 (async () => {
   const datei = process.argv[2];
   const plan = JSON.parse(fs.readFileSync(process.argv[3], 'utf8'));
-  const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium' });
+  // neuer Headless-Modus: neuere Chromium-Versionen kennen den alten nicht mehr
+  const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium',
+    ignoreDefaultArgs: ['--headless=old'], args: ['--headless=new'] });
   const seite = await (await browser.newContext({ viewport: { width: 768, height: 1000 } })).newPage();
   const fehler = [];
   seite.on('pageerror', e => fehler.push(e.message));

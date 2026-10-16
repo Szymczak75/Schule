@@ -1,28 +1,98 @@
 
-function mische(arr){
-  const a=arr.slice();
-  for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
-  return a;
+/* =============================================================================
+   ZUSTAND IM sessionStorage (Lernseiten-Anweisung TEIL 6)
+   Der Stand übersteht Karten-/Stufenwechsel UND Neuladen; nach dem Schließen des
+   Tabs startet die Seite leer. Gespeichert werden nur Daten (state-Objekt,
+   Feldwerte, gewählte Karte/Stufe, MC-Reihenfolgen, offene Tipps, Timer) –
+   nie HTML. Auswertungen werden beim Laden durch dieselben Helfer neu erzeugt.
+   Schlüssel: SPEICHER (setzt bauer.py, z. B. 'aszym:nullstellen_kl8_ls:v1').
+   Leeren-Knöpfe löschen ihre Aufgabe auch im gespeicherten Stand.
+   ========================================================================== */
+var _G, _geladen, _bereit, _misch, _ausw, _mcListe, _wfListe;
+function _schluessel(){
+  if (typeof SPEICHER === 'string' && SPEICHER) return SPEICHER;
+  var d = (location.pathname.split('/').pop() || 'seite').replace(/\.html?$/i, '');
+  return 'aszym:' + d + ':v1';
+}
+function _stand(){
+  if (!_geladen){
+    _geladen = true;
+    _G = null;
+    try {
+      var roh = sessionStorage.getItem(_schluessel());
+      if (roh) _G = JSON.parse(roh);
+    } catch (e) { _G = null; }
+    _misch = (_G && _G.misch) || {};
+    _ausw = (_G && _G.ausw) || {};
+    _mcListe = []; _wfListe = [];
+  }
+  return _G;
+}
+function speichere(){
+  if (!_bereit) return;
+  _stand();
+  var d = { state: (typeof state !== 'undefined') ? state : null,
+            felder: {}, karte: null, stufen: {}, misch: _misch, ausw: _ausw,
+            offen: [], offenId: [], timer: null };
+  document.querySelectorAll('main input[id], main textarea[id], main select[id]').forEach(function(el){
+    if (el.type === 'radio' || el.type === 'checkbox') d.felder[el.id] = { c: el.checked };
+    else d.felder[el.id] = { v: el.value, ro: el.readOnly };
+  });
+  var t = document.querySelector('.tab.aktiv');
+  if (t) d.karte = t.dataset.ziel;
+  document.querySelectorAll('.stufen-wahl').forEach(function(w){
+    var b = w.querySelector('.stufe-btn.aktiv');
+    if (b) d.stufen[w.dataset.karte] = b.dataset.s;
+  });
+  document.querySelectorAll('.stufe').forEach(function(s, i){ if (s.classList.contains('offen')) d.offen.push(i); });
+  document.querySelectorAll('.werkzeug[id], .tipp-box[id]').forEach(function(s){
+    if (s.classList.contains('offen')) d.offenId.push(s.id);
+  });
+  if (typeof restSek !== 'undefined') {
+    d.timer = { rest: restSek, laeuft: !!ticker, zeit: Date.now(),
+                ab: !!(document.getElementById('timerbox') || {classList:{contains:function(){return false;}}}).classList.contains('abgelaufen') };
+  }
+  try { sessionStorage.setItem(_schluessel(), JSON.stringify(d)); } catch (e) {}
+}
+function _merke(key, f, args){ _stand(); _ausw[key] = { f: f, a: args }; }
+function _vergiss(key){ _stand(); delete _ausw[key]; }
+
+/* Fisher-Yates. Mit Schlüssel bleibt die Reihenfolge auch nach dem Neuladen gleich:
+   opt = mische(OPTIONEN, 'mc1');  – ohne Schlüssel wird bei jedem Laden neu gemischt. */
+function mische(arr, key){
+  _stand();
+  var n = arr.length, p = _misch && key ? _misch[key] : null;
+  if (!(p && p.length === n && p.every(function(i){ return i >= 0 && i < n; }))){
+    p = [];
+    for (var k = 0; k < n; k++) p.push(k);
+    for (var i = n - 1; i > 0; i--){ var j = Math.floor(Math.random() * (i + 1)); var h = p[i]; p[i] = p[j]; p[j] = h; }
+    if (key) _misch[key] = p;
+  }
+  return p.map(function(i){ return arr[i]; });
+}
+function _zeigeKarte(ziel, scrollen){
+  var tab = document.querySelector('.tab[data-ziel="' + ziel + '"]');
+  var k = document.getElementById(ziel);
+  if (!tab || !k) return;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('aktiv'));
+  document.querySelectorAll('.karte').forEach(x=>x.classList.remove('aktiv'));
+  tab.classList.add('aktiv');
+  k.classList.add('aktiv');
+  if (scrollen) window.scrollTo({top:0,behavior:'smooth'});
 }
 document.querySelectorAll('.tab').forEach(tab=>{
-  tab.addEventListener('click',()=>{
-    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('aktiv'));
-    document.querySelectorAll('.karte').forEach(k=>k.classList.remove('aktiv'));
-    tab.classList.add('aktiv');
-    document.getElementById(tab.dataset.ziel).classList.add('aktiv');
-    window.scrollTo({top:0,behavior:'smooth'});
-  });
+  tab.addEventListener('click',()=>{ _zeigeKarte(tab.dataset.ziel, true); });
 });
+function _waehleStufe(w, s){
+  const k=w.dataset.karte;
+  w.querySelectorAll('.stufe-btn').forEach(x=>x.classList.toggle('aktiv', x.dataset.s===s));
+  document.querySelectorAll('.stufe-block[data-karte="'+k+'"]').forEach(bl=>{
+    bl.classList.toggle('aktiv', bl.dataset.s===s);
+  });
+}
 document.querySelectorAll('.stufen-wahl').forEach(w=>{
   w.querySelectorAll('.stufe-btn').forEach(b=>{
-    b.addEventListener('click',()=>{
-      const k=w.dataset.karte, s=b.dataset.s;
-      w.querySelectorAll('.stufe-btn').forEach(x=>x.classList.remove('aktiv'));
-      b.classList.add('aktiv');
-      document.querySelectorAll('.stufe-block[data-karte="'+k+'"]').forEach(bl=>{
-        bl.classList.toggle('aktiv', bl.dataset.s===s);
-      });
-    });
+    b.addEventListener('click',()=>{ _waehleStufe(w, b.dataset.s); });
   });
 });
 function toggleStufe(btn){ btn.parentElement.classList.toggle('offen'); }
@@ -68,6 +138,7 @@ function leereGruppen(gruppen){
 function baueMC(wrapId, optionen, key, feld){
   const wrap=document.getElementById(wrapId);
   if(!wrap) return;
+  _stand(); _mcListe.push({wrapId:wrapId, key:key, feld:feld});
   optionen.forEach((o,i)=>{
     const b=document.createElement('button');
     b.textContent=o.t; b.dataset.i=i;
@@ -102,6 +173,7 @@ if(trex) trex.addEventListener('click',()=>{
 function toggleWz(id){ document.getElementById(id).classList.toggle('offen'); }
 function toggleTipp(id){ document.getElementById(id).classList.toggle('offen'); }
 function karteAuswerten(kartenKey, gruppen, ids, textOk, textNok){
+  _merke(kartenKey, 'karteAuswerten', [kartenKey, gruppen, ids, textOk, textNok]);
   const ok=pruefeGruppen(gruppen);
   state[kartenKey].geprueft=true;
   const fb=document.getElementById(ids.fb);
@@ -119,13 +191,16 @@ function karteAuswerten(kartenKey, gruppen, ids, textOk, textNok){
   return ok;
 }
 function karteLeeren(kartenKey, gruppen, ids){
+  _vergiss(kartenKey);
   leereGruppen(gruppen);
   document.getElementById(ids.fb).className='feedback';
   if(ids.leeren) document.getElementById(ids.leeren).style.display='none';
   state[kartenKey].geprueft=false; state[kartenKey].erledigt=false;
   pruefeFortschritt();
+  speichere();
 }
 function baueWF(kartenKey, scope){
+  _stand(); _wfListe.push({key:kartenKey, scope:scope});
   document.querySelectorAll(scope+' [data-aussage]').forEach((box,i)=>{
     box.querySelectorAll('.wf-buttons button').forEach(b=>{
       b.addEventListener('click',()=>{
@@ -140,6 +215,7 @@ function baueWF(kartenKey, scope){
 function wfAuswerten(kartenKey, scope, fbId){
   const boxen=document.querySelectorAll(scope+' [data-aussage]');
   if(Object.values(state[kartenKey].wahlen).some(v=>v===null)) return false;
+  _merke(kartenKey, 'wfAuswerten', [kartenKey, scope, fbId]);
   state[kartenKey].geprueft=true;
   let richtig=0;
   boxen.forEach((box,i)=>{
@@ -164,6 +240,7 @@ function wfAuswerten(kartenKey, scope, fbId){
 }
 function mitMC(key, gruppen, opt, wrapId, ids, textOk, textNok){
   if(state[key].wahlen[0]===null) return;
+  _merke(key, 'mitMC', [key, gruppen, opt, wrapId, ids, textOk, textNok]);
   const okZahlen = pruefeGruppen(gruppen);
   state[key].geprueft = true;
   const okMC = mcAuswerten(wrapId, opt, state[key].wahlen[0]);
@@ -177,6 +254,7 @@ function mitMC(key, gruppen, opt, wrapId, ids, textOk, textNok){
   pruefeFortschritt();
 }
 function mitMCleeren(key, gruppen, opt, wrapId, ids){
+  _vergiss(key);
   leereGruppen(gruppen);
   document.getElementById(ids.fb).className='feedback';
   document.getElementById(ids.leeren).style.display='none';
@@ -184,9 +262,11 @@ function mitMCleeren(key, gruppen, opt, wrapId, ids){
   state[key].wahlen={0:null};
   state[key].geprueft=false; state[key].erledigt=false;
   pruefeFortschritt();
+  speichere();
 }
 function checkAuswerten(fragen, zsfId){
   if(Object.values(state.k4.wahlen).some(v=>v===null)) return;
+  _merke('k4:check', 'checkAuswerten', [fragen, zsfId]);
   state.k4.geprueft=true;
   let richtig=0;
   fragen.forEach((f,idx)=>{ if(mcAuswerten('c'+(idx+1)+'-wahl', f.optionen, state.k4.wahlen[idx])) richtig++; });
@@ -198,6 +278,7 @@ function checkAuswerten(fragen, zsfId){
   k4Status();
 }
 function rechnenAuswerten(gruppen, textOk, textNok){
+  _merke('k4:rechnen', 'rechnenAuswerten', [gruppen, textOk, textNok]);
   const ok=pruefeGruppen(gruppen);
   const fb=document.getElementById('fbRechnen');
   fb.className='feedback zeig '+(ok?'ok':'nok');
@@ -209,15 +290,84 @@ function rechnenAuswerten(gruppen, textOk, textNok){
   k4Status();
 }
 function rechnenLeeren(gruppen){
+  _vergiss('k4:rechnen');
   leereGruppen(gruppen);
   document.getElementById('fbRechnen').className='feedback';
   document.getElementById('leerenRechnen').style.display='none';
   state.k4.rechnenOk=false; k4Status();
+  speichere();
 }
 function k4Status(){
   state.k4.erledigt = state.k4.mcRichtig && state.k4.rechnenOk;
   pruefeFortschritt();
 }
+
+/* ---------- Wiederherstellen beim Laden (läuft einmal, nach dem Seitenskript) ---------- */
+(function(){
+  var g = _stand();
+  if (g){
+    try {
+      if (g.state && typeof state !== 'undefined'){
+        Object.keys(g.state).forEach(function(k){
+          var alt = state[k], neu = g.state[k];
+          if (alt && neu && typeof alt === 'object' && typeof neu === 'object') Object.assign(alt, neu);
+          else if (neu !== undefined) state[k] = neu;
+        });
+      }
+      Object.keys(g.felder || {}).forEach(function(id){
+        var el = document.getElementById(id), f = g.felder[id];
+        if (!el || !f) return;
+        if ('c' in f) el.checked = !!f.c;
+        else { el.value = f.v; el.readOnly = !!f.ro; }
+      });
+      _mcListe.forEach(function(m){
+        var s = state[m.key], i = s && s.wahlen ? s.wahlen[m.feld] : null;
+        if (i === null || i === undefined) return;
+        var b = document.querySelectorAll('#' + m.wrapId + ' button')[i];
+        if (b) b.classList.add('gewaehlt');
+      });
+      _wfListe.forEach(function(w){
+        var s = state[w.key];
+        if (!s || !s.wahlen) return;
+        document.querySelectorAll(w.scope + ' [data-aussage]').forEach(function(box, i){
+          box.querySelectorAll('.wf-buttons button').forEach(function(b){
+            if (b.dataset.w === s.wahlen[i]) b.classList.add('gewaehlt');
+          });
+        });
+      });
+      document.querySelectorAll('.stufen-wahl').forEach(function(w){
+        var s = (g.stufen || {})[w.dataset.karte];
+        if (s) _waehleStufe(w, s);
+      });
+      var FN = { karteAuswerten: karteAuswerten, wfAuswerten: wfAuswerten, mitMC: mitMC,
+                 checkAuswerten: checkAuswerten, rechnenAuswerten: rechnenAuswerten };
+      Object.keys(_ausw).forEach(function(k){
+        var r = _ausw[k];
+        if (r && FN[r.f]) { try { FN[r.f].apply(null, r.a); } catch (e) {} }
+      });
+      var stufen = document.querySelectorAll('.stufe');
+      (g.offen || []).forEach(function(i){ if (stufen[i]) stufen[i].classList.add('offen'); });
+      (g.offenId || []).forEach(function(id){ var e = document.getElementById(id); if (e) e.classList.add('offen'); });
+      if (g.karte) _zeigeKarte(g.karte, false);
+      if (g.timer && typeof restSek !== 'undefined'){
+        var rest = g.timer.rest;
+        if (g.timer.laeuft) rest = Math.max(0, rest - Math.floor((Date.now() - g.timer.zeit) / 1000));
+        restSek = rest;
+        var box = document.getElementById('timerbox');
+        if (box && (g.timer.ab || rest === 0)) box.classList.add('abgelaufen');
+        if (typeof uhrZeigen === 'function') uhrZeigen();
+        if (g.timer.laeuft && rest > 0 && typeof timerStart === 'function') timerStart();
+      }
+      if (typeof nachWiederherstellen === 'function') nachWiederherstellen(g);
+    } catch (e) {}
+  }
+  _bereit = true;
+  document.addEventListener('click', function(){ speichere(); });
+  document.addEventListener('input', function(){ speichere(); });
+  document.addEventListener('change', function(){ speichere(); });
+  if (typeof restSek !== 'undefined') setInterval(function(){ if (ticker) speichere(); }, 5000);
+  speichere();
+})();
 
 /* =============================================================================
    Notfall-Anzeige für Formeln (MATHJAX-FALLBACK)

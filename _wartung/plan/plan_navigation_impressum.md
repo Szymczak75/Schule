@@ -164,14 +164,16 @@ Ordner-Übersichten `_*.html` über `linking.txt`). Änderungen an der Startseit
   `_wartung/plan/entwurf_baustein_navigation.html`, noch nicht in Seiten eingesetzt.
 - sessionStorage-Regel in `anweisung_lernseiten.txt`, Checkliste, `pruefe.py`.
 - Master-Kopien in `_wartung/` → **PR #2** (Branch `wartung-sync`).
+- GeoGebra-Baukasten auf sessionStorage umgestellt (`helfer.js`, `bauer.py` setzt
+  `SPEICHER`, `mische(liste, schlüssel)`, `LIESMICH.md`, „Die harten Formatregeln" in
+  `anweisung_geogebra_projekt.md`; `test.js` startet Chromium im neuen Headless-Modus)
+  → ebenfalls PR #2. Im echten Browser mit Neuladen getestet.
 
 **Als Nächstes:**
-1. GeoGebra-`helfer.js` auf die sessionStorage-Regel umstellen (+ `bauer.py`, `LIESMICH.md`,
-   `anweisung_geogebra_projekt.md` „Die harten Formatregeln").
-2. Schritt 2 (Navigationsleiste als Regel, `pruefe.py`, `bauer.py`, Landkarte, Google Fonts
+1. Schritt 2 (Navigationsleiste als Regel, `pruefe.py`, `bauer.py`, Landkarte, Google Fonts
    streichen).
-3. Schritt 3 (Nachrüst-Skript, PR mit Prüfbericht).
-4. Schritt 4 (Impressum-Seite, Lizenz klären).
+2. Schritt 3 (Nachrüst-Skript, PR mit Prüfbericht).
+3. Schritt 4 (Impressum-Seite, Lizenz klären).
 
 ---
 

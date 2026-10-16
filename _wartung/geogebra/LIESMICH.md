@@ -87,6 +87,10 @@ JavaScript-Fehlern oder horizontalem Scrollen.
 - Notfall-Anzeige für Formeln, falls MathJax nicht geladen werden kann (derselbe Code wie
   `baustein_mathjax_notfall.js` der anderen Projekte)
 - Fortschrittsmarken über den Reitern (✅, beim Wissenstest ●)
+- **Zustand im `sessionStorage`** (TEIL 6): Eingaben, Auswertungen, gewählte Karte und
+  Niveaustufe, offene Tipps, MC-Reihenfolgen und Timer überstehen das Neuladen; nach dem
+  Schließen des Tabs startet die Seite leer. Schlüssel `aszym:<datei>:v1` – bei einem
+  Umbau einer schon veröffentlichten Seite `baue(..., version=2)` setzen
 - keine globale `svg`-Regel; eigene Grafiken werden über `.kontrollbild > svg`
   angesprochen, damit MathJax-Formeln nicht mit aufgeblasen werden
 
@@ -147,7 +151,7 @@ Im Seitenskript steht ein `state`-Objekt je Karte; alles Weitere kommt aus
 
 | Helfer | Zweck |
 |---|---|
-| `mische(liste)` | Fisher-Yates, einmal beim Laden aufrufen |
+| `mische(liste, 'mc1')` | Fisher-Yates, einmal beim Laden aufrufen – **mit Schlüssel**, dann bleibt die Reihenfolge auch nach dem Neuladen gleich |
 | `baueMC(wrapId, optionen, karte, feld)` | MC-Knöpfe bauen und binden |
 | `mcAuswerten(wrapId, optionen, wahl)` | grün/rot markieren, gibt richtig/falsch zurück |
 | `baueWF(karte, scope)` / `wfAuswerten(karte, scope, fbId)` | Wahr/Falsch-Block |
@@ -167,6 +171,25 @@ const G1 = [
   {statusId:'s2', felder:[{id:'z2', erwartet:3.14, tol:0.01}]}
 ];
 ```
+
+### Zustand übersteht das Neuladen – was dafür zu beachten ist
+
+`helfer.js` speichert nach jedem Tippen und Antippen automatisch und stellt beim Laden alles
+wieder her. Ausgewertete Karten werden dabei **durch dieselben Helfer neu ausgewertet**
+(`karteAuswerten`, `mitMC`, `wfAuswerten`, `checkAuswerten`, `rechnenAuswerten`) – es wird
+kein HTML gespeichert. Damit das klappt:
+
+- Das `state`-Objekt enthält **nur Daten** (Zahlen, Texte, `wahlen`, `geprueft`, `erledigt`).
+- Jede MC-Liste wird mit **eigenem Schlüssel** gemischt: `const OPT1 = mische(OPTIONEN1, 'mc1');`
+- Eingabefelder haben eine `id`.
+- Leeren immer über die Leeren-Helfer (`karteLeeren`, `mitMCleeren`, `rechnenLeeren`) – sie
+  löschen die Aufgabe auch im gespeicherten Stand. Eigene Leeren-Funktionen rufen am Ende
+  `_vergiss('k3'); speichere();` auf.
+- Macht eine **seiteneigene** Prüffunktion mehr als die Helfer (eigene Anzeige, eigene
+  Sperre), stellt die Seite das in `function nachWiederherstellen(g){ … }` wieder her –
+  `helfer.js` ruft sie nach dem Wiederherstellen auf.
+
+Der Browsertest sollte einmal **neu laden** und prüfen, dass der Stand noch da ist.
 
 `tol` ist die erlaubte Abweichung; ohne Angabe wird exakt verglichen. Eingaben mit
 Komma und Brüche wie `-1/3` werden automatisch erkannt.

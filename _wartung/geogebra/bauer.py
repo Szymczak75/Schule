@@ -32,6 +32,7 @@ Regeln, die der Bauer automatisch einhält
 - T-Rex mit „Made by ASzym"
 - Notfall-Anzeige für Formeln, falls MathJax nicht geladen werden kann
 - Fortschrittsmarken über den Reitern (✅ bzw. ● beim Wissenstest)
+- Zustand im sessionStorage unter 'aszym:<datei>:v<version>' (übersteht Neuladen, TEIL 6)
 """
 import io
 import os
@@ -100,7 +101,9 @@ _KARTEN = []          # wird von tabs() gefüllt, von baue() ausgewertet
 
 # ---------------------------------------------------------------- Hauptaufruf
 def baue(datei, titel, beschreibung, keywords, thema, typ, klasse, body, js,
-         fach='mathe', oberthema='GeoGebra Suite'):
+         fach='mathe', oberthema='GeoGebra Suite', version=1):
+    """version: erhöhen, wenn sich der Aufbau einer schon veröffentlichten Seite ändert –
+    dann passt ein alter gespeicherter Stand nicht mehr und wird ignoriert (TEIL 6)."""
     thema_farben = THEMA_ZU_TYP.get(typ, THEMA_LERNSEITE)
     css = CSS_VORLAGE
     for k, v in thema_farben.items():
@@ -108,7 +111,9 @@ def baue(datei, titel, beschreibung, keywords, thema, typ, klasse, body, js,
 
     marke = '●' if typ in ('Test', 'Klassenarbeit') else '✅'
     fortschritt = ", ".join("d%d:['k%d']" % (i + 1, i + 1) for i in range(len(_KARTEN) or 4))
-    vorlauf = "var MARKE = '%s';\nvar FORTSCHRITT = {%s};\n" % (marke, fortschritt)
+    schluessel = 'aszym:%s:v%d' % (os.path.splitext(os.path.basename(datei))[0], version)
+    vorlauf = ("var MARKE = '%s';\nvar FORTSCHRITT = {%s};\nvar SPEICHER = '%s';\n"
+               % (marke, fortschritt, schluessel))
 
     html = (KOPF.format(titel=titel, beschreibung=beschreibung, keywords=keywords,
                         thema=thema, typ=typ, klasse=klasse, fach=fach,
