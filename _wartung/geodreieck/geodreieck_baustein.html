@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Geodreieck-Baustein – Demo &amp; Anleitung</title>
+<!--
+  ============================================================================
+  WIEDERVERWENDBARER GEODREIECK-BAUSTEIN  (drehen am Griff, verschieben per Finger)
+  ----------------------------------------------------------------------------
+  Diese Datei enthält ZWEI Teile:
+    1) Eine lauffähige DEMO (oben sichtbar).
+    2) Den dokumentierten Baustein-Code + Einbauanleitung (weiter unten im <body>,
+       als lesbarer Text, damit man ihn bequem kopieren kann).
+
+  Kernregeln, die NICHT verändert werden dürfen (sonst „springt" es am iPad):
+    • Gedreht wird am orangen DREH-GRIFF (Winkel-Delta zur Mitte) ODER per Presets.
+    •   Verschieben startet, wenn der Finger INNERHALB der Gradskala (Radius Rs um
+        den Nullpunkt) greift; AUSSERHALB wird um den Nullpunkt gedreht. Während der
+        Interaktion wird das Seiten-Scrollen gesperrt (stabil gegen iPad-Scrollen).
+    • Verschoben wird per Pointer-Events MIT setPointerCapture (ein Finger).
+    • Zustand (Position, Drehung) lebt im JS-Objekt `geo`, niemals in localStorage.
+  ============================================================================
+-->
+<style>
+  :root{ --geo:#2f5fa6; --geo-edge:#244e86; }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{font-family:'Segoe UI',system-ui,sans-serif;background:#fbf7ef;color:#243447;
+       margin:0;padding:0 0 60px;line-height:1.55;font-size:16px;}
+  .wrap{max-width:820px;margin:0 auto;padding:0 16px;}
+  header{background:linear-gradient(135deg,#3b6cb5,#244e86);color:#fff;padding:20px 18px;border-radius:0 0 22px 22px;}
+  header h1{margin:0 0 4px;font-size:1.45rem;}
+  header p{margin:0;opacity:.9;}
+  h2{color:#244e86;margin-top:2em;border-bottom:2px solid #dce6f2;padding-bottom:4px;}
+  code,pre{font-family:'SFMono-Regular',Consolas,monospace;}
+  pre{background:#1f2a38;color:#e6edf6;padding:14px 16px;border-radius:12px;overflow:auto;font-size:13px;line-height:1.5;}
+  .copybox{position:relative;}
+  .note{background:#fff7ec;border:2px dashed #e8862e;border-radius:12px;padding:12px 14px;margin:14px 0;}
+  .warn{background:#ffeaea;border:2px solid #d92121;border-radius:12px;padding:12px 14px;margin:14px 0;}
+  kbd{background:#eef2f7;border:1px solid #c7d2de;border-radius:6px;padding:1px 6px;font-size:.85em;}
+
+  /* ---- Styles, die der Baustein braucht (mit-kopieren!) ---- */
+  .geo-stage{width:100%;max-width:520px;touch-action:none;overscroll-behavior:contain;border-radius:16px;display:block;margin:0 auto;
+    background:repeating-linear-gradient(0deg,#f4f8fd,#f4f8fd 27px,#e7eef7 28px),
+              repeating-linear-gradient(90deg,transparent,transparent 27px,#e7eef7 28px);
+    border:2px solid #cdd8e6;
+    -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;}
+  .geo-stage text{-webkit-user-select:none;user-select:none;pointer-events:none;}
+  .geoTri{pointer-events:none;will-change:transform;}            /* gesamtes Geodreieck nicht klick-/selektierbar */
+  .geo-stage{cursor:grab;}
+  .geo-controls{max-width:520px;margin:10px auto 0;display:flex;flex-direction:column;gap:10px;}
+  .geo-rot{background:#eef4fb;border:2px solid #cdd8e6;border-radius:14px;padding:10px 12px;}
+  .geo-rot label{font-weight:700;color:var(--geo);display:block;text-align:center;margin-bottom:6px;}
+  .geo-rot-hint{font-weight:600;color:#5a6b7d;font-size:.85em;}
+  .geo-stage:active{cursor:grabbing;}
+  .geo-presets{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;}
+  .geo-btn{min-height:44px;padding:6px 14px;border:2px solid #cdd8e6;background:#fff;border-radius:11px;
+    font-weight:700;cursor:pointer;color:#243447;}
+  .geo-btn:active{transform:scale(.96);}
+  .geo-hint{font-size:.9rem;color:#5a6b7d;text-align:center;margin:4px 0 0;}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <h1>📐 Geodreieck-Baustein</h1>
+    <p>Drehen am Griff · Verschieben per Finger · iPad-tauglich</p>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <h2>1 · Live-Demo</h2>
+  <p>Wähle ein Beispiel, verschiebe das Geodreieck (innerhalb der Gradskala ziehen) und drehe es (außerhalb der Skala ziehen) über die Geraden.</p>
+
+  <div style="text-align:center;margin-bottom:10px;">
+    <button class="geo-btn" onclick="demoLoad(0)">Parallel</button>
+    <button class="geo-btn" onclick="demoLoad(1)">Senkrecht</button>
+    <button class="geo-btn" onclick="demoLoad(2)">Schräg</button>
+  </div>
+
+  <!-- Container, in den der Baustein montiert wird -->
+  <div id="demoGeo"></div>
+
+  <h2>2 · Was du ins andere Projekt schreibst</h2>
+  <p>Kopiere diesen Absatz in die <b>Projektanweisungen</b> des Zielprojekts:</p>
+  <div class="note">
+    <b>Interaktives Geodreieck.</b> Wenn eine Aufgabe das Untersuchen von Geradenlagen,
+    Winkeln, Parallelität oder Orthogonalität betrifft (Klasse 5–7, Geometrie) und es
+    didaktisch sinnvoll ist, das Geodreieck anzulegen, binde das wiederverwendbare
+    Geodreieck-Modul ein (Referenzdatei „geodreieck_baustein.html“ im Projektwissen).
+    Übernimm Code und Styles von dort, statt sie neu zu erfinden. Pflichtregeln:
+    Gedreht wird am orangen Dreh-Griff am Geodreieck (im Kreis ziehen) oder per Presets;
+    verschoben wird durch Ziehen auf der Fläche. Beides per Pointer-Events mit
+    <code>setPointerCapture</code> sauber getrennt (Griff = drehen, Fläche = verschieben) –
+    kein Springen am iPad. Zustand nur im JS-Speicher, kein <code>localStorage</code>.
+    Aufruf über <code>mountGeodreieck(container, geraden, optionen)</code>.
+  </div>
+  <div class="warn">
+    <b>Wichtig:</b> Lege diese Datei wirklich ins <b>Projektwissen</b> (nicht nur in einen Chat).
+    Nur dann findet Claude sie später per Projektsuche und kann den Baustein übernehmen.
+  </div>
+
+  <h2>3 · Schnittstelle</h2>
+  <pre>mountGeodreieck(container, geraden, optionen)
+
+container : DOM-Element ODER dessen id (String), in das alles gerendert wird.
+geraden   : Array von Geraden-Objekten, jeweils Pixelkoordinaten im 0–400-Raster:
+            { x1, y1, x2, y2, color }   // color optional, sonst Standardfarbe
+optionen  : (optional) {
+              start:   {x:200, y:200, rot:0},   // Startlage des Geodreiecks
+              hint:    true,                     // Bedien-Hinweistext anzeigen
+              presets: [0,45,90,135]             // Schnellwahl-Drehwinkel
+            }
+
+Rückgabe  : Steuerobjekt { setRot(grad), reset(), getState(), setGeraden(arr) }
+
+Das Koordinatensystem der Zeichenfläche ist 0–400 (viewBox). Ursprung oben links,
+y zeigt nach unten (SVG-Standard). Geraden also in diesem Raster angeben.</pre>
+
+  <h2>4 · Verwendungsbeispiel</h2>
+  <pre>&lt;div id="meinGeo"&gt;&lt;/div&gt;
+&lt;script&gt;
+  const steuer = mountGeodreieck('meinGeo', [
+    { x1:50,  y1:140, x2:350, y2:140, color:'#d6336c' },
+    { x1:50,  y1:260, x2:350, y2:260, color:'#1f9d55' }
+  ], { start:{x:200,y:120,rot:0}, hint:true });
+
+  // später z.B. programmatisch drehen oder Geraden wechseln:
+  // steuer.setRot(90);
+  // steuer.setGeraden([...]);
+&lt;/script&gt;</pre>
+
+  <h2>5 · Der Baustein-Code (kopieren)</h2>
+  <p>Diese <code>&lt;script&gt;</code>-Funktion plus die <code>.geo-*</code>-CSS-Regeln (oben im
+     <code>&lt;style&gt;</code>) sind alles, was du brauchst. Beides ist in dieser Datei bereits aktiv.</p>
+  <pre id="snippetOut">// wird unten automatisch eingefügt</pre>
+
+  <p style="color:#5a6b7d;font-size:.9rem;margin-top:30px;">
+    Hinweis: Diese Datei nutzt kein <code>localStorage</code> und keine externen Bibliotheken.
+    Der Zustand (Position/Drehung) überlebt nur innerhalb der Sitzung – beim Neuladen startet das
+    Geodreieck wieder in der Ausgangslage.
+  </p>
+</div>
+
+<!-- ======================================================================= -->
+<!-- ====================  DER WIEDERVERWENDBARE BAUSTEIN  ================== -->
+<!-- ======================================================================= -->
+<script id="geodreieckSource">
+/**
+ * mountGeodreieck – montiert ein drehbares/verschiebbares Geodreieck über Geraden.
+ * @param {HTMLElement|string} container  Element oder Element-id
+ * @param {Array} geraden  [{x1,y1,x2,y2,color?}, ...] in 0–400-Koordinaten
+ * @param {Object} [optionen]  {start:{x,y,rot}, hint:bool, presets:[..]}
+ * @returns {Object} {setRot, reset, getState, setGeraden}
+ */
+function mountGeodreieck(container, geraden, optionen){
+  const SVGNS='http://www.w3.org/2000/svg';
+  const root = (typeof container==='string') ? document.getElementById(container) : container;
+  const opt = Object.assign({start:{x:200,y:200,rot:0}, hint:true, presets:[0,45,90,135]}, optionen||{});
+  let geraden_ = geraden.slice();
+  const geo = { x:opt.start.x, y:opt.start.y, rot:opt.start.rot };  // Zustand im JS-Speicher
+
+  // ---- DOM aufbauen ----
+  root.innerHTML='';
+  const stage = document.createElementNS(SVGNS,'svg');
+  stage.setAttribute('viewBox','0 0 400 400');
+  stage.setAttribute('class','geo-stage');
+  root.appendChild(stage);
+
+  const controls=document.createElement('div'); controls.className='geo-controls';
+  controls.innerHTML =
+    `<div class="geo-rot">
+       <label>🔄 Drehung: <span class="geo-rotval">0°</span> <span class="geo-rot-hint">(außerhalb der Skala ziehen)</span></label>
+       <div class="geo-presets">`+
+         opt.presets.map(d=>`<button class="geo-btn geo-set" data-deg="${d}">${d}°</button>`).join('')+
+       `</div>
+     </div>
+     <button class="geo-btn geo-reset">📐 Geodreieck zurücklegen</button>`;
+  root.appendChild(controls);
+  if(opt.hint){
+    const h=document.createElement('p'); h.className='geo-hint';
+    h.innerHTML='👆 <b>Innerhalb</b> der Gradskala ziehen = <b>verschieben</b> · <b>außerhalb</b> ziehen = <b>drehen</b>.';
+    root.appendChild(h);
+  }
+
+  const rotval = controls.querySelector('.geo-rotval');
+
+  function el(tag,attrs){const e=document.createElementNS(SVGNS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);return e;}
+
+  // ---- Geodreieck-SVG zeichnen (realistisch: Skala, Parallellinien, Mittellinie) ----
+  function buildGeo(){
+    const W=180, H=180, COL='#2f5fa6', EDGE='#244e86';
+    const g=el('g',{transform:`translate(${geo.x} ${geo.y}) rotate(${geo.rot})`,class:'geoTri'});
+    // Material (getönt, abgerundete Ecken)
+    g.appendChild(el('path',{d:`M ${-W+8},0 Q ${-W},0 ${-W+6},-4 L -4,${-H+6} Q 0,${-H} 4,${-H+6} L ${W-6},-4 Q ${W},0 ${W-8},0 Z`,
+      fill:'rgba(150,200,235,0.22)',stroke:EDGE,'stroke-width':2.5,'stroke-linejoin':'round'}));
+    // Parallellinien-Schar
+    for(let y=16;y<H-10;y+=16){const half=W*(1-y/H)-4;
+      g.appendChild(el('line',{x1:-half,y1:-y,x2:half,y2:-y,stroke:COL,'stroke-width':0.8,opacity:.38}));}
+    // Mittellinie + Pfeil
+    g.appendChild(el('line',{x1:0,y1:4,x2:0,y2:-H+8,stroke:EDGE,'stroke-width':1.6,'stroke-dasharray':'7 5',opacity:.85}));
+    g.appendChild(el('path',{d:`M -4,${-H+16} L 0,${-H+8} L 4,${-H+16}`,fill:'none',stroke:EDGE,'stroke-width':1.6,opacity:.85}));
+    // Nullkante + cm-Skala mit Bezifferung
+    g.appendChild(el('line',{x1:-W+6,y1:0,x2:W-6,y2:0,stroke:EDGE,'stroke-width':2.4}));
+    const cm=20;
+    for(let n=1;n*cm<=W-12;n++){[-1,1].forEach(sgn=>{const x=sgn*n*cm,lang=(n%5===0);
+      g.appendChild(el('line',{x1:x,y1:0,x2:x,y2:lang?9:5,stroke:COL,'stroke-width':lang?1.4:0.9,opacity:.7}));
+      if(lang){const t=el('text',{x:x,y:19,'text-anchor':'middle','font-size':9,fill:COL,opacity:.8});t.textContent=n;g.appendChild(t);}});}
+    g.appendChild(el('line',{x1:0,y1:0,x2:0,y2:10,stroke:EDGE,'stroke-width':1.6}));
+    // Gradskala (Doppelbogen + Striche jeden 1°, länger alle 5°, beziffert alle 10°)
+    const Rs=W*0.66,cx=0,cy=0,Ri=Rs*0.86;
+    g.appendChild(el('path',{d:`M ${cx-Rs} ${cy} A ${Rs} ${Rs} 0 0 1 ${cx+Rs} ${cy}`,fill:'none',stroke:COL,'stroke-width':1,opacity:.7}));
+    g.appendChild(el('path',{d:`M ${cx-Ri} ${cy} A ${Ri} ${Ri} 0 0 1 ${cx+Ri} ${cy}`,fill:'none',stroke:COL,'stroke-width':0.8,opacity:.5}));
+    for(let a=0;a<=180;a+=1){const rad=Math.PI*a/180;
+      const zehn=(a%10===0), fuenf=(a%5===0);
+      const len=zehn?13:(fuenf?9:5);                       // 10°=lang, 5°=mittel, 1°=kurz
+      const r2=Rs-len;
+      g.appendChild(el('line',{x1:cx-Math.cos(rad)*Rs,y1:cy-Math.sin(rad)*Rs,x2:cx-Math.cos(rad)*r2,y2:cy-Math.sin(rad)*r2,
+        stroke:COL,'stroke-width':zehn?1.5:(fuenf?1:0.6),opacity:zehn?0.9:(fuenf?0.8:0.6)}));
+      if(zehn){const tr=r2-8,tx=cx-Math.cos(rad)*tr,ty=cy-Math.sin(rad)*tr+3;
+        const t=el('text',{x:tx,y:ty,'text-anchor':'middle','font-size':8,fill:COL,opacity:.85});t.textContent=a;g.appendChild(t);}}
+    // 90°-Ecke
+    g.appendChild(el('rect',{x:-9,y:-H+8,width:9,height:9,fill:'none',stroke:EDGE,'stroke-width':1.8}));
+    const t90=el('text',{x:0,y:-H-22,'text-anchor':'middle','font-size':14,fill:EDGE,'font-weight':'bold'});t90.textContent='90°';g.appendChild(t90);
+    return g;
+  }
+
+  function draw(){
+    stage.innerHTML='';
+    geraden_.forEach(L=>stage.appendChild(el('line',
+      {x1:L.x1,y1:L.y1,x2:L.x2,y2:L.y2,stroke:L.color||'#d6336c','stroke-width':6,'stroke-linecap':'round'})));
+    stage.appendChild(buildGeo());
+  }
+  function applyTransform(){
+    const g=stage.querySelector('.geoTri');
+    if(g)g.setAttribute('transform',`translate(${geo.x} ${geo.y}) rotate(${geo.rot})`);
+  }
+  // rAF-gedrosseltes Rendern: bei schnellen Fingerbewegungen wird pro Frame
+  // nur EINMAL ins DOM geschrieben → kein Ruckeln am iPad.
+  let rafPending=false;
+  function scheduleTransform(){
+    if(rafPending)return;
+    rafPending=true;
+    requestAnimationFrame(()=>{rafPending=false;applyTransform();});
+  }
+
+  // ---- Drehen: per Griff ziehen ODER Presets (kein Slider mehr) ----
+  function setRot(deg){
+    deg=((Math.round(deg)%360)+360)%360;            // 0..359 (Griff erlaubt vollen Kreis)
+    geo.rot=deg; rotval.textContent=deg+'°'; scheduleTransform();
+  }
+  controls.querySelectorAll('.geo-set').forEach(b=>b.addEventListener('click',()=>setRot(+b.dataset.deg)));
+  controls.querySelector('.geo-reset').addEventListener('click',()=>{
+    geo.x=opt.start.x; geo.y=opt.start.y; setRot(opt.start.rot); applyTransform();
+  });
+
+  // ---- Finger-Interaktion: Griff => drehen, Fläche => verschieben ----
+  let mode=null, activePointer=null, dragStart=null, rotStart=null;
+  function pt(evt){const r=stage.getBoundingClientRect();
+    return {x:(evt.clientX-r.left)/r.width*400, y:(evt.clientY-r.top)/r.height*400};}
+  function winkelZuMitte(p){ // Winkel (Grad) vom Geodreieck-Mittelpunkt zum Punkt p
+    return Math.atan2(p.y-geo.y, p.x-geo.x)*180/Math.PI;
+  }
+  stage.addEventListener('pointerdown',e=>{
+    if(activePointer!==null)return;
+    activePointer=e.pointerId;
+    try{stage.setPointerCapture(e.pointerId);}catch(_){}
+    const p=pt(e);
+    // Innerhalb der Gradskala (Radius Rs um den Nullpunkt) = verschieben,
+    // außerhalb = drehen um den Nullpunkt. Rs = W*0.66 mit W=180.
+    const Rs=180*0.66;
+    const distMitte=Math.hypot(p.x-geo.x, p.y-geo.y);
+    if(distMitte<=Rs){
+      mode='move';
+      dragStart={px:p.x,py:p.y,gx:geo.x,gy:geo.y};
+    }else{
+      mode='rotate';
+      rotStart={ pointerWinkel:winkelZuMitte(p), rotAnfang:geo.rot };  // Delta-Drehung um den Nullpunkt
+    }
+    e.preventDefault();
+  });
+  stage.addEventListener('pointermove',e=>{
+    if(mode===null||e.pointerId!==activePointer)return;
+    const p=pt(e);
+    if(mode==='rotate'){
+      const delta=winkelZuMitte(p)-rotStart.pointerWinkel;
+      setRot(rotStart.rotAnfang+delta);
+    }else{
+      geo.x=Math.max(-60,Math.min(460,dragStart.gx+(p.x-dragStart.px)));
+      geo.y=Math.max(-60,Math.min(460,dragStart.gy+(p.y-dragStart.py)));
+      scheduleTransform();
+    }
+    e.preventDefault();
+  });
+  // ---- Scroll-Sperre während der Interaktion (stabil & sprungfrei gegen iPad-Scrollen) ----
+  // Solange ein Finger das Geodreieck zieht, wird touchmove auf der Stage aktiv
+  // (nicht-passiv) abgefangen. So scrollt die Seite beim Hoch-/Runterziehen nicht mit.
+  function blockTouch(ev){ if(mode!==null) ev.preventDefault(); }
+  stage.addEventListener('touchmove', blockTouch, {passive:false});
+
+  function endDrag(e){if(e&&e.pointerId!==activePointer)return;mode=null;activePointer=null;}
+  stage.addEventListener('pointerup',endDrag);
+  stage.addEventListener('pointercancel',endDrag);
+
+  setRot(geo.rot); draw();
+
+  // ---- öffentliche Schnittstelle ----
+  return {
+    setRot,
+    reset(){geo.x=opt.start.x;geo.y=opt.start.y;setRot(opt.start.rot);applyTransform();},
+    getState(){return {x:geo.x,y:geo.y,rot:geo.rot};},
+    setGeraden(arr){geraden_=arr.slice();draw();}
+  };
+}
+</script>
+
+<!-- ====================  DEMO-STEUERUNG  ==================== -->
+<script>
+const DEMO_BEISPIELE=[
+  [ {x1:50,y1:140,x2:350,y2:140,color:'#d6336c'}, {x1:50,y1:260,x2:350,y2:260,color:'#1f9d55'} ], // parallel
+  [ {x1:60,y1:210,x2:340,y2:210,color:'#d6336c'}, {x1:200,y1:60,x2:200,y2:340,color:'#1f9d55'} ], // senkrecht
+  [ {x1:51,y1:271,x2:349,y2:229,color:'#d6336c'}, {x1:120,y1:55,x2:280,y2:285,color:'#1f9d55'} ]  // schräg
+];
+let demoSteuer=null;
+function demoLoad(i){
+  if(!demoSteuer){
+    demoSteuer=mountGeodreieck('demoGeo', DEMO_BEISPIELE[i], {start:{x:200,y:120,rot:0}, hint:true});
+  }else{
+    demoSteuer.setGeraden(DEMO_BEISPIELE[i]);
+    demoSteuer.reset();
+  }
+}
+demoLoad(0);
+
+// Den Baustein-Quelltext sichtbar in den <pre id="snippetOut"> spiegeln:
+document.getElementById('snippetOut').textContent =
+  document.getElementById('geodreieckSource').textContent.trim();
+</script>
+</body>
+</html>
