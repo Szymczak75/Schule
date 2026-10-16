@@ -1,6 +1,6 @@
 # Plan: Navigation, Startseite, Impressum & Datenschutz
 
-*Stand: 16.10.2026 (aktualisiert nach Chat „Navigation Schritt 1“, zweiter Teil) – Abschnitt 7
+*Stand: 16.10.2026 (aktualisiert nach Chat „Navigation Schritt 2“) – Abschnitt 7
 zeigt den aktuellen Fortschritt. In einem neuen Chat dieses Wartungs-Projekts hier weitermachen.*
 
 ---
@@ -53,7 +53,7 @@ zeigt den aktuellen Fortschritt. In einem neuen Chat dieses Wartungs-Projekts hi
     Funktionen (`pruefe.py` meldet `DOPPELT`) → bereinigen
 
 ### 2.4 Regeln & Bausteine nachziehen (Wartungs-Standard)
-- Neuer Baustein `baustein_navigation.html` (Entwurf v2 liegt in `_wartung/plan/`).
+- Neuer Baustein `baustein_navigation.html` (v3, liegt in `_wartung/allgemein/`).
 - `anweisung_lernseiten.txt`: neue Pflichtregel „Navigationsleiste auf jeder Seite".
 - `pruefe.py`: Prüfung, ob die Leiste vorhanden ist.
 - GeoGebra-Baukasten (`bauer.py`) setzt die Leiste automatisch.
@@ -160,8 +160,22 @@ Ordner-Übersichten `_*.html` über `linking.txt`). Änderungen an der Startseit
 **Erledigt:**
 - Schritt 1a: Filter `?klasse=…` in `build_hub.py`, `intern/`/`_privat/`, `anzeigename`
   → **PR #1** (Branch `navigation-filter`).
-- Schritt 1b: `baustein_navigation.html` v2 (mit Feedback und 🏠-Knopf) → Entwurf in
-  `_wartung/plan/entwurf_baustein_navigation.html`, noch nicht in Seiten eingesetzt.
+- Schritt 1b: `baustein_navigation.html` v2 (mit Feedback und 🏠-Knopf) als Entwurf.
+- **Schritt 2** → **PR #4** (Branch `navigation-regeln`):
+  - Baustein als **v3** nach `_wartung/allgemein/baustein_navigation.html` (Farbe
+    `#f2f3f5` → `#eef0f3` aus dem Schema, `width:auto` gegen fremde Button-Regeln).
+  - Lernseiten-Anweisung: TEIL 0 Nr. 23 + neuer **TEIL 3.6 Navigationsleiste**, Hinweise in
+    3.3, 3.4, 7.6 (Systemschrift), 8.1 (nur MathJax; `<a href>` ist keine Ressource),
+    8.3, TEIL 10, ANHANG B. Checkliste und Dach-Anweisung nachgezogen.
+  - `pruefe.py`: Regel `NAV` (fehlt / verändert / mehrfach / in `<main>`), Hinweis `NAVALT`
+    (alte Fassung, `NAV_VERSION`); Google Fonts → `EXTERN`; `<a href>`-Links (Videos,
+    Quellen) kein Fehlalarm mehr; Leisten-Block zählt nicht für `DOPPELT`/`NEULADEN`.
+  - `bauer.py` setzt die Leiste vor den T-Rex (bricht ab, wenn der Baustein fehlt);
+    Baukasten-Doku (sieben Dateien), „Die harten Formatregeln", `projekt_aufbau.md`,
+    Landkarte, `_wartung/LIESMICH.md`, Wartungs-Projektanweisung.
+  - Getestet: Testseite mit `bauer.py` gebaut, `pruefe.py` 0 Befunde, `test.js` sauber;
+    Leiste im Browser: Klassen-Link `?klasse=8`, Feedback-Fenster, Mail-Betreff
+    `[Dino-Feedback] Idee: …`, keine Überlappung mit dem T-Rex, nichts im Speicher.
 - sessionStorage-Regel in `anweisung_lernseiten.txt`, Checkliste, `pruefe.py`.
 - Master-Kopien in `_wartung/` → **PR #2** (Branch `wartung-sync`).
 - GeoGebra-Baukasten auf sessionStorage umgestellt (`helfer.js`, `bauer.py` setzt
@@ -170,9 +184,15 @@ Ordner-Übersichten `_*.html` über `linking.txt`). Änderungen an der Startseit
   → ebenfalls PR #2. Im echten Browser mit Neuladen getestet.
 
 **Als Nächstes:**
-1. Schritt 2 (Navigationsleiste als Regel, `pruefe.py`, `bauer.py`, Landkarte, Google Fonts
-   streichen).
-2. Schritt 3 (Nachrüst-Skript, PR mit Prüfbericht). **Neu (Entscheidung 16.10.2026):** Das
+1. Schritt 3 (Nachrüst-Skript, PR mit Prüfbericht). **Befund aus Schritt 2 (Lauf über
+   442 Seiten):** 421 ohne Leiste (`NAV`); **183 Seiten binden Google Fonts ein** → das
+   Skript entfernt den `<link>` (und `preconnect`/`@import`) – die `font-family`-Angaben
+   fallen dann auf ihre Ersatzschrift zurück, Stichprobe im Browser ansehen. **Auch die
+   Startseite** lädt Google Fonts (`build_hub.py`, Playfair Display/Source Sans 3) → dort
+   von Hand auf Systemschriften umstellen. **6 Seiten sind nicht UTF-8** (`blutzucker_kl9_
+   erarbeitung`, fünf Winkel-Seiten Klasse 7) → Skript muss die Kodierung erkennen und
+   als UTF-8 zurückschreiben, sonst überspringen und melden. Leiste immer vor dem T-Rex
+   einsetzen, nie in `<main>`. **Neu (Entscheidung 16.10.2026):** Das
    Skript setzt zusätzlich einen einheitlichen **Neulade-Schutz Stufe 1** in alle bestehenden
    Seiten (ca. 344 interaktive von 430): Feldwerte, Auswahllisten, Häkchen und die offene Karte
    im `sessionStorage`, Schlüssel `aszym:<datei>:v1`, try/catch. Prüfergebnisse,
@@ -182,7 +202,7 @@ Ordner-Übersichten `_*.html` über `linking.txt`). Änderungen an der Startseit
    Skript setzt nur `value` → Baustein speichert zusätzlich bei jedem Klick).
    **Stufe 2** (voller Schutz wie im Baukasten) nach und nach für die Seiten, die gerade im
    Unterricht laufen, bzw. beim nächsten Überarbeiten (Debugging-Regel).
-3. Schritt 4 (Impressum-Seite, Lizenz klären).
+2. Schritt 4 (Impressum-Seite, Lizenz klären).
 
 ---
 

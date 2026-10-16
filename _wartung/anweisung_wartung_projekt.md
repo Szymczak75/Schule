@@ -9,7 +9,7 @@ einem Baustein oder einer Regel wird hier EINMAL umgesetzt und gilt dann in alle
   hier ist per GitHub-Synchronisation eingebunden (nur lesen). Geändert wird ausschließlich
   im Repo – per Branch + Pull Request.
 - `_wartung/allgemein/` – `anweisung_lernseiten.txt`, `wiederkehrende_fehler_checkliste.md`,
-  `pruefe.py`, `baustein_mathjax_notfall.js`
+  `pruefe.py`, `baustein_mathjax_notfall.js`, `baustein_navigation.html`
 - `_wartung/geodreieck/` – `geodreieck_baustein.html`
 - `_wartung/unterrichtsvorbereitung/` – `anweisung_C_unterrichtsvorbereitung.md`
 - `_wartung/geogebra/` – Baukasten (`css.txt`, `helfer.js`, `bauer.py`, `koord.py`, `test.js`,
@@ -30,6 +30,9 @@ einem Baustein oder einer Regel wird hier EINMAL umgesetzt und gilt dann in alle
 1. Betroffene Dateien aus dem Repo vollständig lesen. Nichts aus dem Gedächtnis.
 2. Änderung umsetzen:
    - Geodreieck-Code → `geodreieck_baustein.html` und ggf. ANHANG A der Lernseiten-Anweisung.
+   - Navigationsleiste → `baustein_navigation.html`; Versionsnummer im Kopfkommentar und
+     `NAV_VERSION` in `pruefe.py` gemeinsam erhöhen; die Website-Seiten danach per
+     Nachrüst-Skript aktualisieren (eigener PR).
    - Allgemeine Regel → Lernseiten-Anweisung; prüfen, ob Dach-Anweisung, Checkliste und
      `pruefe.py` mitziehen müssen.
    - **GeoGebra mitdenken:** Betrifft die Regel Farben, Schriftgrößen, CSS-Selektoren,

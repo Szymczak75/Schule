@@ -9,16 +9,16 @@ von claude.ai ein (siehe `_wartung/LIESMICH.md`). Nach einer Änderung genügt i
 
 ## Die vier realen Projekte
 
-| Reales Projekt | GitHub-Ordner | Lernseiten-Anweisung | Fehler-Checkliste | `pruefe.py` | MathJax-Notfall | Dach-Anweisung (.md) | Geodreieck-Baustein |
-|---|---|---|---|---|---|---|---|
-| **Unterrichtsvorbereitung** | `allgemein`, `geodreieck`, `unterrichtsvorbereitung` | ja | ja | ja | ja | ja (`anweisung_C_unterrichtsvorbereitung.md`) | ja |
-| **HTML erzeugen** | `allgemein`, `geodreieck` | ja | ja | ja | ja | — (nicht nötig) | ja |
-| **Debugging** | `allgemein`, `geodreieck` | ja | ja | ja | ja | — (nicht nötig) | ja |
-| **GeoGebra** (Bedienungsseiten) | `allgemein`, `geogebra` | ja | ja | ja | — (steckt in `helfer.js`; liegt über `allgemein` trotzdem mit an, schadet nicht) | — | — (nicht nötig) |
-| **Wartung Unterrichtsprojekte** | ganzer Ordner `_wartung` | alles | | | | | |
+| Reales Projekt | GitHub-Ordner | Lernseiten-Anweisung | Fehler-Checkliste | `pruefe.py` | MathJax-Notfall | Navigationsleiste | Dach-Anweisung (.md) | Geodreieck-Baustein |
+|---|---|---|---|---|---|---|---|---|
+| **Unterrichtsvorbereitung** | `allgemein`, `geodreieck`, `unterrichtsvorbereitung` | ja | ja | ja | ja | ja | ja (`anweisung_C_unterrichtsvorbereitung.md`) | ja |
+| **HTML erzeugen** | `allgemein`, `geodreieck` | ja | ja | ja | ja | ja | — (nicht nötig) | ja |
+| **Debugging** | `allgemein`, `geodreieck` | ja | ja | ja | ja | ja | — (nicht nötig) | ja |
+| **GeoGebra** (Bedienungsseiten) | `allgemein`, `geogebra` | ja | ja | ja | — (steckt in `helfer.js`; liegt über `allgemein` trotzdem mit an, schadet nicht) | ja (`bauer.py` setzt sie; Datei muss mit nach `/tmp/gg/`) | — | — (nicht nötig) |
+| **Wartung Unterrichtsprojekte** | ganzer Ordner `_wartung` | alles | | | | | | |
 
 **Allgemeine Dateien** (`_wartung/allgemein/`: Lernseiten-Anweisung, Fehler-Checkliste,
-`pruefe.py`, MathJax-Notfall) sind in allen Projekten **identisch** und werden nur hier
+`pruefe.py`, MathJax-Notfall, Navigationsleiste) sind in allen Projekten **identisch** und werden nur hier
 geändert.
 
 ## Nur im Projekt „GeoGebra" (`_wartung/geogebra/`)
@@ -31,7 +31,7 @@ Die Master-Kopie liegt hier, damit eine Änderung an allgemeinen Regeln (z. B. F
 | `anweisung_geogebra_projekt.md` | Text für das Feld „Projektanweisungen" | ja, wenn sie eine allgemeine Regel zusammenfasst („Die harten Formatregeln") – **Text muss von Hand ins Feld** |
 | `css.txt` | Stylesheet des Baukastens | **ja** – Farben, Schriftgrößen, `.frac`, `svg`-Selektoren |
 | `helfer.js` | JS-Helfer inkl. MathJax-Notfall-Anzeige | **ja** – Notfall-Anzeige muss mit `baustein_mathjax_notfall.js` übereinstimmen; Speicherregel |
-| `bauer.py` | Seiten-Bauer (Meta-Tags, Farbschemata, T-Rex) | **ja** – Meta-Tags, Farbschemata |
+| `bauer.py` | Seiten-Bauer (Meta-Tags, Farbschemata, T-Rex, Navigationsleiste) | **ja** – Meta-Tags, Farbschemata; liest `baustein_navigation.html` aus `/tmp/gg/` |
 | `koord.py` | Koordinatensystem-SVGs | ja – Regeln für Koordinatensysteme |
 | `test.js` | Browsertest (Playwright) | selten |
 | `LIESMICH.md` | Bedienungsanleitung des Baukastens | bei Baukasten-Änderungen |
@@ -95,6 +95,14 @@ wird es einfach ins Arbeitsverzeichnis geschrieben (Lernseiten-Anweisung TEIL 11
 `baustein_mathjax_notfall.js` wird in jede Seite mit Formeln **hineinkopiert** (nicht
 verlinkt). Im GeoGebra-Projekt steckt derselbe Code am Ende von `helfer.js` – bei einer
 Änderung **beide** Stellen nachziehen.
+
+## Navigationsleiste
+`baustein_navigation.html` (Ordner `allgemein`) wird in jede Seite **hineinkopiert**, vor den
+T-Rex (Lernseiten-Anweisung TEIL 3.6). Im GeoGebra-Projekt setzt `bauer.py` sie automatisch.
+`pruefe.py` erkennt den Block an den Kommentarzeilen und kennt die aktuelle Fassung
+(`NAV_VERSION`). Bei einer Änderung am Baustein: Versionsnummer im Kopfkommentar **und**
+`NAV_VERSION` erhöhen, danach die Website-Seiten per Nachrüst-Skript aktualisieren.
+Feedback-Adresse und Startseiten-Adresse stehen nur im Baustein.
 
 ## Geodreieck
 Der Baustein ist für die drei Unterrichts-Projekte identisch. Er heißt jetzt überall

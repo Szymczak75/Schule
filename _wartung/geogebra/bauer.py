@@ -3,7 +3,8 @@
 Seiten-Bauer für GeoGebra-Bedienungsseiten
 ==========================================
 Setzt aus Bausteinen eine vollständige, selbst enthaltene HTML-Lernseite zusammen.
-Braucht im selben Ordner:  css.txt · helfer.js   (optional: koord.py für Grafiken)
+Braucht im selben Ordner:  css.txt · helfer.js · baustein_navigation.html
+(optional: koord.py für Grafiken)
 
 Minimalbeispiel
 ---------------
@@ -30,6 +31,7 @@ Regeln, die der Bauer automatisch einhält
 - MathJax-Einbindung exakt nach Vorgabe
 - Farbschema passend zum `typ` (Lernseite orange · Übung/Rückblick blau · Test grau)
 - T-Rex mit „Made by ASzym"
+- Navigationsleiste (baustein_navigation.html) vor dem T-Rex (TEIL 3.6)
 - Notfall-Anzeige für Formeln, falls MathJax nicht geladen werden kann
 - Fortschrittsmarken über den Reitern (✅ bzw. ● beim Wissenstest)
 - Zustand im sessionStorage unter 'aszym:<datei>:v<version>' (übersteht Neuladen, TEIL 6)
@@ -42,6 +44,11 @@ ZIEL = os.environ.get('GG_ZIEL', os.getcwd())
 
 CSS_VORLAGE = io.open(os.path.join(HIER, 'css.txt'), encoding='utf-8').read()
 HELFER = io.open(os.path.join(HIER, 'helfer.js'), encoding='utf-8').read()
+_NAV_PFAD = os.path.join(HIER, 'baustein_navigation.html')
+if not os.path.exists(_NAV_PFAD):
+    raise SystemExit('baustein_navigation.html fehlt in %s – aus dem Projektwissen '
+                     '(Ordner allgemein) unverändert dorthin schreiben.' % HIER)
+NAV = io.open(_NAV_PFAD, encoding='utf-8').read().strip() + '\n'
 
 # ---------------------------------------------------------------- Farbschemata
 THEMA_LERNSEITE = {
@@ -119,7 +126,8 @@ def baue(datei, titel, beschreibung, keywords, thema, typ, klasse, body, js,
                         thema=thema, typ=typ, klasse=klasse, fach=fach,
                         oberthema=oberthema)
             + css + "</head>\n<body>\n" + body
-            + '\n<div class="trex" id="trex">\U0001F996'
+            + '\n' + NAV
+            + '<div class="trex" id="trex">\U0001F996'
               '<span class="bubble">Made by ASzym</span></div>\n'
             + "<script>\n" + vorlauf + js + "\n" + HELFER
             + "\npruefeFortschritt();\n</script>\n</body>\n</html>\n")

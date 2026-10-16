@@ -23,7 +23,7 @@ Was dieser Linter NICHT kann (bleibt Handarbeit bzw. Browsertest):
   - ob der Stand ein Neuladen wirklich vollständig übersteht (Browsertest: Seite
     bearbeiten, neu laden, vergleichen)
 
-Stand: 16.10.2026 (sessionStorage erlaubt, TEIL 6)
+Stand: 16.10.2026 (Navigationsleiste Pflicht, TEIL 3.6; Google Fonts nicht mehr erlaubt, TEIL 8.1)
 """
 import io
 import os
@@ -46,7 +46,13 @@ META_PFLICHT = ['description', 'keywords', 'typ', 'klasse', 'fach', 'oberthema',
 SUFFIX_TYP = {'_ls': 'Lernseite', '_ue': 'Übung', '_test': 'Test',
               '_rbka': 'Rückblick', '_rb': 'Rückblick', '_ka': 'Klassenarbeit',
               '_bonus': 'Bonus'}
-ERLAUBTE_HOSTS = ('cdn.jsdelivr.net/npm/mathjax', 'fonts.googleapis.com', 'fonts.gstatic.com')
+ERLAUBTE_HOSTS = ('cdn.jsdelivr.net/npm/mathjax',)   # Google Fonts seit 16.10.2026 nicht mehr
+
+# Navigationsleiste (baustein_navigation.html, TEIL 3.6)
+NAV_VERSION = 'v3'
+NAV_START = 'https://szymczak75.github.io/Schule/dino_hub.html'
+NAV_BLOCK = re.compile(r'<!-- =+\s*BAUSTEIN: Navigationsleiste.*?ENDE BAUSTEIN Navigationsleiste =+ -->',
+                       re.S)
 
 
 def _hex_norm(x):
@@ -88,8 +94,11 @@ def pruefe(pfad):
     """Gibt eine Liste (stufe, kuerzel, meldung) zurück. stufe: 'FEHLER' | 'HINWEIS'."""
     h = io.open(pfad, encoding='utf-8').read()
     name = os.path.basename(pfad)
+    # Seiteneigener Teil ohne den Navigations-Baustein: dessen Skript und Feedback-Textfeld
+    # gehören nicht zur Aufgabenlogik (sonst Fehlalarme bei DOPPELT und NEULADEN).
+    eigen = NAV_BLOCK.sub(' ', h)
     css = _style_bloecke(h)
-    js = _skript_bloecke(h)
+    js = _skript_bloecke(eigen)
     text = _koerper_text(h)
     ohne_code = _ohne_code(h)
     f = []
@@ -123,10 +132,20 @@ def pruefe(pfad):
     elif 'inlineMath' not in h:
         fehler('MATHJAX', 'MathJax-Konfiguration (inlineMath) fehlt')
 
-    for m in re.finditer(r'(?:src|href)="(https?://[^"]+)"', h):
-        url = m.group(1)
+    # Nur nachgeladene Ressourcen zählen (src=…, <link href=…>). Ein normaler Link <a href=…>
+    # (Startseite, Video-Link-Karte, TEIL 8.2) lädt nichts nach.
+    for m in re.finditer(r'<(\w+)\b[^>]*?\b(?:src|href)="(https?://[^"]+)"', h):
+        if m.group(1).lower() == 'a':
+            continue
+        url = m.group(2)
         if not any(g in url for g in ERLAUBTE_HOSTS):
-            fehler('EXTERN', 'nicht erlaubte externe Ressource: %s' % url[:70])
+            if 'fonts.googleapis.com' in url or 'fonts.gstatic.com' in url:
+                fehler('EXTERN', 'Google Fonts nicht mehr erlaubt (Datenschutz) – Link '
+                                 'entfernen, Systemschrift genügt (TEIL 8.1)')
+            else:
+                fehler('EXTERN', 'nicht erlaubte externe Ressource: %s' % url[:70])
+    if '@import' in h and 'fonts.googleapis.com' in h:
+        fehler('EXTERN', 'Google Fonts per @import – entfernen, Systemschrift genügt (TEIL 8.1)')
 
     ordner = os.path.dirname(os.path.abspath(pfad))
     for m in re.finditer(r'(?:src|href)="(?!https?://|#|data:|mailto:)([^"]+)"', h):
@@ -266,8 +285,8 @@ def pruefe(pfad):
             fehler('SPEICHERTRY', 'sessionStorage-Zugriff ohne try/catch – bei blockiertem '
                                   'Speicher bricht das Skript ab (TEIL 6)')
             break
-    interaktiv = ('btn-pruefen' in h or 'mcwahl' in h or 'data-ok' in h
-                  or re.search(r'<input|<textarea', h))
+    interaktiv = ('btn-pruefen' in eigen or 'mcwahl' in eigen or 'data-ok' in eigen
+                  or re.search(r'<input|<textarea', eigen))
     if interaktiv and 'sessionStorage' not in js:
         hinweis('NEULADEN', 'interaktive Seite ohne sessionStorage – der Stand geht beim '
                             'Neuladen verloren (TEIL 6)')
@@ -277,6 +296,27 @@ def pruefe(pfad):
         fehler('TREX', 'T-Rex ohne Hinweis „Made by ASzym"')
     if 'backface-visibility' in css and 'min-height' not in css:
         fehler('FLIP', 'Flip-Card ohne min-height')
+
+    # Navigationsleiste (TEIL 3.6) – nicht auf Ordner-Übersichten/Weiterleitungen (hubignore)
+    if 'name="hubignore"' not in h:
+        nav = NAV_BLOCK.search(h)
+        if not nav:
+            fehler('NAV', 'Navigationsleiste fehlt – baustein_navigation.html unverändert vor '
+                          'dem T-Rex bzw. vor </body> einfügen (TEIL 3.6)')
+        else:
+            n = nav.group(0)
+            if ('class="dino-nav"' not in n or 'class="dino-home"' not in n
+                    or NAV_START not in n or 'dino-nav-fb' not in n):
+                fehler('NAV', 'Navigationsleiste unvollständig oder verändert – Baustein neu '
+                              'einsetzen (TEIL 3.6)')
+            elif 'Navigationsleiste  (%s' % NAV_VERSION not in n:
+                hinweis('NAVALT', 'Navigationsleiste ist nicht die aktuelle Fassung %s – '
+                                  'Baustein ersetzen' % NAV_VERSION)
+            if len(NAV_BLOCK.findall(h)) > 1:
+                fehler('NAV', 'Navigationsleiste steht mehrfach in der Seite')
+            if re.search(r'<main\b', h) and h.find('</main>') > nav.start():
+                fehler('NAV', 'Navigationsleiste steht innerhalb von <main> – gehört ans '
+                              'Seitenende vor den T-Rex')
 
     return f
 

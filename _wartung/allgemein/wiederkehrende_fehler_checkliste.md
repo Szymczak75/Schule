@@ -33,7 +33,7 @@ nach jedem Fund einzeln umgebaut.
 Alle sieben Pflicht-Meta-Tags gesetzt und gefüllt (`description`, `keywords`, `typ`,
 `klasse`, `fach`, `oberthema`, `thema`)? Passt `typ` zum Dateinamen-Suffix? Passt `klasse`
 zur restlichen Reihe? MathJax-Block exakt wie vorgeschrieben eingebunden? Keine weitere
-externe Ressource außer Google Fonts und MathJax?
+externe Ressource außer MathJax – auch kein Google Fonts (Links `<a href>` zählen nicht)?
 
 **2. Farbschema & Typografie**
 Sind exakt die verbindlichen Hex-Werte verwendet (kein eigener Orange-/Blauton)? Passt das
@@ -47,7 +47,8 @@ eine Auswertungskarte **und** eine Wiederholungskarte (vorletzte Karte)? Hat jed
 Oberstufen-Aufgabenkarte unter dem Titel die `.op-tags`-Zeile mit Hilfsmittel- und
 Lösungsart-Kennzeichnung? Gibt es einen „Weiter"-Button – und wenn ja, mit echtem Ziel?
 Beginnt jede Karte, die auf der vorigen aufbaut, mit „Wo wir gerade stehen"? Sind alle
-Aufgaben ausformuliert (keine Tabellen-Stichworte)?
+Aufgaben ausformuliert (keine Tabellen-Stichworte)? Steht die Navigationsleiste
+(`baustein_navigation.html`) unverändert vor dem T-Rex, außerhalb von `<main>`?
 
 **4. Aufgaben- und Antwortlogik**
 Hat jede Eingabe einen erreichbaren Prüfen-Button? Werden MC-Optionen beim Laden einmal
@@ -204,8 +205,7 @@ den Kreis links vor der Zeile" – falsch, der Kreis blendet nur ein/aus. Richti
 ### Einzelfälle mit Signalwirkung
 
 - **Externe Bibliothek eingebunden** (GeoGebra `deployggb.js`) und dazu eine `.ggb`-Datei
-  referenziert, die neben der HTML gar nicht existiert. Erlaubt sind nur Google Fonts und
-  MathJax; Grafiken als eigenes SVG bauen, angesprochen über den Kind-Selektor
+  referenziert, die neben der HTML gar nicht existiert. Erlaubt ist nur MathJax; Grafiken als eigenes SVG bauen, angesprochen über den Kind-Selektor
   (`.kos > svg`, nie global `svg`, nie `.kos svg`).
 - **Zuordnung wurde nach dem Prüfen zurückgesetzt.** Pflicht ist das Gegenteil: gesetzte
   Paare bleiben sichtbar, werden grün/rot markiert und gesperrt; nur der Leeren-Button gibt
@@ -254,7 +254,13 @@ Diese Punkte standen offen und sind inzwischen als Regel in
   nach dem Schließen des Tabs startet die Seite leer. `localStorage`, Cookies und
   serverseitige Speicherung bleiben verboten. Ein Zurücksetzen-Knopf ist nicht nötig, weil
   jeder Schüler an einem eigenen iPad arbeitet.
+- **Navigationsleiste auf jeder Seite** (Oktober 2026). `baustein_navigation.html` wird
+  unverändert vor dem T-Rex eingefügt: 🏠 Startseite, 📚 Alles für Klasse X (aus dem
+  Meta-Tag `klasse`), ✉️ Feedback, schwebender 🏠-Knopf unten links. `pruefe.py` meldet eine
+  fehlende oder veränderte Leiste als `NAV`.
+- **Keine Google Fonts mehr** (Oktober 2026, Datenschutz). Einzige erlaubte externe Quelle
+  ist MathJax; Schrift kommt aus dem System.
 
 ---
 
-*Stand: 16.10.2026 – gepflegt im Wartungs-Projekt „Wartung Unterrichtsprojekte".*
+*Stand: 16.10.2026 (Navigationsleiste, keine Google Fonts) – gepflegt im Wartungs-Projekt „Wartung Unterrichtsprojekte".*
