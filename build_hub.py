@@ -432,6 +432,14 @@ def klasse_sortkey_str(k):
 def ordner_versteckt(name):
     return name.lower() == "intern" or name.startswith("_") or name.startswith(".")
 
+def ist_hubignore(full):
+    """Seiten mit <meta name="hubignore"> erscheinen nicht auf der Startseite."""
+    try:
+        with open(full, encoding="utf-8", errors="ignore") as f:
+            return 'name="hubignore"' in f.read(4096)
+    except Exception:
+        return False
+
 def build(root, out):
     root = os.path.abspath(root)
     files = []
@@ -447,6 +455,8 @@ def build(root, out):
             if fn.lower().startswith("xxx"):
                 continue
             if fn.startswith("_"):        # ausgeblendet (z. B. generierte Ordner-Übersichten)
+                continue
+            if ist_hubignore(full):       # z. B. Weiterleitungen umgezogener Seiten
                 continue
             files.append((rel, fn, full))
 
