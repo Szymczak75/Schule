@@ -124,6 +124,7 @@ def read_meta(fp):
         "thema": m("thema"),
         "kachel": m("kachel"),
         "gruppe": m("gruppe"),
+        "anzeigename": m("anzeigename"),
     }
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -282,6 +283,9 @@ def link_icon(typ):
     return TYP_ICON.get(typ, (ICON_NEUTRAL, "", ICON_NEUTRAL))[0]
 
 def link_title(info, fname):
+    # Vorrang: <meta name="anzeigename"> → <title> → Dateiname
+    if info.get("anzeigename"):
+        return info["anzeigename"]
     if info.get("title"):
         return info["title"]
     # Fallback: Dateiname ohne Suffix, hübsch
