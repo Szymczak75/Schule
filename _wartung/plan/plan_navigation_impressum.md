@@ -172,7 +172,16 @@ Ordner-Übersichten `_*.html` über `linking.txt`). Änderungen an der Startseit
 **Als Nächstes:**
 1. Schritt 2 (Navigationsleiste als Regel, `pruefe.py`, `bauer.py`, Landkarte, Google Fonts
    streichen).
-2. Schritt 3 (Nachrüst-Skript, PR mit Prüfbericht).
+2. Schritt 3 (Nachrüst-Skript, PR mit Prüfbericht). **Neu (Entscheidung 16.10.2026):** Das
+   Skript setzt zusätzlich einen einheitlichen **Neulade-Schutz Stufe 1** in alle bestehenden
+   Seiten (ca. 344 interaktive von 430): Feldwerte, Auswahllisten, Häkchen und die offene Karte
+   im `sessionStorage`, Schlüssel `aszym:<datei>:v1`, try/catch. Prüfergebnisse,
+   MC-Markierungen und Zuordnungen kommen damit nicht zurück (dann erneut „Prüfen"). Seiten,
+   die schon `sessionStorage` nutzen (2), werden übersprungen. Leeren-Knöpfe der Seiten
+   müssen das Feld auch im Speicher leeren (Baustein hört auf Eingabe-Ereignisse; Leeren per
+   Skript setzt nur `value` → Baustein speichert zusätzlich bei jedem Klick).
+   **Stufe 2** (voller Schutz wie im Baukasten) nach und nach für die Seiten, die gerade im
+   Unterricht laufen, bzw. beim nächsten Überarbeiten (Debugging-Regel).
 3. Schritt 4 (Impressum-Seite, Lizenz klären).
 
 ---
