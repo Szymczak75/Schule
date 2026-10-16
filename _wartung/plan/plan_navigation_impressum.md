@@ -116,12 +116,19 @@ zeigt den aktuellen Fortschritt. In einem neuen Chat dieses Wartungs-Projekts hi
 ## 6. Startsatz für den neuen Chat
 
 > Lies `_wartung/plan/plan_navigation_impressum.md` (besonders Abschnitt 7) und die
-> Referenzdateien. Das Repo `Szymczak75/Schule` ist über GitHub verbunden. Wir machen beim
-> nächsten offenen Punkt aus Abschnitt 7 weiter.
+> Referenzdateien. Das Repo `Szymczak75/Schule` ist über GitHub verbunden. Die Schritte 1–4
+> (Navigation, Startseite, Impressum, Fonts) sind **fertig und gemerged**. Offen sind nur
+> noch die Punkte unter „Noch offen" in Abschnitt 7. Sag mir, welchen du angehen willst.
 
 ---
 
-## 7. Fortschritt & Entscheidungen (16.10.2026)
+## 7. Fortschritt & Entscheidungen (Stand 16.10.2026, abends)
+
+**Gesamtstand: Schritte 1–4 fertig und gemerged (PR #1–#8).** Die Website hat jetzt
+überall die Navigationsleiste (v4) mit Impressum-Link, keine Google Fonts mehr (auch die
+Startseite nicht), eine Impressum-/Datenschutz-Seite (CC BY-SA 4.0) und einen Neulade-Schutz
+Stufe 1 in allen interaktiven Bestandsseiten. Offen sind nur noch die Punkte unter
+„Noch offen" am Ende dieses Abschnitts.
 
 **Arbeitsweise:** Claude arbeitet direkt im GitHub-Repo `Szymczak75/Schule`
 (Claude GitHub App installiert). Jeder Schritt = eigener Branch + Pull Request; der Nutzer
@@ -157,6 +164,11 @@ Ordner-Übersichten `_*.html` über `linking.txt`). Änderungen an der Startseit
 - **Neue Zustandsregel sessionStorage** (Stand übersteht Neuladen, Schlüssel
   `aszym:<datei>:v1`, nur Daten, try/catch, Leeren-Button löscht mit). In Anweisung,
   Checkliste und `pruefe.py` eingearbeitet. Gilt für neue und überarbeitete Seiten.
+- **Neu (16.10.2026): Jede NEU erstellte Lernseite bekommt gleich den vollen
+  Neulade-Schutz (Stufe 2)** – also den strukturierten Speicher wie im GeoGebra-Baukasten
+  (`helfer.js`: `state`/Felder/Karte/Stufen/Timer, Bewertungen werden beim Laden neu erzeugt),
+  nicht nur den generischen Stufe-1-Block (der ist die Nachrüstung für Altseiten). Der
+  Stufe-1-Baustein `baustein_neuladeschutz.html` ist ausdrücklich nur für Bestandsseiten.
 - Geodreieck bleibt beim JS-Speicher (bewusst, „passt so").
 
 **Erledigt:**
@@ -209,16 +221,22 @@ Ordner-Übersichten `_*.html` über `linking.txt`). Änderungen an der Startseit
     v3→v4 ersetzt. `pruefe.py` `NAV_VERSION`→v4. Nachrüst-Skript schließt jetzt
     `dino_hub.html` aus (wird von `build_hub.py` erzeugt).
 
+- **Startseite (`build_hub.py`)** → **PR #8** (Branch `hub-systemschrift`):
+  - Google Fonts entfernt, Systemschriften (`'Source Sans 3'` → System-Sans-Stack,
+    `'Playfair Display'` → `Georgia,'Times New Roman',serif`). Damit lädt KEINE Seite der
+    Website mehr externe Schriften.
+  - Impressum fehlte auf der Startseite → dezenter **Footer-Link** „Impressum & Datenschutz".
+  - T-Rex-Tooltip „Made by Mathedino" → **„Made by ASzym"** (einheitlich mit Lernseiten).
+  - `dino_hub.html` baut die Action neu, nicht von Hand.
+
 **Noch offen:**
-1. **`build_hub.py` / `dino_hub.html`:** Startseite lädt noch Google Fonts
-   (Playfair Display / Source Sans 3) → in `build_hub.py` auf Systemschriften umstellen
-   (Datenschutz). Betrifft nur die Startseite.
-2. **Neulade-Schutz Stufe 2** (voller Schutz inkl. Bewertungen, wie im Baukasten) nach und
-   nach für Seiten im laufenden Unterricht bzw. beim nächsten Überarbeiten.
-3. **Echte Seiten-Bugs** (kein GeoGebra): `handyordnung_ls`, `hausordnung_ls`,
+1. **Neulade-Schutz Stufe 2** (voller Schutz inkl. Bewertungen, wie im Baukasten) nach und
+   nach für bestehende Seiten im laufenden Unterricht bzw. beim nächsten Überarbeiten.
+   (NEU erstellte Seiten bekommen Stufe 2 ohnehin gleich – siehe Entscheidungen oben.)
+2. **Echte Seiten-Bugs** (kein GeoGebra): `handyordnung_ls`, `hausordnung_ls`,
    `schulregeln_test` – mehrfach definierte Funktionen (`DOPPELT`) und `localStorage`
    (`STORAGE`). Brauchen inhaltliche Prüfung.
-4. Optional: `pruefe.py`-Regel „Neulade-Schutz vorhanden?" + Anweisung nachziehen.
+3. Optional: `pruefe.py`-Regel „Neulade-Schutz vorhanden?" + Anweisung nachziehen.
 
 ---
 
