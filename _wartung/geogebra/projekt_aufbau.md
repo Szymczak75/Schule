@@ -35,8 +35,9 @@ die Dateien im Projektwissen.
 | `pruefe.py` | Prüf-Brille |
 | `test.js` | Browsertest |
 | `LIESMICH.md` | wie der Baukasten benutzt wird |
+| `baustein_navigation.html` | Navigationsleiste, die `bauer.py` in jede Seite setzt |
 
-Diese sieben gehören zusammen. Claude schreibt sie zu Beginn jeder Sitzung nach
+Diese acht gehören zusammen. Claude schreibt sie zu Beginn jeder Sitzung nach
 `/tmp/gg/` und baut damit.
 
 ### Pflicht – inhaltlich

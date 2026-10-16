@@ -171,7 +171,7 @@ mit einem Fazit, wann welcher Weg der bessere ist.
 - **Kein technisches Einbinden von GeoGebra.** Kein `deployggb.js`, keine
   `.ggb`-Datei. Die Seiten erklären die Bedienung; gearbeitet wird in der echten App.
   Abbildungen werden als eigenes SVG nachgebaut.
-- Erlaubt sind als externe Quellen nur Google Fonts und MathJax.
+- Erlaubt ist als externe Quelle nur MathJax (Google Fonts seit Oktober 2026 nicht mehr).
 
 ---
 

@@ -121,8 +121,9 @@ Es gelten **alle** technischen und gestalterischen Regeln aus den bestehenden Pr
 - **Schriftgröße nie unter `1rem`** – auch nicht in Tabs, Tipp-Boxen, MC-Buttons, Feedback-Zeilen und Badges
 - **Farben ausschließlich aus dem verbindlichen Farbschema** der Lernseiten-Projektanweisungen (Erarbeitung `#c97a2e`/`#a5611e`/`#fbeee0`, Übung `#2f5fa6`/`#1f4680`/`#e6eefb`, `--ink:#22303f`, Grün `#1e7d32`, Rot `#c1272d`) – keine selbst gewählten Orange- oder Blautöne. Tipps und Musterlösungen immer in Amber (`#b8860b`/`#fdf3d9`/`#96690a`).
 - T-Rex 🦖 auf jeder Seite (unten rechts, „Made by ASzym" bei Tap/Mouseover)
+- **Navigationsleiste auf jeder Seite:** Baustein `baustein_navigation.html` aus dem Projektwissen unverändert vor dem T-Rex einfügen, außerhalb von `<main>` (Startseite, Alles für Klasse X, Feedback, 🏠-Knopf unten links – siehe Lernseiten-Projektanweisungen TEIL 3.6)
 - Kein `localStorage`
-- **Keine externen Bibliotheken außer Google Fonts und MathJax** (insbesondere kein GeoGebra-`deployggb.js`), und keine Verweise auf Dateien, die neben der HTML nicht existieren. Grafiken als eigenes SVG, angesprochen **nur über den Kind-Selektor** (`.kos > svg`, `.figur > svg`) – nie global `svg` und nie als Nachfahre `.kos svg` (trifft sonst MathJax-Formeln im selben Kasten).
+- **Keine externen Bibliotheken außer MathJax** (insbesondere kein GeoGebra-`deployggb.js` und keine Google Fonts – Systemschrift), und keine Verweise auf Dateien, die neben der HTML nicht existieren. Grafiken als eigenes SVG, angesprochen **nur über den Kind-Selektor** (`.kos > svg`, `.figur > svg`) – nie global `svg` und nie als Nachfahre `.kos svg` (trifft sonst MathJax-Formeln im selben Kasten).
 - Interaktives Geodreieck (für Geradenlagen, Winkel, Parallelität, Orthogonalität): den wiederverwendbaren Baustein aus dem Projektwissen (`geodreieck_baustein.html`) einbinden, wie in den Lernseiten-Projektanweisungen beschrieben (verschieben innerhalb der Gradskala, drehen außerhalb, scroll-stabil).
 - Symbole/Emojis plattformübergreifend eindeutig und passend wählen (keine mehrdeutigen Emojis); im Zweifel neutral (z. B. 🎯) oder keins.
 - **Formatierung & Rendering** verbindlich prüfen: keine globalen `svg`-/`mjx-container`-Größenregeln, kein Fließtext in Flex-/Grid-Containern, Flip-Cards mit ausreichender `min-height` (siehe Abschnitt „Technische Regeln (Websites)" und die Lernseiten-Projektanweisungen).
@@ -292,7 +293,7 @@ CSS nur mit Kind-Selektoren (`.frac > span`, `.frac > span:first-child`), sonst 
 - Touch-Events für alle Interaktionen (`touchstart`/`touchend` oder Pointer Events)
 - Safari `-webkit`-Prefixes setzen
 - Kein `localStorage`
-- Keine externe Bibliothek außer Google Fonts und MathJax; keine Verweise auf nicht existierende Dateien
+- Keine externe Bibliothek außer MathJax (keine Google Fonts); keine Verweise auf nicht existierende Dateien
 - Formeln riesig/winzig → globale `svg`-Regeln, Nachfahren-Regeln `.xyz svg` und `mjx-container`-Größenregeln vermeiden, keine `em`-Ketten
 - Formeln im Feedback bleiben Rohtext → `innerHTML` + `MathJax.typesetPromise` statt `textContent`
 - Formeln stehen auf dem Gerät als `\(…\)` → Notfall-Anzeige fehlt bzw. `typesetPromise` nicht abgesichert

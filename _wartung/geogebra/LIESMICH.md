@@ -1,7 +1,7 @@
 # Baukasten für GeoGebra-Lernseiten – Bedienungsanleitung
 
 Dieser Baukasten erzeugt fertige, selbst enthaltene HTML-Lernseiten, die alle
-Pflichtregeln der Projektanweisung von sich aus einhalten. Er besteht aus sechs
+Pflichtregeln der Projektanweisung von sich aus einhalten. Er besteht aus sieben
 Dateien, die im Projektwissen liegen:
 
 | Datei | wofür |
@@ -12,13 +12,15 @@ Dateien, die im Projektwissen liegen:
 | `koord.py` | erzeugt statische Koordinatensystem-SVGs mit Achsen, Einheiten und Pfeilen |
 | `pruefe.py` | Prüf-Brille: liest fertige Seiten und meldet Verstöße gegen die Regeln (projektübergreifend, wird nur im Wartungs-Projekt geändert) |
 | `test.js` | Browsertest: spielt einen Bearbeitungsplan durch und meldet Fehler |
+| `baustein_navigation.html` | Navigationsleiste (Startseite, Alles für Klasse X, Feedback, 🏠-Knopf) – projektübergreifend, liegt im Ordner `allgemein`, wird nur im Wartungs-Projekt geändert |
 
 ---
 
 ## Ablauf in einer neuen Sitzung
 
-**Schritt 1 – Baukasten wiederherstellen.** Die sechs Dateien aus dem Projektwissen
-lesen und unverändert nach `/tmp/gg/` schreiben. Erst danach anfangen zu bauen.
+**Schritt 1 – Baukasten wiederherstellen.** Die sieben Dateien aus dem Projektwissen
+lesen und unverändert nach `/tmp/gg/` schreiben. Erst danach anfangen zu bauen. Fehlt
+`baustein_navigation.html`, bricht `bauer.py` mit einer Meldung ab.
 
 **Schritt 2 – Bauskript schreiben.** Eine Python-Datei, die `bauer` importiert und
 den Seiteninhalt zusammensetzt:
@@ -84,6 +86,9 @@ JavaScript-Fehlern oder horizontalem Scrollen.
   Test grau mit dunkelblauem Rand – kein eigener Ton möglich
 - Schriftgrößen durchgehend mindestens 1 rem
 - T-Rex 🦖 mit „Made by ASzym"
+- **Navigationsleiste** vor dem T-Rex (Lernseiten-Anweisung TEIL 3.6): 🏠 Startseite,
+  📚 Alles für Klasse X (aus `klasse`), ✉️ Feedback, 🏠-Knopf unten links. Kein
+  „Weiter"-Button – die Leiste führt nur zur Startseite.
 - Notfall-Anzeige für Formeln, falls MathJax nicht geladen werden kann (derselbe Code wie
   `baustein_mathjax_notfall.js` der anderen Projekte)
 - Fortschrittsmarken über den Reitern (✅, beim Wissenstest ●)

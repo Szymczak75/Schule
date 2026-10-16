@@ -12,7 +12,7 @@ Die Projekte holen sich die Dateien über die GitHub-Synchronisation von claude.
 
 | Ordner | Inhalt |
 |---|---|
-| `allgemein/` | `anweisung_lernseiten.txt`, `wiederkehrende_fehler_checkliste.md`, `pruefe.py`, `baustein_mathjax_notfall.js` |
+| `allgemein/` | `anweisung_lernseiten.txt`, `wiederkehrende_fehler_checkliste.md`, `pruefe.py`, `baustein_mathjax_notfall.js`, `baustein_navigation.html` |
 | `geodreieck/` | `geodreieck_baustein.html` |
 | `unterrichtsvorbereitung/` | `anweisung_C_unterrichtsvorbereitung.md` |
 | `geogebra/` | Baukasten (`css.txt`, `helfer.js`, `bauer.py`, `koord.py`, `test.js`, `LIESMICH.md`) und `anweisung_geogebra_projekt.md`, `geogebra_befehle_geprueft.md`, `geogebra_roadmap.md`, `projekt_aufbau.md` |
