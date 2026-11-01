@@ -49,7 +49,7 @@ SUFFIX_TYP = {'_ls': 'Lernseite', '_ue': 'Übung', '_test': 'Test',
 ERLAUBTE_HOSTS = ('cdn.jsdelivr.net/npm/mathjax',)   # Google Fonts seit 16.10.2026 nicht mehr
 
 # Navigationsleiste (baustein_navigation.html, TEIL 3.6)
-NAV_VERSION = 'v3'
+NAV_VERSION = 'v4'
 NAV_START = 'https://szymczak75.github.io/Schule/dino_hub.html'
 NAV_BLOCK = re.compile(r'<!-- =+\s*BAUSTEIN: Navigationsleiste.*?ENDE BAUSTEIN Navigationsleiste =+ -->',
                        re.S)

@@ -36,7 +36,7 @@ import re
 import sys
 import pathlib
 
-NAV_VERSION_MARKER = 'BAUSTEIN: Navigationsleiste  (v3'
+NAV_VERSION_MARKER = 'BAUSTEIN: Navigationsleiste  (v4'
 NAV_BLOCK_RE = re.compile(
     r'<!-- =+\s*BAUSTEIN: Navigationsleiste.*?ENDE BAUSTEIN Navigationsleiste =+ -->',
     re.S)
@@ -134,13 +134,18 @@ def main():
                     if '.git' not in p.parts and '_wartung' not in p.parts)
 
     ber = {'nav_ein': [], 'nav_ersetzt': [], 'nav_aktuell': [], 'nav_kein_anker': [],
-           'fonts': [], 'utf8_skip': [], 'hubignore': [], 'unveraendert': []}
+           'fonts': [], 'utf8_skip': [], 'hubignore': [], 'unveraendert': [], 'hub': []}
     getan = 0
 
     for p in seiten:
         if args.limit and getan >= args.limit:
             break
         rel = str(p.relative_to(root))
+        # Startseite/Hub nie anfassen: wird von build_hub.py erzeugt, hat eigene
+        # Navigation und würde beim nächsten Hub-Rebuild ohnehin überschrieben.
+        if p.name == 'dino_hub.html':
+            ber['hub'].append(rel)
+            continue
         h, kod = lies(str(p))
         if h is None:
             # Kein gültiges UTF-8 → nicht anfassen, nur melden (Reparatur: repariere_bytes.py)
@@ -198,6 +203,7 @@ def main():
     zeile('Google Fonts entfernt', ber['fonts'])
     zeile('UTF-8 defekt (übersprungen)', ber['utf8_skip'], 50)
     zeile('hubignore (ohne Leiste)', ber['hubignore'], 50)
+    zeile('Hub/Startseite (nie angefasst)', ber['hub'], 50)
     zeile('ohne Änderung', ber['unveraendert'])
     print('=' * 70)
     if not args.apply:
