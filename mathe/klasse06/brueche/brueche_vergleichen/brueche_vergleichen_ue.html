@@ -201,6 +201,31 @@ details.ml summary{min-height:44px;padding:.6rem 0;font-weight:800;color:var(--a
 .trex-tip{position:fixed;right:.75rem;bottom:4rem;z-index:30;background:var(--ink);color:#fff;font-size:1rem;padding:.4rem .7rem;border-radius:.5rem}
 @media (hover:hover){.trex:hover + .trex-tip{display:block !important}}
 
+/* Einheiten-Dropdown */
+.einh-sel{min-height:44px;min-width:6.5rem;padding:.3rem .6rem;font:inherit;font-size:1.1rem;font-weight:700;color:var(--ink);background:var(--card);border:2px solid var(--ink);border-radius:.5rem}
+.einh-sel:disabled{opacity:1;color:var(--ink);-webkit-text-fill-color:var(--ink)}
+.einh-sel.ok,.einh-sel.ok:disabled{background:var(--green);border-color:var(--green);color:#fff;-webkit-text-fill-color:#fff}
+.einh-sel.bad,.einh-sel.bad:disabled{background:var(--red);border-color:var(--red);color:#fff;-webkit-text-fill-color:#fff}
+
+/* Wissenstest */
+.fb.info{display:block;margin-top:.6rem;padding:.6rem .9rem;border-radius:.6rem;background:var(--hl);border:2px solid var(--hd);color:var(--ink);font-weight:700;font-size:1.0625rem}
+.aufgabe.gespeichert{border-color:var(--hd)}
+.aufgabe.falsch{border-color:var(--red)}
+.tab.gespeichert::after{content:" ●"}
+.aufgabe.zusatz .a-titel::before{content:"⭐ Zusatz · "}
+.timer-leiste{max-width:1000px;margin:.8rem auto 0;padding:.7rem 1rem;background:var(--card);border:3px solid var(--hd);border-radius:.8rem}
+.timer-zeile{display:flex;flex-wrap:wrap;align-items:center;gap:.7rem}
+.timer-zeit{font-size:2rem;font-weight:800;font-variant-numeric:tabular-nums;min-width:6rem}
+.timer-hinweis{margin:.4rem 0 0;font-weight:700}
+.timer-leiste.abgelaufen{border-color:var(--amber)}
+.timer-leiste.abgelaufen .timer-zeit{color:var(--amber-dark)}
+.timer-meldung{margin:.3rem 0 0;font-weight:700;color:var(--amber-dark)}
+details.timer-info{margin-top:.4rem;background:var(--amber-light);border:2px solid var(--amber);border-radius:.6rem;padding:0 .8rem}
+details.timer-info summary{min-height:44px;padding:.6rem 0;font-weight:800;color:var(--amber-dark);cursor:pointer;line-height:1.6}
+details.timer-info p{margin:0 0 .6rem}
+.aw-aufgabe{border-top:1px solid var(--line);padding:.3rem 0}
+.aw-frage{font-weight:800;margin:.8rem 0 0}
+
 
 .erinnerung{border-left:6px solid var(--hd);background:var(--hl);border-radius:.5rem;padding:.7rem 1rem;margin:0 0 .8rem}
 .erinnerung-titel{font-weight:800;color:var(--hd);margin:0 0 .3rem}
@@ -477,6 +502,7 @@ details.ml summary{min-height:44px;padding:.6rem 0;font-weight:800;color:var(--a
 <script>
 "use strict";
 const SEITE = 'brueche_vergleichen_ue';
+const TEST = false;
 /* =====================================================================
    Kern: Zustand, Hilfsfunktionen, Aufgabentypen
    Zustand liegt komplett im Objekt S und wird nach jeder Änderung
@@ -646,7 +672,13 @@ function aufgabe(ziel, cfg){
   o.h = TYP[cfg.typ](o);
   const tipps = cfg.tipps || o.h.tipps || [];
   const ml = cfg.ml !== undefined ? cfg.ml : (o.h.ml ? o.h.ml() : '');
-  el.insertAdjacentHTML('beforeend', hilfeHTML(tipps, ml));
+  o.ml = ml;
+  if (cfg.zusatz) el.classList.add('zusatz');
+  if (!TEST) el.insertAdjacentHTML('beforeend', hilfeHTML(tipps, ml));
+  else {
+    el.querySelector('.btn-pruefen').textContent = 'Antwort speichern';
+    el.querySelector('.btn-leeren').textContent = 'Antwort ändern';
+  }
   (typeof ziel === 'string' ? document.getElementById(ziel) : ziel).appendChild(el);
   o.pb = el.querySelector('.btn-pruefen');
   o.lb = el.querySelector('.btn-leeren');
@@ -680,7 +712,30 @@ function hilfeZeigen(o){
 
 /* Darstellung vollständig aus dem Zustand herstellen – setzt nur Klassen,
    baut die Eingaben beim Prüfen nicht neu auf (TEIL 5.5). */
+function anwendenTest(o){
+  const st = o.st, ab = !!S.x.abgegeben;
+  let r = (st.chk || ab) ? o.h.pruef() : null;
+  if (!ab) {
+    if (st.chk && r.status === 'unvoll') st.chk = false;
+    o.h.sperre(!!st.chk); o.h.markiere(null);
+    o.pb.hidden = false; o.pb.disabled = !!st.chk; o.lb.hidden = !st.chk;
+    if (st.chk) { o.fb.className = 'fb info'; o.fb.innerHTML = '● Antwort gespeichert. Bis zur Abgabe kannst du sie noch ändern.'; }
+    else { o.fb.className = 'fb'; o.fb.innerHTML = ''; }
+    o.el.classList.toggle('gespeichert', !!st.chk);
+    o.el.classList.remove('fertig', 'falsch');
+    return;
+  }
+  const gewertet = st.chk && r && r.status !== 'unvoll';
+  st.ok = !!(gewertet && r.status === 'ok');
+  o.h.sperre(true); o.h.markiere(gewertet ? r : null);
+  o.pb.hidden = true; o.lb.hidden = true;
+  o.fb.className = 'fb ' + (st.ok ? 'ok' : (gewertet ? 'bad' : 'info'));
+  o.fb.innerHTML = st.ok ? '✓ Richtig' : (gewertet ? '✗ Nicht richtig – die Musterlösung findest du in der Auswertung.' : '○ Nicht bearbeitet');
+  o.el.classList.toggle('fertig', st.ok);
+  o.el.classList.toggle('falsch', !st.ok);
+}
 function anwenden(o){
+  if (TEST) return anwendenTest(o);
   const st = o.st;
   let r = null;
   if (st.chk) {
@@ -699,15 +754,17 @@ function anwenden(o){
   hilfeZeigen(o);
 }
 function pruefen(o){
-  if (o.st.chk) return;
+  if (o.st.chk || S.x.abgegeben) return;
   const r = o.h.pruef();
-  if (r.status === 'unvoll') { o.fb.className = 'fb bad'; setze(o.fb, '✗ ' + r.msg); return; }
+  if (r.status === 'unvoll') { o.fb.className = TEST ? 'fb info' : 'fb bad'; setze(o.fb, (TEST ? '' : '✗ ') + r.msg); return; }
+  if (TEST) { o.st.chk = true; anwenden(o); speichern(); fortschritt(); return; }
   o.st.chk = true;
   o.st.ok = r.status === 'ok';
   if (!o.st.ok) o.st.hilfe = true;
   anwenden(o); speichern(); fortschritt();
 }
 function leeren(o){
+  if (TEST) { if (S.x.abgegeben) return; o.st.chk = false; anwenden(o); speichern(); fortschritt(); return; }
   o.h.leere();
   o.st.chk = false; o.st.ok = false;
   o.h.zeichne();
@@ -1183,6 +1240,42 @@ TYP.raster = function(o){
   };
 };
 
+/* einh – Zahl + Einheit per Dropdown (TEIL 4.5) */
+TYP.einh = function(o){
+  const c = o.cfg, st = o.st, R = c.zeilen;
+  const reihen = R.map((r, i) => gemischt(c.id + '_e' + i, r.opts.length));
+  return {
+    tipps: c.tipps || [],
+    ml(){ return c.ml || ''; },
+    zeichne(){
+      o.body.innerHTML = R.map((r, i) => '<div class="zahl-zeile"><p class="zahl-frage">' + r.l + '</p><div class="zahl-ein">'
+        + eingabe('x' + i, 'Zahl') + '<select class="einh-sel" data-k="e' + i + '" aria-label="Einheit wählen"><option value="">Einheit</option>'
+        + reihen[i].map(j => '<option value="' + r.opts[j] + '">' + r.opts[j] + '</option>').join('') + '</select></div></div>').join('');
+      feldBinden(o.body, st);
+      o.body.querySelectorAll('.einh-sel').forEach(sel => {
+        sel.value = st.in[sel.dataset.k] || '';
+        sel.addEventListener('change', () => { if (st.chk) { sel.value = st.in[sel.dataset.k] || ''; return; } st.in[sel.dataset.k] = sel.value; speichern(); });
+      });
+    },
+    pruef(){
+      if (R.some((_, i) => leer(st.in['x' + i]) || !st.in['e' + i])) return { status: 'unvoll', msg: 'Trage bei jeder Antwort eine Zahl ein und wähle eine Einheit.' };
+      if (R.some((_, i) => isNaN(zahl(st.in['x' + i])))) return { status: 'unvoll', msg: 'Trage nur ganze Zahlen ein.' };
+      const fz = R.map((r, i) => zahl(st.in['x' + i]) !== r.v), fe = R.map((r, i) => st.in['e' + i] !== r.e);
+      if (!fz.some(Boolean) && !fe.some(Boolean)) return { status: 'ok', fz: fz, fe: fe, msg: c.okMsg || 'Richtig!' };
+      let msg = 'Prüfe die roten Felder.';
+      if (!fz.some(Boolean)) msg = 'Die Zahlen stimmen, aber mindestens eine Einheit nicht. Ist eine Länge, eine Fläche oder ein Volumen gesucht?';
+      else if (!fe.some(Boolean)) msg = 'Die Einheiten stimmen, aber mindestens eine Zahl nicht.';
+      return { status: 'falsch', fz: fz, fe: fe, msg: msg };
+    },
+    markiere(r){
+      o.body.querySelectorAll('input.ein').forEach(i => { i.classList.remove('ok', 'bad'); if (r) i.classList.add(r.fz[+i.dataset.k.slice(1)] ? 'bad' : 'ok'); });
+      o.body.querySelectorAll('.einh-sel').forEach(s => { s.classList.remove('ok', 'bad'); if (r) s.classList.add(r.fe[+s.dataset.k.slice(1)] ? 'bad' : 'ok'); });
+    },
+    sperre(on){ o.body.querySelectorAll('input.ein, .einh-sel').forEach(x => { x.disabled = on; }); },
+    leere(){ R.forEach((r, i) => { if (zahl(st.in['x' + i]) !== r.v) delete st.in['x' + i]; if (st.in['e' + i] !== r.e) delete st.in['e' + i]; }); }
+  };
+};
+
 /* =====================================================================
    Karten, Niveaustufen, Fortschritt
    ===================================================================== */
@@ -1202,7 +1295,11 @@ function fortschritt(){
   });
   document.querySelectorAll('.tab[data-ziel]').forEach(tab => {
     const k = document.getElementById(tab.getAttribute('data-ziel'));
-    if (k) tab.classList.toggle('erledigt', karteFertig(k));
+    if (!k) return;
+    if (TEST) {
+      const as = [...k.querySelectorAll('.aufgabe')];
+      tab.classList.toggle('gespeichert', as.length > 0 && as.every(a => a.classList.contains('gespeichert') || a.classList.contains('fertig') || a.classList.contains('falsch')));
+    } else tab.classList.toggle('erledigt', karteFertig(k));
   });
   document.querySelectorAll('.stufe-k').forEach(b => {
     const blk = document.getElementById(b.dataset.k + '-' + b.dataset.s);
@@ -1302,6 +1399,84 @@ function auswertungAufbauen(awId){
   box.querySelectorAll('[data-geh]').forEach(b => b.addEventListener('click', () => zeigeKarte(b.dataset.geh, true)));
   const w = document.getElementById('weiter');
   if (w) w.hidden = !alle;
+}
+
+/* ---------- Wissenstest: Abgabe und Auswertung ---------- */
+function testAuswertung(){
+  const box = document.getElementById('auswertung');
+  if (!box) return;
+  const pflicht = AUFG.filter(o => !o.cfg.zusatz), zusatz = AUFG.filter(o => o.cfg.zusatz);
+  if (!S.x.abgegeben) {
+    const gesp = pflicht.filter(o => o.st.chk).length;
+    box.innerHTML = '<p class="aw-gesamt">Gespeichert: ' + gesp + ' von ' + pflicht.length + ' Aufgaben'
+      + (zusatz.length ? ' (dazu ' + zusatz.filter(o => o.st.chk).length + ' von ' + zusatz.length + ' Zusatzaufgaben ⭐)' : '') + '.</p>'
+      + '<p>Nicht gespeicherte Aufgaben zählen als nicht bearbeitet. Nach der Abgabe kannst du nichts mehr ändern.</p>'
+      + '<div class="knopf-reihe"><button type="button" class="btn btn-pruefen" id="abgabe1">Test abgeben und auswerten</button></div>'
+      + '<div id="abgabeFrage" hidden><p class="aw-frage">Wirklich abgeben?</p><div class="knopf-reihe">'
+      + '<button type="button" class="btn btn-pruefen" id="abgabe2">Ja, jetzt abgeben</button>'
+      + '<button type="button" class="btn btn-zweit" id="abgabeNein">Nein, weiterarbeiten</button></div></div>';
+    document.getElementById('abgabe1').addEventListener('click', () => { document.getElementById('abgabeFrage').hidden = false; });
+    document.getElementById('abgabeNein').addEventListener('click', () => { document.getElementById('abgabeFrage').hidden = true; });
+    document.getElementById('abgabe2').addEventListener('click', () => {
+      S.x.abgegeben = true;
+      if (S.x.timer && S.x.timer.laeuft) { S.x.timer.rest = timerRest(); S.x.timer.laeuft = false; }
+      speichern(); AUFG.forEach(anwenden); fortschritt(); testAuswertung(); zeichneTimer();
+    });
+    return;
+  }
+  const ok = pflicht.filter(o => o.st.ok).length, zok = zusatz.filter(o => o.st.ok).length;
+  let html = '<p class="aw-gesamt' + (ok === pflicht.length ? ' alles' : '') + '">Ergebnis: ' + ok + ' von ' + pflicht.length + ' Aufgaben richtig'
+    + (zusatz.length ? ' · Zusatz ⭐: ' + zok + ' von ' + zusatz.length : '') + '</p>';
+  document.querySelectorAll('.tab[data-ziel]').forEach(t => {
+    const k = document.getElementById(t.getAttribute('data-ziel'));
+    const as = AUFG.filter(o => k.contains(o.el));
+    if (!as.length) return;
+    html += '<div class="aw-karte"><p class="aw-titel">Karte ' + t.textContent.replace(/ [●✓]$/, '') + '</p>';
+    as.forEach(o => {
+      const titel = o.cfg.titel || o.cfg.id;
+      const zeichen = o.st.ok ? '✅' : (o.st.chk ? '❌' : '○');
+      html += '<div class="aw-aufgabe"><p class="aw-zeile">' + zeichen + ' ' + titel + (o.cfg.zusatz ? ' (Zusatz)' : '') + (o.st.chk || o.st.ok ? '' : ' – nicht bearbeitet') + '</p>';
+      if (!o.st.ok && o.ml) html += '<details class="ml aw-ml"><summary>Musterlösung mit Lösungsweg</summary><div class="ml-inhalt">' + o.ml + '</div></details>';
+      html += '</div>';
+    });
+    html += '</div>';
+  });
+  setze(box, html);
+}
+
+/* ---------- Wissenstest: Orientierungstimer ---------- */
+function timerRest(){
+  const t = S.x.timer;
+  if (!t) return TESTZEIT_MIN * 60000;
+  if (!t.laeuft) return t.rest;
+  return Math.max(0, t.rest - (Date.now() - t.start));
+}
+function zeichneTimer(){
+  const anz = document.getElementById('timerZeit');
+  if (!anz) return;
+  if (!S.x.timer) S.x.timer = { laeuft: false, rest: TESTZEIT_MIN * 60000, start: 0 };
+  const rest = timerRest(), sek = Math.ceil(rest / 1000);
+  anz.textContent = String(Math.floor(sek / 60)).padStart(2, '0') + ':' + String(sek % 60).padStart(2, '0');
+  const leiste = document.getElementById('timerLeiste');
+  leiste.classList.toggle('abgelaufen', rest <= 0);
+  const bs = document.getElementById('timerStart');
+  bs.textContent = S.x.timer.laeuft ? 'Pause' : (rest < TESTZEIT_MIN * 60000 && rest > 0 ? 'Weiter' : 'Start');
+  bs.disabled = rest <= 0;
+  document.getElementById('timerMeldung').textContent = rest <= 0 ? 'Die Richtzeit ist um. Du kannst ganz normal weiterarbeiten.' : '';
+  if (rest <= 0 && S.x.timer.laeuft) { S.x.timer.laeuft = false; S.x.timer.rest = 0; speichern(); }
+}
+function testTimer(){
+  const bs = document.getElementById('timerStart'), br = document.getElementById('timerReset');
+  if (!bs) return;
+  zeichneTimer();
+  bs.addEventListener('click', () => {
+    const t = S.x.timer;
+    if (t.laeuft) { t.rest = timerRest(); t.laeuft = false; }
+    else { t.start = Date.now(); t.laeuft = true; }
+    speichern(); zeichneTimer();
+  });
+  br.addEventListener('click', () => { S.x.timer = { laeuft: false, rest: TESTZEIT_MIN * 60000, start: 0 }; speichern(); zeichneTimer(); });
+  setInterval(zeichneTimer, 500);
 }
 
 /* =====================================================================
