@@ -11,9 +11,6 @@
 <meta name="fach" content="mathe">
 <meta name="oberthema" content="Steckbriefaufgaben">
 <meta name="thema" content="Steckbriefaufgaben im Sachzusammenhang">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700;800&display=swap" rel="stylesheet">
 <script>
   MathJax = {
     tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
@@ -30,7 +27,7 @@
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html{font-size:16px}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:"Source Sans 3",system-ui,-apple-system,sans-serif;font-size:1.0625rem;line-height:1.55}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;font-size:1.0625rem;line-height:1.55}
 mjx-container{max-width:100%;overflow-x:auto;overflow-y:hidden}
 .wrap{max-width:980px;margin:0 auto;padding:0 16px 80px}
 code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:1rem;background:var(--grey-light);padding:1px 6px;border-radius:6px;word-break:break-word}
@@ -183,23 +180,23 @@ input.in:disabled{-webkit-text-fill-color:var(--ink);opacity:1;background:var(--
 
 .bild{display:block;width:100%;height:auto;border-radius:12px;border:1px solid var(--line);margin:10px 0}
 .kos{margin:12px 0}
-.kos svg{display:block;width:100%;max-width:560px;height:auto}
+.kos > svg{display:block;width:100%;max-width:560px;height:auto}
 .kos .ax{stroke:var(--ink);stroke-width:2}
 .kos .grid{stroke:var(--line);stroke-width:1}
-.kos .t,.kos .tf,.kos .tg{font-family:"Source Sans 3",sans-serif;font-size:18px;fill:var(--ink)}
+.kos .t,.kos .tf,.kos .tg{font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;font-size:18px;fill:var(--ink)}
 .kos .tf{fill:var(--border-blue);font-weight:700;font-style:italic}
 .kos .tg{fill:var(--amber-dark);font-weight:700;font-style:italic}
 .kos .gE{stroke:var(--border-blue);stroke-width:3;fill:none}
 .kos .gG{stroke:var(--amber);stroke-width:3;fill:none;stroke-dasharray:9 6}
 .kos .pt{stroke:#fff;stroke-width:2}
 .skizze{margin:12px 0}
-.skizze svg{display:block;width:100%;max-width:680px;height:auto}
+.skizze > svg{display:block;width:100%;max-width:680px;height:auto}
 .skizze .ln{stroke:var(--ink);stroke-width:2;fill:none}
 .skizze .road{fill:var(--line)}
 .skizze .mark{stroke:var(--border-blue);stroke-width:3}
 .skizze .water{fill:var(--grey-light);stroke:var(--border-blue);stroke-width:2}
-.skizze .t{font-family:"Source Sans 3",sans-serif;font-size:17px;fill:var(--ink)}
-.skizze .tb{font-family:"Source Sans 3",sans-serif;font-size:17px;font-weight:700;fill:var(--border-blue)}
+.skizze .t{font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;font-size:17px;fill:var(--ink)}
+.skizze .tb{font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;font-size:17px;font-weight:700;fill:var(--border-blue)}
 
 .check{list-style:none;padding-left:0}
 .check li{margin:6px 0;padding-left:1.8rem;position:relative}
@@ -236,6 +233,12 @@ table.ausw th{background:var(--grey-light)}
 .fb.warn{display:block;background:var(--red)}
 .mbox{margin:8px 0}
 #ausw-muster .muster{background:var(--amber-light);border:2px solid var(--amber)}
+/* Brüche (TEIL 7.2) – nur Kind-Selektoren; nötig für die MathJax-Notfall-Anzeige */
+.frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;
+      margin:0 .2em;line-height:1.15;}
+.frac > span{display:block;padding:0 .35em;}
+.frac > span:first-child{border-bottom:1.8px solid currentColor;padding-bottom:.1em;}
+.frac > span:last-child{padding-top:.1em;}
 </style>
 </head>
 <body>
@@ -493,6 +496,7 @@ var COND = {
 var LK = { t12:1, t13:1, t14:1, t15:1 };
 
 function typeset(el){ if (window.MathJax && MathJax.typesetPromise) { MathJax.typesetPromise([el]).catch(function(){}); } }
+/* Fisher-Yates – einmal beim Laden, vor den Klick-Bindungen (TEIL 4.3) */
 function shuffle(arr){ for (var i = arr.length - 1; i > 0; i--) { var j = Math.floor(Math.random()*(i+1)); var t = arr[i]; arr[i] = arr[j]; arr[j] = t; } return arr; }
 function toArr(nl){ return Array.prototype.slice.call(nl); }
 function parseNum(s){
@@ -510,18 +514,46 @@ function nearCo(v, T){ return Math.abs(T) < 1e-12 ? Math.abs(v) <= 1e-6 : near(v
 var tasks = toArr(document.querySelectorAll('.task'));
 var abgegeben = false;
 
-/* 1) Zuerst mischen – vor allen Klick-Bindungen */
+/* ---------- Zustand (TEIL 6): ein Status-Objekt, gesichert in sessionStorage ----------
+   Enthält: gemischte Reihenfolgen, Eingaben, MC-/Wahr-Falsch-Auswahl, Speicherstatus je
+   Aufgabe, Abgabe, geöffnete Musterlösungen, aktive Karte, Timer und Timer-Hinweis.
+   Nur Daten, kein HTML. Jeder Zugriff in try/catch – bei blockiertem Speicher läuft die
+   Seite normal weiter, nur ohne Wiederherstellung. Tab schließen → Seite startet leer. */
+var SCHLUESSEL = 'aszym:steckbrief_sachzusammenhang_test:v2';
+function ladeStand(){
+  try { var r = sessionStorage.getItem(SCHLUESSEL); var d = r ? JSON.parse(r) : null; return (d && typeof d === 'object') ? d : null; }
+  catch (e) { return null; }
+}
+var S = ladeStand() || {};
+S.reihen = S.reihen || {};   /* id -> Reihenfolge der Original-Indizes (data-i) */
+S.auf = S.auf || {};         /* id -> { w:[Eingaben], sel:data-i, tf:{data-i:'w'|'f'}, saved } */
+S.offen = S.offen || [];     /* geöffnete Musterlösungen in der Auswertung */
+function sichere(){ try { sessionStorage.setItem(SCHLUESSEL, JSON.stringify(S)); } catch (e) {} }
+function aufStand(id){ if (!S.auf[id]) S.auf[id] = { w:[], sel:null, tf:{}, saved:false }; return S.auf[id]; }
+
+/* 1) Zuerst mischen – vor allen Klick-Bindungen. Gespeicherte Reihenfolge hat Vorrang (TEIL 4.3). */
+function ordne(box, id){
+  var kinder = toArr(box.children);
+  kinder.forEach(function(k, i){ k.setAttribute('data-i', i); });
+  var r = S.reihen[id];
+  var gueltig = Array.isArray(r) && r.length === kinder.length &&
+                r.slice().sort(function(a, b){ return a - b; }).every(function(v, i){ return v === i; });
+  if (!gueltig) { r = shuffle(kinder.map(function(k, i){ return i; })); S.reihen[id] = r; }
+  r.forEach(function(i){ box.appendChild(kinder[i]); });
+}
 tasks.forEach(function(t){
-  var ty = t.getAttribute('data-type');
-  if (ty === 'mc') { var mc = t.querySelector('.mc'); shuffle(toArr(mc.children)).forEach(function(o){ mc.appendChild(o); }); }
-  if (ty === 'tf') { var tl = t.querySelector('.tf-list'); shuffle(toArr(tl.children)).forEach(function(o){ tl.appendChild(o); }); }
+  var ty = t.getAttribute('data-type'), id = t.getAttribute('data-id');
+  if (ty === 'mc') ordne(t.querySelector('.mc'), id);
+  if (ty === 'tf') ordne(t.querySelector('.tf-list'), id);
 });
+sichere();
 
 /* 2) Steuerung je Aufgabe: Speichern / Ändern – keine Rückmeldung zur Richtigkeit */
 tasks.forEach(function(t){
-  var ty = t.getAttribute('data-type');
+  var ty = t.getAttribute('data-type'), id = t.getAttribute('data-id');
   var st = { saved:false };
   t._st = st;
+  var A = aufStand(id);
   var ctrl = document.createElement('div'); ctrl.className = 'ctrl';
   ctrl.innerHTML = '<div class="btnrow"><button class="btn pruefen">💾 Antwort speichern</button><button class="btn aendern" style="display:none">✎ Antwort ändern</button></div><div class="fb" role="status"></div>';
   t.appendChild(ctrl);
@@ -529,12 +561,13 @@ tasks.forEach(function(t){
   t._ctrl = { bS:bS, bA:bA, fb:fb };
   var ins = toArr(t.querySelectorAll('input.in')), opts = toArr(t.querySelectorAll('.opt')), items = toArr(t.querySelectorAll('.tf-item'));
 
-  if (ty === 'mc') opts.forEach(function(o){ o.addEventListener('click', function(){ if (st.saved || abgegeben) return; opts.forEach(function(x){ x.classList.remove('sel'); }); o.classList.add('sel'); }); });
+  ins.forEach(function(el, i){ el.addEventListener('input', function(){ A.w[i] = el.value; sichere(); }); });
+  if (ty === 'mc') opts.forEach(function(o){ o.addEventListener('click', function(){ if (st.saved || abgegeben) return; opts.forEach(function(x){ x.classList.remove('sel'); }); o.classList.add('sel'); A.sel = o.getAttribute('data-i'); sichere(); }); });
   if (ty === 'tf') items.forEach(function(it){
     var row = document.createElement('div'); row.className = 'tf-btns';
     row.innerHTML = '<button class="tfb" data-v="w">richtig</button><button class="tfb" data-v="f">falsch</button>';
     it.appendChild(row);
-    toArr(row.querySelectorAll('.tfb')).forEach(function(b){ b.addEventListener('click', function(){ if (st.saved || abgegeben) return; toArr(row.querySelectorAll('.tfb')).forEach(function(x){ x.classList.remove('sel'); }); b.classList.add('sel'); }); });
+    toArr(row.querySelectorAll('.tfb')).forEach(function(b){ b.addEventListener('click', function(){ if (st.saved || abgegeben) return; toArr(row.querySelectorAll('.tfb')).forEach(function(x){ x.classList.remove('sel'); }); b.classList.add('sel'); A.tf[it.getAttribute('data-i')] = b.getAttribute('data-v'); sichere(); }); });
   });
 
   function info(msg, cls){ fb.className = 'fb ' + cls; fb.innerHTML = msg; typeset(fb); }
@@ -543,6 +576,10 @@ tasks.forEach(function(t){
     opts.forEach(function(o){ o.disabled = lock; });
     items.forEach(function(it){ toArr(it.querySelectorAll('.tfb')).forEach(function(b){ b.disabled = lock; }); });
   }
+  function zeigeGespeichert(){
+    st.saved = true; setLock(true); bS.style.display = 'none'; bA.style.display = 'inline-block';
+    info('💾 Antwort gespeichert. Ob sie stimmt, sehen Sie nach der Abgabe.', 'info');
+  }
   bS.addEventListener('click', function(){
     if (abgegeben) return;
     var leer = false;
@@ -550,14 +587,23 @@ tasks.forEach(function(t){
     if (ty === 'mc') leer = !t.querySelector('.opt.sel');
     if (ty === 'tf') leer = items.some(function(it){ return !it.querySelector('.tfb.sel'); });
     if (leer) { info('Bitte füllen Sie zuerst alle Felder aus bzw. treffen Sie eine Auswahl.', 'warn'); return; }
-    st.saved = true; setLock(true); bS.style.display = 'none'; bA.style.display = 'inline-block';
-    info('💾 Antwort gespeichert. Ob sie stimmt, sehen Sie nach der Abgabe.', 'info');
+    zeigeGespeichert(); A.saved = true; sichere();
   });
   bA.addEventListener('click', function(){
     if (abgegeben) return;
     st.saved = false; setLock(false); bA.style.display = 'none'; bS.style.display = 'inline-block'; fb.className = 'fb';
+    A.saved = false; sichere();
   });
   t._lock = setLock;
+
+  /* Wiederherstellen – vor dem ersten Rendern der Auswertung */
+  ins.forEach(function(el, i){ if (typeof A.w[i] === 'string') el.value = A.w[i]; });
+  if (ty === 'mc' && A.sel !== null) { var o = t.querySelector('.opt[data-i="' + A.sel + '"]'); if (o) o.classList.add('sel'); }
+  if (ty === 'tf') items.forEach(function(it){
+    var v = A.tf[it.getAttribute('data-i')];
+    if (v) { var b = it.querySelector('.tfb[data-v="' + v + '"]'); if (b) b.classList.add('sel'); }
+  });
+  if (A.saved) zeigeGespeichert();
 });
 
 /* 3) Bewerten (erst nach der Abgabe) – setzt nur Statusklassen an vorhandenen Elementen */
@@ -593,6 +639,7 @@ function standInfo(){
 
 function abgeben(){
   abgegeben = true;
+  if (!S.abgegeben) { S.abgegeben = true; sichere(); }
   var rows = '', muster = '', ok = 0, okGK = 0, nGK = 0;
   tasks.forEach(function(t){
     var id = t.getAttribute('data-id'), r = bewerte(t);
@@ -603,7 +650,7 @@ function abgeben(){
     else { stand = r === false ? '<span class="st-bad">✘ falsch</span>' : '<span class="st-open">– nicht bearbeitet</span>'; t._ctrl.fb.className = 'fb bad'; t._ctrl.fb.innerHTML = r === false ? '❌ Nicht richtig. Die Musterlösung finden Sie in der Auswertung.' : '❌ Nicht bearbeitet.'; }
     if (!LK[id]) nGK++;
     rows += '<tr><td>' + titel + '</td><td>' + (t.getAttribute('data-titel') || '') + (LK[id] ? ' (LK)' : '') + '</td><td>' + stand + '</td></tr>';
-    if (r !== true) muster += '<div class="mbox"><button class="abtn mbtn">📖 ' + (t.getAttribute('data-titel') || id) + '</button><div class="muster">' + MUSTER[id] + '</div></div>';
+    if (r !== true) muster += '<div class="mbox" data-id="' + id + '"><button class="abtn mbtn">📖 ' + (t.getAttribute('data-titel') || id) + '</button><div class="muster">' + MUSTER[id] + '</div></div>';
   });
   document.getElementById('ausw-body').innerHTML = rows;
   document.getElementById('ausw-summe').textContent = ok + ' von ' + tasks.length + ' Teilaufgaben richtig.';
@@ -611,8 +658,12 @@ function abgeben(){
   var mc = document.getElementById('ausw-muster');
   mc.innerHTML = muster || '<p>Alles richtig – es gibt keine Musterlösungen anzuzeigen.</p>';
   toArr(mc.querySelectorAll('.mbox')).forEach(function(bx){
-    var b = bx.querySelector('.mbtn'), m = bx.querySelector('.muster');
-    b.addEventListener('click', function(){ var open = m.style.display === 'block'; m.style.display = open ? 'none' : 'block'; if (!open) typeset(m); });
+    var b = bx.querySelector('.mbtn'), m = bx.querySelector('.muster'), mid = bx.getAttribute('data-id');
+    if (S.offen.indexOf(mid) > -1) { m.style.display = 'block'; typeset(m); }
+    b.addEventListener('click', function(){
+      var open = m.style.display === 'block'; m.style.display = open ? 'none' : 'block'; if (!open) typeset(m);
+      S.offen = S.offen.filter(function(x){ return x !== mid; }); if (!open) S.offen.push(mid); sichere();
+    });
   });
   document.getElementById('vor-abgabe').style.display = 'none';
   document.getElementById('nach-abgabe').style.display = 'block';
@@ -621,35 +672,342 @@ function abgeben(){
 document.getElementById('abgabe-btn').addEventListener('click', function(){ document.getElementById('abgabe-sicher').style.display = 'block'; });
 document.getElementById('abgabe-nein').addEventListener('click', function(){ document.getElementById('abgabe-sicher').style.display = 'none'; });
 document.getElementById('abgabe-ja').addEventListener('click', abgeben);
+if (S.abgegeben) abgeben();
 
-/* 4) Orientierungstimer (Countdown, bei 0 passiert nichts) */
-var rest = TESTZEIT_MIN * 60, laeuft = false, iv = null;
+/* 4) Orientierungstimer (Countdown, bei 0 passiert nichts).
+   Gespeichert werden Status, Restzeit und Startzeitpunkt; nach dem Neuladen wird die
+   Restzeit aus dem Startzeitpunkt berechnet – der Timer beginnt nicht von vorn (TEIL 2.6). */
+var GESAMT = TESTZEIT_MIN * 60;
+S.timer = S.timer || { rest:GESAMT, laeuft:false, start:0, restStart:GESAMT };
+var T = S.timer, iv = null;
 var anz = document.getElementById('timer-anz'), bStart = document.getElementById('timer-start');
-function zeige(){ var m = Math.floor(rest/60), s = rest % 60; anz.textContent = (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s; anz.classList.toggle('abgelaufen', rest === 0); }
-function stop(){ laeuft = false; if (iv) clearInterval(iv); iv = null; bStart.textContent = rest === 0 ? '⏹ Zeit um' : '▶ Weiter'; }
+function zeige(){ var m = Math.floor(T.rest/60), s = T.rest % 60; anz.textContent = (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s; anz.classList.toggle('abgelaufen', T.rest === 0); }
+function berechne(){ if (T.laeuft) T.rest = Math.max(0, T.restStart - Math.floor((Date.now() - T.start) / 1000)); }
+function knopfText(){ bStart.textContent = T.laeuft ? '⏸ Pause' : (T.rest === 0 ? '⏹ Zeit um' : (T.rest < GESAMT ? '▶ Weiter' : '▶ Start')); }
+function stop(){ berechne(); T.laeuft = false; if (iv) clearInterval(iv); iv = null; knopfText(); zeige(); sichere(); }
+function lauf(){
+  if (iv) clearInterval(iv);
+  iv = setInterval(function(){ berechne(); zeige(); if (T.rest === 0) stop(); }, 1000);
+}
 bStart.addEventListener('click', function(){
-  if (rest === 0) return;
-  if (laeuft) { stop(); return; }
-  laeuft = true; bStart.textContent = '⏸ Pause';
-  iv = setInterval(function(){ if (rest > 0) rest--; zeige(); if (rest === 0) stop(); }, 1000);
+  if (T.rest === 0) return;
+  if (T.laeuft) { stop(); return; }
+  T.laeuft = true; T.start = Date.now(); T.restStart = T.rest; knopfText(); sichere(); lauf();
 });
-document.getElementById('timer-reset').addEventListener('click', function(){ stop(); rest = TESTZEIT_MIN * 60; bStart.textContent = '▶ Start'; zeige(); });
+document.getElementById('timer-reset').addEventListener('click', function(){ if (iv) clearInterval(iv); iv = null; T.laeuft = false; T.rest = GESAMT; T.restStart = GESAMT; T.start = 0; knopfText(); zeige(); sichere(); });
 var tib = document.getElementById('timer-info-btn'), ti = document.getElementById('timer-info');
-tib.addEventListener('click', function(){ var open = ti.style.display === 'block'; ti.style.display = open ? 'none' : 'block'; });
-zeige();
+if (S.timerInfo) ti.style.display = 'block';
+tib.addEventListener('click', function(){ var open = ti.style.display === 'block'; ti.style.display = open ? 'none' : 'block'; S.timerInfo = !open; sichere(); });
+berechne();
+if (T.laeuft && T.rest === 0) stop();
+else if (T.laeuft) lauf();
+knopfText(); zeige();
 
 /* 5) Karten-Navigation (nur ein-/ausblenden) */
-function showCard(id){
+function showCard(id, ohneScroll){
   toArr(document.querySelectorAll('.karte')).forEach(function(k){ k.classList.toggle('active', k.id === id); });
   toArr(document.querySelectorAll('.tab')).forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-card') === id); });
   if (id === 'kz' && !abgegeben) standInfo();
-  window.scrollTo(0, 0);
+  S.karte = id; sichere();
+  if (!ohneScroll) window.scrollTo(0, 0);
 }
 toArr(document.querySelectorAll('.tab')).forEach(function(b){ b.addEventListener('click', function(){ showCard(b.getAttribute('data-card')); }); });
+if (S.karte && document.getElementById(S.karte)) showCard(S.karte, true);
 
 var trex = document.getElementById('trex');
 trex.addEventListener('click', function(){ trex.classList.toggle('show'); });
 })();
+
+/* =============================================================================
+   BAUSTEIN: MathJax-Notfall-Anzeige  (MATHJAX-FALLBACK)
+   Gepflegt im Wartungs-Projekt. Unverändert ans ENDE des Seiten-Skripts kopieren
+   (in die Seite hinein – nie per <script src> verlinken, TEIL 8.1).
+   Voraussetzung auf der Seite: das .frac-CSS mit Kind-Selektoren (TEIL 7.2):
+     .frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;
+           margin:0 .2em;line-height:1.15;}
+     .frac > span{display:block;padding:0 .35em;}
+     .frac > span:first-child{border-bottom:1.8px solid currentColor;padding-bottom:.1em;}
+     .frac > span:last-child{padding-top:.1em;}
+   ========================================================================== */
+/* =============================================================================
+   Notfall-Anzeige für Formeln (MATHJAX-FALLBACK)
+   Lädt MathJax nicht (Schul-WLAN, Vorschau, Offline-Kopie), blieben sonst
+   \( ... \) als Rohtext mit Backslashes stehen. Dann werden die TeX-Ausdrücke
+   hier in lesbares HTML gewandelt: √ mit Klammer, Brüche als .frac-Konstrukt
+   (kein Schrägstrich!), Hoch-/Tiefstellungen als sup/sub, Sonderzeichen direkt.
+   Ist MathJax da, passiert nichts.
+   ========================================================================== */
+(function(){
+  var AUF = '\u0001', ZU = '\u0002';   /* Platzhalter fuer { } aus \left\{ */
+
+  function leseGruppe(t, i){
+    if (t.charAt(i) !== '{') return null;
+    var tiefe = 0;
+    for (var j = i; j < t.length; j++){
+      if (t.charAt(j) === '{') tiefe++;
+      else if (t.charAt(j) === '}'){ tiefe--; if (tiefe === 0) return [t.slice(i+1, j), j+1]; }
+    }
+    return null;
+  }
+
+  function strukturen(t){
+    var aus = '', i = 0;
+    while (i < t.length){
+      var m = /^\\(dfrac|tfrac|frac|sqrt)/.exec(t.slice(i));
+      if (m){
+        var a = leseGruppe(t, i + m[0].length);
+        if (a){
+          if (m[1] === 'sqrt'){
+            var inn = strukturen(a[0]);
+            aus += /^[0-9A-Za-z]+$/.test(a[0]) ? '√' + inn : '√(' + inn + ')';
+            i = a[1]; continue;
+          }
+          var b = leseGruppe(t, a[1]);
+          if (b){
+            aus += '<span class="frac"><span>' + strukturen(a[0]) + '</span><span>'
+                 + strukturen(b[0]) + '</span></span>';
+            i = b[1]; continue;
+          }
+        }
+      }
+      aus += t.charAt(i); i++;
+    }
+    return aus;
+  }
+
+  function texHtml(t){
+    t = t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    t = t.replace(/\\rightarrow/g, '→').replace(/\\leftarrow/g, '←')
+         .replace(/\\Rightarrow/g, '⇒').replace(/\\Leftarrow/g, '⇐')
+         .replace(/\\left\\\{/g, AUF).replace(/\\right\\\}/g, ZU)
+         .replace(/\\left(?![a-zA-Z])/g, '').replace(/\\right(?![a-zA-Z])/g, '')
+         .replace(/\\\{/g, AUF).replace(/\\\}/g, ZU);
+    t = t.replace(/\\cdot/g, '·').replace(/\\times/g, '·')
+         .replace(/\\approx/g, '≈').replace(/\\neq/g, '≠')
+         .replace(/\\leq/g, '≤').replace(/\\le\b/g, '≤')
+         .replace(/\\geq/g, '≥').replace(/\\ge\b/g, '≥')
+         .replace(/\\pm/g, '±').replace(/\\mp/g, '∓')
+         .replace(/\\ldots/g, '…').replace(/\\dots/g, '…')
+         .replace(/\\to\b/g, '→')
+         .replace(/\\infty/g, '∞')
+         .replace(/\\pi/g, 'π').replace(/\\alpha/g, 'α')
+         .replace(/\\beta/g, 'β').replace(/\\gamma/g, 'γ')
+         .replace(/\\Delta/g, 'Δ').replace(/\\delta/g, 'δ')
+         .replace(/\\min/g, 'min').replace(/\\max/g, 'max')
+         .replace(/\\text\{([^{}]*)\}/g, '$1')
+         .replace(/\\mathrm\{([^{}]*)\}/g, '$1');
+    t = strukturen(t);
+    t = t.replace(/\^\{([^{}]*)\}/g, '<sup>$1</sup>')
+         .replace(/\^(-?[0-9A-Za-z])/g, '<sup>$1</sup>')
+         .replace(/_\{([^{}]*)\}/g, '<sub>$1</sub>')
+         .replace(/_(-?[0-9A-Za-z])/g, '<sub>$1</sub>');
+    t = t.replace(/\{,\}/g, ',').replace(/\\,/g, ' ').replace(/\\;/g, ' ')
+         .replace(/\\ /g, ' ').replace(/[{}]/g, '')
+         .replace(new RegExp(AUF, 'g'), '{').replace(new RegExp(ZU, 'g'), '}');
+    return t;
+  }
+
+  function mathNotfall(){
+    if (window.MathJax && window.MathJax.typesetPromise) return;  /* MathJax ist da */
+    var lauf = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
+      acceptNode: function(n){
+        var tag = n.parentNode && n.parentNode.nodeName;
+        if (tag === 'SCRIPT' || tag === 'STYLE') return NodeFilter.FILTER_REJECT;
+        return n.nodeValue.indexOf('\\(') > -1 ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP;
+      }
+    });
+    var treffer = [], n;
+    while ((n = lauf.nextNode())) treffer.push(n);
+    treffer.forEach(function(k){
+      var teile = k.nodeValue.split(/\\\(([\s\S]+?)\\\)/);
+      if (teile.length < 2) return;
+      var html = '';
+      for (var i = 0; i < teile.length; i++){
+        html += (i % 2)
+          ? '<span class="tex-ersatz">' + texHtml(teile[i]) + '</span>'
+          : teile[i].replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      }
+      var huelle = document.createElement('span');
+      huelle.innerHTML = html;
+      var frag = document.createDocumentFragment();
+      while (huelle.firstChild) frag.appendChild(huelle.firstChild);
+      k.parentNode.replaceChild(frag, k);
+    });
+  }
+  window.addEventListener('load', function(){ setTimeout(mathNotfall, 3500); });
+})();
 </script>
+<!-- ============================================================
+     BAUSTEIN: Navigationsleiste  (v4, 16.10.2026)
+     Pflicht auf jeder Lernseite (anweisung_lernseiten.txt, TEIL 3.6).
+     Einfügen: UNVERÄNDERT direkt vor dem T-Rex bzw. vor </body> – nicht in <main>.
+     - 🏠 schwebender Knopf unten links (immer sichtbar, T-Rex bleibt rechts) + Leiste am Seitenende.
+     - 🏠 Startseite: feste Adresse, funktioniert aus jedem Unterordner.
+     - 📚 Alles für …: liest <meta name="klasse"> und hängt ?klasse=… an.
+       Fehlt das Meta-Tag, bleibt der Knopf unsichtbar.
+     - ✉️ Feedback: Fenster mit Art (Fehler/Idee/Lob) und Textfeld.
+       "Mail öffnen" startet das eigene Mailprogramm; Seitentitel und
+       Seitenadresse stehen automatisch drin. Kein fremder Dienst.
+       Empfänger: NUR in FB_NAME/FB_DOMAIN unten ändern.
+     - Impressum & Datenschutz: feste Adresse, seit v4 freigeschaltet
+       (impressum.html im Repo-Root existiert).
+     - Eigene Klassen mit Präfix "dino-", Systemschrift,
+       kein Speicher, Schrift ≥ 1rem, Tipp-Ziele ≥ 44 px.
+     - Die Kommentarzeilen BAUSTEIN/ENDE BAUSTEIN bleiben stehen –
+       pruefe.py und das Nachrüst-Skript erkennen den Block daran.
+     ============================================================ -->
+<style>
+.dino-nav{max-width:1024px;margin:2.5rem auto 5rem;padding:0 1rem;
+  font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;}
+.dino-nav-innen{display:flex;flex-wrap:wrap;gap:.6rem;justify-content:center;
+  border-top:2px solid #e4dcd0;padding-top:1.1rem;}
+.dino-nav a,.dino-nav button{display:inline-flex;align-items:center;gap:.4rem;
+  min-height:44px;padding:.5rem 1.1rem;border:2px solid #22303f;border-radius:.6rem;
+  background:#fff;color:#22303f;text-decoration:none;cursor:pointer;
+  font-family:inherit;font-size:1rem;font-weight:700;line-height:1.2;
+  width:auto;margin:0;box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;}
+.dino-nav a:active,.dino-nav button:active{transform:scale(.97);}
+.dino-nav a.dino-nav-start{background:#22303f;color:#fff;}
+.dino-nav a[hidden]{display:none;}
+.dino-fb{width:min(32rem,calc(100vw - 2rem));border:2px solid #22303f;border-radius:.9rem;
+  padding:1.2rem;color:#22303f;background:#fff;
+  font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;font-size:1rem;}
+.dino-fb::backdrop{background:rgba(34,48,63,.45);}
+.dino-fb h2{margin:0 0 .3rem;font-size:1.2rem;}
+.dino-fb p{margin:.4rem 0;font-size:1rem;line-height:1.45;}
+.dino-fb-seite{font-weight:700;}
+.dino-fb-arten{display:flex;flex-wrap:wrap;gap:.5rem;margin:.7rem 0;border:0;padding:0;}
+.dino-fb-arten legend{font-weight:700;margin-bottom:.4rem;font-size:1rem;}
+.dino-fb-arten label{display:inline-flex;align-items:center;gap:.35rem;min-height:44px;
+  padding:.4rem .9rem;border:2px solid #e4dcd0;border-radius:.6rem;cursor:pointer;font-size:1rem;}
+.dino-fb-arten input{width:1.1rem;height:1.1rem;margin:0;}
+.dino-fb-arten label:has(input:checked){border-color:#22303f;background:#eef0f3;}
+.dino-fb textarea{width:100%;box-sizing:border-box;min-height:7rem;padding:.6rem;
+  border:2px solid #e4dcd0;border-radius:.6rem;font-family:inherit;font-size:1rem;color:#22303f;}
+.dino-fb textarea:focus{outline:none;border-color:#22303f;}
+.dino-fb-knoepfe{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.8rem;}
+.dino-fb-knoepfe button{min-height:44px;padding:.5rem 1rem;border-radius:.6rem;
+  border:2px solid #22303f;background:#fff;color:#22303f;font-family:inherit;
+  font-size:1rem;font-weight:700;cursor:pointer;width:auto;margin:0;}
+.dino-fb-knoepfe .dino-fb-senden{background:#22303f;color:#fff;}
+.dino-fb-meldung{min-height:1.4rem;font-weight:700;}
+.dino-fb-meldung.ok{color:#1e7d32;}
+.dino-fb-meldung.nok{color:#c1272d;}
+.dino-home{position:fixed;left:.7rem;bottom:.7rem;z-index:49;width:44px;height:44px;
+  display:flex;align-items:center;justify-content:center;border-radius:50%;
+  background:#fff;border:2px solid #22303f;text-decoration:none;font-size:1.3rem;
+  box-shadow:0 2px 6px rgba(34,48,63,.25);-webkit-tap-highlight-color:transparent;}
+.dino-home:active{transform:scale(.93);}
+@media print{.dino-nav,.dino-fb,.dino-home{display:none;}}
+</style>
+<a class="dino-home" href="https://szymczak75.github.io/Schule/dino_hub.html" title="Zur Startseite" aria-label="Zur Startseite">🏠</a>
+<nav class="dino-nav" aria-label="Seitennavigation">
+  <div class="dino-nav-innen">
+    <a class="dino-nav-start" href="https://szymczak75.github.io/Schule/dino_hub.html">🏠 Startseite</a>
+    <a id="dino-nav-klasse" href="https://szymczak75.github.io/Schule/dino_hub.html" hidden>📚 Alles für …</a>
+    <button type="button" id="dino-nav-fb">✉️ Feedback zu dieser Seite</button>
+    <a class="dino-nav-impressum" href="https://szymczak75.github.io/Schule/impressum.html">Impressum &amp; Datenschutz</a>
+  </div>
+</nav>
+<dialog class="dino-fb" id="dino-fb" aria-labelledby="dino-fb-titel">
+  <h2 id="dino-fb-titel">✉️ Feedback zu dieser Seite</h2>
+  <p>Seite: <span class="dino-fb-seite" id="dino-fb-seite"></span></p>
+  <fieldset class="dino-fb-arten">
+    <legend>Worum geht es?</legend>
+    <label><input type="radio" name="dino-fb-art" value="Fehler" checked> 🐞 Fehler</label>
+    <label><input type="radio" name="dino-fb-art" value="Idee"> 💡 Idee</label>
+    <label><input type="radio" name="dino-fb-art" value="Lob"> 👍 Lob</label>
+  </fieldset>
+  <textarea id="dino-fb-text" aria-label="Deine Nachricht"
+    placeholder="Was ist dir aufgefallen? Bei Fehlern: Welche Karte, welche Aufgabe?"></textarea>
+  <p>Bitte schreib keine persönlichen Daten hinein.</p>
+  <div class="dino-fb-knoepfe">
+    <button type="button" class="dino-fb-senden" id="dino-fb-senden">✉️ Mail öffnen</button>
+    <button type="button" id="dino-fb-kopieren">📋 Text kopieren</button>
+    <button type="button" id="dino-fb-zu">Schließen</button>
+  </div>
+  <p class="dino-fb-meldung" id="dino-fb-meldung" aria-live="polite"></p>
+  <p>Kein Mailprogramm? Text kopieren und an <b id="dino-fb-adresse"></b> schicken.</p>
+</dialog>
+<script>
+(function(){
+  /* Empfänger – nur hier ändern */
+  var FB_NAME = 'aszymczak', FB_DOMAIN = 'my-mcg.de';
+  var START = 'https://szymczak75.github.io/Schule/dino_hub.html';
+
+  /* 📚 Alles für … */
+  var m = document.querySelector('meta[name="klasse"]');
+  var k = m ? (m.getAttribute('content') || '').trim() : '';
+  var a = document.getElementById('dino-nav-klasse');
+  if (k && a) {
+    a.href = START + '?klasse=' + encodeURIComponent(k);
+    var name = /^\d+$/.test(k) ? 'Klasse ' + parseInt(k, 10) : 'die ' + k.replace('_', '/');
+    a.textContent = '📚 Alles für ' + name;
+    a.hidden = false;
+  }
+
+  /* ✉️ Feedback */
+  var dlg = document.getElementById('dino-fb');
+  var fbBtn = document.getElementById('dino-nav-fb');
+  if (!dlg || !fbBtn) return;
+  var adresse = FB_NAME + '@' + FB_DOMAIN;
+  var titel = (document.title || '').trim() || location.pathname.split('/').pop();
+  var url = location.href.split('#')[0];
+  var text = document.getElementById('dino-fb-text');
+  var meldung = document.getElementById('dino-fb-meldung');
+  document.getElementById('dino-fb-seite').textContent = titel;
+  document.getElementById('dino-fb-adresse').textContent = adresse;
+
+  function art(){
+    var r = dlg.querySelector('input[name="dino-fb-art"]:checked');
+    return r ? r.value : 'Feedback';
+  }
+  function betreff(){ return '[Dino-Feedback] ' + art() + ': ' + titel; }
+  function inhalt(){
+    return 'Seite: ' + titel + '\nAdresse: ' + url + '\nArt: ' + art() +
+           '\n\n' + text.value.trim() + '\n';
+  }
+  function melde(t, ok){ meldung.textContent = t; meldung.className = 'dino-fb-meldung ' + (ok ? 'ok' : 'nok'); }
+  function leer(){
+    if (text.value.trim()) return false;
+    melde('Bitte schreib zuerst etwas in das Feld.', false);
+    text.focus();
+    return true;
+  }
+
+  fbBtn.addEventListener('click', function(){
+    melde('', true);
+    if (typeof dlg.showModal === 'function') dlg.showModal(); else dlg.setAttribute('open', '');
+    text.focus();
+  });
+  document.getElementById('dino-fb-zu').addEventListener('click', function(){
+    if (typeof dlg.close === 'function') dlg.close(); else dlg.removeAttribute('open');
+  });
+  document.getElementById('dino-fb-senden').addEventListener('click', function(){
+    if (leer()) return;
+    location.href = 'mailto:' + adresse + '?subject=' + encodeURIComponent(betreff()) +
+                    '&body=' + encodeURIComponent(inhalt());
+    melde('Dein Mailprogramm öffnet sich. Danke! 🦖', true);
+  });
+  document.getElementById('dino-fb-kopieren').addEventListener('click', function(){
+    if (leer()) return;
+    var ganz = 'Betreff: ' + betreff() + '\n' + inhalt();
+    function ersatz(){
+      var t = document.createElement('textarea');
+      t.value = ganz; document.body.appendChild(t); t.select();
+      var ok = false; try { ok = document.execCommand('copy'); } catch (e) {}
+      document.body.removeChild(t);
+      melde(ok ? 'Kopiert! Jetzt in eine Mail einfügen.' : 'Kopieren ging nicht – bitte Text markieren und kopieren.', ok);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(ganz).then(function(){
+        melde('Kopiert! Jetzt in eine Mail einfügen.', true);
+      }, ersatz);
+    } else ersatz();
+  });
+})();
+</script>
+<!-- ============ ENDE BAUSTEIN Navigationsleiste ============ -->
 </body>
 </html>
