@@ -24,7 +24,7 @@ Konventionen (Pfad 3 – Politur lebt in den Metatags):
 - Aufgeklappte Kachel: volle Zeilenbreite, Spalten Lernseite | Übung |
   Wissenstest (| Sonstiges). Zusammengehörige Seiten stehen in EINER Zeile.
   Zusammengehörig = gleicher <meta name="gruppe">, sonst gleicher
-  Dateinamen-Stamm (ohne _ls/_ue/_test/_bonus/_lehrer). Siehe
+  Dateinamen-Stamm (ohne _ls/_ue/_sfs/_test/_bonus/_lehrer). Siehe
   gruppen_schluessel().
 """
 
@@ -43,6 +43,7 @@ FACH_MAIN  = {"mathe", "bio", "kompass"}
 TYP_ICON = {
     "Lernseite": ("📖", "ls",    "📖"),
     "Übung":     ("✏️", "ue",    "✏️"),
+    "Schritt für Schritt": ("🪜", "sfs", "🪜"),
     "Test":      ("🔍", "test",  "🔍"),
     "Bonus":     ("⭐", "bonus", "⭐"),
     "Lehrer":    ("👨‍🏫", "lehrer", "👨‍🏫"),
@@ -57,7 +58,9 @@ KACHEL_SPALTEN = [
 ]
 # Vierte Spalte nur, wenn die Kachel Bonus-/Lehrer-/typlose Seiten enthält
 SPALTE_SONST = ("sonst", "📎 Sonstiges", "sonstig")
-TYP_SPALTE = {"Lernseite": "ls", "Übung": "ue", "Test": "test"}
+# Schritt-für-Schritt-Seiten (_sfs) sind Übungsaufgaben → Spalte Übung, aber mit eigenem Icon
+TYP_SPALTE = {"Lernseite": "ls", "Übung": "ue", "Schritt für Schritt": "ue", "Test": "test"}
+TYP_MIT_ICON = {"Schritt für Schritt"}   # in ihrer Spalte trotzdem mit Icon kennzeichnen
 
 # Emoji-Lookup für Themen (oberthema / Ordnername, lower, ohne Umlaute-Sonderfälle)
 # Hinweis: Der Lookup greift auch, wenn der Ordnername zusätzliche Wörter
@@ -290,7 +293,7 @@ def link_title(info, fname):
         return info["title"]
     # Fallback: Dateiname ohne Suffix, hübsch
     base = re.sub(r"\.html$", "", fname)
-    base = re.sub(r"_(ls|ue|test|bonus)\d*$", "", base)
+    base = re.sub(r"_(ls|ue|sfs|test|bonus)\d*$", "", base)
     return prettify(base)
 
 def esc(s):
@@ -310,7 +313,7 @@ def gruppen_schluessel(info, fname):
     if g:
         return _norm_key(g)
     base = re.sub(r"\.html?$", "", fname, flags=re.I).strip()
-    base = re.sub(r"[_\-\s](ls|ue|test|bonus|lehrer)\d*$", "", base, flags=re.I)
+    base = re.sub(r"[_\-\s](ls|ue|sfs|test|bonus|lehrer)\d*$", "", base, flags=re.I)
     return _norm_key(base)
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -328,7 +331,7 @@ def build_kachel_tabelle(files, metas):
     def sortkey(item):
         rel, fname = item
         typ = metas[rel].get("typ", "")
-        order = {"Lernseite": 0, "Übung": 1, "Test": 2, "Bonus": 3}.get(typ, 4)
+        order = {"Lernseite": 0, "Übung": 1, "Schritt für Schritt": 2, "Test": 3, "Bonus": 4}.get(typ, 5)
         return (order, fname.lower())
 
     # Zeilen in der Reihenfolge ihres ersten Auftretens: Gruppen mit
@@ -355,7 +358,7 @@ def build_kachel_tabelle(files, metas):
         if typ == "Lehrer":
             return (f'<a href="{esc(rel)}" class="lehrer-link" target="_blank" '
                     f'rel="noopener">{esc(title)}</a>')
-        label = f"{link_icon(typ)} {title}" if mit_icon else title
+        label = f"{link_icon(typ)} {title}" if (mit_icon or typ in TYP_MIT_ICON) else title
         return f'<a href="{esc(rel)}" target="_blank" rel="noopener">{esc(label)}</a>'
 
     ind = "                  "
@@ -724,6 +727,7 @@ def render_overview(dirpath, root, sub, heute):
   .kbadge{{font-size:.65rem;padding:.15rem .45rem;border-radius:20px;font-weight:600}}
   .kbadge.ls{{background:#dbeafe;color:#1d4ed8}}
   .kbadge.ue{{background:#ccfbf1;color:#0f766e}}
+  .kbadge.sfs{{background:#e0e7ff;color:#3730a3}}
   .kbadge.test{{background:#fee2e2;color:#b91c1c}}
   .kbadge.bonus{{background:#ede9fe;color:#6d28d9}}
   .kbadge.lehrer{{background:#fef3c7;color:#92400e}}
@@ -1026,6 +1030,7 @@ TPL_HEAD = r"""<!DOCTYPE html>
   .kbadge{font-size:.65rem;padding:.15rem .45rem;border-radius:20px;font-weight:600}
   .kbadge.ls{background:#dbeafe;color:#1d4ed8}
   .kbadge.ue{background:#ccfbf1;color:#0f766e}
+  .kbadge.sfs{background:#e0e7ff;color:#3730a3}
   .kbadge.test{background:#fee2e2;color:#b91c1c}
   .kbadge.bonus{background:#ede9fe;color:#6d28d9}
   .kbadge.rbka{background:#fef2f2;color:#9f1239}
@@ -1118,6 +1123,7 @@ TPL_HEAD = r"""<!DOCTYPE html>
   .tag-arbeit{background:#ffedd5;color:#c2410c}
   .tag-entwurf{background:#f1f5f9;color:#475569}
   .tag-bonus{background:#ede9fe;color:#6d28d9}
+  .tag-sfs{background:#e0e7ff;color:#3730a3}
   .tag-test{background:#fee2e2;color:#b91c1c}
   .tag-orga{background:#fef9c3;color:#854d0e}
 
@@ -1187,6 +1193,7 @@ TPL_HEAD = r"""<!DOCTYPE html>
       <button class="filter-btn active" data-val="">Alle</button>
       <button class="filter-btn" data-val="Lernseite">Lernseite</button>
       <button class="filter-btn" data-val="Übung">Übung</button>
+      <button class="filter-btn" data-val="Schritt für Schritt">🪜 Schritt für Schritt</button>
       <button class="filter-btn" data-val="Test">Test</button>
       <button class="filter-btn" data-val="Bonus">Bonus</button>
     </div>
@@ -1446,7 +1453,7 @@ function doSearch(){
   });
   if(!q&&!fF&&!fK&&!fT){res.innerHTML='';return;}
   if(!hits.length){res.innerHTML='<div class="no-results">🦖 Keine Ergebnisse gefunden</div>';return;}
-  const tagMap={'Lernseite':'tag-lernen','Übung':'tag-uebung','Test':'tag-test','Bonus':'tag-bonus'};
+  const tagMap={'Lernseite':'tag-lernen','Übung':'tag-uebung','Schritt für Schritt':'tag-sfs','Test':'tag-test','Bonus':'tag-bonus'};
   const emoji={mathe:'📐',bio:'🧬',kompass:'🧭'};
   res.innerHTML=hits.map(([path,m])=>`<a class="sri" href="${path}" target="_blank" rel="noopener"><span class="sri-icon">${emoji[m.fach]||'📄'}</span><div class="sri-info"><div class="sri-title">${m.title}</div><div class="sri-desc">${m.desc}</div></div><div class="sri-tags"><span class="link-tag ${tagMap[m.typ]||''}">${m.typ}</span><span style="font-size:.6rem;padding:.13rem .42rem;border-radius:20px;font-weight:700;background:#f1f5f9;color:#475569">Kl. ${m.kl}</span></div></a>`).join('');
 }

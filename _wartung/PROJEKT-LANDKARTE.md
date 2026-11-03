@@ -18,7 +18,7 @@ von claude.ai ein (siehe `_wartung/LIESMICH.md`). Nach einer Änderung genügt i
 | **Wartung Unterrichtsprojekte** | ganzer Ordner `_wartung` | alles | | | | | | |
 
 **Allgemeine Dateien** (`_wartung/allgemein/`: Lernseiten-Anweisung, Fehler-Checkliste,
-`pruefe.py`, MathJax-Notfall, Navigationsleiste) sind in allen Projekten **identisch** und werden nur hier
+`pruefe.py`, MathJax-Notfall, Navigationsleiste, Schritt-für-Schritt-Vorlage) sind in allen Projekten **identisch** und werden nur hier
 geändert.
 
 ## Nur im Projekt „GeoGebra" (`_wartung/geogebra/`)
@@ -81,6 +81,11 @@ kann nur der Nutzer selbst in den Projekteinstellungen auf claude.ai eintragen.
 > keiner der dort gelisteten wiederkehrenden Fehler in der neuen Seite steckt. Seiten mit
 > Formeln bekommen am Skriptende die Notfall-Anzeige aus `baustein_mathjax_notfall.js`.
 
+### Textbaustein „Schritt für Schritt" für „HTML erzeugen" und „Unterrichtsvorbereitung"
+> Steht „Schritt für Schritt" in der Anfrage, baue ich eine `_sfs`-Seite
+> (`typ="Schritt für Schritt"`) aus `baustein_schritt_fuer_schritt.html` und ersetze nur die
+> mit ANPASSEN markierten Teile (Lernseiten-Anweisung TEIL 2.7).
+
 ### GeoGebra
 Die Projektanweisung `anweisung_geogebra_projekt.md` nennt beide Dateien und `pruefe.py`
 bereits – dort ist kein zusätzlicher Textbaustein nötig.
@@ -103,6 +108,16 @@ T-Rex (Lernseiten-Anweisung TEIL 3.6). Im GeoGebra-Projekt setzt `bauer.py` sie 
 (`NAV_VERSION`). Bei einer Änderung am Baustein: Versionsnummer im Kopfkommentar **und**
 `NAV_VERSION` erhöhen, danach die Website-Seiten per Nachrüst-Skript aktualisieren.
 Feedback-Adresse und Startseiten-Adresse stehen nur im Baustein.
+
+## Schritt-für-Schritt-Vorlage
+`baustein_schritt_fuer_schritt.html` (Ordner `allgemein`) ist eine vollständige Vorlage für
+`_sfs`-Seiten (Lernseiten-Anweisung TEIL 2.7): BAUSTEIN-CSS, Schritt-für-Schritt-Engine,
+MathJax-Notfall und Navigationsleiste sind darin enthalten. `pruefe.py` kennt die
+Engine-Fassung (`SFS_VERSION`). Bei einer Änderung an CSS oder Engine: Versionsnummer in
+beiden Kopfkommentaren **und** `SFS_VERSION` erhöhen, danach die `_sfs`-Seiten nachziehen
+(derzeit `steckbrief_sfs`, `extrempunkte_berechnen_sfs`, `wendepunkte_berechnen_sfs`).
+Der Hub (`build_hub.py`) zeigt `typ="Schritt für Schritt"` mit 🪜 in der Spalte Übung.
+Im GeoGebra-Projekt gibt es diese Seitenart nicht.
 
 ## Geodreieck
 Der Baustein ist für die drei Unterrichts-Projekte identisch. Er heißt jetzt überall

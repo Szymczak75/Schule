@@ -9,7 +9,8 @@ einem Baustein oder einer Regel wird hier EINMAL umgesetzt und gilt dann in alle
   hier ist per GitHub-Synchronisation eingebunden (nur lesen). Geändert wird ausschließlich
   im Repo – per Branch + Pull Request.
 - `_wartung/allgemein/` – `anweisung_lernseiten.txt`, `wiederkehrende_fehler_checkliste.md`,
-  `pruefe.py`, `baustein_mathjax_notfall.js`, `baustein_navigation.html`
+  `pruefe.py`, `baustein_mathjax_notfall.js`, `baustein_navigation.html`,
+  `baustein_schritt_fuer_schritt.html`
 - `_wartung/geodreieck/` – `geodreieck_baustein.html`
 - `_wartung/unterrichtsvorbereitung/` – `anweisung_C_unterrichtsvorbereitung.md`
 - `_wartung/geogebra/` – Baukasten (`css.txt`, `helfer.js`, `bauer.py`, `koord.py`, `test.js`,
