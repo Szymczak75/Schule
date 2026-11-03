@@ -31,7 +31,8 @@ nach jedem Fund einzeln umgebaut.
 
 **1. Kopf & Meta**
 Alle sieben Pflicht-Meta-Tags gesetzt und gefüllt (`description`, `keywords`, `typ`,
-`klasse`, `fach`, `oberthema`, `thema`)? Passt `typ` zum Dateinamen-Suffix? Passt `klasse`
+`klasse`, `fach`, `oberthema`, `thema`)? Passt `typ` zum Dateinamen-Suffix (`_sfs` ↔
+`Schritt für Schritt`)? Passt `klasse`
 zur restlichen Reihe? MathJax-Block exakt wie vorgeschrieben eingebunden? Keine weitere
 externe Ressource außer MathJax – auch kein Google Fonts (Links `<a href>` zählen nicht)?
 
@@ -260,7 +261,14 @@ Diese Punkte standen offen und sind inzwischen als Regel in
   fehlende oder veränderte Leiste als `NAV`.
 - **Keine Google Fonts mehr** (Oktober 2026, Datenschutz). Einzige erlaubte externe Quelle
   ist MathJax; Schrift kommt aus dem System.
+- **Schritt für Schritt ist eine eigene Seitenart** (November 2026). Steht „Schritt für
+  Schritt" in der Anfrage, entsteht `thema_sfs.html` mit `typ="Schritt für Schritt"` aus
+  `baustein_schritt_fuer_schritt.html` – nie frei nachgebaut. Frühere Einzelstücke
+  (`extrempunkte_berechnen_vorgehen_ls`, `wendepunkte_loesen_aufklappen_ue`) hatten keine
+  Meta-Tags, kein MathJax, Schrift unter 1rem, eigene Farbtöne, und der Auftrag zu Schritt 2
+  nannte das Ergebnis von Schritt 1. Die Steckbrief-Seite speicherte Sterne und Fragen nicht.
+  `pruefe.py` meldet fehlende Engine, Schritte ohne Lösung und doppelte `data-step` als `SFS`.
 
 ---
 
-*Stand: 16.10.2026 (Navigationsleiste, keine Google Fonts) – gepflegt im Wartungs-Projekt „Wartung Unterrichtsprojekte".*
+*Stand: 03.11.2026 (Seitenart Schritt für Schritt; Navigationsleiste, keine Google Fonts) – gepflegt im Wartungs-Projekt „Wartung Unterrichtsprojekte".*

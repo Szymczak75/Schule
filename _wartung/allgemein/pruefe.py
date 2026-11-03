@@ -23,7 +23,8 @@ Was dieser Linter NICHT kann (bleibt Handarbeit bzw. Browsertest):
   - ob der Stand ein Neuladen wirklich vollständig übersteht (Browsertest: Seite
     bearbeiten, neu laden, vergleichen)
 
-Stand: 16.10.2026 (Navigationsleiste Pflicht, TEIL 3.6; Google Fonts nicht mehr erlaubt, TEIL 8.1)
+Stand: 03.11.2026 (Seitentyp Schritt für Schritt _sfs, TEIL 2.7; Navigationsleiste Pflicht, TEIL 3.6;
+       Google Fonts nicht mehr erlaubt, TEIL 8.1)
 """
 import io
 import os
@@ -45,8 +46,13 @@ BEKANNT_FALSCH = {'#e07b1a', '#d98324', '#e8943c', '#1565c0', '#1976d2'}
 META_PFLICHT = ['description', 'keywords', 'typ', 'klasse', 'fach', 'oberthema', 'thema']
 SUFFIX_TYP = {'_ls': 'Lernseite', '_ue': 'Übung', '_test': 'Test',
               '_rbka': 'Rückblick', '_rb': 'Rückblick', '_ka': 'Klassenarbeit',
-              '_bonus': 'Bonus'}
+              '_bonus': 'Bonus', '_sfs': 'Schritt für Schritt'}
 ERLAUBTE_HOSTS = ('cdn.jsdelivr.net/npm/mathjax',)   # Google Fonts seit 16.10.2026 nicht mehr
+
+# Schritt-für-Schritt-Engine (baustein_schritt_fuer_schritt.html, TEIL 2.7)
+SFS_TYP = 'Schritt für Schritt'
+SFS_VERSION = 'v1'
+SFS_MARKE = 'BAUSTEIN: Schritt-für-Schritt-Engine'
 
 # Navigationsleiste (baustein_navigation.html, TEIL 3.6)
 NAV_VERSION = 'v4'
@@ -96,6 +102,9 @@ def pruefe(pfad):
     name = os.path.basename(pfad)
     # Seiteneigener Teil ohne den Navigations-Baustein: dessen Skript und Feedback-Textfeld
     # gehören nicht zur Aufgabenlogik (sonst Fehlalarme bei DOPPELT und NEULADEN).
+    # Reine Weiterleitung einer umbenannten Seite (hubignore + refresh) ist keine Lernseite.
+    if 'name="hubignore"' in h and 'http-equiv="refresh"' in h:
+        return []
     eigen = NAV_BLOCK.sub(' ', h)
     css = _style_bloecke(h)
     js = _skript_bloecke(eigen)
@@ -213,7 +222,7 @@ def pruefe(pfad):
     # ---------------------------------------------------- 3 Kartengerüst
     typ = meta.get('typ', '')
     tabs = re.findall(r'data-ziel="k\d+"[^>]*>([^<]*)', h)
-    if typ in ('Übung', 'Test', 'Rückblick'):
+    if typ in ('Übung', 'Test', 'Rückblick', SFS_TYP):
         if not re.search(r'Auswertung', h):
             fehler('AUSWERTUNG', '%s ohne Auswertungskarte' % typ)
         if not re.search(r'Wiederholung', h):
@@ -222,6 +231,34 @@ def pruefe(pfad):
             hinweis('WIEDERHOLUNG',
                     'Wiederholungskarte ist nicht die vorletzte Karte (vorletzte: %s)'
                     % tabs[-2].strip())
+    # Schritt für Schritt (TEIL 2.7): Engine-Baustein, jeder Schritt mit Lösung, eindeutige Schritt-IDs
+    ohne_kommentar = re.sub(r'<!--.*?-->', ' ', h, flags=re.S)
+    if typ == SFS_TYP:
+        if SFS_MARKE not in h:
+            fehler('SFS', 'typ="%s" ohne Engine aus baustein_schritt_fuer_schritt.html' % SFS_TYP)
+        elif '%s  (%s' % (SFS_MARKE, SFS_VERSION) not in h:
+            hinweis('SFSALT', 'Schritt-für-Schritt-Engine ist nicht die aktuelle Fassung %s – '
+                              'Baustein ersetzen' % SFS_VERSION)
+        n_schritt = len(re.findall(r'class="schritt"', ohne_kommentar))
+        n_loes = len(re.findall(r'class="loesung"', ohne_kommentar))
+        if n_schritt == 0:
+            fehler('SFS', 'Schritt-für-Schritt-Seite ohne Schritte (div class="schritt")')
+        elif n_loes < n_schritt:
+            fehler('SFS', '%d Schritte, aber nur %d Lösungen (div class="loesung")' % (n_schritt, n_loes))
+        ids = re.findall(r'data-step="([^"]+)"', ohne_kommentar)
+        for d in sorted(set(i for i in ids if ids.count(i) > 1)):
+            fehler('SFS', 'data-step="%s" mehrfach vergeben – Stände überschreiben sich' % d)
+        if 'data-auswertung' not in ohne_kommentar:
+            fehler('SFS', 'Auswertungskarte ohne data-auswertung – die Engine füllt sie nicht')
+    elif SFS_MARKE in h:
+        fehler('TYP', 'Seite nutzt die Schritt-für-Schritt-Engine, trägt aber typ="%s" – '
+                      'richtig ist typ="%s" und Suffix _sfs' % (typ, SFS_TYP))
+    else:
+        titel = re.search(r'<title>(.*?)</title>', h, re.S)
+        if titel and re.search(r'schritt\s*f(?:ü|ue)r\s*schritt', titel.group(1), re.I):
+            hinweis('SFS', 'Titel nennt „Schritt für Schritt“ – gehört die Seite als _sfs auf '
+                           'baustein_schritt_fuer_schritt.html (TEIL 2.7)?')
+
     if typ == 'Test' and 'TESTZEIT_MIN' not in js:
         fehler('TIMER', 'Wissenstest ohne Orientierungstimer-Konstante TESTZEIT_MIN')
 
