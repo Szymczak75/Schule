@@ -564,6 +564,38 @@ Suite.
 - **Neuer Baukasten:** `/tmp/bauer_q1.py` (wie bauer10, aber `klasse="Q1"`, `.kennz`-CSS,
   `.uebers`-Tabelle und `kennz()`-Helfer). Bauskripte `/tmp/q1_s1.py`, `/tmp/q1_s2.py`.
 
+## Status Seiten-Serie Q1 – Funktionenscharen (Grafikrechner, Karte 4 CAS)
+| # | Titel | Datei | Status |
+|---|---|---|---|
+| 1 | Funktionenscharen und Ortskurven | geogebra_funktionenscharen_q1_ls.html | fertig (04.11.2026), Bedienangaben am Gerät gegenprüfen |
+
+**Festlegungen (mit Andreas abgestimmt, 04.11.2026):**
+- Bedienungs-Grundlage für **GK und LK**, obwohl Funktionenscharen laut Kernlehrplan LK-Stoff
+  sind. Die LK-Erweiterung steht als eigene Karte 4 („LK: Ortskurve im CAS“).
+- Karten: 1 Schar \(f_a(x)=x^3-a x^2\) mit `a=Schieberegler(-3, 3, 0.5)` und Spur des
+  Graphen · 2 `Extremum(f)`/`Wendepunkt(f)` mit Spur, Ortskurve \(o(x)=-\tfrac12x^3\)
+  **vorgegeben** und darübergelegt, Wendepunkt-Ortskurve (\(-2x^3\)) per Ausprobieren ·
+  3 zweite Schar \(g_t(x)=x^3-3x^2+t x\): Ortskurve der Extrempunkte \(-2x^3+3x^2\),
+  Wendepunkte wandern auf der **senkrechten Geraden** \(x=1\) · 4 (LK) CAS-Bauplan
+  `Löse(f'(x)=0, x)` → `Löse(x=…, a)` → `Ersetze(f(x), a, …)`, Aufgabe an
+  \(h_k(x)=x^3+kx^2-1\) (Ergebnis \(-2x^3-1\)); aufklappbar `Ortslinie(Punkt, Regler)` ·
+  5 Überprüfe dich mit \(q_c(x)=x^3-c x\).
+- **Spur statt Ortslinie** als Hauptweg (wie EF 7): anschaulich; Ortslinie nur aufklappbar.
+- Alle Zahlenwerte mit sympy nachgerechnet (f(2)=2 bei a=1,5; a=2,5 für P(1|−1,5);
+  WP-y=−0,25 bei a=1,5; HP-y≈0,2071 bei t=1,5, tol 0.01; w(1)=−3; HP-y=2, TP-x=1 bei c=3).
+- Technik: fünf Karten. `checkAuswerten`/`rechnenAuswerten` sind in `helfer.js` fest auf
+  `state.k4` verdrahtet – deshalb trägt die LK-Karte den Zustand `state.lk`, die
+  Abschlusskarte `state.k4`, und das Seitenskript setzt `FORTSCHRITT` passend neu. Karte 3
+  hat zwei MC-Fragen und eine eigene Auswertung mit `nachWiederherstellen`.
+
+**Am Gerät zu prüfen (Lehrkraft):**
+1. Spur für einen **Funktionsgraphen**: drei Punkte → Einstellungen → „Spur anzeigen“
+   (für Punkte auf EF 7 so verwendet; für Graphen nicht eigens geprüft).
+2. `Extremum(f)` und `Wendepunkt(f)` mit Schieberegler im Term: wandern die Punkte mit,
+   und wie verhalten sich die Namen, wenn a durch 0 läuft?
+3. `Ortslinie(C, a)` mit einem Punkt aus `Wendepunkt(f)` (aufklappbarer Kasten Karte 4).
+4. CAS: Ausgabe von `Löse(x=2a/3, a)` und `Ersetze(f(x), a, 3x/2)` wie auf der Seite beschrieben.
+
 ## Status Seiten-Serie Klasse 10
 | # | Titel | Datei | Status |
 |---|---|---|---|
@@ -683,7 +715,7 @@ Vier EF-Seiten hatten kein `.frac`-CSS; das ist dort ergänzt worden.
 (Wurzelzeichen, Brüche, Indizes).
 
 ## Nächste Schritte
-1. Q1/Q2 weiter ausbauen (bisher nur die beiden Steckbrief-Seiten)
+1. Q1/Q2 weiter ausbauen (bisher Steckbrief-Seiten, LGS im CAS, Funktionenscharen)
 2. Hub-Anbindung aller 37 bisherigen Seiten. **Entscheidung 25.09.2026:** verbindlich ist
    `oberthema="GeoGebra Suite"`. Die 37 fertigen Seiten tragen noch `"GeoGebra Grafikrechner"`
    und werden per Skript umgestellt (nur dieses Meta-Tag, sonst nichts).
@@ -696,4 +728,4 @@ Hier sammeln, was unterwegs an **allgemein gültigen** Regeln oder Fehlern auff�
 Punkte werden im Wartungs-Projekt in `anweisung_lernseiten.txt` / Fehler-Checkliste /
 `pruefe.py` übernommen und dann hier gelöscht.
 
-- *(zurzeit leer – Stand 25.09.2026 übernommen)*
+- **`helfer.js`: Abschlusskarte fest auf `k4` verdrahtet** (`checkAuswerten`, `rechnenAuswerten`, `k4Status`). Seiten mit fünf Karten brauchen einen Umweg (siehe Funktionenscharen Q1). Vorschlag: Kartenschlüssel als Parameter übergeben. Außerdem fehlt ein `checkLeeren`-Helfer – Leeren-Knopf der Abschlussfragen muss jede Seite selbst bauen.
