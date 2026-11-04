@@ -151,7 +151,7 @@ Ordner-Übersichten `_*.html` über `linking.txt`). Änderungen an der Startseit
 - Impressum: **Andreas Szymczak, Frankenweg 249, 45665 Recklinghausen**,
   Kontakt aszymczak@my-mcg.de (als Text, kein `mailto:`-Link).
   **Lizenz entschieden (16.10.2026): CC BY-SA 4.0** (nutzen/anpassen/weitergeben mit
-  Namensnennung „Andreas Szymczak / Mathedino", Weitergabe unter gleicher Lizenz).
+  Namensnennung „Andreas Szymczak / Dinos Lernwerkstatt", Weitergabe unter gleicher Lizenz).
 - **Feedback-Knopf „✉️ Feedback zu dieser Seite"** (Variante 1): Popup mit Fehler/Idee/Lob
   und Textfeld → öffnet Mailprogramm. Seitentitel und Seitenadresse automatisch in
   Betreff/Text, Betreff beginnt mit `[Dino-Feedback]`. Adresse per JS zusammengesetzt,
@@ -228,6 +228,16 @@ Ordner-Übersichten `_*.html` über `linking.txt`). Änderungen an der Startseit
   - Impressum fehlte auf der Startseite → dezenter **Footer-Link** „Impressum & Datenschutz".
   - T-Rex-Tooltip „Made by Mathedino" → **„Made by ASzym"** (einheitlich mit Lernseiten).
   - `dino_hub.html` baut die Action neu, nicht von Hand.
+
+- **Im Fach bleiben + neuer Name** (04.11.2026, Branch `navigation-v5-fach-lernwerkstatt`):
+  - Fehler: „📚 Alles für die EF" auf einer Bio-Seite öffnete die Startseite im Mathe-Reiter.
+  - Navigations-Baustein **v5**: 🏠, Startseite und „Alles für …" hängen `start=<fach>` an
+    (`<meta name="fach">`, sonst Ordnername). `build_hub.py` versteht `?start=` und öffnet
+    diesen Reiter zuerst; die anderen Fächer bleiben erreichbar. 457 Seiten v4→v5,
+    `pruefe.py` `NAV_VERSION`→v5. `intern/MCG/` (2 Formulare ohne Leiste) bewusst nicht angefasst.
+  - Name „Mathedino" → **„Dinos Lernwerkstatt"** (Konflikt mit bestehender Website
+    Mathedino; außerdem nicht nur Mathe): Startseite (Titel, Überschrift) und Impressum
+    inkl. Lizenz-Namensnennung. Spitzname „Dino" und T-Rex bleiben.
 
 **Noch offen:**
 1. **Neulade-Schutz Stufe 2** (voller Schutz inkl. Bewertungen, wie im Baukasten) nach und

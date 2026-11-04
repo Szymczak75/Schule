@@ -412,13 +412,17 @@
 </script>
 <!-- ============ ENDE BAUSTEIN Neulade-Schutz Stufe 1 ============ -->
 <!-- ============================================================
-     BAUSTEIN: Navigationsleiste  (v4, 16.10.2026)
+     BAUSTEIN: Navigationsleiste  (v5, 04.11.2026)
      Pflicht auf jeder Lernseite (anweisung_lernseiten.txt, TEIL 3.6).
      Einfügen: UNVERÄNDERT direkt vor dem T-Rex bzw. vor </body> – nicht in <main>.
      - 🏠 schwebender Knopf unten links (immer sichtbar, T-Rex bleibt rechts) + Leiste am Seitenende.
      - 🏠 Startseite: feste Adresse, funktioniert aus jedem Unterordner.
      - 📚 Alles für …: liest <meta name="klasse"> und hängt ?klasse=… an.
        Fehlt das Meta-Tag, bleibt der Knopf unsichtbar.
+     - Seit v5: Alle drei Links (🏠, Startseite, Alles für …) hängen zusätzlich
+       start=<fach> an (aus <meta name="fach">, sonst aus dem Ordner bio/mathe/…).
+       Die Startseite öffnet dann zuerst den Reiter dieses Fachs; die anderen
+       Fächer bleiben als Reiter erreichbar.
      - ✉️ Feedback: Fenster mit Art (Fehler/Idee/Lob) und Textfeld.
        "Mail öffnen" startet das eigene Mailprogramm; Seitentitel und
        Seitenadresse stehen automatisch drin. Kein fremder Dienst.
@@ -510,12 +514,28 @@
   var FB_NAME = 'aszymczak', FB_DOMAIN = 'my-mcg.de';
   var START = 'https://szymczak75.github.io/Schule/dino_hub.html';
 
+  /* Fach der Seite → Startseite öffnet zuerst diesen Reiter */
+  var FAECHER = ['mathe', 'bio', 'kompass'];
+  var mf = document.querySelector('meta[name="fach"]');
+  var fach = mf ? (mf.getAttribute('content') || '').trim().toLowerCase() : '';
+  if (FAECHER.indexOf(fach) < 0) {
+    var teile = location.pathname.split('/');
+    fach = '';
+    for (var i = 0; i < teile.length; i++) {
+      var t = teile[i].toLowerCase();
+      if (FAECHER.indexOf(t) >= 0) { fach = t; break; }
+    }
+  }
+  var startUrl = fach ? START + '?start=' + fach : START;
+  var heim = document.querySelectorAll('.dino-home, .dino-nav-start');
+  for (var j = 0; j < heim.length; j++) heim[j].href = startUrl;
+
   /* 📚 Alles für … */
   var m = document.querySelector('meta[name="klasse"]');
   var k = m ? (m.getAttribute('content') || '').trim() : '';
   var a = document.getElementById('dino-nav-klasse');
   if (k && a) {
-    a.href = START + '?klasse=' + encodeURIComponent(k);
+    a.href = START + '?klasse=' + encodeURIComponent(k) + (fach ? '&start=' + fach : '');
     var name = /^\d+$/.test(k) ? 'Klasse ' + parseInt(k, 10) : 'die ' + k.replace('_', '/');
     a.textContent = '📚 Alles für ' + name;
     a.hidden = false;
