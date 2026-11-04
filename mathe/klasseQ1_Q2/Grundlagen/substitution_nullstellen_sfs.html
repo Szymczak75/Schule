@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- =============================================================================
+     VORLAGE: Schritt-für-Schritt-Seite (_sfs)  ·  baustein_schritt_fuer_schritt.html (v1, 03.11.2026)
+     Lernseiten-Anweisung TEIL 2.7. Gepflegt im Wartungs-Projekt.
+
+     SO ENTSTEHT EINE NEUE _sfs-SEITE AUS DIESER VORLAGE
+     1. Datei kopieren, Namen nach TEIL 9 setzen: thema_sfs.html.
+     2. <head>: title + alle Meta-Tags anpassen; typ bleibt "Schritt für Schritt".
+     3. <body data-anrede="sie|du" data-version="v1">: Sek I "du", Oberstufe "sie".
+        Ändert sich später der Aufbau einer veröffentlichten Seite: data-version erhöhen.
+     4. Nur die mit  ANPASSEN  markierten Teile im <body> ersetzen:
+        Kopf, Reiter, Aufgabenkarten, Wiederholungskarte.
+        Pro Schritt schreibt man NUR:
+          <div class="schritt" data-step="EINDEUTIG" data-titel="Kurzname">
+            <h3><span class="snr">1</span>Kurzname</h3>
+            <div class="heft"><p>📝 <b>Im Heft:</b> Auftrag …</p></div>
+            <div class="loesung"> vollständige Lösung des Schritts </div>
+          </div>
+        Knöpfe (notiert / aufdecken), Sterne-Raster, Reflexion, Fragen-Knopf,
+        Anleitungsbox, Hinweisfenster und die ganze Auswertung erzeugt die Engine.
+        Alternative Wege: data-wahl="gleicher-name" an beide Schritte – gezählt wird
+        der besser bewertete.
+        Wiederholung: .task data-type="mc" (Optionen mit data-ok="1"/"0") oder
+        data-type="num" (input.in mit data-ans, optional data-tol); Hilfe als
+        <div class="hilfe"><div class="tip">…</div>…<div class="muster">Lösungsweg</div></div>.
+     5. BAUSTEIN-CSS, Engine, MathJax-Notfall und Navigationsleiste UNVERÄNDERT lassen.
+        Seiteneigenes CSS (z. B. .kos > svg) nur unter „seiteneigenes CSS“.
+     6. pruefe.py laufen lassen, Checkliste durchgehen.
+     ============================================================================= -->
+<title>Nullstellen mit Substitution und Polynomdivision – Schritt für Schritt</title>
+<meta name="description" content="Schritt für Schritt Nullstellen ganzrationaler Funktionen bestimmen: Substitution bei einer achsensymmetrischen Funktion 4. Grades und bei ax⁶+bx³+c sowie Nullstelle raten und Polynomdivision bei einer Funktion 3. Grades, mit Selbsteinschätzung nach jedem Schritt.">
+<meta name="keywords" content="Substitution, Polynomdivision, Nullstellen, ganzrationale Funktionen, Nullstelle raten, pq-Formel, Linearfaktorzerlegung">
+<meta name="typ" content="Schritt für Schritt">
+<meta name="klasse" content="Q1">
+<meta name="fach" content="mathe">
+<meta name="oberthema" content="Ganzrationale Funktionen">
+<meta name="thema" content="Nullstellen mit Substitution und Polynomdivision">
+<script>
+  MathJax = {
+    tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+    svg: { fontCache: 'global' }
+  };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+/* ===== BAUSTEIN-CSS: Schritt für Schritt (v1, 03.11.2026) – unverändert übernehmen =====
+   Übungs-Farbschema (TEIL 2.2), Schrift ≥ 1rem, Tipp-Ziele ≥ 44px, nur Kind-Selektoren an SVGs. */
+:root{
+  --ink:#22303f; --card:#ffffff; --green:#1e7d32; --red:#c1272d;
+  --amber:#b8860b; --amber-light:#fdf3d9; --amber-dark:#96690a;
+  --blue:#2f5fa6; --blue-dark:#1f4680; --blue-light:#e6eefb;
+  --bg:#f6f8fb; --line:#dbe3ee;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{font-size:16px}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;font-size:1.0625rem;line-height:1.55}
+mjx-container{max-width:100%;overflow-x:auto;overflow-y:hidden}
+.wrap{max-width:980px;margin:0 auto;padding:0 16px 80px}
+code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:1rem;background:var(--blue-light);padding:1px 6px;border-radius:6px;word-break:break-word}
+
+header.kopf{background:var(--blue-light);border-bottom:4px solid var(--blue);padding:20px 16px 16px}
+header.kopf .inner{max-width:980px;margin:0 auto}
+.kopf .meta{font-size:1rem;font-weight:700;color:var(--blue-dark);text-transform:uppercase;letter-spacing:.04em}
+.kopf h1{margin:4px 0 4px;font-size:1.9rem;line-height:1.2}
+.kopf p{margin:0;font-size:1.0625rem}
+
+nav.tabs{display:flex;flex-wrap:wrap;gap:8px;padding:16px 0;position:sticky;top:0;background:var(--bg);z-index:5;border-bottom:1px solid var(--line)}
+.tab{min-height:44px;min-width:44px;padding:8px 12px;border:2px solid var(--line);background:var(--card);border-radius:10px;font:inherit;font-size:1rem;font-weight:700;color:var(--ink);cursor:pointer}
+.tab.active{background:var(--blue);border-color:var(--blue-dark);color:#fff}
+.tab:active{transform:scale(.97)}
+
+.karte{display:none;background:var(--card);border:1px solid var(--line);border-top:6px solid var(--blue);border-radius:14px;padding:22px 22px 26px;margin-top:18px;box-shadow:0 2px 8px rgba(34,48,63,.06)}
+.karte.active{display:block}
+.karte h2{margin:0 0 6px;font-size:1.6rem;line-height:1.25}
+.karte h3{margin:26px 0 8px;font-size:1.25rem;color:var(--blue-dark)}
+.op-tags{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 14px}
+.op-tag{font-size:1rem;font-weight:700;padding:4px 12px;border-radius:999px;background:var(--blue-light);color:var(--blue-dark);border:1.5px solid var(--blue)}
+
+.box{border:1.5px solid var(--line);border-radius:12px;padding:14px 16px;margin:14px 0;background:var(--bg)}
+.box.def{border-color:var(--blue);background:var(--blue-light)}
+.box p{margin:6px 0}
+.box ul,.box ol{margin:6px 0;padding-left:1.4rem}
+.story{border-left:6px solid var(--blue);background:var(--bg);border-radius:10px;padding:12px 16px;margin:14px 0}
+.story p{margin:6px 0}
+.weg{margin:26px 0 8px;padding:10px 14px;border:2px solid var(--blue-dark);border-radius:12px;background:var(--blue-light)}
+.weg p{margin:4px 0}
+.weg .weg-titel{font-weight:800;color:var(--blue-dark)}
+
+/* Schritte: Heft → notiert → Lösung aufdecken → Selbsteinschätzung */
+.schritt{border:1.5px solid var(--line);border-radius:12px;padding:16px;margin:18px 0;background:var(--card)}
+.schritt h3{margin:0 0 8px;font-size:1.2rem;color:var(--ink)}
+.snr{display:inline-block;min-width:2rem;height:2rem;line-height:2rem;padding:0 6px;text-align:center;border-radius:999px;background:var(--blue);color:#fff;font-weight:800;margin-right:8px}
+.heft{border-left:5px solid var(--blue);background:var(--blue-light);border-radius:8px;padding:10px 14px;margin:8px 0}
+.heft p{margin:4px 0}
+.schritt .loesung{display:none;margin-top:10px;padding:10px 14px;background:var(--amber-light);border:1.5px solid var(--amber);border-radius:10px}
+.schritt .loesung.offen{display:block}
+.loesung p{margin:6px 0}
+.loesung ul,.loesung ol{margin:6px 0;padding-left:1.3rem}
+.reveal{margin:12px 0 0;border:2px dashed var(--amber);border-radius:12px;padding:12px 14px;background:var(--card)}
+.lbl{display:inline-block;font-size:1rem;font-weight:800;color:#fff;background:var(--amber-dark);border-radius:6px;padding:0 8px;margin-right:6px}
+.abtn{min-height:44px;padding:8px 14px;border:2px solid var(--amber);background:#fff;color:var(--amber-dark);border-radius:10px;font:inherit;font-size:1rem;font-weight:700;cursor:pointer;margin:6px 8px 6px 0}
+.abtn:active{background:var(--amber-light);border-color:var(--amber-dark)}
+table.vorlage{border-collapse:collapse;width:100%;margin:8px 0}
+table.vorlage th,table.vorlage td{border:1.5px solid var(--line);padding:8px 10px;text-align:left;font-size:1rem;vertical-align:top}
+table.vorlage th{background:var(--blue-light)}
+table.vorlage td.leer{height:2.6rem;background:#fff}
+.loesung table.vorlage th{background:#fff}
+.scroll-x{overflow-x:auto;max-width:100%}
+
+.selbst{display:none;margin-top:12px;border-top:1.5px solid var(--line);padding-top:8px}
+.raster{margin:8px 0;padding-left:0;list-style:none}
+.raster li{margin:6px 0;padding-left:2rem;position:relative}
+.raster li::before{content:"★";position:absolute;left:0;color:var(--amber);font-size:1.2rem}
+.sterne{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:10px 0}
+.stern{min-width:48px;min-height:48px;border:2px solid var(--line);border-radius:10px;background:#fff;font-size:1.8rem;line-height:1;color:var(--line);cursor:pointer}
+.stern.an{color:var(--amber);border-color:var(--amber)}
+.null{min-height:48px;padding:6px 14px;border:2px solid var(--line);border-radius:10px;background:#fff;font:inherit;font-size:1rem;font-weight:700;color:var(--ink);cursor:pointer}
+.null.an{border-color:var(--amber-dark);background:var(--amber-light)}
+.sterntext{display:none;margin-top:8px;padding:10px 14px;border-left:4px solid var(--amber);background:var(--amber-light);border-radius:6px}
+.refl{margin-top:10px}
+.fragebtn{min-height:44px;padding:8px 14px;border:2px solid var(--blue);border-radius:10px;background:#fff;font:inherit;font-size:1rem;font-weight:700;color:var(--blue-dark);cursor:pointer;margin-top:8px}
+.fragebtn.an{background:var(--blue);color:#fff}
+
+/* Hinweisfenster „Lehrkraft fragen" */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(34,48,63,.55);z-index:50;padding:16px;overflow-y:auto}
+.modal-bg.offen{display:block}
+.modal{max-width:520px;margin:12vh auto 0;background:var(--card);border-radius:14px;border-top:6px solid var(--blue);padding:20px 22px;box-shadow:0 8px 30px rgba(34,48,63,.3)}
+.modal h3{margin:0 0 8px;font-size:1.3rem}
+.modal p{margin:8px 0}
+.modal .muster-frage{border-left:4px solid var(--amber);background:var(--amber-light);border-radius:6px;padding:8px 12px}
+.modal .btn{margin-top:10px;background:var(--blue);color:#fff}
+
+/* Wiederholungskarte: Niveaustufen, MC, Zahleneingabe, Prüfen/Leeren, gestufte Hilfe */
+.niveau{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 16px}
+.nvbtn{min-height:44px;min-width:44px;padding:8px 16px;border:2px solid var(--blue);background:var(--card);border-radius:10px;font:inherit;font-size:1rem;font-weight:700;color:var(--ink);cursor:pointer}
+.nvbtn.active{background:var(--blue);color:#fff}
+.stufe{display:none}
+.stufe.active{display:block}
+.task{border:1.5px solid var(--line);border-radius:12px;padding:16px;margin:16px 0;background:var(--card)}
+.task .auftrag{margin:0 0 10px}
+.task .auftrag b.nr{color:var(--blue-dark)}
+.mc{display:flex;flex-direction:column;gap:8px;margin:8px 0}
+.opt{display:block;width:100%;text-align:left;min-height:48px;padding:10px 14px;border:2px solid var(--line);border-radius:10px;background:#fff;font:inherit;font-size:1.0625rem;color:var(--ink);cursor:pointer}
+.opt.sel{border-color:var(--blue);background:var(--blue-light);font-weight:600}
+.opt.ok{background:var(--green);border-color:var(--green);color:#fff}
+.opt.bad{background:var(--red);border-color:var(--red);color:#fff}
+.opt:disabled{cursor:default}
+.zeile{margin:10px 0}
+input.in{font:inherit;font-size:1.125rem;min-height:44px;padding:6px 10px;border:2px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);width:7.5rem}
+input.in:focus{outline:none;border-color:var(--blue)}
+input.in:disabled{-webkit-text-fill-color:var(--ink);opacity:1;background:var(--bg)}
+.in.ok{border-color:var(--green);border-width:3px;box-shadow:0 0 0 2px var(--green)}
+.in.bad{border-color:var(--red);border-width:3px;box-shadow:0 0 0 2px var(--red)}
+.ctrl{margin-top:12px}
+.btnrow{display:flex;flex-wrap:wrap;gap:10px}
+.btn{min-height:44px;min-width:44px;padding:8px 18px;border:none;border-radius:10px;font:inherit;font-size:1.0625rem;font-weight:700;cursor:pointer}
+.btn.pruefen{background:var(--blue);color:#fff}
+.btn.pruefen:active{background:var(--blue-dark)}
+.btn.pruefen:disabled{background:var(--line);color:var(--ink);cursor:default}
+.btn.leeren{background:var(--card);color:var(--red);border:2px solid var(--red)}
+.fb{display:none;margin-top:10px;padding:12px 14px;border-radius:10px;color:#fff;font-weight:600;font-size:1.0625rem}
+.fb.ok{display:block;background:var(--green)}
+.fb.bad{display:block;background:var(--red)}
+.task .hilfe{display:none;margin-top:12px;border:2px solid var(--amber);background:var(--amber-light);border-radius:12px;padding:12px 14px}
+.task .hilfe.frei{display:block}
+.hilfe .htitel{font-weight:800;color:var(--amber-dark);margin-bottom:6px}
+.hilfe .tip{display:none;margin:8px 0;padding:8px 12px;border-left:4px solid var(--amber);background:#fff;border-radius:6px}
+.hilfe .muster{display:none;margin:8px 0;padding:10px 14px;border:1.5px solid var(--amber-dark);background:#fff;border-radius:8px}
+.hilfe .tip.offen,.hilfe .muster.offen{display:block}
+
+/* Auswertungskarte */
+table.ausw{border-collapse:collapse;width:100%;margin:10px 0}
+table.ausw th,table.ausw td{border:1.5px solid var(--line);padding:8px 10px;text-align:left;font-size:1rem;vertical-align:top}
+table.ausw th{background:var(--blue-light)}
+.st-ok{color:#fff;background:var(--green);font-weight:700;border-radius:6px;padding:2px 8px;display:inline-block}
+.st-bad{color:#fff;background:var(--red);font-weight:700;border-radius:6px;padding:2px 8px;display:inline-block}
+.st-open{font-weight:700}
+.summe{font-size:1.25rem;font-weight:800}
+.sternanz{color:var(--amber-dark);font-size:1.2rem;letter-spacing:2px;white-space:nowrap}
+.fragen{border:2px solid var(--blue);background:var(--blue-light);border-radius:10px;padding:10px 14px;margin:10px 0}
+
+/* Brüche (TEIL 7.2) – nur Kind-Selektoren; nötig für die MathJax-Notfall-Anzeige */
+.frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;
+      margin:0 .2em;line-height:1.15;}
+.frac > span{display:block;padding:0 .35em;}
+.frac > span:first-child{border-bottom:1.8px solid currentColor;padding-bottom:.1em;}
+.frac > span:last-child{padding-top:.1em;}
+
+.trex{position:fixed;right:14px;bottom:12px;font-size:1.6rem;opacity:.75;cursor:pointer;z-index:20;background:none;border:none;min-width:44px;min-height:44px}
+.trex .tt{display:none;position:absolute;right:0;bottom:46px;white-space:nowrap;background:var(--ink);color:#fff;font-size:1rem;padding:4px 10px;border-radius:8px}
+.trex:hover .tt,.trex.show .tt{display:block}
+@media (max-width:600px){.karte{padding:16px 14px 20px}.kopf h1{font-size:1.6rem}}
+/* ===== ENDE BAUSTEIN-CSS Schritt für Schritt ===== */
+</style>
+<style>
+/* ===== seiteneigenes CSS: Divisionsschema (schriftliche Division / Polynomdivision) ===== */
+.divi{border-collapse:collapse;margin:8px 0}
+.divi td{padding:4px 8px;text-align:right;font-size:1.0625rem;white-space:nowrap;vertical-align:middle}
+.divi td.l{text-align:left}
+.divi td.strich{border-bottom:2px solid var(--ink)}
+.divi td.runter{color:var(--blue-dark);font-weight:700}
+.dstep .vd{visibility:hidden}
+.dstep tr.vd > td{border-color:transparent}
+.dstep span[data-k]{display:inline-block;padding:0 4px;margin:0 2px}
+.dstep span.jetzt,.dstep tr.jetzt > td:not(:empty){background:#fff;color:var(--amber-dark);font-weight:700}
+.dstep span.jetzt{box-shadow:0 0 0 2px var(--amber);border-radius:4px}
+.dexpl{margin:8px 0;padding:10px 14px;border-left:4px solid var(--amber);background:#fff;border-radius:6px;min-height:3.2rem}
+.dexpl p{margin:0}
+</style>
+</head>
+<body data-anrede="sie" data-version="v1">
+
+<!-- ANPASSEN: Kopf -->
+<header class="kopf">
+  <div class="inner">
+    <div class="meta">Q1 · Mathematik · Schritt für Schritt</div>
+    <h1>Nullstellen mit Substitution und Polynomdivision – Schritt für Schritt</h1>
+    <p>Erst im Heft rechnen, dann die Lösung aufdecken und sich selbst kontrollieren.</p>
+  </div>
+</header>
+
+<div class="wrap">
+<!-- ANPASSEN: Reiter – Aufgabenkarten zuerst, Wiederholung vorletzte, Auswertung letzte Karte -->
+<nav class="tabs">
+  <button class="tab active" data-ziel="k1">Aufgabe 1 · Grad 4</button>
+  <button class="tab" data-ziel="k2">Aufgabe 2 · Grad 6</button>
+  <button class="tab" data-ziel="k5">Aufgabe 3 · Grad 3</button>
+  <button class="tab" data-ziel="k3">Wiederholung</button>
+  <button class="tab" data-ziel="k4">Auswertung</button>
+</nav>
+
+<!-- ANPASSEN: Aufgabenkarte 1 – symmetrische Funktion 4. Grades -->
+<section class="karte active" id="k1" data-kurz="Grad 4">
+  <h2>Aufgabe 1: Nullstellen einer symmetrischen Funktion 4. Grades</h2>
+  <div class="op-tags"><span class="op-tag">ohne Hilfsmittel</span><span class="op-tag">rechnerisch</span></div>
+  <div class="story"><p>Gegeben ist die Funktion \(f\) mit \(f(x)=2x^4-10x^2-72\). Ihr Graph ist achsensymmetrisch zur \(y\)-Achse. Bestimmen Sie alle Nullstellen von \(f\) rechnerisch mithilfe einer Substitution.</p></div>
+
+  <div class="schritt" data-step="a1" data-titel="Ansatz und Substitution">
+    <h3><span class="snr">1</span>Ansatz und Substitution</h3>
+    <div class="heft"><p>📝 <b>Im Heft:</b> Setzen Sie \(f(x)=0\) an. Begründen Sie, warum hier eine Substitution möglich ist, und ersetzen Sie \(x^2\) durch die neue Variable \(z\). Notieren Sie die entstehende Gleichung in \(z\).</p></div>
+    <div class="loesung">
+      <p><span class="lbl">Ansatz</span>\(2x^4-10x^2-72=0\)</p>
+      <p><span class="lbl">Begründung</span>Es kommen nur die Exponenten 4, 2 und 0 vor. Wegen \(x^4=\left(x^2\right)^2\) ist der eine Exponent genau doppelt so groß wie der andere.</p>
+      <p><span class="lbl">Substitution</span>\(z=x^2\), also \(x^4=z^2\)</p>
+      <p><span class="lbl">Ergebnis</span>\(2z^2-10z-72=0\) – eine quadratische Gleichung in \(z\).</p>
+    </div>
+  </div>
+
+  <div class="schritt" data-step="a2" data-titel="Quadratische Gleichung in z lösen">
+    <h3><span class="snr">2</span>Quadratische Gleichung in \(z\) lösen</h3>
+    <div class="heft"><p>📝 <b>Im Heft:</b> Bringen Sie Ihre Gleichung aus Schritt 1 auf Normalform und lösen Sie sie mit der pq-Formel. Geben Sie beide Lösungen \(z_1\) und \(z_2\) an.</p></div>
+    <div class="loesung">
+      <p><span class="lbl">Normalform</span>Division durch 2: \(z^2-5z-36=0\), also \(p=-5\) und \(q=-36\).</p>
+      <p><span class="lbl">pq-Formel</span>\(z_{1,2}=\frac{5}{2}\pm\sqrt{\frac{25}{4}+36}=\frac{5}{2}\pm\sqrt{\frac{169}{4}}=\frac{5}{2}\pm\frac{13}{2}\)</p>
+      <p><span class="lbl">Ergebnis</span>\(z_1=9\) und \(z_2=-4\)</p>
+    </div>
+  </div>
+
+  <div class="schritt" data-step="a3" data-titel="Rücksubstitution">
+    <h3><span class="snr">3</span>Rücksubstitution</h3>
+    <div class="heft"><p>📝 <b>Im Heft:</b> Setzen Sie jede Ihrer Lösungen aus Schritt 2 wieder für \(x^2\) ein und lösen Sie die beiden Gleichungen nach \(x\) auf. Begründen Sie, wenn eine Gleichung keine Lösung hat.</p></div>
+    <div class="loesung">
+      <p><span class="lbl">Fall 1</span>\(x^2=9\ \Rightarrow\ x=3\) oder \(x=-3\)</p>
+      <p><span class="lbl">Fall 2</span>\(x^2=-4\): keine Lösung, denn ein Quadrat ist nie negativ.</p>
+      <p><span class="lbl">Merke</span>Bei \(z=x^2\) gilt: \(z\gt 0\) liefert zwei Lösungen \(\pm\sqrt{z}\), \(z=0\) liefert \(x=0\), \(z\lt 0\) liefert keine Lösung.</p>
+    </div>
+  </div>
+
+  <div class="schritt" data-step="a4" data-titel="Nullstellen angeben und kontrollieren">
+    <h3><span class="snr">4</span>Nullstellen angeben und kontrollieren</h3>
+    <div class="heft"><p>📝 <b>Im Heft:</b> Geben Sie alle Nullstellen von \(f\) an. Machen Sie für eine Nullstelle die Probe und prüfen Sie, ob Ihr Ergebnis zur Achsensymmetrie des Graphen passt.</p></div>
+    <div class="loesung">
+      <p><span class="lbl">Ergebnis</span>Nullstellen \(x_1=-3\) und \(x_2=3\), also die Punkte \(N_1(-3|0)\) und \(N_2(3|0)\).</p>
+      <p><span class="lbl">Probe</span>\(f(3)=2\cdot 81-10\cdot 9-72=162-90-72=0\) ✓</p>
+      <p><span class="lbl">Symmetrie</span>Die Nullstellen liegen spiegelbildlich zur \(y\)-Achse – das passt zur Achsensymmetrie. Bei einer achsensymmetrischen Funktion kommen Nullstellen \(x\neq 0\) immer paarweise als \(\pm x\) vor.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ANPASSEN: Aufgabenkarte 2 – Funktion der Form ax^6+bx^3+c -->
+<section class="karte" id="k2" data-kurz="Grad 6">
+  <h2>Aufgabe 2: Nullstellen einer Funktion der Form \(ax^6+bx^3+c\)</h2>
+  <div class="op-tags"><span class="op-tag">ohne Hilfsmittel</span><span class="op-tag">rechnerisch</span></div>
+  <div class="story"><p>Gegeben ist die Funktion \(g\) mit \(g(x)=3x^6-21x^3-24\). Bestimmen Sie alle Nullstellen von \(g\) rechnerisch mithilfe einer Substitution.</p></div>
+
+  <div class="schritt" data-step="b1" data-titel="Ansatz und Substitution">
+    <h3><span class="snr">1</span>Ansatz und Substitution</h3>
+    <div class="heft"><p>📝 <b>Im Heft:</b> Setzen Sie \(g(x)=0\) an. Überlegen Sie, welche Potenz von \(x\) Sie hier durch \(z\) ersetzen müssen, und begründen Sie Ihre Wahl. Notieren Sie die entstehende Gleichung in \(z\).</p></div>
+    <div class="loesung">
+      <p><span class="lbl">Ansatz</span>\(3x^6-21x^3-24=0\)</p>
+      <p><span class="lbl">Begründung</span>Es kommen die Exponenten 6, 3 und 0 vor. Wegen \(x^6=\left(x^3\right)^2\) ist 6 genau doppelt so groß wie 3.</p>
+      <p><span class="lbl">Substitution</span>\(z=x^3\), also \(x^6=z^2\)</p>
+      <p><span class="lbl">Ergebnis</span>\(3z^2-21z-24=0\)</p>
+    </div>
+  </div>
+
+  <div class="schritt" data-step="b2" data-titel="Quadratische Gleichung in z lösen">
+    <h3><span class="snr">2</span>Quadratische Gleichung in \(z\) lösen</h3>
+    <div class="heft"><p>📝 <b>Im Heft:</b> Bringen Sie Ihre Gleichung aus Schritt 1 auf Normalform und lösen Sie sie mit der pq-Formel. Geben Sie beide Lösungen \(z_1\) und \(z_2\) an.</p></div>
+    <div class="loesung">
+      <p><span class="lbl">Normalform</span>Division durch 3: \(z^2-7z-8=0\), also \(p=-7\) und \(q=-8\).</p>
+      <p><span class="lbl">pq-Formel</span>\(z_{1,2}=\frac{7}{2}\pm\sqrt{\frac{49}{4}+8}=\frac{7}{2}\pm\sqrt{\frac{81}{4}}=\frac{7}{2}\pm\frac{9}{2}\)</p>
+      <p><span class="lbl">Ergebnis</span>\(z_1=8\) und \(z_2=-1\)</p>
+    </div>
+  </div>
+
+  <div class="schritt" data-step="b3" data-titel="Rücksubstitution">
+    <h3><span class="snr">3</span>Rücksubstitution</h3>
+    <div class="heft"><p>📝 <b>Im Heft:</b> Setzen Sie jede Ihrer Lösungen aus Schritt 2 wieder für \(x^3\) ein und lösen Sie nach \(x\) auf. Vergleichen Sie: Was ist hier anders als bei der Rücksubstitution mit \(x^2\)?</p></div>
+    <div class="loesung">
+      <p><span class="lbl">Fall 1</span>\(x^3=8\ \Rightarrow\ x=\sqrt[3]{8}=2\)</p>
+      <p><span class="lbl">Fall 2</span>\(x^3=-1\ \Rightarrow\ x=-1\), denn \((-1)^3=-1\).</p>
+      <p><span class="lbl">Unterschied</span>Eine dritte Potenz kann negativ sein. Deshalb hat \(x^3=z\) für <b>jede</b> Zahl \(z\) genau eine Lösung – kein „±“ und kein Wegfallen bei negativem \(z\).</p>
+    </div>
+  </div>
+
+  <div class="schritt" data-step="b4" data-titel="Nullstellen angeben und Probe">
+    <h3><span class="snr">4</span>Nullstellen angeben und Probe</h3>
+    <div class="heft"><p>📝 <b>Im Heft:</b> Geben Sie alle Nullstellen von \(g\) an und machen Sie für beide die Probe. Begründen Sie, warum die Nullstellen hier nicht spiegelbildlich zur \(y\)-Achse liegen müssen.</p></div>
+    <div class="loesung">
+      <p><span class="lbl">Ergebnis</span>Nullstellen \(x_1=-1\) und \(x_2=2\), also \(N_1(-1|0)\) und \(N_2(2|0)\).</p>
+      <p><span class="lbl">Probe</span>\(g(2)=3\cdot 64-21\cdot 8-24=192-168-24=0\) ✓ und \(g(-1)=3\cdot 1-21\cdot(-1)-24=3+21-24=0\) ✓</p>
+      <p><span class="lbl">Begründung</span>\(g\) enthält mit \(x^3\) einen ungeraden und mit \(x^6\) einen geraden Exponenten. Der Graph ist daher weder achsensymmetrisch zur \(y\)-Achse noch punktsymmetrisch zum Ursprung.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ANPASSEN: Aufgabenkarte 3 – Funktion 3. Grades: Nullstelle raten und Polynomdivision -->
+<section class="karte" id="k5" data-kurz="Grad 3">
+  <h2>Aufgabe 3: Nullstelle raten und Polynomdivision</h2>
+  <div class="op-tags"><span class="op-tag">ohne Hilfsmittel</span><span class="op-tag">rechnerisch</span></div>
+  <div class="story"><p>Gegeben ist die Funktion \(h\) mit \(h(x)=x^3-2x^2-5x+6\). Hier helfen weder Ausklammern noch Substitution. Bestimmen Sie alle Nullstellen von \(h\) rechnerisch, indem Sie eine Nullstelle raten und den Funktionsterm anschließend mit einer Polynomdivision auf einen Term 2. Grades zurückführen.</p></div>
+
+  <div class="schritt" data-step="c1" data-titel="Eine Nullstelle raten">
+    <h3><span class="snr">1</span>Eine Nullstelle raten</h3>
+    <div class="heft"><p>📝 <b>Im Heft:</b> Notieren Sie alle ganzzahligen Teiler des absoluten Glieds als Kandidaten. Setzen Sie die Kandidaten nacheinander in \(h(x)\) ein, bis Sie eine Nullstelle \(x_0\) gefunden haben. Begründen Sie kurz, warum gerade diese Zahlen als Kandidaten infrage kommen.</p></div>
+    <div class="loesung">
+      <p><span class="lbl">Kandidaten</span>Teiler von 6: \(\pm 1,\ \pm 2,\ \pm 3,\ \pm 6\)</p>
+      <p><span class="lbl">Begründung</span>Ist der Faktor vor \(x^3\) gleich 1 und sind alle Koeffizienten ganzzahlig, dann ist jede ganzzahlige Nullstelle ein Teiler des absoluten Glieds.</p>
+      <p><span class="lbl">Test</span>\(h(1)=1-2-5+6=0\) ✓</p>
+      <p><span class="lbl">Ergebnis</span>\(x_0=1\) ist eine Nullstelle. (Auch \(x=-2\) oder \(x=3\) wären als Treffer möglich – mit \(x_0=1\) geht es hier weiter.)</p>
+    </div>
+  </div>
+
+  <div class="schritt" data-step="c2" data-titel="Polynomdivision">
+    <h3><span class="snr">2</span>Polynomdivision – wie eine schriftliche Division</h3>
+    <div class="box def">
+      <p><b>Erinnerung: schriftliche Division.</b> Genau so ist auch die Polynomdivision aufgebaut.</p>
+      <div class="dstep" data-id="zahl" data-max="6">
+        <div class="scroll-x"><table class="divi">
+          <tr><td></td><td>7</td><td>5</td><td>6</td><td class="l">: 9 = <span data-k="1" data-hl="2">8</span><span data-k="4" data-hl="5">4</span></td></tr>
+          <tr data-k="2"><td>−</td><td class="strich">7</td><td class="strich">2</td><td></td><td></td></tr>
+          <tr data-k="3"><td></td><td></td><td>3</td><td class="runter">↓6</td><td></td></tr>
+          <tr data-k="5"><td>−</td><td></td><td class="strich">3</td><td class="strich">6</td><td></td></tr>
+          <tr data-k="6"><td></td><td></td><td></td><td>0</td><td></td></tr>
+        </table></div>
+        <div class="dexpl">
+          <p class="dtxt" data-k="0">Tippen Sie auf „Ersten Schritt zeigen“ und gehen Sie die Division Schritt für Schritt durch.</p>
+          <p class="dtxt" data-k="1"><b>Teilen:</b> Die 7 allein ist kleiner als 9, also nimmt man 75. 75 : 9 ergibt 8 – die 8 kommt ins Ergebnis.</p>
+          <p class="dtxt" data-k="2"><b>Zurückmultiplizieren:</b> 8 · 9 = 72. Die 72 wird genau unter die 75 geschrieben und abgezogen.</p>
+          <p class="dtxt" data-k="3"><b>Abziehen und herunterholen:</b> 75 − 72 = 3. Die nächste Ziffer 6 wird heruntergeholt – es geht mit 36 weiter.</p>
+          <p class="dtxt" data-k="4"><b>Teilen:</b> 36 : 9 = 4 – die 4 kommt ins Ergebnis.</p>
+          <p class="dtxt" data-k="5"><b>Zurückmultiplizieren:</b> 4 · 9 = 36, unter die 36 schreiben und abziehen.</p>
+          <p class="dtxt" data-k="6"><b>Rest 0:</b> Die Division geht auf, also 756 : 9 = 84.</p>
+        </div>
+        <div class="btnrow"><button class="abtn dvor"></button><button class="abtn dzur">↺ Von vorn</button></div>
+      </div>
+      <p>Bei Polynomen stehen statt Hundertern, Zehnern und Einern die Terme mit \(x^3\), \(x^2\), \(x\) und die Zahl untereinander.</p>
+    </div>
+    <div class="heft"><p>📝 <b>Im Heft:</b> Dividieren Sie \(h(x)\) durch den Linearfaktor \((x-x_0)\) mit Ihrer Nullstelle aus Schritt 1. Schreiben Sie die Rechnung wie eine schriftliche Division auf: Terme mit gleicher Potenz genau untereinander, jeden Term des Ergebnisses nummerieren, abziehen, Strich ziehen, den nächsten Term herunterholen. Kontrollieren Sie: Der Rest muss 0 sein.</p></div>
+    <div class="loesung">
+      <div class="dstep" data-id="poly" data-max="9">
+        <div class="scroll-x"><table class="divi">
+          <tr><td></td><td>(\(x^3\)</td><td>\(-2x^2\)</td><td>\(-5x\)</td><td>\(+6\))</td><td class="l">: \((x-1)=\) <span data-k="1" data-hl="2">\(x^2\)</span> <span data-k="4" data-hl="5">\(-x\)</span> <span data-k="7" data-hl="8">\(-6\)</span></td></tr>
+          <tr data-k="2"><td>−(</td><td class="strich">\(x^3\)</td><td class="strich">\(-x^2\))</td><td></td><td></td><td></td></tr>
+          <tr data-k="3"><td></td><td></td><td>\(-x^2\)</td><td class="runter">↓\(-5x\)</td><td></td><td></td></tr>
+          <tr data-k="5"><td>−(</td><td></td><td class="strich">\(-x^2\)</td><td class="strich">\(+x\))</td><td></td><td></td></tr>
+          <tr data-k="6"><td></td><td></td><td></td><td>\(-6x\)</td><td class="runter">↓\(+6\)</td><td></td></tr>
+          <tr data-k="8"><td>−(</td><td></td><td></td><td class="strich">\(-6x\)</td><td class="strich">\(+6\))</td><td></td></tr>
+          <tr data-k="9"><td></td><td></td><td></td><td></td><td>\(0\)</td><td></td></tr>
+        </table></div>
+        <div class="dexpl">
+          <p class="dtxt" data-k="0">Tippen Sie auf „Ersten Schritt zeigen“ und vergleichen Sie jeden Schritt mit Ihrer Rechnung im Heft.</p>
+          <p class="dtxt" data-k="1"><b>Teilen:</b> Den Term mit der höchsten Potenz durch \(x\) teilen: \(x^3:x=x^2\). Das ist der erste Term des Ergebnisses.</p>
+          <p class="dtxt" data-k="2"><b>Zurückmultiplizieren:</b> \(x^2\cdot(x-1)=x^3-x^2\). Das Ergebnis kommt in Klammern unter die passenden Potenzen und wird abgezogen.</p>
+          <p class="dtxt" data-k="3"><b>Abziehen und herunterholen:</b> \(x^3-x^3=0\) und \(-2x^2-(-x^2)=-x^2\). Dann den nächsten Term \(-5x\) herunterholen.</p>
+          <p class="dtxt" data-k="4"><b>Teilen:</b> \(-x^2:x=-x\). Das ist der zweite Term des Ergebnisses.</p>
+          <p class="dtxt" data-k="5"><b>Zurückmultiplizieren:</b> \(-x\cdot(x-1)=-x^2+x\). In Klammern darunterschreiben und abziehen.</p>
+          <p class="dtxt" data-k="6"><b>Abziehen und herunterholen:</b> \(-x^2-(-x^2)=0\) und \(-5x-(+x)=-6x\). Dann \(+6\) herunterholen.</p>
+          <p class="dtxt" data-k="7"><b>Teilen:</b> \(-6x:x=-6\). Das ist der dritte Term des Ergebnisses.</p>
+          <p class="dtxt" data-k="8"><b>Zurückmultiplizieren:</b> \(-6\cdot(x-1)=-6x+6\). In Klammern darunterschreiben und abziehen.</p>
+          <p class="dtxt" data-k="9"><b>Rest 0:</b> Die Division geht auf – \(x_0=1\) ist also wirklich eine Nullstelle, und es gilt \(h(x)=(x-1)\cdot(x^2-x-6)\).</p>
+        </div>
+        <div class="btnrow"><button class="abtn dvor"></button><button class="abtn dzur">↺ Von vorn</button></div>
+      </div>
+      <p><span class="lbl">Ergebnis</span>\(h(x)=(x-1)\cdot(x^2-x-6)\)</p>
+      <div class="scroll-x"><table class="vorlage">
+        <tr><th>Schriftliche Division</th><th>Polynomdivision</th></tr>
+        <tr><td>Ziffern stehen nach Stellen untereinander</td><td>Terme stehen nach Potenzen untereinander</td></tr>
+        <tr><td>Die vorderste Stelle durch den Teiler teilen</td><td>Den Term mit der höchsten Potenz durch \(x\) teilen</td></tr>
+        <tr><td>Zurückmultiplizieren und abziehen</td><td>Mit \((x-1)\) zurückmultiplizieren und abziehen – Klammer und Vorzeichen beachten</td></tr>
+        <tr><td>Die nächste Ziffer herunterholen</td><td>Den nächsten Term herunterholen</td></tr>
+        <tr><td>Rest 0: Die Division geht auf</td><td>Rest 0: \(x_0\) ist wirklich eine Nullstelle</td></tr>
+      </table></div>
+      <p><span class="lbl">Probe</span>Ausmultiplizieren: \((x-1)\cdot(x^2-x-6)=x^3-x^2-6x-x^2+x+6=x^3-2x^2-5x+6\) ✓</p>
+      <p><span class="lbl">Übrigens</span>Setzt man \(x=10\) ein, wird \(h(10)=756\), \(10-1=9\) und \(10^2-10-6=84\). Die Polynomdivision liefert dann genau die Zahlendivision \(756:9=84\) aus der Erinnerung.</p>
+    </div>
+  </div>
+
+  <div class="schritt" data-step="c3" data-titel="Quadratische Gleichung lösen">
+    <h3><span class="snr">3</span>Quadratische Gleichung lösen</h3>
+    <div class="heft"><p>📝 <b>Im Heft:</b> Wenden Sie den Satz vom Nullprodukt auf Ihre Zerlegung aus Schritt 2 an. Lösen Sie die Gleichung 2. Grades mit der pq-Formel.</p></div>
+    <div class="loesung">
+      <p><span class="lbl">Nullprodukt</span>\((x-1)\cdot(x^2-x-6)=0\) ⇒ \(x-1=0\) oder \(x^2-x-6=0\)</p>
+      <p><span class="lbl">pq-Formel</span>\(p=-1,\ q=-6\): \(x_{1,2}=\frac{1}{2}\pm\sqrt{\frac{1}{4}+6}=\frac{1}{2}\pm\sqrt{\frac{25}{4}}=\frac{1}{2}\pm\frac{5}{2}\)</p>
+      <p><span class="lbl">Ergebnis</span>\(x=3\) und \(x=-2\)</p>
+    </div>
+  </div>
+
+  <div class="schritt" data-step="c4" data-titel="Nullstellen und Linearfaktorzerlegung">
+    <h3><span class="snr">4</span>Nullstellen und Linearfaktorzerlegung</h3>
+    <div class="heft"><p>📝 <b>Im Heft:</b> Geben Sie alle Nullstellen von \(h\) der Größe nach an. Schreiben Sie \(h(x)\) als Produkt aus drei Linearfaktoren und prüfen Sie, ob die Anzahl der Nullstellen zum Grad der Funktion passt.</p></div>
+    <div class="loesung">
+      <p><span class="lbl">Ergebnis</span>Nullstellen \(x_1=-2\), \(x_2=1\), \(x_3=3\), also \(N_1(-2|0)\), \(N_2(1|0)\), \(N_3(3|0)\).</p>
+      <p><span class="lbl">Linearfaktoren</span>\(h(x)=(x+2)\cdot(x-1)\cdot(x-3)\)</p>
+      <p><span class="lbl">Kontrolle</span>Eine Funktion 3. Grades hat höchstens drei Nullstellen – hier sind es genau drei.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ANPASSEN: Wiederholungskarte (Pflicht, früheres Lehrplanthema, Niveaustufen) -->
+<section class="karte" id="k3" data-kurz="Wiederholung">
+  <h2>Wiederholung: Quadratische Gleichungen und Symmetrie</h2>
+  <div class="op-tags"><span class="op-tag">ohne Hilfsmittel</span><span class="op-tag">rechnerisch</span></div>
+  <div class="niveau">
+    <button class="nvbtn active" data-stufe="g">Grundlagen</button>
+    <button class="nvbtn" data-stufe="f">Fortgeschritten</button>
+    <button class="nvbtn" data-stufe="p">Profi</button>
+  </div>
+  <div class="stufe active" data-stufe="g">
+    <div class="task" data-id="w_g" data-type="mc" data-titel="Lösungsmenge einer quadratischen Gleichung">
+      <p class="auftrag"><b class="nr">1</b> Welche Lösungsmenge hat die Gleichung \(x^2-6x+8=0\)?</p>
+      <div class="mc">
+        <button class="opt" data-ok="1">\(L=\{2;\,4\}\)</button>
+        <button class="opt" data-ok="0">\(L=\{-4;\,-2\}\)</button>
+        <button class="opt" data-ok="0">\(L=\{-2;\,4\}\)</button>
+        <button class="opt" data-ok="0">\(L=\{-4;\,2\}\)</button>
+      </div>
+      <div class="hilfe">
+        <div class="tip">Lesen Sie \(p\) und \(q\) mit Vorzeichen ab und setzen Sie sie in die pq-Formel \(x_{1,2}=-\frac{p}{2}\pm\sqrt{\left(\frac{p}{2}\right)^2-q}\) ein.</div>
+        <div class="tip">Machen Sie mit jeder Antwortmöglichkeit die Probe: Ergibt das Einsetzen 0?</div>
+        <div class="muster">\(p=-6,\ q=8\): \(x_{1,2}=3\pm\sqrt{9-8}=3\pm 1\), also \(x_1=2\), \(x_2=4\) und \(L=\{2;\,4\}\).</div>
+      </div>
+    </div>
+  </div>
+  <div class="stufe" data-stufe="f">
+    <div class="task" data-id="w_f" data-type="num" data-titel="pq-Formel anwenden">
+      <p class="auftrag"><b class="nr">1</b> Lösen Sie die Gleichung \(x^2+2x-15=0\) mit der pq-Formel. Tragen Sie die kleinere Lösung bei \(x_1\) und die größere bei \(x_2\) ein.</p>
+      <div class="zeile"><label>\(x_1=\) <input class="in" data-ans="-5" inputmode="decimal" aria-label="x1"></label></div>
+      <div class="zeile"><label>\(x_2=\) <input class="in" data-ans="3" inputmode="decimal" aria-label="x2"></label></div>
+      <div class="hilfe">
+        <div class="tip">Lesen Sie \(p\) und \(q\) mit ihren Vorzeichen ab.</div>
+        <div class="tip">Berechnen Sie zuerst den Term unter der Wurzel, \(\left(\frac{p}{2}\right)^2-q\), und ziehen Sie dann die Wurzel.</div>
+        <div class="muster">\(p=2,\ q=-15\): \(x_{1,2}=-1\pm\sqrt{1+15}=-1\pm 4\), also \(x_1=-5\) und \(x_2=3\).</div>
+      </div>
+    </div>
+  </div>
+  <div class="stufe" data-stufe="p">
+    <div class="task" data-id="w_p" data-type="mc" data-titel="Achsensymmetrie erkennen">
+      <p class="auftrag"><b class="nr">1</b> Der Graph welcher Funktion ist achsensymmetrisch zur \(y\)-Achse?</p>
+      <div class="mc">
+        <button class="opt" data-ok="1">\(h(x)=-x^4+3x^2-1\)</button>
+        <button class="opt" data-ok="0">\(h(x)=-x^4+3x^3-1\)</button>
+        <button class="opt" data-ok="0">\(h(x)=-x^5+3x^3-x\)</button>
+        <button class="opt" data-ok="0">\(h(x)=-x^4+3x^2-x\)</button>
+      </div>
+      <div class="hilfe">
+        <div class="tip">Achten Sie auf die Exponenten aller Summanden – auch auf das absolute Glied (Exponent 0) und auf \(x=x^1\).</div>
+        <div class="muster">Achsensymmetrie zur \(y\)-Achse liegt vor, wenn nur gerade Exponenten vorkommen. Bei \(-x^4+3x^2-1\) sind es 4, 2 und 0. Die anderen Terme enthalten \(x^3\) oder \(x^1\); \(-x^5+3x^3-x\) hat nur ungerade Exponenten und ist punktsymmetrisch zum Ursprung.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Auswertung: Inhalt erzeugt die Engine -->
+<section class="karte" id="k4" data-auswertung="1">
+  <h2>Auswertung</h2>
+  <div class="ausw-inhalt"></div>
+</section>
+</div>
+
+<button class="trex" id="trex" aria-label="Made by ASzym">🦖<span class="tt">Made by ASzym</span></button>
+
+<script>
+/* =============================================================================
+   BAUSTEIN: Schritt-für-Schritt-Engine  (v1, 03.11.2026)
+   Gepflegt im Wartungs-Projekt (_wartung/allgemein/baustein_schritt_fuer_schritt.html).
+   UNVERÄNDERT übernehmen – Seiteninhalte stehen nur im HTML, nie hier.
+   Erwartet im HTML:
+     - Reiter  .tab[data-ziel="kN"]  und Karten  section.karte[id="kN"]
+     - Schritte  .schritt[data-step][data-titel]  mit  .heft  und  .loesung
+       (optional data-wahl="name": alternative Wege, gezählt wird der besser bewertete)
+     - Wiederholung  .niveau > .nvbtn[data-stufe]  +  .stufe[data-stufe]
+       .task[data-id][data-type="mc"|"num"][data-titel]  mit  .hilfe (.tip … , .muster)
+     - Auswertung  section.karte[data-auswertung]  mit  .ausw-inhalt
+   Anrede über <body data-anrede="sie|du">, Version über <body data-version="v1">.
+   Zustand: ein Status-Objekt, gespeichert in sessionStorage unter
+   aszym:<dateiname>:<version>; jeder Zugriff in try/catch (TEIL 6).
+   ============================================================================= */
+(function(){
+"use strict";
+
+var KEY = 'aszym:' + ((location.pathname.split('/').pop() || 'seite').replace(/\.html?$/i, '')) +
+          ':' + (document.body.getAttribute('data-version') || 'v1');
+var DU = document.body.getAttribute('data-anrede') === 'du';
+
+var TX = DU ? {
+  anleitung: '<b>So arbeitest du:</b> Bearbeite jeden Schritt zuerst vollständig im Heft. Tippe dann auf „Habe ich im Heft notiert“, decke die Lösung auf und bewerte deinen Schritt ehrlich mit 0 bis 5 Sternen. Notiere, was gut war und was nicht – und markiere Fragen für die Lehrkraft.',
+  bewerten: '<b>Bewerte diesen Schritt mit 0 bis 5 Sternen.</b> Vergleiche dafür deine Heftnotiz genau mit der Lösung:',
+  sterntext: [
+    'Hier hat es noch nicht geklappt. Geh die Lösung Zeile für Zeile durch, schreib den Schritt neu auf – und frag bei Unklarheiten die Lehrkraft.',
+    'Ein Anfang ist gemacht. Markiere im Heft genau die Stelle, an der deine Notiz von der Lösung abweicht, und verbessere sie.',
+    'Teilweise gelungen. Was fehlt noch – Inhalt, Begründung oder Übersicht? Notiere es neben dem Schritt.',
+    'Solide. Prüfe, ob alle Begründungen dastehen und ob deine Notiz für andere gut lesbar ist.',
+    'Sehr gut – nur ein Kriterium fehlt. Welches? Das ist dein Ziel für den nächsten Schritt.',
+    'Hervorragend: richtig, vollständig, begründet und verständlich notiert!'
+  ],
+  modal: '<p>Der Schritt ist jetzt markiert und erscheint in der Auswertung.</p><p><b>Notiere deine Frage jetzt im Heft</b> – direkt neben dem Schritt –, damit du dich später noch genau erinnerst, was du fragen wolltest.</p><p class="muster-frage">Zum Beispiel: „Schritt 2: Warum darf ich hier so umformen?“</p>',
+  waehle: 'Wähle zuerst eine Antwort aus.',
+  mcFalsch: 'Das stimmt noch nicht. Nutze die Hilfe und versuche es erneut.',
+  leer: 'Fülle alle Felder aus.',
+  feldFalsch: 'Prüfe die rot markierten Felder.',
+  auswIntro: 'Hier siehst du, wie du deine Schritte bewertet hast, wo du die Lehrkraft fragen möchtest und wie die Wiederholung gelaufen ist. Die Übersicht aktualisiert sich jedes Mal, wenn du diese Karte öffnest.',
+  fragenKopf: '❓ Das möchtest du mit der Lehrkraft besprechen:',
+  auswSchluss: 'Schritte mit wenigen Sternen solltest du im Heft verbessern. Nimm deine markierten Fragen mit zur Lehrkraft.'
+} : {
+  anleitung: '<b>So arbeiten Sie:</b> Bearbeiten Sie jeden Schritt zuerst vollständig im Heft. Tippen Sie dann auf „Habe ich im Heft notiert“, decken Sie die Lösung auf und bewerten Sie Ihren Schritt ehrlich mit 0 bis 5 Sternen. Notieren Sie, was gut war und was nicht – und markieren Sie Fragen für die Lehrkraft.',
+  bewerten: '<b>Bewerten Sie diesen Schritt mit 0 bis 5 Sternen.</b> Vergleichen Sie dafür Ihre Heftnotiz genau mit der Lösung:',
+  sterntext: [
+    'Hier hat es noch nicht geklappt. Gehen Sie die Lösung Zeile für Zeile durch, schreiben Sie den Schritt neu auf – und fragen Sie bei Unklarheiten die Lehrkraft.',
+    'Ein Anfang ist gemacht. Markieren Sie im Heft genau die Stelle, an der Ihre Notiz von der Lösung abweicht, und verbessern Sie sie.',
+    'Teilweise gelungen. Was fehlt noch – Inhalt, Begründung oder Übersicht? Notieren Sie es neben dem Schritt.',
+    'Solide. Prüfen Sie, ob alle Begründungen dastehen und ob Ihre Notiz für andere gut lesbar ist.',
+    'Sehr gut – nur ein Kriterium fehlt. Welches? Das ist Ihr Ziel für den nächsten Schritt.',
+    'Hervorragend: richtig, vollständig, begründet und verständlich notiert!'
+  ],
+  modal: '<p>Der Schritt ist jetzt markiert und erscheint in der Auswertung.</p><p><b>Notieren Sie Ihre Frage jetzt im Heft</b> – direkt neben dem Schritt –, damit Sie sich später noch genau erinnern, was Sie fragen wollten.</p><p class="muster-frage">Zum Beispiel: „Schritt 2: Warum darf ich hier so umformen?“</p>',
+  waehle: 'Wählen Sie zuerst eine Antwort aus.',
+  mcFalsch: 'Das stimmt noch nicht. Nutzen Sie die Hilfe und versuchen Sie es erneut.',
+  leer: 'Füllen Sie alle Felder aus.',
+  feldFalsch: 'Prüfen Sie die rot markierten Felder.',
+  auswIntro: 'Hier sehen Sie, wie Sie Ihre Schritte bewertet haben, wo Sie die Lehrkraft fragen möchten und wie die Wiederholung gelaufen ist. Die Übersicht aktualisiert sich jedes Mal, wenn Sie diese Karte öffnen.',
+  fragenKopf: '❓ Das möchten Sie mit der Lehrkraft besprechen:',
+  auswSchluss: 'Schritte mit wenigen Sternen sollten Sie im Heft verbessern. Nehmen Sie Ihre markierten Fragen mit zur Lehrkraft.'
+};
+var RASTER = '<ul class="raster">' +
+  '<li><b>2 Sterne – Inhalt:</b> vollständig richtig (nur teilweise richtig: 1 Stern)</li>' +
+  '<li><b>1 Stern – Vollständigkeit:</b> nichts vergessen, alle Teile des Schritts bearbeitet</li>' +
+  '<li><b>1 Stern – Nachvollziehbarkeit:</b> Begründungen und Zwischenschritte stehen da</li>' +
+  '<li><b>1 Stern – Verständlich notiert:</b> sauber, übersichtlich, Ergebnis markiert – eine andere Person versteht es ohne Nachfragen</li></ul>';
+var NVNAME = { g:'Grundlagen', f:'Fortgeschritten', p:'Profi' };
+
+/* ---------- Hilfsfunktionen ---------- */
+function liste(nl){ return Array.prototype.slice.call(nl); }
+function neu(tag, cls, inhalt){ var e = document.createElement(tag); if (cls) e.className = cls; if (inhalt != null) e.innerHTML = inhalt; return e; }
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function setzeFormel(el){
+  if (window.MathJax && MathJax.typesetPromise) { try { MathJax.typesetPromise([el]).catch(function(){}); } catch (e) {} }
+}
+/* Fisher-Yates – einmal beim Laden, vor den Klick-Bindungen (TEIL 4.3) */
+function mische(a){ for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random()*(i+1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+/* Dezimalzahl (Komma oder Punkt) und Bruch a/b gleichwertig (TEIL 4.6) */
+function zahlLesen(s){
+  if (s == null) return NaN;
+  s = String(s).replace(/\s/g,'').replace(/[−–]/g,'-').replace(/,/g,'.');
+  if (s === '') return NaN;
+  var m = s.match(/^([+-]?)\(?([+-]?(?:\d+\.?\d*|\.\d+))\/((?:\d+\.?\d*|\.\d+))\)?$/);
+  if (m) { var z = parseFloat(m[2]), n = parseFloat(m[3]); if (n === 0) return NaN; var v = z / n; return m[1] === '-' ? -v : v; }
+  if (!/^[+-]?(\d+\.?\d*|\.\d+)$/.test(s)) return NaN;
+  return parseFloat(s);
+}
+function trifft(v, soll, tol){ return Math.abs(v - soll) <= (isNaN(tol) ? 1e-9 * Math.max(1, Math.abs(soll)) : tol); }
+
+/* ---------- Zustand (TEIL 6) ---------- */
+function lies(){ try { var r = sessionStorage.getItem(KEY); return r ? JSON.parse(r) : null; } catch (e) { return null; } }
+var S = lies() || {};
+if (typeof S !== 'object') S = {};
+S.st = S.st || {}; S.t = S.t || {}; S.nv = S.nv || {};
+function sichern(){ try { sessionStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
+
+/* ---------- Hinweisfenster „Lehrkraft fragen“ ---------- */
+var modal = neu('div', 'modal-bg', '<div class="modal" role="dialog" aria-modal="true"><h3>❓ Frage für die Lehrkraft</h3>' + TX.modal + '<button class="btn">Verstanden</button></div>');
+document.body.appendChild(modal);
+modal.querySelector('.btn').addEventListener('click', function(){ modal.classList.remove('offen'); });
+modal.addEventListener('click', function(e){ if (e.target === modal) modal.classList.remove('offen'); });
+
+/* ---------- Anleitung vor den ersten Schritt jeder Aufgabenkarte ---------- */
+liste(document.querySelectorAll('.karte')).forEach(function(k){
+  var erster = k.querySelector('.schritt');
+  if (erster && !k.querySelector('.sfs-anleitung')) erster.parentNode.insertBefore(neu('div', 'box def sfs-anleitung', '<p>' + TX.anleitung + '</p>'), erster);
+});
+
+/* ---------- Schritte: erst notieren, dann aufdecken, dann selbst einschätzen ---------- */
+liste(document.querySelectorAll('.schritt')).forEach(function(s){
+  var id = s.getAttribute('data-step'), lo = s.querySelector('.loesung');
+  if (!id || !lo) return;
+  var z = S.st[id] || (S.st[id] = {});
+  var bN = neu('button', 'abtn notiert', '✍️ Habe ich im Heft notiert');
+  var rv = neu('div', 'reveal'), bR = neu('button', 'abtn rbtn', '');
+  lo.parentNode.insertBefore(bN, lo);
+  lo.parentNode.insertBefore(rv, lo);
+  rv.appendChild(bR); rv.appendChild(lo);
+  var knoepfe = '<button class="null" data-n="0">0 Sterne</button>';
+  for (var i = 1; i <= 5; i++) knoepfe += '<button class="stern" data-n="' + i + '" aria-label="' + i + (i === 1 ? ' Stern' : ' Sterne') + '">★</button>';
+  var sel = neu('div', 'selbst', '<p>' + TX.bewerten + '</p>' + RASTER + '<div class="sterne">' + knoepfe + '</div><div class="sterntext"></div>' +
+    '<div class="heft refl"><p>📝 <b>Im Heft neben diesem Schritt notieren:</b></p><p>✔ Das ist mir gut gelungen: …</p><p>✘ Das muss ich noch verbessern: …</p></div>' +
+    '<button class="fragebtn"></button>');
+  s.appendChild(sel);
+  var stxt = sel.querySelector('.sterntext'), bF = sel.querySelector('.fragebtn');
+
+  function zeichneSchritt(){
+    bN.style.display = z.n ? 'none' : '';
+    rv.style.display = z.n ? 'block' : 'none';
+    lo.classList.toggle('offen', !!z.o);
+    bR.textContent = z.o ? '▼ Lösung zudecken' : '▶ Lösung aufdecken';
+    sel.style.display = z.a ? 'block' : 'none';
+    var n = (typeof z.s === 'number') ? z.s : -1;
+    liste(sel.querySelectorAll('.stern')).forEach(function(x){ x.classList.toggle('an', +x.getAttribute('data-n') <= n); });
+    sel.querySelector('.null').classList.toggle('an', n === 0);
+    stxt.style.display = n >= 0 ? 'block' : 'none';
+    stxt.textContent = n >= 0 ? n + (n === 1 ? ' Stern: ' : ' Sterne: ') + TX.sterntext[n] : '';
+    bF.classList.toggle('an', !!z.f);
+    bF.textContent = z.f ? '❓ Für die Lehrkraft markiert (zum Aufheben antippen)' : '❓ Hierzu möchte ich die Lehrkraft fragen';
+  }
+  bN.addEventListener('click', function(){ z.n = 1; sichern(); zeichneSchritt(); });
+  bR.addEventListener('click', function(){ z.o = z.o ? 0 : 1; if (z.o) { z.a = 1; setzeFormel(lo); } sichern(); zeichneSchritt(); });
+  liste(sel.querySelectorAll('.stern, .null')).forEach(function(x){ x.addEventListener('click', function(){ z.s = +x.getAttribute('data-n'); sichern(); zeichneSchritt(); }); });
+  bF.addEventListener('click', function(){ z.f = z.f ? 0 : 1; sichern(); zeichneSchritt(); if (z.f) modal.classList.add('offen'); });
+  zeichneSchritt();
+  if (z.o) setzeFormel(lo);
+});
+
+/* ---------- Wiederholung: 1) zuerst mischen (gespeicherte Reihenfolge hat Vorrang) ---------- */
+var tasks = liste(document.querySelectorAll('.task'));
+tasks.forEach(function(t){
+  if (t.getAttribute('data-type') !== 'mc') return;
+  var z = S.t[t.getAttribute('data-id')] || (S.t[t.getAttribute('data-id')] = {});
+  var mc = t.querySelector('.mc'), opts = liste(mc.children);
+  opts.forEach(function(o, i){ o.setAttribute('data-i', i); });
+  var gueltig = z.ord && z.ord.length === opts.length;
+  if (!gueltig) z.ord = mische(opts.map(function(o, i){ return i; }));
+  z.ord.forEach(function(i){ mc.appendChild(opts[i]); });
+});
+sichern();
+
+/* ---------- Wiederholung: 2) Steuerelemente aufbauen und binden ---------- */
+tasks.forEach(function(t){
+  var id = t.getAttribute('data-id'), typ = t.getAttribute('data-type');
+  var z = S.t[id] || (S.t[id] = {});
+  var ctrl = neu('div', 'ctrl', '<div class="btnrow"><button class="btn pruefen">✔ Prüfen</button><button class="btn leeren" style="display:none">↺ Leeren</button></div><div class="fb" role="status"></div>');
+  var hilfe = t.querySelector('.hilfe');
+  if (hilfe) t.insertBefore(ctrl, hilfe); else t.appendChild(ctrl);
+  var bP = ctrl.querySelector('.pruefen'), bL = ctrl.querySelector('.leeren'), fb = ctrl.querySelector('.fb');
+
+  /* gestufte Hilfe: Tipps einzeln, zuletzt der Lösungsweg (TEIL 5.2/5.3) */
+  var tips = hilfe ? liste(hilfe.querySelectorAll('.tip')) : [], tipKn = [], mu = hilfe ? hilfe.querySelector('.muster') : null, bM = null;
+  if (hilfe) {
+    hilfe.insertBefore(neu('div', 'htitel', '💡 Hilfe'), hilfe.firstChild);
+    tips.forEach(function(tp, k){
+      var b = neu('button', 'abtn', 'Tipp ' + (k + 1) + ' zeigen');
+      tp.parentNode.insertBefore(b, tp); tipKn.push(b);
+      b.addEventListener('click', function(){ z.tip = k + 1; sichern(); zeichneHilfe(); setzeFormel(tp); });
+    });
+    if (mu) {
+      bM = neu('button', 'abtn', '');
+      mu.parentNode.insertBefore(bM, mu);
+      bM.addEventListener('click', function(){ z.mu = z.mu ? 0 : 1; sichern(); zeichneHilfe(); if (z.mu) setzeFormel(mu); });
+    }
+  }
+  function zeichneHilfe(){
+    if (!hilfe) return;
+    hilfe.classList.toggle('frei', !!z.h);
+    var offen = z.tip || 0;
+    tips.forEach(function(tp, k){ tp.classList.toggle('offen', k < offen); tipKn[k].style.display = (k === offen) ? 'inline-block' : 'none'; });
+    if (bM) { bM.style.display = offen >= tips.length ? 'inline-block' : 'none'; bM.textContent = z.mu ? '📖 Lösungsweg ausblenden' : '📖 Lösungsweg zeigen'; mu.classList.toggle('offen', !!z.mu); }
+  }
+  function meldung(ok, text){ fb.className = 'fb ' + (ok ? 'ok' : 'bad'); fb.innerHTML = (ok ? '✅ ' : '❌ ') + text; setzeFormel(fb); }
+  function zeichneStatus(){
+    if (z.r) t.setAttribute('data-result', z.r); else t.removeAttribute('data-result');
+    bP.disabled = !!z.r;
+    bL.style.display = z.r === 'bad' ? 'inline-block' : 'none';
+    if (!z.r) { fb.className = 'fb'; fb.innerHTML = ''; }
+    zeichneHilfe();
+  }
+
+  if (typ === 'mc') {
+    var opts = liste(t.querySelectorAll('.opt'));
+    var zeichneMC = function(){
+      opts.forEach(function(o){
+        var gew = String(z.sel) === o.getAttribute('data-i');
+        o.classList.toggle('sel', gew && !z.r);
+        o.classList.toggle('ok', gew && z.r === 'ok');
+        o.classList.toggle('bad', gew && z.r === 'bad');
+        o.disabled = !!z.r;
+      });
+      zeichneStatus();
+      if (z.r) meldung(z.r === 'ok', z.r === 'ok' ? 'Richtig!' : TX.mcFalsch);
+    };
+    opts.forEach(function(o){ o.addEventListener('click', function(){ if (z.r) return; z.sel = +o.getAttribute('data-i'); sichern(); zeichneMC(); }); });
+    bP.addEventListener('click', function(){
+      var gewaehlt = t.querySelector('.opt.sel');
+      if (!gewaehlt) { meldung(false, TX.waehle); return; }
+      z.r = gewaehlt.getAttribute('data-ok') === '1' ? 'ok' : 'bad';
+      if (z.r === 'bad') z.h = 1;
+      sichern(); zeichneMC();
+    });
+    bL.addEventListener('click', function(){ z.sel = null; z.r = null; sichern(); zeichneMC(); });
+    zeichneMC();
+  }
+
+  if (typ === 'num') {
+    var ins = liste(t.querySelectorAll('input.in'));
+    z.v = z.v || [];
+    ins.forEach(function(el, i){
+      if (typeof z.v[i] === 'string') el.value = z.v[i];
+      el.addEventListener('input', function(){ z.v[i] = el.value; sichern(); });
+    });
+    var bewerteNum = function(){
+      var falsch = 0, leer = 0;
+      z.g = ins.map(function(el){
+        if (el.value.trim() === '') { leer++; return 0; }
+        var v = zahlLesen(el.value), gut = !isNaN(v) && trifft(v, zahlLesen(el.getAttribute('data-ans')), parseFloat(el.getAttribute('data-tol')));
+        if (!gut) falsch++;
+        return gut ? 1 : 0;
+      });
+      return { falsch: falsch, leer: leer };
+    };
+    var zeichneNum = function(){
+      ins.forEach(function(el, i){
+        el.classList.toggle('ok', !!z.r && !!(z.g && z.g[i]));
+        el.classList.toggle('bad', !!z.r && !(z.g && z.g[i]));
+        el.disabled = !!z.r;
+      });
+      zeichneStatus();
+      if (z.r) {
+        var leer = ins.filter(function(el){ return el.value.trim() === ''; }).length;
+        meldung(z.r === 'ok', z.r === 'ok' ? 'Richtig!' : (leer ? TX.leer + ' ' : '') + TX.feldFalsch);
+      }
+    };
+    bP.addEventListener('click', function(){
+      var e = bewerteNum();
+      z.r = (e.falsch + e.leer) === 0 ? 'ok' : 'bad';
+      if (z.r === 'bad') z.h = 1;
+      sichern(); zeichneNum();
+    });
+    bL.addEventListener('click', function(){
+      ins.forEach(function(el, i){ if (!(z.g && z.g[i])) { el.value = ''; z.v[i] = ''; } });
+      z.r = null; z.g = null; sichern(); zeichneNum();
+    });
+    zeichneNum();
+  }
+});
+
+/* ---------- Niveaustufen (Stand jeder Stufe bleibt erhalten) ---------- */
+liste(document.querySelectorAll('.karte')).forEach(function(k){
+  var btns = liste(k.querySelectorAll('.nvbtn')), stufen = liste(k.querySelectorAll('.stufe'));
+  if (!btns.length) return;
+  function zeigeStufe(st){
+    btns.forEach(function(x){ x.classList.toggle('active', x.getAttribute('data-stufe') === st); });
+    stufen.forEach(function(x){ var an = x.getAttribute('data-stufe') === st; x.classList.toggle('active', an); if (an) setzeFormel(x); });
+  }
+  btns.forEach(function(b){ b.addEventListener('click', function(){ S.nv[k.id] = b.getAttribute('data-stufe'); sichern(); zeigeStufe(S.nv[k.id]); }); });
+  zeigeStufe(S.nv[k.id] || btns[0].getAttribute('data-stufe'));
+});
+
+/* ---------- Auswertung ---------- */
+function sternAnzeige(n){ var t = ''; for (var i = 1; i <= 5; i++) t += i <= n ? '★' : '☆'; return '<span class="sternanz">' + t + '</span> (' + n + '/5)'; }
+function auswerten(ziel){
+  var zeilen = '', summen = [], fragen = [], okW = 0, nW = 0;
+  liste(document.querySelectorAll('.karte')).forEach(function(k){
+    var h2 = k.querySelector('h2'), titel = k.getAttribute('data-kurz') || (h2 ? h2.textContent : k.id);
+    var schritte = liste(k.querySelectorAll('.schritt[data-step]'));
+    if (schritte.length) {
+      var gruppen = {}, summe = 0, max = 0, bewertet = 0, anzahl = 0;
+      schritte.forEach(function(s){
+        var z = S.st[s.getAttribute('data-step')] || {}, w = s.getAttribute('data-wahl');
+        var n = (typeof z.s === 'number') ? z.s : null;
+        var nr = s.querySelector('.snr') ? s.querySelector('.snr').textContent : '';
+        var name = 'Schritt ' + nr + ': ' + s.getAttribute('data-titel');
+        if (w) { var g = gruppen[w] || (gruppen[w] = { best: null }); if (n !== null && (g.best === null || n > g.best)) g.best = n; }
+        else { max += 5; anzahl++; if (n !== null) { summe += n; bewertet++; } }
+        var zelle = n !== null ? sternAnzeige(n) : '<span class="st-open">– noch nicht bewertet</span>';
+        if (w) zelle += ' <i>(alternativer Weg)</i>';
+        if (z.f) { zelle += ' ❓'; fragen.push(esc(titel) + ' – ' + esc(name)); }
+        zeilen += '<tr><td>' + esc(titel) + '</td><td>' + esc(name) + '</td><td>' + zelle + '</td></tr>';
+      });
+      Object.keys(gruppen).forEach(function(w){ max += 5; anzahl++; if (gruppen[w].best !== null) { summe += gruppen[w].best; bewertet++; } });
+      summen.push(esc(titel) + ': ' + summe + ' von ' + max + ' Sternen' + (bewertet < anzahl ? ' (' + bewertet + ' von ' + anzahl + ' Schritten bewertet)' : ''));
+    }
+    liste(k.querySelectorAll('.task')).forEach(function(t){
+      nW++;
+      var r = (S.t[t.getAttribute('data-id')] || {}).r, stf = t.closest('.stufe');
+      if (r === 'ok') okW++;
+      var stand = r === 'ok' ? '<span class="st-ok">✔ richtig</span>' : (r === 'bad' ? '<span class="st-bad">✘ noch falsch</span>' : '<span class="st-open">– offen</span>');
+      zeilen += '<tr><td>' + esc(titel) + '</td><td>' + (stf ? NVNAME[stf.getAttribute('data-stufe')] + ': ' : '') + esc(t.getAttribute('data-titel') || '') + '</td><td>' + stand + '</td></tr>';
+    });
+  });
+  ziel.innerHTML = '<p>' + TX.auswIntro + '</p><p class="summe">' + summen.join('<br>') + '</p>' +
+    (fragen.length ? '<div class="fragen"><p><b>' + TX.fragenKopf + '</b></p><ul><li>' + fragen.join('</li><li>') + '</li></ul></div>' : '') +
+    '<h3>Schritte und Aufgaben im Überblick</h3><div class="scroll-x"><table class="ausw"><thead><tr><th>Karte</th><th>Schritt / Aufgabe</th><th>Bewertung</th></tr></thead><tbody>' + zeilen + '</tbody></table></div>' +
+    (nW ? '<p class="summe">Wiederholung: ' + okW + ' von ' + nW + ' Aufgaben richtig.</p>' : '') +
+    '<p>' + TX.auswSchluss + '</p>';
+}
+
+/* ---------- Karten-Navigation (aktive Karte gehört zum Zustand) ---------- */
+var karten = liste(document.querySelectorAll('.karte[id]')), reiter = liste(document.querySelectorAll('.tab[data-ziel]'));
+function zeigeKarte(id, scrollen){
+  karten.forEach(function(k){ k.classList.toggle('active', k.id === id); });
+  reiter.forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-ziel') === id); });
+  var k = document.getElementById(id);
+  if (k && k.hasAttribute('data-auswertung')) { var ziel = k.querySelector('.ausw-inhalt'); if (ziel) { auswerten(ziel); setzeFormel(ziel); } }
+  S.karte = id; sichern();
+  if (scrollen) window.scrollTo(0, 0);
+}
+reiter.forEach(function(b){ b.addEventListener('click', function(){ zeigeKarte(b.getAttribute('data-ziel'), true); }); });
+var start = (S.karte && document.getElementById(S.karte)) ? S.karte : (karten.filter(function(k){ return k.classList.contains('active'); })[0] || karten[0] || {}).id;
+if (start) zeigeKarte(start, false);
+
+var trex = document.getElementById('trex');
+if (trex) trex.addEventListener('click', function(){ trex.classList.toggle('show'); });
+})();
+/* ============ ENDE BAUSTEIN Schritt-für-Schritt-Engine ============ */
+
+/* =============================================================================
+   BAUSTEIN: MathJax-Notfall-Anzeige  (MATHJAX-FALLBACK)
+   Gepflegt im Wartungs-Projekt. Unverändert ans ENDE des Seiten-Skripts kopieren
+   (in die Seite hinein – nie per <script src> verlinken, TEIL 8.1).
+   Voraussetzung auf der Seite: das .frac-CSS mit Kind-Selektoren (TEIL 7.2):
+     .frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;
+           margin:0 .2em;line-height:1.15;}
+     .frac > span{display:block;padding:0 .35em;}
+     .frac > span:first-child{border-bottom:1.8px solid currentColor;padding-bottom:.1em;}
+     .frac > span:last-child{padding-top:.1em;}
+   ========================================================================== */
+/* =============================================================================
+   Notfall-Anzeige für Formeln (MATHJAX-FALLBACK)
+   Lädt MathJax nicht (Schul-WLAN, Vorschau, Offline-Kopie), blieben sonst
+   \( ... \) als Rohtext mit Backslashes stehen. Dann werden die TeX-Ausdrücke
+   hier in lesbares HTML gewandelt: √ mit Klammer, Brüche als .frac-Konstrukt
+   (kein Schrägstrich!), Hoch-/Tiefstellungen als sup/sub, Sonderzeichen direkt.
+   Ist MathJax da, passiert nichts.
+   ========================================================================== */
+(function(){
+  var AUF = '\u0001', ZU = '\u0002';   /* Platzhalter fuer { } aus \left\{ */
+
+  function leseGruppe(t, i){
+    if (t.charAt(i) !== '{') return null;
+    var tiefe = 0;
+    for (var j = i; j < t.length; j++){
+      if (t.charAt(j) === '{') tiefe++;
+      else if (t.charAt(j) === '}'){ tiefe--; if (tiefe === 0) return [t.slice(i+1, j), j+1]; }
+    }
+    return null;
+  }
+
+  function strukturen(t){
+    var aus = '', i = 0;
+    while (i < t.length){
+      var m = /^\\(dfrac|tfrac|frac|sqrt)/.exec(t.slice(i));
+      if (m){
+        var a = leseGruppe(t, i + m[0].length);
+        if (a){
+          if (m[1] === 'sqrt'){
+            var inn = strukturen(a[0]);
+            aus += /^[0-9A-Za-z]+$/.test(a[0]) ? '√' + inn : '√(' + inn + ')';
+            i = a[1]; continue;
+          }
+          var b = leseGruppe(t, a[1]);
+          if (b){
+            aus += '<span class="frac"><span>' + strukturen(a[0]) + '</span><span>'
+                 + strukturen(b[0]) + '</span></span>';
+            i = b[1]; continue;
+          }
+        }
+      }
+      aus += t.charAt(i); i++;
+    }
+    return aus;
+  }
+
+  function texHtml(t){
+    t = t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    t = t.replace(/\\rightarrow/g, '→').replace(/\\leftarrow/g, '←')
+         .replace(/\\Rightarrow/g, '⇒').replace(/\\Leftarrow/g, '⇐')
+         .replace(/\\left\\\{/g, AUF).replace(/\\right\\\}/g, ZU)
+         .replace(/\\left(?![a-zA-Z])/g, '').replace(/\\right(?![a-zA-Z])/g, '')
+         .replace(/\\\{/g, AUF).replace(/\\\}/g, ZU);
+    t = t.replace(/\\cdot/g, '·').replace(/\\times/g, '·')
+         .replace(/\\approx/g, '≈').replace(/\\neq/g, '≠')
+         .replace(/\\leq/g, '≤').replace(/\\le\b/g, '≤')
+         .replace(/\\geq/g, '≥').replace(/\\ge\b/g, '≥')
+         .replace(/\\pm/g, '±').replace(/\\mp/g, '∓')
+         .replace(/\\ldots/g, '…').replace(/\\dots/g, '…')
+         .replace(/\\to\b/g, '→')
+         .replace(/\\infty/g, '∞')
+         .replace(/\\pi/g, 'π').replace(/\\alpha/g, 'α')
+         .replace(/\\beta/g, 'β').replace(/\\gamma/g, 'γ')
+         .replace(/\\Delta/g, 'Δ').replace(/\\delta/g, 'δ')
+         .replace(/\\min/g, 'min').replace(/\\max/g, 'max')
+         .replace(/\\text\{([^{}]*)\}/g, '$1')
+         .replace(/\\mathrm\{([^{}]*)\}/g, '$1');
+    t = strukturen(t);
+    t = t.replace(/\^\{([^{}]*)\}/g, '<sup>$1</sup>')
+         .replace(/\^(-?[0-9A-Za-z])/g, '<sup>$1</sup>')
+         .replace(/_\{([^{}]*)\}/g, '<sub>$1</sub>')
+         .replace(/_(-?[0-9A-Za-z])/g, '<sub>$1</sub>');
+    t = t.replace(/\{,\}/g, ',').replace(/\\,/g, ' ').replace(/\\;/g, ' ')
+         .replace(/\\ /g, ' ').replace(/[{}]/g, '')
+         .replace(new RegExp(AUF, 'g'), '{').replace(new RegExp(ZU, 'g'), '}');
+    return t;
+  }
+
+  function mathNotfall(){
+    if (window.MathJax && window.MathJax.typesetPromise) return;  /* MathJax ist da */
+    var lauf = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
+      acceptNode: function(n){
+        var tag = n.parentNode && n.parentNode.nodeName;
+        if (tag === 'SCRIPT' || tag === 'STYLE') return NodeFilter.FILTER_REJECT;
+        return n.nodeValue.indexOf('\\(') > -1 ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP;
+      }
+    });
+    var treffer = [], n;
+    while ((n = lauf.nextNode())) treffer.push(n);
+    treffer.forEach(function(k){
+      var teile = k.nodeValue.split(/\\\(([\s\S]+?)\\\)/);
+      if (teile.length < 2) return;
+      var html = '';
+      for (var i = 0; i < teile.length; i++){
+        html += (i % 2)
+          ? '<span class="tex-ersatz">' + texHtml(teile[i]) + '</span>'
+          : teile[i].replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      }
+      var huelle = document.createElement('span');
+      huelle.innerHTML = html;
+      var frag = document.createDocumentFragment();
+      while (huelle.firstChild) frag.appendChild(huelle.firstChild);
+      k.parentNode.replaceChild(frag, k);
+    });
+  }
+  window.addEventListener('load', function(){ setTimeout(mathNotfall, 3500); });
+})();
+</script>
+<script>
+/* ===== seiteneigenes Skript: Divisionsschema zum Durchklicken =====
+   Elemente mit data-k erscheinen ab Schritt k; data-hl hebt zusätzlich bei den genannten Schritten hervor.
+   Stand im JS-Speicher, gesichert per sessionStorage (eigener Schlüssel, try/catch). */
+(function(){
+  var KEY = 'aszym:' + ((location.pathname.split('/').pop() || 'seite').replace(/\.html?$/i, '')) + ':divi';
+  var st = {};
+  try { st = JSON.parse(sessionStorage.getItem(KEY)) || {}; } catch (e) { st = {}; }
+  function divSichern(){ try { sessionStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} }
+  function formel(el){ if (window.MathJax && MathJax.typesetPromise) { try { MathJax.typesetPromise([el]).catch(function(){}); } catch (e) {} } }
+  Array.prototype.slice.call(document.querySelectorAll('.dstep')).forEach(function(w){
+    var id = w.getAttribute('data-id'), max = +w.getAttribute('data-max');
+    var els = Array.prototype.slice.call(w.querySelectorAll('[data-k]'));
+    var vor = w.querySelector('.dvor'), zur = w.querySelector('.dzur');
+    function zeige(){
+      var k = st[id] || 0;
+      els.forEach(function(e){
+        var n = +e.getAttribute('data-k'), a = e.getAttribute('data-hl');
+        var hl = a ? a.split(',').map(Number) : [];
+        if (e.classList.contains('dtxt')) { e.style.display = (n === k) ? 'block' : 'none'; if (n === k) formel(e); }
+        else { e.classList.toggle('vd', n > k); e.classList.toggle('jetzt', k > 0 && (n === k || hl.indexOf(k) > -1)); }
+      });
+      vor.disabled = k >= max;
+      vor.textContent = k >= max ? '✔ Fertig' : (k === 0 ? '▶ Ersten Schritt zeigen' : '▶ Nächster Schritt (' + (k + 1) + ' von ' + max + ')');
+      zur.style.display = k > 0 ? '' : 'none';
+      divSichern();
+    }
+    vor.addEventListener('click', function(){ st[id] = Math.min(max, (st[id] || 0) + 1); zeige(); });
+    zur.addEventListener('click', function(){ st[id] = 0; zeige(); });
+    zeige();
+  });
+})();
+</script>
+<!-- ============================================================
+     BAUSTEIN: Navigationsleiste  (v5, 04.11.2026)
+     Pflicht auf jeder Lernseite (anweisung_lernseiten.txt, TEIL 3.6).
+     Einfügen: UNVERÄNDERT direkt vor dem T-Rex bzw. vor </body> – nicht in <main>.
+     - 🏠 schwebender Knopf unten links (immer sichtbar, T-Rex bleibt rechts) + Leiste am Seitenende.
+     - 🏠 Startseite: feste Adresse, funktioniert aus jedem Unterordner.
+     - 📚 Alles für …: liest <meta name="klasse"> und hängt ?klasse=… an.
+       Fehlt das Meta-Tag, bleibt der Knopf unsichtbar.
+     - Seit v5: Alle drei Links (🏠, Startseite, Alles für …) hängen zusätzlich
+       start=<fach> an (aus <meta name="fach">, sonst aus dem Ordner bio/mathe/…).
+       Die Startseite öffnet dann zuerst den Reiter dieses Fachs; die anderen
+       Fächer bleiben als Reiter erreichbar.
+     - ✉️ Feedback: Fenster mit Art (Fehler/Idee/Lob) und Textfeld.
+       "Mail öffnen" startet das eigene Mailprogramm; Seitentitel und
+       Seitenadresse stehen automatisch drin. Kein fremder Dienst.
+       Empfänger: NUR in FB_NAME/FB_DOMAIN unten ändern.
+     - Impressum & Datenschutz: feste Adresse, seit v4 freigeschaltet
+       (impressum.html im Repo-Root existiert).
+     - Eigene Klassen mit Präfix "dino-", Systemschrift,
+       kein Speicher, Schrift ≥ 1rem, Tipp-Ziele ≥ 44 px.
+     - Die Kommentarzeilen BAUSTEIN/ENDE BAUSTEIN bleiben stehen –
+       pruefe.py und das Nachrüst-Skript erkennen den Block daran.
+     ============================================================ -->
+<style>
+.dino-nav{max-width:1024px;margin:2.5rem auto 5rem;padding:0 1rem;
+  font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;}
+.dino-nav-innen{display:flex;flex-wrap:wrap;gap:.6rem;justify-content:center;
+  border-top:2px solid #e4dcd0;padding-top:1.1rem;}
+.dino-nav a,.dino-nav button{display:inline-flex;align-items:center;gap:.4rem;
+  min-height:44px;padding:.5rem 1.1rem;border:2px solid #22303f;border-radius:.6rem;
+  background:#fff;color:#22303f;text-decoration:none;cursor:pointer;
+  font-family:inherit;font-size:1rem;font-weight:700;line-height:1.2;
+  width:auto;margin:0;box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;}
+.dino-nav a:active,.dino-nav button:active{transform:scale(.97);}
+.dino-nav a.dino-nav-start{background:#22303f;color:#fff;}
+.dino-nav a[hidden]{display:none;}
+.dino-fb{width:min(32rem,calc(100vw - 2rem));border:2px solid #22303f;border-radius:.9rem;
+  padding:1.2rem;color:#22303f;background:#fff;
+  font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;font-size:1rem;}
+.dino-fb::backdrop{background:rgba(34,48,63,.45);}
+.dino-fb h2{margin:0 0 .3rem;font-size:1.2rem;}
+.dino-fb p{margin:.4rem 0;font-size:1rem;line-height:1.45;}
+.dino-fb-seite{font-weight:700;}
+.dino-fb-arten{display:flex;flex-wrap:wrap;gap:.5rem;margin:.7rem 0;border:0;padding:0;}
+.dino-fb-arten legend{font-weight:700;margin-bottom:.4rem;font-size:1rem;}
+.dino-fb-arten label{display:inline-flex;align-items:center;gap:.35rem;min-height:44px;
+  padding:.4rem .9rem;border:2px solid #e4dcd0;border-radius:.6rem;cursor:pointer;font-size:1rem;}
+.dino-fb-arten input{width:1.1rem;height:1.1rem;margin:0;}
+.dino-fb-arten label:has(input:checked){border-color:#22303f;background:#eef0f3;}
+.dino-fb textarea{width:100%;box-sizing:border-box;min-height:7rem;padding:.6rem;
+  border:2px solid #e4dcd0;border-radius:.6rem;font-family:inherit;font-size:1rem;color:#22303f;}
+.dino-fb textarea:focus{outline:none;border-color:#22303f;}
+.dino-fb-knoepfe{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.8rem;}
+.dino-fb-knoepfe button{min-height:44px;padding:.5rem 1rem;border-radius:.6rem;
+  border:2px solid #22303f;background:#fff;color:#22303f;font-family:inherit;
+  font-size:1rem;font-weight:700;cursor:pointer;width:auto;margin:0;}
+.dino-fb-knoepfe .dino-fb-senden{background:#22303f;color:#fff;}
+.dino-fb-meldung{min-height:1.4rem;font-weight:700;}
+.dino-fb-meldung.ok{color:#1e7d32;}
+.dino-fb-meldung.nok{color:#c1272d;}
+.dino-home{position:fixed;left:.7rem;bottom:.7rem;z-index:49;width:44px;height:44px;
+  display:flex;align-items:center;justify-content:center;border-radius:50%;
+  background:#fff;border:2px solid #22303f;text-decoration:none;font-size:1.3rem;
+  box-shadow:0 2px 6px rgba(34,48,63,.25);-webkit-tap-highlight-color:transparent;}
+.dino-home:active{transform:scale(.93);}
+@media print{.dino-nav,.dino-fb,.dino-home{display:none;}}
+</style>
+<a class="dino-home" href="https://szymczak75.github.io/Schule/dino_hub.html" title="Zur Startseite" aria-label="Zur Startseite">🏠</a>
+<nav class="dino-nav" aria-label="Seitennavigation">
+  <div class="dino-nav-innen">
+    <a class="dino-nav-start" href="https://szymczak75.github.io/Schule/dino_hub.html">🏠 Startseite</a>
+    <a id="dino-nav-klasse" href="https://szymczak75.github.io/Schule/dino_hub.html" hidden>📚 Alles für …</a>
+    <button type="button" id="dino-nav-fb">✉️ Feedback zu dieser Seite</button>
+    <a class="dino-nav-impressum" href="https://szymczak75.github.io/Schule/impressum.html">Impressum &amp; Datenschutz</a>
+  </div>
+</nav>
+<dialog class="dino-fb" id="dino-fb" aria-labelledby="dino-fb-titel">
+  <h2 id="dino-fb-titel">✉️ Feedback zu dieser Seite</h2>
+  <p>Seite: <span class="dino-fb-seite" id="dino-fb-seite"></span></p>
+  <fieldset class="dino-fb-arten">
+    <legend>Worum geht es?</legend>
+    <label><input type="radio" name="dino-fb-art" value="Fehler" checked> 🐞 Fehler</label>
+    <label><input type="radio" name="dino-fb-art" value="Idee"> 💡 Idee</label>
+    <label><input type="radio" name="dino-fb-art" value="Lob"> 👍 Lob</label>
+  </fieldset>
+  <textarea id="dino-fb-text" aria-label="Deine Nachricht"
+    placeholder="Was ist dir aufgefallen? Bei Fehlern: Welche Karte, welche Aufgabe?"></textarea>
+  <p>Bitte schreib keine persönlichen Daten hinein.</p>
+  <div class="dino-fb-knoepfe">
+    <button type="button" class="dino-fb-senden" id="dino-fb-senden">✉️ Mail öffnen</button>
+    <button type="button" id="dino-fb-kopieren">📋 Text kopieren</button>
+    <button type="button" id="dino-fb-zu">Schließen</button>
+  </div>
+  <p class="dino-fb-meldung" id="dino-fb-meldung" aria-live="polite"></p>
+  <p>Kein Mailprogramm? Text kopieren und an <b id="dino-fb-adresse"></b> schicken.</p>
+</dialog>
+<script>
+(function(){
+  /* Empfänger – nur hier ändern */
+  var FB_NAME = 'aszymczak', FB_DOMAIN = 'my-mcg.de';
+  var START = 'https://szymczak75.github.io/Schule/dino_hub.html';
+
+  /* Fach der Seite → Startseite öffnet zuerst diesen Reiter */
+  var FAECHER = ['mathe', 'bio', 'kompass'];
+  var mf = document.querySelector('meta[name="fach"]');
+  var fach = mf ? (mf.getAttribute('content') || '').trim().toLowerCase() : '';
+  if (FAECHER.indexOf(fach) < 0) {
+    var teile = location.pathname.split('/');
+    fach = '';
+    for (var i = 0; i < teile.length; i++) {
+      var t = teile[i].toLowerCase();
+      if (FAECHER.indexOf(t) >= 0) { fach = t; break; }
+    }
+  }
+  var startUrl = fach ? START + '?start=' + fach : START;
+  var heim = document.querySelectorAll('.dino-home, .dino-nav-start');
+  for (var j = 0; j < heim.length; j++) heim[j].href = startUrl;
+
+  /* 📚 Alles für … */
+  var m = document.querySelector('meta[name="klasse"]');
+  var k = m ? (m.getAttribute('content') || '').trim() : '';
+  var a = document.getElementById('dino-nav-klasse');
+  if (k && a) {
+    a.href = START + '?klasse=' + encodeURIComponent(k) + (fach ? '&start=' + fach : '');
+    var name = /^\d+$/.test(k) ? 'Klasse ' + parseInt(k, 10) : 'die ' + k.replace('_', '/');
+    a.textContent = '📚 Alles für ' + name;
+    a.hidden = false;
+  }
+
+  /* ✉️ Feedback */
+  var dlg = document.getElementById('dino-fb');
+  var fbBtn = document.getElementById('dino-nav-fb');
+  if (!dlg || !fbBtn) return;
+  var adresse = FB_NAME + '@' + FB_DOMAIN;
+  var titel = (document.title || '').trim() || location.pathname.split('/').pop();
+  var url = location.href.split('#')[0];
+  var text = document.getElementById('dino-fb-text');
+  var meldung = document.getElementById('dino-fb-meldung');
+  document.getElementById('dino-fb-seite').textContent = titel;
+  document.getElementById('dino-fb-adresse').textContent = adresse;
+
+  function art(){
+    var r = dlg.querySelector('input[name="dino-fb-art"]:checked');
+    return r ? r.value : 'Feedback';
+  }
+  function betreff(){ return '[Dino-Feedback] ' + art() + ': ' + titel; }
+  function inhalt(){
+    return 'Seite: ' + titel + '\nAdresse: ' + url + '\nArt: ' + art() +
+           '\n\n' + text.value.trim() + '\n';
+  }
+  function melde(t, ok){ meldung.textContent = t; meldung.className = 'dino-fb-meldung ' + (ok ? 'ok' : 'nok'); }
+  function leer(){
+    if (text.value.trim()) return false;
+    melde('Bitte schreib zuerst etwas in das Feld.', false);
+    text.focus();
+    return true;
+  }
+
+  fbBtn.addEventListener('click', function(){
+    melde('', true);
+    if (typeof dlg.showModal === 'function') dlg.showModal(); else dlg.setAttribute('open', '');
+    text.focus();
+  });
+  document.getElementById('dino-fb-zu').addEventListener('click', function(){
+    if (typeof dlg.close === 'function') dlg.close(); else dlg.removeAttribute('open');
+  });
+  document.getElementById('dino-fb-senden').addEventListener('click', function(){
+    if (leer()) return;
+    location.href = 'mailto:' + adresse + '?subject=' + encodeURIComponent(betreff()) +
+                    '&body=' + encodeURIComponent(inhalt());
+    melde('Dein Mailprogramm öffnet sich. Danke! 🦖', true);
+  });
+  document.getElementById('dino-fb-kopieren').addEventListener('click', function(){
+    if (leer()) return;
+    var ganz = 'Betreff: ' + betreff() + '\n' + inhalt();
+    function ersatz(){
+      var t = document.createElement('textarea');
+      t.value = ganz; document.body.appendChild(t); t.select();
+      var ok = false; try { ok = document.execCommand('copy'); } catch (e) {}
+      document.body.removeChild(t);
+      melde(ok ? 'Kopiert! Jetzt in eine Mail einfügen.' : 'Kopieren ging nicht – bitte Text markieren und kopieren.', ok);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(ganz).then(function(){
+        melde('Kopiert! Jetzt in eine Mail einfügen.', true);
+      }, ersatz);
+    } else ersatz();
+  });
+})();
+</script>
+<!-- ============ ENDE BAUSTEIN Navigationsleiste ============ -->
+</body>
+</html>
