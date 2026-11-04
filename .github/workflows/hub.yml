@@ -34,45 +34,57 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Hub generieren
-        run: |
-          # Repo-Wurzel IST der Schule-Ordner (Repo heißt "Schule").
-          python build_hub.py --root . --out dino_hub.html
-
-      - name: Änderungen committen (Hub + Ordner-Übersichten)
+      - name: Hub generieren, committen und pushen (mit Wiederholung)
+        # Landet während des Laufs ein anderer Push auf main, lehnt GitHub unseren
+        # Push ab („fetch first"). Dann holen wir den neuesten Stand, bauen den Hub
+        # darauf neu und versuchen es erneut – bis zu dreimal.
         run: |
           git config user.name  "dino-hub-bot"
           git config user.email "actions@github.com"
 
-          # Alle vom Generator erzeugten/aktualisierten Dateien vormerken:
-          #  - dino_hub.html (die große Startseite)
-          #  - jede _*.html (die per linking.txt erzeugten Ordner-Übersichten)
-          git add dino_hub.html 2>/dev/null || true
-          git add '*_*.html' 2>/dev/null || true
-          # Sicherheitshalber auch _-Dateien in Unterordnern erfassen:
-          find . -name '_*.html' -not -path './.git/*' -print0 2>/dev/null \
-            | xargs -0 -r git add 2>/dev/null || true
+          for VERSUCH in 1 2 3; do
+            # Repo-Wurzel IST der Schule-Ordner (Repo heißt "Schule").
+            python build_hub.py --root . --out dino_hub.html
 
-          # Steht überhaupt etwas Gestagetes an?
-          if git diff --cached --quiet; then
-            echo "Keine Änderungen an Hub oder Übersichten."
-            exit 0
-          fi
+            # Alle vom Generator erzeugten/aktualisierten Dateien vormerken:
+            #  - dino_hub.html (die große Startseite)
+            #  - jede _*.html (die per linking.txt erzeugten Ordner-Übersichten)
+            git add dino_hub.html 2>/dev/null || true
+            git add '*_*.html' 2>/dev/null || true
+            # Sicherheitshalber auch _-Dateien in Unterordnern erfassen:
+            find . -name '_*.html' -not -path './.git/*' -print0 2>/dev/null \
+              | xargs -0 -r git add 2>/dev/null || true
 
-          # Wenn NUR dino_hub.html geändert ist und dort ausschließlich die
-          # Datumszeile differiert, nicht committen (kein täglicher Leer-Commit).
-          CHANGED=$(git diff --cached --name-only)
-          if [ "$CHANGED" = "dino_hub.html" ]; then
-            REAL=$(git diff --cached -U0 -- dino_hub.html \
-                   | grep -E '^[+-]' | grep -vE '^(\+\+\+|---)' \
-                   | grep -v 'aktualisiert [0-9]' || true)
-            if [ -z "$REAL" ]; then
-              echo "Nur Datum geändert – kein Commit."
-              git reset -- dino_hub.html >/dev/null 2>&1 || true
-              git checkout -- dino_hub.html >/dev/null 2>&1 || true
+            # Steht überhaupt etwas Gestagetes an?
+            if git diff --cached --quiet; then
+              echo "Keine Änderungen an Hub oder Übersichten."
               exit 0
             fi
-          fi
 
-          git commit -m "Auto: Hub & Übersichten aktualisiert [skip ci]"
-          git push
+            # Wenn NUR dino_hub.html geändert ist und dort ausschließlich die
+            # Datumszeile differiert, nicht committen (kein täglicher Leer-Commit).
+            CHANGED=$(git diff --cached --name-only)
+            if [ "$CHANGED" = "dino_hub.html" ]; then
+              REAL=$(git diff --cached -U0 -- dino_hub.html \
+                     | grep -E '^[+-]' | grep -vE '^(\+\+\+|---)' \
+                     | grep -v 'aktualisiert [0-9]' || true)
+              if [ -z "$REAL" ]; then
+                echo "Nur Datum geändert – kein Commit."
+                exit 0
+              fi
+            fi
+
+            git commit -m "Auto: Hub & Übersichten aktualisiert [skip ci]"
+            if git push; then
+              echo "Hub aktualisiert (Versuch $VERSUCH)."
+              exit 0
+            fi
+
+            echo "Push abgelehnt – main hat sich inzwischen geändert. Hole neuesten Stand (Versuch $VERSUCH von 3)."
+            sleep $((VERSUCH * 5))
+            git fetch origin main
+            git reset --hard origin/main
+          done
+
+          echo "Push nach 3 Versuchen nicht möglich."
+          exit 1
