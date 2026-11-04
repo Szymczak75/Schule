@@ -36,7 +36,7 @@ import re
 import sys
 import pathlib
 
-NAV_VERSION_MARKER = 'BAUSTEIN: Navigationsleiste  (v4'
+NAV_VERSION_MARKER = 'BAUSTEIN: Navigationsleiste  (v5'
 NAV_BLOCK_RE = re.compile(
     r'<!-- =+\s*BAUSTEIN: Navigationsleiste.*?ENDE BAUSTEIN Navigationsleiste =+ -->',
     re.S)
@@ -127,7 +127,7 @@ def main():
     repo = os.path.abspath(args.repo)
     baustein = lade_baustein(repo)
     if NAV_VERSION_MARKER not in baustein:
-        raise SystemExit('baustein_navigation.html ist nicht v3 – abgebrochen.')
+        raise SystemExit('baustein_navigation.html ist nicht v5 – abgebrochen.')
 
     root = pathlib.Path(repo)
     seiten = sorted(p for p in root.rglob('*.html')
@@ -197,7 +197,7 @@ def main():
     print('=' * 70)
     print('%-26s %4d' % ('Seiten gesamt', len(seiten)))
     zeile('Leiste eingefügt', ber['nav_ein'])
-    zeile('Leiste ersetzt (alt→v3)', ber['nav_ersetzt'], 50)
+    zeile('Leiste ersetzt (alt→v5)', ber['nav_ersetzt'], 50)
     zeile('Leiste schon aktuell', ber['nav_aktuell'])
     zeile('Leiste: KEIN Anker', ber['nav_kein_anker'], 50)
     zeile('Google Fonts entfernt', ber['fonts'])

@@ -895,7 +895,7 @@ TPL_HEAD = r"""<!DOCTYPE html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🦖 Mathedino Hub</title>
+<title>🦖 Dinos Lernwerkstatt</title>
 <style>
   :root {
     --bg:#f0f2f8;--surface:#fff;--border:#d4daf0;--bl:#e8ecf8;
@@ -1156,7 +1156,7 @@ TPL_HEAD = r"""<!DOCTYPE html>
 
 <div class="topbar">
   <div class="topbar-inner">
-    <h1>🦖 Mathedino <span>· Materialübersicht</span>
+    <h1>🦖 Dinos Lernwerkstatt <span>· Materialübersicht</span>
       <span class="lehrer-badge" id="lehrerBadge">👨‍🏫 Lehrermodus</span>
       <span class="ts">aktualisiert 16.07.2026</span>
     </h1>
@@ -1249,6 +1249,8 @@ function toggleLehrerModus() {
 const params = new URLSearchParams(window.location.search);
 if (params.get('lehrer') === '1') setLehrerModus(true);
 const fachParam = (params.get('fach') || 'alle').toLowerCase();
+// ?start=bio – von der Navigationsleiste: zuerst den Reiter des Herkunftsfachs zeigen
+const startParam = (params.get('start') || '').trim().toLowerCase();
 
 // ── Klassen-Filter ?klasse=… (gesetzt von der Navigationsleiste der Seiten) ──
 const order = ['mathe','bio','kompass','sonst'];
@@ -1295,9 +1297,10 @@ let suchFach = (fachParam !== 'alle' && allowed.length === 1) ? allowed[0] : '';
 const tabBar = document.getElementById('tabBar');
 const sb = document.createElement('button'); sb.className='tab-btn'; sb.dataset.fach='suche'; sb.textContent='🔍 Suche'; sb.onclick=()=>showCard('suche',sb); tabBar.appendChild(sb);
 const labels = {mathe:'📐 Mathematik',bio:'🧬 Biologie',kompass:'🧭 Kompass',sonst:'📁 Sonstiges'};
-allowed.forEach((f,i)=>{const b=document.createElement('button');b.className='tab-btn'+(i===0?' active':'');b.dataset.fach=f;b.textContent=labels[f];b.onclick=()=>showCard(f,b);tabBar.appendChild(b);});
+const startFach = allowed.includes(startParam) ? startParam : allowed[0];
+allowed.forEach((f,i)=>{const b=document.createElement('button');b.className='tab-btn'+(f===startFach?' active':'');b.dataset.fach=f;b.textContent=labels[f];b.onclick=()=>showCard(f,b);tabBar.appendChild(b);});
 order.forEach(f=>{if(!allowed.includes(f)){const c=document.getElementById('card-'+f);if(c)c.remove();}});
-const firstCard=document.getElementById('card-'+allowed[0]);if(firstCard)firstCard.classList.add('active');
+const firstCard=document.getElementById('card-'+startFach);if(firstCard)firstCard.classList.add('active');
 
 if(suchFach){document.querySelectorAll('#filterFach .fach-filter-btn').forEach(b=>{b.classList.toggle('active',b.dataset.val===suchFach);});}
 let fF=suchFach,fK='',fT='';

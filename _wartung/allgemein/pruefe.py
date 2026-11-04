@@ -55,7 +55,7 @@ SFS_VERSION = 'v1'
 SFS_MARKE = 'BAUSTEIN: Schritt-für-Schritt-Engine'
 
 # Navigationsleiste (baustein_navigation.html, TEIL 3.6)
-NAV_VERSION = 'v4'
+NAV_VERSION = 'v5'
 NAV_START = 'https://szymczak75.github.io/Schule/dino_hub.html'
 NAV_BLOCK = re.compile(r'<!-- =+\s*BAUSTEIN: Navigationsleiste.*?ENDE BAUSTEIN Navigationsleiste =+ -->',
                        re.S)

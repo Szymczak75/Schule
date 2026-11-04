@@ -257,7 +257,9 @@ Diese Punkte standen offen und sind inzwischen als Regel in
   jeder Schüler an einem eigenen iPad arbeitet.
 - **Navigationsleiste auf jeder Seite** (Oktober 2026). `baustein_navigation.html` wird
   unverändert vor dem T-Rex eingefügt: 🏠 Startseite, 📚 Alles für Klasse X (aus dem
-  Meta-Tag `klasse`), ✉️ Feedback, schwebender 🏠-Knopf unten links. `pruefe.py` meldet eine
+  Meta-Tag `klasse`), ✉️ Feedback, schwebender 🏠-Knopf unten links. Seit v5 (November 2026) öffnen
+  🏠/Startseite/„Alles für …" die Startseite im Reiter des eigenen Fachs (`?start=bio` usw.,
+  aus dem Meta-Tag `fach`) – falsches `fach`-Tag = falscher Reiter. `pruefe.py` meldet eine
   fehlende oder veränderte Leiste als `NAV`.
 - **Keine Google Fonts mehr** (Oktober 2026, Datenschutz). Einzige erlaubte externe Quelle
   ist MathJax; Schrift kommt aus dem System.
