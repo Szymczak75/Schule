@@ -77,6 +77,16 @@ Endwert und Schrittweite eintragen.
 Der Zusatz mit Start und Ende ist kein Schmuck: Eine Sinuskurve hat unendlich viele
 Nullstellen, GeoGebra braucht einen Suchbereich.
 
+### Funktionenscharen, Spur, Ortslinie (nachgeschlagen 04.11.2026)
+
+| Eingabe | Bedeutung | geprüft |
+|---|---|---|
+| `a=Schieberegler(-3, 3, 0.5)` | Regler mit Min, Max, Schrittweite (Standard-Schrittweite 0.1) | Handbuch „Schieberegler (Befehl)“ |
+| Spur: drei Punkte → Einstellungen → „Spur anzeigen“ | Objekt hinterlässt beim Bewegen Abdrücke; verschwindet beim Verschieben/Zoomen | EF 7 (Punkt); für Graphen **am Gerät prüfen** |
+| `Wendepunkt(f)` | Wendepunkt(e) eines Polynoms als Punkt | auf EF 9 verwendet |
+| `Ortslinie( <Punkt>, <Schieberegler> )` | Ortslinie des Punktes in Abhängigkeit vom Regler | Handbuch „Ortslinie (Befehl)“; mit Punkt aus `Wendepunkt(f)` **am Gerät prüfen** |
+| `Ersetze( <Ausdruck>, <von>, <durch> )` | ersetzt im Ausdruck (CAS-Befehl) | Handbuch „Ersetze (Befehl)“ |
+
 ### Gleichungen
 
 | Befehl | Bedeutung |
@@ -175,5 +185,5 @@ mit einem Fazit, wann welcher Weg der bessere ist.
 
 ---
 
-*Stand: September 2026. Quellen: GeoGebra-Manual (de und en), Handout
+*Stand: November 2026. Quellen: GeoGebra-Manual (de und en), Handout
 Sachsen-Anhalt, Prüfungen am Gerät durch Andreas.*
