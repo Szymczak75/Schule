@@ -119,6 +119,20 @@ details.amber .inhalt ol,details.amber .inhalt ul{margin:6px 0 0;padding-left:22
 
 /* Rechenzeilen */
 .rliste{display:grid;gap:10px;margin-top:8px}
+/* Zwischenschritt: Zeichen nach dem Aufloesen aller Klammern antippen */
+.rzeile.mitschritt{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:8px 10px}
+.zrest{display:flex;flex-wrap:nowrap;align-items:center;gap:8px 10px;min-width:0}
+.zrest .schritt{flex:0 1 auto;min-width:0}
+.zrest .mark{flex:0 0 auto}
+.schritt{display:inline-flex;flex-wrap:wrap;align-items:center;gap:6px 10px;padding:4px 6px;
+  border:2px dashed var(--line);border-radius:10px;font-size:1.15rem}
+.schritt.ok{border:3px solid var(--green)}
+.schritt.bad{border:3px solid var(--red)}
+.slot{display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+.slot .vz{min-width:44px;min-height:44px;font-size:1.2rem}
+.slot .zw{margin-left:4px}
+.schrittinfo{margin:6px 0 0}
+@media(max-width:520px){ .rzeile.mitschritt{grid-template-columns:1fr} .rzeile.mitschritt .platz{display:none} }
 .rzeile{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:#fff}
 .rzeile .term{min-width:150px}
 .rzeile .gl{font-size:1.15rem;font-weight:700}
@@ -267,7 +281,7 @@ mjx-container{max-width:100%;overflow-x:auto}
 </section>
 <section class="karte" id="k2">
   <h2>2 &middot; Aufl&ouml;sen und berechnen</h2>
-  <p>L&ouml;se im Heft die Klammer auf und berechne dann.</p>
+  <p>L&ouml;se zuerst <b>alle</b> Klammern auf: Tippe im Zwischenschritt vor jeder Zahl das Rechenzeichen an, das nach dem Aufl&ouml;sen dort steht. Berechne dann das Ergebnis.</p>
   <div class="stufen">
     <button type="button" class="stufenbtn aktiv" data-stufe="g2">Grundlagen</button>
     <button type="button" class="stufenbtn" data-stufe="f2">Fortgeschritten</button>
@@ -556,7 +570,7 @@ mjx-container{max-width:100%;overflow-x:auto}
      im Wissenstest zusätzlich Abgabe, Timer-Hinweis und Timer (Status, Restzeit, Startzeitpunkt).
      Schlüssel aus Dateiname + Version; bei geändertem Seitenaufbau Version erhöhen. */
   var SCHLUESSEL = 'aszym:' +
-    ((location.pathname.split('/').pop() || 'seite').replace(/\.html?$/i, '')) + ':v2';
+    ((location.pathname.split('/').pop() || 'seite').replace(/\.html?$/i, '')) + ':v3';
   var S = (function(){
     try { var r = sessionStorage.getItem(SCHLUESSEL); var d = r ? JSON.parse(r) : null;
           if (d && typeof d === 'object') return d; } catch (e) {}
@@ -810,7 +824,38 @@ mjx-container{max-width:100%;overflow-x:auto}
       var term=el('span','term', it.text || t(it.a));
       if(it.text) term.className='';
       z.appendChild(term);
-      if(!it.text) z.appendChild(el('span','gl','='));
+      /* Zwischenschritt (it.auf): Term nach dem Aufloesen aller Klammern, Zeichen per Knopf.
+         Schreibweise: '18 +4 -9'; erstes Stueck fest, mit '?' davor ebenfalls ein Zeichenfeld. */
+      var slots=[], schritt=null, markS=null, ziel=z;
+      if(it.auf && !it.gegeben){
+        z.className+=' mitschritt';
+        var r1=el('span','zrest');
+        r1.appendChild(el('span','gl','='));
+        schritt=el('span','schritt');
+        it.auf.split(/\s+/).forEach(function(tok,k){
+          var feld = k>0 || tok.charAt(0)==='?';
+          if(tok.charAt(0)==='?') tok=tok.slice(1);
+          if(!feld){ schritt.appendChild(el('span','zw', t(tok))); return; }
+          var sl={soll:tok.charAt(0)==='-'?'-':'+', ist:null};
+          var w=el('span','slot');
+          sl.plus=knopf('vz','+'); sl.minus=knopf('vz','−');
+          sl.plus.setAttribute('aria-label','Rechenzeichen plus'); sl.minus.setAttribute('aria-label','Rechenzeichen minus');
+          w.appendChild(sl.plus); w.appendChild(sl.minus);
+          w.appendChild(el('span','zw', t(tok.replace(/^[+-]/,''))));
+          schritt.appendChild(w);
+          sl.setze=function(v){ sl.ist=v; sl.plus.classList.toggle('an',v==='+'); sl.minus.classList.toggle('an',v==='-'); };
+          sl.plus.addEventListener('click',function(){ if(!api.gesperrt) sl.setze(sl.ist==='+'?null:'+'); });
+          sl.minus.addEventListener('click',function(){ if(!api.gesperrt) sl.setze(sl.ist==='-'?null:'-'); });
+          slots.push(sl);
+        });
+        r1.appendChild(schritt);
+        markS=el('span','mark'); r1.appendChild(markS);
+        z.appendChild(r1);
+        z.appendChild(el('span','platz'));
+        ziel=el('span','zrest');
+        ziel.appendChild(el('span','gl','='));
+        z.appendChild(ziel);
+      } else if(!it.text) z.appendChild(el('span','gl','='));
       if(it.gegeben){
         z.appendChild(el('span','gegeben', it.b ? bruchText(wert) : zahlText(wert)));
         liste.appendChild(z);
@@ -832,12 +877,13 @@ mjx-container{max-width:100%;overflow-x:auto}
         inp.setAttribute('autocomplete','off');
         ein.appendChild(inp);
       }
-      z.appendChild(ein);
-      if(cfg.einheit||it.einheit) z.appendChild(el('span','einheit', it.einheit||cfg.einheit));
+      ziel.appendChild(ein);
+      if(cfg.einheit||it.einheit) ziel.appendChild(el('span','einheit', it.einheit||cfg.einheit));
       var mark=el('span','mark');
-      z.appendChild(mark);
+      ziel.appendChild(mark);
       liste.appendChild(z);
-      var zs={it:it, wert:wert, vz:null, plus:plus, minus:minus, inp:inp, zae:zae, nen:nen, mark:mark};
+      var zs={it:it, wert:wert, vz:null, plus:plus, minus:minus, inp:inp, zae:zae, nen:nen, mark:mark,
+              slots:slots, schritt:schritt, markS:markS};
       function setVz(v){ zs.vz=v; plus.classList.toggle('an',v==='+'); minus.classList.toggle('an',v==='-'); }
       zs.setVz=setVz;
       plus.addEventListener('click',function(){ if(!api.gesperrt) setVz(zs.vz==='+'?null:'+'); });
@@ -862,6 +908,7 @@ mjx-container{max-width:100%;overflow-x:auto}
     var api={gesperrt:false};
     api.fehlt=function(){
       for(var i=0;i<zeilen.length;i++){
+        if(zeilen[i].slots.some(function(sl){ return !sl.ist; })) return 'Tippe im Zwischenschritt vor jeder Zahl + oder − an.';
         var r=liesZeile(zeilen[i]);
         if(r.leer) return zeilen.length>1 ? 'Fülle zuerst alle Felder aus.' : 'Trage zuerst dein Ergebnis ein.';
         if(r.ungueltig) return zeilen[i].it.b ? 'Trage im Bruch oben und unten eine natürliche Zahl ein (unten nicht 0).' : 'Gib eine Zahl ein, z.&nbsp;B. 12 oder 0,5.';
@@ -870,32 +917,43 @@ mjx-container{max-width:100%;overflow-x:auto}
       return '';
     };
     api.auswerten=function(faerben){
-      var richtig=0, vzF=0, betF=0, kuerzen=false;
+      var richtig=0, vzF=0, betF=0, schF=0, kuerzen=false;
       zeilen.forEach(function(zs){
         var r=liesZeile(zs);
         var val=(r.vz==='-'?-1:1)*r.abs;
-        var ok=Math.abs(val-zs.wert)<EPS;
-        if(ok){ richtig++; if(zs.it.b && ggT(r.z,r.n)>1) kuerzen=true; }
+        var vOk=Math.abs(val-zs.wert)<EPS;
+        var sOk=schrittOk(zs);
+        if(!sOk) schF++;
+        if(vOk){ if(zs.it.b && ggT(r.z,r.n)>1) kuerzen=true; }
         else if(Math.abs(r.abs-Math.abs(zs.wert))<EPS) vzF++;
         else betF++;
+        var ok=vOk&&sOk;
+        if(ok) richtig++;
         zs.ok=ok;
-        if(faerben) faerbe(zs,ok);
+        if(faerben) faerbe(zs,vOk,sOk);
       });
       var h=[];
+      if(schF) h.push(schF===1 ? 'Bei einer Aufgabe stimmt der Zwischenschritt noch nicht – prüfe jedes Zeichen, das in einer Minusklammer stand.' : 'Bei '+schF+' Aufgaben stimmt der Zwischenschritt noch nicht – prüfe jedes Zeichen, das in einer Minusklammer stand.');
       if(vzF) h.push(vzF===1 ? 'Bei einer Aufgabe stimmt der Betrag, aber das Vorzeichen nicht.' : 'Bei '+vzF+' Aufgaben stimmt der Betrag, aber das Vorzeichen nicht.');
       if(betF) h.push(betF===1 ? 'Bei einer Aufgabe stimmt der Betrag noch nicht – rechne ihn noch einmal nach.' : 'Bei '+betF+' Aufgaben stimmt der Betrag noch nicht – rechne die Beträge noch einmal nach.');
       return {r:richtig, g:zeilen.length, hinweis:h.join(' '), zusatz: kuerzen ? 'Tipp: Dein Bruch lässt sich noch kürzen.' : ''};
     };
-    function faerbe(zs,ok){
+    function schrittOk(zs){ return zs.slots.every(function(sl){ return sl.ist===sl.soll; }); }
+    function faerbe(zs,ok,sOk){
       var felder=zs.it.b?[zs.zae,zs.nen]:[zs.inp];
       felder.forEach(function(f){ f.classList.remove('ok','bad'); f.classList.add(ok?'ok':'bad'); });
       zs.mark.className='mark '+(ok?'ok':'bad'); zs.mark.innerHTML=ok?'&#10004;':'&#10007;';
+      if(zs.schritt){
+        zs.schritt.classList.remove('ok','bad'); zs.schritt.classList.add(sOk?'ok':'bad');
+        zs.markS.className='mark '+(sOk?'ok':'bad'); zs.markS.innerHTML=sOk?'&#10004;':'&#10007;';
+      }
     }
-    api.faerben=function(){ zeilen.forEach(function(zs){ var r=liesZeile(zs); if(r.leer||r.ungueltig){ faerbe(zs,false); return; } var val=(r.vz==='-'?-1:1)*r.abs; faerbe(zs,Math.abs(val-zs.wert)<EPS); }); };
+    api.faerben=function(){ zeilen.forEach(function(zs){ var r=liesZeile(zs); var sOk=schrittOk(zs); if(r.leer||r.ungueltig){ faerbe(zs,false,sOk); return; } var val=(r.vz==='-'?-1:1)*r.abs; faerbe(zs,Math.abs(val-zs.wert)<EPS,sOk); }); };
     api.sperren=function(b){
       api.gesperrt=b;
       zeilen.forEach(function(zs){
         zs.plus.disabled=b; zs.minus.disabled=b;
+        zs.slots.forEach(function(sl){ sl.plus.disabled=b; sl.minus.disabled=b; });
         (zs.it.b?[zs.zae,zs.nen]:[zs.inp]).forEach(function(f){ f.disabled=b; });
       });
     };
@@ -904,11 +962,15 @@ mjx-container{max-width:100%;overflow-x:auto}
         zs.setVz(null);
         (zs.it.b?[zs.zae,zs.nen]:[zs.inp]).forEach(function(f){ f.value=''; f.classList.remove('ok','bad'); });
         zs.mark.className='mark'; zs.mark.innerHTML='';
+        zs.slots.forEach(function(sl){ sl.setze(null); });
+        if(zs.schritt){ zs.schritt.classList.remove('ok','bad'); zs.markS.className='mark'; zs.markS.innerHTML=''; }
       });
     };
     api.zustand=function(){
       return zeilen.map(function(zs){
-        return zs.it.b ? {vz:zs.vz, z:zs.zae.value, n:zs.nen.value} : {vz:zs.vz, v:zs.inp.value};
+        var d = zs.it.b ? {vz:zs.vz, z:zs.zae.value, n:zs.nen.value} : {vz:zs.vz, v:zs.inp.value};
+        if(zs.slots.length) d.s=zs.slots.map(function(sl){ return sl.ist; });
+        return d;
       });
     };
     api.setze=function(d){
@@ -917,11 +979,13 @@ mjx-container{max-width:100%;overflow-x:auto}
         zs.setVz(s.vz==='+'||s.vz==='-'?s.vz:null);
         if(zs.it.b){ zs.zae.value=s.z||''; zs.nen.value=s.n||''; }
         else zs.inp.value=s.v||'';
+        zs.slots.forEach(function(sl,k){ var v=s.s&&s.s[k]; sl.setze(v==='+'||v==='-'?v:null); });
       });
     };
     api.anzahl=zeilen.length;
     api.demo=function(richtig){   /* nur für automatische Tests */
       zeilen.forEach(function(zs,i){
+        zs.slots.forEach(function(sl,k){ var v=(richtig||k)?sl.soll:(sl.soll==='+'?'-':'+'); (v==='+'?sl.plus:sl.minus).click(); });
         var v = richtig ? zs.wert : (i%2 ? -zs.wert-(zs.wert===0?1:0) : zs.wert+1);
         if(v!==0) (v<0?zs.minus:zs.plus).click();
         var b=Math.abs(v);
@@ -1487,24 +1551,24 @@ mjx-container{max-width:100%;overflow-x:auto}
   /* ================= Karte 2 ================= */
   LS.rechnen('g2a',{
     titel:'Ganze Zahlen',
-    items:[{a:'20-(8+5)'},{a:'14-(9-3)'},{a:'(-6)-(4+2)'},{a:'9-(-3+5)'}],
+    items:[{a:'20-(8+5)',auf:'20 -8 -5'},{a:'14-(9-3)',auf:'14 -9 +3'},{a:'(-6)-(4+2)',auf:'-6 -4 -2'},{a:'9-(-3+5)',auf:'9 +3 -5'}],
     tipps:['Klammer aufl&ouml;sen: Minus und Klammer fallen weg, die Zeichen in der Klammer drehen sich um.','Dann von links nach rechts rechnen.'],
-    muster:zeilen([T('20-8-5')+' = 7',T('14-9+3')+' = 8',T('(-6)-4-2')+' = '+T('-12'),T('9+3-5')+' = 7'])
+    muster:zeilen([G('20-(8+5)','20-8-5')+' = 7',G('14-(9-3)','14-9+3')+' = 8',G('(-6)-(4+2)','-6-4-2')+' = '+T('-12'),G('9-(-3+5)','9+3-5')+' = 7'])
   });
   LS.rechnen('f2a',{
     titel:'Komma, Bruch und Minus vorne',
-    items:[{a:'2.4-(1.4-3)'},{a:'(-7.5)-(-2.5-4)'},{a:'[3/4]-([1/4]-[1/2])'},{a:'-(12-19)+(-4)'}],
-    tipps:['Steht das Minus ganz vorne, gilt dieselbe Regel: '+T('-(12-19)')+' wird zu '+T('-12+19')+'.','Nach dem Aufl&ouml;sen passen oft zwei Zahlen gut zusammen.'],
-    muster:'<p class="mitfrac">'+T('2.4-1.4+3')+' = 4<br>'+T('(-7.5)+2.5+4')+' = '+T('-1')+'<br>'+T('[3/4]-[1/4]+[1/2]')+' = 1<br>'+T('-12+19+(-4)')+' = 3</p>'
+    items:[{a:'2.4-(1.4-3)',auf:'2.4 -1.4 +3'},{a:'(-7.5)-(-2.5-4)',auf:'-7.5 +2.5 +4'},{a:'[3/4]-([1/4]-[1/2])',auf:'[3/4] -[1/4] +[1/2]'},{a:'-(12-19)+(-4)',auf:'?-12 +19 -4'}],
+    tipps:['Steht das Minus ganz vorne, gilt dieselbe Regel: '+T('-(12-19)')+' wird zu '+T('-12+19')+'.','Auch '+T('+(-4)')+' ist eine Klammer: Plus und Minus ergeben Minus.','Nach dem Aufl&ouml;sen passen oft zwei Zahlen gut zusammen.'],
+    muster:'<p class="mitfrac">'+G('2.4-(1.4-3)','2.4-1.4+3')+' = 4<br>'+G('(-7.5)-(-2.5-4)','-7.5+2.5+4')+' = '+T('-1')+'<br>'+G('[3/4]-([1/4]-[1/2])','[3/4]-[1/4]+[1/2]')+' = 1<br>'+G('-(12-19)+(-4)','-12+19-4')+' = 3</p>'
   });
   LS.rechnen('p2a',{
     titel:'L&auml;ngere Klammern',
-    items:[{a:'(-3.6)-(2.4-7.5+0.5)'},{a:'-([2/3]-[5/6])',b:1},{a:'18-(-(4-9))'},{a:'(-12)-(-(-7+2)-6)'}],
+    items:[{a:'(-3.6)-(2.4-7.5+0.5)',auf:'-3.6 -2.4 +7.5 -0.5'},{a:'-([2/3]-[5/6])',b:1,auf:'?-[2/3] +[5/6]'},{a:'18-(-(4-9))',auf:'18 +4 -9'},{a:'(-12)-(-(-7+2)-6)',auf:'-12 -7 +2 +6'}],
     tipps:['Bei verschachtelten Klammern l&ouml;st du zuerst die innere Klammer auf.','Ein Minus vor einem Minus ergibt Plus.'],
-    muster:'<p class="mitfrac">'+T('(-3.6)-2.4+7.5-0.5')+' = '+T('-6+7')+' = 1<br>'+
-      T('-[2/3]+[5/6]')+' = '+T('-[4/6]+[5/6]')+' = '+F(1,6)+'<br>'+
-      T('-(4-9)')+' = '+T('-4+9')+' = 5, also '+T('18-5')+' = 13<br>'+
-      T('-(-7+2)')+' = '+T('7-2')+' = 5, also '+T('(-12)-(5-6)')+' = '+T('(-12)-5+6')+' = '+T('-11')+'</p>'
+    muster:'<p class="mitfrac">'+G('(-3.6)-(2.4-7.5+0.5)','-3.6-2.4+7.5-0.5')+' = '+T('-6+7')+' = 1<br>'+
+      G('-([2/3]-[5/6])','-[2/3]+[5/6]')+' = '+T('-[4/6]+[5/6]')+' = '+F(1,6)+'<br>'+
+      G('18-(-(4-9))','18-(-4+9)')+' = '+T('18+4-9')+' = 13<br>'+
+      G('(-12)-(-(-7+2)-6)','(-12)-(7-2-6)')+' = '+T('-12-7+2+6')+' = '+T('-11')+'</p>'
   });
 
   /* ================= Karte 3 ================= */
