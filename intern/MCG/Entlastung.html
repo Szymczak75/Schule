@@ -441,6 +441,17 @@
     <div class="deadline-note">⚑ Abgabe bis 01.06.2026 — digital an Anne oder ausgedruckt ins Fach</div>
   </header>
 
+  <!-- Zwischenstand -->
+  <div class="card" style="padding:1.1rem 1.8rem;">
+    <div class="section-title">Zwischenstand</div>
+    <div style="display:flex;flex-wrap:wrap;gap:0.6rem;">
+      <button type="button" class="btn-add-row" id="zs-speichern">Als Datei speichern</button>
+      <button type="button" class="btn-add-row" id="zs-laden">Datei laden …</button>
+      <input type="file" id="zs-datei" accept=".json,application/json" hidden>
+    </div>
+    <p class="hinweis" id="zs-meldung" style="margin-top:0.6rem;">Speichere deine Eingaben als Datei, um später weiterzuarbeiten – auch an einem anderen Gerät.</p>
+  </div>
+
   <!-- Name -->
   <div class="card">
     <div class="section-title">Angaben zur Person</div>
@@ -903,6 +914,62 @@ ${sonstigeHTML}
 
     // Init: 3 leere Zeilen
   addRow(); addRow(); addRow();
+
+/* ---------- Zwischenstand als Datei (lokal, ohne Browser-Speicher) ---------- */
+function zsDownload(name, obj){
+  const blob = new Blob([JSON.stringify(obj, null, 1)], {type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a"); a.href = url; a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 10000);
+}
+function zsLesen(input, app, anwenden, melde){
+  const f = input.files[0]; if(!f) return;
+  f.text().then(txt=>{
+    let s; try{ s = JSON.parse(txt); }catch(e){ throw new Error("Die Datei ist keine gültige Zwischenstand-Datei."); }
+    if(!s || s.app !== app) throw new Error("Diese Datei gehört nicht zu dieser Seite.");
+    anwenden(s); melde("Zwischenstand „" + f.name + "“ geladen.", true);
+  }).catch(e=> melde(e.message, false)).finally(()=>{ input.value = ""; });
+}
+function zsDateiname(s){ return String(s||"").trim().replace(/[^\wäöüÄÖÜß-]+/g,"_").replace(/_+/g,"_").replace(/^_|_$/g,""); }
+
+  const ZS_APP = "entlastungsstunden-2026-27";
+  const ZS_TEXT = ["name","kuerzel","klass-bez","fach-voll-bez","fach-halb-bez","sonstige-belastungen"];
+  const ZS_HAKEN = ["klass","fach-voll","fach-halb"];
+  function zsMelde(text, ok){ const m=document.getElementById("zs-meldung"); m.textContent=text; m.style.color = ok===false ? "var(--danger)" : ok===true ? "var(--accent)" : ""; m.style.fontStyle = ok===undefined ? "italic" : "normal"; }
+  function zsStand(){
+    const s = {app:ZS_APP, version:1, gespeichert:new Date().toISOString(), text:{}, haken:{}, zeilen:[]};
+    ZS_TEXT.forEach(id=> s.text[id] = document.getElementById(id).value);
+    ZS_HAKEN.forEach(id=> s.haken[id] = document.getElementById(id).checked);
+    document.querySelectorAll('#korrekturen-body tr').forEach(tr=>{
+      const id = tr.id.replace('row-','');
+      const z = {}; ['kl','gf','sz','za','da'].forEach(p=> z[p] = (document.getElementById(p+'-'+id)||{}).value || '');
+      s.zeilen.push(z);
+    });
+    return s;
+  }
+  function zsAnwenden(s){
+    ZS_TEXT.forEach(id=>{ if(s.text && id in s.text) document.getElementById(id).value = s.text[id]; });
+    ZS_HAKEN.forEach(id=> document.getElementById(id).checked = !!(s.haken||{})[id]);
+    document.getElementById('korrekturen-body').innerHTML = '';
+    rowCount = 0;
+    const zeilen = (s.zeilen && s.zeilen.length) ? s.zeilen : [{},{},{}];
+    zeilen.forEach(z=>{
+      addRow();
+      ['kl','gf','sz','za','da'].forEach(p=> document.getElementById(p+'-'+rowCount).value = z[p] || '');
+      recalcRow(rowCount);
+    });
+    calcAll();
+    document.getElementById('name').dispatchEvent(new Event('change', {bubbles:true}));  /* Neulade-Schutz aktualisieren */
+  }
+  document.getElementById('zs-speichern').addEventListener('click', ()=>{
+    const n = zsDateiname(document.getElementById('name').value);
+    zsDownload('Entlastung_' + (n ? n + '_' : '') + '2026-27.json', zsStand());
+    zsMelde('Zwischenstand gespeichert. Mit „Datei laden …“ kannst du später weitermachen.', true);
+  });
+  document.getElementById('zs-laden').addEventListener('click', ()=> document.getElementById('zs-datei').click());
+  document.getElementById('zs-datei').addEventListener('change', e=> zsLesen(e.target, ZS_APP, zsAnwenden, zsMelde));
+
 </script>
 <!-- ============================================================
      BAUSTEIN: Neulade-Schutz Stufe 1  (v1, 16.10.2026)

@@ -128,6 +128,8 @@
   .termin-blank{display:inline-block;border-bottom:1.5px solid var(--ink);min-width:240px;height:1.1em;}
 
   .hidden{display:none;}
+  #zs-meldung.ok{color:#2c6b3f;}
+  #zs-meldung.nok{color:#a23a2e;}
   .warn{color:#a23a2e;font-size:.85rem;margin-top:8px;}
   #validation-warn{
     border:1px solid #e2b8b2;background:#fbecea;border-radius:6px;
@@ -174,7 +176,11 @@
 
     <div class="actions">
       <button class="ghost" onclick="resetAll()">Zurücksetzen</button>
+      <button class="ghost" type="button" id="zs-speichern">Zwischenstand als Datei speichern</button>
+      <button class="ghost" type="button" id="zs-laden">Zwischenstand laden …</button>
+      <input type="file" id="zs-datei" accept=".json,application/json" hidden>
     </div>
+    <p class="hint" id="zs-meldung" style="margin:10px 0 0">Speichere deine Kurswahl als Datei, um später daran weiterzuarbeiten – auch an einem anderen Gerät.</p>
     <p class="warn hidden" id="empty-warn">Bitte trag mindestens einen Kurs ein.</p>
     <div class="warn hidden" id="validation-warn"></div>
   </section>
@@ -566,6 +572,52 @@ function resetAll(){
   vw.classList.add("hidden"); vw.innerHTML="";
   buildPlan();
 }
+
+
+/* ---------- Zwischenstand als Datei (lokal, ohne Browser-Speicher) ---------- */
+function zsDownload(name, obj){
+  const blob = new Blob([JSON.stringify(obj, null, 1)], {type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a"); a.href = url; a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 10000);
+}
+function zsLesen(input, app, anwenden, melde){
+  const f = input.files[0]; if(!f) return;
+  f.text().then(txt=>{
+    let s; try{ s = JSON.parse(txt); }catch(e){ throw new Error("Die Datei ist keine gültige Zwischenstand-Datei."); }
+    if(!s || s.app !== app) throw new Error("Diese Datei gehört nicht zu dieser Seite.");
+    anwenden(s); melde("Zwischenstand „" + f.name + "“ geladen.", true);
+  }).catch(e=> melde(e.message, false)).finally(()=>{ input.value = ""; });
+}
+function zsDateiname(s){ return String(s||"").trim().replace(/[^\wäöüÄÖÜß-]+/g,"_").replace(/_+/g,"_").replace(/^_|_$/g,""); }
+
+const ZS_APP = "stundenplan-q1q2";
+function zsMelde(text, ok){ const m=document.getElementById("zs-meldung"); m.textContent=text; m.className="hint"+(ok===true?" ok":ok===false?" nok":""); }
+function zsStand(){
+  const felder = {};
+  document.querySelectorAll("[data-fach],[data-lehrer],[data-raum]").forEach(el=>{
+    const art = el.hasAttribute("data-fach") ? "fach" : el.hasAttribute("data-lehrer") ? "lehrer" : "raum";
+    felder[art + ":" + el.getAttribute("data-" + art)] = el.value;
+  });
+  return {app:ZS_APP, version:1, gespeichert:new Date().toISOString(), felder};
+}
+function zsAnwenden(s){
+  Object.entries(s.felder||{}).forEach(([k,v])=>{
+    const i = k.indexOf(":"), art = k.slice(0,i), id = k.slice(i+1);
+    const el = document.querySelector('[data-' + art + '="' + id + '"]');
+    if(el) el.value = v;
+  });
+  const erstes = document.querySelector("[data-fach]");
+  if(erstes) erstes.dispatchEvent(new Event("change", {bubbles:true}));  /* Plan neu bauen + Neulade-Schutz aktualisieren */
+}
+document.getElementById("zs-speichern").addEventListener("click", ()=>{
+  const d = new Date(), tag = d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+  zsDownload("Stundenplan_Q1Q2_" + tag + ".json", zsStand());
+  zsMelde("Zwischenstand gespeichert. Mit „Zwischenstand laden …“ kannst du später weitermachen.", true);
+});
+document.getElementById("zs-laden").addEventListener("click", ()=> document.getElementById("zs-datei").click());
+document.getElementById("zs-datei").addEventListener("change", e=> zsLesen(e.target, ZS_APP, zsAnwenden, zsMelde));
 
 buildEntryForm();
 /* Live: bei jeder Eingabe den Plan neu erzeugen */
