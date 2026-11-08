@@ -133,7 +133,7 @@ BAUSTEIN-CSS, Schreibhilfen, Rückblick-KA-Engine, MathJax-Notfall und Navigatio
 darin enthalten; pro Klassenarbeit wird nur der Datenblock `ANPASSEN` geschrieben.
 `pruefe.py` kennt die Engine-Fassung (`RBKA_VERSION`). Bei einer Änderung an CSS oder Engine:
 Versionsnummer in den Kopfkommentaren **und** `RBKA_VERSION` erhöhen, danach die
-`_rbka`-Seiten nachziehen (derzeit `bruch_dezimal_rbka`). Der Hub (`build_hub.py`) zeigt
+`_rbka`-Seiten nachziehen (derzeit `bruch_dezimal_rbka`, `rationale_zahlen_ka1_rbka`; beide v2). Der Hub (`build_hub.py`) zeigt
 `typ="Rückblick KA"` mit 📋 und `typ="KA-Vorbereitung"` (`_kavb`) mit 🎯.
 
 ## Geodreieck

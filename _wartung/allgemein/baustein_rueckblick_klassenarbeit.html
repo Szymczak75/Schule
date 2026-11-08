@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <!-- =====================================================================
-     BAUSTEIN: Rückblick Klassenarbeit (_rbka)  v1, 08.11.2026
+     BAUSTEIN: Rückblick Klassenarbeit (_rbka)  v2, 08.11.2026
+     v2: Vorzeichen (negative Zahlen in Eingabe und soll), Rückmeldung „Vorzeichen“,
+         Antwortart 'zeichen' (<, >, =), Texttastatur sobald ein soll-Wert negativ ist.
      Gepflegt im Wartungs-Projekt. Anleitung (anweisung_lernseiten.txt, TEIL 2.8):
      1. Datei kopieren, Name: thema_rbka.html (Suffix _rbka).
      2. Meta-Tags ausfüllen: typ="Rückblick KA", klasse, fach, oberthema, thema,
@@ -33,7 +35,7 @@
 </script>
 <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
 <style>
-/* ===== BAUSTEIN-CSS: Rückblick Klassenarbeit (v1, 08.11.2026) – unverändert übernehmen ===== */
+/* ===== BAUSTEIN-CSS: Rückblick Klassenarbeit (v2, 08.11.2026) – unverändert übernehmen ===== */
 :root{
   --ink:#22303f; --card:#ffffff; --green:#1e7d32; --red:#c1272d;
   --amber:#b8860b; --amber-light:#fdf3d9; --amber-dark:#96690a;
@@ -156,7 +158,7 @@ mjx-container{max-width:100%;overflow-x:auto;}
 
 <script>
 /* ============================================================
-   BAUSTEIN: Rückblick-KA-Schreibhilfen (v1, 08.11.2026) – unverändert übernehmen
+   BAUSTEIN: Rückblick-KA-Schreibhilfen (v2, 08.11.2026) – unverändert übernehmen
    f(z,n)      Bruch als .frac-Konstrukt          f(3,4)  f('2 · 7','5 · 3')
    g(ganz,z,n) gemischte Zahl                       g(1,5,9)
    m('…')      Formel mit Dezimalzahlen: Komma wird {,}, · wird \cdot
@@ -192,8 +194,11 @@ function m(t){
          art     'bruch'   → Wert + vollständig gekürzt (Dezimalzahl zählt auch)
                  'zahl'    → Wert (Dezimalzahl, Bruch, gemischte Zahl, Periode 0,(3))
                  'groesse' → Zahl + Einheit im Dropdown; einheiten: 'liter' | 'meter' | 'gramm' | 'euro'
+                             oder eigene Liste [['°C',[1,1]], ['m',null]]
+                 'zeichen' → Vergleichszeichen aus Dropdown, soll: '<' | '>' | '='  (v2)
          text    true, wenn Klammern/Schrägstrich getippt werden müssen (Periode bei 'zahl')
-         soll    [Zähler, Nenner] des exakten Ergebnisses, z. B. 0,15 → [3,20]; 7 → [7,1]
+         soll    [Zähler, Nenner] des exakten Ergebnisses, z. B. 0,15 → [3,20]; 7 → [7,1];
+                 negativ: Minus in den Zähler, −2,6 → [-13,5]  (v2)
          tipps   zwei Tipps: Idee, dann Vorgehen – ohne Zwischenergebnisse
          weg     Lösungsweg (letzte Hilfestufe, darf das Ergebnis nennen)
    Schreibhilfen: f(3,4) Bruch · g(1,5,9) gemischte Zahl · m('0,4 · 0,9') Dezimal-Formel
@@ -242,7 +247,7 @@ var KA = {
 
 <script>
 /* ============================================================
-   BAUSTEIN: Rückblick-KA-Engine (v1, 08.11.2026) – unverändert übernehmen
+   BAUSTEIN: Rückblick-KA-Engine (v2, 08.11.2026) – unverändert übernehmen
    Baut aus dem Objekt KA: Startkarte (Fehler ankreuzen) → je Teilaufgabe eine
    Karte (Originalaufgabe + vollständiger Lösungsweg + typischer Fehler + zwei
    ähnliche Aufgaben mit Prüfen/Leeren/gestuften Tipps) → Abschlusskarte.
@@ -250,6 +255,9 @@ var KA = {
    Antwortarten:  'bruch'  Wert gleich UND vollständig gekürzt (Dezimalzahl zählt auch)
                   'zahl'   Wert gleich (Dezimalzahl, Bruch, gemischte Zahl, Periode)
                   'groesse' Zahl + Einheit aus Dropdown (einheiten: 'liter' o. eigene Liste)
+                  'zeichen' Vergleichszeichen <, >, = aus Dropdown (soll: '<' | '>' | '=')
+   Vorzeichen (v2): Eingaben dürfen mit −, - oder + beginnen und in Klammern stehen,
+   soll darf einen negativen Zähler haben (z. B. −2,6 → [-13,5]).
    ============================================================ */
 (function(){
 "use strict";
@@ -279,7 +287,16 @@ function mal(a, b){ return kurz(a[0] * b[0], a[1] * b[1]); }
 
 /* Eingabe lesen: Dezimalzahl, Bruch a/b, gemischte Zahl g a/b, Periode 0,(3) / 0,3̅ / 0,333… */
 function lese(roh){
-  var s = String(roh || '').trim();
+  var s = String(roh || '').trim().replace(/[−–]/g, '-');
+  var kl = s.match(/^\((.*)\)$/); if (kl) s = kl[1].trim();
+  var vz = 1, r0 = s.match(/^([+-])\s*(.*)$/);
+  if (r0) { if (r0[1] === '-') vz = -1; s = r0[2]; }
+  var p0 = leseBetrag(s);
+  if (p0 && vz < 0) p0.w = [-p0.w[0], p0.w[1]];
+  if (p0) p0.vz = !!r0;
+  return p0;
+}
+function leseBetrag(s){
   if (!s || s.length > 24) return null;
   s = s.replace(/…|\.\.\.+/g, '~').replace(/\./g, ',').replace(/\s+/g, ' ')
        .replace(/[÷]/g, '/').replace(/⁄/g, '/');
@@ -309,6 +326,7 @@ function endlich(w){ var n = w[1]; while (n % 2 === 0) n /= 2; while (n % 5 === 
 
 /* Prüfen einer Antwort → Schlüssel für Rückmeldung */
 function bewerte(u, wert, einheit){
+  if (u.art === 'zeichen') return String(wert).trim() === u.soll ? 'ok' : 'falsch';
   var soll = kurz(u.soll[0], u.soll[1]);
   var p = lese(wert);
   if (u.art === 'groesse') {
@@ -321,10 +339,12 @@ function bewerte(u, wert, einheit){
     var basis = mal(p.w, fak);
     if (gleich(basis, soll)) return 'ok';
     if (gleich(p.w, soll)) return 'einheitPasstNicht';
+    if (soll[0] !== 0 && gleich(basis, [-soll[0], soll[1]])) return 'vorzeichen';
     return kommaFehler(basis, soll) ? 'komma' : 'falsch';
   }
   if (!p) return 'unlesbar';
   if (gleich(p.w, soll)) return (u.art === 'bruch' && !p.gek) ? 'kuerzen' : 'ok';
+  if (soll[0] !== 0 && gleich(p.w, [-soll[0], soll[1]])) return 'vorzeichen';
   if (kommaFehler(p.w, soll)) return 'komma';
   if (u.art === 'bruch' && soll[0] !== soll[1] && gleich(p.w, [soll[1], soll[0]])) return 'kehr';
   if (p.dez && !endlich(soll)) {
@@ -345,9 +365,10 @@ var TEXT = {
   kuerzen: '❌ Der Wert stimmt, aber der Bruch ist noch nicht vollständig gekürzt.',
   komma: '❌ Die Ziffern passen, aber das Komma sitzt an der falschen Stelle.',
   kehr: '❌ Prüfe, welchen Bruch du umgedreht hast.',
+  vorzeichen: '❌ Der Betrag stimmt, aber das Vorzeichen nicht.',
   gerundet: '❌ Das ist gerundet. Gesucht ist das genaue Ergebnis – mit Periode oder als Bruch.',
   falsch: '❌ Das stimmt noch nicht. Hol dir einen Tipp oder rechne noch einmal nach.',
-  unlesbar: '❌ Das kann ich nicht lesen. Erlaubt sind Dezimalzahlen, Brüche in der Form a/b und gemischte Zahlen in der Form g a/b.',
+  unlesbar: '❌ Das kann ich nicht lesen. Erlaubt sind Dezimalzahlen, Brüche in der Form a/b und gemischte Zahlen in der Form g a/b – jeweils auch mit Minuszeichen davor.',
   keineEinheit: '❌ Wähle noch eine Einheit aus.',
   falscheGroesse: '❌ Die Zahl passt, aber die Einheit gehört zu einer anderen Größe.',
   beidesFalsch: '❌ Zahl und Einheit stimmen noch nicht.',
@@ -360,6 +381,9 @@ KA.aufgaben.forEach(function(a){
   a.teile.forEach(function(t){ t.aufgabe = a; TEILE.push(t); TEIL[t.id] = t; });
 });
 function uid(t, i){ return t.id + '-' + (i + 1); }
+/* v2: Sobald irgendwo ein negatives Ergebnis vorkommt, überall Texttastatur –
+   die Ziffern-Tastatur des iPads hat kein Minuszeichen, und die Tastatur darf das Vorzeichen nicht verraten. */
+var MINUS = TEILE.some(function(t){ return t.ueb.some(function(u){ return u.soll && u.soll[0] < 0; }); });
 function zustand(id){ if (!S.a[id]) S.a[id] = { e:'', u:'', st:'offen', t:0, gp:false }; return S.a[id]; }
 
 /* ---------- Aufbau ---------- */
@@ -424,10 +448,13 @@ function baue(){
       (t.eingabeHinweis ? '<p class="hinweis">' + t.eingabeHinweis + '</p>' : '');
     t.ueb.forEach(function(u, i){
       var id = uid(t, i);
-      var im = u.art === 'bruch' || u.text ? 'text' : 'decimal';
+      var im = u.art === 'bruch' || u.text || MINUS ? 'text' : 'decimal';
       x += '<div class="ueb" id="u-' + id + '"><h4>Übung ' + (i + 1) + '</h4>' +
         '<p class="frage">' + u.frage + '</p><div class="zeile">' +
-        '<input type="text" id="in-' + id + '" inputmode="' + im + '" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="Ergebnis" aria-label="Ergebnis Übung ' + (i + 1) + '">';
+        (u.art === 'zeichen'
+          ? '<select id="in-' + id + '" aria-label="Zeichen Übung ' + (i + 1) + '"><option value="">Zeichen …</option>' +
+            '<option value="<">&lt;</option><option value=">">&gt;</option><option value="=">=</option></select>'
+          : '<input type="text" id="in-' + id + '" inputmode="' + im + '" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="Ergebnis" aria-label="Ergebnis Übung ' + (i + 1) + '">');
       if (u.art === 'groesse') {
         var liste = typeof u.einheiten === 'string' ? EINHEITEN[u.einheiten] : u.einheiten;
         x += '<select id="un-' + id + '" aria-label="Einheit"><option value="">Einheit …</option>' +
@@ -454,6 +481,7 @@ function baue(){
       $('le-' + id).addEventListener('click', function(){ leere(t, i); });
       $('ti-' + id).addEventListener('click', function(){ tipp(t, i); });
       $('in-' + id).addEventListener('input', function(){ zustand(id).e = this.value; sichern(); });
+      $('in-' + id).addEventListener('change', function(){ zustand(id).e = this.value; sichern(); });
       $('in-' + id).addEventListener('keydown', function(ev){ if (ev.key === 'Enter') pruefe(t, i); });
       var sel = $('un-' + id);
       if (sel) sel.addEventListener('change', function(){ zustand(id).u = this.value; sichern(); });
@@ -503,7 +531,7 @@ function zeigeUeb(t, i){
 function pruefe(t, i){
   var id = uid(t, i), z = zustand(id), u = t.ueb[i];
   z.e = $('in-' + id).value; var sel = $('un-' + id); if (sel) z.u = sel.value;
-  if (!z.e.trim()) { var fb = $('fb-' + id); fb.className = 'fb nok'; fb.innerHTML = '❌ Tippe zuerst ein Ergebnis ein.'; return; }
+  if (!z.e.trim()) { var fb = $('fb-' + id); fb.className = 'fb nok'; fb.innerHTML = u.art === 'zeichen' ? '❌ Wähle zuerst ein Zeichen aus.' : '❌ Tippe zuerst ein Ergebnis ein.'; return; }
   z.r = bewerte(u, z.e, z.u);
   z.st = z.r === 'ok' ? 'ok' : 'nok';
   z.gp = true;
