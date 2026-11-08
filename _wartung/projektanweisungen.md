@@ -72,8 +72,10 @@ Maßgeblich sind ausschließlich die Dateien aus dem GitHub-Sync `_wartung/allge
 
 ## GeoGebra  (Sync: `allgemein`, `geogebra`)
 
-Unverändert: Inhalt von `_wartung/geogebra/anweisung_geogebra_projekt.md`.
+Hier **nichts ändern**: Im Feld bleibt der vollständige Text aus
+`_wartung/geogebra/anweisung_geogebra_projekt.md` (nicht diese Zeile einfügen).
 
 ## Wartung Unterrichtsprojekte  (Sync: ganzer Ordner `_wartung`)
 
-Unverändert: Inhalt von `_wartung/anweisung_wartung_projekt.md`.
+Hier **nichts ändern**: Im Feld bleibt der vollständige Text aus
+`_wartung/anweisung_wartung_projekt.md` (nicht diese Zeile einfügen).
