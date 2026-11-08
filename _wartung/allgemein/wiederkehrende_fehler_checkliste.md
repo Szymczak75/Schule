@@ -32,7 +32,7 @@ nach jedem Fund einzeln umgebaut.
 **1. Kopf & Meta**
 Alle sieben Pflicht-Meta-Tags gesetzt und gefüllt (`description`, `keywords`, `typ`,
 `klasse`, `fach`, `oberthema`, `thema`)? Passt `typ` zum Dateinamen-Suffix (`_sfs` ↔
-`Schritt für Schritt`)? Passt `klasse`
+`Schritt für Schritt`, `_rbka` ↔ `Rückblick KA`, `_kavb` ↔ `KA-Vorbereitung`)? Passt `klasse`
 zur restlichen Reihe? MathJax-Block exakt wie vorgeschrieben eingebunden? Keine weitere
 externe Ressource außer MathJax – auch kein Google Fonts (Links `<a href>` zählen nicht)?
 
@@ -270,7 +270,16 @@ Diese Punkte standen offen und sind inzwischen als Regel in
   Meta-Tags, kein MathJax, Schrift unter 1rem, eigene Farbtöne, und der Auftrag zu Schritt 2
   nannte das Ergebnis von Schritt 1. Die Steckbrief-Seite speicherte Sterne und Fragen nicht.
   `pruefe.py` meldet fehlende Engine, Schritte ohne Lösung und doppelte `data-step` als `SFS`.
+- **Rückblick Klassenarbeit ist eine eigene Seitenart** (November 2026). Nacharbeit einer
+  zurückgegebenen KA = `thema_rbka.html` mit `typ="Rückblick KA"` aus
+  `baustein_rueckblick_klassenarbeit.html`: Startkarte „Meine Fehler", je Teilaufgabe eine Karte mit
+  Lösungsweg, typischem Fehler und genau zwei ähnlichen Aufgaben, Abschlusskarte „Meine
+  Korrektur". Vorbereitung **vor** einer Arbeit heißt jetzt `_kavb` (`typ="KA-Vorbereitung"`,
+  Regeln der Übung). Die alte Rückblick-Seite zur Klasse-6-Arbeit hatte `typ="Übung"`, nur
+  Ziffern als Reiter, Schrift unter 1rem, eigene Blautöne und einen toten Weiter-Knopf.
+  `pruefe.py` meldet fehlende Engine, doppelte Teilaufgaben-IDs und Teilaufgaben ohne genau
+  zwei Übungen als `RBKA`.
 
 ---
 
-*Stand: 03.11.2026 (Seitenart Schritt für Schritt; Navigationsleiste, keine Google Fonts) – gepflegt im Wartungs-Projekt „Wartung Unterrichtsprojekte".*
+*Stand: 08.11.2026 (Seitenart Rückblick KA, Suffix _kavb; Schritt für Schritt; Navigationsleiste, keine Google Fonts) – gepflegt im Wartungs-Projekt „Wartung Unterrichtsprojekte".*

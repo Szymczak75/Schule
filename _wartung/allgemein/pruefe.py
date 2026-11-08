@@ -23,8 +23,9 @@ Was dieser Linter NICHT kann (bleibt Handarbeit bzw. Browsertest):
   - ob der Stand ein Neuladen wirklich vollständig übersteht (Browsertest: Seite
     bearbeiten, neu laden, vergleichen)
 
-Stand: 03.11.2026 (Seitentyp Schritt für Schritt _sfs, TEIL 2.7; Navigationsleiste Pflicht, TEIL 3.6;
-       Google Fonts nicht mehr erlaubt, TEIL 8.1)
+Stand: 08.11.2026 (Rückblick KA _rbka aus baustein_rueckblick_klassenarbeit.html, TEIL 2.8; neues Suffix
+       _kavb für KA-Vorbereitung, TEIL 9; Schritt für Schritt _sfs, TEIL 2.7; Navigationsleiste
+       Pflicht, TEIL 3.6; Google Fonts nicht mehr erlaubt, TEIL 8.1)
 """
 import io
 import os
@@ -45,7 +46,8 @@ BEKANNT_FALSCH = {'#e07b1a', '#d98324', '#e8943c', '#1565c0', '#1976d2'}
 
 META_PFLICHT = ['description', 'keywords', 'typ', 'klasse', 'fach', 'oberthema', 'thema']
 SUFFIX_TYP = {'_ls': 'Lernseite', '_ue': 'Übung', '_test': 'Test',
-              '_rbka': 'Rückblick', '_rb': 'Rückblick', '_ka': 'Klassenarbeit',
+              '_rbka': 'Rückblick KA', '_kavb': 'KA-Vorbereitung',
+              '_rb': 'Rückblick', '_ka': 'Klassenarbeit',
               '_bonus': 'Bonus', '_sfs': 'Schritt für Schritt'}
 ERLAUBTE_HOSTS = ('cdn.jsdelivr.net/npm/mathjax',)   # Google Fonts seit 16.10.2026 nicht mehr
 
@@ -53,6 +55,11 @@ ERLAUBTE_HOSTS = ('cdn.jsdelivr.net/npm/mathjax',)   # Google Fonts seit 16.10.2
 SFS_TYP = 'Schritt für Schritt'
 SFS_VERSION = 'v1'
 SFS_MARKE = 'BAUSTEIN: Schritt-für-Schritt-Engine'
+
+# Rückblick-KA-Engine (baustein_rueckblick_klassenarbeit.html, TEIL 2.8)
+RBKA_TYP = 'Rückblick KA'
+RBKA_VERSION = 'v1'
+RBKA_MARKE = 'BAUSTEIN: Rückblick-KA-Engine'
 
 # Navigationsleiste (baustein_navigation.html, TEIL 3.6)
 NAV_VERSION = 'v5'
@@ -222,7 +229,7 @@ def pruefe(pfad):
     # ---------------------------------------------------- 3 Kartengerüst
     typ = meta.get('typ', '')
     tabs = re.findall(r'data-ziel="k\d+"[^>]*>([^<]*)', h)
-    if typ in ('Übung', 'Test', 'Rückblick', SFS_TYP):
+    if typ in ('Übung', 'Test', 'Rückblick', 'KA-Vorbereitung', SFS_TYP):
         if not re.search(r'Auswertung', h):
             fehler('AUSWERTUNG', '%s ohne Auswertungskarte' % typ)
         if not re.search(r'Wiederholung', h):
@@ -258,6 +265,39 @@ def pruefe(pfad):
         if titel and re.search(r'schritt\s*f(?:ü|ue)r\s*schritt', titel.group(1), re.I):
             hinweis('SFS', 'Titel nennt „Schritt für Schritt“ – gehört die Seite als _sfs auf '
                            'baustein_schritt_fuer_schritt.html (TEIL 2.7)?')
+
+    # Rückblick KA (TEIL 2.8): Engine-Baustein, je Teilaufgabe genau zwei Übungen mit soll + 2 Tipps
+    if typ == RBKA_TYP:
+        if RBKA_MARKE not in h:
+            fehler('RBKA', 'typ="%s" ohne Engine aus baustein_rueckblick_klassenarbeit.html' % RBKA_TYP)
+        else:
+            if '%s (%s' % (RBKA_MARKE, RBKA_VERSION) not in h:
+                hinweis('RBKAALT', 'Rückblick-KA-Engine ist nicht die aktuelle Fassung %s – '
+                                   'Baustein ersetzen' % RBKA_VERSION)
+            daten = re.search(r'var KA\s*=(.*?)ENDE ANPASSEN', h, re.S)
+            if not daten:
+                fehler('RBKA', 'Datenblock „ANPASSEN: Daten der Klassenarbeit" (var KA = …) fehlt')
+            else:
+                d = daten.group(1)
+                ids = re.findall(r"\bid:\s*'([^']+)'", d)
+                for x in sorted(set(i for i in ids if ids.count(i) > 1)):
+                    fehler('RBKA', 'Teilaufgabe id="%s" mehrfach vergeben' % x)
+                teile = re.split(r"\{\s*id:\s*'", d)[1:]
+                for t in teile:
+                    tid = t.split("'", 1)[0]
+                    n_ueb = len(re.findall(r'\bfrage:', t))
+                    if n_ueb != 2:
+                        fehler('RBKA', 'Teilaufgabe %s hat %d ähnliche Aufgaben statt genau 2' % (tid, n_ueb))
+                    if len(re.findall(r'\bsoll:\s*\[\s*\d+\s*,\s*[1-9]\d*\s*\]', t)) < n_ueb:
+                        fehler('RBKA', 'Teilaufgabe %s: nicht jede Übung hat soll: [Zähler, Nenner]' % tid)
+                    if len(re.findall(r'\btipps:\s*\[', t)) < n_ueb:
+                        fehler('RBKA', 'Teilaufgabe %s: nicht jede Übung hat tipps' % tid)
+                    if not re.search(r"\bname:\s*'[^']*[A-Za-zÄÖÜäöü]{3}", t) or \
+                       re.search(r"\bname:\s*'(Aufgabe|Teilaufgabe)\s*\d", t):
+                        hinweis('RBKA', 'Teilaufgabe %s: Kartentitel soll den Rechentyp beschreiben' % tid)
+    elif RBKA_MARKE in h:
+        fehler('TYP', 'Seite nutzt die Rückblick-KA-Engine, trägt aber typ="%s" – '
+                      'richtig ist typ="%s" und Suffix _rbka' % (typ, RBKA_TYP))
 
     if typ == 'Test' and 'TESTZEIT_MIN' not in js:
         fehler('TIMER', 'Wissenstest ohne Orientierungstimer-Konstante TESTZEIT_MIN')

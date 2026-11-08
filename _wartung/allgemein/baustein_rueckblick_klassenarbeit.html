@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<!-- =====================================================================
+     BAUSTEIN: Rückblick Klassenarbeit (_rbka)  v1, 08.11.2026
+     Gepflegt im Wartungs-Projekt. Anleitung (anweisung_lernseiten.txt, TEIL 2.8):
+     1. Datei kopieren, Name: thema_rbka.html (Suffix _rbka).
+     2. Meta-Tags ausfüllen: typ="Rückblick KA", klasse, fach, oberthema, thema,
+        description, keywords.
+     3. NUR den Block  ANPASSEN: Daten der Klassenarbeit  ersetzen – eine Teilaufgabe
+        der KA = ein Eintrag in teile[] mit Lösungsweg, typischem Fehler und genau
+        zwei ähnlichen Aufgaben.
+     4. BAUSTEIN-CSS, Schreibhilfen, Engine, MathJax-Notfall und Navigationsleiste
+        UNVERÄNDERT lassen. Bei geändertem Aufbau einer veröffentlichten Seite
+        data-version am <body> erhöhen.
+     5. Alle soll-Werte mit dem Rechner nachrechnen, dann pruefe.py laufen lassen.
+     ===================================================================== -->
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="ANPASSEN: 1–2 Sätze, welche Klassenarbeit nachgearbeitet wird.">
+<meta name="keywords" content="ANPASSEN">
+<meta name="typ" content="Rückblick KA">
+<meta name="klasse" content="ANPASSEN">
+<meta name="fach" content="mathe">
+<meta name="oberthema" content="ANPASSEN">
+<meta name="thema" content="ANPASSEN">
+<title>Rückblick KA – ANPASSEN</title>
+<script>
+  MathJax = {
+    tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+    svg: { fontCache: 'global' }
+  };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+/* ===== BAUSTEIN-CSS: Rückblick Klassenarbeit (v1, 08.11.2026) – unverändert übernehmen ===== */
+:root{
+  --ink:#22303f; --card:#ffffff; --green:#1e7d32; --red:#c1272d;
+  --amber:#b8860b; --amber-light:#fdf3d9; --amber-dark:#96690a;
+  --blue:#2f5fa6; --blue-dark:#1f4680; --blue-light:#e6eefb; --bg:#f6f8fb; --line:#dbe3ee;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;}
+body{font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;font-size:1.0625rem;
+  line-height:1.55;color:var(--ink);background:var(--bg);}
+.kopf{background:var(--blue-light);border-bottom:4px solid var(--blue);padding:1.1rem 1rem 1rem;}
+.kopf-innen{max-width:860px;margin:0 auto;}
+.kopf-typ{font-size:1rem;font-weight:700;color:var(--blue);margin:0;}
+.kopf h1{font-size:1.5rem;margin:.2rem 0 .2rem;color:var(--blue-dark);line-height:1.25;}
+.kopf p{font-size:1rem;margin:0;}
+.reiter{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--line);
+  padding:.55rem .75rem;}
+.reiter-innen{max-width:860px;margin:0 auto;display:flex;flex-wrap:wrap;gap:.45rem;}
+.reiter button{min-height:44px;min-width:44px;padding:.4rem .8rem;border:2px solid var(--line);
+  background:#fff;color:var(--blue-dark);border-radius:.6rem;font:inherit;font-size:1rem;
+  font-weight:700;cursor:pointer;}
+.reiter button.aktiv{background:var(--blue);border-color:var(--blue);color:#fff;}
+.reiter button.fertig::after{content:" ✓";}
+.reiter button[hidden]{display:none;}
+main{max-width:860px;margin:0 auto;padding:1rem .75rem 2rem;}
+.karte{display:none;}
+.karte.aktiv{display:block;}
+.block{background:var(--card);border:1px solid var(--line);border-radius:1rem;padding:1.1rem;
+  margin-bottom:1rem;}
+.block h2{font-size:1.35rem;margin:.1rem 0 .6rem;color:var(--blue-dark);line-height:1.3;}
+.block h3{font-size:1.15rem;margin:0 0 .5rem;color:var(--blue-dark);}
+.block h4{font-size:1.05rem;margin:0 0 .3rem;color:var(--blue-dark);}
+.eyebrow{font-size:1rem;font-weight:700;color:var(--blue);margin:0;}
+.block p{margin:.4rem 0;}
+.ka-box{background:var(--blue-light);border-left:6px solid var(--blue);border-radius:.6rem;
+  padding:.8rem 1rem;margin:.8rem 0;}
+.ka-term{font-size:1.2rem;margin:.5rem 0 .2rem;}
+.weg-box{border:2px solid var(--blue-light);border-radius:.6rem;padding:.8rem 1rem;margin:.8rem 0;}
+.weg-box ol{margin:.3rem 0 0;padding-left:1.4rem;}
+.weg-box li{margin:.45rem 0;}
+.fehler-box{border-left:6px solid var(--red);background:#fff;border-radius:.6rem;
+  padding:.7rem 1rem;margin:.8rem 0;box-shadow:0 0 0 1px var(--line) inset;}
+.stand-box{border:2px dashed var(--blue);border-radius:.6rem;padding:.6rem 1rem;margin:.6rem 0;}
+.ueb{border-top:2px dashed var(--line);padding-top:1rem;margin-top:1rem;}
+.ueb:first-of-type{border-top:none;padding-top:0;margin-top:.4rem;}
+.frage{font-size:1.1rem;}
+.zeile{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin:.5rem 0;}
+.zeile input,.zeile select{font:inherit;font-size:1.1rem;min-height:44px;padding:.35rem .6rem;
+  border:2px solid var(--line);border-radius:.6rem;background:#fff;color:var(--ink);}
+.zeile input{width:11rem;text-align:center;}
+.zeile input:focus,.zeile select:focus{outline:none;border-color:var(--blue);}
+.zeile input:disabled,.zeile select:disabled{background:var(--bg);color:var(--ink);opacity:1;}
+.knoepfe{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.4rem;}
+.btn{min-height:44px;min-width:44px;padding:.5rem 1.1rem;border-radius:.6rem;font:inherit;
+  font-size:1rem;font-weight:700;cursor:pointer;border:2px solid transparent;}
+.btn:active{transform:scale(.97);}
+.btn-pruefen{background:var(--blue);color:#fff;}
+.btn-leeren{background:#fff;color:var(--red);border-color:var(--red);}
+.btn-tipp{background:var(--amber-light);color:var(--amber-dark);border-color:var(--amber);}
+.btn-los{background:var(--blue);color:#fff;width:100%;font-size:1.1rem;margin-top:.8rem;}
+.btn-los:disabled{background:var(--line);color:var(--ink);cursor:default;}
+.btn[hidden]{display:none;}
+.fb{display:none;margin-top:.6rem;padding:.6rem .9rem;border-radius:.6rem;font-weight:700;color:#fff;}
+.fb.ok{display:block;background:var(--green);}
+.fb.nok{display:block;background:var(--red);}
+.tipps{display:none;margin-top:.6rem;}
+.tipps.an{display:block;}
+.tippstufe{display:none;background:var(--amber-light);border:2px solid var(--amber);
+  border-radius:.6rem;padding:.6rem .9rem;margin-top:.5rem;}
+.tippstufe.an{display:block;}
+.tippstufe b.tl{color:var(--amber-dark);}
+.hinweis{font-size:1rem;color:var(--ink);background:var(--bg);border-radius:.5rem;padding:.4rem .7rem;}
+/* Startkarte */
+.gruppe{margin:1rem 0 .4rem;}
+.gruppe h3{margin-bottom:.2rem;}
+.wahl{display:grid;grid-template-columns:repeat(auto-fill,minmax(10.5rem,1fr));gap:.5rem;margin-top:.5rem;}
+.wahl button{min-height:56px;padding:.45rem .6rem;border:2px solid var(--line);border-radius:.7rem;
+  background:#fff;color:var(--ink);font:inherit;font-size:1rem;cursor:pointer;text-align:left;
+  line-height:1.4;}
+.wahl button .nr{font-weight:800;color:var(--blue-dark);margin-right:.35rem;}
+.wahl button.an{background:var(--blue);border-color:var(--blue);color:#fff;}
+.wahl button.an .nr{color:#fff;}
+.zaehler{font-weight:700;margin-top:1rem;}
+/* Abschluss */
+.liste{list-style:none;padding:0;margin:.5rem 0;}
+.liste li{border:1px solid var(--line);border-radius:.6rem;padding:.55rem .8rem;margin:.4rem 0;}
+.liste .titel{font-weight:700;}
+.status-ok{color:var(--green);font-weight:700;}
+.status-nok{color:var(--red);font-weight:700;}
+.fazit{border-radius:.6rem;padding:.7rem 1rem;font-weight:700;margin-top:.8rem;}
+.fazit.ok{background:var(--green);color:#fff;}
+.fazit.offen{background:var(--blue-light);}
+/* Brüche (TEIL 7.2 – nur Kind-Selektoren) */
+.frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;
+      margin:0 .2em;line-height:1.15;}
+.frac > span{display:block;padding:0 .35em;}
+.frac > span:first-child{border-bottom:1.8px solid currentColor;padding-bottom:.1em;}
+.frac > span:last-child{padding-top:.1em;}
+.gem{white-space:nowrap;}
+mjx-container{max-width:100%;overflow-x:auto;}
+/* T-Rex */
+.trex{position:fixed;right:.7rem;bottom:.7rem;z-index:50;width:44px;height:44px;border-radius:50%;
+  background:#fff;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;
+  font-size:1.4rem;cursor:pointer;user-select:none;}
+.trex-text{position:fixed;right:3.9rem;bottom:1rem;z-index:50;background:var(--ink);color:#fff;
+  padding:.3rem .7rem;border-radius:.5rem;font-size:1rem;display:none;}
+.trex:hover + .trex-text,.trex-text.an{display:block;}
+@media (max-width:600px){ .zeile input{width:9rem;} }
+/* ===== ENDE BAUSTEIN-CSS Rückblick Klassenarbeit ===== */
+</style>
+</head>
+<body data-version="1">
+
+<header class="kopf"><div class="kopf-innen">
+  <p class="kopf-typ">📋 Rückblick Klassenarbeit</p>
+  <h1 id="ka-titel"></h1>
+  <p id="ka-untertitel"></p>
+</div></header>
+<nav class="reiter" aria-label="Karten"><div class="reiter-innen" id="reiter"></div></nav>
+<main id="main"></main>
+
+<script>
+/* ============================================================
+   BAUSTEIN: Rückblick-KA-Schreibhilfen (v1, 08.11.2026) – unverändert übernehmen
+   f(z,n)      Bruch als .frac-Konstrukt          f(3,4)  f('2 · 7','5 · 3')
+   g(ganz,z,n) gemischte Zahl                       g(1,5,9)
+   m('…')      Formel mit Dezimalzahlen: Komma wird {,}, · wird \cdot
+   ============================================================ */
+function f(z, n){ return '<span class="frac"><span>' + z + '</span><span>' + n + '</span></span>'; }
+function g(ganz, z, n){ return '<span class="gem">' + ganz + ' ' + f(z, n) + '</span>'; }
+function m(t){
+  return '\\(' + String(t).replace(/(\d),(\d)/g, '$1{,}$2').replace(/·/g, '\\cdot ')
+    .replace(/−/g, '-') + '\\)';
+}
+/* ============ ENDE BAUSTEIN Schreibhilfen ============ */
+</script>
+
+<script>
+/* ============================================================
+   ANPASSEN: Daten der Klassenarbeit  (nur diesen Block ersetzen)
+   ------------------------------------------------------------
+   KA.titel / KA.untertitel  → Kopf der Seite
+   KA.aufgaben[]             → eine Aufgabe der Klassenarbeit:
+     nr, titel, ort ('auf dem Blatt' | 'im Heft'), auftrag (wörtlich aus der KA),
+     kontext (optional: Sachtext, der für alle Teilaufgaben gilt),
+     teile[]                 → je Teilaufgabe EINE Karte:
+       id        '1a', '1b' …  (Nummer + Buchstabe wie in der KA)
+       name      sprechender Kartentitel, beschreibt den Rechentyp ('Bruch mal Kehrbruch')
+       term      die Teilaufgabe aus der KA (Term oder Fragesatz)
+       knopf     optional: kurzer Text für die Startkarte, wenn term ein langer Satz ist
+       stand     optional: „Wo wir gerade stehen", wenn die Teilaufgabe auf einer früheren aufbaut
+       weg[]     vollständiger Lösungsweg der KA-Aufgabe, ein Schritt je Eintrag
+       fehler    typischer Fehler (ein bis zwei Sätze)
+       eingabeHinweis  optional: Tippformat, abstrakt formuliert (nie die Lösung als Beispiel)
+       ueb[]     GENAU ZWEI ähnliche Aufgaben:
+         frage   vollständig formulierte Aufgabe
+         art     'bruch'   → Wert + vollständig gekürzt (Dezimalzahl zählt auch)
+                 'zahl'    → Wert (Dezimalzahl, Bruch, gemischte Zahl, Periode 0,(3))
+                 'groesse' → Zahl + Einheit im Dropdown; einheiten: 'liter' | 'meter' | 'gramm' | 'euro'
+         text    true, wenn Klammern/Schrägstrich getippt werden müssen (Periode bei 'zahl')
+         soll    [Zähler, Nenner] des exakten Ergebnisses, z. B. 0,15 → [3,20]; 7 → [7,1]
+         tipps   zwei Tipps: Idee, dann Vorgehen – ohne Zwischenergebnisse
+         weg     Lösungsweg (letzte Hilfestufe, darf das Ergebnis nennen)
+   Schreibhilfen: f(3,4) Bruch · g(1,5,9) gemischte Zahl · m('0,4 · 0,9') Dezimal-Formel
+   ============================================================ */
+var KA = {
+  titel: 'Titel der Klassenarbeit',
+  untertitel: 'n. Klassenarbeit, Klasse X – arbeite deine Fehler mit ähnlichen Aufgaben nach.',
+  aufgaben: [
+  { nr: 1, titel: 'Brüche multiplizieren', ort: 'auf dem Blatt',
+    auftrag: 'Multipliziere und kürze so weit wie möglich.',
+    teile: [
+    { id: '1a', name: 'Bruch mal Bruch', term: f(1,3) + ' · ' + f(10,3),
+      weg: [ 'Zähler mal Zähler, Nenner mal Nenner: ' + f('1 · 10','3 · 3') + ' = ' + f(10,9) + '.',
+             'Nicht kürzbar. Ergebnis: ' + f(10,9) + ' = ' + g(1,1,9) + '.' ],
+      fehler: 'Den Nenner wie beim Addieren stehen lassen.',
+      ueb: [
+        { frage: 'Berechne und kürze so weit wie möglich: ' + f(2,5) + ' · ' + f(7,3), art: 'bruch', soll: [14,15],
+          tipps: [ 'Multipliziere Zähler mit Zähler und Nenner mit Nenner.', 'Prüfe, ob du noch kürzen kannst.' ],
+          weg: f('2 · 7','5 · 3') + ' = ' + f(14,15) + '.' },
+        { frage: 'Berechne und kürze so weit wie möglich: ' + f(3,4) + ' · ' + f(5,7), art: 'bruch', soll: [15,28],
+          tipps: [ 'Multipliziere Zähler mit Zähler und Nenner mit Nenner.', 'Prüfe, ob du noch kürzen kannst.' ],
+          weg: f('3 · 5','4 · 7') + ' = ' + f(15,28) + '.' } ] }
+    ] },
+  { nr: 2, titel: 'Sachaufgabe', ort: 'im Heft', auftrag: 'Beantworte mit einem Antwortsatz.',
+    kontext: 'Sachtext der Klassenarbeit …',
+    teile: [
+    { id: '2a', name: 'Anteil von einer Menge', knopf: 'Liter Orangensaft',
+      term: 'Wie viel Liter Orangensaft werden verwendet?',
+      weg: [ f(3,8) + ' von 3,2 l: 3,2 : 8 = 0,4; 0,4 · 3 = 1,2.', 'Antwort: 1,2 Liter.' ],
+      fehler: 'Den Anteil von der falschen Menge nehmen.',
+      ueb: [
+        { frage: 'Lena mischt 2,4 Liter Saft. ' + f(5,8) + ' davon sind Kirschsaft. Wie viel Kirschsaft ist das?',
+          art: 'groesse', einheiten: 'liter', soll: [3,2],
+          tipps: [ 'Anteil von einer Menge: Menge mal Bruch.', 'Erst durch den Nenner teilen, dann mal den Zähler.' ],
+          weg: '2,4 : 8 = 0,3; 0,3 · 5 = 1,5. Es sind 1,5 l.' },
+        { frage: 'Tom hat 4,8 Liter Saft. ' + f(3,4) + ' davon sind Apfelsaft. Wie viel Apfelsaft ist das?',
+          art: 'groesse', einheiten: 'liter', soll: [18,5],
+          tipps: [ 'Anteil von einer Menge: Menge mal Bruch.', 'Erst durch den Nenner teilen, dann mal den Zähler.' ],
+          weg: '4,8 : 4 = 1,2; 1,2 · 3 = 3,6. Es sind 3,6 l.' } ] }
+    ] }
+  ]
+};
+/* ============ ENDE ANPASSEN: Daten der Klassenarbeit ============ */
+
+</script>
+
+<script>
+/* ============================================================
+   BAUSTEIN: Rückblick-KA-Engine (v1, 08.11.2026) – unverändert übernehmen
+   Baut aus dem Objekt KA: Startkarte (Fehler ankreuzen) → je Teilaufgabe eine
+   Karte (Originalaufgabe + vollständiger Lösungsweg + typischer Fehler + zwei
+   ähnliche Aufgaben mit Prüfen/Leeren/gestuften Tipps) → Abschlusskarte.
+   Zustand in einem Status-Objekt, gesichert per sessionStorage (TEIL 6).
+   Antwortarten:  'bruch'  Wert gleich UND vollständig gekürzt (Dezimalzahl zählt auch)
+                  'zahl'   Wert gleich (Dezimalzahl, Bruch, gemischte Zahl, Periode)
+                  'groesse' Zahl + Einheit aus Dropdown (einheiten: 'liter' o. eigene Liste)
+   ============================================================ */
+(function(){
+"use strict";
+var EINHEITEN = {
+  liter:  [['l',[1,1]], ['ml',[1,1000]], ['kg',null], ['m',null]],
+  meter:  [['m',[1,1]], ['cm',[1,100]], ['km',[1000,1]], ['m²',null]],
+  gramm:  [['kg',[1,1]], ['g',[1,1000]], ['l',null], ['m',null]],
+  euro:   [['€',[1,1]], ['ct',[1,100]], ['kg',null]]
+};
+var DATEI = (location.pathname.split('/').pop() || 'seite').replace(/\.html?$/i, '');
+var KEY = 'aszym:' + DATEI + ':v' + (document.body.getAttribute('data-version') || '1');
+var S = { wahl:{}, karte:'start', a:{} };
+
+function lies(){ try { var r = sessionStorage.getItem(KEY); return r ? JSON.parse(r) : null; } catch (e) { return null; } }
+function sichern(){ try { sessionStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
+function setzeFormel(el){
+  if (window.MathJax && MathJax.typesetPromise) { try { MathJax.typesetPromise([el]); } catch (e) {} }
+}
+function $(id){ return document.getElementById(id); }
+function neu(tag, cls, html){ var e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; }
+
+/* ---------- Rechnen mit Brüchen ---------- */
+function ggt(a, b){ a = Math.abs(a); b = Math.abs(b); while (b) { var t = a % b; a = b; b = t; } return a || 1; }
+function kurz(z, n){ var t = ggt(z, n); return [z / t, n / t]; }
+function gleich(a, b){ return a[0] * b[1] === b[0] * a[1]; }
+function mal(a, b){ return kurz(a[0] * b[0], a[1] * b[1]); }
+
+/* Eingabe lesen: Dezimalzahl, Bruch a/b, gemischte Zahl g a/b, Periode 0,(3) / 0,3̅ / 0,333… */
+function lese(roh){
+  var s = String(roh || '').trim();
+  if (!s || s.length > 24) return null;
+  s = s.replace(/…|\.\.\.+/g, '~').replace(/\./g, ',').replace(/\s+/g, ' ')
+       .replace(/[÷]/g, '/').replace(/⁄/g, '/');
+  s = s.replace(/((?:\d̅)+)/g, function(t){ return '(' + t.replace(/̅/g, '') + ')'; });
+  var r;
+  if ((r = s.match(/^(\d+) (\d+) ?\/ ?(\d+)$/))) {
+    var ga = +r[1], za = +r[2], na = +r[3]; if (!na) return null;
+    return { w: kurz(ga * na + za, na), gek: ggt(za, na) === 1 };
+  }
+  var t = s.replace(/ /g, '');
+  if ((r = t.match(/^(\d+)\/(\d+)$/))) {
+    if (!+r[2]) return null;
+    return { w: kurz(+r[1], +r[2]), gek: ggt(+r[1], +r[2]) === 1 };
+  }
+  if ((r = t.match(/^(\d*),(\d*)\((\d+)\)$/)) || (r = t.match(/^(\d*),(\d*?)(\d)~$/))) {
+    var I = r[1] || '0', P = r[2], Q = r[3];
+    var N = parseInt(I + P + Q, 10), M = parseInt(I + P, 10);
+    return { w: kurz(N - M, (Math.pow(10, Q.length) - 1) * Math.pow(10, P.length)), gek: true, dez: true };
+  }
+  if ((r = t.match(/^(\d*),(\d+)$/)) || (r = t.match(/^(\d+),?()$/))) {
+    var ziff = (r[1] || '0') + r[2];
+    return { w: kurz(parseInt(ziff, 10), Math.pow(10, r[2].length)), gek: true, dez: true };
+  }
+  return null;
+}
+function endlich(w){ var n = w[1]; while (n % 2 === 0) n /= 2; while (n % 5 === 0) n /= 5; return n === 1; }
+
+/* Prüfen einer Antwort → Schlüssel für Rückmeldung */
+function bewerte(u, wert, einheit){
+  var soll = kurz(u.soll[0], u.soll[1]);
+  var p = lese(wert);
+  if (u.art === 'groesse') {
+    var liste = typeof u.einheiten === 'string' ? EINHEITEN[u.einheiten] : u.einheiten;
+    if (!p) return 'unlesbar';
+    if (!einheit) return 'keineEinheit';
+    var fak = null;
+    for (var i = 0; i < liste.length; i++) if (liste[i][0] === einheit) fak = liste[i][1];
+    if (!fak) return gleich(p.w, soll) ? 'falscheGroesse' : 'beidesFalsch';
+    var basis = mal(p.w, fak);
+    if (gleich(basis, soll)) return 'ok';
+    if (gleich(p.w, soll)) return 'einheitPasstNicht';
+    return kommaFehler(basis, soll) ? 'komma' : 'falsch';
+  }
+  if (!p) return 'unlesbar';
+  if (gleich(p.w, soll)) return (u.art === 'bruch' && !p.gek) ? 'kuerzen' : 'ok';
+  if (kommaFehler(p.w, soll)) return 'komma';
+  if (u.art === 'bruch' && soll[0] !== soll[1] && gleich(p.w, [soll[1], soll[0]])) return 'kehr';
+  if (p.dez && !endlich(soll)) {
+    var a = p.w[0] / p.w[1], b = soll[0] / soll[1];
+    if (Math.abs(a - b) <= 0.011 * Math.abs(b)) return 'gerundet';
+  }
+  return 'falsch';
+}
+function kommaFehler(w, soll){
+  for (var k = 1; k <= 3; k++) {
+    var z = Math.pow(10, k);
+    if (gleich(w, [soll[0] * z, soll[1]]) || gleich(w, [soll[0], soll[1] * z])) return true;
+  }
+  return false;
+}
+var TEXT = {
+  ok: '✅ Richtig!',
+  kuerzen: '❌ Der Wert stimmt, aber der Bruch ist noch nicht vollständig gekürzt.',
+  komma: '❌ Die Ziffern passen, aber das Komma sitzt an der falschen Stelle.',
+  kehr: '❌ Prüfe, welchen Bruch du umgedreht hast.',
+  gerundet: '❌ Das ist gerundet. Gesucht ist das genaue Ergebnis – mit Periode oder als Bruch.',
+  falsch: '❌ Das stimmt noch nicht. Hol dir einen Tipp oder rechne noch einmal nach.',
+  unlesbar: '❌ Das kann ich nicht lesen. Erlaubt sind Dezimalzahlen, Brüche in der Form a/b und gemischte Zahlen in der Form g a/b.',
+  keineEinheit: '❌ Wähle noch eine Einheit aus.',
+  falscheGroesse: '❌ Die Zahl passt, aber die Einheit gehört zu einer anderen Größe.',
+  beidesFalsch: '❌ Zahl und Einheit stimmen noch nicht.',
+  einheitPasstNicht: '❌ Die Zahl passt nicht zur gewählten Einheit.'
+};
+
+/* ---------- Alle Teilaufgaben einsammeln ---------- */
+var TEILE = [], TEIL = {};
+KA.aufgaben.forEach(function(a){
+  a.teile.forEach(function(t){ t.aufgabe = a; TEILE.push(t); TEIL[t.id] = t; });
+});
+function uid(t, i){ return t.id + '-' + (i + 1); }
+function zustand(id){ if (!S.a[id]) S.a[id] = { e:'', u:'', st:'offen', t:0, gp:false }; return S.a[id]; }
+
+/* ---------- Aufbau ---------- */
+function baue(){
+  $('ka-titel').innerHTML = KA.titel;
+  $('ka-untertitel').innerHTML = KA.untertitel || '';
+  var reiter = $('reiter'), main = $('main');
+
+  function tab(id, text){
+    var b = neu('button', '', text); b.type = 'button'; b.id = 'tab-' + id;
+    b.addEventListener('click', function(){ zeigeKarte(id, true); });
+    reiter.appendChild(b); return b;
+  }
+
+  /* Startkarte */
+  tab('start', '① Meine Fehler');
+  var st = neu('section', 'karte'); st.id = 'karte-start';
+  var h = '<div class="block"><h2>Wo hattest du Fehler?</h2>' +
+    '<p>Du hast deine Klassenarbeit zurück. Statt einer Berichtigung rechnest du zu jeder Teilaufgabe, ' +
+    'in der du Punkte verloren hast, <b>zwei ähnliche Aufgaben</b> neu. Vorher siehst du noch einmal, ' +
+    'wie die Aufgabe aus der Arbeit gelöst wird.</p>' +
+    '<p><b>Tippe alle Teilaufgaben an, bei denen du Fehler hattest.</b> Du kannst jederzeit hierher zurückkommen und weitere dazunehmen.</p>';
+  KA.aufgaben.forEach(function(a){
+    h += '<div class="gruppe"><h3>Aufgabe ' + a.nr + ' · ' + a.titel + '</h3>' +
+      '<p>' + a.auftrag + '</p><div class="wahl">';
+    a.teile.forEach(function(t){
+      h += '<button type="button" id="wahl-' + t.id + '" aria-pressed="false"><span class="nr">' + t.id + '</span>' +
+        (t.knopf || t.term) + '</button>';
+    });
+    h += '</div></div>';
+  });
+  h += '<p class="zaehler" id="zaehler"></p>' +
+    '<button type="button" class="btn btn-los" id="los" disabled>Teilaufgaben auswählen</button></div>';
+  st.innerHTML = h; main.appendChild(st);
+  TEILE.forEach(function(t){
+    $('wahl-' + t.id).addEventListener('click', function(){
+      S.wahl[t.id] = !S.wahl[t.id]; if (!S.wahl[t.id]) delete S.wahl[t.id];
+      zeigeWahl(); sichern();
+    });
+  });
+  $('los').addEventListener('click', function(){
+    var erste = TEILE.filter(function(t){ return S.wahl[t.id]; })[0];
+    if (erste) zeigeKarte(erste.id, true);
+  });
+
+  /* Teilaufgaben-Karten */
+  TEILE.forEach(function(t){
+    var a = t.aufgabe;
+    tab(t.id, t.id + ' · ' + t.name).hidden = true;
+    var k = neu('section', 'karte'); k.id = 'karte-' + t.id;
+    var x = '<div class="block"><p class="eyebrow">Aufgabe ' + t.id + ' · ' + a.ort + '</p>' +
+      '<h2>' + t.name + '</h2>' +
+      '<div class="ka-box"><h3>📄 Die Aufgabe aus deiner Arbeit</h3><p>' + a.auftrag + '</p>' +
+      (a.kontext ? '<p>' + a.kontext + '</p>' : '') +
+      '<p class="ka-term">' + t.id.slice(-1) + ') ' + t.term + '</p></div>' +
+      (t.stand ? '<div class="stand-box"><b>Wo wir gerade stehen:</b> ' + t.stand + '</div>' : '') +
+      '<div class="weg-box"><h3>🔎 So wird sie gelöst</h3><ol>' +
+      t.weg.map(function(s){ return '<li>' + s + '</li>'; }).join('') + '</ol></div>' +
+      (t.fehler ? '<div class="fehler-box"><h3>⚠️ Typischer Fehler</h3><p>' + t.fehler + '</p></div>' : '') +
+      '</div><div class="block"><h3>✏️ Jetzt du: zwei ähnliche Aufgaben</h3>' +
+      '<p>Rechne im Heft und tippe dann dein Ergebnis ein.</p>' +
+      (t.eingabeHinweis ? '<p class="hinweis">' + t.eingabeHinweis + '</p>' : '');
+    t.ueb.forEach(function(u, i){
+      var id = uid(t, i);
+      var im = u.art === 'bruch' || u.text ? 'text' : 'decimal';
+      x += '<div class="ueb" id="u-' + id + '"><h4>Übung ' + (i + 1) + '</h4>' +
+        '<p class="frage">' + u.frage + '</p><div class="zeile">' +
+        '<input type="text" id="in-' + id + '" inputmode="' + im + '" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="Ergebnis" aria-label="Ergebnis Übung ' + (i + 1) + '">';
+      if (u.art === 'groesse') {
+        var liste = typeof u.einheiten === 'string' ? EINHEITEN[u.einheiten] : u.einheiten;
+        x += '<select id="un-' + id + '" aria-label="Einheit"><option value="">Einheit …</option>' +
+          liste.map(function(e){ return '<option value="' + e[0] + '">' + e[0] + '</option>'; }).join('') + '</select>';
+      }
+      x += '</div><div class="knoepfe">' +
+        '<button type="button" class="btn btn-pruefen" id="pr-' + id + '">Prüfen</button>' +
+        '<button type="button" class="btn btn-leeren" id="le-' + id + '" hidden>Leeren</button>' +
+        '<button type="button" class="btn btn-tipp" id="ti-' + id + '" hidden>💡 Tipp 1 zeigen</button></div>' +
+        '<div class="fb" id="fb-' + id + '"></div><div class="tipps" id="tp-' + id + '">';
+      var stufen = u.tipps.concat([u.weg]);
+      stufen.forEach(function(s, j){
+        var last = j === stufen.length - 1;
+        x += '<div class="tippstufe" id="ts-' + id + '-' + j + '"><b class="tl">' +
+          (last ? 'Lösungsweg' : 'Tipp ' + (j + 1)) + ':</b> ' + s + '</div>';
+      });
+      x += '</div></div>';
+    });
+    x += '</div>';
+    k.innerHTML = x; main.appendChild(k);
+    t.ueb.forEach(function(u, i){
+      var id = uid(t, i);
+      $('pr-' + id).addEventListener('click', function(){ pruefe(t, i); });
+      $('le-' + id).addEventListener('click', function(){ leere(t, i); });
+      $('ti-' + id).addEventListener('click', function(){ tipp(t, i); });
+      $('in-' + id).addEventListener('input', function(){ zustand(id).e = this.value; sichern(); });
+      $('in-' + id).addEventListener('keydown', function(ev){ if (ev.key === 'Enter') pruefe(t, i); });
+      var sel = $('un-' + id);
+      if (sel) sel.addEventListener('change', function(){ zustand(id).u = this.value; sichern(); });
+    });
+  });
+
+  /* Abschlusskarte */
+  tab('ende', '✅ Meine Korrektur');
+  var en = neu('section', 'karte'); en.id = 'karte-ende';
+  en.innerHTML = '<div class="block"><h2>Meine Korrektur</h2>' +
+    '<p>Hier siehst du, welche Teilaufgaben du schon nachgearbeitet hast. Eine Teilaufgabe ist geschafft, ' +
+    'wenn beide ähnlichen Aufgaben richtig sind.</p><div id="ende-inhalt"></div></div>';
+  main.appendChild(en);
+}
+
+/* ---------- Anzeige aus dem Zustand ---------- */
+function zeigeWahl(){
+  var n = 0;
+  TEILE.forEach(function(t){
+    var an = !!S.wahl[t.id]; if (an) n++;
+    var b = $('wahl-' + t.id); b.classList.toggle('an', an); b.setAttribute('aria-pressed', an ? 'true' : 'false');
+    $('tab-' + t.id).hidden = !an;
+  });
+  $('zaehler').textContent = n ? 'Ausgewählt: ' + n + (n === 1 ? ' Teilaufgabe' : ' Teilaufgaben') : 'Noch nichts ausgewählt.';
+  var erste = TEILE.filter(function(t){ return S.wahl[t.id]; })[0];
+  $('los').disabled = !erste;
+  $('los').textContent = erste ? 'Los geht’s mit ' + erste.id + ' →' : 'Teilaufgaben auswählen';
+  fortschritt();
+}
+function zeigeUeb(t, i){
+  var id = uid(t, i), z = zustand(id), u = t.ueb[i];
+  var inp = $('in-' + id), sel = $('un-' + id), fb = $('fb-' + id);
+  inp.value = z.e; if (sel) sel.value = z.u;
+  var fertig = z.st === 'ok';
+  inp.disabled = fertig; if (sel) sel.disabled = fertig;
+  $('pr-' + id).hidden = fertig;
+  $('le-' + id).hidden = z.st !== 'nok';
+  if (z.st === 'offen') { fb.className = 'fb'; fb.innerHTML = ''; }
+  else { fb.className = 'fb ' + (fertig ? 'ok' : 'nok'); fb.innerHTML = TEXT[z.r] || TEXT.falsch; }
+  var stufen = u.tipps.length + 1;
+  $('tp-' + id).classList.toggle('an', z.gp && z.t > 0);
+  for (var j = 0; j < stufen; j++) $('ts-' + id + '-' + j).classList.toggle('an', j < z.t);
+  var tb = $('ti-' + id);
+  tb.hidden = !z.gp || fertig || z.t >= stufen;
+  tb.textContent = z.t === stufen - 1 ? '💡 Lösungsweg zeigen' : '💡 Tipp ' + (z.t + 1) + ' zeigen';
+}
+function pruefe(t, i){
+  var id = uid(t, i), z = zustand(id), u = t.ueb[i];
+  z.e = $('in-' + id).value; var sel = $('un-' + id); if (sel) z.u = sel.value;
+  if (!z.e.trim()) { var fb = $('fb-' + id); fb.className = 'fb nok'; fb.innerHTML = '❌ Tippe zuerst ein Ergebnis ein.'; return; }
+  z.r = bewerte(u, z.e, z.u);
+  z.st = z.r === 'ok' ? 'ok' : 'nok';
+  z.gp = true;
+  sichern(); zeigeUeb(t, i); setzeFormel($('fb-' + id)); fortschritt();
+}
+function leere(t, i){
+  var id = uid(t, i), z = zustand(id);
+  z.e = ''; z.u = ''; z.st = 'offen'; z.r = '';
+  sichern(); zeigeUeb(t, i); fortschritt();
+  $('in-' + id).focus();
+}
+function tipp(t, i){
+  var id = uid(t, i), z = zustand(id);
+  z.t = Math.min(z.t + 1, t.ueb[i].tipps.length + 1);
+  sichern(); zeigeUeb(t, i);
+  var stufe = $('ts-' + id + '-' + (z.t - 1)); if (stufe) setzeFormel(stufe);
+}
+function teilFertig(t){ return t.ueb.every(function(u, i){ return zustand(uid(t, i)).st === 'ok'; }); }
+function fortschritt(){
+  var gew = TEILE.filter(function(t){ return S.wahl[t.id]; }), fertig = 0;
+  TEILE.forEach(function(t){ $('tab-' + t.id).classList.toggle('fertig', teilFertig(t)); });
+  var h = '';
+  if (!gew.length) {
+    h = '<p class="fazit offen">Du hast noch keine Teilaufgabe ausgewählt. Kreuze sie auf der Karte „Meine Fehler" an.</p>';
+  } else {
+    h = '<ul class="liste">';
+    gew.forEach(function(t){
+      var ok = teilFertig(t); if (ok) fertig++;
+      h += '<li><span class="titel">' + t.id + ' · ' + t.name + '</span><br>' +
+        t.ueb.map(function(u, i){
+          var st = zustand(uid(t, i)).st;
+          return 'Übung ' + (i + 1) + ': ' + (st === 'ok' ? '<span class="status-ok">✅ richtig</span>'
+            : st === 'nok' ? '<span class="status-nok">❌ noch nicht richtig</span>' : 'noch offen');
+        }).join(' · ') + '</li>';
+    });
+    h += '</ul>';
+    h += fertig === gew.length
+      ? '<p class="fazit ok">✅ Alle ' + gew.length + ' Teilaufgaben geschafft! Zeig diese Karte deiner Lehrkraft.</p>'
+      : '<p class="fazit offen">Geschafft: ' + fertig + ' von ' + gew.length + ' Teilaufgaben.</p>';
+  }
+  $('ende-inhalt').innerHTML = h;
+  $('tab-ende').classList.toggle('fertig', gew.length > 0 && fertig === gew.length);
+}
+function zeigeKarte(id, scrollen){
+  if (id !== 'start' && id !== 'ende' && !S.wahl[id]) id = 'start';
+  var alle = document.querySelectorAll('.karte');
+  for (var i = 0; i < alle.length; i++) alle[i].classList.remove('aktiv');
+  var tabs = document.querySelectorAll('.reiter button');
+  for (var j = 0; j < tabs.length; j++) tabs[j].classList.remove('aktiv');
+  $('karte-' + id).classList.add('aktiv'); $('tab-' + id).classList.add('aktiv');
+  S.karte = id; sichern();
+  if (scrollen) window.scrollTo(0, 0);
+}
+
+/* ---------- Start ---------- */
+var alt = lies();
+if (alt && alt.a) S = alt;
+baue();
+TEILE.forEach(function(t){ t.ueb.forEach(function(u, i){ zeigeUeb(t, i); }); });
+zeigeWahl();
+zeigeKarte(S.karte || 'start', false);
+
+/* T-Rex */
+var rex = $('trex'), rexText = $('trex-text');
+if (rex) rex.addEventListener('click', function(){
+  rexText.classList.toggle('an'); setTimeout(function(){ rexText.classList.remove('an'); }, 2000);
+});
+})();
+/* ============ ENDE BAUSTEIN Rückblick-KA-Engine ============ */
+
+/* =============================================================================
+   BAUSTEIN: MathJax-Notfall-Anzeige  (MATHJAX-FALLBACK)
+   Gepflegt im Wartungs-Projekt. Unverändert ans ENDE des Seiten-Skripts kopieren
+   (in die Seite hinein – nie per <script src> verlinken, TEIL 8.1).
+   Voraussetzung auf der Seite: das .frac-CSS mit Kind-Selektoren (TEIL 7.2):
+     .frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;
+           margin:0 .2em;line-height:1.15;}
+     .frac > span{display:block;padding:0 .35em;}
+     .frac > span:first-child{border-bottom:1.8px solid currentColor;padding-bottom:.1em;}
+     .frac > span:last-child{padding-top:.1em;}
+   ========================================================================== */
+/* =============================================================================
+   Notfall-Anzeige für Formeln (MATHJAX-FALLBACK)
+   Lädt MathJax nicht (Schul-WLAN, Vorschau, Offline-Kopie), blieben sonst
+   \( ... \) als Rohtext mit Backslashes stehen. Dann werden die TeX-Ausdrücke
+   hier in lesbares HTML gewandelt: √ mit Klammer, Brüche als .frac-Konstrukt
+   (kein Schrägstrich!), Hoch-/Tiefstellungen als sup/sub, Sonderzeichen direkt.
+   Ist MathJax da, passiert nichts.
+   ========================================================================== */
+(function(){
+  var AUF = '\u0001', ZU = '\u0002';   /* Platzhalter fuer { } aus \left\{ */
+
+  function leseGruppe(t, i){
+    if (t.charAt(i) !== '{') return null;
+    var tiefe = 0;
+    for (var j = i; j < t.length; j++){
+      if (t.charAt(j) === '{') tiefe++;
+      else if (t.charAt(j) === '}'){ tiefe--; if (tiefe === 0) return [t.slice(i+1, j), j+1]; }
+    }
+    return null;
+  }
+
+  function strukturen(t){
+    var aus = '', i = 0;
+    while (i < t.length){
+      var m = /^\\(dfrac|tfrac|frac|sqrt)/.exec(t.slice(i));
+      if (m){
+        var a = leseGruppe(t, i + m[0].length);
+        if (a){
+          if (m[1] === 'sqrt'){
+            var inn = strukturen(a[0]);
+            aus += /^[0-9A-Za-z]+$/.test(a[0]) ? '√' + inn : '√(' + inn + ')';
+            i = a[1]; continue;
+          }
+          var b = leseGruppe(t, a[1]);
+          if (b){
+            aus += '<span class="frac"><span>' + strukturen(a[0]) + '</span><span>'
+                 + strukturen(b[0]) + '</span></span>';
+            i = b[1]; continue;
+          }
+        }
+      }
+      aus += t.charAt(i); i++;
+    }
+    return aus;
+  }
+
+  function texHtml(t){
+    t = t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    t = t.replace(/\\rightarrow/g, '→').replace(/\\leftarrow/g, '←')
+         .replace(/\\Rightarrow/g, '⇒').replace(/\\Leftarrow/g, '⇐')
+         .replace(/\\left\\\{/g, AUF).replace(/\\right\\\}/g, ZU)
+         .replace(/\\left(?![a-zA-Z])/g, '').replace(/\\right(?![a-zA-Z])/g, '')
+         .replace(/\\\{/g, AUF).replace(/\\\}/g, ZU);
+    t = t.replace(/\\cdot/g, '·').replace(/\\times/g, '·')
+         .replace(/\\approx/g, '≈').replace(/\\neq/g, '≠')
+         .replace(/\\leq/g, '≤').replace(/\\le\b/g, '≤')
+         .replace(/\\geq/g, '≥').replace(/\\ge\b/g, '≥')
+         .replace(/\\pm/g, '±').replace(/\\mp/g, '∓')
+         .replace(/\\ldots/g, '…').replace(/\\dots/g, '…')
+         .replace(/\\to\b/g, '→')
+         .replace(/\\infty/g, '∞')
+         .replace(/\\pi/g, 'π').replace(/\\alpha/g, 'α')
+         .replace(/\\beta/g, 'β').replace(/\\gamma/g, 'γ')
+         .replace(/\\Delta/g, 'Δ').replace(/\\delta/g, 'δ')
+         .replace(/\\min/g, 'min').replace(/\\max/g, 'max')
+         .replace(/\\text\{([^{}]*)\}/g, '$1')
+         .replace(/\\mathrm\{([^{}]*)\}/g, '$1');
+    t = strukturen(t);
+    t = t.replace(/\^\{([^{}]*)\}/g, '<sup>$1</sup>')
+         .replace(/\^(-?[0-9A-Za-z])/g, '<sup>$1</sup>')
+         .replace(/_\{([^{}]*)\}/g, '<sub>$1</sub>')
+         .replace(/_(-?[0-9A-Za-z])/g, '<sub>$1</sub>');
+    t = t.replace(/\{,\}/g, ',').replace(/\\,/g, ' ').replace(/\\;/g, ' ')
+         .replace(/\\ /g, ' ').replace(/[{}]/g, '')
+         .replace(new RegExp(AUF, 'g'), '{').replace(new RegExp(ZU, 'g'), '}');
+    return t;
+  }
+
+  function mathNotfall(){
+    if (window.MathJax && window.MathJax.typesetPromise) return;  /* MathJax ist da */
+    var lauf = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
+      acceptNode: function(n){
+        var tag = n.parentNode && n.parentNode.nodeName;
+        if (tag === 'SCRIPT' || tag === 'STYLE') return NodeFilter.FILTER_REJECT;
+        return n.nodeValue.indexOf('\\(') > -1 ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP;
+      }
+    });
+    var treffer = [], n;
+    while ((n = lauf.nextNode())) treffer.push(n);
+    treffer.forEach(function(k){
+      var teile = k.nodeValue.split(/\\\(([\s\S]+?)\\\)/);
+      if (teile.length < 2) return;
+      var html = '';
+      for (var i = 0; i < teile.length; i++){
+        html += (i % 2)
+          ? '<span class="tex-ersatz">' + texHtml(teile[i]) + '</span>'
+          : teile[i].replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      }
+      var huelle = document.createElement('span');
+      huelle.innerHTML = html;
+      var frag = document.createDocumentFragment();
+      while (huelle.firstChild) frag.appendChild(huelle.firstChild);
+      k.parentNode.replaceChild(frag, k);
+    });
+  }
+  window.addEventListener('load', function(){ setTimeout(mathNotfall, 3500); });
+})();
+
+</script>
+
+<!-- ============================================================
+     BAUSTEIN: Navigationsleiste  (v5, 04.11.2026)
+     Pflicht auf jeder Lernseite (anweisung_lernseiten.txt, TEIL 3.6).
+     Einfügen: UNVERÄNDERT direkt vor dem T-Rex bzw. vor </body> – nicht in <main>.
+     - 🏠 schwebender Knopf unten links (immer sichtbar, T-Rex bleibt rechts) + Leiste am Seitenende.
+     - 🏠 Startseite: feste Adresse, funktioniert aus jedem Unterordner.
+     - 📚 Alles für …: liest <meta name="klasse"> und hängt ?klasse=… an.
+       Fehlt das Meta-Tag, bleibt der Knopf unsichtbar.
+     - Seit v5: Alle drei Links (🏠, Startseite, Alles für …) hängen zusätzlich
+       start=<fach> an (aus <meta name="fach">, sonst aus dem Ordner bio/mathe/…).
+       Die Startseite öffnet dann zuerst den Reiter dieses Fachs; die anderen
+       Fächer bleiben als Reiter erreichbar.
+     - ✉️ Feedback: Fenster mit Art (Fehler/Idee/Lob) und Textfeld.
+       "Mail öffnen" startet das eigene Mailprogramm; Seitentitel und
+       Seitenadresse stehen automatisch drin. Kein fremder Dienst.
+       Empfänger: NUR in FB_NAME/FB_DOMAIN unten ändern.
+     - Impressum & Datenschutz: feste Adresse, seit v4 freigeschaltet
+       (impressum.html im Repo-Root existiert).
+     - Eigene Klassen mit Präfix "dino-", Systemschrift,
+       kein Speicher, Schrift ≥ 1rem, Tipp-Ziele ≥ 44 px.
+     - Die Kommentarzeilen BAUSTEIN/ENDE BAUSTEIN bleiben stehen –
+       pruefe.py und das Nachrüst-Skript erkennen den Block daran.
+     ============================================================ -->
+<style>
+.dino-nav{max-width:1024px;margin:2.5rem auto 5rem;padding:0 1rem;
+  font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;}
+.dino-nav-innen{display:flex;flex-wrap:wrap;gap:.6rem;justify-content:center;
+  border-top:2px solid #e4dcd0;padding-top:1.1rem;}
+.dino-nav a,.dino-nav button{display:inline-flex;align-items:center;gap:.4rem;
+  min-height:44px;padding:.5rem 1.1rem;border:2px solid #22303f;border-radius:.6rem;
+  background:#fff;color:#22303f;text-decoration:none;cursor:pointer;
+  font-family:inherit;font-size:1rem;font-weight:700;line-height:1.2;
+  width:auto;margin:0;box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;}
+.dino-nav a:active,.dino-nav button:active{transform:scale(.97);}
+.dino-nav a.dino-nav-start{background:#22303f;color:#fff;}
+.dino-nav a[hidden]{display:none;}
+.dino-fb{width:min(32rem,calc(100vw - 2rem));border:2px solid #22303f;border-radius:.9rem;
+  padding:1.2rem;color:#22303f;background:#fff;
+  font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;font-size:1rem;}
+.dino-fb::backdrop{background:rgba(34,48,63,.45);}
+.dino-fb h2{margin:0 0 .3rem;font-size:1.2rem;}
+.dino-fb p{margin:.4rem 0;font-size:1rem;line-height:1.45;}
+.dino-fb-seite{font-weight:700;}
+.dino-fb-arten{display:flex;flex-wrap:wrap;gap:.5rem;margin:.7rem 0;border:0;padding:0;}
+.dino-fb-arten legend{font-weight:700;margin-bottom:.4rem;font-size:1rem;}
+.dino-fb-arten label{display:inline-flex;align-items:center;gap:.35rem;min-height:44px;
+  padding:.4rem .9rem;border:2px solid #e4dcd0;border-radius:.6rem;cursor:pointer;font-size:1rem;}
+.dino-fb-arten input{width:1.1rem;height:1.1rem;margin:0;}
+.dino-fb-arten label:has(input:checked){border-color:#22303f;background:#eef0f3;}
+.dino-fb textarea{width:100%;box-sizing:border-box;min-height:7rem;padding:.6rem;
+  border:2px solid #e4dcd0;border-radius:.6rem;font-family:inherit;font-size:1rem;color:#22303f;}
+.dino-fb textarea:focus{outline:none;border-color:#22303f;}
+.dino-fb-knoepfe{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.8rem;}
+.dino-fb-knoepfe button{min-height:44px;padding:.5rem 1rem;border-radius:.6rem;
+  border:2px solid #22303f;background:#fff;color:#22303f;font-family:inherit;
+  font-size:1rem;font-weight:700;cursor:pointer;width:auto;margin:0;}
+.dino-fb-knoepfe .dino-fb-senden{background:#22303f;color:#fff;}
+.dino-fb-meldung{min-height:1.4rem;font-weight:700;}
+.dino-fb-meldung.ok{color:#1e7d32;}
+.dino-fb-meldung.nok{color:#c1272d;}
+.dino-home{position:fixed;left:.7rem;bottom:.7rem;z-index:49;width:44px;height:44px;
+  display:flex;align-items:center;justify-content:center;border-radius:50%;
+  background:#fff;border:2px solid #22303f;text-decoration:none;font-size:1.3rem;
+  box-shadow:0 2px 6px rgba(34,48,63,.25);-webkit-tap-highlight-color:transparent;}
+.dino-home:active{transform:scale(.93);}
+@media print{.dino-nav,.dino-fb,.dino-home{display:none;}}
+</style>
+<a class="dino-home" href="https://szymczak75.github.io/Schule/dino_hub.html" title="Zur Startseite" aria-label="Zur Startseite">🏠</a>
+<nav class="dino-nav" aria-label="Seitennavigation">
+  <div class="dino-nav-innen">
+    <a class="dino-nav-start" href="https://szymczak75.github.io/Schule/dino_hub.html">🏠 Startseite</a>
+    <a id="dino-nav-klasse" href="https://szymczak75.github.io/Schule/dino_hub.html" hidden>📚 Alles für …</a>
+    <button type="button" id="dino-nav-fb">✉️ Feedback zu dieser Seite</button>
+    <a class="dino-nav-impressum" href="https://szymczak75.github.io/Schule/impressum.html">Impressum &amp; Datenschutz</a>
+  </div>
+</nav>
+<dialog class="dino-fb" id="dino-fb" aria-labelledby="dino-fb-titel">
+  <h2 id="dino-fb-titel">✉️ Feedback zu dieser Seite</h2>
+  <p>Seite: <span class="dino-fb-seite" id="dino-fb-seite"></span></p>
+  <fieldset class="dino-fb-arten">
+    <legend>Worum geht es?</legend>
+    <label><input type="radio" name="dino-fb-art" value="Fehler" checked> 🐞 Fehler</label>
+    <label><input type="radio" name="dino-fb-art" value="Idee"> 💡 Idee</label>
+    <label><input type="radio" name="dino-fb-art" value="Lob"> 👍 Lob</label>
+  </fieldset>
+  <textarea id="dino-fb-text" aria-label="Deine Nachricht"
+    placeholder="Was ist dir aufgefallen? Bei Fehlern: Welche Karte, welche Aufgabe?"></textarea>
+  <p>Bitte schreib keine persönlichen Daten hinein.</p>
+  <div class="dino-fb-knoepfe">
+    <button type="button" class="dino-fb-senden" id="dino-fb-senden">✉️ Mail öffnen</button>
+    <button type="button" id="dino-fb-kopieren">📋 Text kopieren</button>
+    <button type="button" id="dino-fb-zu">Schließen</button>
+  </div>
+  <p class="dino-fb-meldung" id="dino-fb-meldung" aria-live="polite"></p>
+  <p>Kein Mailprogramm? Text kopieren und an <b id="dino-fb-adresse"></b> schicken.</p>
+</dialog>
+<script>
+(function(){
+  /* Empfänger – nur hier ändern */
+  var FB_NAME = 'aszymczak', FB_DOMAIN = 'my-mcg.de';
+  var START = 'https://szymczak75.github.io/Schule/dino_hub.html';
+
+  /* Fach der Seite → Startseite öffnet zuerst diesen Reiter */
+  var FAECHER = ['mathe', 'bio', 'kompass'];
+  var mf = document.querySelector('meta[name="fach"]');
+  var fach = mf ? (mf.getAttribute('content') || '').trim().toLowerCase() : '';
+  if (FAECHER.indexOf(fach) < 0) {
+    var teile = location.pathname.split('/');
+    fach = '';
+    for (var i = 0; i < teile.length; i++) {
+      var t = teile[i].toLowerCase();
+      if (FAECHER.indexOf(t) >= 0) { fach = t; break; }
+    }
+  }
+  var startUrl = fach ? START + '?start=' + fach : START;
+  var heim = document.querySelectorAll('.dino-home, .dino-nav-start');
+  for (var j = 0; j < heim.length; j++) heim[j].href = startUrl;
+
+  /* 📚 Alles für … */
+  var m = document.querySelector('meta[name="klasse"]');
+  var k = m ? (m.getAttribute('content') || '').trim() : '';
+  var a = document.getElementById('dino-nav-klasse');
+  if (k && a) {
+    a.href = START + '?klasse=' + encodeURIComponent(k) + (fach ? '&start=' + fach : '');
+    var name = /^\d+$/.test(k) ? 'Klasse ' + parseInt(k, 10) : 'die ' + k.replace('_', '/');
+    a.textContent = '📚 Alles für ' + name;
+    a.hidden = false;
+  }
+
+  /* ✉️ Feedback */
+  var dlg = document.getElementById('dino-fb');
+  var fbBtn = document.getElementById('dino-nav-fb');
+  if (!dlg || !fbBtn) return;
+  var adresse = FB_NAME + '@' + FB_DOMAIN;
+  var titel = (document.title || '').trim() || location.pathname.split('/').pop();
+  var url = location.href.split('#')[0];
+  var text = document.getElementById('dino-fb-text');
+  var meldung = document.getElementById('dino-fb-meldung');
+  document.getElementById('dino-fb-seite').textContent = titel;
+  document.getElementById('dino-fb-adresse').textContent = adresse;
+
+  function art(){
+    var r = dlg.querySelector('input[name="dino-fb-art"]:checked');
+    return r ? r.value : 'Feedback';
+  }
+  function betreff(){ return '[Dino-Feedback] ' + art() + ': ' + titel; }
+  function inhalt(){
+    return 'Seite: ' + titel + '\nAdresse: ' + url + '\nArt: ' + art() +
+           '\n\n' + text.value.trim() + '\n';
+  }
+  function melde(t, ok){ meldung.textContent = t; meldung.className = 'dino-fb-meldung ' + (ok ? 'ok' : 'nok'); }
+  function leer(){
+    if (text.value.trim()) return false;
+    melde('Bitte schreib zuerst etwas in das Feld.', false);
+    text.focus();
+    return true;
+  }
+
+  fbBtn.addEventListener('click', function(){
+    melde('', true);
+    if (typeof dlg.showModal === 'function') dlg.showModal(); else dlg.setAttribute('open', '');
+    text.focus();
+  });
+  document.getElementById('dino-fb-zu').addEventListener('click', function(){
+    if (typeof dlg.close === 'function') dlg.close(); else dlg.removeAttribute('open');
+  });
+  document.getElementById('dino-fb-senden').addEventListener('click', function(){
+    if (leer()) return;
+    location.href = 'mailto:' + adresse + '?subject=' + encodeURIComponent(betreff()) +
+                    '&body=' + encodeURIComponent(inhalt());
+    melde('Dein Mailprogramm öffnet sich. Danke! 🦖', true);
+  });
+  document.getElementById('dino-fb-kopieren').addEventListener('click', function(){
+    if (leer()) return;
+    var ganz = 'Betreff: ' + betreff() + '\n' + inhalt();
+    function ersatz(){
+      var t = document.createElement('textarea');
+      t.value = ganz; document.body.appendChild(t); t.select();
+      var ok = false; try { ok = document.execCommand('copy'); } catch (e) {}
+      document.body.removeChild(t);
+      melde(ok ? 'Kopiert! Jetzt in eine Mail einfügen.' : 'Kopieren ging nicht – bitte Text markieren und kopieren.', ok);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(ganz).then(function(){
+        melde('Kopiert! Jetzt in eine Mail einfügen.', true);
+      }, ersatz);
+    } else ersatz();
+  });
+})();
+</script>
+<!-- ============ ENDE BAUSTEIN Navigationsleiste ============ -->
+<div class="trex" id="trex" title="Made by ASzym" aria-label="Made by ASzym">🦖</div>
+<div class="trex-text" id="trex-text">Made by ASzym</div>
+</body>
+</html>

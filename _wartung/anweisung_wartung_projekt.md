@@ -10,7 +10,7 @@ einem Baustein oder einer Regel wird hier EINMAL umgesetzt und gilt dann in alle
   im Repo – per Branch + Pull Request.
 - `_wartung/allgemein/` – `anweisung_lernseiten.txt`, `wiederkehrende_fehler_checkliste.md`,
   `pruefe.py`, `baustein_mathjax_notfall.js`, `baustein_navigation.html`,
-  `baustein_schritt_fuer_schritt.html`
+  `baustein_schritt_fuer_schritt.html`, `baustein_rueckblick_klassenarbeit.html`
 - `_wartung/geodreieck/` – `geodreieck_baustein.html`
 - `_wartung/unterrichtsvorbereitung/` – `anweisung_C_unterrichtsvorbereitung.md`
 - `_wartung/geogebra/` – Baukasten (`css.txt`, `helfer.js`, `bauer.py`, `koord.py`, `test.js`,
@@ -40,7 +40,7 @@ einem Baustein oder einer Regel wird hier EINMAL umgesetzt und gilt dann in alle
      Meta-Tags, MathJax, Speichern oder Koordinatensysteme, auch den Baukasten und
      „Die harten Formatregeln" in `anweisung_geogebra_projekt.md` nachziehen.
 3. **Sonderpunkte nie verlieren:**
-   - Lernseiten-Anweisung: `thema_rbka.html`, Koordinatensysteme-Abschnitt, die Warnhinweise
+   - Lernseiten-Anweisung: `thema_rbka.html` (TEIL 2.8, Baustein) und `_kavb`, Koordinatensysteme-Abschnitt, die Warnhinweise
      „im Beispieltext nicht die Lösung vorweg nehmen" und „nicht von Anfang an die richtige
      Sortierung vorgeben".
    - Dach-Anweisung: Drei-Produkte-Struktur, Verweise auf die Lernseiten-Anweisung;
