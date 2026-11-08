@@ -18,7 +18,8 @@ von claude.ai ein (siehe `_wartung/LIESMICH.md`). Nach einer Änderung genügt i
 | **Wartung Unterrichtsprojekte** | ganzer Ordner `_wartung` | alles | | | | | | |
 
 **Allgemeine Dateien** (`_wartung/allgemein/`: Lernseiten-Anweisung, Fehler-Checkliste,
-`pruefe.py`, MathJax-Notfall, Navigationsleiste, Schritt-für-Schritt-Vorlage) sind in allen Projekten **identisch** und werden nur hier
+`pruefe.py`, MathJax-Notfall, Navigationsleiste, Schritt-für-Schritt-Vorlage,
+Rückblick-KA-Vorlage) sind in allen Projekten **identisch** und werden nur hier
 geändert.
 
 ## Nur im Projekt „GeoGebra" (`_wartung/geogebra/`)
@@ -86,6 +87,12 @@ kann nur der Nutzer selbst in den Projekteinstellungen auf claude.ai eintragen.
 > (`typ="Schritt für Schritt"`) aus `baustein_schritt_fuer_schritt.html` und ersetze nur die
 > mit ANPASSEN markierten Teile (Lernseiten-Anweisung TEIL 2.7).
 
+### Textbaustein „Rückblick Klassenarbeit" für „HTML erzeugen" und „Unterrichtsvorbereitung"
+> Lädt der Nutzer eine Klassenarbeit hoch und wünscht einen Rückblick bzw. eine Nacharbeit,
+> baue ich eine `_rbka`-Seite (`typ="Rückblick KA"`) aus
+> `baustein_rueckblick_klassenarbeit.html` und schreibe nur den Datenblock `ANPASSEN`
+> (Lernseiten-Anweisung TEIL 2.8). Vorbereitung auf eine Arbeit ist `_kavb`.
+
 ### GeoGebra
 Die Projektanweisung `anweisung_geogebra_projekt.md` nennt beide Dateien und `pruefe.py`
 bereits – dort ist kein zusätzlicher Textbaustein nötig.
@@ -118,6 +125,16 @@ beiden Kopfkommentaren **und** `SFS_VERSION` erhöhen, danach die `_sfs`-Seiten 
 (derzeit `steckbrief_sfs`, `extrempunkte_berechnen_sfs`, `wendepunkte_berechnen_sfs`).
 Der Hub (`build_hub.py`) zeigt `typ="Schritt für Schritt"` mit 🪜 in der Spalte Übung.
 Im GeoGebra-Projekt gibt es diese Seitenart nicht.
+
+## Rückblick-KA-Vorlage
+`baustein_rueckblick_klassenarbeit.html` (Ordner `allgemein`) ist eine vollständige Vorlage für
+`_rbka`-Seiten (Nacharbeit einer zurückgegebenen Klassenarbeit, Lernseiten-Anweisung TEIL 2.8):
+BAUSTEIN-CSS, Schreibhilfen, Rückblick-KA-Engine, MathJax-Notfall und Navigationsleiste sind
+darin enthalten; pro Klassenarbeit wird nur der Datenblock `ANPASSEN` geschrieben.
+`pruefe.py` kennt die Engine-Fassung (`RBKA_VERSION`). Bei einer Änderung an CSS oder Engine:
+Versionsnummer in den Kopfkommentaren **und** `RBKA_VERSION` erhöhen, danach die
+`_rbka`-Seiten nachziehen (derzeit `bruch_dezimal_rbka`). Der Hub (`build_hub.py`) zeigt
+`typ="Rückblick KA"` mit 📋 und `typ="KA-Vorbereitung"` (`_kavb`) mit 🎯.
 
 ## Geodreieck
 Der Baustein ist für die drei Unterrichts-Projekte identisch. Er heißt jetzt überall

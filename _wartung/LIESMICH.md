@@ -12,13 +12,14 @@ Die Projekte holen sich die Dateien über die GitHub-Synchronisation von claude.
 
 | Ordner | Inhalt |
 |---|---|
-| `allgemein/` | `anweisung_lernseiten.txt`, `wiederkehrende_fehler_checkliste.md`, `pruefe.py`, `baustein_mathjax_notfall.js`, `baustein_navigation.html`, `baustein_schritt_fuer_schritt.html` |
+| `allgemein/` | `anweisung_lernseiten.txt`, `wiederkehrende_fehler_checkliste.md`, `pruefe.py`, `baustein_mathjax_notfall.js`, `baustein_navigation.html`, `baustein_schritt_fuer_schritt.html`, `baustein_rueckblick_klassenarbeit.html` |
 | `geodreieck/` | `geodreieck_baustein.html` |
 | `unterrichtsvorbereitung/` | `anweisung_C_unterrichtsvorbereitung.md` |
 | `geogebra/` | Baukasten (`css.txt`, `helfer.js`, `bauer.py`, `koord.py`, `test.js`, `LIESMICH.md`) und `anweisung_geogebra_projekt.md`, `geogebra_befehle_geprueft.md`, `geogebra_roadmap.md`, `projekt_aufbau.md` |
 | `plan/` | laufende Planung (`plan_navigation_impressum.md`) und Entwürfe |
 | `PROJEKT-LANDKARTE.md` | welche Datei in welches Projekt gehört |
 | `anweisung_wartung_projekt.md` | Text für das Feld „Anweisungen" des Wartungs-Projekts |
+| `projektanweisungen.md` | Texte für das Feld „Projektanweisungen" der übrigen Projekte (kurzer Verweis auf `_wartung/`) |
 
 ## Welches Projekt synchronisiert welche Ordner?
 

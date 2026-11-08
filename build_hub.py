@@ -45,6 +45,9 @@ TYP_ICON = {
     "Übung":     ("✏️", "ue",    "✏️"),
     "Schritt für Schritt": ("🪜", "sfs", "🪜"),
     "Test":      ("🔍", "test",  "🔍"),
+    "Rückblick KA":    ("📋", "rbka", "📋"),
+    "KA-Vorbereitung": ("🎯", "kavb", "🎯"),
+    "Rückblick":       ("🔁", "rb",   "🔁"),
     "Bonus":     ("⭐", "bonus", "⭐"),
     "Lehrer":    ("👨‍🏫", "lehrer", "👨‍🏫"),
 }
@@ -1038,6 +1041,7 @@ TPL_HEAD = r"""<!DOCTYPE html>
   .kbadge.leer{background:#f1f5f9;color:#94a3b8}
   .kbadge.lehrer{background:#fef3c7;color:#92400e;display:none}
   .kbadge.rbka{background:#fef3c7;color:#b45309}
+  .kbadge.kavb{background:#dcfce7;color:#166534}
   body.lehrer-mode .kbadge.lehrer{display:inline-block}
   .kachel-links{margin-top:.5rem;border-top:1px solid var(--bl);padding-top:.5rem;display:flex;flex-direction:column;gap:.2rem;cursor:default}
   .kachel-links a{font-size:.78rem;color:var(--mathe);text-decoration:none;padding:.2rem .1rem;display:block}
