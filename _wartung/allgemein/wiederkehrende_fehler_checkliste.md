@@ -279,6 +279,10 @@ Diese Punkte standen offen und sind inzwischen als Regel in
   Ziffern als Reiter, Schrift unter 1rem, eigene Blautöne und einen toten Weiter-Knopf.
   `pruefe.py` meldet fehlende Engine, doppelte Teilaufgaben-IDs und Teilaufgaben ohne genau
   zwei Übungen als `RBKA`.
+- **Änderungen kamen als Dateien zum Einspielen statt als Pull Request** (November 2026): Ein
+  Chat ohne Schreibzugriff gab Baustein und `pruefe.py` zum Hochladen ins Wartungs-Projekt
+  heraus. Seitdem gilt TEIL 0 Nr. 26: Repo mit Schreibzugriff anhängen, Branch, Pull Request,
+  dem Nutzer nur den Link geben.
 
 ---
 

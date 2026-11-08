@@ -5,7 +5,7 @@ Prüf-Brille für interaktive Lernseiten
 Statischer Linter zu `wiederkehrende_fehler_checkliste.md` und `anweisung_lernseiten.txt`.
 Prüft jede HTML-Lernseite auf die Fehler, die dort als wiederkehrend dokumentiert sind.
 Gilt für alle vier Projekte (Unterrichtsvorbereitung, HTML erzeugen, Debugging, GeoGebra)
-und wird NUR im Wartungs-Projekt geändert.
+und wird nur per Pull Request im Repo geändert (anweisung_lernseiten.txt, TEIL 0 Nr. 26).
 
 Aufruf:   python3 pruefe.py [ordner_oder_datei ...]
           python3 pruefe.py ordner/ --kurz           (nur Dateien mit Fehlern)
@@ -23,7 +23,8 @@ Was dieser Linter NICHT kann (bleibt Handarbeit bzw. Browsertest):
   - ob der Stand ein Neuladen wirklich vollständig übersteht (Browsertest: Seite
     bearbeiten, neu laden, vergleichen)
 
-Stand: 08.11.2026 (Rückblick KA _rbka aus baustein_rueckblick_klassenarbeit.html, TEIL 2.8; neues Suffix
+Stand: 08.11.2026 (Rückblick-KA-Engine v2: negative soll-Werte, art 'zeichen';
+       Rückblick KA _rbka aus baustein_rueckblick_klassenarbeit.html, TEIL 2.8; neues Suffix
        _kavb für KA-Vorbereitung, TEIL 9; Schritt für Schritt _sfs, TEIL 2.7; Navigationsleiste
        Pflicht, TEIL 3.6; Google Fonts nicht mehr erlaubt, TEIL 8.1)
 """
@@ -58,7 +59,7 @@ SFS_MARKE = 'BAUSTEIN: Schritt-für-Schritt-Engine'
 
 # Rückblick-KA-Engine (baustein_rueckblick_klassenarbeit.html, TEIL 2.8)
 RBKA_TYP = 'Rückblick KA'
-RBKA_VERSION = 'v1'
+RBKA_VERSION = 'v2'
 RBKA_MARKE = 'BAUSTEIN: Rückblick-KA-Engine'
 
 # Navigationsleiste (baustein_navigation.html, TEIL 3.6)
@@ -288,8 +289,11 @@ def pruefe(pfad):
                     n_ueb = len(re.findall(r'\bfrage:', t))
                     if n_ueb != 2:
                         fehler('RBKA', 'Teilaufgabe %s hat %d ähnliche Aufgaben statt genau 2' % (tid, n_ueb))
-                    if len(re.findall(r'\bsoll:\s*\[\s*\d+\s*,\s*[1-9]\d*\s*\]', t)) < n_ueb:
-                        fehler('RBKA', 'Teilaufgabe %s: nicht jede Übung hat soll: [Zähler, Nenner]' % tid)
+                    n_soll = len(re.findall(r'\bsoll:\s*\[\s*-?\d+\s*,\s*[1-9]\d*\s*\]', t)) + \
+                             len(re.findall(r"\bart:\s*'zeichen'[^}]*?\bsoll:\s*'[<>=]'", t))
+                    if n_soll < n_ueb:
+                        fehler('RBKA', 'Teilaufgabe %s: nicht jede Übung hat soll: [Zähler, Nenner] '
+                                       'bzw. bei art \'zeichen\' soll: \'<\'|\'>\'|\'=\'' % tid)
                     if len(re.findall(r'\btipps:\s*\[', t)) < n_ueb:
                         fehler('RBKA', 'Teilaufgabe %s: nicht jede Übung hat tipps' % tid)
                     if not re.search(r"\bname:\s*'[^']*[A-Za-zÄÖÜäöü]{3}", t) or \

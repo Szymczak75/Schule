@@ -73,6 +73,13 @@ Ausnahme, auch beim Debuggen einzelner Seiten.
     `baustein_rueckblick_klassenarbeit.html`; nur der Datenblock `ANPASSEN` wird geschrieben, je
     Teilaufgabe der KA eine Karte mit genau zwei ähnlichen Aufgaben (TEIL 2.8).
     Vorbereitung **auf** eine Klassenarbeit ist dagegen `_kavb` (TEIL 9).
+26. **Änderungen am Repo laufen über einen Pull Request – nie über Dateien zum Einspielen.**
+    Muss etwas in `_wartung/` (Baustein, `pruefe.py`, Anweisung, Checkliste) oder eine Seite im
+    Repo geändert werden, hängt Claude das Repo `Szymczak75/Schule` mit Schreibzugriff an (der
+    Nutzer bestätigt das einmal), arbeitet auf einem eigenen Branch, lässt `pruefe.py` laufen
+    und gibt dem Nutzer am Ende **nur den Link zum Pull Request** („anlegen und mergen, dann
+    in den Projekten synchronisieren"). Erst wenn das nachweislich nicht geht, sagt Claude das
+    ausdrücklich und liefert die Dateien – mit genauer Liste, wohin jede gehört.
 
 ---
 
@@ -342,11 +349,19 @@ Wiederholung, die Differenzierung entsteht durch die Auswahl auf der Startkarte.
 - Die ähnlichen Aufgaben üben **denselben Rechentyp und dieselbe Falle** wie die KA-Aufgabe
   (gemischte Zahl bleibt gemischte Zahl, Periode bleibt Periode) – mit anderen Zahlen und nie
   mit demselben Ergebnis wie die KA-Aufgabe.
-- `art`: `bruch` (Wert + vollständig gekürzt), `zahl` (Wert in beliebiger Form) oder
-  `groesse` (Zahl + Einheit im Dropdown, 4.5). `soll` ist das exakte Ergebnis als
-  `[Zähler, Nenner]`. Die Engine akzeptiert Dezimalzahl, Bruch, gemischte Zahl und Periode
-  gleichwertig (4.6) und meldet gezielt: nicht gekürzt, Komma verrutscht, falscher Bruch
-  umgedreht, gerundet statt exakt, Einheit passt nicht.
+- `art`: `bruch` (Wert + vollständig gekürzt), `zahl` (Wert in beliebiger Form),
+  `groesse` (Zahl + Einheit im Dropdown, 4.5) oder `zeichen` (Vergleichszeichen <, >, = aus
+  einem Dropdown, `soll: '<'`). Bei Zahlen ist `soll` das exakte Ergebnis als
+  `[Zähler, Nenner]`; **negative Ergebnisse** bekommen das Minus in den Zähler
+  (−2,6 → `[-13,5]`). Die Engine akzeptiert Dezimalzahl, Bruch, gemischte Zahl und Periode
+  gleichwertig (4.6), jeweils auch mit −, - oder in Klammern, und meldet gezielt: nicht
+  gekürzt, Komma verrutscht, Vorzeichen falsch, falscher Bruch umgedreht, gerundet statt
+  exakt, Einheit passt nicht. Kommt irgendwo ein negativer `soll`-Wert vor, zeigt die Seite
+  **überall** die Texttastatur (die iPad-Zifferntastatur hat kein Minus, und die Tastatur darf
+  das Vorzeichen nicht verraten).
+- Eigene Grafiken im Datenblock (z. B. eine Zahlengerade) sind erlaubt: als Hilfsfunktion
+  **im** Datenblock, die ein SVG mit `role="img"` und `aria-label` erzeugt, Farben aus 2.2,
+  Achsen/Einteilung wie in der KA (7.3).
 - Tipps nach 5.2: Tipp 1 = Idee, Tipp 2 = Vorgehen, beide ohne Zwischenergebnis; erst die
   dritte Stufe „Lösungsweg" nennt das Ergebnis.
 - Baut eine Teilaufgabe auf einer früheren auf (z. B. 6c auf 6a), bekommt sie `stand`
@@ -357,7 +372,8 @@ Wiederholung, die Differenzierung entsteht durch die Auswahl auf der Startkarte.
 - Oberstufe: `.op-tags` gehören dann in die `term`-Zeile bzw. den Auftrag (3.2).
 
 **Debugging:** Ein inhaltlicher Fehler (falscher `soll`-Wert, verratender Tipp) wird nur im
-Datenblock der betroffenen Seite korrigiert. Ein Fehler in CSS oder Engine wird im Baustein
+Datenblock der betroffenen Seite korrigiert. Ein Fehler in CSS oder Engine wird per Pull
+Request (TEIL 0 Nr. 26) im Baustein
 behoben (Versionsnummer in beiden Kopfkommentaren **und** `RBKA_VERSION` in `pruefe.py`
 erhöhen) und danach in alle `_rbka`-Seiten übertragen.
 
@@ -494,7 +510,8 @@ zu allen Seiten der eigenen Jahrgangsstufe – ohne dass etwas von Hand gepflegt
 - Den Block **unverändert** hineinkopieren (nicht verlinken, 8.1) – **direkt vor dem T-Rex**
   bzw. vor `</body>`, **außerhalb** von `<main>` und außerhalb jeder Karte.
 - Nichts im Baustein anpassen, auch nicht Farben, Texte oder die Feedback-Adresse. Eine
-  Änderung geschieht nur im Wartungs-Projekt und wird dann in alle Seiten nachgezogen.
+  Änderung geschieht nur am Baustein selbst (per Pull Request, TEIL 0 Nr. 26) und wird dann
+  in alle Seiten nachgezogen.
 - Die Kommentarzeilen `BAUSTEIN: Navigationsleiste` und `ENDE BAUSTEIN Navigationsleiste`
   bleiben stehen – daran erkennen `pruefe.py` und das Nachrüst-Skript den Block.
 - Der Baustein hält alle Pflichtregeln selbst ein (Farben aus 2.2, Schrift ≥ 1rem,
@@ -1196,8 +1213,9 @@ python3 pruefe.py ordner/ --kurz      # nur Dateien mit Fehlern
   Lösung verrät, ob Tipps die Rechnung vorwegnehmen, ob Werte fachlich stimmen, ob die Seite
   lehrplankonform ist, ob Zuordnungen nach dem Prüfen sichtbar bleiben (braucht einen echten
   Klick im Browser), ob der Stand ein Neuladen wirklich vollständig übersteht.
-- Das Programm wird **nur im Wartungs-Projekt** geändert. Findet sich ein Fehlalarm oder
-  eine Lücke, wird das dort gemeldet – nicht im Chat lokal umgeschrieben.
+- Das Programm wird **nie in einer Chat-Kopie** umgeschrieben und weitergereicht, sondern
+  nur per Pull Request im Repo geändert (TEIL 0 Nr. 26). Ein Fehlalarm oder eine Lücke wird
+  so behoben – oder, wenn das nicht geht, im Wartungs-Projekt gemeldet.
 
 ---
 
