@@ -19,6 +19,7 @@ Die Projekte holen sich die Dateien über die GitHub-Synchronisation von claude.
 | `plan/` | laufende Planung (`plan_navigation_impressum.md`) und Entwürfe |
 | `PROJEKT-LANDKARTE.md` | welche Datei in welches Projekt gehört |
 | `anweisung_wartung_projekt.md` | Text für das Feld „Anweisungen" des Wartungs-Projekts |
+| `projektanweisungen.md` | Texte für das Feld „Projektanweisungen" der übrigen Projekte (kurzer Verweis auf `_wartung/`) |
 
 ## Welches Projekt synchronisiert welche Ordner?
 
