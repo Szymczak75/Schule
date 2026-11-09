@@ -1691,13 +1691,17 @@ async function openWorkbook(buf, name, getPw){
   catch(e){ throw new Error(`„${name}“ ist keine lesbare Excel-Datei (.xlsx). Alte .xls-Dateien bitte in Excel als .xlsx speichern.`); }
   return { wb, bytes:data, password };
 }
+/* Nur Zellen mit Inhalt lesen: Excel-Exporte haben oft formatierte, aber leere Bereiche bis Spalte XFD
+   bzw. Zeile 1.048.576 – ein Durchlauf über alle Zellen würde die Seite einfrieren. */
 function wsRows(ws){
   const rows = [];
-  for (let r = 1; r <= ws.rowCount; r++){
-    const row = ws.getRow(r), a = [];
-    for (let c = 1; c <= Math.max(row.cellCount, ws.columnCount); c++) a.push(cellVal(row.getCell(c).value));
-    rows.push(a);
-  }
+  ws.eachRow({ includeEmpty:false }, (row, r) => {
+    const v = row.values, a = [];
+    let last = 0; for (let c = 1; c < v.length; c++) if (v[c] != null && v[c] !== '') last = c;
+    for (let c = 1; c <= last; c++) a.push(cellVal(v[c]));
+    rows[r - 1] = a;
+  });
+  for (let i = 0; i < rows.length; i++) if (!rows[i]) rows[i] = [];
   return rows;
 }
 
