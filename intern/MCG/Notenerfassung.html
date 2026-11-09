@@ -150,7 +150,6 @@ https://github.com/nodeca/pako/blob/main/LICENSE
       <label class="cb"><input type="checkbox" id="setProtect"><span>Blattschutz in Lehrerdateien<br><small>Nur Noten/Bemerkung editierbar. Filtern geht, Sortieren nicht.</small></span></label>
       <label>Blattschutz-Passwort (optional)<input type="password" id="setPwd" autocomplete="off"><small>Leer = Schutz ohne Passwort</small></label>
       <span></span>
-      <label>Spalte „Note“ in der Importdatei<select id="setNoteMode"><option value="tendenz">mit Tendenz (z. B. 2+)</option><option value="ohne">ohne Tendenz (z. B. 2)</option></select></label>
       <label>Spalte „Punkte“ in der Importdatei<select id="setPunkteMode"><option value="oberstufe">nur Oberstufe</option><option value="immer">immer</option><option value="nie">nie</option></select></label>
       <label class="cb"><input type="checkbox" id="setOverwrite"><span>Bereits vorhandene Noten in der Vorlage überschreiben</span></label>
       <span><button id="btnReset" class="small">Alles zurücksetzen</button></span>
@@ -185,7 +184,7 @@ const POINTS = Object.fromEntries(GRADES);
 const OS_EXTRA = ['Quartalsnote','Klausur 1','Klausur 2'];
 
 const DEFAULTS = { oberstufe:'EF, Q1, Q2', extras:true, protect:true, pwd:'', pattern:'Noten_{LEHRER}',
-                   noteMode:'tendenz', punkteMode:'oberstufe', overwrite:true };
+                   punkteMode:'oberstufe', overwrite:true };
 const S = { noten:null, daten:null, match:null, returns:new Map(), merged:null, settings:loadSettings() };
 
 /* ---------- Hilfsfunktionen ---------- */
@@ -526,10 +525,10 @@ async function buildImport(){
     const n = N[idx], row = ws.getRow(n.rowNum), isOS = OS.has(n.klasse.toUpperCase());
     if (r.note){
       const cell = row.getCell(c.note), old = str(cell.value);
-      let nv = set.noteMode === 'ohne' ? r.note.replace(/[+-]/g,'') : r.note;
+      const nv = r.note; // immer mit Tendenz, als Text, z. B. "2-"
       if (old && old !== nv) overwritten.push([...nCols(n), old, nv]);
       if (!old || set.overwrite){
-        cell.value = /^\d$/.test(nv) ? Number(nv) : nv;
+        cell.value = nv; cell.numFmt = '@';
         if (c.punkte && (set.punkteMode === 'immer' || (set.punkteMode === 'oberstufe' && isOS))) row.getCell(c.punkte).value = r.punkte;
       }
     }
@@ -697,7 +696,7 @@ function wireSettings(){
   const bind = (id, key, type) => { const el = $(id); if (type === 'cb') el.checked = s[key]; else el.value = s[key];
     el.addEventListener('change', () => { s[key] = type === 'cb' ? el.checked : el.value; saveSettings(); if (S.match) renderStep2(); }); };
   bind('#setOS','oberstufe'); bind('#setExtras','extras','cb'); bind('#setProtect','protect','cb'); bind('#setPwd','pwd');
-  bind('#setPattern','pattern'); bind('#setNoteMode','noteMode'); bind('#setPunkteMode','punkteMode'); bind('#setOverwrite','overwrite','cb');
+  bind('#setPattern','pattern'); bind('#setPunkteMode','punkteMode'); bind('#setOverwrite','overwrite','cb');
   $('#btnReset').onclick = () => { if (!confirm('Alle geladenen Daten aus diesem Fenster entfernen?')) return;
     S.noten = S.daten = S.match = S.merged = null; S.returns.clear(); renderFiles(); renderStep2(); renderStep3(); };
 }
