@@ -1120,7 +1120,7 @@ G.OfficeCrypto = { encrypt, decrypt, tryPassword, isEncrypted, derivePassword, _
         <option value="none">keine Verschlüsselung</option>
         <option value="one">ein Passwort für alle Dateien</option></select>
         <small>Excel und LibreOffice fragen beim Öffnen nach dem Passwort.</small></label>
-      <label>Passwort (mind. 8 Zeichen)<input type="password" id="setPassword" autocomplete="off" spellcheck="false">
+      <label>Passwort (mind. 7 Zeichen)<input type="password" id="setPassword" autocomplete="off" spellcheck="false">
         <small><input type="checkbox" id="pwShow"> anzeigen · wird nicht gespeichert – beim Rückimport erneut eingeben</small></label>
     </div>
   </div>
@@ -1236,7 +1236,7 @@ const tick = () => new Promise(r => setTimeout(r, 0));
 function encActive(){ return S.settings.encMode !== 'none'; }
 function checkPassword(){
   if (!encActive()) return;
-  if ((S.password || '').length < 8) throw new Error('Bitte in Schritt 1 ein Passwort mit mindestens 8 Zeichen eingeben (oder Verschlüsselung ausschalten).');
+  if ((S.password || '').length < 7) throw new Error('Bitte in Schritt 1 ein Passwort mit mindestens 7 Zeichen eingeben (oder Verschlüsselung ausschalten).');
 }
 function filePassword(label){ return S.settings.encMode === 'each' ? OfficeCrypto.derivePassword(S.password, label) : S.password; }
 async function outBytes(wb, label){
@@ -1458,9 +1458,9 @@ async function buildTeacherWb(lehrer, entries){
       cell.protection = { locked:false };
       cell.fill = { type:'pattern', pattern:'solid', fgColor:{ argb:'FFFFF8DC' } };
       if (c.inp === 'text') cell.alignment = { wrapText:true, vertical:'top' };
-      else cell.dataValidation = dv;
     });
   });
+  if (entries.length) cols.forEach((c, j) => { if (c.inp && c.inp !== 'text'){ const L = ws.getColumn(j+1).letter; ws.dataValidations.add(`${L}2:${L}${entries.length + 1}`, dv); } });
   ws.autoFilter = { from:{ row:1, column:3 }, to:{ row:Math.max(2, entries.length + 1), column:cols.length } };
   if (set.protect) await ws.protect(set.pwd || '', { selectLockedCells:true, selectUnlockedCells:true, autoFilter:true, sort:true,
     formatColumns:false, formatRows:true, spinCount:1000 });
@@ -1511,8 +1511,9 @@ async function buildStufeWb(stufe){
     [n.idx, n.key, e.lehrer, e.kurs || '', n.fach, n.kursart, n.klasse, n.name, n.vorname, isoToDate(n.geb)].forEach((v, j) => r.getCell(j+1).value = v);
     r.getCell(10).numFmt = 'DD.MM.YYYY';
     cols.forEach((c, j) => { if (!c.inp) return; const cell = r.getCell(j+1);
-      cell.protection = { locked:false }; cell.fill = { type:'pattern', pattern:'solid', fgColor:{ argb:'FFFFF8DC' } }; cell.dataValidation = dv; });
+      cell.protection = { locked:false }; cell.fill = { type:'pattern', pattern:'solid', fgColor:{ argb:'FFFFF8DC' } }; });
   });
+  if (entries.length) cols.forEach((c, j) => { if (c.inp && c.inp !== 'text'){ const L = ws.getColumn(j+1).letter; ws.dataValidations.add(`${L}2:${L}${entries.length + 1}`, dv); } });
   ws.autoFilter = { from:{ row:1, column:3 }, to:{ row:Math.max(2, entries.length + 1), column:cols.length } };
   if (set.protect) await ws.protect(set.pwd || '', { selectLockedCells:true, selectUnlockedCells:true, autoFilter:true, sort:true,
     formatColumns:false, formatRows:true, spinCount:1000 });
@@ -1645,6 +1646,7 @@ async function buildImport(){
   const set = S.settings, OS = osSet(), N = S.noten.rows, c = S.noten.cols;
   const wb = new ExcelJS.Workbook(); await wb.xlsx.load(S.noten.buf);
   const ws = wb.getWorksheet(S.noten.sheetName); const overwritten = [];
+  wb.worksheets.forEach(normalizeValidations);
   for (const [idx, r] of S.merged.res){
     const n = N[idx], row = ws.getRow(n.rowNum), isOS = OS.has(n.klasse.toUpperCase());
     if (r.note){
@@ -1833,6 +1835,28 @@ document.addEventListener('DOMContentLoaded', () => {
   wireSettings(); renderFiles(); renderStep2(); renderStep3();
   window.addEventListener('beforeunload', e => { if (S.returns.size){ e.preventDefault(); e.returnValue = ''; } });
 });
+/* ExcelJS-Fehler umgehen: Beim Neuschreiben eingelesener Dateien entstehen überlappende Gültigkeitsbereiche.
+   Daher Gültigkeiten je Spalte zu zusammenhängenden Bereichen zusammenfassen. */
+function normalizeValidations(ws){
+  const dvs = ws.dataValidations, model = dvs && dvs.model; if (!model) return;
+  const groups = new Map();
+  const colNum = L => L.split('').reduce((n, ch) => n * 26 + ch.charCodeAt(0) - 64, 0);
+  for (const [addr, v] of Object.entries(model)){
+    if (!v) continue;
+    for (const part of addr.replace(/\$/g,'').split(/\s+/)){
+      const m = part.match(/^([A-Z]+)(\d+)(?::([A-Z]+)(\d+))?$/); if (!m) continue;
+      const c1 = colNum(m[1]), c2 = m[3] ? colNum(m[3]) : c1, r1 = +m[2], r2 = m[4] ? +m[4] : r1;
+      for (let c = c1; c <= c2; c++){ const k = c + '|' + JSON.stringify(v); if (!groups.has(k)) groups.set(k, { c, v, rows:new Set() });
+        const g = groups.get(k); for (let r = r1; r <= r2; r++) g.rows.add(r); }
+    }
+  }
+  dvs.model = {};
+  for (const { c, v, rows } of groups.values()){
+    const L = ws.getColumn(c).letter, rs = [...rows].sort((a,b) => a - b);
+    for (let i = 0; i < rs.length;){ let j = i; while (j + 1 < rs.length && rs[j+1] === rs[j] + 1) j++;
+      dvs.add(rs[i] === rs[j] ? `${L}${rs[i]}` : `${L}${rs[i]}:${L}${rs[j]}`, v); i = j + 1; }
+  }
+}
 </script>
 </body>
 </html>
