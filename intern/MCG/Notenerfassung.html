@@ -146,7 +146,6 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     <div class="grid">
       <label>Oberstufen-Klassen<input type="text" id="setOS"><small>Kommagetrennt, wie in der Spalte „Klasse“</small></label>
       <label>Dateiname der Lehrerdateien<input type="text" id="setPattern"><small>Platzhalter: {LEHRER}, {JAHR}, {ABSCHNITT}</small></label>
-      <label class="cb"><input type="checkbox" id="setExtras"><span>Oberstufe: Quartalsnote/Klausuren zusätzlich in den Lehrerdateien<br><small>Normalerweise aus: dafür gibt es die Oberstufen-Listen je Stufe</small></span></label>
       <label class="cb"><input type="checkbox" id="setProtect"><span>Blattschutz in Lehrerdateien<br><small>Nur Noten/Bemerkung editierbar. Filtern geht, Sortieren nicht.</small></span></label>
       <label>Blattschutz-Passwort (optional)<input type="password" id="setPwd" autocomplete="off"><small>Leer = Schutz ohne Passwort</small></label>
       <span></span>
@@ -184,7 +183,7 @@ const POINTS = Object.fromEntries(GRADES);
 const OS_EXTRA = ['Quartalsnote','Klausur 1','Klausur 2'];
 const STUFE_INPUT = ['Klausur 1','Quartalsnote'];
 
-const DEFAULTS = { oberstufe:'EF, Q1, Q2', extras:false, protect:true, pwd:'', pattern:'Noten_{LEHRER}',
+const DEFAULTS = { oberstufe:'EF, Q1, Q2', protect:true, pwd:'', pattern:'Noten_{LEHRER}',
                    punkteMode:'oberstufe', overwrite:true };
 const S = { noten:null, daten:null, match:null, returns:new Map(), merged:null, settings:loadSettings() };
 
@@ -369,15 +368,14 @@ function fileNameFor(lehrer){
 async function buildTeacherWb(lehrer, entries){
   const N = S.noten.rows, OS = osSet(), set = S.settings;
   entries = sortEntries(entries);
-  const hasOS = set.extras && entries.some(e => OS.has(N[e.idx].klasse.toUpperCase()));
   const wb = new ExcelJS.Workbook(); wb.creator = 'Notenerfassung'; wb.created = new Date();
   const ws = wb.addWorksheet('Noten', { views:[{ state:'frozen', ySplit:1, xSplit:0 }] });
   const cols = [
     { h:'_ID', w:6, hidden:true }, { h:'_Schlüssel', w:8, hidden:true },
     { h:'Klasse', w:8 }, { h:'Fach', w:7 }, { h:'Kurs', w:10 }, { h:'Kursart', w:9 },
     { h:'Nachname', w:20 }, { h:'Vorname', w:18 }, { h:'Geburtsdatum', w:13 },
-    { h:'Note', w:11, inp:'all' }, { h:'Zeugnisbemerkung', w:45, inp:'text' },
-    ...(hasOS ? OS_EXTRA.map(h => ({ h, w:13, inp:'os' })) : []) ];
+    { h:'Note', w:11, inp:'all' },
+  ];
   ws.columns = cols.map(c => ({ header:c.h, width:c.w, hidden:!!c.hidden }));
   const listen = wb.addWorksheet('Listen', { state:'veryHidden' });
   GRADE_LABELS.forEach((l, i) => listen.getCell(i+1, 1).value = l);
@@ -389,14 +387,13 @@ async function buildTeacherWb(lehrer, entries){
     cell.fill = { type:'pattern', pattern:'solid', fgColor:{ argb: c.inp ? 'FFFCE9A8' : 'FFE3E8EC' } };
     cell.border = { bottom:{ style:'thin', color:{ argb:'FF8A9299' } } }; cell.alignment = { vertical:'middle' }; });
   entries.forEach((e, i) => {
-    const n = N[e.idx], r = ws.getRow(i + 2), isOS = OS.has(n.klasse.toUpperCase());
-    const vals = [n.idx, n.key, n.klasse, n.fach, e.kurs || '', n.kursart, n.name, n.vorname, isoToDate(n.geb), '', ''];
+    const n = N[e.idx], r = ws.getRow(i + 2);
+    const vals = [n.idx, n.key, n.klasse, n.fach, e.kurs || '', n.kursart, n.name, n.vorname, isoToDate(n.geb), ''];
     vals.forEach((v, j) => r.getCell(j+1).value = v);
     r.getCell(9).numFmt = 'DD.MM.YYYY';
     cols.forEach((c, j) => {
       if (!c.inp) return;
       const cell = r.getCell(j+1);
-      if (c.inp === 'os' && !isOS){ cell.fill = { type:'pattern', pattern:'solid', fgColor:{ argb:'FFEDEDED' } }; return; }
       cell.protection = { locked:false };
       cell.fill = { type:'pattern', pattern:'solid', fgColor:{ argb:'FFFFF8DC' } };
       if (c.inp === 'text') cell.alignment = { wrapText:true, vertical:'top' };
@@ -412,8 +409,6 @@ async function buildTeacherWb(lehrer, entries){
     '1. Im Blatt „Noten“ stehen alle Ihre Schüler:innen mit Fach, Kurs und Klasse – eine Zeile pro Schüler:in und Fach.',
     '2. Mit den Filterpfeilen in der Kopfzeile können Sie nach Klasse, Kurs, Fach oder Namen filtern.',
     '3. Die Note in der gelben Spalte „Note“ über die Auswahlliste eintragen (z. B. „2+ (12)“).',
-    '4. „Zeugnisbemerkung“ ist ein freies Textfeld (optional).',
-    hasOS ? '5. Oberstufe: zusätzlich Quartalsnote und Klausuren über die Auswahlliste (graue Felder sind gesperrt).' : '',
     '', 'Wichtig: Bitte keine Zeilen löschen, einfügen oder Spalten umbenennen. Datei unter dem gleichen Namen speichern und zurückschicken.',
     set.protect ? 'Hinweis: Das Blatt ist geschützt. Filtern geht, Sortieren ist wegen des Schutzes nicht möglich.' : '' ]
     .forEach((t, i) => { const c = hint.getCell(i+1, 1); c.value = t; if (i === 0) c.font = { bold:true, size:14 }; });
@@ -465,7 +460,7 @@ async function buildStufeWb(stufe){
     '1. Im ersten Blatt stehen alle Schüler:innen der Stufe – eine Zeile pro Schüler:in, Fach und Lehrkraft.',
     '2. Über die Filterpfeile in der Kopfzeile nach „Lehrer“ (Ihr Kürzel) und/oder „Kurs“ filtern.',
     '3. „Klausur 1“ und „Quartalsnote“ in den gelben Spalten über die Auswahlliste eintragen (z. B. „2- (10)“).',
-    '', 'Wichtig: Keine Zeilen löschen oder einfügen. Datei speichern und zurückgeben.',
+    '', 'Diese Liste dient als Übersicht (z. B. zum Quartal). Die Zeugnisnoten werden über Ihre persönliche Lehrerdatei erfasst.',
     set.protect ? 'Hinweis: Das Blatt ist geschützt. Filtern geht, Sortieren ist wegen des Schutzes nicht möglich.' : '' ]
     .forEach((t, i) => { const c = hint.getCell(i+1, 1); c.value = t; if (i === 0) c.font = { bold:true, size:14 }; });
   const info = wb.addWorksheet('_Info', { state:'veryHidden' });
@@ -597,7 +592,6 @@ async function buildImport(){
         if (c.punkte && (set.punkteMode === 'immer' || (set.punkteMode === 'oberstufe' && isOS))) row.getCell(c.punkte).value = r.punkte;
       }
     }
-    if (r.bem && c.bem){ const cell = row.getCell(c.bem); if (!str(cell.value) || set.overwrite) cell.value = r.bem; }
     row.commit && row.commit();
   }
   return { wb, overwritten };
@@ -623,15 +617,6 @@ async function downloadMissing(){
   const { overwritten } = await buildImport();
   addSheet(wb, 'Vorhandene Noten geändert', ['Klasse','Fach','Nachname','Vorname','Geburtsdatum','Alt','Neu'], overwritten);
   saveBlob(await wbBlob(wb), 'Offene_Punkte.xlsx');
-}
-async function downloadExtras(){
-  const N = S.noten.rows, wb = new ExcelJS.Workbook();
-  const rows = S.merged.extras.map(e => { const n = N[e.idx]; const v = k => e.ex[k] ? `${e.ex[k].note} (${e.ex[k].punkte})` : '';
-    const p = k => e.ex[k] ? e.ex[k].punkte : '';
-    const kurs = S.match ? (S.match.assign.get(e.idx) || []).map(a => a.kurs).filter(Boolean).join(', ') : '';
-    return [...nCols(n), e.lehrer, kurs, ...OS_EXTRA.flatMap(k => [v(k), p(k)])]; });
-  addSheet(wb, 'Zusatznoten Oberstufe', ['Klasse','Fach','Nachname','Vorname','Geburtsdatum','Lehrer','Kurs', ...OS_EXTRA.flatMap(k => [k, k + ' Punkte'])], rows);
-  saveBlob(await wbBlob(wb), 'Zusatznoten_Oberstufe.xlsx');
 }
 
 /* ---------- Oberfläche ---------- */
@@ -677,8 +662,8 @@ function renderStep2(){
       <button class="primary" id="btnZip">Alle Lehrerdateien als ZIP</button>
       <button id="btnReport">Prüfbericht (Excel)</button>
     </div>
-    ${stufen().length ? `<h3>Oberstufen-Listen (Klausur 1 &amp; Quartalsnote)</h3>
-      <p class="muted">Eine Datei je Stufe mit allen Schüler:innen, filterbar nach Lehrer und Kurs. Sind auch im ZIP (Ordner „Oberstufe“).</p>
+    ${stufen().length ? `<h3>Oberstufen-Übersichten (Klausur 1 &amp; Quartalsnote)</h3>
+      <p class="muted">Übersicht je Stufe mit allen Schüler:innen, filterbar nach Lehrer und Kurs – z. B. zum Quartal. Wird nicht zurückgespielt. Auch im ZIP (Ordner „Oberstufe“).</p>
       <div class="actions">${stufen().map(st => `<button data-st="${esc(st)}">${esc(stufeFile(st))} (${stufeEntries(st).length} Zeilen)</button>`).join('')}</div>` : ''}
     <h3>Lehrerdateien</h3>
     ${table(['Lehrer','Zeilen','Klassen','Kurse',''], [...teachers.map(l => { const e = byTeacher.get(l);
@@ -716,12 +701,10 @@ function renderStep3(){
     <div class="actions">
       <button class="primary" id="btnImport">Importdatei erzeugen</button>
       <button id="btnMissing">Offene Punkte (Excel)</button>
-      ${M.extras.length ? '<button id="btnExtras">Zusatznoten Oberstufe (Excel)</button>' : ''}
     </div>
     <p class="muted">Die Importdatei kann jederzeit erzeugt werden – auch wenn noch nicht alle Dateien zurück sind. Weitere Dateien einfach nachladen; eine neuere Datei desselben Lehrers ersetzt die ältere.</p>`;
   $('#btnImport').onclick = () => guard(downloadImport);
   $('#btnMissing').onclick = () => guard(downloadMissing);
-  if ($('#btnExtras')) $('#btnExtras').onclick = () => guard(downloadExtras);
   el.querySelectorAll('button[data-rm]').forEach(b => b.onclick = () => { S.returns.delete(b.dataset.rm); renderStep3(); });
 }
 async function guard(fn){ try { await fn(); } catch(e){ console.error(e); toast(e.message || String(e), 'err'); busy(); } }
@@ -745,6 +728,7 @@ async function handleReturns(files){
     busy(`Lese ${file.name} …`);
     try {
       const f = await readFile(file); const ret = await parseReturn(f);
+      if (ret.stufe){ toast(`„${f.name}“ ist eine Oberstufen-Übersichtsliste – sie wird nicht zurückgespielt.`, 'warn'); continue; }
       if (S.returns.has(ret.id)) toast(`${ret.lehrer}: ältere Datei durch „${f.name}“ ersetzt.`, 'warn');
       S.returns.set(ret.id, ret); n++;
     } catch(e){ toast(e.message, 'err'); }
@@ -765,7 +749,7 @@ function wireSettings(){
   const s = S.settings;
   const bind = (id, key, type) => { const el = $(id); if (type === 'cb') el.checked = s[key]; else el.value = s[key];
     el.addEventListener('change', () => { s[key] = type === 'cb' ? el.checked : el.value; saveSettings(); if (S.match) renderStep2(); }); };
-  bind('#setOS','oberstufe'); bind('#setExtras','extras','cb'); bind('#setProtect','protect','cb'); bind('#setPwd','pwd');
+  bind('#setOS','oberstufe'); bind('#setProtect','protect','cb'); bind('#setPwd','pwd');
   bind('#setPattern','pattern'); bind('#setPunkteMode','punkteMode'); bind('#setOverwrite','overwrite','cb');
   $('#btnReset').onclick = () => { if (!confirm('Alle geladenen Daten aus diesem Fenster entfernen?')) return;
     S.noten = S.daten = S.match = S.merged = null; S.returns.clear(); renderFiles(); renderStep2(); renderStep3(); };
