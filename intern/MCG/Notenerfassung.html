@@ -181,7 +181,7 @@ const GRADES = [['1+',15],['1',14],['1-',13],['2+',12],['2',11],['2-',10],['3+',
 const GRADE_LABELS = GRADES.map(([n,p]) => `${n} (${p})`);
 const POINTS = Object.fromEntries(GRADES);
 const OS_EXTRA = ['Quartalsnote','Klausur 1','Klausur 2'];
-const STUFE_INPUT = ['Klausur 1','Quartalsnote'];
+const STUFE_INPUT = ['Klausur 1','SoMi 1','Quartalsnote','Klausur 2','SoMi 2','Endnote'];
 
 const DEFAULTS = { oberstufe:'EF, Q1, Q2', protect:true, pwd:'', pattern:'Noten_{LEHRER}',
                    punkteMode:'oberstufe', overwrite:true };
@@ -435,7 +435,7 @@ async function buildStufeWb(stufe){
   const cols = [ { h:'_ID', w:6, hidden:true }, { h:'_Schlüssel', w:8, hidden:true },
     { h:'Lehrer', w:9 }, { h:'Kurs', w:11 }, { h:'Fach', w:7 }, { h:'Kursart', w:9 }, { h:'Klasse', w:8 },
     { h:'Nachname', w:20 }, { h:'Vorname', w:18 }, { h:'Geburtsdatum', w:13 },
-    ...STUFE_INPUT.map(h => ({ h, w:14, inp:true })) ];
+    ...STUFE_INPUT.map(h => ({ h, w:12, inp:true })) ];
   ws.columns = cols.map(c => ({ header:c.h, width:c.w, hidden:!!c.hidden }));
   const listen = wb.addWorksheet('Listen', { state:'veryHidden' });
   GRADE_LABELS.forEach((l, i) => listen.getCell(i+1, 1).value = l);
@@ -456,10 +456,11 @@ async function buildStufeWb(stufe){
   if (set.protect) await ws.protect(set.pwd || '', { selectLockedCells:true, selectUnlockedCells:true, autoFilter:true, sort:true,
     formatColumns:true, formatRows:true, spinCount:1000 });
   const hint = wb.addWorksheet('Anleitung'); hint.getColumn(1).width = 110;
-  [ `Klausur- und Quartalsnoten Stufe ${stufe}`, '',
+  [ `Notenübersicht Oberstufe – Stufe ${stufe}`, '',
     '1. Im ersten Blatt stehen alle Schüler:innen der Stufe – eine Zeile pro Schüler:in, Fach und Lehrkraft.',
     '2. Über die Filterpfeile in der Kopfzeile nach „Lehrer“ (Ihr Kürzel) und/oder „Kurs“ filtern.',
-    '3. „Klausur 1“ und „Quartalsnote“ in den gelben Spalten über die Auswahlliste eintragen (z. B. „2- (10)“).',
+    '3. Klausur 1, SoMi 1, Quartalsnote, Klausur 2, SoMi 2 und Endnote in den gelben Spalten über die Auswahlliste eintragen (z. B. „2- (10)“).',
+    '   SoMi = Sonstige Mitarbeit.',
     '', 'Diese Liste dient als Übersicht (z. B. zum Quartal). Die Zeugnisnoten werden über Ihre persönliche Lehrerdatei erfasst.',
     set.protect ? 'Hinweis: Das Blatt ist geschützt. Filtern geht, Sortieren ist wegen des Schutzes nicht möglich.' : '' ]
     .forEach((t, i) => { const c = hint.getCell(i+1, 1); c.value = t; if (i === 0) c.font = { bold:true, size:14 }; });
@@ -662,7 +663,7 @@ function renderStep2(){
       <button class="primary" id="btnZip">Alle Lehrerdateien als ZIP</button>
       <button id="btnReport">Prüfbericht (Excel)</button>
     </div>
-    ${stufen().length ? `<h3>Oberstufen-Übersichten (Klausur 1 &amp; Quartalsnote)</h3>
+    ${stufen().length ? `<h3>Oberstufen-Übersichten (Klausuren, SoMi, Quartals- und Endnote)</h3>
       <p class="muted">Übersicht je Stufe mit allen Schüler:innen, filterbar nach Lehrer und Kurs – z. B. zum Quartal. Wird nicht zurückgespielt. Auch im ZIP (Ordner „Oberstufe“).</p>
       <div class="actions">${stufen().map(st => `<button data-st="${esc(st)}">${esc(stufeFile(st))} (${stufeEntries(st).length} Zeilen)</button>`).join('')}</div>` : ''}
     <h3>Lehrerdateien</h3>
