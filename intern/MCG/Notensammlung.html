@@ -2186,20 +2186,18 @@ function importPlan(sel){
 async function buildImport(sel){
   const G = W(), V = C.vorlage, P = importPlan(sel), t = V.t, col = V.col;
   if (t.kind === 'xlsx'){
-    const wb = new ExcelJS.Workbook(); await wb.xlsx.load(t.buf);
-    const ws = wb.getWorksheet(V.sheet);
+    // Die Vorlage wird NICHT neu geschrieben, sondern nur an den nötigen Zellen geändert (sonst meldet Excel ggf. „Problem mit Inhalten“).
+    const edits = new Map(), cell = (r, c, v) => { if (!edits.has(r)) edits.set(r, new Map()); edits.get(r).set(c, v); };
     for (const { n, g } of P.write){
-      const iw = importWerte(g.E, fmtOfRow(g)), row = ws.getRow(n.r + 1);
-      const c = row.getCell(col.note + 1); c.value = iw.note; c.numFmt = '@';
-      if (col.punkte != null) row.getCell(col.punkte + 1).value = iw.punkte;
+      const iw = importWerte(g.E, fmtOfRow(g));
+      cell(n.r + 1, col.note + 1, { s:iw.note });
+      if (col.punkte != null) cell(n.r + 1, col.punkte + 1, iw.punkte == null ? { s:'' } : { n:iw.punkte });
     }
-    for (const g of P.append){
-      const iw = importWerte(g.E, fmtOfRow(g)), vals = [];
-      vals[col.name] = g.name; vals[col.vorname] = g.vorname; vals[col.geb] = isoToDate(g.geb); vals[col.klasse] = g.klasse; vals[col.fach] = g.fach;
-      if (col.kursart != null) vals[col.kursart] = g.kursart; vals[col.note] = iw.note; if (col.punkte != null) vals[col.punkte] = iw.punkte;
-      const row = ws.addRow(vals); row.getCell(col.geb + 1).numFmt = 'DD.MM.YYYY'; row.getCell(col.note + 1).numFmt = '@';
-    }
-    return { bytes:await wbBytes(wb, null), ext:'xlsx', P };
+    const appendRows = P.append.map(g => { const iw = importWerte(g.E, fmtOfRow(g)), m = new Map();
+      m.set(col.name + 1, { s:g.name }); m.set(col.vorname + 1, { s:g.vorname }); m.set(col.geb + 1, { d:g.geb }); m.set(col.klasse + 1, { s:g.klasse });
+      m.set(col.fach + 1, { s:g.fach }); if (col.kursart != null) m.set(col.kursart + 1, { s:g.kursart }); m.set(col.note + 1, { s:iw.note });
+      if (col.punkte != null && iw.punkte != null) m.set(col.punkte + 1, { n:iw.punkte }); return m; });
+    return { bytes:await patchXlsx(t.buf, V.sheet, edits, appendRows, col.geb + 1), ext:'xlsx', P };
   }
   const rows = t.rows.map(r => r.slice());
   for (const { n, g } of P.write){ const iw = importWerte(g.E, fmtOfRow(g)); rows[n.r][col.note] = iw.note; if (col.punkte != null) rows[n.r][col.punkte] = iw.punkte ?? ''; }
@@ -2213,6 +2211,57 @@ async function buildImport(sel){
   return { bytes, ext:(t.name.match(/\.(\w+)$/) || [, 'csv'])[1], P };
 }
 const c0 = t => 0;
+/* ---------- Vorlage gezielt ändern (XML), statt sie mit ExcelJS neu zu schreiben ---------- */
+const colLetter = n => { let s = ''; while (n > 0){ const m = (n - 1) % 26; s = String.fromCharCode(65 + m) + s; n = Math.floor((n - 1) / 26); } return s; };
+const colNumOf = ref => ref.replace(/\d+/g, '').split('').reduce((n, ch) => n * 26 + ch.charCodeAt(0) - 64, 0);
+async function patchXlsx(buf, sheetName, edits, appendRows, gebCol){
+  const zip = await JSZip.loadAsync(buf), P = new DOMParser(), S = new XMLSerializer();
+  const wbx = P.parseFromString(await zip.file('xl/workbook.xml').async('string'), 'application/xml');
+  const rels = P.parseFromString(await zip.file('xl/_rels/workbook.xml.rels').async('string'), 'application/xml');
+  const sh = [...wbx.getElementsByTagName('sheet')].find(e => e.getAttribute('name') === sheetName) || wbx.getElementsByTagName('sheet')[0];
+  const rid = sh.getAttribute('r:id') || sh.getAttributeNS('http://schemas.openxmlformats.org/officeDocument/2006/relationships', 'id');
+  let target = [...rels.getElementsByTagName('Relationship')].find(r => r.getAttribute('Id') === rid).getAttribute('Target');
+  const path = target.startsWith('/') ? target.slice(1) : 'xl/' + target.replace(/^\.\//, '');
+  const doc = P.parseFromString(await zip.file(path).async('string'), 'application/xml');
+  const NS = doc.documentElement.namespaceURI, el = n => doc.createElementNS(NS, n);
+  const data = doc.getElementsByTagName('sheetData')[0];
+  const rowsByNum = new Map([...data.getElementsByTagName('row')].map(r => [+r.getAttribute('r'), r]));
+  let dateStyle = null;
+  const setVal = (c, v) => {
+    while (c.firstChild) c.removeChild(c.firstChild);
+    c.removeAttribute('t');
+    if (v.s != null){ if (v.s === '') return; c.setAttribute('t', 'inlineStr'); const is = el('is'), tt = el('t'); tt.textContent = v.s; is.appendChild(tt); c.appendChild(is); }
+    else if (v.n != null){ const x = el('v'); x.textContent = String(v.n); c.appendChild(x); }
+    else if (v.d){ const d = isoToDate(v.d), x = el('v'); x.textContent = String(Math.round(d.getTime() / 864e5) + 25569); c.appendChild(x); if (dateStyle) c.setAttribute('s', dateStyle); }
+  };
+  const putCell = (row, rn, cn, v) => {
+    const ref = colLetter(cn) + rn, cells = [...row.getElementsByTagName('c')];
+    let c = cells.find(x => x.getAttribute('r') === ref);
+    if (!c){ c = el('c'); c.setAttribute('r', ref); const after = cells.find(x => colNumOf(x.getAttribute('r') || '') > cn); row.insertBefore(c, after || null);
+}
+    setVal(c, v);
+    const sp = row.getAttribute('spans'); if (sp){ const [a, b] = sp.split(':').map(Number); if (cn > b || cn < a) row.setAttribute('spans', `${Math.min(a, cn)}:${Math.max(b, cn)}`); }
+  };
+  // Datumsformat der Vorlage übernehmen (für angehängte Zeilen)
+  for (const r of rowsByNum.values()){ const c = [...r.getElementsByTagName('c')].find(x => colNumOf(x.getAttribute('r') || '') === gebCol && x.getAttribute('s') && (!x.getAttribute('t') || x.getAttribute('t') === 'n'));
+    if (c){ dateStyle = c.getAttribute('s'); break; } }
+  for (const [rn, m] of edits){
+    let row = rowsByNum.get(rn);
+    if (!row){ row = el('row'); row.setAttribute('r', rn); const after = [...rowsByNum.keys()].sort((a, b) => a - b).find(k => k > rn); data.insertBefore(row, after ? rowsByNum.get(after) : null); rowsByNum.set(rn, row); }
+    for (const [cn, v] of [...m].sort((a, b) => a[0] - b[0])) putCell(row, rn, cn, v);
+  }
+  let last = Math.max(0, ...rowsByNum.keys()), maxCol = 0;
+  for (const m of appendRows){
+    const rn = ++last, row = el('row'); row.setAttribute('r', rn); data.appendChild(row);
+    for (const [cn, v] of [...m].sort((a, b) => a[0] - b[0])){ const c = el('c'); c.setAttribute('r', colLetter(cn) + rn); row.appendChild(c); setVal(c, v); maxCol = Math.max(maxCol, cn); }
+  }
+  const dim = doc.getElementsByTagName('dimension')[0];
+  if (dim && appendRows.length){ const ref = dim.getAttribute('ref') || 'A1'; const [a, b = a] = ref.split(':');
+    const endCol = Math.max(colNumOf(b), maxCol); dim.setAttribute('ref', `${a}:${colLetter(endCol)}${last}`); }
+  // Tabellen/Filter-Bereiche, die nur bis zur alten letzten Zeile reichen, bleiben unverändert (Excel akzeptiert das).
+  zip.file(path, S.serializeToString(doc));
+  return new Uint8Array(await zip.generateAsync({ type:'uint8array', compression:'DEFLATE' }));
+}
 async function doImport(){
   const G = W(), sel = Object.keys(C.importSel).filter(s => C.importSel[s]);
   if (!C.vorlage) throw new Error('Bitte zuerst die Notendatei-Vorlage laden.');
