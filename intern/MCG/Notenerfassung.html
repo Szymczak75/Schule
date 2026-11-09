@@ -146,7 +146,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     <div class="grid">
       <label>Oberstufen-Klassen<input type="text" id="setOS"><small>Kommagetrennt, wie in der Spalte „Klasse“</small></label>
       <label>Dateiname der Lehrerdateien<input type="text" id="setPattern"><small>Platzhalter: {LEHRER}, {JAHR}, {ABSCHNITT}</small></label>
-      <label class="cb"><input type="checkbox" id="setExtras"><span>Oberstufe: Spalten Quartalsnote, Klausur 1, Klausur 2<br><small>werden in einer eigenen Liste ausgegeben (nicht in der Importdatei)</small></span></label>
+      <label class="cb"><input type="checkbox" id="setExtras"><span>Oberstufe: Quartalsnote/Klausuren zusätzlich in den Lehrerdateien<br><small>Normalerweise aus: dafür gibt es die Oberstufen-Listen je Stufe</small></span></label>
       <label class="cb"><input type="checkbox" id="setProtect"><span>Blattschutz in Lehrerdateien<br><small>Nur Noten/Bemerkung editierbar. Filtern geht, Sortieren nicht.</small></span></label>
       <label>Blattschutz-Passwort (optional)<input type="password" id="setPwd" autocomplete="off"><small>Leer = Schutz ohne Passwort</small></label>
       <span></span>
@@ -182,8 +182,9 @@ const GRADES = [['1+',15],['1',14],['1-',13],['2+',12],['2',11],['2-',10],['3+',
 const GRADE_LABELS = GRADES.map(([n,p]) => `${n} (${p})`);
 const POINTS = Object.fromEntries(GRADES);
 const OS_EXTRA = ['Quartalsnote','Klausur 1','Klausur 2'];
+const STUFE_INPUT = ['Klausur 1','Quartalsnote'];
 
-const DEFAULTS = { oberstufe:'EF, Q1, Q2', extras:true, protect:true, pwd:'', pattern:'Noten_{LEHRER}',
+const DEFAULTS = { oberstufe:'EF, Q1, Q2', extras:false, protect:true, pwd:'', pattern:'Noten_{LEHRER}',
                    punkteMode:'oberstufe', overwrite:true };
 const S = { noten:null, daten:null, match:null, returns:new Map(), merged:null, settings:loadSettings() };
 
@@ -421,6 +422,60 @@ async function buildTeacherWb(lehrer, entries){
    ['Fingerprint', S.noten.fingerprint], ['Zeilen', entries.length]].forEach((kv, i) => { info.getCell(i+1,1).value = kv[0]; info.getCell(i+1,2).value = kv[1]; });
   return wb;
 }
+function stufen(){ const present = new Set(S.noten.rows.map(n => n.klasse.toUpperCase()));
+  return [...osSet()].filter(k => present.has(k)); }
+function stufeEntries(stufe){
+  const N = S.noten.rows, out = [];
+  for (const [l, es] of S.match.byTeacher) for (const e of es) if (N[e.idx].klasse.toUpperCase() === stufe) out.push({ idx:e.idx, kurs:e.kurs, lehrer:l });
+  for (const e of S.match.ohne) if (N[e.idx].klasse.toUpperCase() === stufe) out.push({ idx:e.idx, kurs:'', lehrer:'' });
+  return out.sort((a,b) => { const x = N[a.idx], y = N[b.idx];
+    return a.lehrer.localeCompare(b.lehrer,'de') || x.fach.localeCompare(y.fach,'de') || (a.kurs||'').localeCompare(b.kurs||'','de')
+      || x.name.localeCompare(y.name,'de') || x.vorname.localeCompare(y.vorname,'de'); });
+}
+const stufeFile = st => safeName(`Oberstufe_${st}`) + '.xlsx';
+async function buildStufeWb(stufe){
+  const N = S.noten.rows, set = S.settings, entries = stufeEntries(stufe);
+  const wb = new ExcelJS.Workbook(); wb.creator = 'Notenerfassung'; wb.created = new Date();
+  const ws = wb.addWorksheet(`Stufe ${stufe}`, { views:[{ state:'frozen', ySplit:1, xSplit:0 }] });
+  const cols = [ { h:'_ID', w:6, hidden:true }, { h:'_Schlüssel', w:8, hidden:true },
+    { h:'Lehrer', w:9 }, { h:'Kurs', w:11 }, { h:'Fach', w:7 }, { h:'Kursart', w:9 }, { h:'Klasse', w:8 },
+    { h:'Nachname', w:20 }, { h:'Vorname', w:18 }, { h:'Geburtsdatum', w:13 },
+    ...STUFE_INPUT.map(h => ({ h, w:14, inp:true })) ];
+  ws.columns = cols.map(c => ({ header:c.h, width:c.w, hidden:!!c.hidden }));
+  const listen = wb.addWorksheet('Listen', { state:'veryHidden' });
+  GRADE_LABELS.forEach((l, i) => listen.getCell(i+1, 1).value = l);
+  const dv = { type:'list', allowBlank:true, formulae:[`Listen!$A$1:$A$${GRADE_LABELS.length}`], showErrorMessage:true,
+    errorStyle:'stop', errorTitle:'Ungültige Eingabe', error:'Bitte eine Note aus der Auswahlliste wählen.' };
+  const head = ws.getRow(1); head.height = 20;
+  cols.forEach((c, i) => { const cell = head.getCell(i+1); cell.font = { bold:true };
+    cell.fill = { type:'pattern', pattern:'solid', fgColor:{ argb: c.inp ? 'FFFCE9A8' : 'FFE3E8EC' } };
+    cell.border = { bottom:{ style:'thin', color:{ argb:'FF8A9299' } } }; });
+  entries.forEach((e, i) => {
+    const n = N[e.idx], r = ws.getRow(i + 2);
+    [n.idx, n.key, e.lehrer, e.kurs || '', n.fach, n.kursart, n.klasse, n.name, n.vorname, isoToDate(n.geb)].forEach((v, j) => r.getCell(j+1).value = v);
+    r.getCell(10).numFmt = 'DD.MM.YYYY';
+    cols.forEach((c, j) => { if (!c.inp) return; const cell = r.getCell(j+1);
+      cell.protection = { locked:false }; cell.fill = { type:'pattern', pattern:'solid', fgColor:{ argb:'FFFFF8DC' } }; cell.dataValidation = dv; });
+  });
+  ws.autoFilter = { from:{ row:1, column:3 }, to:{ row:Math.max(2, entries.length + 1), column:cols.length } };
+  if (set.protect) await ws.protect(set.pwd || '', { selectLockedCells:true, selectUnlockedCells:true, autoFilter:true, sort:true,
+    formatColumns:true, formatRows:true, spinCount:1000 });
+  const hint = wb.addWorksheet('Anleitung'); hint.getColumn(1).width = 110;
+  [ `Klausur- und Quartalsnoten Stufe ${stufe}`, '',
+    '1. Im ersten Blatt stehen alle Schüler:innen der Stufe – eine Zeile pro Schüler:in, Fach und Lehrkraft.',
+    '2. Über die Filterpfeile in der Kopfzeile nach „Lehrer“ (Ihr Kürzel) und/oder „Kurs“ filtern.',
+    '3. „Klausur 1“ und „Quartalsnote“ in den gelben Spalten über die Auswahlliste eintragen (z. B. „2- (10)“).',
+    '', 'Wichtig: Keine Zeilen löschen oder einfügen. Datei speichern und zurückgeben.',
+    set.protect ? 'Hinweis: Das Blatt ist geschützt. Filtern geht, Sortieren ist wegen des Schutzes nicht möglich.' : '' ]
+    .forEach((t, i) => { const c = hint.getCell(i+1, 1); c.value = t; if (i === 0) c.font = { bold:true, size:14 }; });
+  const info = wb.addWorksheet('_Info', { state:'veryHidden' });
+  [['Lehrer', `Stufe ${stufe}`], ['Typ', 'Stufe'], ['Erstellt', new Date().toISOString()], ['Version', VERSION],
+   ['Notendatei', S.noten.name], ['Fingerprint', S.noten.fingerprint], ['Zeilen', entries.length]]
+    .forEach((kv, i) => { info.getCell(i+1,1).value = kv[0]; info.getCell(i+1,2).value = kv[1]; });
+  return wb;
+}
+async function downloadStufe(st){ busy('Erzeuge Datei …'); try { saveBlob(await wbBlob(await buildStufeWb(st)), stufeFile(st)); } finally { busy(); } }
+
 async function downloadTeacher(lehrer){
   const entries = lehrer === 'OHNE_LEHRER' ? S.match.ohne : S.match.byTeacher.get(lehrer);
   busy('Erzeuge Datei …');
@@ -432,6 +487,7 @@ async function downloadZip(){
   for (const l of list){ busy(`Erzeuge Lehrerdateien … ${++i}/${list.length}`);
     zip.file(fileNameFor(l), await (await buildTeacherWb(l, S.match.byTeacher.get(l))).xlsx.writeBuffer()); }
   if (S.match.ohne.length) zip.file('_intern/' + fileNameFor('OHNE_LEHRER'), await (await buildTeacherWb('OHNE_LEHRER', S.match.ohne)).xlsx.writeBuffer());
+  for (const st of stufen()){ busy(`Erzeuge Oberstufen-Liste ${st} …`); zip.file('Oberstufe/' + stufeFile(st), await (await buildStufeWb(st)).xlsx.writeBuffer()); }
   busy('Packe ZIP …');
   zip.file('_intern/Pruefbericht.xlsx', await (await buildReport()).xlsx.writeBuffer());
   saveBlob(await zip.generateAsync({ type:'blob' }), 'Lehrerdateien.zip'); busy();
@@ -465,30 +521,31 @@ async function buildReport(){
 
 /* ---------- Rückimport ---------- */
 async function parseReturn(f){
-  const info = f.wb.getWorksheet('_Info'), ws = f.wb.getWorksheet('Noten');
+  const info = f.wb.getWorksheet('_Info'), ws = f.wb.getWorksheet('Noten') || f.wb.worksheets.find(w => w.state === 'visible' && w.name.startsWith('Stufe '));
   if (!info || !ws) throw new Error(`„${f.name}“ ist keine von diesem Werkzeug erzeugte Lehrerdatei.`);
   const meta = {}; info.eachRow(r => meta[str(r.getCell(1).value)] = str(r.getCell(2).value));
   const h = {}; ws.getRow(1).eachCell((c, col) => h[str(c.value)] = col);
-  if (!h._ID || !h.Note) throw new Error(`„${f.name}“: Spalten „_ID“/„Note“ fehlen – wurde die Datei verändert?`);
+  if (!h._ID || !(h.Note || OS_EXTRA.some(x => h[x]))) throw new Error(`„${f.name}“: Spalten „_ID“/„Note“ fehlen – wurde die Datei verändert?`);
   const rows = [];
   for (let r = 2; r <= ws.rowCount; r++){
     const row = ws.getRow(r), id = cellVal(row.getCell(h._ID).value);
     if (id === null || id === '') continue;
-    const o = { r, id:Number(id), key:str(row.getCell(h['_Schlüssel']).value), noteRaw:str(row.getCell(h.Note).value),
+    const o = { r, id:Number(id), key:str(row.getCell(h['_Schlüssel']).value), noteRaw:h.Note ? str(row.getCell(h.Note).value) : '', lehrer:h.Lehrer ? str(row.getCell(h.Lehrer).value) : '',
       bem:h.Zeugnisbemerkung ? str(row.getCell(h.Zeugnisbemerkung).value) : '', extras:{},
       label:[h.Klasse, h.Fach, h.Nachname, h.Vorname].map(c => c ? str(row.getCell(c).value) : '').join(' · ') };
     OS_EXTRA.forEach(x => { if (h[x]){ const v = str(row.getCell(h[x]).value); if (v) o.extras[x] = v; } });
     rows.push(o);
   }
-  return { lehrer:meta.Lehrer || f.name, fileName:f.name, meta, rows, loadedAt:new Date() };
+  const stufe = meta.Typ === 'Stufe', lehrer = meta.Lehrer || f.name;
+  return { id: stufe ? lehrer + '|' + f.name : lehrer, stufe, hasNote:!!h.Note, lehrer, fileName:f.name, meta, rows, loadedAt:new Date() };
 }
 function runMerge(){
   if (!S.noten){ S.merged = null; return; }
   const N = S.noten.rows, keyMap = new Map();
   N.forEach(n => keyMap.set(n.key, keyMap.has(n.key) ? -1 : n.idx));
-  const res = new Map(), extras = [], P = { invalid:[], notFound:[], conflict:[], fp:[] }, stats = [];
+  const res = new Map(), extras = new Map(), P = { invalid:[], notFound:[], conflict:[], fp:[] }, stats = [];
   for (const ret of [...S.returns.values()].sort((a,b) => a.lehrer.localeCompare(b.lehrer,'de'))){
-    const st = { lehrer:ret.lehrer, fileName:ret.fileName, total:0, filled:0, errors:0 };
+    const st = { id:ret.id, lehrer:ret.lehrer, fileName:ret.fileName, total:0, filled:0, errors:0 };
     if (ret.meta.Fingerprint && ret.meta.Fingerprint !== S.noten.fingerprint) P.fp.push(ret);
     for (const row of ret.rows){
       st.total++;
@@ -499,7 +556,15 @@ function runMerge(){
       const ex = {}; let exBad = false;
       for (const [k, v] of Object.entries(row.extras)){ const eg = parseGrade(v); if (eg && eg.invalid){ P.invalid.push({ ret, row, val:`${k}: ${v}` }); exBad = true; } else ex[k] = eg; }
       if (exBad) st.errors++;
-      if (Object.keys(ex).length) extras.push({ idx, lehrer:ret.lehrer, ex });
+      if (Object.keys(ex).length){
+        if (!ret.hasNote) st.filled++;
+        const cur = extras.get(idx) || { idx, lehrer:row.lehrer || ret.lehrer, ex:{} };
+        for (const [k, v] of Object.entries(ex)){
+          if (cur.ex[k] && cur.ex[k].note !== v.note) P.conflict.push({ n:N[idx], a:{ lehrer:cur.lehrer, note:`${k}: ${cur.ex[k].note}` }, b:{ lehrer:(row.lehrer || ret.lehrer) + ' (' + ret.fileName + ')', note:`${k}: ${v.note}` } });
+          else cur.ex[k] = v;
+        }
+        extras.set(idx, cur);
+      }
       if (!g && !row.bem) continue;
       if (g) st.filled++;
       const prev = res.get(idx);
@@ -515,7 +580,7 @@ function runMerge(){
   }
   const pending = S.match ? [...S.match.byTeacher.keys()].filter(l => !S.returns.has(l)).sort() : null;
   const withNote = N.filter(n => res.get(n.idx)?.note || n.note).length;
-  S.merged = { res, extras, P, stats, pending, withNote };
+  S.merged = { res, extras:[...extras.values()], P, stats, pending, withNote };
 }
 async function buildImport(){
   const set = S.settings, OS = osSet(), N = S.noten.rows, c = S.noten.cols;
@@ -563,8 +628,9 @@ async function downloadExtras(){
   const N = S.noten.rows, wb = new ExcelJS.Workbook();
   const rows = S.merged.extras.map(e => { const n = N[e.idx]; const v = k => e.ex[k] ? `${e.ex[k].note} (${e.ex[k].punkte})` : '';
     const p = k => e.ex[k] ? e.ex[k].punkte : '';
-    return [...nCols(n), e.lehrer, ...OS_EXTRA.flatMap(k => [v(k), p(k)])]; });
-  addSheet(wb, 'Zusatznoten Oberstufe', ['Klasse','Fach','Nachname','Vorname','Geburtsdatum','Lehrer', ...OS_EXTRA.flatMap(k => [k, k + ' Punkte'])], rows);
+    const kurs = S.match ? (S.match.assign.get(e.idx) || []).map(a => a.kurs).filter(Boolean).join(', ') : '';
+    return [...nCols(n), e.lehrer, kurs, ...OS_EXTRA.flatMap(k => [v(k), p(k)])]; });
+  addSheet(wb, 'Zusatznoten Oberstufe', ['Klasse','Fach','Nachname','Vorname','Geburtsdatum','Lehrer','Kurs', ...OS_EXTRA.flatMap(k => [k, k + ' Punkte'])], rows);
   saveBlob(await wbBlob(wb), 'Zusatznoten_Oberstufe.xlsx');
 }
 
@@ -611,6 +677,9 @@ function renderStep2(){
       <button class="primary" id="btnZip">Alle Lehrerdateien als ZIP</button>
       <button id="btnReport">Prüfbericht (Excel)</button>
     </div>
+    ${stufen().length ? `<h3>Oberstufen-Listen (Klausur 1 &amp; Quartalsnote)</h3>
+      <p class="muted">Eine Datei je Stufe mit allen Schüler:innen, filterbar nach Lehrer und Kurs. Sind auch im ZIP (Ordner „Oberstufe“).</p>
+      <div class="actions">${stufen().map(st => `<button data-st="${esc(st)}">${esc(stufeFile(st))} (${stufeEntries(st).length} Zeilen)</button>`).join('')}</div>` : ''}
     <h3>Lehrerdateien</h3>
     ${table(['Lehrer','Zeilen','Klassen','Kurse',''], [...teachers.map(l => { const e = byTeacher.get(l);
         const u = f => [...new Set(e.map(f).filter(Boolean))].sort().join(', ');
@@ -618,6 +687,7 @@ function renderStep2(){
       ...(ohne.length ? [[{ html:'<i>OHNE_LEHRER</i>' }, ohne.length, '', 'intern', { html:'<button class="small" data-t="OHNE_LEHRER">Herunterladen</button>' }]] : [])], 1000)}`;
   $('#btnZip').onclick = () => guard(downloadZip);
   $('#btnReport').onclick = () => guard(async () => saveBlob(await wbBlob(await buildReport()), 'Pruefbericht.xlsx'));
+  el.querySelectorAll('button[data-st]').forEach(b => b.onclick = () => guard(() => downloadStufe(b.dataset.st)));
   el.querySelectorAll('button[data-t]').forEach(b => b.onclick = () => guard(() => downloadTeacher(b.dataset.t)));
 }
 function renderStep3(){
@@ -638,7 +708,7 @@ function renderStep3(){
     ${table(['Lehrer','Datei','Zeilen','Noten','fehlen','Fehler',''], M.stats.map(s => [s.lehrer, s.fileName, s.total, s.filled,
       { html: s.total - s.filled ? `<span class="pill warn">${s.total - s.filled}</span>` : '<span class="pill good">0</span>' },
       { html: s.errors ? `<span class="pill bad">${s.errors}</span>` : '0' },
-      { html:`<button class="small ghost" data-rm="${esc(s.lehrer)}">entfernen</button>` }]), 1000)}
+      { html:`<button class="small ghost" data-rm="${esc(s.id)}">entfernen</button>` }]), 1000)}
     ${M.pending ? issueBlock('Noch nicht zurückgekommen', M.pending.length, 'warn', `<p>${M.pending.map(esc).join(', ')}</p>`) : ''}
     ${issueBlock('Ungültige Einträge (nicht übernommen)', P.invalid.length, 'bad', table(['Lehrer','Zeile','Schüler','Wert'], P.invalid.map(x => [x.ret.lehrer, x.row.r, x.row.label, x.val])), true)}
     ${issueBlock('Zeilen nicht in der Notendatei gefunden', P.notFound.length, 'bad', table(['Lehrer','Zeile','Schüler'], P.notFound.map(x => [x.ret.lehrer, x.row.r, x.row.label])), true)}
@@ -675,8 +745,8 @@ async function handleReturns(files){
     busy(`Lese ${file.name} …`);
     try {
       const f = await readFile(file); const ret = await parseReturn(f);
-      if (S.returns.has(ret.lehrer)) toast(`${ret.lehrer}: ältere Datei durch „${f.name}“ ersetzt.`, 'warn');
-      S.returns.set(ret.lehrer, ret); n++;
+      if (S.returns.has(ret.id)) toast(`${ret.lehrer}: ältere Datei durch „${f.name}“ ersetzt.`, 'warn');
+      S.returns.set(ret.id, ret); n++;
     } catch(e){ toast(e.message, 'err'); }
   }
   busy(); if (n) toast(`${n} Lehrerdatei(en) übernommen.`);
