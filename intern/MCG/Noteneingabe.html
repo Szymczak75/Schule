@@ -152,7 +152,7 @@ th[data-k]{ cursor:pointer; user-select:none; } th.asc::after{ content:' ▲'; }
       <button class="small" id="f_reset">Filter zurücksetzen</button>
       <span class="small muted" id="count"></span>
     </div>
-    <p class="small muted">Note eintippen (z. B. <span class="kbd">2-</span> oder Punkte <span class="kbd">10</span>) oder aus der Liste wählen ·
+    <p class="small muted">Note eintippen (z. B. <span class="kbd">2-</span> oder Punkte <span class="kbd">10</span>, Sonderkürzel wie <span class="kbd">NT</span>, in Vertiefungskursen <span class="kbd">E1</span>) oder aus der Liste wählen ·
       <span class="kbd">Enter</span> = nächste Zeile · gelb = offen, grau = gesperrt · Klick auf einen Spaltenkopf sortiert.</p>
     <div class="tw" style="max-height:none"><table><thead id="thead"></thead><tbody id="tbody"></tbody></table></div>
     <div id="lists"></div>
@@ -1439,7 +1439,18 @@ function sichtbar(bereich, offen){
   const r2 = offen.some(k => RUNDE2.includes(k));
   return SPALTEN.filter(k => offen.includes(k) || (r2 && RUNDE1.includes(k)));
 }
-function listeFuer(fmt){ return fmt === 'Punkte' ? PUNKTE : fmt === 'Note ohne Tendenz' ? NOTEN_O : NOTEN_T; }
+/* Sonderkürzel: in allen Kursen erlaubt (z. B. NT, AT) bzw. nur in Vertiefungskursen (z. B. E1, E2, E3).
+   Die Listen kommen aus den Voreinstellungen von Seite A und stehen in jeder Datei (_Info), damit B und C dieselben nutzen. */
+const VERTIEFUNG = 'Vertiefung';
+const LISTEN_FORMATE = ['Note mit Tendenz', 'Note ohne Tendenz', 'Punkte', VERTIEFUNG];
+let SONDER = ['NT', 'AT'], VERT = ['E1', 'E2', 'E3', 'NT'];
+const kuerzelListe = s => uniq((Array.isArray(s) ? s : String(s || '').split(/[,;\s]+/)).map(x => String(x).trim().toUpperCase()).filter(Boolean));
+function setKuerzel(sonder, vert){ if (sonder != null) SONDER = kuerzelListe(sonder); if (vert != null) VERT = kuerzelListe(vert); }
+function listeFuer(fmt){
+  const base = fmt === VERTIEFUNG ? VERT : fmt === 'Punkte' ? PUNKTE : fmt === 'Note ohne Tendenz' ? NOTEN_O : NOTEN_T;
+  return uniq([...base, ...SONDER]);
+}
+const istKuerzel = (v, fmt) => SONDER.includes(v) || (fmt === VERTIEFUNG && VERT.includes(v));
 
 /* Eingabe prüfen und vereinheitlichen. Liefert { v } (kanonischer Text, '' = leer) oder { invalid, raw } */
 function parseGrade(raw, fmt){
@@ -1447,6 +1458,8 @@ function parseGrade(raw, fmt){
   if (typeof raw === 'number'){ raw = String(raw); }
   let s = String(raw).trim().replace(/[−–—]/g, '-').replace(/\s+/g, '');
   if (!s) return { v:'' };
+  if (istKuerzel(s.toUpperCase(), fmt)) return { v:s.toUpperCase() };
+  if (fmt === VERTIEFUNG) return { invalid:true, raw:String(raw).trim() };
   // Altes Format aus Version 1: „2- (10)“
   const old = s.match(/^([1-6][+-]?)\((\d{1,2})\)$/); if (old) s = fmt === 'Punkte' ? old[2] : old[1];
   if (fmt === 'Punkte'){
@@ -1461,6 +1474,7 @@ function parseGrade(raw, fmt){
 function gradeClass(v, fmt){
   if (v == null || v === '') return '';
   v = String(v);
+  if (fmt === VERTIEFUNG || istKuerzel(v, fmt)) return '';
   if (fmt === 'Punkte'){
     if (!/^\d{1,2}$/.test(v)) return '';
     const p = +v; return p === 0 ? 'd' : p <= 3 ? 'r' : p === 4 ? 'o' : p <= 6 ? 'y' : '';
@@ -1481,11 +1495,17 @@ const FILL_OFFEN = 'FFFFF8DC', FILL_GESPERRT = 'FFE7E6E6', FILL_KOPF = 'FFE3E8EC
 /* Für den Import nach SchILD: Note und Punkte aus kanonischem Wert */
 function importWerte(v, fmt){
   if (!v) return null;
-  if (fmt === 'Punkte'){ const p = +v; return { note:NOTE_OF_P[p] ?? '', punkte:p }; }
+  if (fmt === 'Punkte' && /^\d{1,2}$/.test(v)){ const p = +v; return { note:NOTE_OF_P[p] ?? '', punkte:p }; }
   return { note:v, punkte:null };
 }
 /* Wert für Excel-Zelle: Punkte als Zahl, Noten als Text */
-const excelWert = (v, fmt) => v === '' || v == null ? null : fmt === 'Punkte' ? Number(v) : String(v);
+const excelWert = (v, fmt) => v === '' || v == null ? null : fmt === 'Punkte' && /^\d{1,2}$/.test(String(v)) ? Number(v) : String(v);
+/* Erlaubte Eingaben als lesbarer Text (für Fehlermeldungen) */
+function erlaubtText(fmt){
+  const base = fmt === VERTIEFUNG ? VERT.join(', ') : fmt === 'Punkte' ? 'Punkte 0 bis 15' : fmt === 'Note ohne Tendenz' ? 'Noten 1 bis 6' : 'Noten wie 2+, 2, 2-';
+  const s = SONDER.filter(x => fmt !== VERTIEFUNG || !VERT.includes(x));
+  return base + (s.length ? ' oder ' + s.join(', ') : '');
+}
 
 /* --- xl.js --- */
 'use strict';
@@ -1494,6 +1514,7 @@ const FARB_WERTE = {
   'Note mit Tendenz':  { y:['4+','4'], o:['4-'], r:['5+','5','5-'], d:['6'] },
   'Note ohne Tendenz': { y:['4'], r:['5'], d:['6'] },
   'Punkte':            { y:['5','6'], o:['4'], r:['1','2','3'], d:['0'] },
+  'Vertiefung':        {},
 };
 function writeInfo(wb, obj){
   const ws = wb.addWorksheet('_Info', { state:'veryHidden' });
@@ -1519,16 +1540,16 @@ function updateInfo(wb, key, value){
 function addListen(wb){
   const ws = wb.addWorksheet('Listen', { state:'veryHidden' });
   const ref = {};
-  NOTENFORMATE.forEach((fmt, i) => {
+  LISTEN_FORMATE.forEach((fmt, i) => {
     const L = String.fromCharCode(65 + i), list = listeFuer(fmt);
-    list.forEach((v, j) => ws.getCell(j + 1, i + 1).value = fmt === 'Punkte' ? Number(v) : v);
+    list.forEach((v, j) => ws.getCell(j + 1, i + 1).value = /^\d{1,2}$/.test(v) && fmt === 'Punkte' ? Number(v) : v);
     ref[fmt] = `Listen!$${L}$1:$${L}$${list.length}`;
   });
   return ref;
 }
 function dvFor(ref, fmt){
   return { type:'list', allowBlank:true, formulae:[ref], showErrorMessage:true, errorStyle:'stop', errorTitle:'Ungültige Eingabe',
-    error:fmt === 'Punkte' ? 'Bitte Punkte von 0 bis 15 aus der Auswahlliste wählen.' : 'Bitte eine Note aus der Auswahlliste wählen.' };
+    error:'Erlaubt: ' + erlaubtText(fmt) + '. Bitte aus der Auswahlliste wählen.' };
 }
 /* Zeilen zu zusammenhängenden Bereichen zusammenfassen: [[von, bis], …] */
 function runs(nums){
@@ -1538,7 +1559,7 @@ function runs(nums){
 }
 /* Bedingte Formatierung (Notenfarben) für einen Bereich mit bekanntem Notenformat */
 function addGradeCF(ws, L, r1, r2, fmt){
-  const vals = FARB_WERTE[fmt], c = `${L}${r1}`, rules = [];
+  const vals = FARB_WERTE[fmt] || {}, c = `${L}${r1}`, rules = [];
   for (const k of ['d','r','o','y']){
     if (!vals[k]) continue;
     const f = FARBEN[k];
@@ -1546,7 +1567,7 @@ function addGradeCF(ws, L, r1, r2, fmt){
       formulae:[`OR(${vals[k].map(v => `TRIM(${c}&"")="${v}"`).join(',')})`],
       style:{ fill:{ type:'pattern', pattern:'solid', bgColor:{ argb:f.bg } }, font:{ color:{ argb:f.fg }, bold:f.bold } } });
   }
-  ws.addConditionalFormatting({ ref:`${L}${r1}:${L}${r2}`, rules });
+  if (rules.length) ws.addConditionalFormatting({ ref:`${L}${r1}:${L}${r2}`, rules });
 }
 function gradeStyle(cell, v, fmt){
   const k = gradeClass(v, fmt); if (!k) return;
@@ -1779,6 +1800,9 @@ function fileName(pattern, vals){
   return safeName(s.replace(/_+/g, '_').replace(/^_|_$/g, '')) + '.xlsx';
 }
 const fmtFuer = (G, stufe) => G.settings.formate[stufe] || (bereichOf(stufe, G.settings.oberstufe) === 'SekI' ? 'Note mit Tendenz' : 'Punkte');
+const istVertiefung = (r, set) => { const ka = kuerzelListe(set.vertiefungKursarten), fa = kuerzelListe(set.vertiefungFaecher);
+  return ka.includes(String(r.kursart || '').toUpperCase()) || fa.includes(normFach(r.fach)); };
+const fmtRow = (G, r) => r.vertiefung ? VERTIEFUNG : fmtFuer(G, r.stufe);
 const spName = (G, stufe, k) => (G.settings.spaltennamenJeStufe?.[stufe]?.[k]) || G.settings.spaltennamen?.[k] || SPALTEN_STANDARD[k];
 
 /* ---------- Gesamtdatei ---------- */
@@ -1794,10 +1818,10 @@ function buildGesamtWb(G){
   styleHeader(ws.getRow(1));
   const rows = G.rows.slice().sort((a, b) => cmpDe(a.stufe, b.stufe) || cmpDe(a.klasse, b.klasse) || cmpDe(a.name, b.name) || cmpDe(a.vorname, b.vorname) || cmpDe(a.fach, b.fach));
   for (const r of rows){
-    const fmt = fmtFuer(G, r.stufe);
+    const fmt = fmtRow(G, r);
     const vals = G_COLS.map(k => {
       switch (k){
-        case '_ID': return r.id; case '_Schlüssel': return rowSKey(r); case '_Quelle': return JSON.stringify({ q:r.quelle || {}, m:r.manuell ? 1 : 0 });
+        case '_ID': return r.id; case '_Schlüssel': return rowSKey(r); case '_Quelle': return JSON.stringify({ q:r.quelle || {}, m:r.manuell ? 1 : 0, v:r.vertiefung ? 1 : 0 });
         case 'Stufe': return r.stufe; case 'Klasse': return r.klasse; case 'Fach': return r.fach; case 'Kursart': return r.kursart; case 'Kurs': return r.kurs;
         case 'Lehrkraft': return r.lehrer; case 'Nachname': return r.name; case 'Vorname': return r.vorname; case 'Geburtsdatum': return isoToDate(r.geb);
         case 'Status': return r.status; case 'Hinweis': return r.hinweis || '';
@@ -1827,6 +1851,7 @@ function readGesamtWb(wb){
   const cols = infoJSON(info, 'Spalten', G_COLS), ws = wb.getWorksheet('Gesamt');
   const idx = Object.fromEntries(cols.map((k, i) => [k, i + 1]));
   const settings = infoJSON(info, 'Einstellungen', {});
+  setKuerzel(settings.sonderkuerzel ?? null, settings.vertiefungKuerzel ?? null);
   const d = wb.getWorksheet('_Daten'), dj = (r, def) => { try { return JSON.parse(str(d.getCell(r, 2).value)) ?? def; } catch(e){ return def; } };
   const G = { info:{ SJ:info.SJ, Schuljahr:info.Schuljahr, HJ:info.HJ, Runde:info.Runde, LaufID:info.LaufID },
     settings, rows:[], laeufe:dj(1, []), protokoll:dj(2, []), rueckgaben:dj(3, {}),
@@ -1837,8 +1862,8 @@ function readGesamtWb(wb){
     let q = {}; try { q = JSON.parse(str(g('_Quelle')) || '{}'); } catch(e){}
     const o = { id:Number(id), stufe:str(g('Stufe')), klasse:str(g('Klasse')), fach:str(g('Fach')), kursart:str(g('Kursart')), kurs:str(g('Kurs')),
       lehrer:str(g('Lehrkraft')), name:str(g('Nachname')), vorname:str(g('Vorname')), geb:dateKey(g('Geburtsdatum')), status:str(g('Status')) || 'aktiv',
-      hinweis:str(g('Hinweis')), quelle:q.q || {}, manuell:!!q.m };
-    const fmt = fmtFuer(G, o.stufe);
+      hinweis:str(g('Hinweis')), quelle:q.q || {}, manuell:!!q.m, vertiefung:!!q.v };
+    const fmt = fmtRow(G, o);
     for (const k of SPALTEN){ const p = parseGrade(cellVal(g(k)), fmt); o[k] = p.v || ''; }
     G.rows.push(o);
   }
@@ -1846,7 +1871,7 @@ function readGesamtWb(wb){
 }
 
 /* ---------- Lehrerdateien lesen (Seite B und C) ---------- */
-const T_COLS_FEST = ['_ID','_Schlüssel','_Stufe','Klasse','Fach','Kurs','Kursart','Nachname','Vorname','Geburtsdatum'];
+const T_COLS_FEST = ['_ID','_Schlüssel','_Stufe','_Art','Klasse','Fach','Kurs','Kursart','Nachname','Vorname','Geburtsdatum'];
 function readTeacherWb(wb){
   const info = readInfo(wb);
   if (!info) return { error:'Das ist keine Lehrerdatei aus der Notenerfassung.' };
@@ -1857,11 +1882,12 @@ function readTeacherWb(wb){
   if (!ws || !keys) return { error:'Die Datei wurde verändert (Blatt „Noten“ fehlt).' };
   const idx = Object.fromEntries(keys.map((k, i) => [k, i + 1]));
   const offen = infoJSON(info, 'Offen', {}), formate = infoJSON(info, 'Formate', {});
+  setKuerzel(infoJSON(info, 'Sonderkuerzel', null), infoJSON(info, 'VertiefungKuerzel', null));
   const rows = [];
   for (let r = 2; r <= ws.rowCount; r++){
     const row = ws.getRow(r), g = k => idx[k] ? cellVal(row.getCell(idx[k]).value) : null;
     const id = g('_ID'); if (id == null || id === '') continue;
-    const o = { r, id:Number(id), skey:str(g('_Schlüssel')), stufe:str(g('_Stufe')), klasse:str(g('Klasse')), fach:str(g('Fach')), kurs:str(g('Kurs')),
+    const o = { r, id:Number(id), skey:str(g('_Schlüssel')), stufe:str(g('_Stufe')), vertiefung:str(g('_Art')) === 'V', klasse:str(g('Klasse')), fach:str(g('Fach')), kurs:str(g('Kurs')),
       kursart:str(g('Kursart')), name:str(g('Nachname')), vorname:str(g('Vorname')), vals:{} };
     for (const k of SPALTEN) if (idx[k]) o.vals[k] = g(k);
     rows.push(o);
@@ -1877,7 +1903,7 @@ function reapplyTeacherCF(t){
   const ws = t.ws; ws.conditionalFormattings = [];
   const cf = new Map();
   for (const r of t.rows){
-    const fmt = t.formate[r.stufe] || 'Note mit Tendenz';
+    const fmt = r.vertiefung ? VERTIEFUNG : (t.formate[r.stufe] || 'Note mit Tendenz');
     for (const k of SPALTEN) if (t.idx[k]){ const key = k + '|' + fmt; if (!cf.has(key)) cf.set(key, []); cf.get(key).push(r.r); }
   }
   for (const [kf, nums] of cf){ const [k, fmt] = kf.split('|'), L = ws.getColumn(t.idx[k]).letter;
@@ -1927,7 +1953,7 @@ const E = { cfg:null, name:'', handle:null, wb:null, t:null, enc:false, password
 const vk = (id, k) => id + '|' + k;
 const isOpen = (r, k) => (E.t.offen[r.stufe] || []).includes(k);
 const isShown = (r, k) => sichtbar(E.t.info.Bereich, E.t.offen[r.stufe] || []).includes(k);
-const fmtOf = r => E.t.formate[r.stufe] || 'Note mit Tendenz';
+const fmtOf = r => r.vertiefung ? VERTIEFUNG : (E.t.formate[r.stufe] || 'Note mit Tendenz');
 const backupKey = () => `notenerfassung-b|${E.t.info.LaufID}|${E.t.info.Lehrer}|${E.t.info.Bereich}`;
 
 /* ---------- Öffnen ---------- */
@@ -1979,7 +2005,7 @@ function showWork(){
   $('#who').textContent = `${i.Lehrer} · ${bereichName(i.Bereich)}`;
   $('#stand').textContent = `${i.Schuljahr} · ${i.HJ}. Halbjahr · ${i.Runde === 'Zeugnis' ? 'Zeugnis' : 'Quartal'}`;
   $('#rueck').innerHTML = `Bitte nach dem Eintragen an <b>${esc(i.RueckgabeAn)}</b> (${esc(i.RueckgabeWeg)}) zurückschicken. Datei: <b>${esc(E.name)}</b>${E.enc ? ' · 🔒 verschlüsselt' : ''}`;
-  $('#lists').innerHTML = NOTENFORMATE.map((f, j) => `<datalist id="dl${j}">${listeFuer(f).map(v => `<option value="${v}">`).join('')}</datalist>`).join('');
+  $('#lists').innerHTML = LISTEN_FORMATE.map((f, j) => `<datalist id="dl${j}">${listeFuer(f).map(v => `<option value="${v}">`).join('')}</datalist>`).join('');
   buildFilters(); render(); updateState();
   const first = document.querySelector('#tbody input.g'); if (first) first.focus();
 }
@@ -2004,8 +2030,8 @@ function cellHtml(r, k){
   const v = E.vals.get(vk(r.id, k)) || '', fmt = fmtOf(r), cls = gradeClass(v, fmt);
   if (!isShown(r, k)) return `<td class="gc lk"></td>`;
   if (!isOpen(r, k)) return `<td class="gc lk ${cls ? 'g-' + cls : ''}" title="gesperrt">${esc(v)}</td>`;
-  const dl = 'dl' + NOTENFORMATE.indexOf(fmt);
-  return `<td class="gc"><input class="g ${cls ? 'g-' + cls : ''}" data-id="${r.id}" data-k="${k}" list="${dl}" value="${esc(v)}" inputmode="${fmt === 'Punkte' ? 'numeric' : 'text'}"
+  const dl = 'dl' + LISTEN_FORMATE.indexOf(fmt);
+  return `<td class="gc"><input class="g ${cls ? 'g-' + cls : ''}" data-id="${r.id}" data-k="${k}" list="${dl}" value="${esc(v)}" inputmode="text"
     autocomplete="off" aria-label="${esc(spaltenName(k))} ${esc(r.name)}, ${esc(r.vorname)}, ${esc(r.fach)}"></td>`;
 }
 const spaltenName = k => E.t.spaltennamen[k] || SPALTEN_STANDARD[k];
@@ -2040,7 +2066,7 @@ function commit(inp){
   const p = parseGrade(inp.value, fmt), key = vk(r.id, k), prev = E.vals.get(key) || '';
   if (p.invalid){
     inp.classList.add('bad');
-    toast(`„${p.raw}“ ist hier nicht erlaubt. ${fmt === 'Punkte' ? 'Bitte Punkte von 0 bis 15 eintragen.' : fmt === 'Note ohne Tendenz' ? 'Bitte eine Note von 1 bis 6 eintragen.' : 'Bitte eine Note wie 2+, 2 oder 2- eintragen.'}`, 'err');
+    toast(`„${p.raw}“ ist hier nicht erlaubt. Erlaubt: ${erlaubtText(fmt)}.`, 'err');
     inp.value = prev; setTimeout(() => inp.classList.remove('bad'), 1500); return false;
   }
   inp.value = p.v;

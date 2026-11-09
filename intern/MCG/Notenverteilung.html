@@ -18,6 +18,10 @@ const VOREINSTELLUNGEN = {
   passwortModus:        "ein Passwort für alle",     // oder "individuell" (vorbereitet)
   passwortMindestlaenge: 7,
   spaltennamen:         { S1: "SoMi 1", K1: "Klausur 1", Q: "Quartalsnote", S2: "SoMi 2", K2: "Klausur 2", E: "Endnote" },
+  sonderkuerzel:        "NT, AT",                    // in ALLEN Kursen zusätzlich erlaubt (NT = nicht teilgenommen, AT = Attest)
+  vertiefungKuerzel:    "E1, E2, E3, NT",            // nur in Vertiefungskursen, statt Noten (E1 = mit besonderem Erfolg, E2 = mit Erfolg, E3 = teilgenommen)
+  vertiefungKursarten:  "VTF",                       // daran werden Vertiefungskurse erkannt (Kursart aus SchILD)
+  vertiefungFaecher:    "",                          // optional zusätzlich Fachkürzel, z. B. "VTD, VTM, VTE"
   blattschutz:          true,                        // true = Blätter schützen, false = nicht schützen
 };
 /* ==================  ENDE DER VOREINSTELLUNGEN  ================== */
@@ -143,6 +147,10 @@ footer{ text-align:center; color:var(--muted); font-size:.8rem; padding:1rem; }
       <label>Rückgabeweg <input type="text" id="setWeg"></label>
       <label>Verteilung Sek I über <input type="text" id="setVertS"></label>
       <label>Verteilung Oberstufe über <input type="text" id="setVertO"></label>
+      <label>Sonderkürzel (alle Kurse) <input type="text" id="setSonder"></label>
+      <label>Kürzel Vertiefungskurse <input type="text" id="setVert"></label>
+      <label>Vertiefungskurse erkennen an Kursart <input type="text" id="setVertKA"></label>
+      <label>… oder an Fachkürzel <input type="text" id="setVertF"></label>
       <label class="cb" style="align-self:end"><input type="checkbox" id="setSchutz"> Blattschutz in den Lehrerdateien</label>
     </div>
     <p class="muted small" id="patternHint"></p>
@@ -1459,7 +1467,18 @@ function sichtbar(bereich, offen){
   const r2 = offen.some(k => RUNDE2.includes(k));
   return SPALTEN.filter(k => offen.includes(k) || (r2 && RUNDE1.includes(k)));
 }
-function listeFuer(fmt){ return fmt === 'Punkte' ? PUNKTE : fmt === 'Note ohne Tendenz' ? NOTEN_O : NOTEN_T; }
+/* Sonderkürzel: in allen Kursen erlaubt (z. B. NT, AT) bzw. nur in Vertiefungskursen (z. B. E1, E2, E3).
+   Die Listen kommen aus den Voreinstellungen von Seite A und stehen in jeder Datei (_Info), damit B und C dieselben nutzen. */
+const VERTIEFUNG = 'Vertiefung';
+const LISTEN_FORMATE = ['Note mit Tendenz', 'Note ohne Tendenz', 'Punkte', VERTIEFUNG];
+let SONDER = ['NT', 'AT'], VERT = ['E1', 'E2', 'E3', 'NT'];
+const kuerzelListe = s => uniq((Array.isArray(s) ? s : String(s || '').split(/[,;\s]+/)).map(x => String(x).trim().toUpperCase()).filter(Boolean));
+function setKuerzel(sonder, vert){ if (sonder != null) SONDER = kuerzelListe(sonder); if (vert != null) VERT = kuerzelListe(vert); }
+function listeFuer(fmt){
+  const base = fmt === VERTIEFUNG ? VERT : fmt === 'Punkte' ? PUNKTE : fmt === 'Note ohne Tendenz' ? NOTEN_O : NOTEN_T;
+  return uniq([...base, ...SONDER]);
+}
+const istKuerzel = (v, fmt) => SONDER.includes(v) || (fmt === VERTIEFUNG && VERT.includes(v));
 
 /* Eingabe prüfen und vereinheitlichen. Liefert { v } (kanonischer Text, '' = leer) oder { invalid, raw } */
 function parseGrade(raw, fmt){
@@ -1467,6 +1486,8 @@ function parseGrade(raw, fmt){
   if (typeof raw === 'number'){ raw = String(raw); }
   let s = String(raw).trim().replace(/[−–—]/g, '-').replace(/\s+/g, '');
   if (!s) return { v:'' };
+  if (istKuerzel(s.toUpperCase(), fmt)) return { v:s.toUpperCase() };
+  if (fmt === VERTIEFUNG) return { invalid:true, raw:String(raw).trim() };
   // Altes Format aus Version 1: „2- (10)“
   const old = s.match(/^([1-6][+-]?)\((\d{1,2})\)$/); if (old) s = fmt === 'Punkte' ? old[2] : old[1];
   if (fmt === 'Punkte'){
@@ -1481,6 +1502,7 @@ function parseGrade(raw, fmt){
 function gradeClass(v, fmt){
   if (v == null || v === '') return '';
   v = String(v);
+  if (fmt === VERTIEFUNG || istKuerzel(v, fmt)) return '';
   if (fmt === 'Punkte'){
     if (!/^\d{1,2}$/.test(v)) return '';
     const p = +v; return p === 0 ? 'd' : p <= 3 ? 'r' : p === 4 ? 'o' : p <= 6 ? 'y' : '';
@@ -1501,11 +1523,17 @@ const FILL_OFFEN = 'FFFFF8DC', FILL_GESPERRT = 'FFE7E6E6', FILL_KOPF = 'FFE3E8EC
 /* Für den Import nach SchILD: Note und Punkte aus kanonischem Wert */
 function importWerte(v, fmt){
   if (!v) return null;
-  if (fmt === 'Punkte'){ const p = +v; return { note:NOTE_OF_P[p] ?? '', punkte:p }; }
+  if (fmt === 'Punkte' && /^\d{1,2}$/.test(v)){ const p = +v; return { note:NOTE_OF_P[p] ?? '', punkte:p }; }
   return { note:v, punkte:null };
 }
 /* Wert für Excel-Zelle: Punkte als Zahl, Noten als Text */
-const excelWert = (v, fmt) => v === '' || v == null ? null : fmt === 'Punkte' ? Number(v) : String(v);
+const excelWert = (v, fmt) => v === '' || v == null ? null : fmt === 'Punkte' && /^\d{1,2}$/.test(String(v)) ? Number(v) : String(v);
+/* Erlaubte Eingaben als lesbarer Text (für Fehlermeldungen) */
+function erlaubtText(fmt){
+  const base = fmt === VERTIEFUNG ? VERT.join(', ') : fmt === 'Punkte' ? 'Punkte 0 bis 15' : fmt === 'Note ohne Tendenz' ? 'Noten 1 bis 6' : 'Noten wie 2+, 2, 2-';
+  const s = SONDER.filter(x => fmt !== VERTIEFUNG || !VERT.includes(x));
+  return base + (s.length ? ' oder ' + s.join(', ') : '');
+}
 
 /* --- xl.js --- */
 'use strict';
@@ -1514,6 +1542,7 @@ const FARB_WERTE = {
   'Note mit Tendenz':  { y:['4+','4'], o:['4-'], r:['5+','5','5-'], d:['6'] },
   'Note ohne Tendenz': { y:['4'], r:['5'], d:['6'] },
   'Punkte':            { y:['5','6'], o:['4'], r:['1','2','3'], d:['0'] },
+  'Vertiefung':        {},
 };
 function writeInfo(wb, obj){
   const ws = wb.addWorksheet('_Info', { state:'veryHidden' });
@@ -1539,16 +1568,16 @@ function updateInfo(wb, key, value){
 function addListen(wb){
   const ws = wb.addWorksheet('Listen', { state:'veryHidden' });
   const ref = {};
-  NOTENFORMATE.forEach((fmt, i) => {
+  LISTEN_FORMATE.forEach((fmt, i) => {
     const L = String.fromCharCode(65 + i), list = listeFuer(fmt);
-    list.forEach((v, j) => ws.getCell(j + 1, i + 1).value = fmt === 'Punkte' ? Number(v) : v);
+    list.forEach((v, j) => ws.getCell(j + 1, i + 1).value = /^\d{1,2}$/.test(v) && fmt === 'Punkte' ? Number(v) : v);
     ref[fmt] = `Listen!$${L}$1:$${L}$${list.length}`;
   });
   return ref;
 }
 function dvFor(ref, fmt){
   return { type:'list', allowBlank:true, formulae:[ref], showErrorMessage:true, errorStyle:'stop', errorTitle:'Ungültige Eingabe',
-    error:fmt === 'Punkte' ? 'Bitte Punkte von 0 bis 15 aus der Auswahlliste wählen.' : 'Bitte eine Note aus der Auswahlliste wählen.' };
+    error:'Erlaubt: ' + erlaubtText(fmt) + '. Bitte aus der Auswahlliste wählen.' };
 }
 /* Zeilen zu zusammenhängenden Bereichen zusammenfassen: [[von, bis], …] */
 function runs(nums){
@@ -1558,7 +1587,7 @@ function runs(nums){
 }
 /* Bedingte Formatierung (Notenfarben) für einen Bereich mit bekanntem Notenformat */
 function addGradeCF(ws, L, r1, r2, fmt){
-  const vals = FARB_WERTE[fmt], c = `${L}${r1}`, rules = [];
+  const vals = FARB_WERTE[fmt] || {}, c = `${L}${r1}`, rules = [];
   for (const k of ['d','r','o','y']){
     if (!vals[k]) continue;
     const f = FARBEN[k];
@@ -1566,7 +1595,7 @@ function addGradeCF(ws, L, r1, r2, fmt){
       formulae:[`OR(${vals[k].map(v => `TRIM(${c}&"")="${v}"`).join(',')})`],
       style:{ fill:{ type:'pattern', pattern:'solid', bgColor:{ argb:f.bg } }, font:{ color:{ argb:f.fg }, bold:f.bold } } });
   }
-  ws.addConditionalFormatting({ ref:`${L}${r1}:${L}${r2}`, rules });
+  if (rules.length) ws.addConditionalFormatting({ ref:`${L}${r1}:${L}${r2}`, rules });
 }
 function gradeStyle(cell, v, fmt){
   const k = gradeClass(v, fmt); if (!k) return;
@@ -1799,6 +1828,9 @@ function fileName(pattern, vals){
   return safeName(s.replace(/_+/g, '_').replace(/^_|_$/g, '')) + '.xlsx';
 }
 const fmtFuer = (G, stufe) => G.settings.formate[stufe] || (bereichOf(stufe, G.settings.oberstufe) === 'SekI' ? 'Note mit Tendenz' : 'Punkte');
+const istVertiefung = (r, set) => { const ka = kuerzelListe(set.vertiefungKursarten), fa = kuerzelListe(set.vertiefungFaecher);
+  return ka.includes(String(r.kursart || '').toUpperCase()) || fa.includes(normFach(r.fach)); };
+const fmtRow = (G, r) => r.vertiefung ? VERTIEFUNG : fmtFuer(G, r.stufe);
 const spName = (G, stufe, k) => (G.settings.spaltennamenJeStufe?.[stufe]?.[k]) || G.settings.spaltennamen?.[k] || SPALTEN_STANDARD[k];
 
 /* ---------- Gesamtdatei ---------- */
@@ -1814,10 +1846,10 @@ function buildGesamtWb(G){
   styleHeader(ws.getRow(1));
   const rows = G.rows.slice().sort((a, b) => cmpDe(a.stufe, b.stufe) || cmpDe(a.klasse, b.klasse) || cmpDe(a.name, b.name) || cmpDe(a.vorname, b.vorname) || cmpDe(a.fach, b.fach));
   for (const r of rows){
-    const fmt = fmtFuer(G, r.stufe);
+    const fmt = fmtRow(G, r);
     const vals = G_COLS.map(k => {
       switch (k){
-        case '_ID': return r.id; case '_Schlüssel': return rowSKey(r); case '_Quelle': return JSON.stringify({ q:r.quelle || {}, m:r.manuell ? 1 : 0 });
+        case '_ID': return r.id; case '_Schlüssel': return rowSKey(r); case '_Quelle': return JSON.stringify({ q:r.quelle || {}, m:r.manuell ? 1 : 0, v:r.vertiefung ? 1 : 0 });
         case 'Stufe': return r.stufe; case 'Klasse': return r.klasse; case 'Fach': return r.fach; case 'Kursart': return r.kursart; case 'Kurs': return r.kurs;
         case 'Lehrkraft': return r.lehrer; case 'Nachname': return r.name; case 'Vorname': return r.vorname; case 'Geburtsdatum': return isoToDate(r.geb);
         case 'Status': return r.status; case 'Hinweis': return r.hinweis || '';
@@ -1847,6 +1879,7 @@ function readGesamtWb(wb){
   const cols = infoJSON(info, 'Spalten', G_COLS), ws = wb.getWorksheet('Gesamt');
   const idx = Object.fromEntries(cols.map((k, i) => [k, i + 1]));
   const settings = infoJSON(info, 'Einstellungen', {});
+  setKuerzel(settings.sonderkuerzel ?? null, settings.vertiefungKuerzel ?? null);
   const d = wb.getWorksheet('_Daten'), dj = (r, def) => { try { return JSON.parse(str(d.getCell(r, 2).value)) ?? def; } catch(e){ return def; } };
   const G = { info:{ SJ:info.SJ, Schuljahr:info.Schuljahr, HJ:info.HJ, Runde:info.Runde, LaufID:info.LaufID },
     settings, rows:[], laeufe:dj(1, []), protokoll:dj(2, []), rueckgaben:dj(3, {}),
@@ -1857,8 +1890,8 @@ function readGesamtWb(wb){
     let q = {}; try { q = JSON.parse(str(g('_Quelle')) || '{}'); } catch(e){}
     const o = { id:Number(id), stufe:str(g('Stufe')), klasse:str(g('Klasse')), fach:str(g('Fach')), kursart:str(g('Kursart')), kurs:str(g('Kurs')),
       lehrer:str(g('Lehrkraft')), name:str(g('Nachname')), vorname:str(g('Vorname')), geb:dateKey(g('Geburtsdatum')), status:str(g('Status')) || 'aktiv',
-      hinweis:str(g('Hinweis')), quelle:q.q || {}, manuell:!!q.m };
-    const fmt = fmtFuer(G, o.stufe);
+      hinweis:str(g('Hinweis')), quelle:q.q || {}, manuell:!!q.m, vertiefung:!!q.v };
+    const fmt = fmtRow(G, o);
     for (const k of SPALTEN){ const p = parseGrade(cellVal(g(k)), fmt); o[k] = p.v || ''; }
     G.rows.push(o);
   }
@@ -1866,7 +1899,7 @@ function readGesamtWb(wb){
 }
 
 /* ---------- Lehrerdateien lesen (Seite B und C) ---------- */
-const T_COLS_FEST = ['_ID','_Schlüssel','_Stufe','Klasse','Fach','Kurs','Kursart','Nachname','Vorname','Geburtsdatum'];
+const T_COLS_FEST = ['_ID','_Schlüssel','_Stufe','_Art','Klasse','Fach','Kurs','Kursart','Nachname','Vorname','Geburtsdatum'];
 function readTeacherWb(wb){
   const info = readInfo(wb);
   if (!info) return { error:'Das ist keine Lehrerdatei aus der Notenerfassung.' };
@@ -1877,11 +1910,12 @@ function readTeacherWb(wb){
   if (!ws || !keys) return { error:'Die Datei wurde verändert (Blatt „Noten“ fehlt).' };
   const idx = Object.fromEntries(keys.map((k, i) => [k, i + 1]));
   const offen = infoJSON(info, 'Offen', {}), formate = infoJSON(info, 'Formate', {});
+  setKuerzel(infoJSON(info, 'Sonderkuerzel', null), infoJSON(info, 'VertiefungKuerzel', null));
   const rows = [];
   for (let r = 2; r <= ws.rowCount; r++){
     const row = ws.getRow(r), g = k => idx[k] ? cellVal(row.getCell(idx[k]).value) : null;
     const id = g('_ID'); if (id == null || id === '') continue;
-    const o = { r, id:Number(id), skey:str(g('_Schlüssel')), stufe:str(g('_Stufe')), klasse:str(g('Klasse')), fach:str(g('Fach')), kurs:str(g('Kurs')),
+    const o = { r, id:Number(id), skey:str(g('_Schlüssel')), stufe:str(g('_Stufe')), vertiefung:str(g('_Art')) === 'V', klasse:str(g('Klasse')), fach:str(g('Fach')), kurs:str(g('Kurs')),
       kursart:str(g('Kursart')), name:str(g('Nachname')), vorname:str(g('Vorname')), vals:{} };
     for (const k of SPALTEN) if (idx[k]) o.vals[k] = g(k);
     rows.push(o);
@@ -1897,7 +1931,7 @@ function reapplyTeacherCF(t){
   const ws = t.ws; ws.conditionalFormattings = [];
   const cf = new Map();
   for (const r of t.rows){
-    const fmt = t.formate[r.stufe] || 'Note mit Tendenz';
+    const fmt = r.vertiefung ? VERTIEFUNG : (t.formate[r.stufe] || 'Note mit Tendenz');
     for (const k of SPALTEN) if (t.idx[k]){ const key = k + '|' + fmt; if (!cf.has(key)) cf.set(key, []); cf.get(key).push(r.r); }
   }
   for (const [kf, nums] of cf){ const [k, fmt] = kf.split('|'), L = ws.getColumn(t.idx[k]).letter;
@@ -1956,6 +1990,10 @@ const SCHEMA_A = {
   passwortMindestlaenge:{ def:7, type:'number', min:4 },
   spaltennamen:{ def:Object.assign({}, SPALTEN_STANDARD), type:'map', keys:SPALTEN },
   blattschutz:{ def:true, type:'bool' },
+  sonderkuerzel:{ def:'NT, AT', type:'text' },
+  vertiefungKuerzel:{ def:'E1, E2, E3, NT', type:'text' },
+  vertiefungKursarten:{ def:'VTF', type:'text' },
+  vertiefungFaecher:{ def:'', type:'text' },
 };
 const S = { cfg:null, set:{}, dat:null, vorlage:null, alt:null, altPw:null, sjManual:{ jahr:'', hj:'' }, match:null,
             dec:new Map(), plan:null, stufenSet:{ formate:{}, offen:{}, erzeugen:{} }, rundeTouched:false, pwTouched:false };
@@ -1983,6 +2021,8 @@ async function handleFiles(files){
     if (!S.pwTouched && S.altPw){ S.set.pw = S.set.pw2 = S.altPw; }
     if (S.alt.settings.passwortModus) S.set.pwMode = S.alt.settings.passwortModus;
     if (S.alt.settings.oberstufe) S.set.os = S.alt.settings.oberstufe.join(', ');
+    for (const [k, sk] of [['sonderkuerzel','sonder'], ['vertiefungKuerzel','vert'], ['vertiefungKursarten','vertKA'], ['vertiefungFaecher','vertF']])
+      if (S.alt.settings[k] != null) S.set[sk] = Array.isArray(S.alt.settings[k]) ? S.alt.settings[k].join(', ') : S.alt.settings[k];
   }
   recompute();
 }
@@ -2010,7 +2050,7 @@ function computePlan(){
     let r = byKey.get(n.key);
     if (!r){ r = { key:n.key, name:n.name, vorname:n.vorname, geb:n.geb, klasse:n.klasse, stufe:stufeOf(n.klasse, os), fach:n.fach, kursart:n.kursart,
       lehrer:'', kurs:'', manuell:false, status:'aktiv', hinweis:'', quelle:{} }; SPALTEN.forEach(k => r[k] = ''); byKey.set(n.key, r); base.push(r); }
-    for (const a of M.assign.get(n.idx) || []) addAssign(r, a.lehrer, a.kurs);
+    for (const a of M.assign.get(n.idx) || []){ addAssign(r, a.lehrer, a.kurs); if (!r.kursart && a.kursart) r.kursart = a.kursart; }
   }
   const nByIdx = new Map(N.map(n => [n.idx, n]));
   // Mehrdeutig
@@ -2135,6 +2175,9 @@ function computePlan(){
   } else {
     rows.forEach(r => r.id = ++maxId);
   }
+  // Vertiefungskurse markieren (Kursart oder Fach laut Einstellung)
+  const vset = { vertiefungKursarten:S.set.vertKA, vertiefungFaecher:S.set.vertF };
+  for (const r of rows) r.vertiefung = istVertiefung(r, vset);
   // offene Klärungen zählen
   let open = 0;
   for (const g of groups){
@@ -2158,6 +2201,8 @@ function syncSettingsUI(){
   $('#setRunde').value = s.runde; $('#setPw').value = s.pw || ''; $('#setPw2').value = s.pw2 || '';
   $('#setPwMode').value = s.pwMode; $('#setOS').value = s.os; $('#setPattern').value = s.pattern;
   $('#setRueck').value = s.rueck; $('#setWeg').value = s.weg; $('#setVertS').value = s.vertS; $('#setVertO').value = s.vertO;
+  $('#setSonder').value = s.sonder; $('#setVert').value = s.vert; $('#setVertKA').value = s.vertKA; $('#setVertF').value = s.vertF;
+  setKuerzel(s.sonder, s.vert);
   $('#setSchutz').checked = s.schutz; $('#pwMin').textContent = S.cfg.passwortMindestlaenge;
   const p = patternProblem(s.pattern), x = sj();
   $('#patternHint').innerHTML = p ? `<span class="badline">${esc(p)}</span>`
@@ -2172,6 +2217,8 @@ function wireSettings(){
     if (['runde','os','pwMode','pw','pw2','pattern'].includes(key)) renderAll(); });
   bind('#setRunde','runde'); bind('#setPw','pw'); bind('#setPw2','pw2'); bind('#setPwMode','pwMode'); bind('#setOS','os');
   bind('#setPattern','pattern'); bind('#setRueck','rueck'); bind('#setWeg','weg'); bind('#setVertS','vertS'); bind('#setVertO','vertO'); bind('#setSchutz','schutz', true);
+  for (const [id, key] of [['#setSonder','sonder'], ['#setVert','vert'], ['#setVertKA','vertKA'], ['#setVertF','vertF']])
+    $(id).addEventListener('change', e => { S.set[key] = e.target.value; setKuerzel(S.set.sonder, S.set.vert); renderAll(); });
   $('#setRunde').onchange = e => { S.set.runde = e.target.value; S.rundeTouched = true; S.stufenSet.offen = {}; syncSettingsUI(); renderAll(); };
   $('#setPwMode').onchange = e => { S.set.pwMode = e.target.value; renderAll(); };
   $('#pwShow').onchange = e => { $('#setPw').type = $('#setPw2').type = e.target.checked ? 'text' : 'password'; };
@@ -2290,7 +2337,7 @@ function stufenInfo(){
     if (!S.stufenSet.formate[s]) S.stufenSet.formate[s] = fmtDef;
     if (!S.stufenSet.offen[s]) S.stufenSet.offen[s] = spaltenFuer(b, S.set.runde);
     if (S.stufenSet.erzeugen[s] == null) S.stufenSet.erzeugen[s] = true;
-    return { stufe:s, bereich:b, rows:rs.length, lehrer:uniq(rs.flatMap(r => lehrerList(r.lehrer))).length, klassen:sortDe(uniq(rs.map(r => r.klasse))) };
+    return { stufe:s, bereich:b, rows:rs.length, vt:rs.filter(r => r.vertiefung).length, lehrer:uniq(rs.flatMap(r => lehrerList(r.lehrer))).length, klassen:sortDe(uniq(rs.map(r => r.klasse))) };
   });
 }
 function renderStufen(){
@@ -2300,7 +2347,7 @@ function renderStufen(){
     <div class="tw"><table class="matrix"><thead><tr><th>Stufe</th><th>Bereich</th><th>Klassen</th><th>Zeilen</th><th>Notenformat</th>${SPALTEN.map(k => `<th>${esc(names[k])}</th>`).join('')}<th>erzeugen</th></tr></thead><tbody>`;
   for (const s of info){
     const allowed = spaltenBereich(s.bereich), off = S.stufenSet.offen[s.stufe];
-    h += `<tr><td><b>${esc(s.stufe)}</b></td><td>${bereichName(s.bereich)}</td><td class="small">${esc(s.klassen.join(', '))}</td><td>${s.rows}</td>
+    h += `<tr><td><b>${esc(s.stufe)}</b></td><td>${bereichName(s.bereich)}</td><td class="small">${esc(s.klassen.join(', '))}</td><td>${s.rows}${s.vt ? `<br><span class="small muted">davon ${s.vt} Vertiefung</span>` : ''}</td>
       <td><select data-fmt="${esc(s.stufe)}">${NOTENFORMATE.map(f => `<option ${S.stufenSet.formate[s.stufe] === f ? 'selected' : ''}>${f}</option>`).join('')}</select></td>
       ${SPALTEN.map(k => allowed.includes(k) ? `<td style="background:${off.includes(k) ? 'var(--open)' : ''}"><input type="checkbox" data-off="${esc(s.stufe)}" data-k="${k}" ${off.includes(k) ? 'checked' : ''} aria-label="${esc(s.stufe)} ${esc(names[k])}"></td>` : '<td class="muted">–</td>').join('')}
       <td><input type="checkbox" data-gen="${esc(s.stufe)}" ${S.stufenSet.erzeugen[s.stufe] ? 'checked' : ''} aria-label="Stufe ${esc(s.stufe)} erzeugen"></td></tr>`;
@@ -2339,7 +2386,8 @@ function buildG(){
   const G = {
     info:{ SJ:x.SJ, Schuljahr:x.Schuljahr, HJ:x.HJ, Runde:runde, LaufID:laufId },
     settings:{ oberstufe:os, formate:Object.assign({}, old.settings?.formate || {}, S.stufenSet.formate), spaltennamen:S.cfg.spaltennamen, spaltennamenJeStufe:{},
-      rueckgabeAn:S.set.rueck, rueckgabeWeg:S.set.weg, passwortModus:S.set.pwMode, dateiname:S.set.pattern },
+      rueckgabeAn:S.set.rueck, rueckgabeWeg:S.set.weg, passwortModus:S.set.pwMode, dateiname:S.set.pattern,
+      sonderkuerzel:kuerzelListe(S.set.sonder), vertiefungKuerzel:kuerzelListe(S.set.vert), vertiefungKursarten:S.set.vertKA, vertiefungFaecher:S.set.vertF },
     rows:S.plan.rows.map(r => { const o = Object.assign({}, r); delete o.key; delete o.ohneOk; return o; }),
     laeufe:(old.laeufe || []).slice(), protokoll:(old.protokoll || []).slice(), rueckgaben:Object.assign({}, old.rueckgaben || {}),
     stufeRunde:Object.assign({}, old.stufeRunde || {}), stufeLauf:Object.assign({}, old.stufeLauf || {}), erwartet:{},
@@ -2372,15 +2420,15 @@ async function buildTeacherWb(G, f, lauf){
   const wb = new ExcelJS.Workbook(); wb.creator = APP_NAME; wb.created = new Date();
   const ws = wb.addWorksheet('Noten', { views:[{ state:'frozen', ySplit:1, xSplit:0 }] });
   const listRef = addListen(wb);
-  const widths = { _ID:5, _Schlüssel:5, _Stufe:5, Klasse:8, Fach:7, Kurs:11, Kursart:9, Nachname:22, Vorname:20, Geburtsdatum:12 };
+  const widths = { _ID:5, _Schlüssel:5, _Stufe:5, _Art:4, Klasse:8, Fach:7, Kurs:11, Kursart:9, Nachname:22, Vorname:20, Geburtsdatum:12 };
   ws.columns = keys.map(k => ({ header:SPALTEN.includes(k) ? spName(G, stufen.length === 1 ? stufen[0] : null, k) : k, width:widths[k] || 12,
     hidden:k.startsWith('_') || k === 'Geburtsdatum' }));
   const openIdx = new Set(vis.filter(k => stufen.some(st => (lauf.offen[st] || []).includes(k))).map(k => keys.indexOf(k) + 1));
   styleHeader(ws.getRow(1), openIdx);
   const dv = new Map(), cf = new Map(), add = (m, k, n) => { if (!m.has(k)) m.set(k, []); m.get(k).push(n); };
   rows.forEach((r, i) => {
-    const rn = i + 2, row = ws.getRow(rn), fmt = fmtFuer(G, r.stufe), off = lauf.offen[r.stufe] || [], sv = sichtbar(f.bereich, off);
-    const fest = { _ID:r.id, _Schlüssel:rowSKey(r), _Stufe:r.stufe, Klasse:r.klasse, Fach:r.fach, Kurs:r.kurs, Kursart:r.kursart, Nachname:r.name, Vorname:r.vorname, Geburtsdatum:isoToDate(r.geb) };
+    const rn = i + 2, row = ws.getRow(rn), fmt = fmtRow(G, r), off = lauf.offen[r.stufe] || [], sv = sichtbar(f.bereich, off);
+    const fest = { _ID:r.id, _Schlüssel:rowSKey(r), _Stufe:r.stufe, _Art:r.vertiefung ? 'V' : '', Klasse:r.klasse, Fach:r.fach, Kurs:r.kurs, Kursart:r.kursart, Nachname:r.name, Vorname:r.vorname, Geburtsdatum:isoToDate(r.geb) };
     keys.forEach((k, j) => {
       const cell = row.getCell(j + 1);
       if (!SPALTEN.includes(k)){ cell.value = fest[k] ?? ''; if (k === 'Geburtsdatum') cell.numFmt = 'DD.MM.YYYY'; return; }
@@ -2402,6 +2450,7 @@ async function buildTeacherWb(G, f, lauf){
   writeInfo(wb, { Typ:'Lehrerdatei', SJ:G.info.SJ, Schuljahr:G.info.Schuljahr, HJ:G.info.HJ, Runde:G.info.Runde, LaufID:lauf.id,
     Lehrer:f.lehrer, Bereich:f.bereich, RueckgabeAn:G.settings.rueckgabeAn, RueckgabeWeg:G.settings.rueckgabeWeg,
     Spalten:keys, Offen:Object.fromEntries(stufen.map(s => [s, lauf.offen[s] || []])), Formate:Object.fromEntries(stufen.map(s => [s, fmtFuer(G, s)])),
+    Sonderkuerzel:G.settings.sonderkuerzel, VertiefungKuerzel:G.settings.vertiefungKuerzel,
     Spaltennamen:Object.fromEntries(SPALTEN.map(k => [k, spName(G, null, k)])), Erstellt:new Date().toISOString(), Zeilen:rows.length });
   return wb;
 }
@@ -2418,6 +2467,7 @@ function addAnleitung(wb, G, f, stufen, lauf){
     ['1. Im Blatt „Noten“ stehen alle Ihre Schüler:innen – eine Zeile pro Schüler:in und Fach.'],
     [`2. Eintragen in den gelben Spalten: ${offen.join(', ') || '–'}. Graue Spalten sind gesperrt (nur zur Ansicht).`],
     ['3. Die Note aus der Auswahlliste wählen oder eintippen (z. B. „2-“ bzw. Punkte „10“).'],
+    [`   In allen Kursen zusätzlich erlaubt: ${G.settings.sonderkuerzel.join(', ') || '–'}. In Vertiefungskursen statt Noten: ${G.settings.vertiefungKuerzel.join(', ')}.`],
     ['4. Mit den Filterpfeilen in der Kopfzeile lässt sich nach Klasse, Fach, Kurs oder Name filtern.'],
     ['5. Datei unter demselben Namen speichern und zurückschicken. Das Passwort bleibt erhalten.'],
     [''],
@@ -2514,7 +2564,8 @@ document.addEventListener('DOMContentLoaded', () => {
   if (typeof ExcelJS === 'undefined' || typeof JSZip === 'undefined' || typeof OfficeCrypto === 'undefined'){ document.body.innerHTML = '<p style="padding:2rem">Die eingebetteten Bibliotheken konnten nicht geladen werden. Ist die Datei vollständig?</p>'; return; }
   const c = readConfig(SCHEMA_A); S.cfg = c.values; showConfigProblems(c.problems);
   S.set = { runde:'Quartal', pw:'', pw2:'', pwMode:S.cfg.passwortModus, os:S.cfg.oberstufe, pattern:S.cfg.dateiname, rueck:S.cfg.rueckgabeAn, weg:S.cfg.rueckgabeWeg,
-    vertS:S.cfg.verteilungSekI, vertO:S.cfg.verteilungOberstufe, schutz:S.cfg.blattschutz };
+    vertS:S.cfg.verteilungSekI, vertO:S.cfg.verteilungOberstufe, schutz:S.cfg.blattschutz,
+    sonder:S.cfg.sonderkuerzel, vert:S.cfg.vertiefungKuerzel, vertKA:S.cfg.vertiefungKursarten, vertF:S.cfg.vertiefungFaecher };
   wireDrop('#dropSrc', '#inSrc', handleFiles); wireSettings(); wireMatch(); wireStufen();
   syncSettingsUI(); renderAll();
   window.addEventListener('beforeunload', e => { if (S.dat && !S.lastGen){ e.preventDefault(); e.returnValue = ''; } });
