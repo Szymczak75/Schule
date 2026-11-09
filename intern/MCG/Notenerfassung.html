@@ -1299,24 +1299,42 @@ function mapCols(h, spec){ const out = {}; for (const [k, aliases] of Object.ent
 
 /* Textdateien (.dat/.csv/.txt): Zeichensatz und Trennzeichen werden automatisch erkannt */
 function decodeText(buf){
+  const b = new Uint8Array(buf);
+  if (b[0] === 0xFF && b[1] === 0xFE) return new TextDecoder('utf-16le').decode(b.subarray(2));
+  if (b[0] === 0xFE && b[1] === 0xFF) return new TextDecoder('utf-16be').decode(b.subarray(2));
+  // UTF-16 ohne BOM: viele Nullbytes an ungeraden Stellen
+  let z = 0; for (let i = 1; i < Math.min(b.length, 400); i += 2) if (b[i] === 0) z++;
+  if (z > 100) return new TextDecoder('utf-16le').decode(b);
   let t;
-  try { t = new TextDecoder('utf-8', { fatal:true }).decode(buf); } catch(e){ t = new TextDecoder('windows-1252').decode(buf); }
-  return t.replace(/^\uFEFF/, '');
+  try { t = new TextDecoder('utf-8', { fatal:true }).decode(b); } catch(e){ t = new TextDecoder('windows-1252').decode(b); }
+  return t.replace(/^﻿/, '');
 }
-function parseDelimited(text){
-  const first = text.split(/\r?\n/).find(l => l.trim()) || '';
-  const delim = [';', '\t', '|', ','].map(d => [d, first.split(d).length]).sort((a,b) => b[1] - a[1])[0][0];
-  const rows = []; let row = [], cur = '', q = false;
-  for (let i = 0; i < text.length; i++){
-    const ch = text[i];
-    if (q){ if (ch === '"'){ if (text[i+1] === '"'){ cur += '"'; i++; } else q = false; } else cur += ch; continue; }
-    if (ch === '"' && cur === '') q = true;
-    else if (ch === delim){ row.push(cur); cur = ''; }
-    else if (ch === '\n' || ch === '\r'){ if (ch === '\r' && text[i+1] === '\n') i++; row.push(cur); rows.push(row); row = []; cur = ''; }
+/* Trennzeichen werden je Zeile erkannt – Kopfzeile und Daten dürfen unterschiedliche Trennzeichen haben
+   (z. B. Kopf mit Tab, Daten mit |). Auch unsichtbare Trennzeichen (0x1F, 0x1E, 0x01) und ¦ werden erkannt. */
+const DELIMS = ['|', '\t', ';', '\u001F', '\u001E', '\u0001', '¦', ','];
+function bestDelim(line){
+  let best = null, n = 0;
+  for (const d of DELIMS){ const c = line.split(d).length - 1; if (c > n){ best = d; n = c; } }
+  return best;
+}
+function splitLine(line, d){
+  const out = []; let cur = '', q = false;
+  for (let i = 0; i < line.length; i++){
+    const ch = line[i];
+    if (q){ if (ch === '"'){ if (line[i+1] === '"'){ cur += '"'; i++; } else q = false; } else cur += ch; continue; }
+    if (ch === '"' && cur.trim() === ''){ q = true; cur = ''; }
+    else if (ch === d){ out.push(cur); cur = ''; }
     else cur += ch;
   }
-  if (cur !== '' || row.length){ row.push(cur); rows.push(row); }
-  return rows.filter(r => r.some(c => c.trim() !== ''));
+  out.push(cur); return out;
+}
+function parseDelimited(text){
+  const lines = text.split(/\r\n|\n|\r/).filter(l => l.trim() !== '');
+  if (!lines.length) return [];
+  const head = bestDelim(lines[0]);
+  const counts = new Map(); lines.slice(1, 30).forEach(l => { const d = bestDelim(l); if (d) counts.set(d, (counts.get(d) || 0) + 1); });
+  const data = [...counts.entries()].sort((a,b) => b[1] - a[1])[0]?.[0] || head;
+  return lines.map((l, i) => splitLine(l, i === 0 ? (head || data) : data));
 }
 async function readFile(file){
   const buf = await file.arrayBuffer();
