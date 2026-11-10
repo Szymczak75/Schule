@@ -621,14 +621,16 @@ mjx-container{max-width:100%;overflow-x:auto}
         var stapel = {}, oben = 0, zeiger = mk('g', {}, T.z.lab);
         st.folge.forEach(function(i){ if (st.pos[i] !== undefined) (stapel[st.pos[i]] = stapel[st.pos[i]] || []).push(i); });
         T.boxen = [];
-        Object.keys(stapel).forEach(function(tk){
-          var t = +tk, x = xv(t, teile), wechsel = teile >= 16;
-          var hoechst = Y;
-          stapel[tk].forEach(function(i, k){
-            var L = (wechsel && t % 2 === 1 ? 1 : 0) + (wechsel ? 2 * k : k);
+        /* Schilder so tief wie möglich setzen, ohne ein anderes zu berühren; gleiche Stelle = übereinander */
+        Object.keys(stapel).map(Number).sort(function(a, b){ return a - b; }).forEach(function(t){
+          var x = xv(t, teile), hoechst = Y, L = 0;
+          stapel[t].forEach(function(i){
+            var w = schildBreite(items[i]);
+            while (T.boxen.some(function(bx){ return bx.L === L && Math.abs(bx.x - x) < (bx.w + w) / 2 + 6; })) L++;
             var cy = 92 - L * 64;
             oben = Math.min(oben, cy - 34); hoechst = Math.min(hoechst, cy);
-            T.boxen.push({ i: i, x: x, cy: cy, w: schildBreite(items[i]) });
+            T.boxen.push({ i: i, x: x, cy: cy, w: w, L: L });
+            L++;
           });
           /* Zeiger vom obersten Schild bis zum Strich – liegt hinter den Schildern */
           mk('line', { x1: x, y1: hoechst, x2: x, y2: Y - 12, 'class': 'zs-zeiger' }, zeiger);
