@@ -59,7 +59,7 @@ SFS_MARKE = 'BAUSTEIN: Schritt-für-Schritt-Engine'
 
 # Rückblick-KA-Engine (baustein_rueckblick_klassenarbeit.html, TEIL 2.8)
 RBKA_TYP = 'Rückblick KA'
-RBKA_VERSION = 'v2'
+RBKA_VERSION = 'v3'
 RBKA_MARKE = 'BAUSTEIN: Rückblick-KA-Engine'
 
 # Navigationsleiste (baustein_navigation.html, TEIL 3.6)

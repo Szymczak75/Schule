@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <!-- =====================================================================
-     BAUSTEIN: Rückblick Klassenarbeit (_rbka)  v2, 08.11.2026
+     BAUSTEIN: Rückblick Klassenarbeit (_rbka)  v3, 10.11.2026
+     v3: Reiterleiste bleibt einzeilig und lässt sich seitlich wischen – bei vielen
+         gewählten Teilaufgaben verdeckte die umbrechende Leiste sonst den Bildschirm.
+         Der aktive Reiter rollt in die Mitte, ein Ausblend-Rand zeigt: da geht's weiter.
      v2: Vorzeichen (negative Zahlen in Eingabe und soll), Rückmeldung „Vorzeichen“,
          Antwortart 'zeichen' (<, >, =), Texttastatur sobald ein soll-Wert negativ ist.
      Gepflegt im Wartungs-Projekt. Anleitung (anweisung_lernseiten.txt, TEIL 2.8):
@@ -35,7 +38,7 @@
 </script>
 <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
 <style>
-/* ===== BAUSTEIN-CSS: Rückblick Klassenarbeit (v2, 08.11.2026) – unverändert übernehmen ===== */
+/* ===== BAUSTEIN-CSS: Rückblick Klassenarbeit (v3, 10.11.2026) – unverändert übernehmen ===== */
 :root{
   --ink:#22303f; --card:#ffffff; --green:#1e7d32; --red:#c1272d;
   --amber:#b8860b; --amber-light:#fdf3d9; --amber-dark:#96690a;
@@ -52,8 +55,19 @@ body{font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;font-size:
 .kopf p{font-size:1rem;margin:0;}
 .reiter{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--line);
   padding:.55rem .75rem;}
-.reiter-innen{max-width:860px;margin:0 auto;display:flex;flex-wrap:wrap;gap:.45rem;}
-.reiter button{min-height:44px;min-width:44px;padding:.4rem .8rem;border:2px solid var(--line);
+/* v3: einzeilig, seitlich wischbar – sonst verdeckt die klebende Leiste bei vielen Reitern alles */
+.reiter-innen{position:relative;max-width:860px;margin:0 auto;display:flex;flex-wrap:nowrap;gap:.45rem;
+  overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;
+  scrollbar-width:thin;padding-bottom:.2rem;}
+.reiter-innen.mehr-rechts{-webkit-mask-image:linear-gradient(to right,#000 calc(100% - 3rem),transparent);
+  mask-image:linear-gradient(to right,#000 calc(100% - 3rem),transparent);}
+.reiter-innen.mehr-links{-webkit-mask-image:linear-gradient(to left,#000 calc(100% - 3rem),transparent);
+  mask-image:linear-gradient(to left,#000 calc(100% - 3rem),transparent);}
+.reiter-innen.mehr-links.mehr-rechts{
+  -webkit-mask-image:linear-gradient(to right,transparent,#000 3rem,#000 calc(100% - 3rem),transparent);
+  mask-image:linear-gradient(to right,transparent,#000 3rem,#000 calc(100% - 3rem),transparent);}
+.reiter button{flex:0 0 auto;white-space:nowrap;
+  min-height:44px;min-width:44px;padding:.4rem .8rem;border:2px solid var(--line);
   background:#fff;color:var(--blue-dark);border-radius:.6rem;font:inherit;font-size:1rem;
   font-weight:700;cursor:pointer;}
 .reiter button.aktiv{background:var(--blue);border-color:var(--blue);color:#fff;}
@@ -158,7 +172,7 @@ mjx-container{max-width:100%;overflow-x:auto;}
 
 <script>
 /* ============================================================
-   BAUSTEIN: Rückblick-KA-Schreibhilfen (v2, 08.11.2026) – unverändert übernehmen
+   BAUSTEIN: Rückblick-KA-Schreibhilfen (v3, 10.11.2026) – unverändert übernehmen
    f(z,n)      Bruch als .frac-Konstrukt          f(3,4)  f('2 · 7','5 · 3')
    g(ganz,z,n) gemischte Zahl                       g(1,5,9)
    m('…')      Formel mit Dezimalzahlen: Komma wird {,}, · wird \cdot
@@ -247,7 +261,7 @@ var KA = {
 
 <script>
 /* ============================================================
-   BAUSTEIN: Rückblick-KA-Engine (v2, 08.11.2026) – unverändert übernehmen
+   BAUSTEIN: Rückblick-KA-Engine (v3, 10.11.2026) – unverändert übernehmen
    Baut aus dem Objekt KA: Startkarte (Fehler ankreuzen) → je Teilaufgabe eine
    Karte (Originalaufgabe + vollständiger Lösungsweg + typischer Fehler + zwei
    ähnliche Aufgaben mit Prüfen/Leeren/gestuften Tipps) → Abschlusskarte.
@@ -256,6 +270,8 @@ var KA = {
                   'zahl'   Wert gleich (Dezimalzahl, Bruch, gemischte Zahl, Periode)
                   'groesse' Zahl + Einheit aus Dropdown (einheiten: 'liter' o. eigene Liste)
                   'zeichen' Vergleichszeichen <, >, = aus Dropdown (soll: '<' | '>' | '=')
+   Reiter (v3): einzeilig und seitlich wischbar; reiterZu() rollt den aktiven Reiter
+   in die Mitte, reiterRand() setzt den Ausblend-Rand. Mausrad rollt die Leiste seitlich.
    Vorzeichen (v2): Eingaben dürfen mit −, - oder + beginnen und in Klammern stehen,
    soll darf einen negativen Zähler haben (z. B. −2,6 → [-13,5]).
    ============================================================ */
@@ -509,6 +525,7 @@ function zeigeWahl(){
   var erste = TEILE.filter(function(t){ return S.wahl[t.id]; })[0];
   $('los').disabled = !erste;
   $('los').textContent = erste ? 'Los geht’s mit ' + erste.id + ' →' : 'Teilaufgaben auswählen';
+  reiterRand();
   fortschritt();
 }
 function zeigeUeb(t, i){
@@ -575,6 +592,17 @@ function fortschritt(){
   $('ende-inhalt').innerHTML = h;
   $('tab-ende').classList.toggle('fertig', gew.length > 0 && fertig === gew.length);
 }
+/* v3: Reiterleiste seitlich rollen */
+function reiterRand(){
+  var r = $('reiter'), max = r.scrollWidth - r.clientWidth;
+  r.classList.toggle('mehr-links', r.scrollLeft > 2);
+  r.classList.toggle('mehr-rechts', r.scrollLeft < max - 2);
+}
+function reiterZu(b){
+  var r = $('reiter');
+  if (b && !b.hidden) r.scrollLeft = Math.max(0, b.offsetLeft - (r.clientWidth - b.offsetWidth) / 2);
+  reiterRand();
+}
 function zeigeKarte(id, scrollen){
   if (id !== 'start' && id !== 'ende' && !S.wahl[id]) id = 'start';
   var alle = document.querySelectorAll('.karte');
@@ -583,6 +611,7 @@ function zeigeKarte(id, scrollen){
   for (var j = 0; j < tabs.length; j++) tabs[j].classList.remove('aktiv');
   $('karte-' + id).classList.add('aktiv'); $('tab-' + id).classList.add('aktiv');
   S.karte = id; sichern();
+  reiterZu($('tab-' + id));
   if (scrollen) window.scrollTo(0, 0);
 }
 
@@ -593,6 +622,16 @@ baue();
 TEILE.forEach(function(t){ t.ueb.forEach(function(u, i){ zeigeUeb(t, i); }); });
 zeigeWahl();
 zeigeKarte(S.karte || 'start', false);
+(function(){
+  var r = $('reiter');
+  r.addEventListener('scroll', reiterRand);
+  window.addEventListener('resize', function(){ reiterZu($('tab-' + S.karte)); });
+  r.addEventListener('wheel', function(e){
+    if (r.scrollWidth > r.clientWidth && Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+      r.scrollLeft += e.deltaY; e.preventDefault();
+    }
+  }, { passive: false });
+})();
 
 /* T-Rex */
 var rex = $('trex'), rexText = $('trex-text');
