@@ -283,6 +283,10 @@ Diese Punkte standen offen und sind inzwischen als Regel in
   Chat ohne Schreibzugriff gab Baustein und `pruefe.py` zum Hochladen ins Wartungs-Projekt
   heraus. Seitdem gilt TEIL 0 Nr. 26: Repo mit Schreibzugriff anhängen, Branch, Pull Request,
   dem Nutzer nur den Link geben.
+- **Pull Request ohne vorheriges Review** (10.11.2026): Zwei neue Seiten (`_sfs`, `_ue`) gingen
+  direkt als Pull Request raus; der Nutzer hatte sie vorher nie gesehen und konnte sie nicht
+  durchspielen. Seitdem regelt TEIL 0 Nr. 26 zwei Stufen: **erst die Dateien im Chat zeigen
+  und auf das OK warten, dann** Branch und Pull Request. Kein Push vor dem OK.
 
 ---
 
