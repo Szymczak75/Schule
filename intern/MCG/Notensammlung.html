@@ -1439,6 +1439,18 @@ function listeFuer(fmt){
   const base = fmt === VERTIEFUNG ? VERT : fmt === 'Punkte' ? PUNKTE : fmt === 'Note ohne Tendenz' ? NOTEN_O : NOTEN_T;
   return uniq([...base, ...SONDER]);
 }
+/* Anzeige mit Zusatz in Klammern (Auswahllisten in Excel und auf Seite B): „3+ (9 Pkt)“, „9 (3+ befriedigend)“, „NT (nicht teilgenommen)“ */
+const WORT = { 1:'sehr gut', 2:'gut', 3:'befriedigend', 4:'ausreichend', 5:'mangelhaft', 6:'ungenügend' };
+const KUERZEL_TEXT = { NT:'nicht teilgenommen', AT:'Attest', E1:'mit besonderem Erfolg', E2:'mit Erfolg', E3:'teilgenommen' };
+function label(v, fmt){
+  if (v == null || v === '') return '';
+  v = String(v);
+  if (KUERZEL_TEXT[v] && (SONDER.includes(v) || VERT.includes(v))) return `${v} (${KUERZEL_TEXT[v]})`;
+  if (fmt === 'Punkte' && /^\d{1,2}$/.test(v)){ const n = NOTE_OF_P[+v]; return n ? `${v} (${n} ${WORT[n[0]]})` : v; }
+  if (fmt === 'Note ohne Tendenz' && WORT[v]) return `${v} (${WORT[v]})`;
+  if (PUNKTE_OF[v] != null) return `${v} (${PUNKTE_OF[v]} Pkt)`;
+  return v;
+}
 const istKuerzel = (v, fmt) => SONDER.includes(v) || (fmt === VERTIEFUNG && VERT.includes(v));
 
 /* Eingabe prüfen und vereinheitlichen. Liefert { v } (kanonischer Text, '' = leer) oder { invalid, raw } */
@@ -1447,10 +1459,12 @@ function parseGrade(raw, fmt){
   if (typeof raw === 'number'){ raw = String(raw); }
   let s = String(raw).trim().replace(/[−–—]/g, '-').replace(/\s+/g, '');
   if (!s) return { v:'' };
-  if (istKuerzel(s.toUpperCase(), fmt)) return { v:s.toUpperCase() };
-  if (fmt === VERTIEFUNG) return { invalid:true, raw:String(raw).trim() };
   // Altes Format aus Version 1: „2- (10)“
   const old = s.match(/^([1-6][+-]?)\((\d{1,2})\)$/); if (old) s = fmt === 'Punkte' ? old[2] : old[1];
+  // Anzeige mit Klammerzusatz („3+ (9 Pkt)“, „9 (3+ befriedigend)“): nur der Teil vor der Klammer zählt
+  else if (/^[^(]+\(.*\)$/.test(s)) s = s.replace(/\(.*\)$/, '');
+  if (istKuerzel(s.toUpperCase(), fmt)) return { v:s.toUpperCase() };
+  if (fmt === VERTIEFUNG) return { invalid:true, raw:String(raw).trim() };
   if (fmt === 'Punkte'){
     if (/^\d{1,2}$/.test(s) && +s <= 15) return { v:String(+s) };
     return { invalid:true, raw:String(raw).trim() };
@@ -1487,6 +1501,8 @@ function importWerte(v, fmt){
   if (fmt === 'Punkte' && /^\d{1,2}$/.test(v)){ const p = +v; return { note:NOTE_OF_P[p] ?? '', punkte:p }; }
   return { note:v, punkte:null };
 }
+/* Wert für eine Eingabezelle der Lehrerdatei: immer die Anzeige mit Zusatz (passend zur Auswahlliste) */
+const excelZelle = (v, fmt) => v === '' || v == null ? null : label(v, fmt);
 /* Wert für Excel-Zelle: Punkte als Zahl, Noten als Text */
 const excelWert = (v, fmt) => v === '' || v == null ? null : fmt === 'Punkte' && /^\d{1,2}$/.test(String(v)) ? Number(v) : String(v);
 /* Erlaubte Eingaben als lesbarer Text (für Fehlermeldungen) */
@@ -1531,14 +1547,14 @@ function addListen(wb){
   const ref = {};
   LISTEN_FORMATE.forEach((fmt, i) => {
     const L = String.fromCharCode(65 + i), list = listeFuer(fmt);
-    list.forEach((v, j) => ws.getCell(j + 1, i + 1).value = /^\d{1,2}$/.test(v) && fmt === 'Punkte' ? Number(v) : v);
+    list.forEach((v, j) => ws.getCell(j + 1, i + 1).value = label(v, fmt));
     ref[fmt] = `Listen!$${L}$1:$${L}$${list.length}`;
   });
   return ref;
 }
 function dvFor(ref, fmt){
   return { type:'list', allowBlank:true, formulae:[ref], showErrorMessage:true, errorStyle:'stop', errorTitle:'Ungültige Eingabe',
-    error:'Erlaubt: ' + erlaubtText(fmt) + '. Bitte aus der Auswahlliste wählen.' };
+    error:'Bitte aus der Auswahlliste wählen (z. B. „' + label(listeFuer(fmt)[Math.min(7, listeFuer(fmt).length - 1)], fmt) + '“). Erlaubt: ' + erlaubtText(fmt) + '.' };
 }
 /* Zeilen zu zusammenhängenden Bereichen zusammenfassen: [[von, bis], …] */
 function runs(nums){
@@ -1553,7 +1569,7 @@ function addGradeCF(ws, L, r1, r2, fmt){
     if (!vals[k]) continue;
     const f = FARBEN[k];
     rules.push({ type:'expression', priority:rules.length + 1, stopIfTrue:true,
-      formulae:[`OR(${vals[k].map(v => `TRIM(${c}&"")="${v}"`).join(',')})`],
+      formulae:[`OR(${vals[k].map(v => `TRIM(${c}&"")="${v}",LEFT(TRIM(${c}&""),${v.length + 2})="${v} ("`).join(',')})`],
       style:{ fill:{ type:'pattern', pattern:'solid', bgColor:{ argb:f.bg } }, font:{ color:{ argb:f.fg }, bold:f.bold } } });
   }
   if (rules.length) ws.addConditionalFormatting({ ref:`${L}${r1}:${L}${r2}`, rules });
@@ -2152,7 +2168,7 @@ async function zipOverviews(which){
   if (!jobs.length) throw new Error('Keine Übersichten zu erzeugen.');
   let i = 0;
   for (const [name, fn, label] of jobs){ busy(`Erzeuge und verschlüssele Übersichten … ${++i}/${jobs.length}`, i / jobs.length); await tick(5);
-    zip.file(name, await wbBytes(fn(), pwFor(label))); }
+    zip.file(name, await wbBytes(await nurAnsicht(fn()), pwFor(label))); }
   zip.file(`_Admin/Offene_Punkte_${baseName()}.xlsx`, await wbBytes(buildOffenePunkte(), null));
   if (C.cfg.passwortModus === 'individuell'){ const pwb = new ExcelJS.Workbook();
     addSheet(pwb, 'Passwörter', ['Datei für','Passwort'], uniq(jobs.map(j => j[2])).map(l => [l, pwFor(l)])); zip.file(`_Admin/Passwoerter_Uebersichten.xlsx`, await wbBytes(pwb, null)); }
@@ -2160,6 +2176,14 @@ async function zipOverviews(which){
   toast(`${jobs.length} Übersichten erzeugt (verschlüsselt).`);
 }
 
+/* Übersichten nur zur Ansicht: alle Blätter mit Blattschutz (zufälliges Kennwort, nicht notiert). Filtern bleibt möglich. */
+async function nurAnsicht(wb){
+  for (const ws of wb.worksheets){
+    const pw = [...crypto.getRandomValues(new Uint8Array(12))].map(x => 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789'[x % 55]).join('');
+    await ws.protect(pw, { selectLockedCells:true, selectUnlockedCells:true, autoFilter:true, sort:false, formatColumns:true, formatRows:true, spinCount:1000 });
+  }
+  return wb;
+}
 /* ---------- Import ---------- */
 async function loadVorlage(files){
   const t = await readTable(files[0], async () => C.pw);
