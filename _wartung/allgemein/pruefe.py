@@ -371,8 +371,12 @@ def pruefe(pfad):
     if interaktiv and 'sessionStorage' not in js:
         hinweis('NEULADEN', 'interaktive Seite ohne sessionStorage – der Stand geht beim '
                             'Neuladen verloren (TEIL 6)')
-    if '\U0001F996' not in h:
-        fehler('TREX', 'T-Rex 🦖 fehlt')
+    if 'dino-ikon' not in h:
+        if re.search(r'''(?:id|class)="[^"]*\b(?:t?rex|dino)\b[^"]*"[^>]*>\s*(?:\U0001F996|&#129430;)''', h):
+            hinweis('TREX', 'altes 🦖-Emoji statt Dino-Baustein – nachruesten_dino.py '
+                            'laufen lassen (8.3)')
+        else:
+            fehler('TREX', 'Dino fehlt – baustein_dino.html einsetzen (8.3)')
     elif 'Made by ASzym' not in h:
         fehler('TREX', 'T-Rex ohne Hinweis „Made by ASzym"')
     if 'backface-visibility' in css and 'min-height' not in css:

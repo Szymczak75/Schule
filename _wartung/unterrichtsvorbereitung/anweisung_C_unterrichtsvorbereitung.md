@@ -120,7 +120,7 @@ Es gelten **alle** technischen und gestalterischen Regeln aus den bestehenden Pr
 - Mindestgröße Tipp-Ziele 44×44px
 - **Schriftgröße nie unter `1rem`** – auch nicht in Tabs, Tipp-Boxen, MC-Buttons, Feedback-Zeilen und Badges
 - **Farben ausschließlich aus dem verbindlichen Farbschema** der Lernseiten-Projektanweisungen (Erarbeitung `#c97a2e`/`#a5611e`/`#fbeee0`, Übung `#2f5fa6`/`#1f4680`/`#e6eefb`, `--ink:#22303f`, Grün `#1e7d32`, Rot `#c1272d`) – keine selbst gewählten Orange- oder Blautöne. Tipps und Musterlösungen immer in Amber (`#b8860b`/`#fdf3d9`/`#96690a`).
-- T-Rex 🦖 auf jeder Seite (unten rechts, „Made by ASzym" bei Tap/Mouseover)
+- Dino auf jeder Seite (unten rechts, „Made by ASzym" bei Tap/Mouseover) – Baustein `baustein_dino.html`
 - **Navigationsleiste auf jeder Seite:** Baustein `baustein_navigation.html` aus dem Projektwissen unverändert vor dem T-Rex einfügen, außerhalb von `<main>` (Startseite, Alles für Klasse X, Feedback, 🏠-Knopf unten links – siehe Lernseiten-Projektanweisungen TEIL 3.6)
 - Kein `localStorage`
 - **Keine externen Bibliotheken außer MathJax** (insbesondere kein GeoGebra-`deployggb.js` und keine Google Fonts – Systemschrift), und keine Verweise auf Dateien, die neben der HTML nicht existieren. Grafiken als eigenes SVG, angesprochen **nur über den Kind-Selektor** (`.kos > svg`, `.figur > svg`) – nie global `svg` und nie als Nachfahre `.kos svg` (trifft sonst MathJax-Formeln im selben Kasten).
@@ -307,8 +307,8 @@ CSS nur mit Kind-Selektoren (`.frac > span`, `.frac > span:first-child`), sonst 
 - Funktion im Skript doppelt definiert → die letzte gewinnt stillschweigend; `pruefe.py` meldet das
 ---
  
-## Markenzeichen 🦖
-Auf jeder Website (Lehrer und Schüler) ist ein kleiner T-Rex als Emoji sichtbar – dezent in einer Ecke (z. B. unten rechts). Bei Mouseover oder Antippen: „Made by ASzym".
+## Markenzeichen: feiernder Dino
+Auf jeder Website (Lehrer und Schüler) sitzt unten rechts der feiernde T-Rex mit Kreide (72 px, Blick nach links). Bei Mouseover oder Antippen: „Made by ASzym". Code unverändert aus `baustein_dino.html` (Lernseiten-Anweisung 8.3) – nicht das 🦖-Emoji.
  
 ---
  
@@ -338,7 +338,7 @@ Zuerst `wiederkehrende_fehler_checkliste.md` durchgehen und `pruefe.py` laufen l
 - [ ] Gibt es keinen toten „Weiter"-Button (`href="#"`, `location.href='#'`)?
 - [ ] Haben Koordinatensysteme Achsenbeschriftung, mindestens eine Einheit je Achse und Pfeilspitzen?
 - [ ] Wird keine externe Bibliothek und keine nicht existierende Datei referenziert?
-- [ ] Ist der T-Rex 🦖 sichtbar?
+- [ ] Ist der Dino aus `baustein_dino.html` sichtbar?
 - [ ] Passen die Inhalte zum Lehrplan NRW der genannten Jahrgangsstufe – auch die falschen Antwortoptionen?
 - [ ] Passt das Thema zur Lebenswelt der SuS?
 - [ ] Gibt es differenzierte Niveaustufen (wo sinnvoll)?

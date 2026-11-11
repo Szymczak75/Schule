@@ -33,7 +33,7 @@ zeigt den aktuellen Fortschritt. In einem neuen Chat dieses Wartungs-Projekts hi
 - Kein Widerspruch zur Regel „GeoGebra-Seiten verlinken sich nicht untereinander" und kein
   „Weiter"-Button: Die Verbindung läuft weiterhin über die Startseite.
 - Muss alle Pflichtregeln einhalten: Farben aus dem Schema, `font-size` ≥ 1rem, Tap-Ziele
-  ≥ 44×44 px, kein `localStorage`, kein toter Link (`href="#"`), T-Rex 🦖 bleibt.
+  ≥ 44×44 px, kein `localStorage`, kein toter Link (`href="#"`), Dino (`baustein_dino.html`) bleibt.
 - Der Link „Impressum & Datenschutz" wird **erst freigeschaltet, wenn die Seite existiert**
   (sonst wäre er ein toter Link).
 
