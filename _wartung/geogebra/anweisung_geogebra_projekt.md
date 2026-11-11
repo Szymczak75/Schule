@@ -64,9 +64,9 @@ Handbuch nachgeschlagen (`geogebra.github.io/docs/manual/de/`) – **nicht gerat
 Ein erfundener Befehl macht die Seite unbrauchbar, weil die Kinder vor dem Gerät
 sitzen und es nicht hinbekommen. Neu Nachgeschlagenes kommt mit Quelle in die Datei.
 
-**3. Baukasten wiederherstellen.** Die sieben Baukasten-Dateien aus dem Projektwissen
+**3. Baukasten wiederherstellen.** Die acht Baukasten-Dateien aus dem Projektwissen
 (`css.txt`, `helfer.js`, `bauer.py`, `koord.py`, `test.js`, `pruefe.py`,
-`baustein_navigation.html`) nach `/tmp/gg/` schreiben. `LIESMICH.md` erklärt den Rest.
+`baustein_navigation.html`, `baustein_dino.html`) nach `/tmp/gg/` schreiben. `LIESMICH.md` erklärt den Rest.
 
 **4. Bauskript schreiben und ausführen.**
 
@@ -171,7 +171,8 @@ geprüft. Das Wichtigste im Überblick:
   `helfer.js` erledigt das automatisch; MC-Listen dafür mit Schlüssel mischen
   (`mische(OPT, 'mc1')`), Details in `LIESMICH.md`.
 - **Kennzeichnung ab EF** an jeder Aufgabe: Hilfsmittel und Lösungsart (`kennz(...)`).
-- **T-Rex 🦖** mit „Made by ASzym" auf jeder Seite.
+- **Dino** (feiernder T-Rex aus `baustein_dino.html`) mit „Made by ASzym" auf jeder Seite;
+  `bauer.py` setzt ihn automatisch – `baustein_dino.html` dafür neben `bauer.py` legen.
 - **Navigationsleiste** auf jeder Seite (Startseite, Alles für Klasse X, Feedback,
   🏠-Knopf unten links). `bauer.py` setzt sie automatisch; nichts daran ändern.
 - **Keine externe Quelle außer MathJax** – auch keine Google Fonts. Der Baukasten nutzt

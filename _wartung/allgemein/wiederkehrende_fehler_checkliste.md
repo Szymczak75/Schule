@@ -84,8 +84,8 @@ nicht existieren?
 Bei 768px kein horizontales Scrollen, keine Überläufe? Flip-Cards mit `min-height` an der
 längeren Seite? Zustand in einem Status-Objekt und per `sessionStorage` mit eigenem
 Seitenschlüssel gesichert? Nach Neuladen vollständig wiederhergestellt (inkl.
-MC-Reihenfolge und Timer)? Zugriffe in `try/catch`? Kein `localStorage`? T-Rex 🦖
-vorhanden? Lehrplan-Check gemacht – auch für falsche Antwortoptionen? Zum Schluss die
+MC-Reihenfolge und Timer)? Zugriffe in `try/catch`? Kein `localStorage`? Dino aus
+`baustein_dino.html` vorhanden (nicht das 🦖-Emoji)? Lehrplan-Check gemacht – auch für falsche Antwortoptionen? Zum Schluss die
 Fehlerliste in Teil 2 einmal komplett gegenlesen.
 
 ---

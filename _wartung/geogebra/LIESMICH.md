@@ -12,6 +12,7 @@ Dateien, die im Projektwissen liegen:
 | `koord.py` | erzeugt statische Koordinatensystem-SVGs mit Achsen, Einheiten und Pfeilen |
 | `pruefe.py` | Prüf-Brille: liest fertige Seiten und meldet Verstöße gegen die Regeln (projektübergreifend, wird nur im Wartungs-Projekt geändert) |
 | `test.js` | Browsertest: spielt einen Bearbeitungsplan durch und meldet Fehler |
+| `baustein_dino.html` | Dino-Markenzeichen (Bild als data-URI) – liegt im Ordner `allgemein`, `bauer.py` liest den HTML-Teil daraus |
 | `baustein_navigation.html` | Navigationsleiste (Startseite, Alles für Klasse X, Feedback, 🏠-Knopf) – projektübergreifend, liegt im Ordner `allgemein`, wird nur im Wartungs-Projekt geändert |
 
 ---
@@ -85,7 +86,7 @@ JavaScript-Fehlern oder horizontalem Scrollen.
 - Farbschema **passend zum `typ`**: Lernseite orange, Übung und Rückblick blau,
   Test grau mit dunkelblauem Rand – kein eigener Ton möglich
 - Schriftgrößen durchgehend mindestens 1 rem
-- T-Rex 🦖 mit „Made by ASzym"
+- Dino aus `baustein_dino.html` mit „Made by ASzym" (Datei neben `bauer.py` legen)
 - **Navigationsleiste** vor dem T-Rex (Lernseiten-Anweisung TEIL 3.6): 🏠 Startseite,
   📚 Alles für Klasse X (aus `klasse`), ✉️ Feedback, 🏠-Knopf unten links. Kein
   „Weiter"-Button – die Leiste führt nur zur Startseite.

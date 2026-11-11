@@ -3,7 +3,7 @@
 Seiten-Bauer für GeoGebra-Bedienungsseiten
 ==========================================
 Setzt aus Bausteinen eine vollständige, selbst enthaltene HTML-Lernseite zusammen.
-Braucht im selben Ordner:  css.txt · helfer.js · baustein_navigation.html
+Braucht im selben Ordner:  css.txt · helfer.js · baustein_navigation.html · baustein_dino.html
 (optional: koord.py für Grafiken)
 
 Minimalbeispiel
@@ -30,7 +30,7 @@ Regeln, die der Bauer automatisch einhält
 - alle sieben Pflicht-Meta-Tags
 - MathJax-Einbindung exakt nach Vorgabe
 - Farbschema passend zum `typ` (Lernseite orange · Übung/Rückblick blau · Test grau)
-- T-Rex mit „Made by ASzym"
+- Dino (baustein_dino.html) mit „Made by ASzym"
 - Navigationsleiste (baustein_navigation.html) vor dem T-Rex (TEIL 3.6)
 - Notfall-Anzeige für Formeln, falls MathJax nicht geladen werden kann
 - Fortschrittsmarken über den Reitern (✅ bzw. ● beim Wissenstest)
@@ -38,6 +38,7 @@ Regeln, die der Bauer automatisch einhält
 """
 import io
 import os
+import re
 
 HIER = os.path.dirname(os.path.abspath(__file__))
 ZIEL = os.environ.get('GG_ZIEL', os.getcwd())
@@ -49,6 +50,12 @@ if not os.path.exists(_NAV_PFAD):
     raise SystemExit('baustein_navigation.html fehlt in %s – aus dem Projektwissen '
                      '(Ordner allgemein) unverändert dorthin schreiben.' % HIER)
 NAV = io.open(_NAV_PFAD, encoding='utf-8').read().strip() + '\n'
+_DINO_PFAD = os.path.join(HIER, 'baustein_dino.html')
+if not os.path.exists(_DINO_PFAD):
+    raise SystemExit('baustein_dino.html fehlt in %s – aus dem Projektwissen '
+                     '(Ordner allgemein) unverändert dorthin schreiben.' % HIER)
+DINO = re.search(r'<div class="trex" id="trex">.*?</div>',
+                 io.open(_DINO_PFAD, encoding='utf-8').read(), re.S).group(0) + '\n'
 
 # ---------------------------------------------------------------- Farbschemata
 THEMA_LERNSEITE = {
@@ -127,8 +134,7 @@ def baue(datei, titel, beschreibung, keywords, thema, typ, klasse, body, js,
                         oberthema=oberthema)
             + css + "</head>\n<body>\n" + body
             + '\n' + NAV
-            + '<div class="trex" id="trex">\U0001F996'
-              '<span class="bubble">Made by ASzym</span></div>\n'
+            + DINO
             + "<script>\n" + vorlauf + js + "\n" + HELFER
             + "\npruefeFortschritt();\n</script>\n</body>\n</html>\n")
     pfad = os.path.join(ZIEL, datei)
