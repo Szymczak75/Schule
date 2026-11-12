@@ -24,6 +24,10 @@ Projektwissen und werden vor jeder Abgabe einer Website durchgegangen.
 
 **Immer laufen lassen:** `pruefe.py` aus dem Projektwissen über jede fertige Website
 (Lehrer- und Schüler-Website), bevor sie ausgegeben wird (Lernseiten-Anweisung, TEIL 11).
+
+**Mathematik – Kernkompetenzen:** `kernkompetenzen.md` (Projektwissen) listet, was die
+Kinder am Ende jeder Jahrgangsstufe sicher können sollen. Jede Einheit wiederholt sie
+verstärkt (Lernseiten-Anweisung TEIL 2.9) – siehe „Kernkompetenzen in der Einheit" unten.
 ---
  
 ## Fächer & Lehrpläne (NRW)
@@ -182,9 +186,15 @@ Abwechslung ist Pflicht. Die Form soll zum Lernziel passen:
 - **Feedback mit Formeln per `innerHTML` + `MathJax.typesetPromise([el])`** setzen – nie `textContent`, sonst bleibt die Formel Rohtext. Den Aufruf immer in `if (window.MathJax && …)` + `try/catch` einpacken.
 - **Zuordnungen bleiben nach dem Prüfen stehen (Pflicht):** Bei Zuordnungs-, Sortier-, Paare-verbinden-, Kategorien- und Hotspot-Aufgaben bleiben die gesetzten Elemente nach dem Prüfen **sichtbar an ihrem Platz**; die grün/rot-Auswertung kommt **zusätzlich** dazu. Danach ist die Zuordnung **gesperrt** (nicht mehr verschiebbar) und wird ausschließlich durch den **Leeren-Button** wieder freigegeben. Beim Prüfen dürfen nur Statusklassen an den vorhandenen Elementen gesetzt werden – die Karte darf nicht neu gerendert werden (typische Ursache dafür, dass die Zuordnung verschwindet). Details siehe Lernseiten-Projektanweisungen („Zuordnungen bleiben nach dem Prüfen sichtbar").
 ### Pflicht-Wiederholungskarte und Pflicht-Auswertungskarte
-Bei Übungen und Wissenstests immer eine Karte zu einem früheren Lehrplanthema einfügen (mit Niveaustufen). Als Wiederholungsinhalt zählt ausdrücklich auch die Bedienung der GeoGebra Suite aus einer früheren Jahrgangsstufe, nicht nur fachliche Vorthemen (siehe Lernseiten-Projektanweisungen, ANHANG B „GeoGebra in diesen Projekten"; passende Bedienungsseiten liefert das Projekt „GeoGebra", Auswahl über den Hub). Reihenfolge: erst die Karte(n) zum aktuellen Thema, die Wiederholungskarte kommt als vorletzte Karte – direkt vor der Auswertungskarte, nicht an den Anfang. (Bei Erarbeitungs-Seiten ist eine Wiederholungskarte nur optional und dann als erste Karte – siehe Lernseiten-Projektanweisungen.)
+Bei Übungen und Wissenstests immer eine Karte zu einem früheren Lehrplanthema einfügen (mit Niveaustufen) – in Mathematik **bevorzugt eine Kernkompetenz** aus `kernkompetenzen.md`. Als Ausnahme zählt auch die Bedienung der GeoGebra Suite aus einer früheren Jahrgangsstufe, nicht nur fachliche Vorthemen (siehe Lernseiten-Projektanweisungen, ANHANG B „GeoGebra in diesen Projekten"; passende Bedienungsseiten liefert das Projekt „GeoGebra", Auswahl über den Hub). Reihenfolge: erst die Karte(n) zum aktuellen Thema, die Wiederholungskarte kommt als vorletzte Karte – direkt vor der Auswertungskarte, nicht an den Anfang. (Bei Erarbeitungs-Seiten ist eine Wiederholungskarte nur optional und dann als erste Karte – siehe Lernseiten-Projektanweisungen.)
 
 Die **Auswertungskarte** ist bei Übung und Wissenstest ebenfalls Pflicht und steht als letzte Karte. Eine Übung ohne Auswertungs- oder ohne Wiederholungskarte ist unvollständig.
+
+### Kernkompetenzen in der Einheit (Mathematik)
+- **Schüler-Website:** Mindestens eine Aufgabe braucht eine passende Kernkompetenz als Rechenschritt (bevorzugt Fortgeschritten/Profi oder Sachkontext); Meta-Tag `kernkompetenzen` mit den Kürzeln (Lernseiten-Anweisung TEIL 2.9 und 3.4).
+- **Lehrer-Website:** Wo es passt, ein kurzes Kernkompetenz-Warm-up im Einstieg (2–5 Minuten, z. B. zwei Kopfrechenaufgaben zum Kürzen) – mit Kürzel auf der Karte, damit die Lehrkraft weiß, was wiederholt wird.
+- **Planungsdokument:** „Benötigte Kenntnisse" nennt die Kernkompetenzen mit Kürzel (z. B. „K6-1 Brüche kürzen"); „Hausaufgaben / Weitere Übungen" enthält regelmäßig eine Kernkompetenz-Aufgabe.
+- Nur Kernkompetenzen, die laut Stoffverteilungsplan schon behandelt sind – nie aus einem späteren Jahrgang.
  
 ---
  
@@ -198,7 +208,7 @@ Das Word-Dokument ist für die Ablage in **OneNote** optimiert. Es enthält eine
 |---|---|
 | **Ziel der Stunde** | Kompetenz / Lernziel klar und knapp formuliert |
 | **Zentrale Erkenntnisse / neue Techniken** | Definitionen, Vorgehen, Kriterien – ausführlich. Platzhalter für Bilder/Grafiken (werden von Lehrkraft ergänzt). |
-| **Benötigte Kenntnisse** | Vorwissen, das SuS mitbringen müssen |
+| **Benötigte Kenntnisse** | Vorwissen, das SuS mitbringen müssen – in Mathematik mit den Kernkompetenz-Kürzeln (z. B. „K6-1 Brüche kürzen") |
 | **Verwendete Materialien** | Buchseiten (mit Seitenangabe), Websites (mit Link), Arbeitsblätter, Experimente |
 | **Hausaufgaben / Weitere Übungen** | Aufgaben aus dem Buch oder ergänzendes Material |
  
@@ -333,6 +343,7 @@ Zuerst `wiederkehrende_fehler_checkliste.md` durchgehen und `pruefe.py` laufen l
 - [ ] Werden Dezimalzahl und Bruch akzeptiert, haben gerundete Werte eine Toleranz, und nennt die Aufgabe die Rundung?
 - [ ] Bleiben bei Zuordnungs-/Sortieraufgaben die gesetzten Elemente nach dem Prüfen sichtbar (nur gesperrt und markiert, nie geleert), und gibt der Leeren-Button sie wieder frei?
 - [ ] Haben Übung/Wissenstest eine Wiederholungskarte (vorletzte) und eine Auswertungskarte (letzte)?
+- [ ] Mathematik: Nutzt mindestens eine Aufgabe eine Kernkompetenz als Rechenschritt, nimmt die Wiederholungskarte bevorzugt eine Kernkompetenz, und steht das Meta-Tag `kernkompetenzen`?
 - [ ] Trägt jede Oberstufen-Aufgabenkarte die `.op-tags`-Zeile?
 - [ ] Beginnt jede Karte, die auf der vorigen aufbaut, mit „Wo wir gerade stehen"? Sind alle Aufgaben ausformuliert?
 - [ ] Gibt es keinen toten „Weiter"-Button (`href="#"`, `location.href='#'`)?

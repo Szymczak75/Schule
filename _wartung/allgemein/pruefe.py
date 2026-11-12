@@ -23,7 +23,9 @@ Was dieser Linter NICHT kann (bleibt Handarbeit bzw. Browsertest):
   - ob der Stand ein Neuladen wirklich vollständig übersteht (Browsertest: Seite
     bearbeiten, neu laden, vergleichen)
 
-Stand: 12.11.2026 (Navigationsleiste v6 mit neutralen Feedback-Texten; Anrede: Oberstufe „Sie", Prüfung ANREDE, TEIL 3.7;
+Stand: 12.11.2026 (Kernkompetenzen: Meta-Tag kernkompetenzen, Prüfung KERN, TEIL 2.9;
+       Rückblick-KA-Engine v4 mit KA.kern / Karte „Fit bleiben";
+       Navigationsleiste v6 mit neutralen Feedback-Texten; Anrede: Oberstufe „Sie", Prüfung ANREDE, TEIL 3.7;
        Rückblick-KA-Engine v2: negative soll-Werte, art 'zeichen';
        Rückblick KA _rbka aus baustein_rueckblick_klassenarbeit.html, TEIL 2.8; neues Suffix
        _kavb für KA-Vorbereitung, TEIL 9; Schritt für Schritt _sfs, TEIL 2.7; Navigationsleiste
@@ -60,8 +62,14 @@ SFS_MARKE = 'BAUSTEIN: Schritt-für-Schritt-Engine'
 
 # Rückblick-KA-Engine (baustein_rueckblick_klassenarbeit.html, TEIL 2.8)
 RBKA_TYP = 'Rückblick KA'
-RBKA_VERSION = 'v3'
+RBKA_VERSION = 'v4'
 RBKA_MARKE = 'BAUSTEIN: Rückblick-KA-Engine'
+
+# Kernkompetenzen (kernkompetenzen.md, TEIL 2.9): Anzahl Kürzel je Jahrgang.
+# Ändert sich kernkompetenzen.md, wird diese Tabelle mitgezogen. Klasse 9: noch keine Liste.
+KERN_ANZAHL = {5: 8, 6: 6, 7: 12, 8: 20, 9: 0, 10: 12}
+KERN_TYPEN = ('Übung', 'Test', 'Rückblick', 'KA-Vorbereitung', 'Rückblick KA', 'Schritt für Schritt')
+KERN_KUERZEL = re.compile(r'^K(\d{1,2})-(\d{1,2})$')
 
 # Navigationsleiste (baustein_navigation.html, TEIL 3.6)
 NAV_VERSION = 'v6'
@@ -273,6 +281,38 @@ def pruefe(pfad):
             hinweis('WIEDERHOLUNG',
                     'Wiederholungskarte ist nicht die vorletzte Karte (vorletzte: %s)'
                     % tabs[-2].strip())
+    # Kernkompetenzen (TEIL 2.9): Meta-Tag mit Kürzeln, keine aus späteren Jahrgängen
+    kern_meta = []
+    kl = meta.get('klasse', '')
+    kl_zahl = int(kl) if kl.isdigit() else None
+    if 'kernkompetenzen' in meta:
+        roh = meta['kernkompetenzen'].strip()
+        if not roh or 'ANPASSEN' in roh:
+            fehler('KERN', 'Meta-Tag kernkompetenzen ist leer bzw. noch nicht ausgefüllt')
+        else:
+            for k in [x.strip() for x in roh.split(',') if x.strip()]:
+                km = KERN_KUERZEL.match(k)
+                if not km or int(km.group(1)) not in KERN_ANZAHL or \
+                   not 1 <= int(km.group(2)) <= KERN_ANZAHL[int(km.group(1))]:
+                    fehler('KERN', 'unbekanntes Kürzel im Meta-Tag kernkompetenzen: %s '
+                                   '(siehe kernkompetenzen.md)' % k)
+                    continue
+                kern_meta.append(k)
+                if kl_zahl is not None and int(km.group(1)) > kl_zahl:
+                    fehler('KERN', '%s stammt aus Klasse %s – auf einer Seite der Klasse %s ist das '
+                                   'Vorgriff, keine Wiederholung (TEIL 2.9)' % (k, km.group(1), kl))
+    elif meta.get('fach') == 'mathe' and typ in KERN_TYPEN and \
+            meta.get('oberthema') != 'GeoGebra Suite':
+        hinweis('KERN', 'Meta-Tag kernkompetenzen fehlt – welche Kernkompetenzen nutzt die Seite? '
+                        '(TEIL 2.9, beim Debuggen nachtragen)')
+    if meta.get('fach') == 'mathe' and typ in ('Rückblick', 'KA-Vorbereitung') and \
+            meta.get('oberthema') != 'GeoGebra Suite':
+        if not any('Kernkompetenz' in t for t in tabs):
+            hinweis('KERN', '%s ohne Karte „Wiederholung · Kernkompetenzen" (TEIL 2.9)' % typ)
+        elif len(kern_meta) < 3:
+            hinweis('KERN', '%s: Kernkompetenz-Karte soll mindestens drei Kürzel mischen '
+                            '(im Meta-Tag stehen %d)' % (typ, len(kern_meta)))
+
     # Schritt für Schritt (TEIL 2.7): Engine-Baustein, jeder Schritt mit Lösung, eindeutige Schritt-IDs
     ohne_kommentar = re.sub(r'<!--.*?-->', ' ', h, flags=re.S)
     if typ == SFS_TYP:
@@ -314,6 +354,29 @@ def pruefe(pfad):
                 fehler('RBKA', 'Datenblock „ANPASSEN: Daten der Klassenarbeit" (var KA = …) fehlt')
             else:
                 d = daten.group(1)
+                kern_m = re.search(r'\n\s*kern\s*:\s*\[', d)
+                kern_d = d[kern_m.end():] if kern_m else ''
+                if kern_m:
+                    d = d[:kern_m.start()]
+                    eintraege = re.split(r"\{\s*kk:\s*'", kern_d)[1:]
+                    if not 2 <= len(eintraege) <= 4:
+                        hinweis('KERN', 'KA.kern hat %d Kernkompetenzen – vorgesehen sind 2 bis 4 (TEIL 2.8)'
+                                % len(eintraege))
+                    for e in eintraege:
+                        kid = e.split("'", 1)[0]
+                        n_ueb = len(re.findall(r'\bfrage:', e))
+                        if n_ueb not in (1, 2):
+                            fehler('KERN', 'KA.kern %s hat %d Aufgaben statt 1 oder 2' % (kid, n_ueb))
+                        n_soll = len(re.findall(r'\bsoll:\s*\[\s*-?\d+\s*,\s*[1-9]\d*\s*\]', e)) + \
+                                 len(re.findall(r"\bart:\s*'zeichen'[^}]*?\bsoll:\s*'[<>=]'", e))
+                        if n_soll < n_ueb:
+                            fehler('KERN', 'KA.kern %s: nicht jede Aufgabe hat einen gültigen soll-Wert' % kid)
+                        if len(re.findall(r'\btipps:\s*\[', e)) < n_ueb:
+                            fehler('KERN', 'KA.kern %s: nicht jede Aufgabe hat tipps' % kid)
+                        if kid not in kern_meta:
+                            hinweis('KERN', 'KA.kern %s steht nicht im Meta-Tag kernkompetenzen' % kid)
+                elif meta.get('fach') == 'mathe':
+                    hinweis('KERN', 'Rückblick KA ohne KA.kern – Karte „Fit bleiben" fehlt (TEIL 2.8/2.9)')
                 ids = re.findall(r"\bid:\s*'([^']+)'", d)
                 for x in sorted(set(i for i in ids if ids.count(i) > 1)):
                     fehler('RBKA', 'Teilaufgabe id="%s" mehrfach vergeben' % x)

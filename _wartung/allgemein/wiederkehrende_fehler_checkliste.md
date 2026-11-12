@@ -33,7 +33,8 @@ nach jedem Fund einzeln umgebaut.
 Alle sieben Pflicht-Meta-Tags gesetzt und gefüllt (`description`, `keywords`, `typ`,
 `klasse`, `fach`, `oberthema`, `thema`)? Passt `typ` zum Dateinamen-Suffix (`_sfs` ↔
 `Schritt für Schritt`, `_rbka` ↔ `Rückblick KA`, `_kavb` ↔ `KA-Vorbereitung`)? Passt `klasse`
-zur restlichen Reihe? MathJax-Block exakt wie vorgeschrieben eingebunden? Keine weitere
+zur restlichen Reihe? In Mathematik: Meta-Tag `kernkompetenzen` mit allen genutzten Kürzeln
+aus `kernkompetenzen.md`, keins aus einem späteren Jahrgang? MathJax-Block exakt wie vorgeschrieben eingebunden? Keine weitere
 externe Ressource außer MathJax – auch kein Google Fonts (Links `<a href>` zählen nicht)?
 
 **2. Farbschema & Typografie**
@@ -44,7 +45,10 @@ Rand)? Sind Tipps und Musterlösungen in Amber? Gibt es irgendwo eine `font-size
 
 **3. Kartengerüst**
 Sind die Aufgabentypen auf getrennten, umschaltbaren Karten? Hat die Übung/der Wissenstest
-eine Auswertungskarte **und** eine Wiederholungskarte (vorletzte Karte)? Hat jede
+eine Auswertungskarte **und** eine Wiederholungskarte (vorletzte Karte) – in Mathematik
+bevorzugt zu einer Kernkompetenz? Braucht mindestens eine normale Aufgabe eine Kernkompetenz
+als Rechenschritt? Haben `_rb`/`_kavb` die Karte „Wiederholung · Kernkompetenzen" (mindestens
+drei Kürzel) und `_rbka` die Karte „🧠 Fit bleiben" (`KA.kern`)? Hat jede
 Oberstufen-Aufgabenkarte unter dem Titel die `.op-tags`-Zeile mit Hilfsmittel- und
 Lösungsart-Kennzeichnung? Gibt es einen „Weiter"-Button – und wenn ja, mit echtem Ziel?
 Beginnt jede Karte, die auf der vorigen aufbaut, mit „Wo wir gerade stehen"? Sind alle
@@ -284,6 +288,13 @@ Diese Punkte standen offen und sind inzwischen als Regel in
   Ziffern als Reiter, Schrift unter 1rem, eigene Blautöne und einen toten Weiter-Knopf.
   `pruefe.py` meldet fehlende Engine, doppelte Teilaufgaben-IDs und Teilaufgaben ohne genau
   zwei Übungen als `RBKA`.
+- **Kernkompetenzen werden laufend mitgeübt** (12.11.2026). Die Fachschaft hat je Jahrgang
+  Kernkompetenzen festgelegt (`kernkompetenzen.md`, Kürzel `K6-3`). Neue Mathe-Seiten nutzen
+  sie in den normalen Aufgaben, bevorzugt in der Wiederholungskarte und in einer eigenen Karte
+  der Rückblicke (`_rb`, `_kavb`, `_rbka` ab Engine v4); die Kürzel stehen im Meta-Tag
+  `kernkompetenzen`. Beim Debuggen wird nachgetragen, was sich sinnvoll ergänzen lässt.
+  `pruefe.py` meldet ein fehlendes Tag als Hinweis `KERN`, ein Kürzel aus einem späteren
+  Jahrgang als FEHLER `KERN`.
 - **Änderungen kamen als Dateien zum Einspielen statt als Pull Request** (November 2026): Ein
   Chat ohne Schreibzugriff gab Baustein und `pruefe.py` zum Hochladen ins Wartungs-Projekt
   heraus. Seitdem gilt TEIL 0 Nr. 26: Repo mit Schreibzugriff anhängen, Branch, Pull Request,
@@ -295,4 +306,4 @@ Diese Punkte standen offen und sind inzwischen als Regel in
 
 ---
 
-*Stand: 08.11.2026 (Seitenart Rückblick KA, Suffix _kavb; Schritt für Schritt; Navigationsleiste, keine Google Fonts) – gepflegt im Wartungs-Projekt „Wartung Unterrichtsprojekte".*
+*Stand: 12.11.2026 (Kernkompetenzen; Seitenart Rückblick KA, Suffix _kavb; Schritt für Schritt; Navigationsleiste, keine Google Fonts) – gepflegt im Wartungs-Projekt „Wartung Unterrichtsprojekte".*
