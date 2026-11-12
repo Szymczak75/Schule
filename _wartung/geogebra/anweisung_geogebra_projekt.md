@@ -171,6 +171,9 @@ geprüft. Das Wichtigste im Überblick:
   `helfer.js` erledigt das automatisch; MC-Listen dafür mit Schlüssel mischen
   (`mische(OPT, 'mc1')`), Details in `LIESMICH.md`.
 - **Kennzeichnung ab EF** an jeder Aufgabe: Hilfsmittel und Lösungsart (`kennz(...)`).
+- **Anrede:** Sek I „du", Oberstufe (EF/Q1/Q2) „Sie" – in allen Texten der Seite, auch
+  Tipps und Rückmeldungen. `helfer.js` schaltet seine eigenen Texte über den Meta-Tag
+  `klasse` selbst um (Lernseiten-Anweisung 3.7).
 - **Dino** (feiernder T-Rex aus `baustein_dino.html`) mit „Made by ASzym" auf jeder Seite;
   `bauer.py` setzt ihn automatisch – `baustein_dino.html` dafür neben `bauer.py` legen.
 - **Navigationsleiste** auf jeder Seite (Startseite, Alles für Klasse X, Feedback,

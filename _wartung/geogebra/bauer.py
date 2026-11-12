@@ -213,7 +213,7 @@ def wz(titel, intro, schritte, fazit, fak=False, wid='wz1'):
 
 
 def tipps(tid, stufen,
-          ueberschrift="Brauchst du Hilfe? Decke so viel auf, wie du brauchst:"):
+          ueberschrift="Hilfe in Stufen – nur so viel aufdecken wie nötig:"):
     """Gestufte Hilfen. Startet unsichtbar und wird erst nach dem Prüfen gezeigt."""
     s = ('    <div class="stufen-tipps" id="%s">\n      <h4>%s</h4>\n'
          % (tid, ueberschrift))
@@ -270,7 +270,7 @@ def timer(minuten):
             '''<span>Was hat es mit der Zeit auf sich?</span>'''
             '''<span class="stufe-pfeil">▾</span></button>
         <div class="stufe-inhalt">Die Zeit ist eine Empfehlung, kein Muss. Nach Ablauf '''
-            '''kannst du normal weiterarbeiten – es wird nichts gesperrt, nichts '''
+            '''geht es ganz normal weiter – es wird nichts gesperrt, nichts '''
             '''abgeschickt und nichts ausgewertet.</div>
       </div>
     </div>

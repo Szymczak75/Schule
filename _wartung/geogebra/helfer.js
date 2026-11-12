@@ -264,6 +264,11 @@ function mitMCleeren(key, gruppen, opt, wrapId, ids){
   pruefeFortschritt();
   speichere();
 }
+/* Anrede (Lernseiten-Anweisung 3.7): Oberstufe „Sie", Sek I „du" – nach Meta-Tag klasse */
+var SIE = (function(){
+  try { var m = document.querySelector('meta[name="klasse"]'); return !!m && /^(EF|Q1|Q2)$/.test(m.content); }
+  catch (e) { return false; }
+})();
 function checkAuswerten(fragen, zsfId){
   if(Object.values(state.k4.wahlen).some(v=>v===null)) return;
   _merke('k4:check', 'checkAuswerten', [fragen, zsfId]);
@@ -272,8 +277,8 @@ function checkAuswerten(fragen, zsfId){
   fragen.forEach((f,idx)=>{ if(mcAuswerten('c'+(idx+1)+'-wahl', f.optionen, state.k4.wahlen[idx])) richtig++; });
   const zsf=document.getElementById(zsfId);
   zsf.classList.add('zeig');
-  zsf.textContent='Du hast '+richtig+' von '+fragen.length+' richtig beantwortet.'
-    + (richtig===fragen.length ? ' Stark!' : ' Schau dir die roten Antworten an und blättere auf die passende Karte zurück.');
+  zsf.textContent=(SIE ? 'Sie haben ' : 'Du hast ')+richtig+' von '+fragen.length+' richtig beantwortet.'
+    + (richtig===fragen.length ? ' Stark!' : (SIE ? ' Sehen Sie sich die roten Antworten an und blättern Sie auf die passende Karte zurück.' : ' Schau dir die roten Antworten an und blättere auf die passende Karte zurück.'));
   state.k4.mcRichtig=(richtig===fragen.length);
   k4Status();
 }

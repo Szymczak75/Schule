@@ -23,7 +23,8 @@ Was dieser Linter NICHT kann (bleibt Handarbeit bzw. Browsertest):
   - ob der Stand ein Neuladen wirklich vollständig übersteht (Browsertest: Seite
     bearbeiten, neu laden, vergleichen)
 
-Stand: 08.11.2026 (Rückblick-KA-Engine v2: negative soll-Werte, art 'zeichen';
+Stand: 12.11.2026 (Anrede: Oberstufe „Sie", Prüfung ANREDE, TEIL 3.7;
+       Rückblick-KA-Engine v2: negative soll-Werte, art 'zeichen';
        Rückblick KA _rbka aus baustein_rueckblick_klassenarbeit.html, TEIL 2.8; neues Suffix
        _kavb für KA-Vorbereitung, TEIL 9; Schritt für Schritt _sfs, TEIL 2.7; Navigationsleiste
        Pflicht, TEIL 3.6; Google Fonts nicht mehr erlaubt, TEIL 8.1)
@@ -102,6 +103,37 @@ def _koerper_text(h):
     t = re.sub(r'<script.*?</script>', ' ', t, flags=re.S)
     t = re.sub(r'<code>.*?</code>', ' ', t, flags=re.S)
     return t
+
+
+# Anrede (TEIL 3.7): Du-Formen, die auf Oberstufenseiten nicht vorkommen dürfen
+DU_WORT = re.compile(r'\b(?:du|dich|dir|dein(?:e[mnrs]?)?|Du|Dich|Dir|Dein(?:e[mnrs]?)?)\b')
+# Du-Imperative am Satzanfang („Bestimme …"), ohne folgendes „Sie"
+DU_IMPERATIV = re.compile(
+    r'(?:^|[.!?:;>"„(–]\s*|\n\s*)'
+    r'(Bestimme|Berechne|Prüfe|Wähle|Gib|Nenne|Zeichne|Löse|Erkläre|Begründe|Ordne|Vergleiche|'
+    r'Setze|Schreibe|Trage|Tippe|Ziehe|Überlege|Nutze|Probiere|Lies|Markiere|Ergänze|Beschreibe|'
+    r'Untersuche|Skizziere|Gehe|Achte|Versuche|Schau|Hol|Wende|Erkunde|Fülle|Klicke|Öffne|'
+    r'Multipliziere|Addiere|Subtrahiere|Dividiere|Rechne|Entscheide|Notiere|Formuliere|Zeige|'
+    r'Beweise|Bilde|Leite|Vereinfache|Forme|Kürze|Beobachte|Verändere|Verschiebe|Stelle|Teste|'
+    r'Denk|Denke|Merke|Sieh|Gib)\b(?!\s+Sie\b)', re.M)
+_JS_STR = r"'(?:[^'\\\n]|\\.)*'|\"(?:[^\"\\\n]|\\.)*\""
+# Umschaltstellen „SIE ? 'Sie …' : 'du …'" (GeoGebra-helfer.js) sind kein Verstoß
+_SIE_WEICHE = re.compile(r'\bSIE\s*\?\s*(?:%s)\s*:\s*(?:%s)' % (_JS_STR, _JS_STR))
+
+
+def _du_formen(eigen, js, mit_skript):
+    """Du-Formen im sichtbaren Text, in Attributen und (optional) in Skript-Zeichenketten."""
+    t = re.sub(r'<!--.*?-->', ' ', eigen, flags=re.S)
+    attr = ' '.join(re.findall(r'\b(?:placeholder|aria-label|title|alt)="([^"]*)"', t))
+    t = re.sub(r'<[^>]+>', ' ', _koerper_text(t)) + ' ' + attr
+    funde = DU_WORT.findall(t) + DU_IMPERATIV.findall(t)
+    if mit_skript:
+        j = re.sub(r'/\*.*?\*/', ' ', js, flags=re.S)
+        j = re.sub(r'(?<![:\'"\\])//[^\n]*', ' ', j)
+        j = _SIE_WEICHE.sub(' ', j)
+        for z in re.findall(_JS_STR + r'|`[^`]*`', j):
+            funde += DU_WORT.findall(z) + DU_IMPERATIV.findall(z[1:-1])
+    return funde
 
 
 def pruefe(pfad):
@@ -314,6 +346,16 @@ def pruefe(pfad):
         elif aufgaben and kennz < aufgaben:
             hinweis('KENNZ', '%d Aufgaben-Blöcke, aber nur %d Kennzeichnungs-Zeilen – '
                              'prüfen, ob jede Aufgabenkarte eine hat' % (aufgaben, kennz))
+        sfs = SFS_MARKE in h
+        if sfs and 'data-anrede="sie"' not in h:
+            fehler('ANREDE', 'Schritt-für-Schritt-Seite der Oberstufe ohne <body data-anrede="sie"> (TEIL 3.7)')
+        du = _du_formen(eigen, js, not sfs)
+        if du:
+            zahl = {}
+            for w in du:
+                zahl[w] = zahl.get(w, 0) + 1
+            fehler('ANREDE', 'Oberstufe wird gesiezt (TEIL 3.7) – Du-Formen gefunden: ' +
+                   ', '.join('„%s" ×%d' % (w, n) for w, n in sorted(zahl.items(), key=lambda x: -x[1])))
 
     if 'href="#"' in h or "location.href='#'" in h or 'location.href="#"' in h:
         fehler('WEITER', 'toter Weiter-Button (Ziel "#")')

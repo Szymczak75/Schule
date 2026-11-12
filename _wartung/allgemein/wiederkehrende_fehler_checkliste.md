@@ -235,6 +235,10 @@ den Kreis links vor der Zeile" – falsch, der Kreis blendet nur ein/aus. Richti
 Diese Punkte standen offen und sind inzwischen als Regel in
 `anweisung_lernseiten.txt` festgeschrieben:
 
+- **Oberstufe wird gesiezt** (November 2026). EF, Q1 und Q2 sprechen mit „Sie" an, Sek I
+  mit „du" – auch in Tipps, Lösungswegen, Platzhaltern und allen Rückmeldungen aus dem
+  Skript; keine Mischformen. Viele ältere EF-Seiten duzen noch (Fall
+  `potenzfunktionen_transformation_ls/_ue`). `pruefe.py` meldet das als `ANREDE`.
 - **Einstufige geführte Aufgabenkarten sind erlaubt.** Wenn sich Grundlagen /
   Fortgeschritten / Profi bei einer geführten Aufgabe nicht sinnvoll unterscheiden lassen,
   werden dort keine Stufen angeboten; die Niveaustufen liegen dann in der
