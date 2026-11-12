@@ -132,7 +132,8 @@ def _du_formen(eigen, js, mit_skript):
         j = re.sub(r'(?<![:\'"\\])//[^\n]*', ' ', j)
         j = _SIE_WEICHE.sub(' ', j)
         for z in re.findall(_JS_STR + r'|`[^`]*`', j):
-            z = re.sub(r'\b[\w-]+=\\?"[^"\\]*\\?"', ' ', z)   # Attributwerte (class="…") sind kein Text
+            z = re.sub(r'<code\b.*?</code>', ' ', z)                # Code (GeoGebra-Eingaben) ist kein Text
+            z = re.sub(r'\b(?!placeholder|aria-label|title|alt)[\w-]+=\\?"[^"\\]*\\?"', ' ', z)   # Attributwerte (class="…") sind kein Text
             funde += DU_WORT.findall(z) + DU_IMPERATIV.findall(z[1:-1])
     return funde
 
