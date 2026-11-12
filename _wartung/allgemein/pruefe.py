@@ -115,7 +115,7 @@ DU_IMPERATIV = re.compile(
     r'Untersuche|Skizziere|Gehe|Achte|Versuche|Schau|Hol|Wende|Erkunde|Fülle|Klicke|Öffne|'
     r'Multipliziere|Addiere|Subtrahiere|Dividiere|Rechne|Entscheide|Notiere|Formuliere|Zeige|'
     r'Beweise|Bilde|Leite|Vereinfache|Forme|Kürze|Beobachte|Verändere|Verschiebe|Stelle(?=\s+(?:die|den|das|dem|eine|einen|ein|sie|ihn|es|dir|dich|fest|zuerst|dann|dein\w*))|Teste|'
-    r'Denk|Denke|Merke|Sieh|Gib)\b(?!\s+(?:Sie|ich|wir)\b)', re.M)
+    r'Denk|Denke|Merke|Sieh|Gib)\b(?!\s+(?:Sie|ich|wir)\b)(?!\()', re.M)   # Wort direkt vor ( ist ein GeoGebra-Befehl
 _JS_STR = r"'(?:[^'\\\n]|\\.)*'|\"(?:[^\"\\\n]|\\.)*\""
 # Umschaltstellen „SIE ? 'Sie …' : 'du …'" (GeoGebra-helfer.js) sind kein Verstoß
 _SIE_WEICHE = re.compile(r'\bSIE\s*\?\s*(?:%s)\s*:\s*(?:%s)' % (_JS_STR, _JS_STR))
