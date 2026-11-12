@@ -18,7 +18,7 @@ von claude.ai ein (siehe `_wartung/LIESMICH.md`). Nach einer Änderung genügt i
 | **Wartung Unterrichtsprojekte** | ganzer Ordner `_wartung` | alles | | | | | | |
 
 **Allgemeine Dateien** (`_wartung/allgemein/`: Lernseiten-Anweisung, Fehler-Checkliste,
-`pruefe.py`, MathJax-Notfall, Navigationsleiste, Schritt-für-Schritt-Vorlage,
+Kernkompetenzen (`kernkompetenzen.md`, seit 12.11.2026), `pruefe.py`, MathJax-Notfall, Navigationsleiste, Schritt-für-Schritt-Vorlage,
 Rückblick-KA-Vorlage) sind in allen Projekten **identisch** und werden nur hier
 geändert.
 

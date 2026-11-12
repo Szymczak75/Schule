@@ -247,6 +247,14 @@ Ordner-Übersichten `_*.html` über `linking.txt`). Änderungen an der Startseit
   und `baustein_rueckblick_klassenarbeit` mitgezogen; `pruefe.py` `NAV_VERSION`→v6,
   `nachruesten.py`-Marker→v6.
 
+- **Kernkompetenzen** (12.11.2026, Branch `kernkompetenzen`): Neue Datei
+  `allgemein/kernkompetenzen.md` (Kürzel K5-1 … K10-12, Klasse 9 fehlt noch). Lernseiten-
+  Anweisung TEIL 0 Nr. 28 + neuer Abschnitt 2.9, 2.4/2.8/3.4/TEIL 9/10/ANHANG B angepasst;
+  Dach-Anweisung C, Checkliste, Landkarte, LIESMICH. Rückblick-KA-Engine **v4** (Karte
+  „🧠 Fit bleiben" aus `KA.kern`), in die drei bestehenden `_rbka`-Seiten übertragen (ohne
+  `KA.kern`). `pruefe.py`: Meta-Tag `kernkompetenzen`, Regel `KERN`, `RBKA_VERSION`→v4.
+  Projektanweisungs-Texte unverändert (verweisen über TEIL 0 auf die neue Regel).
+
 **Noch offen:**
 1. **Neulade-Schutz Stufe 2** (voller Schutz inkl. Bewertungen, wie im Baukasten) nach und
    nach für bestehende Seiten im laufenden Unterricht bzw. beim nächsten Überarbeiten.
@@ -257,6 +265,10 @@ Ordner-Übersichten `_*.html` über `linking.txt`). Änderungen an der Startseit
 3. Optional: `pruefe.py`-Regel „Neulade-Schutz vorhanden?" + Anweisung nachziehen.
 4. **Oberstufenseiten auf „Sie" umstellen** (≈ 105 Seiten, `pruefe.py` meldet `ANREDE`) –
    ordnerweise in eigenen PRs.
+5. **Kernkompetenzen Klasse 9** – Liste fehlt noch; dann in `kernkompetenzen.md` und
+   `KERN_ANZAHL` (`pruefe.py`) eintragen.
+6. **Bestandsseiten:** ≈ 200 Mathe-Seiten ohne Meta-Tag `kernkompetenzen` (Hinweis `KERN`) –
+   wird beim Debuggen nach und nach nachgetragen; die drei `_rbka`-Seiten bekommen dabei `KA.kern`.
 
 ---
 

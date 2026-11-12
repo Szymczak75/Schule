@@ -38,7 +38,7 @@
 </script>
 <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
 <style>
-/* ===== BAUSTEIN-CSS: Rückblick Klassenarbeit (v3, 10.11.2026) – unverändert übernehmen ===== */
+/* ===== BAUSTEIN-CSS: Rückblick Klassenarbeit (v4, 12.11.2026) – unverändert übernehmen ===== */
 :root{
   --ink:#22303f; --card:#ffffff; --green:#1e7d32; --red:#c1272d;
   --amber:#b8860b; --amber-light:#fdf3d9; --amber-dark:#96690a;
@@ -120,6 +120,8 @@ main{max-width:860px;margin:0 auto;padding:1rem .75rem 2rem;}
   border-radius:.6rem;padding:.6rem .9rem;margin-top:.5rem;}
 .tippstufe.an{display:block;}
 .tippstufe b.tl{color:var(--amber-dark);}
+.kk{display:inline-block;font-weight:800;color:var(--blue-dark);background:var(--blue-light);
+  border-radius:.4rem;padding:0 .45rem;margin-right:.4rem;}
 .hinweis{font-size:1rem;color:var(--ink);background:var(--bg);border-radius:.5rem;padding:.4rem .7rem;}
 /* Startkarte */
 .gruppe{margin:1rem 0 .4rem;}
@@ -180,7 +182,7 @@ mjx-container{max-width:100%;overflow-x:auto;}
 
 <script>
 /* ============================================================
-   BAUSTEIN: Rückblick-KA-Schreibhilfen (v3, 10.11.2026) – unverändert übernehmen
+   BAUSTEIN: Rückblick-KA-Schreibhilfen (v4, 12.11.2026) – unverändert übernehmen
    f(z,n)      Bruch als .frac-Konstrukt          f(3,4)  f('2 · 7','5 · 3')
    g(ganz,z,n) gemischte Zahl                       g(1,5,9)
    m('…')      Formel mit Dezimalzahlen: Komma wird {,}, · wird \cdot
@@ -730,7 +732,7 @@ var KA = {
 
 <script>
 /* ============================================================
-   BAUSTEIN: Rückblick-KA-Engine (v3, 10.11.2026) – unverändert übernehmen
+   BAUSTEIN: Rückblick-KA-Engine (v4, 12.11.2026) – unverändert übernehmen
    Baut aus dem Objekt KA: Startkarte (Fehler ankreuzen) → je Teilaufgabe eine
    Karte (Originalaufgabe + vollständiger Lösungsweg + typischer Fehler + zwei
    ähnliche Aufgaben mit Prüfen/Leeren/gestuften Tipps) → Abschlusskarte.
@@ -865,10 +867,12 @@ var TEILE = [], TEIL = {};
 KA.aufgaben.forEach(function(a){
   a.teile.forEach(function(t){ t.aufgabe = a; TEILE.push(t); TEIL[t.id] = t; });
 });
+/* v4: Kernkompetenzen (KA.kern) – gleiche Übungslogik, eigene Karte „Fit bleiben" */
+var KERN = (KA.kern || []).map(function(k){ return { id: k.kk, kern: true, name: k.name, merke: k.merke, ueb: k.ueb }; });
 function uid(t, i){ return t.id + '-' + (i + 1); }
 /* v2: Sobald irgendwo ein negatives Ergebnis vorkommt, überall Texttastatur –
    die Ziffern-Tastatur des iPads hat kein Minuszeichen, und die Tastatur darf das Vorzeichen nicht verraten. */
-var MINUS = TEILE.some(function(t){ return t.ueb.some(function(u){ return u.soll && u.soll[0] < 0; }); });
+var MINUS = TEILE.concat(KERN).some(function(t){ return t.ueb.some(function(u){ return u.soll && typeof u.soll === 'object' && u.soll[0] < 0; }); });
 function zustand(id){ if (!S.a[id]) S.a[id] = { e:'', u:'', st:'offen', t:0, gp:false }; return S.a[id]; }
 
 /* ---------- Aufbau ---------- */
@@ -890,6 +894,7 @@ function baue(){
     '<p>Du hast deine Klassenarbeit zurück. Statt einer Berichtigung rechnest du zu jeder Teilaufgabe, ' +
     'in der du Punkte verloren hast, <b>zwei ähnliche Aufgaben</b> neu. Vorher siehst du noch einmal, ' +
     'wie die Aufgabe aus der Arbeit gelöst wird.</p>' +
+    (KERN.length ? '<p>Auf der Karte <b>🧠 Fit bleiben</b> übst du außerdem Rechenfertigkeiten, die du immer wieder brauchst – die ist für alle.</p>' : '') +
     '<p><b>Tippe alle Teilaufgaben an, bei denen du Fehler hattest.</b> Du kannst jederzeit hierher zurückkommen und weitere dazunehmen.</p>';
   KA.aufgaben.forEach(function(a){
     h += '<div class="gruppe"><h3>Aufgabe ' + a.nr + ' · ' + a.titel + '</h3>' +
@@ -930,48 +935,27 @@ function baue(){
       (t.fehler ? '<div class="fehler-box"><h3>⚠️ Typischer Fehler</h3><p>' + t.fehler + '</p></div>' : '') +
       '</div><div class="block"><h3>✏️ Jetzt du: zwei ähnliche Aufgaben</h3>' +
       '<p>Rechne im Heft und tippe dann dein Ergebnis ein.</p>' +
-      (t.eingabeHinweis ? '<p class="hinweis">' + t.eingabeHinweis + '</p>' : '');
-    t.ueb.forEach(function(u, i){
-      var id = uid(t, i);
-      var im = u.art === 'bruch' || u.text || MINUS ? 'text' : 'decimal';
-      x += '<div class="ueb" id="u-' + id + '"><h4>Übung ' + (i + 1) + '</h4>' +
-        '<p class="frage">' + u.frage + '</p><div class="zeile">' +
-        (u.art === 'zeichen'
-          ? '<select id="in-' + id + '" aria-label="Zeichen Übung ' + (i + 1) + '"><option value="">Zeichen …</option>' +
-            '<option value="<">&lt;</option><option value=">">&gt;</option><option value="=">=</option></select>'
-          : '<input type="text" id="in-' + id + '" inputmode="' + im + '" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="Ergebnis" aria-label="Ergebnis Übung ' + (i + 1) + '">');
-      if (u.art === 'groesse') {
-        var liste = typeof u.einheiten === 'string' ? EINHEITEN[u.einheiten] : u.einheiten;
-        x += '<select id="un-' + id + '" aria-label="Einheit"><option value="">Einheit …</option>' +
-          liste.map(function(e){ return '<option value="' + e[0] + '">' + e[0] + '</option>'; }).join('') + '</select>';
-      }
-      x += '</div><div class="knoepfe">' +
-        '<button type="button" class="btn btn-pruefen" id="pr-' + id + '">Prüfen</button>' +
-        '<button type="button" class="btn btn-leeren" id="le-' + id + '" hidden>Leeren</button>' +
-        '<button type="button" class="btn btn-tipp" id="ti-' + id + '" hidden>💡 Tipp 1 zeigen</button></div>' +
-        '<div class="fb" id="fb-' + id + '"></div><div class="tipps" id="tp-' + id + '">';
-      var stufen = u.tipps.concat([u.weg]);
-      stufen.forEach(function(s, j){
-        var last = j === stufen.length - 1;
-        x += '<div class="tippstufe" id="ts-' + id + '-' + j + '"><b class="tl">' +
-          (last ? 'Lösungsweg' : 'Tipp ' + (j + 1)) + ':</b> ' + s + '</div>';
-      });
-      x += '</div></div>';
-    });
-    x += '</div>';
+      (t.eingabeHinweis ? '<p class="hinweis">' + t.eingabeHinweis + '</p>' : '') +
+      uebHtml(t) + '</div>';
     k.innerHTML = x; main.appendChild(k);
-    t.ueb.forEach(function(u, i){
-      var id = uid(t, i);
-      $('pr-' + id).addEventListener('click', function(){ pruefe(t, i); });
-      $('le-' + id).addEventListener('click', function(){ leere(t, i); });
-      $('ti-' + id).addEventListener('click', function(){ tipp(t, i); });
-      $('in-' + id).addEventListener('input', function(){ zustand(id).e = this.value; sichern(); });
-      $('in-' + id).addEventListener('change', function(){ zustand(id).e = this.value; sichern(); });
-      $('in-' + id).addEventListener('keydown', function(ev){ if (ev.key === 'Enter') pruefe(t, i); });
-      var sel = $('un-' + id);
-      if (sel) sel.addEventListener('change', function(){ zustand(id).u = this.value; sichern(); });
-    });
+    bindeUeb(t);
   });
+
+  /* v4: Kernkompetenzen – für alle sichtbar */
+  if (KERN.length) {
+    tab('kern', '🧠 Fit bleiben');
+    var kk = neu('section', 'karte'); kk.id = 'karte-kern';
+    var y = '<div class="block"><h2>Fit bleiben: Kernkompetenzen</h2>' +
+      '<p>Diese Rechenfertigkeiten brauchst du immer wieder – auch in den nächsten Themen. ' +
+      'Rechne im Heft und tippe dann dein Ergebnis ein.</p></div>';
+    KERN.forEach(function(t){
+      y += '<div class="block"><h3><span class="kk">' + t.id + '</span>' + t.name + '</h3>' +
+        (t.merke ? '<div class="weg-box"><b>Kurz erinnert:</b> ' + t.merke + '</div>' : '') +
+        uebHtml(t) + '</div>';
+    });
+    kk.innerHTML = y; main.appendChild(kk);
+    KERN.forEach(bindeUeb);
+  }
 
   /* Abschlusskarte */
   tab('ende', '✅ Meine Korrektur');
@@ -980,6 +964,52 @@ function baue(){
     '<p>Hier siehst du, welche Teilaufgaben du schon nachgearbeitet hast. Eine Teilaufgabe ist geschafft, ' +
     'wenn beide ähnlichen Aufgaben richtig sind.</p><div id="ende-inhalt"></div></div>';
   main.appendChild(en);
+}
+
+/* ---------- Übungsblöcke (Teilaufgaben und Kernkompetenzen) ---------- */
+function uebHtml(t){
+  var x = '';
+  t.ueb.forEach(function(u, i){
+    var id = uid(t, i);
+    var im = u.art === 'bruch' || u.text || MINUS ? 'text' : 'decimal';
+    x += '<div class="ueb" id="u-' + id + '"><h4>Übung ' + (i + 1) + '</h4>' +
+      '<p class="frage">' + u.frage + '</p><div class="zeile">' +
+      (u.art === 'zeichen'
+        ? '<select id="in-' + id + '" aria-label="Zeichen Übung ' + (i + 1) + '"><option value="">Zeichen …</option>' +
+          '<option value="<">&lt;</option><option value=">">&gt;</option><option value="=">=</option></select>'
+        : '<input type="text" id="in-' + id + '" inputmode="' + im + '" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="Ergebnis" aria-label="Ergebnis Übung ' + (i + 1) + '">');
+    if (u.art === 'groesse') {
+      var liste = typeof u.einheiten === 'string' ? EINHEITEN[u.einheiten] : u.einheiten;
+      x += '<select id="un-' + id + '" aria-label="Einheit"><option value="">Einheit …</option>' +
+        liste.map(function(e){ return '<option value="' + e[0] + '">' + e[0] + '</option>'; }).join('') + '</select>';
+    }
+    x += '</div><div class="knoepfe">' +
+      '<button type="button" class="btn btn-pruefen" id="pr-' + id + '">Prüfen</button>' +
+      '<button type="button" class="btn btn-leeren" id="le-' + id + '" hidden>Leeren</button>' +
+      '<button type="button" class="btn btn-tipp" id="ti-' + id + '" hidden>💡 Tipp 1 zeigen</button></div>' +
+      '<div class="fb" id="fb-' + id + '"></div><div class="tipps" id="tp-' + id + '">';
+    var stufen = u.tipps.concat([u.weg]);
+    stufen.forEach(function(s, j){
+      var last = j === stufen.length - 1;
+      x += '<div class="tippstufe" id="ts-' + id + '-' + j + '"><b class="tl">' +
+        (last ? 'Lösungsweg' : 'Tipp ' + (j + 1)) + ':</b> ' + s + '</div>';
+    });
+    x += '</div></div>';
+  });
+  return x;
+}
+function bindeUeb(t){
+  t.ueb.forEach(function(u, i){
+    var id = uid(t, i);
+    $('pr-' + id).addEventListener('click', function(){ pruefe(t, i); });
+    $('le-' + id).addEventListener('click', function(){ leere(t, i); });
+    $('ti-' + id).addEventListener('click', function(){ tipp(t, i); });
+    $('in-' + id).addEventListener('input', function(){ zustand(id).e = this.value; sichern(); });
+    $('in-' + id).addEventListener('change', function(){ zustand(id).e = this.value; sichern(); });
+    $('in-' + id).addEventListener('keydown', function(ev){ if (ev.key === 'Enter') pruefe(t, i); });
+    var sel = $('un-' + id);
+    if (sel) sel.addEventListener('change', function(){ zustand(id).u = this.value; sichern(); });
+  });
 }
 
 /* ---------- Anzeige aus dem Zustand ---------- */
@@ -1054,12 +1084,30 @@ function fortschritt(){
         }).join(' · ') + '</li>';
     });
     h += '</ul>';
-    h += fertig === gew.length
-      ? '<p class="fazit ok">✅ Alle ' + gew.length + ' Teilaufgaben geschafft! Zeig diese Karte deiner Lehrkraft.</p>'
-      : '<p class="fazit offen">Geschafft: ' + fertig + ' von ' + gew.length + ' Teilaufgaben.</p>';
+  }
+  /* v4: Kernkompetenzen zählen mit */
+  var kFertig = 0;
+  KERN.forEach(function(t){ var ok = teilFertig(t); if (ok) kFertig++; });
+  if (KERN.length) {
+    $('tab-kern').classList.toggle('fertig', kFertig === KERN.length);
+    h += '<h3>🧠 Fit bleiben</h3><ul class="liste">' + KERN.map(function(t){
+      return '<li><span class="titel">' + t.id + ' · ' + t.name + '</span><br>' +
+        t.ueb.map(function(u, i){
+          var st = zustand(uid(t, i)).st;
+          return 'Übung ' + (i + 1) + ': ' + (st === 'ok' ? '<span class="status-ok">✅ richtig</span>'
+            : st === 'nok' ? '<span class="status-nok">❌ noch nicht richtig</span>' : 'noch offen');
+        }).join(' · ') + '</li>';
+    }).join('') + '</ul>';
+  }
+  var alles = gew.length > 0 && fertig === gew.length && kFertig === KERN.length;
+  if (gew.length) {
+    h += alles
+      ? '<p class="fazit ok">✅ Alle ' + gew.length + ' Teilaufgaben' + (KERN.length ? ' und alle Kernkompetenzen' : '') + ' geschafft! Zeig diese Karte deiner Lehrkraft.</p>'
+      : '<p class="fazit offen">Geschafft: ' + fertig + ' von ' + gew.length + ' Teilaufgaben' +
+        (KERN.length ? ' · ' + kFertig + ' von ' + KERN.length + ' Kernkompetenzen' : '') + '.</p>';
   }
   $('ende-inhalt').innerHTML = h;
-  $('tab-ende').classList.toggle('fertig', gew.length > 0 && fertig === gew.length);
+  $('tab-ende').classList.toggle('fertig', alles);
 }
 /* v3: Reiterleiste seitlich rollen */
 function reiterRand(){
@@ -1073,7 +1121,7 @@ function reiterZu(b){
   reiterRand();
 }
 function zeigeKarte(id, scrollen){
-  if (id !== 'start' && id !== 'ende' && !S.wahl[id]) id = 'start';
+  if (id !== 'start' && id !== 'ende' && !(id === 'kern' && KERN.length) && !S.wahl[id]) id = 'start';
   var alle = document.querySelectorAll('.karte');
   for (var i = 0; i < alle.length; i++) alle[i].classList.remove('aktiv');
   var tabs = document.querySelectorAll('.reiter button');
@@ -1088,7 +1136,7 @@ function zeigeKarte(id, scrollen){
 var alt = lies();
 if (alt && alt.a) S = alt;
 baue();
-TEILE.forEach(function(t){ t.ueb.forEach(function(u, i){ zeigeUeb(t, i); }); });
+TEILE.concat(KERN).forEach(function(t){ t.ueb.forEach(function(u, i){ zeigeUeb(t, i); }); });
 zeigeWahl();
 zeigeKarte(S.karte || 'start', false);
 (function(){
