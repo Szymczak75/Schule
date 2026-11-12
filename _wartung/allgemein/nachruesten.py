@@ -5,7 +5,7 @@ Nachrüst-Skript für bestehende Lernseiten  (Schritt 3, sicherer Teil)
 Setzt EINMALIG über alle bestehenden HTML-Seiten (außer `_wartung/` und
 Seiten mit <meta name="hubignore">) drei mechanisch sichere Änderungen um:
 
-  1. NAV   – Navigationsleiste (baustein_navigation.html, v3) unverändert
+  1. NAV   – Navigationsleiste (baustein_navigation.html, aktuelle Fassung) unverändert
              direkt VOR dem T-Rex einfügen (bzw. vor </body>, wenn kein T-Rex).
              Alte Leisten-Blöcke (falls vorhanden) werden vorher ersetzt.
   2. FONTS – Google-Fonts-Einbindungen entfernen (Datenschutz, LG München 2022):
@@ -36,7 +36,7 @@ import re
 import sys
 import pathlib
 
-NAV_VERSION_MARKER = 'BAUSTEIN: Navigationsleiste  (v5'
+NAV_VERSION_MARKER = 'BAUSTEIN: Navigationsleiste  (v6'
 NAV_BLOCK_RE = re.compile(
     r'<!-- =+\s*BAUSTEIN: Navigationsleiste.*?ENDE BAUSTEIN Navigationsleiste =+ -->',
     re.S)
@@ -127,7 +127,7 @@ def main():
     repo = os.path.abspath(args.repo)
     baustein = lade_baustein(repo)
     if NAV_VERSION_MARKER not in baustein:
-        raise SystemExit('baustein_navigation.html ist nicht v5 – abgebrochen.')
+        raise SystemExit('baustein_navigation.html ist nicht v6 – abgebrochen.')
 
     root = pathlib.Path(repo)
     seiten = sorted(p for p in root.rglob('*.html')
@@ -197,7 +197,7 @@ def main():
     print('=' * 70)
     print('%-26s %4d' % ('Seiten gesamt', len(seiten)))
     zeile('Leiste eingefügt', ber['nav_ein'])
-    zeile('Leiste ersetzt (alt→v5)', ber['nav_ersetzt'], 50)
+    zeile('Leiste ersetzt (alt→v6)', ber['nav_ersetzt'], 50)
     zeile('Leiste schon aktuell', ber['nav_aktuell'])
     zeile('Leiste: KEIN Anker', ber['nav_kein_anker'], 50)
     zeile('Google Fonts entfernt', ber['fonts'])

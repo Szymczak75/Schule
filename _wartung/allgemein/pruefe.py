@@ -23,7 +23,7 @@ Was dieser Linter NICHT kann (bleibt Handarbeit bzw. Browsertest):
   - ob der Stand ein Neuladen wirklich vollständig übersteht (Browsertest: Seite
     bearbeiten, neu laden, vergleichen)
 
-Stand: 12.11.2026 (Anrede: Oberstufe „Sie", Prüfung ANREDE, TEIL 3.7;
+Stand: 12.11.2026 (Navigationsleiste v6 mit neutralen Feedback-Texten; Anrede: Oberstufe „Sie", Prüfung ANREDE, TEIL 3.7;
        Rückblick-KA-Engine v2: negative soll-Werte, art 'zeichen';
        Rückblick KA _rbka aus baustein_rueckblick_klassenarbeit.html, TEIL 2.8; neues Suffix
        _kavb für KA-Vorbereitung, TEIL 9; Schritt für Schritt _sfs, TEIL 2.7; Navigationsleiste
@@ -64,7 +64,7 @@ RBKA_VERSION = 'v3'
 RBKA_MARKE = 'BAUSTEIN: Rückblick-KA-Engine'
 
 # Navigationsleiste (baustein_navigation.html, TEIL 3.6)
-NAV_VERSION = 'v5'
+NAV_VERSION = 'v6'
 NAV_START = 'https://szymczak75.github.io/Schule/dino_hub.html'
 NAV_BLOCK = re.compile(r'<!-- =+\s*BAUSTEIN: Navigationsleiste.*?ENDE BAUSTEIN Navigationsleiste =+ -->',
                        re.S)
