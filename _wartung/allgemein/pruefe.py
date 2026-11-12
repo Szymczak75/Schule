@@ -124,7 +124,7 @@ _SIE_WEICHE = re.compile(r'\bSIE\s*\?\s*(?:%s)\s*:\s*(?:%s)' % (_JS_STR, _JS_STR
 def _du_formen(eigen, js, mit_skript):
     """Du-Formen im sichtbaren Text, in Attributen und (optional) in Skript-Zeichenketten."""
     t = re.sub(r'<!--.*?-->', ' ', eigen, flags=re.S)
-    attr = ' '.join(re.findall(r'\b(?:placeholder|aria-label|title|alt)="([^"]*)"', t))
+    attr = ' '.join(re.findall(r'\b(?:placeholder|aria-label|title|alt|data-(?!anrede|version)[\w-]+)="([^"]*\s[^"]*)"', t))
     t = re.sub(r'<[^>]+>', ' ', _koerper_text(t)) + ' ' + attr
     funde = DU_WORT.findall(t) + DU_IMPERATIV.findall(t)
     if mit_skript:
