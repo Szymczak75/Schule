@@ -263,8 +263,9 @@ Diese Punkte standen offen und sind inzwischen als Regel in
   unverändert vor dem T-Rex eingefügt: 🏠 Startseite, 📚 Alles für Klasse X (aus dem
   Meta-Tag `klasse`), ✉️ Feedback, schwebender 🏠-Knopf unten links. Seit v5 (November 2026) öffnen
   🏠/Startseite/„Alles für …" die Startseite im Reiter des eigenen Fachs (`?start=bio` usw.,
-  aus dem Meta-Tag `fach`) – falsches `fach`-Tag = falscher Reiter. `pruefe.py` meldet eine
-  fehlende oder veränderte Leiste als `NAV`.
+  aus dem Meta-Tag `fach`) – falsches `fach`-Tag = falscher Reiter. Seit v6 (12.11.2026)
+  sind die Texte im Feedback-Fenster ohne Anrede, damit sie auch auf Oberstufenseiten passen.
+  `pruefe.py` meldet eine fehlende oder veränderte Leiste als `NAV`.
 - **Keine Google Fonts mehr** (Oktober 2026, Datenschutz). Einzige erlaubte externe Quelle
   ist MathJax; Schrift kommt aus dem System.
 - **Schritt für Schritt ist eine eigene Seitenart** (November 2026). Steht „Schritt für

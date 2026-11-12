@@ -239,6 +239,14 @@ Ordner-Übersichten `_*.html` über `linking.txt`). Änderungen an der Startseit
     Mathedino; außerdem nicht nur Mathe): Startseite (Titel, Überschrift) und Impressum
     inkl. Lizenz-Namensnennung. Spitzname „Dino" und T-Rex bleiben.
 
+- **Anrede neutral** (12.11.2026, Branch `navigation-v6-neutral`, setzt auf
+  `anrede-oberstufe-sie` auf): Neue Regel „Oberstufe wird gesiezt" (Lernseiten-Anweisung 3.7).
+  Navigations-Baustein **v6**: Feedback-Fenster ohne Anrede („Was ist aufgefallen?",
+  „Das Mailprogramm öffnet sich"). 479 Seiten v5/v4→v6 – nur vorhandene Leisten ersetzt,
+  `intern/MCG/` und hubignore-Seiten nicht angefasst. Kopien in `baustein_schritt_fuer_schritt`
+  und `baustein_rueckblick_klassenarbeit` mitgezogen; `pruefe.py` `NAV_VERSION`→v6,
+  `nachruesten.py`-Marker→v6.
+
 **Noch offen:**
 1. **Neulade-Schutz Stufe 2** (voller Schutz inkl. Bewertungen, wie im Baukasten) nach und
    nach für bestehende Seiten im laufenden Unterricht bzw. beim nächsten Überarbeiten.
@@ -247,6 +255,8 @@ Ordner-Übersichten `_*.html` über `linking.txt`). Änderungen an der Startseit
    `schulregeln_test` – mehrfach definierte Funktionen (`DOPPELT`) und `localStorage`
    (`STORAGE`). Brauchen inhaltliche Prüfung.
 3. Optional: `pruefe.py`-Regel „Neulade-Schutz vorhanden?" + Anweisung nachziehen.
+4. **Oberstufenseiten auf „Sie" umstellen** (≈ 105 Seiten, `pruefe.py` meldet `ANREDE`) –
+   ordnerweise in eigenen PRs.
 
 ---
 
