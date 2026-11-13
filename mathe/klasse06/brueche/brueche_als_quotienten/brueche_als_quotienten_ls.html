@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Brüche als Quotienten – Teilen ergibt Brüche (Gruppenarbeit)</title>
-<meta name="description" content="Lernseite als Gruppen-, Partner- oder Einzelarbeit: Mit dem Pizza-Teiler erfahren die Kinder, dass jede Geteiltaufgabe als Bruch geschrieben werden kann (3 : 5 = drei Fünftel). In vier Expertenaufgaben geht es um Brüche kleiner und größer als 1, gemischte Zahlen und gleichwertige Geteiltaufgaben; jede Expertin stellt ihre Aufgabe vor.">
+<meta name="description" content="Lernseite als Gruppenpuzzle, Partner- oder Einzelarbeit: Mit dem Pizza-Teiler erfahren die Kinder, dass jede Geteiltaufgabe als Bruch geschrieben werden kann (3 : 5 = drei Fünftel). In vier Expertenaufgaben geht es um Brüche kleiner und größer als 1, gemischte Zahlen und gleichwertige Geteiltaufgaben; jede Expertin stellt ihre Aufgabe vor. Zum Schluss Gruppen-Check mit Teampunkten.">
 <meta name="keywords" content="Brüche als Quotienten, Division, Bruch, unechter Bruch, gemischte Zahl, Kürzen, Gruppenarbeit, Pizza">
 <meta name="typ" content="Lernseite">
 <meta name="klasse" content="6">
@@ -12,6 +12,7 @@
 <meta name="oberthema" content="Brüche">
 <meta name="thema" content="Brüche als Quotienten">
 <meta name="anzeigename" content="Brüche als Quotienten (Gruppenarbeit)">
+<meta name="kernkompetenzen" content="K6-1">
 <script>
   MathJax = {
     tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
@@ -25,6 +26,8 @@
   --amber:#b8860b; --amber-light:#fdf3d9; --amber-dark:#96690a;
   --orange:#c97a2e; --orange-dark:#a5611e; --orange-light:#fbeee0;
   --bg:#faf7f2; --line:#e4dcd0;
+  /* Farbnamen für baustein_gruppencheck.html */
+  --h:var(--orange); --hd:var(--orange-dark); --hl:var(--orange-light);
 }
 [hidden]{display:none !important}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -143,7 +146,13 @@ input.in.falsch{border-color:var(--red);border-width:3px}
 .pz-teller{fill:#faf7f2;stroke:#e4dcd0;stroke-width:2}
 .pz-text{fill:#22303f}
 .demo-paar{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-/* Sozialform */
+/* Sozialform-Etiketten (TEIL 2.10) */
+.sf{display:inline-block;vertical-align:middle;margin-left:6px;padding:2px 10px;border-radius:999px;border:2px solid var(--orange);background:var(--orange-light);color:var(--orange-dark);font-size:1rem;font-weight:700;line-height:1.5;white-space:nowrap}
+#gc-box{margin-top:16px}
+.losergebnis{display:none;margin:12px 0;padding:12px 16px;border:3px solid var(--orange-dark);border-radius:12px;background:var(--orange-light)}
+.losergebnis.zeig{display:block}
+.losergebnis p{margin:4px 0}
+/* Rollenwahl Karte 2 */
 .mwahlen{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin:8px 0}
 .mwahl{min-height:64px;padding:10px 12px;border-radius:12px;border:2px solid var(--orange);background:var(--card);color:var(--ink);font:inherit;font-size:1.0625rem;text-align:left;cursor:pointer}
 .mwahl b{display:block;color:var(--orange-dark)}
@@ -169,6 +178,51 @@ input.in.falsch{border-color:var(--red);border-width:3px}
   }
   .trex:hover .bubble,.trex.zeig .bubble{opacity:1;}
 @media (max-width:700px){.flips{grid-template-columns:1fr}.kats{grid-template-columns:1fr}.demo-paar{grid-template-columns:1fr}}
+/* ===== BAUSTEIN-CSS: Gruppen-Check (v2, 13.11.2026) ===== */
+.gc-box{background:#fff;border:3px solid var(--h);border-radius:12px;padding:12px 16px;margin-bottom:12px}
+.gc-box h2{margin:0 0 8px;font-size:1.15rem;color:var(--hd)}
+.gc-box h3{margin:12px 0 6px;font-size:1.05rem;color:var(--hd)}
+.gc-knoepfe{display:flex;flex-wrap:wrap;gap:8px}
+.gc-knoepfe .gc-zbtn{flex:1 1 180px}
+.gc-zbtn{min-width:64px;min-height:52px;padding:8px 14px;font-size:1.1rem;font-weight:700;border:2px solid var(--h);
+  background:#fff;color:var(--hd);border-radius:10px;cursor:pointer;font-family:inherit}
+.gc-zbtn.aktiv{background:var(--h);color:#fff}
+.gc-zahlwahl{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+.gc-btn{min-height:48px;padding:12px 18px;font-size:1rem;font-weight:700;border:2px solid var(--hd);
+  background:var(--hd);color:#fff;border-radius:10px;cursor:pointer;font-family:inherit}
+.gc-btn.sek{background:#fff;color:var(--hd)}
+.gc-zeile{display:none}
+.gc-box.gewaehlt .gc-wahl{display:none}
+.gc-box.gewaehlt .gc-zeile{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.gc-zeile .gc-btn{min-height:44px;padding:8px 14px}
+.gc-hinweis{margin:8px 0 0;font-weight:600;color:var(--hd)}
+.gc-nur-ea,.gc-nur-pa,.gc-nur-ga,.gc-nur-team{display:none}
+body.sf-ea .gc-nur-ea,body.sf-pa .gc-nur-pa,body.sf-ga .gc-nur-ga,body.sf-pa .gc-nur-team,body.sf-ga .gc-nur-team{display:block}
+body.sf-ea .gc-nicht-ea{display:none}
+.gc-merk{background:#fff;border:3px solid var(--h);border-radius:12px;padding:12px 16px;margin:14px 0}
+.gc-merk h4{margin:0 0 6px;font-size:1.1rem;color:var(--hd)}
+.gc-eingabe{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+input.gc-code{width:150px;min-height:48px;font-size:1.1rem;text-transform:uppercase;letter-spacing:2px;
+  border:2px solid var(--line);border-radius:10px;padding:6px 10px;font-family:inherit}
+.gc-codebox{display:none;margin-top:16px;background:#fff;border:3px solid var(--hd);border-radius:12px;padding:14px 16px}
+.gc-codebox.zeig{display:block}
+.gc-codebox .gc-codetext{font-size:1.8rem;font-weight:700;letter-spacing:4px;color:var(--hd)}
+.gc-sterne{font-size:1.5rem}
+.gc-liste{display:grid;gap:8px;margin-top:8px}
+.gc-mzeile{display:flex;flex-wrap:wrap;align-items:center;gap:10px;border:1px solid var(--line);border-radius:10px;padding:8px 12px;background:#fff}
+.gc-mname{min-width:110px;font-weight:700}
+.gc-erg{display:none;margin-top:14px}
+.gc-erg.zeig{display:block}
+.gc-erow{border-radius:10px;padding:10px 14px;margin-top:8px;font-size:1rem;font-weight:600}
+.gc-erow.ok{background:var(--green);color:#fff}
+.gc-erow.bad{background:var(--red);color:#fff}
+.gc-erow.neutral{background:#fff;border:2px solid var(--line)}
+.gc-gesamt{margin-top:12px;background:var(--hl);border:3px solid var(--hd);border-radius:12px;padding:14px 16px;font-size:1.2rem;font-weight:700}
+.gc-von{font-weight:600}
+.gc-balken{margin-top:10px;height:18px;background:#fff;border:2px solid var(--hd);border-radius:9px;overflow:hidden}
+.gc-balken > div{height:100%;background:var(--hd)}
+.gc-prozent{margin:8px 0 0;font-size:1.05rem;font-weight:600}
+/* ===== ENDE BAUSTEIN-CSS Gruppen-Check ===== */
 </style>
 </head>
 <body>
@@ -181,6 +235,33 @@ input.in.falsch{border-color:var(--red);border-width:3px}
 </header>
 
 <main class="wrap">
+<!-- ===== TEIL A: Sozialform-Wahl (nach </header>) ===== -->
+<section class="gc-box" id="gc-box">
+  <div class="gc-wahl">
+    <h2>Wie arbeitest du heute?</h2>
+    <div class="gc-knoepfe">
+      <button type="button" class="gc-zbtn" data-sf="ea">&#128100; Allein (EA)</button>
+      <button type="button" class="gc-zbtn" data-sf="pa">&#128101; Zu zweit (PA)</button>
+      <button type="button" class="gc-zbtn" data-sf="ga">&#128106; In der Gruppe (GA)</button>
+    </div>
+    <div id="gc-groesse" hidden>
+      <h3>Wie viele seid ihr in der Gruppe?</h3>
+      <div class="gc-zahlwahl">
+        <button type="button" class="gc-zbtn" data-gr="3">3</button>
+        <button type="button" class="gc-zbtn" data-gr="4">4</button>
+        <button type="button" class="gc-zbtn" data-gr="5">5</button>
+        <button type="button" class="gc-zbtn" data-gr="6">6</button>
+        <button type="button" class="gc-zbtn" data-gr="7">7</button>
+      </div>
+    </div>
+  </div>
+  <div class="gc-zeile"><span id="gc-text"></span><button type="button" class="gc-btn sek" id="gc-aendern">ändern</button></div>
+  <!-- ANPASSEN: Texte je Sozialform passend zur Methode der Seite -->
+  <div class="gc-nur-ea"><p style="margin:10px 0 0"><b>Allein:</b> Du bearbeitest alle vier Expertenaufgaben A bis D nacheinander und schreibst zu jeder einen kurzen Merkzettel. Wo „zu zweit“ oder „in der Gruppe“ steht, gibt es einen Auftrag für dich allein.</p></div>
+  <div class="gc-nur-pa"><p style="margin:10px 0 0"><b>Zu zweit:</b> Ihr teilt euch die vier Expertenaufgaben auf (Person 1: A und D, Person 2: B und C) und erklärt sie euch danach gegenseitig. Auf Karte 2 wählt jede:r ihre bzw. seine Aufgaben.</p></div>
+  <div class="gc-nur-ga"><p style="margin:10px 0 0"><b>In der Gruppe (Gruppenpuzzle):</b> Jede:r wird Expertin oder Experte für eine der Aufgaben A bis D und stellt sie danach der Gruppe vor. Zu dritt übernimmt eine Person zwei Aufgaben, ab fünf Personen arbeiten einige im Tandem. Auf Karte 2 wählt jede:r ihre bzw. seine Aufgabe.</p></div>
+</section>
+
 <nav class="tabs" id="tabs">
   <button class="tab aktiv" data-ziel="k1">1 · Die Idee</button>
   <button class="tab" data-ziel="k2">2 · Wer macht was?</button>
@@ -189,14 +270,18 @@ input.in.falsch{border-color:var(--red);border-width:3px}
   <button class="tab" data-ziel="k5" data-exp="C">C · Gemischte Zahlen</button>
   <button class="tab" data-ziel="k6" data-exp="D">D · Gleiches Ergebnis</button>
   <button class="tab" data-ziel="k7">Vorstellen</button>
+  <button class="tab" data-ziel="k9">Gruppen-Check &#128100;</button>
+  <button class="tab" data-ziel="k10">Teampunkte &#127942;</button>
   <button class="tab" data-ziel="k8">Alles zusammen</button>
 </nav>
 
 <!-- ================= KARTE 1: DIE IDEE ================= -->
 <section class="karte aktiv" id="k1">
-  <h2>Die Idee: Teilen ergibt einen Bruch</h2>
+  <h2>Die Idee: Teilen ergibt einen Bruch <span class="sf">&#128106; in der Gruppe</span></h2>
   <div class="auftrag">
-    <p><b>Diese Karte bearbeitet ihr alle gemeinsam</b> – egal, ob ihr später in der Gruppe, zu zweit oder allein weiterarbeitet.</p>
+    <p class="gc-nur-team"><b>Diese Karte bearbeitet ihr gemeinsam</b> – in eurer Gruppe bzw. zu zweit. Erst danach teilt ihr die Expertenaufgaben auf.</p>
+    <p class="gc-nur-ea"><b>Allein:</b> Bearbeite diese Karte zuerst gründlich. Sie ist die Grundlage für alle vier Expertenaufgaben.</p>
+    <p class="gc-hinweis-wahl"><b>Wählt zuerst ganz oben, wie ihr heute arbeitet:</b> allein, zu zweit oder in der Gruppe.</p>
   </div>
 
   <h3>Das kennt ihr schon: Bruch als Anteil</h3>
@@ -239,21 +324,14 @@ input.in.falsch{border-color:var(--red);border-width:3px}
 
 <!-- ================= KARTE 2: WER MACHT WAS ================= -->
 <section class="karte" id="k2">
-  <h2>Wer macht was?</h2>
+  <h2>Wer macht was? <span class="sf">&#128106; in der Gruppe</span></h2>
   <div class="auftrag">
-    <p>Es gibt vier Expertenaufgaben A bis D. Jede Aufgabe wird von mindestens einer Expertin oder einem Experten gründlich bearbeitet und danach den anderen vorgestellt. In Gruppen mit 3 bis 6 Kindern wird die Arbeit passend verteilt: Zu dritt übernimmt eine Person zwei Aufgaben, zu fünft oder sechst arbeiten einige im Tandem. Zusammen ergibt das das ganze Bild: Brüche als Ergebnis von Geteiltaufgaben.</p>
+    <p>Es gibt vier Expertenaufgaben A bis D. Jede Aufgabe wird von mindestens einer Expertin oder einem Experten gründlich bearbeitet und danach den anderen vorgestellt. In Gruppen mit 3 bis 7 Kindern wird die Arbeit passend verteilt: Zu dritt übernimmt eine Person zwei Aufgaben, ab fünf Kindern arbeiten einige im Tandem. Zusammen ergibt das das ganze Bild: Brüche als Ergebnis von Geteiltaufgaben.</p>
   </div>
 
-  <h3>1. Wie arbeitet ihr?</h3>
-  <div class="mwahlen" id="modusWahl"></div>
-
-  <div id="groesseBereich" hidden>
-    <h3>2. Wie viele seid ihr in der Gruppe?</h3>
-    <div class="mwahlen" id="groesseWahl"></div>
-  </div>
-
+  <p id="sfFehlt"><b>Wählt zuerst ganz oben auf der Seite, wie ihr arbeitet</b> – allein, zu zweit oder in der Gruppe (mit Gruppengröße). Dann erscheint hier die passende Aufgabenverteilung.</p>
   <div id="rollenBereich" hidden>
-    <h3><span id="rollenNr">2</span>. Welche Aufgabe übernimmst du?</h3>
+    <h3>Welche Aufgabe übernimmst du?</h3>
     <div class="mwahlen" id="rollenWahl"></div>
   </div>
   <div class="mein" id="meinAuftrag" hidden></div>
@@ -267,19 +345,21 @@ input.in.falsch{border-color:var(--red);border-width:3px}
     <tr><td><b>D</b> · Gleiches Ergebnis</td><td>Verschiedene Geteiltaufgaben – und doch bekommt jede Person gleich viel. Warum?</td></tr>
   </table></div>
 
-  <h3>Zeitplan (ca. 50 Minuten)</h3>
+  <h3>Zeitplan (ca. 60 Minuten)</h3>
   <div class="scroll-x"><table class="tbl">
     <tr><th>Phase</th><th>Karte</th><th>Zeit</th></tr>
     <tr><td>Die Idee gemeinsam verstehen</td><td>1</td><td>10 min</td></tr>
     <tr><td>Expertenaufgabe bearbeiten und Vortrag vorbereiten</td><td>A, B, C oder D</td><td>20 min</td></tr>
-    <tr><td>Vorstellen und Zuhör-Check</td><td>Vorstellen</td><td>ca. 3 min je Aufgabe</td></tr>
+    <tr><td>In der Gruppe vorstellen, Los: Wer stellt der Klasse vor?</td><td>Vorstellen</td><td>ca. 3 min je Aufgabe</td></tr>
+    <tr><td>Gruppen-Check allein, dann Teampunkte berechnen</td><td>Gruppen-Check, Teampunkte</td><td>8 min</td></tr>
     <tr><td>Alles zusammen</td><td>Alles zusammen</td><td>8 min</td></tr>
   </table></div>
 </section>
 
 <!-- ================= KARTE 3: A ================= -->
 <section class="karte" id="k3">
-  <h2>A · Weniger Pizzen als Personen</h2>
+  <h2>A · Weniger Pizzen als Personen <span class="sf">&#128100; allein</span></h2>
+  <p class="gc-nur-team">Im Tandem bearbeitet ihr die Karte <b>zu zweit</b> &#128101;. Alle anderen, die diese Karte nicht als Expertenaufgabe haben, schauen sie sich erst nach dem Vortrag an.</p>
   <div class="stand">
     <p><b>Wo wir gerade stehen:</b> Auf Karte 1 habt ihr gesehen: Werden Pizzen gerecht verteilt, schneidet man jede Pizza in so viele Stücke, wie es Personen gibt. Jede Person bekommt dann von jeder Pizza ein Stück. Auf dieser Karte gibt es immer <b>weniger</b> Pizzen als Personen.</p>
   </div>
@@ -338,7 +418,8 @@ input.in.falsch{border-color:var(--red);border-width:3px}
 
 <!-- ================= KARTE 4: B ================= -->
 <section class="karte" id="k4">
-  <h2>B · Mehr Pizzen als Personen</h2>
+  <h2>B · Mehr Pizzen als Personen <span class="sf">&#128100; allein</span></h2>
+  <p class="gc-nur-team">Im Tandem bearbeitet ihr die Karte <b>zu zweit</b> &#128101;. Alle anderen, die diese Karte nicht als Expertenaufgabe haben, schauen sie sich erst nach dem Vortrag an.</p>
   <div class="stand">
     <p><b>Wo wir gerade stehen:</b> Auf Karte 1 habt ihr gesehen: Werden Pizzen gerecht verteilt, schneidet man jede Pizza in so viele Stücke, wie es Personen gibt. Jede Person bekommt von jeder Pizza ein Stück. Auf dieser Karte gibt es immer <b>mehr</b> Pizzen als Personen.</p>
   </div>
@@ -390,7 +471,8 @@ input.in.falsch{border-color:var(--red);border-width:3px}
 
 <!-- ================= KARTE 5: C ================= -->
 <section class="karte" id="k5">
-  <h2>C · Ganze Pizzen und ein Rest: gemischte Zahlen</h2>
+  <h2>C · Ganze Pizzen und ein Rest: gemischte Zahlen <span class="sf">&#128100; allein</span></h2>
+  <p class="gc-nur-team">Im Tandem bearbeitet ihr die Karte <b>zu zweit</b> &#128101;. Alle anderen, die diese Karte nicht als Expertenaufgabe haben, schauen sie sich erst nach dem Vortrag an.</p>
   <div class="stand">
     <p><b>Wo wir gerade stehen:</b> Auf Karte 1 habt ihr gesehen, dass man jede Geteiltaufgabe als Bruch schreiben kann. Auf dieser Karte geht es um Verteilungen, bei denen jede Person mehr als eine ganze Pizza bekommt – und darum, wie man so ein Ergebnis noch anders aufschreiben kann.</p>
   </div>
@@ -446,7 +528,8 @@ input.in.falsch{border-color:var(--red);border-width:3px}
 
 <!-- ================= KARTE 6: D ================= -->
 <section class="karte" id="k6">
-  <h2>D · Verschiedene Aufgaben – gleiches Ergebnis</h2>
+  <h2>D · Verschiedene Aufgaben – gleiches Ergebnis <span class="sf">&#128100; allein</span></h2>
+  <p class="gc-nur-team">Im Tandem bearbeitet ihr die Karte <b>zu zweit</b> &#128101;. Alle anderen, die diese Karte nicht als Expertenaufgabe haben, schauen sie sich erst nach dem Vortrag an.</p>
   <div class="stand">
     <p><b>Wo wir gerade stehen:</b> Auf Karte 1 habt ihr gesehen, dass man jede Geteiltaufgabe als Bruch schreiben kann. Kürzen und Erweitern kennt ihr schon. Auf dieser Karte geht es darum, warum ganz verschiedene Geteiltaufgaben dasselbe Ergebnis haben können.</p>
   </div>
@@ -503,16 +586,16 @@ input.in.falsch{border-color:var(--red);border-width:3px}
 
 <!-- ================= KARTE 7: VORSTELLEN ================= -->
 <section class="karte" id="k7">
-  <h2>Vorstellen</h2>
-  <div class="auftrag" data-nur="gruppe">
+  <h2>Vorstellen <span class="sf">&#128106; in der Gruppe</span></h2>
+  <div class="auftrag gc-nur-ga">
     <p><b>Gruppe:</b> Stellt die Aufgaben in der Reihenfolge A, B, C, D vor – jede Aufgabe ca. 3 Minuten. Wer zwei Aufgaben hatte, stellt beide vor. Tandems teilen sich ihren Vortrag: Eine Person zeigt den Pizza-Teiler und die erste Aufgabe, die andere erklärt den Rest. Zeigt dabei den Pizza-Teiler auf dem iPad und schreibt die wichtigsten Rechnungen auf.</p>
-    <p>Wer zuhört, notiert zu jeder Aufgabe einen Merksatz im Heft und beantwortet danach den Zuhör-Check.</p>
+    <p>Wer zuhört, notiert zu jeder Aufgabe einen Merksatz im Heft. Danach bearbeitet jede:r allein den Gruppen-Check.</p>
   </div>
-  <div class="auftrag" data-nur="partner">
-    <p><b>Partnerarbeit:</b> Stellt euch eure Aufgaben gegenseitig vor – zuerst A, dann B, C und D. Wer zuhört, darf Fragen stellen und beantwortet danach den Zuhör-Check.</p>
+  <div class="auftrag gc-nur-pa">
+    <p><b>Partnerarbeit:</b> Stellt euch eure Aufgaben gegenseitig vor – zuerst A, dann B, C und D. Wer zuhört, darf Fragen stellen. Danach bearbeitet jede:r allein den Gruppen-Check.</p>
   </div>
-  <div class="auftrag" data-nur="einzel">
-    <p><b>Einzelarbeit:</b> Lies deine Merkzettel zu A bis D noch einmal durch. Beantworte dann zu jeder Aufgabe den Zuhör-Check, ohne auf die Expertenkarten zu schauen. Wenn es geht, erkläre einer Mitschülerin oder einem Mitschüler eine der Aufgaben.</p>
+  <div class="auftrag gc-nur-ea">
+    <p><b>Einzelarbeit:</b> Lies deine Merkzettel zu A bis D noch einmal durch. Bearbeite dann den Gruppen-Check, ohne auf die Expertenkarten zu schauen. Wenn es geht, erkläre einer Mitschülerin oder einem Mitschüler eine der Aufgaben.</p>
   </div>
 
   <h3>Rückmeldung geben: zwei Sterne und ein Wunsch</h3>
@@ -525,19 +608,90 @@ input.in.falsch{border-color:var(--red);border-width:3px}
     </ul>
   </div>
 
-  <h3>Zuhör-Check A · Weniger Pizzen</h3>
-  <div class="aufg"><div class="w" data-w="ZA"></div></div>
-  <h3>Zuhör-Check B · Mehr Pizzen</h3>
-  <div class="aufg"><div class="w" data-w="ZB"></div></div>
-  <h3>Zuhör-Check C · Gemischte Zahlen</h3>
-  <div class="aufg"><div class="w" data-w="ZC"></div></div>
-  <h3>Zuhör-Check D · Gleiches Ergebnis</h3>
-  <div class="aufg"><div class="w" data-w="ZD"></div></div>
+  <div class="gc-nicht-ea">
+    <h3>Wer stellt der Klasse vor? &#127922; <span class="sf">&#128106; in der Gruppe</span></h3>
+    <p>Das Los entscheidet, welche Aufgabe eure Gruppe der Klasse vorstellt &ndash; und wer spricht. Es spricht <b>nie</b> die Expertin oder der Experte für diese Aufgabe. Deshalb müsst ihr alle Aufgaben eurer Gruppe verstanden haben.</p>
+    <p>Die Personen-Nummern sind dieselben wie auf Karte 2.</p>
+    <div class="btnrow"><button type="button" class="btn btn-pruefen" id="los-btn">&#127922; Losen</button></div>
+    <div class="losergebnis" id="los-erg" aria-live="polite"></div>
+    <p>Die Lehrkraft vergibt nach dem Vortrag 0, 1 oder 2 Bonuspunkte für eure Teampunkte.</p>
+  </div>
 </section>
+
+<!-- ================= KARTE: GRUPPEN-CHECK ================= -->
+<section class="karte" id="k9">
+  <h2>Gruppen-Check <span class="sf">&#128100; allein</span></h2>
+  <div class="stand"><p><b>Wo wir gerade stehen:</b> Ihr habt euch die vier Expertenaufgaben A bis D gegenseitig vorgestellt. Jetzt zeigt jede:r allein, was die Gruppe gelernt hat.</p></div>
+  <div class="auftrag">
+    <p>Bearbeite die fünf Aufgaben <b>allein</b> und ohne auf die Expertenkarten zu schauen. Sie stammen aus allen vier Expertenaufgaben.</p>
+    <p><b>Für deine Sterne zählt nur dein erster Versuch.</b> Danach darfst du mit „Leeren“ und den Tipps weiterüben.</p>
+    <p class="gc-nicht-ea">Wenn du alle fünf Aufgaben einmal geprüft hast, bekommst du einen Code für den Gruppenrechner.</p>
+  </div>
+<!-- ===== TEIL B: Gruppenschlüssel (vor die Check-Aufgaben) ===== -->
+<div class="gc-merk gc-nicht-ea" id="gc-schluessel">
+  <h4>&#128273; Euer Gruppenschlüssel</h4>
+  <p><b>Eine</b> Person aus eurer Gruppe tippt auf „Schlüssel erzeugen" und sagt den Schlüssel an. Alle anderen tippen genau diesen Schlüssel ein. Ohne Schlüssel gibt es keinen Code &ndash; und ein Code gilt nur für eure Gruppe.</p>
+  <div class="gc-eingabe">
+    <input type="text" class="gc-code" id="gc-key" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Gruppenschlüssel">
+    <button type="button" class="gc-btn sek" id="gc-key-neu">Schlüssel für unsere Gruppe erzeugen</button>
+  </div>
+  <p id="gc-key-info" style="margin-top:8px"></p>
+</div>
+  <h3>Check 1 · Weniger Pizzen</h3>
+  <div class="aufg"><div class="w" data-w="ZA"></div></div>
+  <h3>Check 2 · Mehr Pizzen</h3>
+  <div class="aufg"><div class="w" data-w="ZB"></div></div>
+  <h3>Check 3 · Gemischte Zahlen</h3>
+  <div class="aufg"><div class="w" data-w="ZC"></div></div>
+  <h3>Check 4 · Gleiches Ergebnis</h3>
+  <div class="aufg"><div class="w" data-w="ZD"></div></div>
+  <h3>Check 5 · Alles zusammen</h3>
+  <div class="aufg"><div class="w" data-w="ZE"></div></div>
+<!-- ===== TEIL B: Codebox (nach die Check-Aufgaben) ===== -->
+<p id="gc-offen">Noch nicht alle Aufgaben geprüft &ndash; deine Sterne erscheinen danach hier.</p>
+<div class="gc-codebox" id="gc-codebox"></div>
+
+</section>
+
+<!-- ================= KARTE: TEAMPUNKTE (Baustein Gruppen-Check, TEIL C) ================= -->
+<section class="karte" id="k10">
+  <h2>Teampunkte <span class="sf">&#128106; in der Gruppe</span></h2>
+  <div class="stand"><p><b>Wo wir gerade stehen:</b> Eure Gruppe hat die vier Expertenaufgaben vorgestellt, und jede:r hat beim Gruppen-Check einen Code bekommen. Ein Mitglied gibt jetzt den Gruppenschlüssel und alle Codes ein. Jeder Code darf nur einmal vorkommen.</p></div>
+  <p class="gc-nur-ea"><b>Allein:</b> Die Teampunkte entfallen. Notiere deine Sterne aus dem Gruppen-Check im Heft.</p>
+  <div class="gc-merk" id="gc-regeln"></div>
+  <div class="gc-nicht-ea">
+    <h3>Der Gruppenrechner</h3>
+    <p><b>Euer Gruppenschlüssel:</b></p>
+    <div class="gc-eingabe"><input type="text" class="gc-code" id="gc-re-key" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Gruppenschlüssel für den Rechner"></div>
+    <p style="margin-top:12px"><b>Wie viele seid ihr?</b></p>
+    <div class="gc-zahlwahl" id="gc-re-n">
+      <button type="button" class="gc-zbtn" data-n="2">2</button>
+      <button type="button" class="gc-zbtn" data-n="3">3</button>
+      <button type="button" class="gc-zbtn" data-n="4">4</button>
+      <button type="button" class="gc-zbtn" data-n="5">5</button>
+      <button type="button" class="gc-zbtn" data-n="6">6</button>
+      <button type="button" class="gc-zbtn" data-n="7">7</button>
+    </div>
+    <p>Tragt die Codes aller Mitglieder ein:</p>
+    <div class="gc-liste" id="gc-re-liste"></div>
+    <div id="gc-re-praes-box">
+      <p style="margin-top:14px"><b>Präsentationsbonus</b> (tippt die Lehrkraft an):</p>
+      <div class="gc-zahlwahl" id="gc-re-p">
+        <button type="button" class="gc-zbtn" data-p="0">+0</button>
+        <button type="button" class="gc-zbtn" data-p="1">+1</button>
+        <button type="button" class="gc-zbtn" data-p="2">+2</button>
+      </div>
+    </div>
+    <div style="margin-top:14px"><button type="button" class="gc-btn" id="gc-re-btn">&#127942; Teampunkte berechnen</button></div>
+    <div class="gc-erg" id="gc-re-erg"></div>
+  </div>
+</section>
+
+
 
 <!-- ================= KARTE 8: ALLES ZUSAMMEN ================= -->
 <section class="karte" id="k8">
-  <h2>Alles zusammen</h2>
+  <h2>Alles zusammen <span class="sf">&#128100; allein</span></h2>
   <div class="auftrag"><p>Überlege zuerst selbst eine Antwort und tippe dann auf die Karte, um zu vergleichen.</p></div>
   <div class="flips" id="flips"></div>
 
@@ -556,13 +710,15 @@ input.in.falsch{border-color:var(--red);border-width:3px}
 </main>
 
 <!-- ============================================================
-     BAUSTEIN: Navigationsleiste  (v5, 04.11.2026)
+     BAUSTEIN: Navigationsleiste  (v6, 12.11.2026)
      Pflicht auf jeder Lernseite (anweisung_lernseiten.txt, TEIL 3.6).
      Einfügen: UNVERÄNDERT direkt vor dem T-Rex bzw. vor </body> – nicht in <main>.
      - 🏠 schwebender Knopf unten links (immer sichtbar, T-Rex bleibt rechts) + Leiste am Seitenende.
      - 🏠 Startseite: feste Adresse, funktioniert aus jedem Unterordner.
      - 📚 Alles für …: liest <meta name="klasse"> und hängt ?klasse=… an.
        Fehlt das Meta-Tag, bleibt der Knopf unsichtbar.
+     - Seit v6: Texte im Feedback-Fenster ohne Anrede (passt zu Sek I „du"
+       und Oberstufe „Sie", anweisung_lernseiten.txt 3.7).
      - Seit v5: Alle drei Links (🏠, Startseite, Alles für …) hängen zusätzlich
        start=<fach> an (aus <meta name="fach">, sonst aus dem Ordner bio/mathe/…).
        Die Startseite öffnet dann zuerst den Reiter dieses Fachs; die anderen
@@ -641,8 +797,8 @@ input.in.falsch{border-color:var(--red);border-width:3px}
     <label><input type="radio" name="dino-fb-art" value="Idee"> 💡 Idee</label>
     <label><input type="radio" name="dino-fb-art" value="Lob"> 👍 Lob</label>
   </fieldset>
-  <textarea id="dino-fb-text" aria-label="Deine Nachricht"
-    placeholder="Was ist dir aufgefallen? Bei Fehlern: Welche Karte, welche Aufgabe?"></textarea>
+  <textarea id="dino-fb-text" aria-label="Nachricht"
+    placeholder="Was ist aufgefallen? Bei Fehlern: Welche Karte, welche Aufgabe?"></textarea>
   <p>Bitte schreib keine persönlichen Daten hinein.</p>
   <div class="dino-fb-knoepfe">
     <button type="button" class="dino-fb-senden" id="dino-fb-senden">✉️ Mail öffnen</button>
@@ -726,7 +882,7 @@ input.in.falsch{border-color:var(--red);border-width:3px}
     if (leer()) return;
     location.href = 'mailto:' + adresse + '?subject=' + encodeURIComponent(betreff()) +
                     '&body=' + encodeURIComponent(inhalt());
-    melde('Dein Mailprogramm öffnet sich. Danke! 🦖', true);
+    melde('Das Mailprogramm öffnet sich. Danke! 🦖', true);
   });
   document.getElementById('dino-fb-kopieren').addEventListener('click', function(){
     if (leer()) return;
@@ -749,6 +905,207 @@ input.in.falsch{border-color:var(--red);border-width:3px}
 <!-- ============ ENDE BAUSTEIN Navigationsleiste ============ -->
 <div class="trex" id="trex"><img class="dino-ikon" src="data:image/webp;base64,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" alt="Dino" width="72" height="72" draggable="false"><span class="bubble">Made by ASzym</span></div>
 
+<!-- ===== Baustein Gruppen-Check v2: Datenblock + Engine (unverändert) ===== -->
+<script>
+/* ===== ANPASSEN: Datenblock Gruppenarbeit ===== */
+var GRUPPE = {
+  key: 'm6-brueche-als-quotienten-ls',
+  methode: 'Gruppenpuzzle',
+  checks: [ 'ZA', 'ZB', 'ZC', 'ZD', 'ZE' ],
+  rechnerKarte: 'der Karte „Teampunkte“',
+  praesentation: true
+};
+/* ===== ENDE ANPASSEN ===== */
+</script>
+<script>
+/* ============================================================
+   BAUSTEIN: Gruppen-Check-Engine (v2, 13.11.2026) – nicht ändern
+   ============================================================ */
+(function(){
+  "use strict";
+  var KEY = 'gc|' + GRUPPE.key;
+  var G;
+  try { G = JSON.parse(sessionStorage.getItem(KEY) || 'null'); } catch (e) { G = null; }
+  G = G || {};
+  G.sf = G.sf || null; G.gr = G.gr || null; G.erster = G.erster || {};
+  G.key = G.key || ''; G.keyNeu = !!G.keyNeu; G.code = G.code || null;
+  G.rech = G.rech || { n:null, codes:[], praes:null, ber:false, key:'' };
+  function sichern(){ try { sessionStorage.setItem(KEY, JSON.stringify(G)); } catch (e) {} }
+  function $(id){ return document.getElementById(id); }
+
+  /* ---------- Sozialform ---------- */
+  var NAME = { ea:'allein (EA)', pa:'zu zweit (PA)', ga:'in der Gruppe (GA)' };
+  function groesse(){ return G.sf === 'ea' ? 1 : G.sf === 'pa' ? 2 : G.sf === 'ga' ? G.gr : null; }
+  function sfZeig(){
+    var box = $('gc-box'); if (!box) return;
+    var fertig = G.sf === 'ea' || G.sf === 'pa' || (G.sf === 'ga' && G.gr);
+    var b = document.body;
+    b.classList.remove('sf-ea', 'sf-pa', 'sf-ga', 'gr-3', 'gr-4', 'gr-5', 'gr-6', 'gr-7');
+    if (fertig) { b.classList.add('sf-' + G.sf); if (G.sf === 'ga') b.classList.add('gr-' + G.gr); }
+    box.classList.toggle('gewaehlt', !!fertig);
+    $('gc-groesse').hidden = G.sf !== 'ga';
+    box.querySelectorAll('[data-sf]').forEach(function(x){ x.classList.toggle('aktiv', x.getAttribute('data-sf') === G.sf); });
+    box.querySelectorAll('[data-gr]').forEach(function(x){ x.classList.toggle('aktiv', +x.getAttribute('data-gr') === G.gr); });
+    $('gc-text').innerHTML = fertig ? 'Du arbeitest: <b>' + NAME[G.sf] + (G.sf === 'ga' ? ', ' + G.gr + ' Personen' : '') + '</b>' : '';
+    try { document.dispatchEvent(new CustomEvent('gc-sozialform', { detail:{ sf:G.sf, groesse:groesse() } })); } catch (e) {}
+  }
+  if ($('gc-box')) {
+    $('gc-box').querySelectorAll('[data-sf]').forEach(function(x){
+      x.addEventListener('click', function(){
+        G.sf = x.getAttribute('data-sf'); if (G.sf !== 'ga') G.gr = null;
+        if (G.sf === 'pa') G.rech.n = 2;
+        sfZeig(); reBau(); codeZeig(); sichern();
+      });
+    });
+    $('gc-box').querySelectorAll('[data-gr]').forEach(function(x){
+      x.addEventListener('click', function(){ G.gr = +x.getAttribute('data-gr'); G.rech.n = G.gr; sfZeig(); reBau(); codeZeig(); sichern(); });
+    });
+    $('gc-aendern').addEventListener('click', function(){ G.sf = null; G.gr = null; sfZeig(); sichern(); });
+  }
+
+  /* ---------- Code (Gruppenschlüssel + Prüfsumme) ----------
+     7 Zeichen: 3 Zufallszeichen, 1 verschlüsseltes Sterne-Zeichen, 3 Prüfzeichen.
+     Prüfsumme hängt von Schlüssel und Seite ab. */
+  var ZEICHEN = 'ACDEFGHJKMNPQRTUVWXY3479', NZ = ZEICHEN.length;
+  var CHECKS = GRUPPE.checks || [], MAXS = CHECKS.length;
+  var MAXP = GRUPPE.praesentation ? 2 : 0;
+  var SCHWELLE = Math.ceil(MAXS * 0.6);
+  function streu(str){ var h = 2166136261; for (var i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; } return h >>> 0; }
+  function norm(c){ return String(c || '').toUpperCase().replace(/[^A-Z0-9]/g, ''); }
+  function gueltig(k){ k = norm(k); if (k.length !== 3) return false; for (var i = 0; i < 3; i++) if (ZEICHEN.indexOf(k.charAt(i)) < 0) return false; return true; }
+  function baueCode(schl, r, s){
+    var basis = GRUPPE.key + '|' + norm(schl) + '|' + r.join('.');
+    var h = streu(basis), sz = (h % NZ + 7 * s) % NZ, p = streu(basis + '|' + s + '#');
+    var k0 = p % NZ, k1 = Math.floor(p / NZ) % NZ, k2 = Math.floor(p / (NZ * NZ)) % NZ;
+    var t = [ r[0], k0, sz, r[1], k1, r[2], k2 ].map(function(i){ return ZEICHEN.charAt(i); }).join('');
+    return t.slice(0, 3) + '-' + t.slice(3);
+  }
+  function liesCode(c, schl){
+    c = norm(c);
+    if (c.length !== 7 || !gueltig(schl)) return null;
+    var idx = [];
+    for (var i = 0; i < 7; i++) { var j = ZEICHEN.indexOf(c.charAt(i)); if (j < 0) return null; idx.push(j); }
+    var r = [ idx[0], idx[3], idx[5] ];
+    var h = streu(GRUPPE.key + '|' + norm(schl) + '|' + r.join('.'));
+    var s = (((idx[2] - h % NZ) % NZ + NZ) % NZ * 7) % NZ;   /* 7 ist zu sich selbst invers (mod 24) */
+    if (s > MAXS) return null;
+    return baueCode(schl, r, s).replace('-', '') === c ? s : null;
+  }
+  function sterneText(s){ var t = ''; for (var i = 0; i < MAXS; i++) t += i < s ? '&#11088;' : '&#9734;'; return t; }
+  function komma(x){ return String(Math.round(x * 10) / 10).replace('.', ','); }
+
+  /* ---------- Gruppenschlüssel + Codebox ---------- */
+  function keyZeig(){
+    var inp = $('gc-key'), info = $('gc-key-info'); if (!inp) return;
+    inp.value = G.key || '';
+    if (!G.key) info.innerHTML = '';
+    else if (!gueltig(G.key)) info.innerHTML = '&#10007; Ein Schlüssel hat genau 3 Zeichen. Bitte genau abschreiben.';
+    else info.innerHTML = G.keyNeu ? '&#10004; Diesen Schlüssel sagst du deiner Gruppe an: <b>' + norm(G.key) + '</b>' : '&#10004; Schlüssel eingetragen.';
+  }
+  if ($('gc-key')) {
+    $('gc-key').addEventListener('input', function(){ G.key = norm(this.value).slice(0, 3); G.keyNeu = false; $('gc-key-info').innerHTML = ''; sichern(); codeZeig(); });
+    $('gc-key').addEventListener('change', keyZeig);
+    $('gc-key-neu').addEventListener('click', function(){
+      var k = ''; for (var i = 0; i < 3; i++) k += ZEICHEN.charAt(Math.floor(Math.random() * NZ));
+      G.key = k; G.keyNeu = true; if (!G.rech.key) G.rech.key = k;
+      keyZeig(); reBau(); sichern(); codeZeig();
+    });
+  }
+  function codeZeig(){
+    var box = $('gc-codebox'), off = $('gc-offen'); if (!box || !MAXS) return;
+    var fertig = CHECKS.every(function(id){ return G.erster[id] !== undefined; });
+    if (!fertig) { box.classList.remove('zeig'); if (off) off.style.display = ''; return; }
+    var s = CHECKS.reduce(function(a, id){ return a + G.erster[id]; }, 0);
+    if (!G.code || G.code.s !== s) { G.code = { s:s, r:[0, 1, 2].map(function(){ return Math.floor(Math.random() * NZ); }) }; sichern(); }
+    if (off) off.style.display = 'none';
+    var h = '<p class="gc-sterne">' + sterneText(s) + '</p><p><b>Deine Sterne: ' + s + ' von ' + MAXS + '</b> (erster Versuch).</p>';
+    if (G.sf === 'ea') h += '<p>Notiere deine Sterne im Heft. Wenn du willst, kannst du die Aufgaben jetzt mit den Tipps weiterüben.</p>';
+    else if (!gueltig(G.key)) h += '<p><b>Dein Code fehlt noch:</b> Trage oben euren Gruppenschlüssel ein. Dann erscheint dein Code hier.</p>';
+    else h += '<p>Dein Code für den Gruppenrechner (Gruppenschlüssel ' + norm(G.key) + '):</p><p class="gc-codetext">' + baueCode(G.key, G.code.r, s) + '</p>' +
+      '<p>Gib diesen Code an das Mitglied, das den Gruppenrechner auf ' + GRUPPE.rechnerKarte + ' bedient. Der Code gilt nur für deine Gruppe und nur einmal. Wenn du willst, kannst du die Aufgaben jetzt mit den Tipps weiterüben.</p>';
+    box.innerHTML = h; box.classList.add('zeig');
+  }
+
+  /* ---------- Teampunkte ---------- */
+  function regelnZeig(){
+    var r = $('gc-regeln'); if (!r) return;
+    var max = MAXS + 1 + MAXP;
+    r.innerHTML = '<h4>&#127942; So zählen die Teampunkte</h4><ol>' +
+      '<li><b>Sterne:</b> Jede:r holt beim Gruppen-Check 0 bis ' + MAXS + ' Sterne. Es zählt der erste Versuch.</li>' +
+      '<li><b>Teamwert:</b> Alle Sterne werden zusammengezählt. Das Mitglied mit den <b>wenigsten</b> Sternen zählt dabei <b>doppelt</b>. Dann wird durch (Anzahl der Mitglieder + 1) geteilt. Höchstens ' + MAXS + '.</li>' +
+      '<li><b>+1 Bonus „Alle dabei":</b> wenn jedes Mitglied mindestens ' + SCHWELLE + ' Sterne hat.</li>' +
+      (MAXP ? '<li><b>+0, +1 oder +2 Präsentationsbonus:</b> vergibt die Lehrkraft nach eurem Vortrag.</li>' : '') +
+      '</ol><p>Höchstens sind ' + MAXS + ' + 1' + (MAXP ? ' + ' + MAXP : '') + ' = ' + max + ' Teampunkte möglich. Große und kleine Gruppen haben die gleichen Chancen. Es lohnt sich, dass <b>alle</b> es verstehen &ndash; also helft euch gegenseitig!</p>';
+    if ($('gc-re-praes-box')) $('gc-re-praes-box').hidden = !MAXP;
+  }
+  function reBau(){
+    var liste = $('gc-re-liste'); if (!liste) return;
+    var n = G.rech.n || 4;
+    $('gc-re-key').value = G.rech.key || '';
+    liste.innerHTML = '';
+    for (var i = 0; i < n; i++) (function(i){
+      var z = document.createElement('div'); z.className = 'gc-mzeile';
+      z.innerHTML = '<span class="gc-mname">Mitglied ' + (i + 1) + '</span>';
+      var inp = document.createElement('input');
+      inp.type = 'text'; inp.className = 'gc-code'; inp.setAttribute('autocomplete', 'off'); inp.setAttribute('autocapitalize', 'characters');
+      inp.setAttribute('spellcheck', 'false'); inp.setAttribute('aria-label', 'Code von Mitglied ' + (i + 1));
+      inp.value = G.rech.codes[i] || '';
+      inp.addEventListener('input', function(){ G.rech.codes[i] = inp.value; sichern(); });
+      z.appendChild(inp); liste.appendChild(z);
+    })(i);
+    document.querySelectorAll('#gc-re-n [data-n]').forEach(function(x){ x.classList.toggle('aktiv', +x.getAttribute('data-n') === n); });
+    document.querySelectorAll('#gc-re-p [data-p]').forEach(function(x){ x.classList.toggle('aktiv', G.rech.praes !== null && +x.getAttribute('data-p') === G.rech.praes); });
+  }
+  function rechne(){
+    var erg = $('gc-re-erg'), n = G.rech.n || 4, sterne = [], h = '', fehler = false, gesehen = {};
+    if (!gueltig(G.rech.key)) { erg.innerHTML = '<div class="gc-erow bad">&#10007; Tragt zuerst euren Gruppenschlüssel (3 Zeichen) ein.</div>'; erg.classList.add('zeig'); return; }
+    for (var i = 0; i < n; i++) {
+      var c = norm(G.rech.codes[i]), s = liesCode(c, G.rech.key);
+      if (c && gesehen[c]) { fehler = true; h += '<div class="gc-erow bad">&#10007; Mitglied ' + (i + 1) + ': Dieser Code wurde schon bei Mitglied ' + gesehen[c] + ' eingegeben. Jede:r hat einen eigenen Code.</div>'; continue; }
+      if (c) gesehen[c] = i + 1;
+      if (s === null) { fehler = true; h += '<div class="gc-erow bad">&#10007; Mitglied ' + (i + 1) + ': Dieser Code ist ungültig oder gehört nicht zu eurem Gruppenschlüssel. Bitte genau abschreiben.</div>'; }
+      else { sterne.push(s); h += '<div class="gc-erow neutral">Mitglied ' + (i + 1) + ': &#10004; Code gültig</div>'; }   /* keine Einzelsterne zeigen (TEIL 2.10) */
+    }
+    if (fehler) { erg.innerHTML = h; erg.classList.add('zeig'); return; }
+    var summe = sterne.reduce(function(a, b){ return a + b; }, 0), min = Math.min.apply(null, sterne);
+    var team = (summe + min) / (n + 1), alle = min >= SCHWELLE ? 1 : 0, p = MAXP ? G.rech.praes : 0;
+    var gesamt = team + alle + (p === null ? 0 : p);
+    var maxGes = MAXS + 1 + MAXP, bezug = p === null ? MAXS + 1 : maxGes;
+    var anteil = Math.round(gesamt / bezug * 100);
+    h += '<div class="gc-erow neutral"><b>Teamwert:</b> ' + komma(team) + ' <span class="gc-von">von höchstens ' + MAXS + '</span></div>';
+    h += '<div class="gc-erow ' + (alle ? 'ok' : 'neutral') + '"><b>Bonus „Alle dabei":</b> ' + (alle ? '+1 von 1 &ndash; alle haben mindestens ' + SCHWELLE + ' Sterne!' : '+0 von 1 &ndash; nicht alle haben mindestens ' + SCHWELLE + ' Sterne.') + '</div>';
+    if (MAXP) h += '<div class="gc-erow neutral"><b>Präsentationsbonus:</b> ' + (p === null ? 'noch offen (höchstens +' + MAXP + ') &ndash; die Lehrkraft tippt ihn nach eurem Vortrag an.' : '+' + p + ' von ' + MAXP) + '</div>';
+    h += '<div class="gc-gesamt">&#127942; Teampunkte: ' + komma(gesamt) + ' <span class="gc-von">von ' + bezug + ' möglichen' + (p === null ? ' (ohne Präsentationsbonus; mit Bonus höchstens ' + maxGes + ')' : '') + '</span>' +
+      '<div class="gc-balken" role="img" aria-label="' + komma(gesamt) + ' von ' + bezug + ' Teampunkten"><div style="width:' + Math.min(100, anteil) + '%"></div></div>' +
+      '<p class="gc-prozent">Das sind ' + anteil + '&nbsp;% der möglichen Punkte.</p></div>';
+    erg.innerHTML = h; erg.classList.add('zeig');
+  }
+  if ($('gc-re-liste')) {
+    $('gc-re-key').addEventListener('input', function(){ G.rech.key = norm(this.value).slice(0, 3); sichern(); });
+    document.querySelectorAll('#gc-re-n [data-n]').forEach(function(x){
+      x.addEventListener('click', function(){ G.rech.n = +x.getAttribute('data-n'); G.rech.ber = false; $('gc-re-erg').classList.remove('zeig'); reBau(); sichern(); });
+    });
+    document.querySelectorAll('#gc-re-p [data-p]').forEach(function(x){
+      x.addEventListener('click', function(){ G.rech.praes = +x.getAttribute('data-p'); reBau(); if (G.rech.ber) rechne(); sichern(); });
+    });
+    $('gc-re-btn').addEventListener('click', function(){ G.rech.ber = true; rechne(); sichern(); });
+  }
+
+  /* ---------- Schnittstelle für die Seite ---------- */
+  window.GC = {
+    melde: function(id, richtig){
+      if (CHECKS.indexOf(id) < 0 || G.erster[id] !== undefined) return;
+      G.erster[id] = richtig ? 1 : 0; sichern(); codeZeig();
+    },
+    sozialform: function(){ return G.sf; },
+    groesse: groesse
+  };
+
+  sfZeig(); keyZeig(); regelnZeig(); reBau(); codeZeig();
+  if (G.rech.ber) rechne();
+})();
+/* ============ ENDE BAUSTEIN Gruppen-Check-Engine ============ */
+</script>
 <script>
 (function(){
 'use strict';
@@ -763,7 +1120,7 @@ if(!S.flip) S.flip={};
 function speichern(){ try{ window.sessionStorage.setItem(KEY,JSON.stringify(S)); }catch(e){} }
 
 /* ================= Hilfsfunktionen ================= */
-function $(id){ return document.getElementById(id); }
+var $=function(id){ return document.getElementById(id); };   /* als Ausdruck: Baustein-Engine hat ein eigenes $ */
 function el(tag,cls,html){ var e=document.createElement(tag); if(cls) e.className=cls; if(html!==undefined) e.innerHTML=html; return e; }
 function toArr(n){ return Array.prototype.slice.call(n); }
 function typeset(e){ if(window.MathJax && MathJax.typesetPromise){ try{ MathJax.typesetPromise([e]).catch(function(){}); }catch(err){} } }
@@ -924,7 +1281,7 @@ D4:{art:'multi', f:'Welche Geteiltaufgaben haben das Ergebnis <span class="frac"
   tipps:['Schreibe jede Aufgabe als Bruch und kürze vollständig.','Vorsicht bei vertauschten Zahlen: 5 : 3 bedeutet 5 Pizzen für 3 Personen.'],
   lw:'Gekürzt ergeben <span class="frac"><span>3</span><span>5</span></span>: 6 : 10 (mit 2), 9 : 15 (mit 3), 12 : 20 (mit 4) und 30 : 50 (mit 10). 5 : 3 und 10 : 6 ergeben <span class="frac"><span>5</span><span>3</span></span>, 15 : 20 ergibt <span class="frac"><span>3</span><span>4</span></span>, 3 : 8 lässt sich nicht kürzen.'},
 
-/* ---------- Zuhör-Checks ---------- */
+/* ---------- Gruppen-Check (erster Versuch zählt, GC.melde) ---------- */
 ZA:{art:'mc', f:'Fünf Muffins werden gerecht an acht Kinder verteilt. Wie viel Muffin bekommt jedes Kind?',
   o:[['<span class="frac"><span>5</span><span>8</span></span> eines Muffins',1],['<span class="frac"><span>8</span><span>5</span></span> eines Muffins',0],['<span class="frac"><span>1</span><span>8</span></span> eines Muffins',0],['<span class="frac"><span>1</span><span>5</span></span> eines Muffins',0]],
   tipps:['Was wird verteilt? Das kommt in den Zähler.'], lw:'5 : 8 = <span class="frac"><span>5</span><span>8</span></span>: Jedes Kind bekommt von jedem Muffin ein Achtel, also 5 Achtel.'},
@@ -937,6 +1294,11 @@ ZC:{art:'mc', f:'Welche gemischte Zahl gehört zu <span class="frac"><span>7</sp
 ZD:{art:'mc', f:'Welche Geteiltaufgabe hat dasselbe Ergebnis wie 3 : 4?',
   o:[['9 : 12',1],['4 : 3',0],['3 : 8',0],['6 : 4',0]],
   tipps:['Schreibe jede Aufgabe als Bruch und kürze vollständig.'], lw:'<span class="frac"><span>9</span><span>12</span></span> gekürzt mit 3 ergibt <span class="frac"><span>3</span><span>4</span></span>: dreimal so viele Pizzen für dreimal so viele Personen.'},
+
+ZE:{art:'mc', f:'Sieben Pizzen werden gerecht an vier Personen verteilt. Wie viel Pizza bekommt jede Person?',
+  o:[['<span class="gem">1<span class="frac"><span>3</span><span>4</span></span></span> Pizzen',1],['<span class="frac"><span>4</span><span>7</span></span> einer Pizza',0],['<span class="gem">1<span class="frac"><span>1</span><span>4</span></span></span> Pizzen',0],['<span class="frac"><span>3</span><span>4</span></span> einer Pizza',0]],
+  tipps:['Schreibe zuerst die Geteiltaufgabe als Bruch. Was wird verteilt, an wie viele wird verteilt?','Es sind mehr Pizzen als Personen. Rechne 7 : 4 mit Rest.'],
+  lw:'7 : 4 = <span class="frac"><span>7</span><span>4</span></span>. Mit Rest: 7 : 4 = 1 Rest 3, also <span class="frac"><span>7</span><span>4</span></span> = <span class="gem">1<span class="frac"><span>3</span><span>4</span></span></span>. Jede Person bekommt eine ganze Pizza und drei Viertel einer Pizza.'},
 
 /* ---------- Alles zusammen ---------- */
 E1:{art:'multi', f:'Welche Fragen führen auf eine Geteiltaufgabe? Wähle alle passenden aus.',
@@ -1110,6 +1472,7 @@ function mountMC(root,id,sp,multi){
     var ok=knoepfe.every(function(b){ return (b.getAttribute('data-ok')==='1')===gewaehlt(b); });
     if(!multi) ok=knoepfe.some(function(b){ return gewaehlt(b) && b.getAttribute('data-ok')==='1'; });
     st.gepr=true; st.ok=ok;
+    if(window.GC) GC.melde(id, ok);   /* Gruppen-Check: nur der erste Versuch zählt (Baustein) */
     st.fbh= ok ? '✓ Richtig!' : (multi ? '✗ Deine Auswahl stimmt noch nicht ganz: Es fehlt mindestens eine passende Antwort, oder eine passt nicht.' : '✗ Das stimmt noch nicht.')+' Mit „Leeren“ kannst du es noch einmal versuchen. Die Tipps helfen dir.';
     if(ok) st.fbh='✓ Richtig!';
     speichern(); zeigeMC();
@@ -1273,60 +1636,73 @@ toArr(document.querySelectorAll('[data-w]')).forEach(function(c){
   else if(sp.art==='teiler') mountTeiler(c,id,sp);
 });
 
-/* ================= Karte 2: Sozialform und Rollen ================= */
-var MODI=[['gruppe','👥 Gruppenarbeit','3 bis 6 Personen, die Aufgaben werden aufgeteilt'],['partner','👫 Partnerarbeit','zwei Personen, jede übernimmt zwei Aufgaben'],['einzel','🙋 Einzelarbeit','du bearbeitest alle vier Aufgaben']];
+/* ================= Karte 2: Rollen (Sozialform kommt aus baustein_gruppencheck, GC) ================= */
 var ROLLEN={
   gruppe3:[['AD','Person 1','Aufgaben A und D'],['B','Person 2','Aufgabe B · Mehr Pizzen'],['C','Person 3','Aufgabe C · Gemischte Zahlen']],
   gruppe4:[['A','Person 1','Aufgabe A · Weniger Pizzen'],['B','Person 2','Aufgabe B · Mehr Pizzen'],['C','Person 3','Aufgabe C · Gemischte Zahlen'],['D','Person 4','Aufgabe D · Gleiches Ergebnis']],
   gruppe5:[['A','Person 1','Aufgabe A · Weniger Pizzen'],['B','Person 2','Aufgabe B · Mehr Pizzen'],['C','Person 3','Aufgabe C · Gemischte Zahlen'],['D','Person 4','Aufgabe D · Gleiches Ergebnis'],['C*','Person 5','Aufgabe C im Tandem mit Person 3']],
   gruppe6:[['A','Person 1','Aufgabe A · Weniger Pizzen'],['B','Person 2','Aufgabe B · Mehr Pizzen'],['C','Person 3','Aufgabe C · Gemischte Zahlen'],['D','Person 4','Aufgabe D · Gleiches Ergebnis'],['B*','Person 5','Aufgabe B im Tandem mit Person 2'],['C*','Person 6','Aufgabe C im Tandem mit Person 3']],
+  gruppe7:[['A','Person 1','Aufgabe A · Weniger Pizzen'],['B','Person 2','Aufgabe B · Mehr Pizzen'],['C','Person 3','Aufgabe C · Gemischte Zahlen'],['D','Person 4','Aufgabe D · Gleiches Ergebnis'],['A*','Person 5','Aufgabe A im Tandem mit Person 1'],['B*','Person 6','Aufgabe B im Tandem mit Person 2'],['C*','Person 7','Aufgabe C im Tandem mit Person 3']],
   partner:[['AD','Person 1','Aufgaben A und D'],['BC','Person 2','Aufgaben B und C']],
   einzel:[]
 };
+var EXPNR={A:1,B:2,C:3,D:4};
+function modus(){ var sf=window.GC?GC.sozialform():null, n=window.GC?GC.groesse():null;
+  if(sf==='ea') return 'einzel'; if(sf==='pa') return 'partner'; if(sf==='ga' && n) return 'gruppe'; return null; }
+function rollenListe(){ var m=modus(); if(m==='gruppe') return ROLLEN['gruppe'+GC.groesse()]||[]; return m?ROLLEN[m]:[]; }
 function auftragText(){
-  if(!S.modus) return '';
-  if(S.modus==='einzel') return '<p><b>Dein Auftrag:</b> Bearbeite alle vier Expertenaufgaben nacheinander: A, B, C, D. Statt eines Vortrags schreibst du zu jeder Aufgabe einen kurzen Merkzettel ins Heft – die Stichpunkte im Kasten „Für deinen Vortrag“ helfen dir dabei. Danach geht es mit der Karte „Vorstellen“ weiter.</p>';
-  if(S.modus==='gruppe' && !S.gruppe) return '<p>Tippe oben an, wie viele Kinder in eurer Gruppe sind.</p>';
+  var m=modus();
+  if(!m) return '';
+  if(m==='einzel') return '<p><b>Dein Auftrag:</b> Bearbeite alle vier Expertenaufgaben nacheinander: A, B, C, D. Statt eines Vortrags schreibst du zu jeder Aufgabe einen kurzen Merkzettel ins Heft – die Stichpunkte im Kasten „Für deinen Vortrag“ helfen dir dabei. Danach geht es mit der Karte „Vorstellen“ weiter.</p>';
   if(!S.rolle) return '<p>Tippe oben an, welche Aufgabe du übernimmst.</p>';
-  if(S.modus==='partner') return '<p><b>Dein Auftrag:</b> Bearbeite die Aufgaben '+S.rolle.charAt(0)+' und '+S.rolle.charAt(1)+' (mit ★ markiert). Bereite mit dem Kasten „Für deinen Vortrag“ vor, wie du sie deiner Partnerin oder deinem Partner erklärst. Danach stellt ihr euch die Aufgaben gegenseitig vor.</p>';
+  if(m==='partner') return '<p><b>Dein Auftrag:</b> Bearbeite die Aufgaben '+S.rolle.charAt(0)+' und '+S.rolle.charAt(1)+' (mit ★ markiert). Bereite mit dem Kasten „Für deinen Vortrag“ vor, wie du sie deiner Partnerin oder deinem Partner erklärst. Danach stellt ihr euch die Aufgaben gegenseitig vor.</p>';
   if(S.rolle.length===2 && S.rolle.charAt(1)!=='*') return '<p><b>Dein Auftrag:</b> Ihr seid zu dritt, darum übernimmst du zwei Aufgaben: '+S.rolle.charAt(0)+' und '+S.rolle.charAt(1)+' (mit ★ markiert). Beginne mit '+S.rolle.charAt(0)+'. Bereite mit den Kästen „Für deinen Vortrag“ zwei kurze Vorträge vor (je ca. 2–3 Minuten).</p>';
-  if(S.rolle.charAt(1)==='*'){ var x=S.rolle.charAt(0), partnerNr=(x==='B'?'2':'3'); return '<p><b>Dein Auftrag:</b> Du bearbeitest Aufgabe '+x+' im <b>Tandem</b> mit Person '+partnerNr+' (mit ★ markiert). Löst die Aufgaben gemeinsam und vergleicht eure Ergebnisse. Teilt den Vortrag auf: Eine Person zeigt den Pizza-Teiler und die erste Aufgabe, die andere erklärt die übrigen Aufgaben.</p>'; }
+  if(S.rolle.charAt(1)==='*'){ var x=S.rolle.charAt(0); return '<p><b>Dein Auftrag:</b> Du bearbeitest Aufgabe '+x+' im <b>Tandem</b> mit Person '+EXPNR[x]+' (mit ★ markiert). Löst die Aufgaben gemeinsam und vergleicht eure Ergebnisse. Teilt den Vortrag auf: Eine Person zeigt den Pizza-Teiler und die erste Aufgabe, die andere erklärt die übrigen Aufgaben.</p>'; }
   return '<p><b>Dein Auftrag:</b> Du bist Expertin bzw. Experte für Aufgabe '+S.rolle+' (mit ★ markiert). Bearbeite die Karte vollständig und bereite mit dem Kasten „Für deinen Vortrag“ deinen Vortrag vor (ca. 3 Minuten). Bist du früher fertig, schau dir schon eine andere Aufgabe an.</p>';
 }
 function sozialform(){
-  var mw=$('modusWahl'); mw.innerHTML='';
-  MODI.forEach(function(m){
-    var b=el('button','mwahl'+(S.modus===m[0]?' gew':''),'<b>'+m[1]+'</b>'+m[2]);
-    b.addEventListener('click',function(){ if(S.modus!==m[0]){ S.modus=m[0]; S.rolle=(m[0]==='einzel')?'ABCD':''; speichern(); sozialform(); } });
-    mw.appendChild(b);
-  });
-  var gw=$('groesseWahl'); gw.innerHTML='';
-  $('groesseBereich').hidden=(S.modus!=='gruppe');
-  $('rollenNr').textContent=(S.modus==='gruppe')?'3':'2';
-  [3,4,5,6].forEach(function(g){
-    var b=el('button','mwahl'+(S.gruppe===g?' gew':''),'<b>'+g+' Kinder</b>'+(g===3?'eine Person übernimmt zwei Aufgaben':g===4?'jede Person übernimmt eine Aufgabe':g===5?'Aufgabe C im Tandem':'Aufgaben B und C im Tandem'));
-    b.addEventListener('click',function(){ if(S.gruppe!==g){ S.gruppe=g; S.rolle=''; speichern(); sozialform(); } });
-    gw.appendChild(b);
-  });
+  var m=modus(), sfKey=m?(m+(m==='gruppe'?GC.groesse():'')):'';
+  if(S.sfKey!==sfKey){ S.sfKey=sfKey; S.rolle=(m==='einzel')?'ABCD':''; S.los=null; speichern(); }
+  $('sfFehlt').hidden=!!m;
+  var liste=rollenListe();
   var rw=$('rollenWahl'); rw.innerHTML='';
-  var liste=(S.modus==='gruppe') ? (S.gruppe ? ROLLEN['gruppe'+S.gruppe] : []) : (ROLLEN[S.modus]||[]);
   $('rollenBereich').hidden=!liste.length;
   liste.forEach(function(r){
     var b=el('button','mwahl'+(S.rolle===r[0]?' gew':''),'<b>'+r[1]+'</b>'+r[2]);
+    b.type='button';
     b.addEventListener('click',function(){ S.rolle=r[0]; speichern(); sozialform(); });
     rw.appendChild(b);
   });
-  var ma=$('meinAuftrag'); ma.hidden=!S.modus; ma.innerHTML=auftragText();
+  var ma=$('meinAuftrag'); ma.hidden=!m; ma.innerHTML=auftragText();
   toArr(document.querySelectorAll('.tab[data-exp]')).forEach(function(t){
-    var meins=!!S.rolle && S.rolle.indexOf(t.getAttribute('data-exp'))>=0 && S.modus!=='einzel';
+    var meins=!!S.rolle && S.rolle.indexOf(t.getAttribute('data-exp'))>=0 && m!=='einzel';
     t.classList.toggle('meins',meins);
     var basis=t.getAttribute('data-basis')||t.textContent; t.setAttribute('data-basis',basis);
     t.textContent=meins?'★ '+basis:basis;
   });
-  toArr(document.querySelectorAll('[data-nur]')).forEach(function(e){
-    e.hidden = !!S.modus && e.getAttribute('data-nur')!==S.modus;
-  });
+  toArr(document.querySelectorAll('.gc-hinweis-wahl')).forEach(function(e){ e.hidden=!!m; });
+  losZeig();
 }
+document.addEventListener('gc-sozialform',function(){ sozialform(); });
+
+/* ================= Los: Wer stellt der Klasse vor? (nie die Expertin / der Experte) ================= */
+var THEMEN={A:'A · Weniger Pizzen',B:'B · Mehr Pizzen',C:'C · Gemischte Zahlen',D:'D · Gleiches Ergebnis'};
+function losZeig(){
+  var erg=$('los-erg'); if(!erg) return;
+  if(!S.los){ erg.classList.remove('zeig'); erg.innerHTML=''; return; }
+  var experten=rollenListe().filter(function(r){ return r[0].indexOf(S.los.th)>=0; }).map(function(r){ return r[1]; });
+  erg.innerHTML='<p><b>Eure Aufgabe:</b> '+THEMEN[S.los.th]+'</p><p><b>Es stellt vor:</b> '+S.los.wer+'</p>'+
+    '<p>'+(experten.length>1?experten.join(' und ')+' dürfen':experten[0]+' darf')+' helfen, aber nicht selbst vortragen.</p>';
+  erg.classList.add('zeig');
+}
+if($('los-btn')) $('los-btn').addEventListener('click',function(){
+  var liste=rollenListe(), m=modus(), erg=$('los-erg');
+  if(!liste.length || m==='einzel'){ erg.innerHTML='<p>Wählt zuerst ganz oben, ob ihr zu zweit oder in der Gruppe arbeitet.</p>'; erg.classList.add('zeig'); return; }
+  var th='ABCD'.charAt(Math.floor(Math.random()*4));
+  var frei=liste.filter(function(r){ return r[0].indexOf(th)<0; });
+  S.los={th:th, wer:frei[Math.floor(Math.random()*frei.length)][1]};
+  speichern(); losZeig();
+});
 
 /* ================= Flip-Cards ================= */
 var FLIPS=[
