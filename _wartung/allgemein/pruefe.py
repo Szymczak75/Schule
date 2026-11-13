@@ -276,7 +276,8 @@ def pruefe(pfad):
 
     # ---------------------------------------------------- 3 Kartengerüst
     typ = meta.get('typ', '')
-    tabs = re.findall(r'data-ziel="k\d+"[^>]*>([^<]*)', h)
+    # Reiter-Knöpfe; „ka“ = Auswertung auf einigen Klasse-5-Seiten. Nur echte <button>, nicht JS-Selektoren.
+    tabs = re.findall(r'<button[^>]*data-ziel="k(?:\d+|a)"[^>]*>([^<]*)', h)
     if typ in ('Übung', 'Test', 'Rückblick', 'KA-Vorbereitung', SFS_TYP):
         if not re.search(r'Auswertung', h):
             fehler('AUSWERTUNG', '%s ohne Auswertungskarte' % typ)
@@ -462,7 +463,7 @@ def pruefe(pfad):
 
     # ---------------------------------------------------- 4 Antwortlogik
     if 'mcwahl' in h or 'data-ok' in h:
-        if 'mische(' not in js and 'Fisher' not in js:
+        if 'mische(' not in js and 'shuffle(' not in js and 'Fisher' not in js:
             fehler('MCMISCHEN', 'MC-Optionen werden nicht gemischt')
         if re.search(r"dataset\.(?:ok|c)\s*===?\s*['\"]0['\"]", js):
             fehler('DATAOK', 'data-ok invertiert und im Prüf-Code kompensiert')
@@ -489,7 +490,8 @@ def pruefe(pfad):
         if istkoord:
             if '<polygon' not in inhalt:
                 fehler('KOORD', 'Koordinatensystem ohne Pfeilspitzen: %s' % label[:45])
-            zahlen = [t for t in beschriftungen if re.match(r'^[−-]?\d', t)]
+            # Skalenzahlen aus einer JS-Schablone (${fmt(x)}) zählen ebenfalls
+            zahlen = [t for t in beschriftungen if re.match(r'^[−-]?\d', t) or '${' in t]
             if len(zahlen) < 2:
                 fehler('KOORD', 'Koordinatensystem ohne beschriftete Einheiten: %s' % label[:45])
     for m in re.finditer(r'<svg(?![^>]*role=)', h):
