@@ -312,7 +312,8 @@ def pruefe(pfad):
                         '(TEIL 2.9, beim Debuggen nachtragen)')
     if meta.get('fach') == 'mathe' and typ in ('Rückblick', 'KA-Vorbereitung') and \
             meta.get('oberthema') != 'GeoGebra Suite':
-        if not any('Kernkompetenz' in t for t in tabs):
+        if not any('Kernkompetenz' in t for t in tabs) and \
+                not re.search(r'Wiederholung\s*(?:·|&middot;)\s*Kernkompetenzen', h):
             hinweis('KERN', '%s ohne Karte „Wiederholung · Kernkompetenzen" (TEIL 2.9)' % typ)
         elif len(kern_meta) < 3:
             hinweis('KERN', '%s: Kernkompetenz-Karte soll mindestens drei Kürzel mischen '
