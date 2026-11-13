@@ -146,6 +146,9 @@ Die Schüler-Website passt sich der jeweiligen Sozialform an:
 | **Think–Pair–Share** | Drei-Phasen-Struktur klar getrennt (Timer pro Phase sinnvoll) |
 | **Museumsgang** | Stations-Karten einzeln aufrufbar |
 | **Gruppenpuzzle** | Expertenmaterial und Stammmaterial klar getrennt |
+| **Expertenrunde, Placemat, Kugellager, Lerntempoduett, Stationenlernen** | wie in Lernseiten-Anweisung TEIL 2.10 beschrieben |
+
+Für die Schüler-Website gilt Lernseiten-Anweisung **TEIL 2.10**: Bei GA am Anfang die Wahl EA / PA / GA mit Gruppengröße 3–7 (`baustein_gruppencheck.html`, EA und PA immer wählbar); jede Karte trägt ihr eigenes Sozialform-Etikett, Karten dürfen unterschiedlich arbeiten. Ob am Ende ein **Gruppen-Check mit Gruppenergebnis** kommt, wird beim Planen abgefragt (zusammen mit Sozialform und Methode). Gruppenergebnisse nennen immer die Höchstpunktzahl („x von max möglichen").
  
 ### Timer auf Schüler-Websites
 Wenn es inhaltlich sinnvoll ist (z. B. Think-Phase, Partnerarbeit, Testphasen), können Countdown-Timer eingebunden werden:

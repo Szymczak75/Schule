@@ -180,6 +180,10 @@ table.wt td input{width:78px;text-align:center;padding:6px 4px}
 .erow.bad{background:var(--red);color:#fff}
 .erow.neutral{background:#fff;border:2px solid var(--line)}
 .gesamt{margin-top:12px;background:var(--hl);border:3px solid var(--hd);border-radius:12px;padding:14px 16px;font-size:1.2rem;font-weight:700}
+.gesamt .von{font-weight:600}
+.maxbalken{margin-top:10px;height:18px;background:#fff;border:2px solid var(--hd);border-radius:9px;overflow:hidden}
+.maxbalken > div{height:100%;background:var(--hd)}
+.maxtext{margin:8px 0 0;font-size:1.05rem;font-weight:600}
 
 .trex{position:fixed;right:12px;bottom:12px;width:54px;height:54px;border-radius:50%;
   background:#fff;border:2px solid var(--line);cursor:pointer;font-size:1.6rem;line-height:1;padding:0;z-index:20}
@@ -1592,7 +1596,7 @@ var SEITE = {
       if (nc && gesehen[nc]) { fehler = true; html += '<div class="erow bad">&#10007; Mitglied ' + (i + 1) + ': Dieser Code wurde schon bei Mitglied ' + gesehen[nc] + ' eingegeben. Jede:r hat einen eigenen Code.</div>'; continue; }
       if (nc) gesehen[nc] = i + 1;
       if (s === null) { fehler = true; html += '<div class="erow bad">&#10007; Mitglied ' + (i + 1) + ': Dieser Code ist ungültig oder gehört nicht zu eurem Gruppenschlüssel. Bitte genau abschreiben.</div>'; }
-      else { sterne.push(s); html += '<div class="erow neutral">Mitglied ' + (i + 1) + ': ' + sterneText(s) + ' (' + s + ' Sterne)</div>'; }
+      else { sterne.push(s); html += '<div class="erow neutral">Mitglied ' + (i + 1) + ': &#10004; Code gültig</div>'; }   /* keine Einzelsterne zeigen */
     }
     if (fehler) { reErg.innerHTML = html; reErg.classList.add('zeig'); return; }
     var summe = sterne.reduce(function(a, b){ return a + b; }, 0);
@@ -1601,10 +1605,17 @@ var SEITE = {
     var alle = min >= 3 ? 1 : 0;
     var p = S.rech.praes;
     var gesamt = team + alle + (p === null ? 0 : p);
-    html += '<div class="erow neutral"><b>Teamwert:</b> (Summe ' + summe + ' + wenigste Sterne ' + min + ') : (' + n + ' + 1) = ' + (summe + min) + ' : ' + (n + 1) + ' = ' + komma(Math.round(team * 10) / 10) + '</div>';
-    html += '<div class="erow ' + (alle ? 'ok' : 'neutral') + '"><b>Bonus „Alle dabei“:</b> ' + (alle ? '+1 &ndash; alle haben mindestens 3 Sterne!' : '+0 &ndash; nicht alle haben mindestens 3 Sterne.') + '</div>';
-    html += '<div class="erow neutral"><b>Präsentationsbonus:</b> ' + (p === null ? 'noch offen &ndash; die Lehrkraft tippt ihn nach eurem Vortrag an.' : '+' + p) + '</div>';
-    html += '<div class="gesamt">&#127942; Teampunkte: ' + komma(Math.round(gesamt * 10) / 10) + (p === null ? ' (ohne Präsentationsbonus)' : '') + '</div>';
+    /* Vergleich mit der Höchstpunktzahl: Teamwert höchstens MAXS, +1 „Alle dabei“, +2 Präsentation */
+    var MAXP = 2, maxOhne = MAXS + 1, maxGes = MAXS + 1 + MAXP;
+    var bezug = p === null ? maxOhne : maxGes;
+    var gerundet = Math.round(gesamt * 10) / 10;
+    var anteil = Math.round(gesamt / bezug * 100);
+    html += '<div class="erow neutral"><b>Teamwert:</b> ' + komma(Math.round(team * 10) / 10) + ' <span class="von">von höchstens ' + MAXS + '</span></div>';
+    html += '<div class="erow ' + (alle ? 'ok' : 'neutral') + '"><b>Bonus „Alle dabei“:</b> ' + (alle ? '+1 von 1 &ndash; alle haben mindestens 3 Sterne!' : '+0 von 1 &ndash; nicht alle haben mindestens 3 Sterne.') + '</div>';
+    html += '<div class="erow neutral"><b>Präsentationsbonus:</b> ' + (p === null ? 'noch offen (höchstens +' + MAXP + ') &ndash; die Lehrkraft tippt ihn nach eurem Vortrag an.' : '+' + p + ' von ' + MAXP) + '</div>';
+    html += '<div class="gesamt">&#127942; Teampunkte: ' + komma(gerundet) + ' <span class="von">von ' + bezug + ' möglichen' + (p === null ? ' (ohne Präsentationsbonus; mit Bonus höchstens ' + maxGes + ')' : '') + '</span>' +
+      '<div class="maxbalken" role="img" aria-label="' + komma(gerundet) + ' von ' + bezug + ' Teampunkten"><div style="width:' + Math.min(100, anteil) + '%"></div></div>' +
+      '<p class="maxtext">Das sind ' + anteil + '&nbsp;% der möglichen Punkte.</p></div>';
     reErg.innerHTML = html; reErg.classList.add('zeig');
   }
   document.querySelectorAll('#re-n .zbtn').forEach(function(b){

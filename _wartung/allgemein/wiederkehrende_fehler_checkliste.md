@@ -295,6 +295,12 @@ Diese Punkte standen offen und sind inzwischen als Regel in
   `kernkompetenzen`. Beim Debuggen wird nachgetragen, was sich sinnvoll ergänzen lässt.
   `pruefe.py` meldet ein fehlendes Tag als Hinweis `KERN`, ein Kürzel aus einem späteren
   Jahrgang als FEHLER `KERN`.
+- **Arbeitsform wird beim Erstellen abgefragt** (13.11.2026). Vor jeder neuen Lernseite:
+  EA/PA/GA, bei GA die Methode, und ob es einen Gruppen-Check mit Gruppenergebnis gibt.
+  GA-Seiten starten mit der Wahl EA/PA/GA und Gruppengröße 3–7 (`baustein_gruppencheck.html`);
+  Karten dürfen unterschiedlich arbeiten. Gruppenergebnisse nennen immer die Höchstpunktzahl
+  – auf den Zuordnungs-Seiten Klasse 7 fehlte das. Der Gruppenrechner zeigt **keine Sterne
+  einzelner Mitglieder** (sonst ist die Gruppe auf eine Person sauer), nur das Gruppenergebnis. `pruefe.py` meldet `GC`, `GCALT`, `GRUPPE`.
 - **Änderungen kamen als Dateien zum Einspielen statt als Pull Request** (November 2026): Ein
   Chat ohne Schreibzugriff gab Baustein und `pruefe.py` zum Hochladen ins Wartungs-Projekt
   heraus. Seitdem gilt TEIL 0 Nr. 26: Repo mit Schreibzugriff anhängen, Branch, Pull Request,
@@ -306,4 +312,4 @@ Diese Punkte standen offen und sind inzwischen als Regel in
 
 ---
 
-*Stand: 12.11.2026 (Kernkompetenzen; Seitenart Rückblick KA, Suffix _kavb; Schritt für Schritt; Navigationsleiste, keine Google Fonts) – gepflegt im Wartungs-Projekt „Wartung Unterrichtsprojekte".*
+*Stand: 13.11.2026 (Sozialformen/Gruppen-Check; Kernkompetenzen; Seitenart Rückblick KA, Suffix _kavb; Schritt für Schritt; Navigationsleiste, keine Google Fonts) – gepflegt im Wartungs-Projekt „Wartung Unterrichtsprojekte".*

@@ -23,7 +23,8 @@ Was dieser Linter NICHT kann (bleibt Handarbeit bzw. Browsertest):
   - ob der Stand ein Neuladen wirklich vollständig übersteht (Browsertest: Seite
     bearbeiten, neu laden, vergleichen)
 
-Stand: 12.11.2026 (Kernkompetenzen: Meta-Tag kernkompetenzen, Prüfung KERN, TEIL 2.9;
+Stand: 13.11.2026 (Gruppenarbeit: Baustein Gruppen-Check, Regeln GC/GCALT/GRUPPE, TEIL 2.10;
+       Kernkompetenzen: Meta-Tag kernkompetenzen, Prüfung KERN, TEIL 2.9;
        Rückblick-KA-Engine v4 mit KA.kern / Karte „Fit bleiben";
        Navigationsleiste v6 mit neutralen Feedback-Texten; Anrede: Oberstufe „Sie", Prüfung ANREDE, TEIL 3.7;
        Rückblick-KA-Engine v2: negative soll-Werte, art 'zeichen';
@@ -64,6 +65,10 @@ SFS_MARKE = 'BAUSTEIN: Schritt-für-Schritt-Engine'
 RBKA_TYP = 'Rückblick KA'
 RBKA_VERSION = 'v4'
 RBKA_MARKE = 'BAUSTEIN: Rückblick-KA-Engine'
+
+# Gruppenarbeit & Gruppen-Check (baustein_gruppencheck.html, TEIL 2.10)
+GC_VERSION = 'v2'
+GC_MARKE = 'BAUSTEIN: Gruppen-Check-Engine'
 
 # Kernkompetenzen (kernkompetenzen.md, TEIL 2.9): Anzahl Kürzel je Jahrgang.
 # Ändert sich kernkompetenzen.md, wird diese Tabelle mitgezogen. Klasse 9: noch keine Liste.
@@ -340,6 +345,35 @@ def pruefe(pfad):
         if titel and re.search(r'schritt\s*f(?:ü|ue)r\s*schritt', titel.group(1), re.I):
             hinweis('SFS', 'Titel nennt „Schritt für Schritt“ – gehört die Seite als _sfs auf '
                            'baustein_schritt_fuer_schritt.html (TEIL 2.7)?')
+
+    # Gruppenarbeit & Gruppen-Check (TEIL 2.10)
+    if 'id="gc-box"' in h or GC_MARKE in h:
+        if GC_MARKE not in h:
+            fehler('GC', 'Teile von baustein_gruppencheck.html ohne dessen Engine')
+        else:
+            if '%s (%s' % (GC_MARKE, GC_VERSION) not in h:
+                hinweis('GCALT', 'Gruppen-Check-Engine ist nicht die aktuelle Fassung %s – '
+                                 'Baustein ersetzen' % GC_VERSION)
+            gd = re.search(r'var GRUPPE\s*=(.*?)ENDE ANPASSEN', h, re.S)
+            if not gd:
+                fehler('GC', 'Datenblock var GRUPPE fehlt')
+            else:
+                if 'ANPASSEN' in gd.group(1):
+                    fehler('GC', 'Datenblock GRUPPE noch nicht angepasst (key)')
+                checks = re.findall(r"'([^']+)'", (re.search(r'checks:\s*\[(.*?)\]', gd.group(1), re.S)
+                                                   or re.search('()', '')).group(1))
+                if checks and 'gc-codebox' not in h:
+                    fehler('GC', 'GRUPPE.checks gesetzt, aber Codebox (TEIL B) fehlt')
+                ohne_kommentar = re.sub(r'<!--.*?-->', '', h, flags=re.S)
+                if checks and not re.search(r'GC\.melde\(', ohne_kommentar):
+                    fehler('GC', 'Gruppen-Check ohne GC.melde(…) in der Aufgaben-Engine – Sterne werden nie gezählt')
+                if checks and 'gc-re-erg' not in h:
+                    hinweis('GC', 'Gruppen-Check ohne Teampunkte-Karte (TEIL C)')
+            if 'id="gc-box"' in h and 'data-gr="3"' not in h:
+                fehler('GC', 'Sozialform-Wahl ohne Gruppengröße 3–7')
+    elif re.search(r'Teampunkte berechnen|id="re-erg"', h) and \
+            not re.search(r'von\s*(?:\'\s*\+\s*\w+\s*\+\s*\'\s*)?m(?:ö|oe|&ouml;)glichen', h):
+        hinweis('GRUPPE', 'Gruppenergebnis ohne Vergleich mit der Höchstpunktzahl („x von max möglichen“, TEIL 2.10)')
 
     # Rückblick KA (TEIL 2.8): Engine-Baustein, je Teilaufgabe genau zwei Übungen mit soll + 2 Tipps
     if typ == RBKA_TYP:

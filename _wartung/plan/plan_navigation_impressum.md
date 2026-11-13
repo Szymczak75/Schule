@@ -255,6 +255,13 @@ Ordner-Übersichten `_*.html` über `linking.txt`). Änderungen an der Startseit
   `KA.kern`). `pruefe.py`: Meta-Tag `kernkompetenzen`, Regel `KERN`, `RBKA_VERSION`→v4.
   Projektanweisungs-Texte unverändert (verweisen über TEIL 0 auf die neue Regel).
 
+- **Sozialformen & Gruppen-Check** (13.11.2026, Branch `sozialformen`): TEIL 0 Nr. 29 +
+  Abschnitt 2.10 (Rückfrage EA/PA/GA, Methode, Gruppen-Check beim Erstellen; Gruppengröße
+  3–7, EA/PA immer wählbar; Karten dürfen unterschiedlich arbeiten). Neuer
+  `allgemein/baustein_gruppencheck.html` v1 (aus der Zuordnungs-Seite Kl. 7 herausgelöst).
+  Gruppenergebnis immer „x von max möglichen" + Balken – nachgerüstet in den drei
+  Zuordnungs-Seiten Kl. 7. `pruefe.py`: `GC`, `GCALT`, `GRUPPE`.
+
 **Noch offen:**
 1. **Neulade-Schutz Stufe 2** (voller Schutz inkl. Bewertungen, wie im Baukasten) nach und
    nach für bestehende Seiten im laufenden Unterricht bzw. beim nächsten Überarbeiten.
