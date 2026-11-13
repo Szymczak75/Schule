@@ -288,6 +288,10 @@ Diese Punkte standen offen und sind inzwischen als Regel in
   Ziffern als Reiter, Schrift unter 1rem, eigene Blautöne und einen toten Weiter-Knopf.
   `pruefe.py` meldet fehlende Engine, doppelte Teilaufgaben-IDs und Teilaufgaben ohne genau
   zwei Übungen als `RBKA`.
+- **Rückblick KA in der Oberstufe duzte** (13.11.2026). Die Engine bis v4 hatte feste
+  Du-Texte – jede EF/Q-Seite scheiterte an `ANREDE`. Seit v5 schaltet `<body data-anrede="sie">`
+  alle Engine-Texte um. Parallelkurse mit derselben Arbeit, aber anderen Zahlen bekommen **eine**
+  Seite mit Kurswahl (`KA.kurse`, `jeKurs`, TEIL 2.8) statt zwei fast gleicher Dateien.
 - **Kernkompetenzen werden laufend mitgeübt** (12.11.2026). Die Fachschaft hat je Jahrgang
   Kernkompetenzen festgelegt (`kernkompetenzen.md`, Kürzel `K6-3`). Neue Mathe-Seiten nutzen
   sie in den normalen Aufgaben, bevorzugt in der Wiederholungskarte und in einer eigenen Karte
