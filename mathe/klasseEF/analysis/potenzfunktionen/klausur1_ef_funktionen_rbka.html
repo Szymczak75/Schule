@@ -1,0 +1,1524 @@
+<!DOCTYPE html>
+<!-- =====================================================================
+     BAUSTEIN: Rückblick Klassenarbeit (_rbka)  v5, 13.11.2026
+     v5: Anrede über <body data-anrede="sie"> (Oberstufe, TEIL 3.7) – alle Engine-Texte
+         schalten um. Parallelkurse: KA.kurse = ['9','11'] → Kurswahl auf der Startkarte;
+         im Datenblock liefert jeKurs({'9': …, '11': …}) den Wert des gewählten Kurses,
+         teile mit kurs: '11' gibt es nur in diesem Kurs, idKurs: {'9': '6e'} nummeriert
+         eine Teilaufgabe im anderen Kurs um. CSS für .op-tags (Oberstufe, TEIL 3.2).
+     v4: Karte „🧠 Fit bleiben" mit Kernkompetenz-Aufgaben aus KA.kern (TEIL 2.9) –
+         für alle sichtbar, unabhängig von der Fehlerauswahl; „Meine Korrektur" zählt sie mit.
+     v3: Reiterleiste bleibt einzeilig und lässt sich seitlich wischen – bei vielen
+         gewählten Teilaufgaben verdeckte die umbrechende Leiste sonst den Bildschirm.
+         Der aktive Reiter rollt in die Mitte, ein Ausblend-Rand zeigt: da geht's weiter.
+     v2: Vorzeichen (negative Zahlen in Eingabe und soll), Rückmeldung „Vorzeichen“,
+         Antwortart 'zeichen' (<, >, =), Texttastatur sobald ein soll-Wert negativ ist.
+     Gepflegt im Wartungs-Projekt. Anleitung (anweisung_lernseiten.txt, TEIL 2.8):
+     1. Datei kopieren, Name: thema_rbka.html (Suffix _rbka).
+     2. Meta-Tags ausfüllen: typ="Rückblick KA", klasse, fach, oberthema, thema,
+        description, keywords, kernkompetenzen (Kürzel aus KA.kern).
+     3. NUR den Block  ANPASSEN: Daten der Klassenarbeit  ersetzen – eine Teilaufgabe
+        der KA = ein Eintrag in teile[] mit Lösungsweg, typischem Fehler und genau
+        zwei ähnlichen Aufgaben. Dazu KA.kern: 2–4 Kernkompetenzen aus kernkompetenzen.md.
+     4. BAUSTEIN-CSS, Schreibhilfen, Engine, MathJax-Notfall und Navigationsleiste
+        UNVERÄNDERT lassen. Bei geändertem Aufbau einer veröffentlichten Seite
+        data-version am <body> erhöhen.
+     5. Alle soll-Werte mit dem Rechner nachrechnen, dann pruefe.py laufen lassen.
+     ===================================================================== -->
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Rückblick auf die 1. Klausur der Einführungsphase (Potenzfunktionen, quadratische Funktionen und Gleichungen) für die Parallelkurse 9 und 11: Fehler auswählen, Lösungsweg ansehen und je zwei ähnliche Aufgaben rechnen.">
+<meta name="keywords" content="Potenzfunktionen, quadratische Funktionen, Funktionsgleichung aufstellen, pq-Formel, Modellierung, Definitionsbereich, Klausur, Rückblick">
+<meta name="typ" content="Rückblick KA">
+<meta name="klasse" content="EF">
+<meta name="fach" content="mathe">
+<meta name="oberthema" content="Funktionen">
+<meta name="thema" content="Potenzfunktionen und quadratische Funktionen">
+<meta name="kernkompetenzen" content="K10-5, K7-5, K7-2">
+<title>Rückblick 1. Klausur EF – Potenzfunktionen und quadratische Funktionen</title>
+<script>
+  MathJax = {
+    tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+    svg: { fontCache: 'global' }
+  };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+/* ===== BAUSTEIN-CSS: Rückblick Klassenarbeit (v5, 13.11.2026) – unverändert übernehmen ===== */
+:root{
+  --ink:#22303f; --card:#ffffff; --green:#1e7d32; --red:#c1272d;
+  --amber:#b8860b; --amber-light:#fdf3d9; --amber-dark:#96690a;
+  --blue:#2f5fa6; --blue-dark:#1f4680; --blue-light:#e6eefb; --bg:#f6f8fb; --line:#dbe3ee;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;}
+body{font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;font-size:1.0625rem;
+  line-height:1.55;color:var(--ink);background:var(--bg);}
+.kopf{background:var(--blue-light);border-bottom:4px solid var(--blue);padding:1.1rem 1rem 1rem;}
+.kopf-innen{max-width:860px;margin:0 auto;}
+.kopf-typ{font-size:1rem;font-weight:700;color:var(--blue);margin:0;}
+.kopf h1{font-size:1.5rem;margin:.2rem 0 .2rem;color:var(--blue-dark);line-height:1.25;}
+.kopf p{font-size:1rem;margin:0;}
+.reiter{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--line);
+  padding:.55rem .75rem;}
+/* v3: einzeilig, seitlich wischbar – sonst verdeckt die klebende Leiste bei vielen Reitern alles */
+.reiter-innen{position:relative;max-width:860px;margin:0 auto;display:flex;flex-wrap:nowrap;gap:.45rem;
+  overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;
+  scrollbar-width:thin;padding-bottom:.2rem;}
+.reiter-innen.mehr-rechts{-webkit-mask-image:linear-gradient(to right,#000 calc(100% - 3rem),transparent);
+  mask-image:linear-gradient(to right,#000 calc(100% - 3rem),transparent);}
+.reiter-innen.mehr-links{-webkit-mask-image:linear-gradient(to left,#000 calc(100% - 3rem),transparent);
+  mask-image:linear-gradient(to left,#000 calc(100% - 3rem),transparent);}
+.reiter-innen.mehr-links.mehr-rechts{
+  -webkit-mask-image:linear-gradient(to right,transparent,#000 3rem,#000 calc(100% - 3rem),transparent);
+  mask-image:linear-gradient(to right,transparent,#000 3rem,#000 calc(100% - 3rem),transparent);}
+.reiter button{flex:0 0 auto;white-space:nowrap;
+  min-height:44px;min-width:44px;padding:.4rem .8rem;border:2px solid var(--line);
+  background:#fff;color:var(--blue-dark);border-radius:.6rem;font:inherit;font-size:1rem;
+  font-weight:700;cursor:pointer;}
+.reiter button.aktiv{background:var(--blue);border-color:var(--blue);color:#fff;}
+.reiter button.fertig::after{content:" ✓";}
+.reiter button[hidden]{display:none;}
+main{max-width:860px;margin:0 auto;padding:1rem .75rem 2rem;}
+.karte{display:none;}
+.karte.aktiv{display:block;}
+.block{background:var(--card);border:1px solid var(--line);border-radius:1rem;padding:1.1rem;
+  margin-bottom:1rem;}
+.block h2{font-size:1.35rem;margin:.1rem 0 .6rem;color:var(--blue-dark);line-height:1.3;}
+.block h3{font-size:1.15rem;margin:0 0 .5rem;color:var(--blue-dark);}
+.block h4{font-size:1.05rem;margin:0 0 .3rem;color:var(--blue-dark);}
+.eyebrow{font-size:1rem;font-weight:700;color:var(--blue);margin:0;}
+.block p{margin:.4rem 0;}
+.ka-box{background:var(--blue-light);border-left:6px solid var(--blue);border-radius:.6rem;
+  padding:.8rem 1rem;margin:.8rem 0;}
+.ka-term{font-size:1.2rem;margin:.5rem 0 .2rem;}
+.weg-box{border:2px solid var(--blue-light);border-radius:.6rem;padding:.8rem 1rem;margin:.8rem 0;}
+.weg-box ol{margin:.3rem 0 0;padding-left:1.4rem;}
+.weg-box li{margin:.45rem 0;}
+.fehler-box{border-left:6px solid var(--red);background:#fff;border-radius:.6rem;
+  padding:.7rem 1rem;margin:.8rem 0;box-shadow:0 0 0 1px var(--line) inset;}
+.stand-box{border:2px dashed var(--blue);border-radius:.6rem;padding:.6rem 1rem;margin:.6rem 0;}
+.ueb{border-top:2px dashed var(--line);padding-top:1rem;margin-top:1rem;}
+.ueb:first-of-type{border-top:none;padding-top:0;margin-top:.4rem;}
+.frage{font-size:1.1rem;}
+.zeile{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin:.5rem 0;}
+.zeile input,.zeile select{font:inherit;font-size:1.1rem;min-height:44px;padding:.35rem .6rem;
+  border:2px solid var(--line);border-radius:.6rem;background:#fff;color:var(--ink);}
+.zeile input{width:11rem;text-align:center;}
+.zeile input:focus,.zeile select:focus{outline:none;border-color:var(--blue);}
+.zeile input:disabled,.zeile select:disabled{background:var(--bg);color:var(--ink);opacity:1;}
+.knoepfe{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.4rem;}
+.btn{min-height:44px;min-width:44px;padding:.5rem 1.1rem;border-radius:.6rem;font:inherit;
+  font-size:1rem;font-weight:700;cursor:pointer;border:2px solid transparent;}
+.btn:active{transform:scale(.97);}
+.btn-pruefen{background:var(--blue);color:#fff;}
+.btn-leeren{background:#fff;color:var(--red);border-color:var(--red);}
+.btn-tipp{background:var(--amber-light);color:var(--amber-dark);border-color:var(--amber);}
+.btn-los{background:var(--blue);color:#fff;width:100%;font-size:1.1rem;margin-top:.8rem;}
+.btn-los:disabled{background:var(--line);color:var(--ink);cursor:default;}
+.btn[hidden]{display:none;}
+.fb{display:none;margin-top:.6rem;padding:.6rem .9rem;border-radius:.6rem;font-weight:700;color:#fff;}
+.fb.ok{display:block;background:var(--green);}
+.fb.nok{display:block;background:var(--red);}
+.tipps{display:none;margin-top:.6rem;}
+.tipps.an{display:block;}
+.tippstufe{display:none;background:var(--amber-light);border:2px solid var(--amber);
+  border-radius:.6rem;padding:.6rem .9rem;margin-top:.5rem;}
+.tippstufe.an{display:block;}
+.tippstufe b.tl{color:var(--amber-dark);}
+.kk{display:inline-block;font-weight:800;color:var(--blue-dark);background:var(--blue-light);
+  border-radius:.4rem;padding:0 .45rem;margin-right:.4rem;}
+.hinweis{font-size:1rem;color:var(--ink);background:var(--bg);border-radius:.5rem;padding:.4rem .7rem;}
+/* v5: Oberstufe – Hilfsmittel und Lösungsart (TEIL 3.2) */
+.op-tags{display:block;margin:.2rem 0 .4rem;}
+.op-tag{display:inline-block;font-size:1rem;font-weight:700;color:var(--blue-dark);background:var(--blue-light);
+  border:1px solid var(--line);border-radius:1rem;padding:.05rem .65rem;margin:0 .35rem .25rem 0;}
+/* v5: Koordinatensysteme im Datenblock (TEIL 7.3/7.7) */
+.kos{display:block;margin:.6rem 0;}
+.kos > svg{display:block;width:100%;max-width:820px;height:auto;}
+.kos.klein > svg{max-width:320px;}
+/* v5: Kurswahl bei Parallelkursen */
+.kurswahl{display:flex;flex-wrap:wrap;gap:.5rem;margin:.5rem 0 .2rem;}
+.kurswahl button{min-height:56px;min-width:9rem;padding:.45rem 1rem;border:2px solid var(--line);border-radius:.7rem;
+  background:var(--card);color:var(--ink);font:inherit;font-weight:700;cursor:pointer;}
+.kurswahl button.an{background:var(--blue);border-color:var(--blue);color:#fff;}
+/* Startkarte */
+.gruppe{margin:1rem 0 .4rem;}
+.gruppe h3{margin-bottom:.2rem;}
+.wahl{display:grid;grid-template-columns:repeat(auto-fill,minmax(10.5rem,1fr));gap:.5rem;margin-top:.5rem;}
+.wahl button{min-height:56px;padding:.45rem .6rem;border:2px solid var(--line);border-radius:.7rem;
+  background:#fff;color:var(--ink);font:inherit;font-size:1rem;cursor:pointer;text-align:left;
+  line-height:1.4;}
+.wahl button .nr{font-weight:800;color:var(--blue-dark);margin-right:.35rem;}
+.wahl button.an{background:var(--blue);border-color:var(--blue);color:#fff;}
+.wahl button.an .nr{color:#fff;}
+.zaehler{font-weight:700;margin-top:1rem;}
+/* Abschluss */
+.liste{list-style:none;padding:0;margin:.5rem 0;}
+.liste li{border:1px solid var(--line);border-radius:.6rem;padding:.55rem .8rem;margin:.4rem 0;}
+.liste .titel{font-weight:700;}
+.status-ok{color:var(--green);font-weight:700;}
+.status-nok{color:var(--red);font-weight:700;}
+.fazit{border-radius:.6rem;padding:.7rem 1rem;font-weight:700;margin-top:.8rem;}
+.fazit.ok{background:var(--green);color:#fff;}
+.fazit.offen{background:var(--blue-light);}
+/* Brüche (TEIL 7.2 – nur Kind-Selektoren) */
+.frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;
+      margin:0 .2em;line-height:1.15;}
+.frac > span{display:block;padding:0 .35em;}
+.frac > span:first-child{border-bottom:1.8px solid currentColor;padding-bottom:.1em;}
+.frac > span:last-child{padding-top:.1em;}
+.gem{white-space:nowrap;}
+mjx-container{max-width:100%;overflow-x:auto;}
+/* T-Rex */
+.trex{position:fixed;right:.7rem;bottom:.7rem;z-index:50;width:44px;height:44px;border-radius:50%;
+  background:#fff;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;
+  font-size:1.4rem;cursor:pointer;user-select:none;}
+.trex-text{position:fixed;right:3.9rem;bottom:1rem;z-index:50;background:var(--ink);color:#fff;
+  padding:.3rem .7rem;border-radius:.5rem;font-size:1rem;display:none;}
+.trex:hover + .trex-text,.trex-text.an{display:block;}
+@media (max-width:600px){ .zeile input{width:9rem;} }
+/* ===== ENDE BAUSTEIN-CSS Rückblick Klassenarbeit ===== */
+</style>
+<style id="dino-stil">
+/* Markenzeichen: feiernder Dino (Lernseiten-Anweisung 8.3) */
+.dino-ecke{width:auto!important;height:auto!important;min-width:0!important;min-height:0!important;padding:0!important;background:none!important;border:0!important;border-radius:0!important;box-shadow:none!important;opacity:1!important;font-size:1rem!important;line-height:1.3!important;filter:none!important}
+.dino-huelle{all:unset;display:block;cursor:pointer}
+.dino-ikon{display:block;width:72px;height:72px;max-width:none;-webkit-user-drag:none;user-select:none}
+.dino-ecke>:not(.dino-huelle):not(.dino-ikon){position:absolute!important;right:calc(100% + 6px)!important;bottom:26px!important;left:auto!important;top:auto!important;white-space:nowrap}
+.dino-tipp-fest{right:96px!important;bottom:34px!important;left:auto!important;top:auto!important}
+</style>
+</head>
+<body data-anrede="sie" data-version="1">
+
+<header class="kopf"><div class="kopf-innen">
+  <p class="kopf-typ">📋 Rückblick Klassenarbeit</p>
+  <h1 id="ka-titel"></h1>
+  <p id="ka-untertitel"></p>
+</div></header>
+<nav class="reiter" aria-label="Karten"><div class="reiter-innen" id="reiter"></div></nav>
+<main id="main"></main>
+
+<script>
+/* ============================================================
+   BAUSTEIN: Rückblick-KA-Schreibhilfen (v5, 13.11.2026) – unverändert übernehmen
+   f(z,n)      Bruch als .frac-Konstrukt          f(3,4)  f('2 · 7','5 · 3')
+   g(ganz,z,n) gemischte Zahl                       g(1,5,9)
+   m('…')      Formel mit Dezimalzahlen: Komma wird {,}, · wird \cdot
+   ============================================================ */
+function f(z, n){ return '<span class="frac"><span>' + z + '</span><span>' + n + '</span></span>'; }
+function g(ganz, z, n){ return '<span class="gem">' + ganz + ' ' + f(z, n) + '</span>'; }
+function m(t){
+  return '\\(' + String(t).replace(/(\d),(\d)/g, '$1{,}$2').replace(/·/g, '\\cdot ')
+    .replace(/−/g, '-') + '\\)';
+}
+/* v5: Parallelkurse. KURS = gewählter Kurs ('' = noch keiner gewählt).
+   jeKurs({'9': a, '11': b}) liefert den Wert des gewählten Kurses – ohne Wahl den ersten. */
+var KURS = (function(){
+  try { return sessionStorage.getItem('aszym:' + (location.pathname.split('/').pop() || 'seite')
+    .replace(/\.html?$/i, '') + ':kurs') || ''; } catch (e) { return ''; }
+})();
+function jeKurs(werte){
+  if (Object.prototype.hasOwnProperty.call(werte, KURS)) return werte[KURS];
+  for (var k in werte) if (Object.prototype.hasOwnProperty.call(werte, k)) return werte[k];
+  return '';
+}
+/* ============ ENDE BAUSTEIN Schreibhilfen ============ */
+</script>
+
+<script>
+/* ============================================================
+   ANPASSEN: Daten der Klassenarbeit  (nur diesen Block ersetzen)
+   ------------------------------------------------------------
+   1. Klausur EF Mathematik (Potenzfunktionen, quadratische Funktionen), Parallelkurse 9 und 11.
+   Gleicher Aufbau, andere Zahlen und Sachaufgaben: jeKurs({'9': …, '11': …}).
+   Kurs 11 hat in Aufgabe 6 eine Teilaufgabe mehr (6e Beurteilen); die Funktionsgleichung
+   ist dort 6f, in Kurs 9 6e (idKurs).
+   ============================================================ */
+function OP(h, l){ return '<span class="op-tags"><span class="op-tag">' + h + '</span><span class="op-tag">' + l + '</span></span>'; }
+var OHNE = 'ohne Hilfsmittel', MIT = 'mit GeoGebra';
+
+/* Koordinatensysteme mit Graphen von Potenzfunktionen, x von −3 bis 3, y von −4 bis 4 (wie in der Klausur) */
+function kos(liste, label){
+  var B = 300, H = 270, sx = 40, sy = 26, spalten = Math.min(3, liste.length);
+  var zeilen = Math.ceil(liste.length / spalten);
+  var s = '<span class="kos' + (liste.length === 1 ? ' klein' : '') + '"><svg viewBox="0 0 ' + (B * spalten) + ' ' + (H * zeilen) + '" role="img" aria-label="' + label + '" xmlns="http://www.w3.org/2000/svg">';
+  liste.forEach(function(g, i){
+    var ox = (i % spalten) * B + 150, oy = Math.floor(i / spalten) * H + 140;
+    var X = function(x){ return (ox + x * sx).toFixed(1); }, Y = function(y){ return (oy - y * sy).toFixed(1); };
+    for (var k = -3; k <= 3; k++) s += '<line x1="' + X(k) + '" y1="' + Y(-4.4) + '" x2="' + X(k) + '" y2="' + Y(4.4) + '" stroke="#dbe3ee" stroke-width="1"/>';
+    for (var j = -4; j <= 4; j++) s += '<line x1="' + X(-3.2) + '" y1="' + Y(j) + '" x2="' + X(3.2) + '" y2="' + Y(j) + '" stroke="#dbe3ee" stroke-width="1"/>';
+    s += '<line x1="' + X(-3.3) + '" y1="' + oy + '" x2="' + X(3.35) + '" y2="' + oy + '" stroke="#22303f" stroke-width="1.6"/>' +
+      '<polygon points="' + X(3.55) + ',' + oy + ' ' + X(3.3) + ',' + (oy - 5) + ' ' + X(3.3) + ',' + (oy + 5) + '" fill="#22303f"/>' +
+      '<line x1="' + ox + '" y1="' + Y(-4.5) + '" x2="' + ox + '" y2="' + Y(4.6) + '" stroke="#22303f" stroke-width="1.6"/>' +
+      '<polygon points="' + ox + ',' + Y(4.95) + ' ' + (ox - 5) + ',' + Y(4.6) + ' ' + (ox + 5) + ',' + Y(4.6) + '" fill="#22303f"/>' +
+      '<text x="' + X(3.4) + '" y="' + (oy - 9) + '" font-size="18" fill="#22303f">x</text>' +
+      '<text x="' + (ox + 8) + '" y="' + Y(4.6) + '" font-size="18" fill="#22303f">y</text>';
+    [-3, -2, -1, 1, 2, 3].forEach(function(k){ s += `<text x="${X(k)}" y="${oy + 17}" font-size="16" text-anchor="middle" fill="#22303f">${k}</text>`; });
+    [-4, -2, 2, 4].forEach(function(j){ s += `<text x="${ox - 6}" y="${+Y(j) + 4}" font-size="16" text-anchor="end" fill="#22303f">${j}</text>`; });
+    s += '<text x="' + (ox - 145) + '" y="' + (oy - 118) + '" font-size="18" font-weight="700" fill="#22303f">' + (g.nr ? '(' + g.nr + ')' : '') + '</text>';
+    var d = '', an = false;
+    for (var t = -3; t <= 3.0001; t += 0.01) {
+      var x = Math.abs(t) < 1e-9 ? 0 : t, y = g.f(x);
+      if (!isFinite(y) || Math.abs(y) > 4.4) { an = false; continue; }
+      d += (an ? 'L' : 'M') + X(x) + ' ' + Y(y) + ' '; an = true;
+    }
+    s += '<path d="' + d + '" fill="none" stroke="#2f5fa6" stroke-width="3" stroke-linejoin="round"/>';
+  });
+  return s + '</svg></span>';
+}
+function pw(a, n){ return function(x){ return (n < 0 && x === 0) ? NaN : a * Math.pow(x, n); }; }
+
+var FIG_KA = jeKurs({
+  '9':  kos([{nr:1,f:pw(-1,-1)},{nr:2,f:pw(0.5,3)},{nr:3,f:pw(0.5,-2)},{nr:4,f:pw(-1,4)},{nr:5,f:pw(2,3)},{nr:6,f:pw(2,-2)}],
+            'Sechs Graphen von Potenzfunktionen aus der Klausur, nummeriert von 1 bis 6'),
+  '11': kos([{nr:1,f:pw(0.5,4)},{nr:2,f:pw(-2,-2)},{nr:3,f:pw(2,-1)},{nr:4,f:pw(-2,3)},{nr:5,f:pw(-1,-2)},{nr:6,f:pw(-0.5,3)}],
+            'Sechs Graphen von Potenzfunktionen aus der Klausur, nummeriert von 1 bis 6')
+});
+var FIG_UEB = kos([{nr:1,f:pw(-2,4)},{nr:2,f:pw(3,-1)},{nr:3,f:pw(-0.5,-2)},{nr:4,f:pw(0.25,3)},{nr:5,f:pw(1.5,-2)},{nr:6,f:pw(-1,3)}],
+  'Übungsabbildung: sechs Graphen von Potenzfunktionen, nummeriert von 1 bis 6');
+
+var KA = {
+  titel: '1. Klausur EF: Potenzfunktionen und quadratische Funktionen',
+  untertitel: 'Rückblick auf die 1. Klausur – arbeiten Sie Ihre Fehler mit ähnlichen Aufgaben nach.',
+  kurse: ['9', '11'],
+  aufgaben: [
+  { nr: 1, titel: 'Graphen von Potenzfunktionen', ort: 'auf dem Blatt',
+    auftrag: 'Gegeben sind die Funktionen ' + m('f') + ', ' + m('g') + ', ' + m('h') + ' und ' + m('k') + ' mit ' + jeKurs({
+      '9':  m('f(x)=0,5 · x^3') + ', ' + m('g(x)=-x^4') + ', ' + m('h(x)=2 · x^{-2}') + ' und ' + m('k(x)=-x^{-1}'),
+      '11': m('f(x)=-0,5 · x^3') + ', ' + m('g(x)=0,5 · x^4') + ', ' + m('h(x)=-x^{-2}') + ' und ' + m('k(x)=2 · x^{-1}') }) +
+      ', jeweils mit maximalem Definitionsbereich. Die Abbildung zeigt sechs Graphen. Vier davon gehören zu den Funktionen ' + m('f') + ', ' + m('g') + ', ' + m('h') + ' und ' + m('k') + '.',
+    kontext: FIG_KA,
+    teile: [
+    { id: '1a', name: 'Graphen zuordnen', knopf: 'Graphen zuordnen',
+      term: OP(OHNE, 'zuordnen') + 'Geben Sie zu jeder der vier Funktionen ' + m('f') + ', ' + m('g') + ', ' + m('h') + ' und ' + m('k') + ' die Nummer des zugehörigen Graphen an.',
+      weg: jeKurs({
+        '9': [ m('f(x)=0,5 · x^3') + ': ' + m('n=3') + ' ist positiv und ungerade → punktsymmetrisch, ohne Lücke, von links unten nach rechts oben. ' + m('f(1)=0,5') + ', also gestaucht → Graph (2).',
+               m('g(x)=-x^4') + ': ' + m('n=4') + ' ist positiv und gerade, ' + m('a=-1<0') + ' → nach unten geöffnet → Graph (4).',
+               m('h(x)=2 · x^{-2}') + ': ' + m('n=-2') + ' ist negativ und gerade → achsensymmetrisch, Lücke bei ' + m('x=0') + ', oberhalb der x-Achse. ' + m('h(1)=2') + ' → Graph (6), nicht (3).',
+               m('k(x)=-x^{-1}') + ': ' + m('n=-1') + ' ist negativ und ungerade, ' + m('a<0') + ' → 2. und 4. Quadrant → Graph (1).' ],
+        '11': [ m('f(x)=-0,5 · x^3') + ': ' + m('n=3') + ' positiv und ungerade, ' + m('a<0') + ' → von links oben nach rechts unten. ' + m('f(1)=-0,5') + ', also gestaucht → Graph (6), nicht (4).',
+                m('g(x)=0,5 · x^4') + ': ' + m('n=4') + ' positiv und gerade, ' + m('a>0') + ' → nach oben geöffnet → Graph (1).',
+                m('h(x)=-x^{-2}') + ': ' + m('n=-2') + ' negativ und gerade → achsensymmetrisch mit Lücke, wegen ' + m('a<0') + ' unterhalb der x-Achse. ' + m('h(1)=-1') + ' → Graph (5), nicht (2).',
+                m('k(x)=2 · x^{-1}') + ': ' + m('n=-1') + ' negativ und ungerade, ' + m('a>0') + ' → 1. und 3. Quadrant → Graph (3).' ] }),
+      fehler: 'Zwei Graphen mit derselben Form (z. B. beide achsensymmetrisch mit Lücke) werden verwechselt. Den Unterschied zeigt der Punkt ' + m('(1|a)') + ': Setzen Sie ' + m('x=1') + ' ein.',
+      ueb: [
+        { frage: 'Die Übungsabbildung zeigt sechs neue Graphen.' + FIG_UEB + 'Welcher Graph gehört zu ' + m('u(x)=-0,5 · x^{-2}') + '? Geben Sie die Nummer an.',
+          art: 'zahl', soll: [3,1],
+          tipps: [ 'Entscheiden Sie zuerst über den Exponenten: Ist er negativ und gerade, hat der Graph eine bestimmte Symmetrie und eine Lücke.', 'Das Vorzeichen von ' + m('a') + ' sagt, ob der Graph oberhalb oder unterhalb der x-Achse liegt. Vergleichen Sie dann den Punkt bei ' + m('x=1') + '.' ],
+          weg: m('n=-2') + ' negativ und gerade → achsensymmetrisch mit Lücke; ' + m('a=-0,5<0') + ' → unterhalb der x-Achse; ' + m('u(1)=-0,5') + '. Das ist Graph (3).' },
+        { frage: 'Nutzen Sie die Übungsabbildung aus Übung 1. Welcher Graph gehört zu ' + m('v(x)=0,25 · x^3') + '? Geben Sie die Nummer an.',
+          art: 'zahl', soll: [4,1],
+          tipps: [ 'Ein positiver ungerader Exponent: punktsymmetrisch zum Ursprung, ohne Lücke.', 'Prüfen Sie mit dem Vorzeichen von ' + m('a') + ', ob der Graph steigt oder fällt, und mit ' + m('v(1)') + ', wie steil er ist.' ],
+          weg: m('n=3') + ' positiv und ungerade → punktsymmetrisch, ohne Lücke; ' + m('a>0') + ' → von links unten nach rechts oben; ' + m('v(1)=0,25') + ', stark gestaucht. Das ist Graph (4).' } ] },
+
+    { id: '1b', name: 'Zuordnung mit Eigenschaften begründen', knopf: 'Zuordnung begründen',
+      term: OP(OHNE, 'begründen') + 'Begründen Sie Ihre Zuordnung für die Funktionen ' + m('h') + ' und ' + m('k') + ' mit jeweils zwei Eigenschaften des Graphen.',
+      weg: jeKurs({
+        '9': [ m('h(x)=2 · x^{-2}') + ': Der Exponent ist negativ und gerade → achsensymmetrisch zur y-Achse, Lücke bei ' + m('x=0') + ', oberhalb der x-Achse.',
+               'Wegen ' + m('h(1)=2') + ' verläuft der Graph durch ' + m('(1|2)') + ' – das unterscheidet Graph (6) von Graph (3), der durch ' + m('(1|0,5)') + ' verläuft.',
+               m('k(x)=-x^{-1}') + ': Der Exponent ist negativ und ungerade → punktsymmetrisch zum Ursprung, Lücke bei ' + m('x=0') + '.',
+               'Wegen ' + m('a=-1<0') + ' liegt der Graph im 2. und 4. Quadranten, z. B. ' + m('k(1)=-1') + ' → Graph (1).' ],
+        '11': [ m('h(x)=-x^{-2}') + ': Der Exponent ist negativ und gerade → achsensymmetrisch zur y-Achse, Lücke bei ' + m('x=0') + '.',
+                'Wegen ' + m('a=-1<0') + ' verläuft er unterhalb der x-Achse, z. B. ' + m('h(1)=-1') + ' – das unterscheidet Graph (5) von Graph (2), der durch ' + m('(1|-2)') + ' verläuft.',
+                m('k(x)=2 · x^{-1}') + ': Der Exponent ist negativ und ungerade → punktsymmetrisch zum Ursprung, Lücke bei ' + m('x=0') + '.',
+                'Wegen ' + m('a=2>0') + ' liegt der Graph im 1. und 3. Quadranten, z. B. ' + m('k(1)=2') + ' → Graph (3).' ] }),
+      fehler: 'Nur eine Eigenschaft genannt oder eine, die mehrere Graphen haben („hat eine Lücke"). Eine gute Begründung nennt Symmetrie bzw. Lage <b>und</b> einen Punkt, der genau diesen Graphen von dem ähnlichen unterscheidet.',
+      ueb: [
+        { frage: 'Der Graph von ' + m('u(x)=-3 · x^{-2}') + ' ist achsensymmetrisch zur y-Achse. Er verläuft durch den Punkt ' + m('(-1|y)') + '. Geben Sie ' + m('y') + ' an.',
+          art: 'zahl', soll: [-3,1],
+          tipps: [ 'Achsensymmetrie bedeutet: ' + m('u(-x)=u(x)') + '.', 'Berechnen Sie den Funktionswert an der Stelle ' + m('x=1') + ' und nutzen Sie die Symmetrie – oder setzen Sie direkt ein. Achten Sie auf die Klammer um die negative Zahl.' ],
+          weg: m('u(-1)=-3 · (-1)^{-2}=-3 · ' + '\\frac{1}{(-1)^2}=-3 · 1=-3') + '. Wegen des geraden Exponenten gilt ' + m('u(-1)=u(1)=-3') + '.' },
+        { frage: 'Der Graph von ' + m('v(x)=2,5 · x^{-1}') + ' ist punktsymmetrisch zum Ursprung. Er verläuft durch den Punkt ' + m('(-1|y)') + '. Geben Sie ' + m('y') + ' an.',
+          art: 'zahl', soll: [-5,2],
+          tipps: [ 'Punktsymmetrie zum Ursprung bedeutet: ' + m('v(-x)=-v(x)') + '.', 'Berechnen Sie ' + m('v(1)') + ' und wenden Sie die Symmetrie an.' ],
+          weg: m('v(1)=2,5') + ', wegen der Punktsymmetrie ' + m('v(-1)=-v(1)=-2,5') + '. Der Punkt ist ' + m('(-1|-2,5)') + ' im 3. Quadranten.' } ] },
+
+    { id: '1c', name: 'a und n am Graphen ablesen', knopf: 'a und n zu übrigen Graphen',
+      term: OP(OHNE, 'ablesen und begründen') + 'Zwei der sechs Graphen sind in a) übrig geblieben. Geben Sie für jeden dieser beiden Graphen die Nummer und passende Werte für ' + m('a') + ' und ' + m('n') + ' einer Funktionsgleichung der Form ' + m('y=a · x^n') + ' an. Begründen Sie Ihre Wahl von ' + m('a') + ' und ' + m('n') + '.',
+      weg: jeKurs({
+        '9': [ 'Übrig sind die Graphen (3) und (5).',
+               'Graph (3): achsensymmetrisch zur y-Achse, Lücke bei ' + m('x=0') + ', nähert sich der x-Achse → ' + m('n') + ' negativ und gerade, z. B. ' + m('n=-2') + '. Er verläuft durch ' + m('(1|0,5)') + ' → ' + m('a=0,5') + ' (positiv, gestaucht): ' + m('y=0,5 · x^{-2}') + '.',
+               'Graph (5): punktsymmetrisch zum Ursprung, ohne Lücke, von links unten nach rechts oben → ' + m('n') + ' positiv und ungerade, z. B. ' + m('n=3') + '. Er verläuft durch ' + m('(1|2)') + ' → ' + m('a=2') + ': ' + m('y=2 · x^3') + '.' ],
+        '11': [ 'Übrig sind die Graphen (2) und (4).',
+                'Graph (2): achsensymmetrisch zur y-Achse, Lücke bei ' + m('x=0') + ', nähert sich der x-Achse → ' + m('n') + ' negativ und gerade, z. B. ' + m('n=-2') + '. Er verläuft unterhalb der x-Achse durch ' + m('(1|-2)') + ' → ' + m('a=-2') + ': ' + m('y=-2 · x^{-2}') + '.',
+                'Graph (4): punktsymmetrisch zum Ursprung, ohne Lücke, von links oben nach rechts unten → ' + m('n') + ' positiv und ungerade, z. B. ' + m('n=3') + '. Er verläuft durch ' + m('(1|-2)') + ' → ' + m('a=-2') + ': ' + m('y=-2 · x^3') + '.' ] }),
+      fehler: m('a') + ' wird nur geschätzt („gestreckt") statt am Punkt ' + m('(1|a)') + ' abgelesen – denn ' + m('1^n=1') + ' für jedes ' + m('n') + '. Und: Das Vorzeichen von ' + m('a') + ' vergessen, wenn der Graph unterhalb der x-Achse liegt.',
+      ueb: [
+        { frage: 'Der abgebildete Graph gehört zu einer Funktion ' + m('y=a · x^4') + '.' + kos([{nr:0,f:pw(-1.5,4)}], 'Graph einer Potenzfunktion mit geradem positivem Exponenten, nach unten geöffnet') + 'Geben Sie ' + m('a') + ' an.',
+          art: 'zahl', soll: [-3,2],
+          tipps: [ 'Bei ' + m('x=1') + ' gilt ' + m('1^4=1') + '. Was bleibt dann von ' + m('a · x^4') + ' übrig?', 'Lesen Sie den y-Wert an der Stelle ' + m('x=1') + ' ab. Achten Sie auf das Vorzeichen.' ],
+          weg: 'Der Graph verläuft durch ' + m('(1|-1,5)') + '. Wegen ' + m('a · 1^4=a') + ' ist ' + m('a=-1,5') + ' (negativ, nach unten geöffnet, gestreckt): ' + m('y=-1,5 · x^4') + '.' },
+        { frage: 'Der abgebildete Graph gehört zu einer Funktion ' + m('y=a · x^n') + ' mit ganzzahligem ' + m('n') + '.' + kos([{nr:0,f:pw(1.5,-1)}], 'Graph einer Potenzfunktion, punktsymmetrisch mit Lücke bei x gleich 0') + 'Geben Sie den Exponenten ' + m('n') + ' an, dessen Betrag möglichst klein ist.',
+          art: 'zahl', soll: [-1,1],
+          tipps: [ 'Hat der Graph eine Lücke bei ' + m('x=0') + '? Dann ist ' + m('n') + ' negativ.', 'Achsensymmetrisch oder punktsymmetrisch? Das entscheidet, ob ' + m('n') + ' gerade oder ungerade ist.' ],
+          weg: 'Lücke bei ' + m('x=0') + ' und Annäherung an die x-Achse → ' + m('n') + ' negativ. Punktsymmetrisch zum Ursprung → ' + m('n') + ' ungerade. Betragsmäßig kleinster Wert: ' + m('n=-1') + ' (hier ' + m('y=1,5 · x^{-1}') + ').' } ] },
+
+    { id: '1d', name: 'Graphen ohne Wertetabelle skizzieren', knopf: 'Graphen skizzieren',
+      term: OP(OHNE, 'skizzieren') + 'Gegeben sind ' + jeKurs({
+        '9':  m('p(x)=0,25 · x^4') + ', ' + m('q(x)=-2 · x^3') + ' und ' + m('r(x)=-2 · x^{-2}'),
+        '11': m('p(x)=-0,25 · x^4') + ', ' + m('q(x)=1,5 · x^3') + ' und ' + m('r(x)=2 · x^{-2}') }) +
+        '. Skizzieren Sie die drei Graphen ohne Wertetabelle in das Koordinatensystem und beschriften Sie die Graphen mit ' + m('p') + ', ' + m('q') + ' und ' + m('r') + '.',
+      weg: jeKurs({
+        '9': [ 'Zuerst die Form über ' + m('n') + ', dann Vorzeichen und Streckung über den Punkt ' + m('(1|a)') + '.',
+               m('p') + ': gerade Form, nach oben geöffnet, gestaucht – z. B. ' + m('(\\pm 1|0,25)') + ' und ' + m('(\\pm 2|4)') + '.',
+               m('q') + ': punktsymmetrisch, von links oben nach rechts unten, gestreckt – z. B. ' + m('(1|-2)') + ' und ' + m('(-1|2)') + '.',
+               m('r') + ': achsensymmetrisch, Lücke bei ' + m('x=0') + ', unterhalb der x-Achse – z. B. ' + m('(\\pm 1|-2)') + '.' ],
+        '11': [ 'Zuerst die Form über ' + m('n') + ', dann Vorzeichen und Streckung über den Punkt ' + m('(1|a)') + '.',
+                m('p') + ': gerade Form, nach unten geöffnet, gestaucht – z. B. ' + m('(\\pm 1|-0,25)') + ' und ' + m('(\\pm 2|-4)') + '.',
+                m('q') + ': punktsymmetrisch, von links unten nach rechts oben, gestreckt – z. B. ' + m('(1|1,5)') + ' und ' + m('(-1|-1,5)') + '.',
+                m('r') + ': achsensymmetrisch, Lücke bei ' + m('x=0') + ', oberhalb der x-Achse – z. B. ' + m('(\\pm 1|2)') + '.' ] }),
+      fehler: 'Graph ohne Kontrollpunkte „nach Gefühl" gezeichnet: Dann stimmen Steilheit und Vorzeichen oft nicht. Zwei Punkte wie ' + m('(1|a)') + ' und ' + m('(-1|…)') + ' kosten kaum Zeit und sichern die Skizze.',
+      ueb: [
+        { frage: 'Sie skizzieren den Graphen von ' + m('s(x)=-0,5 · x^4') + '. Welchen y-Wert hat der Graph an der Stelle ' + m('x=2') + '?',
+          art: 'zahl', soll: [-8,1],
+          tipps: [ 'Setzen Sie ' + m('x=2') + ' in den Funktionsterm ein.', 'Berechnen Sie zuerst die Potenz, dann multiplizieren Sie mit ' + m('a') + '.' ],
+          weg: m('2^4=16') + ', ' + m('s(2)=-0,5 · 16=-8') + '. Der Punkt ' + m('(2|-8)') + ' liegt schon außerhalb eines Koordinatensystems bis ' + m('y=-4') + ' – der Graph fällt dort steil ab.' },
+        { frage: 'Sie skizzieren den Graphen von ' + m('t(x)=0,5 · x^{-2}') + '. Welchen y-Wert hat der Graph an der Stelle ' + m('x=-2') + '? Geben Sie den genauen Wert an.',
+          art: 'zahl', soll: [1,8],
+          tipps: [ 'Ein negativer Exponent bedeutet einen Kehrwert: ' + m('x^{-2}=') + f(1, m('x^2')) + '.', 'Berechnen Sie zuerst ' + m('(-2)^2') + ' und bilden Sie dann den Kehrwert.' ],
+          weg: m('(-2)^{-2}=') + f(1, m('(-2)^2')) + ' = ' + f(1,4) + ', ' + m('t(-2)=0,5 · ') + f(1,4) + ' = ' + f(1,8) + ' = 0,125. Der Graph liegt oberhalb der x-Achse und nähert sich ihr.' } ] }
+    ] },
+
+  { nr: 2, titel: 'Funktionsgleichungen aufstellen', ort: 'auf dem Blatt',
+    auftrag: 'Alle Funktionen in dieser Aufgabe haben die Form ' + m('f(x)=a · x^n') + ' mit ' + m('a \\in \\mathbb{R}') + ', ' + m('a \\neq 0') + ' und ' + m('n \\in \\mathbb{Z}') + '.',
+    teile: [
+    { id: '2a', name: 'a und n aus zwei Punkten', knopf: 'a und n aus zwei Punkten',
+      term: OP(OHNE, 'rechnerisch') + 'Der Graph der Funktion ' + m('f_1') + ' verläuft durch die Punkte ' + jeKurs({ '9': m('P(1|4)') + ' und ' + m('Q(2|0,5)'), '11': m('P(1|3)') + ' und ' + m('Q(2|0,75)') }) + '. Berechnen Sie ' + m('a') + ' und ' + m('n') + '.',
+      weg: jeKurs({
+        '9': [ m('P(1|4)') + ': ' + m('a · 1^n=4 \\Rightarrow a=4') + ', denn ' + m('1^n=1') + '.',
+               m('Q(2|0,5)') + ': ' + m('4 · 2^n=0,5 \\Rightarrow 2^n=') + f(1,8) + '.',
+               f(1,8) + ' = ' + m('2^{-3}') + ', also ' + m('n=-3') + ' und ' + m('f_1(x)=4 · x^{-3}') + '.' ],
+        '11': [ m('P(1|3)') + ': ' + m('a · 1^n=3 \\Rightarrow a=3') + ', denn ' + m('1^n=1') + '.',
+                m('Q(2|0,75)') + ': ' + m('3 · 2^n=0,75 \\Rightarrow 2^n=') + f(1,4) + '.',
+                f(1,4) + ' = ' + m('2^{-2}') + ', also ' + m('n=-2') + ' und ' + m('f_1(x)=3 · x^{-2}') + '.' ] }),
+      fehler: 'Bei ' + m('2^n=') + f(1,8) + ' wird ' + m('n=3') + ' oder ' + m('n=') + f(1,3) + ' notiert. Ein Bruch mit 1 im Zähler entsteht durch einen <b>negativen</b> Exponenten: ' + m('2^{-3}=') + f(1, m('2^3')) + '.',
+      ueb: [
+        { frage: 'Der Graph von ' + m('f(x)=a · x^n') + ' verläuft durch ' + m('P(1|6)') + ' und ' + m('Q(2|0,375)') + '. Berechnen Sie ' + m('n') + '.',
+          art: 'zahl', soll: [-4,1],
+          tipps: [ 'Der Punkt mit ' + m('x=1') + ' liefert sofort ' + m('a') + '.', 'Setzen Sie ' + m('Q') + ' ein, lösen Sie nach ' + m('2^n') + ' auf und schreiben Sie das Ergebnis als Zweierpotenz.' ],
+          weg: m('a=6') + '. ' + m('6 · 2^n=0,375 \\Rightarrow 2^n=0,0625=') + f(1,16) + ' = ' + m('2^{-4}') + ', also ' + m('n=-4') + ' und ' + m('f(x)=6 · x^{-4}') + '.' },
+        { frage: 'Der Graph von ' + m('f(x)=a · x^n') + ' verläuft durch ' + m('P(1|-2)') + ' und ' + m('Q(3|-18)') + '. Berechnen Sie ' + m('n') + '.',
+          art: 'zahl', soll: [2,1],
+          tipps: [ 'Bestimmen Sie zuerst ' + m('a') + ' mit dem Punkt ' + m('P') + ' – mit Vorzeichen.', 'Setzen Sie ' + m('Q') + ' ein und lösen Sie nach ' + m('3^n') + ' auf.' ],
+          weg: m('a=-2') + '. ' + m('-2 · 3^n=-18 \\Rightarrow 3^n=9=3^2') + ', also ' + m('n=2') + ' und ' + m('f(x)=-2 · x^2') + '.' } ] },
+
+    { id: '2b', name: 'a bei bekanntem Exponenten', knopf: 'a bei bekanntem n',
+      term: OP(OHNE, 'rechnerisch') + jeKurs({
+        '9':  'Die Funktion ' + m('f_2') + ' hat den Exponenten ' + m('n=4') + '. Ihr Graph verläuft durch den Punkt ' + m('R(-2|-8)') + '. Berechnen Sie ' + m('a') + '.',
+        '11': 'Die Funktion ' + m('f_2') + ' hat den Exponenten ' + m('n=3') + '. Ihr Graph verläuft durch den Punkt ' + m('R(-2|-4)') + '. Berechnen Sie ' + m('a') + '.' }),
+      weg: jeKurs({
+        '9': [ 'Punkt einsetzen: ' + m('a · (-2)^4=-8') + '.', m('(-2)^4=16') + ' (gerader Exponent → positiv), also ' + m('16a=-8') + '.', m('a=-0,5') + ', also ' + m('f_2(x)=-0,5 · x^4') + '.' ],
+        '11': [ 'Punkt einsetzen: ' + m('a · (-2)^3=-4') + '.', m('(-2)^3=-8') + ' (ungerader Exponent → negativ), also ' + m('-8a=-4') + '.', m('a=0,5') + ', also ' + m('f_2(x)=0,5 · x^3') + '.' ] }),
+      fehler: 'Das Vorzeichen bei ' + m('(-2)^n') + ' falsch bestimmt: ' + m('(-2)^4') + ' ist positiv, ' + m('(-2)^3') + ' ist negativ. Und: ' + m('-2^4') + ' (ohne Klammer) ist etwas anderes als ' + m('(-2)^4') + '.',
+      ueb: [
+        { frage: 'Die Funktion ' + m('f(x)=a · x^2') + ' verläuft durch ' + m('R(-3|-18)') + '. Berechnen Sie ' + m('a') + '.',
+          art: 'zahl', soll: [-2,1],
+          tipps: [ 'Setzen Sie die Koordinaten von ' + m('R') + ' ein.', 'Bestimmen Sie das Vorzeichen von ' + m('(-3)^2') + ' – gerader Exponent.' ],
+          weg: m('a · (-3)^2=-18 \\Rightarrow 9a=-18 \\Rightarrow a=-2') + '.' },
+        { frage: 'Die Funktion ' + m('f(x)=a · x^3') + ' verläuft durch ' + m('R(-2|6)') + '. Berechnen Sie ' + m('a') + '.',
+          art: 'zahl', soll: [-3,4],
+          tipps: [ 'Setzen Sie die Koordinaten von ' + m('R') + ' ein.', 'Bestimmen Sie das Vorzeichen von ' + m('(-2)^3') + ' – ungerader Exponent – und teilen Sie dann.' ],
+          weg: m('a · (-2)^3=6 \\Rightarrow -8a=6 \\Rightarrow a=-0,75') + '.' } ] }
+    ] },
+
+  { nr: 3, titel: 'Quadratische Gleichung', ort: 'auf dem Blatt',
+    auftrag: 'Berechnen Sie die Lösungen der Gleichung.',
+    teile: [
+    { id: '3', name: 'Quadratische Gleichung mit pq-Formel', knopf: jeKurs({ '9': m('2x^2-8x-10=0'), '11': m('3x^2+6x-24=0') }),
+      term: OP(OHNE, 'rechnerisch') + 'Berechnen Sie die Lösungen der Gleichung ' + jeKurs({ '9': m('2x^2-8x-10=0'), '11': m('3x^2+6x-24=0') }) + '.',
+      weg: jeKurs({
+        '9': [ 'Durch 2 teilen (Normalform): ' + m('x^2-4x-5=0') + ', also ' + m('p=-4') + ', ' + m('q=-5') + '.',
+               m('x_{1,2}=2 \\pm \\sqrt{4+5}=2 \\pm 3') + '.', m('x_1=5') + ' und ' + m('x_2=-1') + '.' ],
+        '11': [ 'Durch 3 teilen (Normalform): ' + m('x^2+2x-8=0') + ', also ' + m('p=2') + ', ' + m('q=-8') + '.',
+                m('x_{1,2}=-1 \\pm \\sqrt{1+8}=-1 \\pm 3') + '.', m('x_1=2') + ' und ' + m('x_2=-4') + '.' ] }),
+      fehler: 'Die pq-Formel direkt auf die Gleichung mit Vorfaktor angewendet, ohne vorher durch ihn zu teilen. Oder ' + m('-') + f('p',2) + ' mit falschem Vorzeichen.',
+      eingabeHinweis: 'Jede Gleichung hat zwei Lösungen. Geben Sie jeweils die Lösung ein, nach der gefragt ist.',
+      ueb: [
+        { frage: 'Berechnen Sie die Lösungen von ' + m('2x^2+4x-30=0') + '. Geben Sie die kleinere Lösung ein.',
+          art: 'zahl', soll: [-5,1],
+          tipps: [ 'Bringen Sie die Gleichung zuerst in Normalform.', 'Lesen Sie ' + m('p') + ' und ' + m('q') + ' mit Vorzeichen ab und setzen Sie in die pq-Formel ein.' ],
+          weg: m('x^2+2x-15=0') + ', ' + m('x_{1,2}=-1 \\pm \\sqrt{1+15}=-1 \\pm 4') + ', also ' + m('x_1=3') + ', ' + m('x_2=-5') + '. Kleinere Lösung: ' + m('-5') + '.' },
+        { frage: 'Berechnen Sie die Lösungen von ' + m('4x^2-8x-12=0') + '. Geben Sie die größere Lösung ein.',
+          art: 'zahl', soll: [3,1],
+          tipps: [ 'Bringen Sie die Gleichung zuerst in Normalform.', 'Lesen Sie ' + m('p') + ' und ' + m('q') + ' mit Vorzeichen ab und setzen Sie in die pq-Formel ein.' ],
+          weg: m('x^2-2x-3=0') + ', ' + m('x_{1,2}=1 \\pm \\sqrt{1+3}=1 \\pm 2') + ', also ' + m('x_1=3') + ', ' + m('x_2=-1') + '. Größere Lösung: ' + m('3') + '.' } ] }
+    ] },
+
+  { nr: 4, titel: jeKurs({ '9': 'Ein Windrad für das Schuldach', '11': 'Eine Strömungsturbine im Bach' }), ort: 'im Heft',
+    auftrag: 'Teil B, mit GeoGebra. Bei „berechnen" notieren Sie den Ansatz, geben alle Lösungen an und entscheiden, welche im Sachzusammenhang sinnvoll ist.',
+    kontext: jeKurs({
+      '9': 'Die Umwelt-AG möchte ein kleines Windrad auf dem Schuldach installieren. Die Leistung wird durch ' + m('P(v)=a · v^3') + ' modelliert (' + m('v') + ' Windgeschwindigkeit in m/s, ' + m('P(v)') + ' Leistung in W). Bei 4 m/s liefert die Anlage 96 W. Die maximale Leistung beträgt 1500 W. Ab b): ' + m('P(v)=1,5 · v^3') + '.',
+      '11': 'Die Physik-AG baut eine kleine Strömungsturbine in den Bach hinter der Schule. Die Leistung wird durch ' + m('P(v)=a · v^3') + ' modelliert (' + m('v') + ' Fließgeschwindigkeit in m/s, ' + m('P(v)') + ' Leistung in W). Bei 0,5 m/s liefert die Turbine 5 W. Die maximale Leistung beträgt 320 W. Ab b): ' + m('P(v)=40 · v^3') + '.' }),
+    teile: [
+    { id: '4a', name: 'Streckfaktor aus einem Messwert', knopf: 'Streckfaktor a',
+      term: OP(MIT, 'rechnerisch') + 'Berechnen Sie den Streckfaktor ' + m('a') + '.',
+      weg: jeKurs({
+        '9': [ 'Ansatz: ' + m('P(4)=96') + '.', m('a · 4^3=96 \\Rightarrow 64a=96') + '.', m('a=1,5') + '.' ],
+        '11': [ 'Ansatz: ' + m('P(0,5)=5') + '.', m('a · 0,5^3=5 \\Rightarrow 0,125a=5') + '.', m('a=40') + '.' ] }),
+      fehler: 'Ohne Ansatz nur das Ergebnis notiert – bei „berechnen" gehört die Gleichung dazu. Oder ' + m('v^3') + ' mit ' + m('3v') + ' verwechselt.',
+      ueb: [
+        { frage: 'Ein anderes Windrad liefert bei einer Windgeschwindigkeit von 2 m/s eine Leistung von 20 W. Es gilt ' + m('P(v)=a · v^3') + '. Berechnen Sie ' + m('a') + '.',
+          art: 'zahl', soll: [5,2],
+          tipps: [ 'Stellen Sie die Gleichung ' + m('P(2)=20') + ' auf.', 'Berechnen Sie die Potenz und teilen Sie durch sie.' ],
+          weg: m('a · 2^3=20 \\Rightarrow 8a=20 \\Rightarrow a=2,5') + '.' },
+        { frage: 'Eine andere Strömungsturbine liefert bei 0,2 m/s eine Leistung von 0,4 W. Es gilt ' + m('P(v)=a · v^3') + '. Berechnen Sie ' + m('a') + '.',
+          art: 'zahl', soll: [50,1],
+          tipps: [ 'Stellen Sie die Gleichung ' + m('P(0,2)=0,4') + ' auf.', 'Berechnen Sie ' + m('0,2^3') + ' sorgfältig (Nachkommastellen zählen) und teilen Sie.' ],
+          weg: m('0,2^3=0,008') + '; ' + m('0,008a=0,4 \\Rightarrow a=50') + '.' } ] },
+
+    { id: '4b', name: 'Funktionswert im Sachzusammenhang', knopf: jeKurs({ '9': 'Leistung bei 7 m/s', '11': 'Leistung bei 1,5 m/s' }),
+      term: OP(MIT, 'rechnerisch') + jeKurs({ '9': 'Berechnen Sie die Leistung der Anlage bei einer Windgeschwindigkeit von 7 m/s.', '11': 'Berechnen Sie die Leistung der Turbine bei einer Fließgeschwindigkeit von 1,5 m/s.' }),
+      weg: jeKurs({
+        '9': [ m('P(7)=1,5 · 7^3=1,5 · 343=514,5') + '.', 'Bei 7 m/s liefert die Anlage 514,5 W.' ],
+        '11': [ m('P(1,5)=40 · 1,5^3=40 · 3,375=135') + '.', 'Bei 1,5 m/s liefert die Turbine 135 W.' ] }),
+      fehler: 'Erst ' + m('a · v') + ' rechnen und dann hoch 3 nehmen. Die Potenz gehört nur zu ' + m('v') + ' – Potenz vor Punkt.',
+      ueb: [
+        { frage: 'Für ein Windrad gilt ' + m('P(v)=2,5 · v^3') + '. Berechnen Sie die Leistung in W bei 6 m/s.',
+          art: 'zahl', soll: [540,1],
+          tipps: [ 'Setzen Sie ' + m('v=6') + ' ein.', 'Potenz vor Punkt: zuerst ' + m('6^3') + ', dann mal ' + m('2,5') + '.' ],
+          weg: m('P(6)=2,5 · 216=540') + '. Die Leistung beträgt 540 W.' },
+        { frage: 'Für eine Turbine gilt ' + m('P(v)=50 · v^3') + '. Berechnen Sie die Leistung in W bei 0,6 m/s.',
+          art: 'zahl', soll: [54,5],
+          tipps: [ 'Setzen Sie ' + m('v=0,6') + ' ein.', 'Potenz vor Punkt: zuerst ' + m('0,6^3') + ', dann mal 50.' ],
+          weg: m('0,6^3=0,216') + '; ' + m('P(0,6)=50 · 0,216=10,8') + '. Die Leistung beträgt 10,8 W.' } ] },
+
+    { id: '4c', name: 'Gleichung mit v hoch 3 lösen', knopf: 'Ab wann maximale Leistung?',
+      term: OP(MIT, 'rechnerisch') + jeKurs({ '9': 'Berechnen Sie, ab welcher Windgeschwindigkeit die Anlage ihre maximale Leistung von 1500 W erreicht.', '11': 'Berechnen Sie, ab welcher Fließgeschwindigkeit die Turbine ihre maximale Leistung von 320 W erreicht.' }),
+      weg: jeKurs({
+        '9': [ 'Ansatz: ' + m('1,5 · v^3=1500') + '.', m('v^3=1000') + ', also ' + m('v=10') + ' (einzige reelle Lösung).', 'Ab 10 m/s liefert die Anlage ihre maximale Leistung von 1500 W.' ],
+        '11': [ 'Ansatz: ' + m('40 · v^3=320') + '.', m('v^3=8') + ', also ' + m('v=2') + ' (einzige reelle Lösung).', 'Ab 2 m/s liefert die Turbine ihre maximale Leistung von 320 W.' ] }),
+      fehler: 'Nach dem Teilen durch ' + m('a') + ' durch 3 geteilt statt die dritte Wurzel gezogen. Oder den Ansatz weggelassen und nur „GeoGebra: 10" notiert.',
+      ueb: [
+        { frage: 'Für ein Windrad gilt ' + m('P(v)=2,5 · v^3') + '. Seine maximale Leistung beträgt 1280 W. Berechnen Sie, ab welcher Windgeschwindigkeit (in m/s) es diese erreicht.',
+          art: 'zahl', soll: [8,1],
+          tipps: [ 'Setzen Sie ' + m('P(v)') + ' gleich der maximalen Leistung.', 'Teilen Sie durch den Streckfaktor und ziehen Sie die dritte Wurzel.' ],
+          weg: m('2,5 · v^3=1280 \\Rightarrow v^3=512 \\Rightarrow v=8') + '. Ab 8 m/s.' },
+        { frage: 'Für eine Turbine gilt ' + m('P(v)=50 · v^3') + '. Ihre maximale Leistung beträgt 1350 W. Berechnen Sie, ab welcher Fließgeschwindigkeit (in m/s) sie diese erreicht.',
+          art: 'zahl', soll: [3,1],
+          tipps: [ 'Setzen Sie ' + m('P(v)') + ' gleich der maximalen Leistung.', 'Teilen Sie durch den Streckfaktor und ziehen Sie die dritte Wurzel.' ],
+          weg: m('50 · v^3=1350 \\Rightarrow v^3=27 \\Rightarrow v=3') + '. Ab 3 m/s.' } ] },
+
+    { id: '4d', name: 'Prozentuale Zunahme', knopf: 'Zunahme in Prozent',
+      term: OP(MIT, 'rechnerisch') + jeKurs({ '9': 'Berechnen Sie, um wie viel Prozent die Leistung zunimmt, wenn die Windgeschwindigkeit von 5 m/s auf 6 m/s steigt.', '11': 'Berechnen Sie, um wie viel Prozent die Leistung zunimmt, wenn die Fließgeschwindigkeit von 1,0 m/s auf 1,1 m/s steigt.' }),
+      weg: jeKurs({
+        '9': [ m('P(5)=187,5') + ' und ' + m('P(6)=324') + '.', 'Verhältnis: ' + f(324, '187,5') + ' = 1,728.', '1,728 = 172,8 % des alten Werts – die Leistung nimmt um etwa 72,8 % zu.' ],
+        '11': [ m('P(1,0)=40') + ' und ' + m('P(1,1)=53,24') + '.', 'Verhältnis: ' + f('53,24', 40) + ' = 1,331.', '1,331 = 133,1 % des alten Werts – die Leistung nimmt um etwa 33,1 % zu.' ] }),
+      fehler: 'Das Verhältnis 1,728 als „172,8 % Zunahme" gedeutet. Die Zunahme ist der Teil über 100 %. Oder nur die Differenz der Leistungen in W angegeben statt in Prozent.',
+      ueb: [
+        { frage: 'Für ein Windrad gilt ' + m('P(v)=2,5 · v^3') + '. Berechnen Sie, um wie viel Prozent die Leistung zunimmt, wenn die Windgeschwindigkeit von 4 m/s auf 6 m/s steigt. Geben Sie die Zahl ohne %-Zeichen ein.',
+          art: 'zahl', soll: [475,2],
+          tipps: [ 'Berechnen Sie beide Leistungen und bilden Sie das Verhältnis neu durch alt.', 'Ziehen Sie vom Verhältnis in Prozent die 100 % des alten Werts ab.' ],
+          weg: m('P(4)=160') + ', ' + m('P(6)=540') + '; ' + f(540,160) + ' = 3,375 = 337,5 %. Zunahme um 237,5 %.' },
+        { frage: 'Für eine Turbine gilt ' + m('P(v)=50 · v^3') + '. Berechnen Sie, um wie viel Prozent die Leistung zunimmt, wenn die Fließgeschwindigkeit von 1,6 m/s auf 2,0 m/s steigt. Geben Sie die Zahl ohne %-Zeichen und ohne Rundung ein.',
+          art: 'zahl', soll: [1525,16],
+          tipps: [ 'Berechnen Sie beide Leistungen und bilden Sie das Verhältnis neu durch alt.', 'Ziehen Sie vom Verhältnis in Prozent die 100 % des alten Werts ab.' ],
+          weg: m('P(1,6)=204,8') + ', ' + m('P(2)=400') + '; ' + f(400,'204,8') + ' = 1,953125 = 195,3125 %. Zunahme um 95,3125 %.' } ] },
+
+    { id: '4e', name: 'Sinnvoller Definitionsbereich', knopf: 'Definitionsbereich',
+      term: OP(MIT, 'begründen') + 'Geben Sie einen sinnvollen Definitionsbereich für die Funktion ' + m('P') + ' an und begründen Sie Ihre Angabe. (' + jeKurs({ '9': 'Ab 1500 W wird die Anlage abgeregelt.', '11': 'Ab 320 W wird die Turbine abgeregelt.' }) + ')',
+      stand: jeKurs({ '9': 'Aus c) wissen Sie: Die maximale Leistung ist ab 10 m/s erreicht.', '11': 'Aus c) wissen Sie: Die maximale Leistung ist ab 2 m/s erreicht.' }),
+      weg: jeKurs({
+        '9': [ m('D=\\{v \\in \\mathbb{R} \\mid 0 \\le v \\le 10\\}') + '.', 'Untere Grenze: Negative Windgeschwindigkeiten gibt es nicht.', 'Obere Grenze: Ab 10 m/s wird abgeregelt, die Leistung bleibt bei 1500 W, während ' + m('P(v)') + ' weiter steigen würde. Das Modell gilt nur bis 10 m/s.' ],
+        '11': [ m('D=\\{v \\in \\mathbb{R} \\mid 0 \\le v \\le 2\\}') + '.', 'Untere Grenze: Negative Fließgeschwindigkeiten gibt es nicht.', 'Obere Grenze: Ab 2 m/s wird abgeregelt, die Leistung bleibt bei 320 W, während ' + m('P(v)') + ' weiter steigen würde. Das Modell gilt nur bis 2 m/s.' ] }),
+      fehler: 'Nur „' + m('v \\ge 0') + '" angegeben und die obere Grenze vergessen – oder die obere Grenze ohne Bezug zur Abregelung aus der Aufgabe begründet.',
+      ueb: [
+        { frage: 'Für ein Windrad gilt ' + m('P(v)=2,5 · v^3') + '; es wird ab 4320 W abgeregelt. Geben Sie die obere Grenze (in m/s) des sinnvollen Definitionsbereichs an.',
+          art: 'zahl', soll: [12,1],
+          tipps: [ 'Die obere Grenze ist die Geschwindigkeit, ab der abgeregelt wird.', 'Setzen Sie ' + m('P(v)') + ' gleich der Abregelgrenze und lösen Sie nach ' + m('v') + ' auf.' ],
+          weg: m('2,5 · v^3=4320 \\Rightarrow v^3=1728 \\Rightarrow v=12') + '. Sinnvoll: ' + m('0 \\le v \\le 12') + '.' },
+        { frage: 'Für eine Turbine gilt ' + m('P(v)=50 · v^3') + '; sie wird ab 3200 W abgeregelt. Geben Sie die obere Grenze (in m/s) des sinnvollen Definitionsbereichs an.',
+          art: 'zahl', soll: [4,1],
+          tipps: [ 'Die obere Grenze ist die Geschwindigkeit, ab der abgeregelt wird.', 'Setzen Sie ' + m('P(v)') + ' gleich der Abregelgrenze und lösen Sie nach ' + m('v') + ' auf.' ],
+          weg: m('50 · v^3=3200 \\Rightarrow v^3=64 \\Rightarrow v=4') + '. Sinnvoll: ' + m('0 \\le v \\le 4') + '.' } ] }
+    ] },
+
+  { nr: 5, titel: jeKurs({ '9': 'Scheinwerfer für die Theater-AG', '11': 'Mit dem Fahrrad zur Schule' }), ort: 'im Heft',
+    auftrag: 'Teil B, mit GeoGebra.',
+    kontext: jeKurs({
+      '9': 'Die Beleuchtungsstärke ' + m('E') + ' (in lx) hängt vom Abstand ' + m('d') + ' (in m) zum Scheinwerfer ab: ' + m('E(d)=a · d^{-2}') + '. In 2 m Abstand misst die AG 450 lx. Ab b): ' + m('E(d)=1800 · d^{-2}') + '.',
+      '11': 'Leas Fahrzeit ' + m('t') + ' (in Minuten) hängt von ihrer Durchschnittsgeschwindigkeit ' + m('v') + ' (in km/h) ab: ' + m('t(v)=a · v^{-1}') + '. Bei 12 km/h braucht Lea 30 Minuten. Ab b): ' + m('t(v)=360 · v^{-1}') + '.' }),
+    teile: [
+    { id: '5a', name: 'a bei negativem Exponenten', knopf: 'Parameter a',
+      term: OP(MIT, 'rechnerisch') + 'Berechnen Sie ' + m('a') + '.',
+      weg: jeKurs({
+        '9': [ 'Ansatz: ' + m('E(2)=450') + '.', m('a · 2^{-2}=450 \\Rightarrow') + ' ' + f('a',4) + ' = 450.', m('a=1800') + '.' ],
+        '11': [ 'Ansatz: ' + m('t(12)=30') + '.', m('a · 12^{-1}=30 \\Rightarrow') + ' ' + f('a',12) + ' = 30.', m('a=360') + '.' ] }),
+      fehler: 'Den negativen Exponenten als „mal minus" gelesen: ' + m('2^{-2}') + ' ist nicht ' + m('-4') + ', sondern ' + f(1,4) + '.',
+      ueb: [
+        { frage: 'Für eine Lampe gilt ' + m('E(d)=a · d^{-2}') + '. In 3 m Abstand misst man 100 lx. Berechnen Sie ' + m('a') + '.',
+          art: 'zahl', soll: [900,1],
+          tipps: [ 'Stellen Sie die Gleichung ' + m('E(3)=100') + ' auf.', 'Schreiben Sie ' + m('3^{-2}') + ' als Bruch und lösen Sie nach ' + m('a') + ' auf.' ],
+          weg: m('a · 3^{-2}=100 \\Rightarrow') + ' ' + f('a',9) + ' = 100 ' + m('\\Rightarrow a=900') + '.' },
+        { frage: 'Für einen Schulweg gilt ' + m('t(v)=a · v^{-1}') + ' (' + m('t') + ' in min, ' + m('v') + ' in km/h). Bei 16 km/h dauert er 45 Minuten. Berechnen Sie ' + m('a') + '.',
+          art: 'zahl', soll: [720,1],
+          tipps: [ 'Stellen Sie die Gleichung ' + m('t(16)=45') + ' auf.', 'Schreiben Sie ' + m('16^{-1}') + ' als Bruch und lösen Sie nach ' + m('a') + ' auf.' ],
+          weg: f('a',16) + ' = 45 ' + m('\\Rightarrow a=720') + '.' } ] },
+
+    { id: '5b', name: 'Ungleichung im Sachzusammenhang', knopf: jeKurs({ '9': 'Höchstens wie weit entfernt?', '11': 'Mindestens wie schnell?' }),
+      term: OP(MIT, 'rechnerisch') + jeKurs({
+        '9': 'Die Schauspielerinnen und Schauspieler brauchen mindestens 500 lx. Berechnen Sie, wie weit sie höchstens vom Scheinwerfer entfernt sein dürfen.',
+        '11': 'Lea möchte höchstens 20 Minuten unterwegs sein. Berechnen Sie, wie schnell sie mindestens fahren muss.' }),
+      weg: jeKurs({
+        '9': [ 'Ansatz: ' + m('1800 · d^{-2}=500') + '.', 'Von Hand: ' + m('d^2=3,6') + '; GeoGebra: ' + m('d_1 \\approx -1,90') + ' und ' + m('d_2 \\approx 1,90') + '.', 'Ein Abstand ist nicht negativ, also ' + m('d \\approx 1,90') + '. Da ' + m('E') + ' für ' + m('d>0') + ' fällt, dürfen sie höchstens etwa 1,90 m entfernt sein.' ],
+        '11': [ 'Ansatz: ' + m('360 · v^{-1}=20') + '.', 'Lösung: ' + m('v=18') + ' (einzige Lösung).', 'Da ' + m('t') + ' für ' + m('v>0') + ' fällt, braucht Lea bei höherer Geschwindigkeit weniger Zeit: Sie muss mindestens 18 km/h fahren.' ] }),
+      fehler: jeKurs({
+        '9': 'Die negative Lösung nicht verworfen – oder nicht begründet, warum der berechnete Abstand eine <b>Höchst</b>grenze ist (E fällt mit wachsendem Abstand).',
+        '11': 'Nur die Gleichung gelöst, ohne zu begründen, warum 18 km/h eine <b>Mindest</b>geschwindigkeit ist (t fällt mit wachsender Geschwindigkeit).' }),
+      ueb: [
+        { frage: 'Für eine Lampe gilt ' + m('E(d)=900 · d^{-2}') + '. Zum Lesen braucht man mindestens 400 lx. Berechnen Sie, wie weit (in m) man höchstens von der Lampe entfernt sein darf.',
+          art: 'zahl', soll: [3,2],
+          tipps: [ 'Setzen Sie ' + m('E(d)') + ' gleich der Mindest-Beleuchtungsstärke.', 'Lösen Sie nach ' + m('d^2') + ' auf. Es gibt zwei Lösungen – welche ist als Abstand sinnvoll?' ],
+          weg: m('900 · d^{-2}=400 \\Rightarrow d^2=2,25 \\Rightarrow d=\\pm 1,5') + '. Nur ' + m('d=1,5') + ' ist sinnvoll; da ' + m('E') + ' fällt, höchstens 1,5 m.' },
+        { frage: 'Für einen Schulweg gilt ' + m('t(v)=720 · v^{-1}') + ' (' + m('t') + ' in min, ' + m('v') + ' in km/h). Man möchte höchstens 36 Minuten unterwegs sein. Berechnen Sie, wie schnell (in km/h) man mindestens fahren muss.',
+          art: 'zahl', soll: [20,1],
+          tipps: [ 'Setzen Sie ' + m('t(v)') + ' gleich der höchstens erlaubten Zeit.', 'Lösen Sie nach ' + m('v') + ' auf und überlegen Sie, ob die Grenze ein Mindest- oder Höchstwert ist.' ],
+          weg: m('720 · v^{-1}=36 \\Rightarrow v=20') + '. Da ' + m('t') + ' fällt, muss man mindestens 20 km/h fahren.' } ] },
+
+    { id: '5c', name: 'Modellaussage beurteilen', knopf: 'Aussage beurteilen',
+      term: OP(MIT, 'beurteilen') + jeKurs({
+        '9': 'Eine Schülerin sagt: „Nach dem Modell wird es immer heller, je näher man an den Scheinwerfer herangeht. Direkt am Scheinwerfer wäre die Beleuchtungsstärke unendlich groß." Beurteilen Sie diese Aussage mithilfe des Funktionsterms und im Sachzusammenhang.',
+        '11': 'Leas Bruder sagt: „Nach dem Modell kann Lea ihre Fahrzeit beliebig klein machen, wenn sie nur schnell genug fährt. Irgendwann braucht sie gar keine Zeit mehr." Beurteilen Sie diese Aussage mithilfe des Funktionsterms und im Sachzusammenhang.' }),
+      weg: jeKurs({
+        '9': [ 'Mathematisch stimmt die Aussage: ' + m('E') + ' ist für ' + m('d>0') + ' streng monoton fallend, für ' + m('d \\to 0') + ' gilt ' + m('E(d) \\to \\infty') + '; ' + m('d=0') + ' gehört nicht zum Definitionsbereich.',
+               'Im Sachzusammenhang ist sie nicht haltbar: Der Scheinwerfer hat eine Ausdehnung und strahlt nur endlich viel Licht ab. Für sehr kleine Abstände beschreibt das Modell die Wirklichkeit nicht mehr, sinnvoll ist z. B. ' + m('d \\ge 0,5') + '.' ],
+        '11': [ 'Mathematisch: ' + m('t') + ' ist für ' + m('v>0') + ' streng monoton fallend, für ' + m('v \\to \\infty') + ' gilt ' + m('t(v) \\to 0') + '. Wegen ' + m('t(v)=') + f(360,'v') + ' > 0 wird die Fahrzeit aber nie 0 – „gar keine Zeit" ist auch im Modell falsch.',
+                'Im Sachzusammenhang: Mit dem Fahrrad ist die Geschwindigkeit begrenzt (z. B. höchstens etwa 30 km/h, dann mindestens 12 Minuten), dazu Ampeln und Kreuzungen. Sinnvoll ist z. B. ' + m('5 \\le v \\le 30') + '.' ] }),
+      fehler: 'Nur eine Seite beurteilt: entweder nur mathematisch („stimmt, Grenzwert") oder nur im Sachzusammenhang („geht nicht"). „Beurteilen" verlangt beides – und ein klares Urteil am Ende.',
+      ueb: [
+        { frage: 'Für eine Lampe gilt ' + m('E(d)=900 · d^{-2}') + '. Berechnen Sie, bei welchem Abstand (in m) das Modell eine Beleuchtungsstärke von 90 000 lx liefern würde. (Zum Vergleich: helles Sonnenlicht hat etwa 100 000 lx.)',
+          art: 'zahl', soll: [1,10],
+          tipps: [ 'Setzen Sie ' + m('E(d)=90\\,000') + ' und lösen Sie nach ' + m('d^2') + ' auf.', 'Nur die positive Lösung ist ein Abstand.' ],
+          weg: m('d^2=') + f(900, '90 000') + ' = 0,01, also ' + m('d=0,1') + '. Nach dem Modell wäre es 10 cm vor einer Lampe fast so hell wie in der Sonne – für so kleine Abstände taugt das Modell nicht mehr.' },
+        { frage: 'Für einen Schulweg gilt ' + m('t(v)=720 · v^{-1}') + ' (' + m('t') + ' in min, ' + m('v') + ' in km/h). Selbst mit einem schnellen E-Bike fährt man höchstens 45 km/h. Berechnen Sie die kürzeste Fahrzeit in Minuten.',
+          art: 'zahl', soll: [16,1],
+          tipps: [ 'Die kürzeste Zeit gehört zur größten Geschwindigkeit, weil ' + m('t') + ' fällt.', 'Setzen Sie die Höchstgeschwindigkeit ein.' ],
+          weg: m('t(45)=720 : 45=16') + '. Auch realistisch bleibt also eine Fahrzeit von mindestens 16 Minuten – „gar keine Zeit" ist unmöglich.' } ] }
+    ] },
+
+  { nr: 6, titel: jeKurs({ '9': 'Wasserrakete beim Schulfest', '11': 'Das Regenrückhaltebecken' }), ort: 'im Heft',
+    auftrag: 'Teil B, mit GeoGebra. Bei „bestimmen" genügt auch ein grafisches Vorgehen; das Vorgehen muss erkennbar sein.',
+    kontext: jeKurs({
+      '9': 'Die Physik-AG startet eine Wasserrakete senkrecht nach oben. Ihre Höhe über dem Boden: ' + m('h(t)=-5t^2+25t') + ' (' + m('t') + ' in s nach dem Start, ' + m('h(t)') + ' in m). Ab d): Eine Drohne filmt den Start, ihre Höhe ist ' + m('D(t)=2t+10') + '. Ab e): Beim zweiten Start landet die Rakete nach 6 s und erreicht maximal 45 m.',
+      '11': 'Der Querschnitt eines Regenrückhaltebeckens: ' + m('g(x)=0,02x^2-0,4x') + ' (' + m('x') + ' waagerechter Abstand vom linken Rand in m, ' + m('g(x)') + ' Höhe des Bodens gegenüber dem Gelände in m; negativ = tiefer). Ab d): Das Becken ist 50 m lang; eine geplante Bohrlinie ist im Querschnitt ' + m('l(x)=0,4x-7,5') + '. Ab f): Ein zweites Becken ist 40 m breit und in der Mitte 4 m tief, der linke Rand liegt im Ursprung.' }),
+    teile: [
+    { id: '6a', name: 'Nullstellen im Sachzusammenhang', knopf: jeKurs({ '9': 'Wann landet die Rakete?', '11': 'Breite des Beckens' }),
+      term: OP(MIT, 'rechnerisch') + jeKurs({ '9': 'Berechnen Sie, nach welcher Zeit die Rakete wieder auf dem Boden landet.', '11': 'Berechnen Sie die Breite des Beckens.' }),
+      weg: jeKurs({
+        '9': [ 'Ansatz: ' + m('-5t^2+25t=0 \\Leftrightarrow -5t(t-5)=0') + '.', 'Lösungen: ' + m('t_1=0') + ' (Start) und ' + m('t_2=5') + '.', 'Die Rakete landet nach 5 Sekunden.' ],
+        '11': [ 'Ansatz: ' + m('0,02x^2-0,4x=0 \\Leftrightarrow x(0,02x-0,4)=0') + '.', 'Lösungen: ' + m('x_1=0') + ' (linker Rand) und ' + m('x_2=20') + ' (rechter Rand).', 'Das Becken ist 20 m breit.' ] }),
+      fehler: 'Nur eine Nullstelle angegeben oder die Lösung ' + jeKurs({ '9': m('t=0'), '11': m('x=0') }) + ' nicht gedeutet. Bei „berechnen" werden alle Lösungen genannt und dann die sinnvolle ausgewählt.',
+      ueb: [
+        { frage: 'Eine Wasserrakete fliegt nach ' + m('h(t)=-5t^2+20t') + ' (' + m('t') + ' in s, ' + m('h') + ' in m). Berechnen Sie, nach wie vielen Sekunden sie landet.',
+          art: 'zahl', soll: [4,1],
+          tipps: [ 'Landung heißt: Höhe 0.', 'Klammern Sie ' + m('t') + ' aus und nutzen Sie den Satz vom Nullprodukt.' ],
+          weg: m('-5t(t-4)=0 \\Rightarrow t=0') + ' (Start) oder ' + m('t=4') + '. Landung nach 4 s.' },
+        { frage: 'Der Querschnitt eines Grabens ist ' + m('g(x)=0,05x^2-0,6x') + ' (in m). Berechnen Sie die Breite des Grabens in m.',
+          art: 'zahl', soll: [12,1],
+          tipps: [ 'Die Ränder liegen auf Geländehöhe, also bei ' + m('g(x)=0') + '.', 'Klammern Sie ' + m('x') + ' aus.' ],
+          weg: m('x(0,05x-0,6)=0 \\Rightarrow x=0') + ' oder ' + m('x=12') + '. Breite: 12 m.' } ] },
+
+    { id: '6b', name: 'Scheitelpunkt deuten', knopf: jeKurs({ '9': 'Maximale Höhe', '11': 'Tiefste Stelle' }),
+      term: OP(MIT, 'GeoGebra-Funktionen erlaubt') + jeKurs({ '9': 'Bestimmen Sie die maximale Höhe der Rakete und den Zeitpunkt, zu dem sie diese Höhe erreicht.', '11': 'Bestimmen Sie die Stelle, an der das Becken am tiefsten ist, und geben Sie die maximale Tiefe an.' }),
+      weg: jeKurs({
+        '9': [ 'Hochpunkt mit GeoGebra bzw. Scheitelpunkt in der Mitte der Nullstellen 0 und 5: ' + m('t=2,5') + '.', m('h(2,5)=31,25') + '.', 'Nach 2,5 s erreicht die Rakete ihre maximale Höhe von 31,25 m.' ],
+        '11': [ 'Tiefpunkt mit GeoGebra bzw. Scheitelpunkt in der Mitte der Nullstellen 0 und 20: ' + m('x=10') + '.', m('g(10)=-2') + '.', 'Bei 10 m vom linken Rand ist das Becken am tiefsten; die maximale Tiefe beträgt 2 m (positiv – eine Tiefe).' ] }),
+      fehler: jeKurs({ '9': 'Nur die Zeit oder nur die Höhe angegeben – gefragt ist beides.', '11': 'Die Tiefe als „−2 m" angegeben. Der Funktionswert ist negativ, die Tiefe ist sein Betrag: 2 m.' }),
+      ueb: [
+        { frage: 'Für eine Wasserrakete gilt ' + m('h(t)=-5t^2+20t') + '. Bestimmen Sie die maximale Höhe in m.',
+          art: 'zahl', soll: [20,1],
+          tipps: [ 'Der Scheitelpunkt liegt in der Mitte zwischen den Nullstellen.', 'Setzen Sie die Scheitelstelle in ' + m('h') + ' ein.' ],
+          weg: 'Nullstellen 0 und 4 → Scheitelstelle ' + m('t=2') + '; ' + m('h(2)=-20+40=20') + '. Maximale Höhe 20 m nach 2 s.' },
+        { frage: 'Für einen Graben gilt ' + m('g(x)=0,05x^2-0,6x') + '. Bestimmen Sie die maximale Tiefe in m.',
+          art: 'zahl', soll: [9,5],
+          tipps: [ 'Der Tiefpunkt liegt in der Mitte zwischen den Nullstellen.', 'Berechnen Sie den Funktionswert dort – und überlegen Sie, wie man eine Tiefe angibt.' ],
+          weg: 'Nullstellen 0 und 12 → Scheitelstelle ' + m('x=6') + '; ' + m('g(6)=1,8-3,6=-1,8') + '. Die maximale Tiefe beträgt 1,8 m.' } ] },
+
+    { id: '6c', name: 'Bereich zwischen zwei Lösungen', knopf: jeKurs({ '9': 'Wie lange über 20 m?', '11': 'Bereich für das Boot' }),
+      term: OP(MIT, 'rechnerisch') + jeKurs({
+        '9': 'Berechnen Sie, wie lange sich die Rakete mehr als 20 m über dem Boden befindet.',
+        '11': 'Bei randvollem Becken braucht ein Boot eine Wassertiefe von mehr als 1,5 m. Berechnen Sie, wie breit der Bereich ist, in dem das Boot fahren kann.' }),
+      weg: jeKurs({
+        '9': [ 'Ansatz: ' + m('-5t^2+25t=20 \\Leftrightarrow t^2-5t+4=0') + '.', 'Lösungen: ' + m('t_1=1') + ' und ' + m('t_2=4') + '. Dazwischen liegt der Graph über 20 m (nach unten geöffnete Parabel).', 'Die Rakete ist 4 s − 1 s = 3 Sekunden höher als 20 m.' ],
+        '11': [ 'Mehr als 1,5 m Tiefe heißt: ' + m('g(x)<-1,5') + '. Ansatz: ' + m('0,02x^2-0,4x=-1,5 \\Leftrightarrow x^2-20x+75=0') + '.', 'Lösungen: ' + m('x_1=5') + ' und ' + m('x_2=15') + '. Dazwischen liegt der Graph unter ' + m('-1,5') + ' (nach oben geöffnete Parabel).', 'Der Bereich ist 15 m − 5 m = 10 m breit.' ] }),
+      fehler: jeKurs({ '9': 'Die beiden Zeitpunkte als Antwort angegeben statt der Dauer dazwischen.', '11': 'Mit ' + m('+1,5') + ' statt ' + m('-1,5') + ' gerechnet – eine Tiefe von 1,5 m ist die Höhe ' + m('-1,5') + '. Oder die Stellen statt der Breite angegeben.' }),
+      ueb: [
+        { frage: 'Für eine Wasserrakete gilt ' + m('h(t)=-5t^2+20t') + '. Berechnen Sie, wie viele Sekunden sie höher als 15 m ist.',
+          art: 'zahl', soll: [2,1],
+          tipps: [ 'Setzen Sie ' + m('h(t)=15') + ' und bringen Sie alles auf eine Seite.', 'Gesucht ist nicht ein Zeitpunkt, sondern der Abstand der beiden Lösungen.' ],
+          weg: m('-5t^2+20t=15 \\Leftrightarrow t^2-4t+3=0 \\Rightarrow t=1') + ' oder ' + m('t=3') + '. Dauer: 3 s − 1 s = 2 s.' },
+        { frage: 'Für einen Graben gilt ' + m('g(x)=0,05x^2-0,6x') + ' (Gelände bei Höhe 0). Ist er randvoll, wie breit (in m) ist der Bereich mit mehr als 1 m Wassertiefe?',
+          art: 'zahl', soll: [8,1],
+          tipps: [ 'Übersetzen Sie „mehr als 1 m Tiefe" in eine Bedingung für ' + m('g(x)') + ' – mit Vorzeichen.', 'Lösen Sie die zugehörige Gleichung; gesucht ist der Abstand der beiden Lösungen.' ],
+          weg: m('g(x)<-1') + ': ' + m('0,05x^2-0,6x=-1 \\Leftrightarrow x^2-12x+20=0 \\Rightarrow x=2') + ' oder ' + m('x=10') + '. Breite: 10 m − 2 m = 8 m.' } ] },
+
+    { id: '6d', name: 'Schnitt von Parabel und Gerade', knopf: jeKurs({ '9': 'Rakete und Drohne gleich hoch', '11': 'Schnittpunkte mit der Bohrlinie' }),
+      term: OP(MIT, 'rechnerisch') + jeKurs({
+        '9': 'Berechnen Sie die Zeitpunkte, zu denen Rakete und Drohne gleich hoch sind, und die zugehörigen Höhen.',
+        '11': 'Berechnen Sie die Schnittpunkte der Graphen von ' + m('g') + ' und ' + m('l') + ' und deuten Sie die Schnittpunkte im Sachzusammenhang.' }),
+      weg: jeKurs({
+        '9': [ 'Ansatz: ' + m('-5t^2+25t=2t+10 \\Leftrightarrow 5t^2-23t+10=0') + '.', 'Lösungen: ' + m('t_1 \\approx 0,49') + ' und ' + m('t_2 \\approx 4,11') + ' (beide im Flugzeitraum 0 bis 5 s).', m('D(0,49) \\approx 10,97') + ' und ' + m('D(4,11) \\approx 18,23') + '. Nach etwa 0,49 s (ca. 11,0 m) und nach etwa 4,11 s (ca. 18,2 m) sind beide gleich hoch.' ],
+        '11': [ 'Ansatz: ' + m('0,02x^2-0,4x=0,4x-7,5 \\Leftrightarrow x^2-40x+375=0') + '.', 'Lösungen: ' + m('x_1=15') + ', ' + m('x_2=25') + '; ' + m('S_1(15|-1,5)') + ', ' + m('S_2(25|2,5)') + '.', m('S_1') + ' liegt im Becken (' + m('0 \\le x \\le 20') + ') auf dem Boden, 1,5 m unter dem Gelände: Dort würde die Bohrung (in der Seitenansicht) den Beckenboden durchstoßen.', m('S_2') + ' liegt außerhalb des Beckens; dort beschreibt ' + m('g') + ' nicht mehr das Gelände. Dieser Schnittpunkt hat im Sachzusammenhang keine Bedeutung.' ] }),
+      fehler: jeKurs({ '9': 'Nur die Zeitpunkte angegeben und die Höhen vergessen – oder die Höhen mit der falschen Funktion berechnet (beide sind gleich, ' + m('D') + ' ist einfacher).', '11': 'Beide Schnittpunkte gleich gedeutet. Ein Schnittpunkt außerhalb von ' + m('0 \\le x \\le 20') + ' gehört nicht mehr zum Becken.' }),
+      ueb: [
+        { frage: 'Für eine Rakete gilt ' + m('h(t)=-5t^2+20t') + ', eine Drohne fliegt nach ' + m('D(t)=5t+10') + '. Berechnen Sie die Höhe (in m), in der beide zum ersten Mal gleich hoch sind.',
+          art: 'zahl', soll: [15,1],
+          tipps: [ 'Setzen Sie die beiden Funktionsterme gleich und bringen Sie alles auf eine Seite.', 'Nehmen Sie den früheren Zeitpunkt und setzen Sie ihn in eine der beiden Funktionen ein.' ],
+          weg: m('-5t^2+15t-10=0 \\Leftrightarrow t^2-3t+2=0 \\Rightarrow t=1') + ' oder ' + m('t=2') + '. ' + m('D(1)=15') + ': zuerst in 15 m Höhe.' },
+        { frage: 'Ein Graben hat den Querschnitt ' + m('g(x)=0,05x^2-0,6x') + ' für ' + m('0 \\le x \\le 12') + '. Eine Bohrlinie verläuft im Querschnitt nach ' + m('l(x)=0,6x-7') + '. Geben Sie die x-Koordinate des Schnittpunkts an, der im Sachzusammenhang Bedeutung hat.',
+          art: 'zahl', soll: [10,1],
+          tipps: [ 'Setzen Sie ' + m('g(x)=l(x)') + ' und lösen Sie die quadratische Gleichung.', 'Prüfen Sie, welche Lösung im Bereich des Grabens liegt.' ],
+          weg: m('0,05x^2-1,2x+7=0 \\Leftrightarrow x^2-24x+140=0 \\Rightarrow x=10') + ' oder ' + m('x=14') + '. Nur ' + m('x=10') + ' liegt im Graben (' + m('g(10)=-1') + '); ' + m('x=14') + ' liegt außerhalb.' } ] },
+
+    { id: '6e', kurs: '11', name: 'Folgerung aus der Seitenansicht beurteilen', knopf: 'Aussage zur Bohrung beurteilen',
+      term: OP(MIT, 'beurteilen') + 'Ein Mitarbeiter folgert aus d): „Die Bohrung wird das Becken auf jeden Fall beschädigen." Beurteilen Sie diese Aussage.',
+      weg: [ m('l') + ' beschreibt die Bohrlinie nur in der Seitenansicht, also ihre Projektion auf die Querschnittsebene. Wie die Bohrung in Längsrichtung verläuft, ist nicht bekannt.',
+             'Verläuft sie schräg oder seitlich versetzt, z. B. am Ende des 50 m langen Beckens vorbei, schneiden sich die Linien in der Seitenansicht, obwohl das Becken nicht berührt wird. „Auf jeden Fall" ist deshalb nicht haltbar.',
+             'Die Aussage stimmt nur, wenn die Bohrung an der Stelle ' + m('x=15') + ' innerhalb der Beckenlänge verläuft. Umgekehrt: Gäbe es in der Seitenansicht keinen Schnittpunkt im Beckenbereich, wäre das Becken sicher unbeschädigt.' ],
+      fehler: 'Die Seitenansicht wie ein räumliches Bild gelesen: Ein Schnittpunkt in der Projektion heißt nicht, dass sich Bohrung und Becken im Raum treffen.',
+      ueb: [
+        { frage: 'Ein Becken ist 50 m lang. In der Seitenansicht schneidet eine Bohrlinie den Beckenboden. Die Bohrung kreuzt die Längsachse des Beckens 35 m hinter dem Beckenanfang. Vergleichen Sie die beiden Längen: 35 m ? 50 m. (Wird das Becken beschädigt?)',
+          art: 'zeichen', soll: '<',
+          tipps: [ 'Ein Schnitt in der Seitenansicht heißt nur dann Beschädigung, wenn die Bohrung auch in Längsrichtung im Becken verläuft.', 'Liegt die Kreuzungsstelle innerhalb der Beckenlänge?' ],
+          weg: '35 m < 50 m: Die Bohrung kreuzt innerhalb der Beckenlänge, und die Seitenansicht zeigt einen Schnitt mit dem Boden – das Becken wird beschädigt.' },
+        { frage: 'Gleiches Becken (50 m lang), gleiche Seitenansicht mit Schnitt am Beckenboden. Diesmal kreuzt die Bohrung die Längsachse erst 62 m hinter dem Beckenanfang. Vergleichen Sie: 62 m ? 50 m. (Wird das Becken beschädigt?)',
+          art: 'zeichen', soll: '>',
+          tipps: [ 'Überlegen Sie, wo die Bohrung in Längsrichtung verläuft.', 'Liegt die Kreuzungsstelle innerhalb der Beckenlänge?' ],
+          weg: '62 m > 50 m: Die Bohrung verläuft hinter dem Beckenende. Trotz Schnitt in der Seitenansicht wird das Becken nicht berührt – genau deshalb ist „auf jeden Fall" falsch.' } ] },
+
+    { id: '6f', idKurs: { '9': '6e' }, name: 'Parabelgleichung aus Nullstellen und Scheitel', knopf: jeKurs({ '9': 'Gleichung für h₂', '11': 'Gleichung für g₂' }),
+      term: OP(MIT, 'rechnerisch oder grafisch') + jeKurs({
+        '9': 'Beim zweiten Start landet die Rakete nach 6 Sekunden und erreicht eine maximale Höhe von 45 m. Bestimmen Sie eine Funktionsgleichung für ' + m('h_2') + '.',
+        '11': 'Bestimmen Sie eine Gleichung einer quadratischen Funktion ' + m('g_2') + ', die den Querschnitt des zweiten Beckens beschreibt.' }),
+      weg: jeKurs({
+        '9': [ 'Start bei ' + m('t=0') + ', Landung bei ' + m('t=6') + ' → wegen der Symmetrie Scheitel ' + m('S(3|45)') + '.',
+               'Nullstellenform: ' + m('h_2(t)=a · t(t-6)') + '; mit ' + m('h_2(3)=45') + ': ' + m('-9a=45 \\Rightarrow a=-5') + '.',
+               'Ebenso mit der Scheitelpunktform ' + m('h_2(t)=a(t-3)^2+45') + ' und ' + m('h_2(0)=0') + ': ' + m('9a+45=0') + '.',
+               m('h_2(t)=-5t(t-6)=-5t^2+30t') + '.' ],
+        '11': [ 'Ränder bei ' + m('x=0') + ' und ' + m('x=40') + ' → wegen der Symmetrie Scheitel ' + m('S(20|-4)') + '.',
+                'Nullstellenform: ' + m('g_2(x)=a · x(x-40)') + '; mit ' + m('g_2(20)=-4') + ': ' + m('-400a=-4 \\Rightarrow a=0,01') + '.',
+                'Ebenso mit der Scheitelpunktform ' + m('g_2(x)=a(x-20)^2-4') + ' und ' + m('g_2(0)=0') + ': ' + m('400a-4=0') + '.',
+                m('g_2(x)=0,01x(x-40)=0,01x^2-0,4x') + '.' ] }),
+      fehler: jeKurs({ '9': 'Den Scheitel falsch gesetzt (z. B. bei ' + m('t=6') + ') oder ' + m('a') + ' positiv gewählt – eine nach oben fliegende Rakete braucht eine nach unten geöffnete Parabel.', '11': 'Die Tiefe als ' + m('+4') + ' eingesetzt: Der Scheitel liegt bei ' + m('(20|-4)') + '. Oder die Breite 40 m mit der Scheitelstelle verwechselt.' }),
+      ueb: [
+        { frage: 'Eine Rakete startet am Boden, landet nach 8 s und erreicht maximal 32 m Höhe. Ihre Höhe ist ' + m('h(t)=a · t(t-8)') + '. Bestimmen Sie ' + m('a') + '.',
+          art: 'zahl', soll: [-2,1],
+          tipps: [ 'Wegen der Symmetrie liegt der Scheitel in der Mitte zwischen Start und Landung.', 'Setzen Sie den Scheitelpunkt in die Nullstellenform ein und lösen Sie nach ' + m('a') + ' auf.' ],
+          weg: 'Scheitel ' + m('S(4|32)') + ': ' + m('a · 4 · (-4)=32 \\Rightarrow -16a=32 \\Rightarrow a=-2') + '. ' + m('h(t)=-2t^2+16t') + '.' },
+        { frage: 'Ein parabelförmiges Becken ist 30 m breit und in der Mitte 4,5 m tief, der linke Rand liegt im Ursprung: ' + m('g(x)=a · x(x-30)') + '. Bestimmen Sie ' + m('a') + '.',
+          art: 'zahl', soll: [1,50],
+          tipps: [ 'Der tiefste Punkt liegt in der Mitte – mit negativer Höhe.', 'Setzen Sie den Scheitelpunkt in die Nullstellenform ein und lösen Sie nach ' + m('a') + ' auf.' ],
+          weg: 'Scheitel ' + m('S(15|-4,5)') + ': ' + m('a · 15 · (-15)=-4,5 \\Rightarrow -225a=-4,5 \\Rightarrow a=0,02') + '. ' + m('g(x)=0,02x^2-0,6x') + '.' } ] }
+    ] }
+  ],
+  kern: [
+  { kk: 'K10-5', name: 'Quadratische Gleichungen mit der pq-Formel lösen',
+    merke: 'Erst auf Normalform ' + m('x^2+px+q=0') + ' bringen (durch den Vorfaktor teilen), dann ' + m('p') + ' und ' + m('q') + ' mit Vorzeichen ablesen und in ' + m('x_{1,2}=-\\frac{p}{2} \\pm \\sqrt{\\left(\\frac{p}{2}\\right)^2-q}') + ' einsetzen.',
+    ueb: [
+      { frage: 'Lösen Sie ' + m('x^2-6x-16=0') + '. Geben Sie die größere Lösung ein.', art: 'zahl', soll: [8,1],
+        tipps: [ 'Die Gleichung ist schon in Normalform. Lesen Sie ' + m('p') + ' und ' + m('q') + ' mit Vorzeichen ab.', 'Berechnen Sie zuerst den Ausdruck unter der Wurzel.' ],
+        weg: m('x_{1,2}=3 \\pm \\sqrt{9+16}=3 \\pm 5') + ', also ' + m('x_1=8') + ', ' + m('x_2=-2') + '.' },
+      { frage: 'Lösen Sie ' + m('x^2+4x-21=0') + '. Geben Sie die kleinere Lösung ein.', art: 'zahl', soll: [-7,1],
+        tipps: [ 'Lesen Sie ' + m('p') + ' und ' + m('q') + ' mit Vorzeichen ab.', 'Berechnen Sie zuerst den Ausdruck unter der Wurzel.' ],
+        weg: m('x_{1,2}=-2 \\pm \\sqrt{4+21}=-2 \\pm 5') + ', also ' + m('x_1=3') + ', ' + m('x_2=-7') + '.' } ] },
+  { kk: 'K7-5', name: 'Prozentsatz berechnen',
+    merke: 'Prozentsatz = Prozentwert geteilt durch Grundwert. Bei einer Zunahme ist der Grundwert der alte Wert; die Zunahme ist der Anteil über 100 %.',
+    ueb: [
+      { frage: 'Eine Leistung steigt von 80 W auf 92 W. Um wie viel Prozent nimmt sie zu? Geben Sie die Zahl ohne %-Zeichen ein.', art: 'zahl', soll: [15,1],
+        tipps: [ 'Der Grundwert ist der Wert vor der Zunahme.', 'Teilen Sie die Zunahme in W durch den Grundwert.' ],
+        weg: '92 − 80 = 12; ' + f(12,80) + ' = 0,15 = 15 %.' } ] },
+  { kk: 'K7-2', name: 'Rationale Zahlen multiplizieren (Potenzen negativer Zahlen)',
+    merke: 'Ein Produkt mit einer geraden Anzahl negativer Faktoren ist positiv, mit einer ungeraden Anzahl negativ.',
+    ueb: [
+      { frage: 'Berechnen Sie ' + m('(-2)^5') + '.', art: 'zahl', soll: [-32,1],
+        tipps: [ 'Zählen Sie die negativen Faktoren.', 'Bestimmen Sie zuerst das Vorzeichen, dann den Betrag.' ],
+        weg: 'Fünf negative Faktoren → negativ; ' + m('2^5=32') + ', also ' + m('(-2)^5=-32') + '.' },
+      { frage: 'Berechnen Sie ' + m('(-0,5)^4') + '.', art: 'zahl', soll: [1,16],
+        tipps: [ 'Zählen Sie die negativen Faktoren.', 'Rechnen Sie mit ' + f(1,2) + ' statt 0,5, wenn das leichter ist.' ],
+        weg: 'Vier negative Faktoren → positiv; ' + m('0,5^4=0,0625') + ' = ' + f(1,16) + '.' } ] }
+  ]
+};
+/* ============ ENDE ANPASSEN: Daten der Klassenarbeit ============ */
+
+</script>
+
+<script>
+/* ============================================================
+   BAUSTEIN: Rückblick-KA-Engine (v5, 13.11.2026) – unverändert übernehmen
+   Baut aus dem Objekt KA: Startkarte (Fehler ankreuzen) → je Teilaufgabe eine
+   Karte (Originalaufgabe + vollständiger Lösungsweg + typischer Fehler + zwei
+   ähnliche Aufgaben mit Prüfen/Leeren/gestuften Tipps) → Abschlusskarte.
+   Zustand in einem Status-Objekt, gesichert per sessionStorage (TEIL 6).
+   Antwortarten:  'bruch'  Wert gleich UND vollständig gekürzt (Dezimalzahl zählt auch)
+                  'zahl'   Wert gleich (Dezimalzahl, Bruch, gemischte Zahl, Periode)
+                  'groesse' Zahl + Einheit aus Dropdown (einheiten: 'liter' o. eigene Liste)
+                  'zeichen' Vergleichszeichen <, >, = aus Dropdown (soll: '<' | '>' | '=')
+   Reiter (v3): einzeilig und seitlich wischbar; reiterZu() rollt den aktiven Reiter
+   in die Mitte, reiterRand() setzt den Ausblend-Rand. Mausrad rollt die Leiste seitlich.
+   Vorzeichen (v2): Eingaben dürfen mit −, - oder + beginnen und in Klammern stehen,
+   soll darf einen negativen Zähler haben (z. B. −2,6 → [-13,5]).
+   Anrede (v5): <body data-anrede="sie"> → alle Texte gesiezt (Oberstufe), sonst „du".
+   Parallelkurse (v5): KA.kurse = ['9','11'] → Kurswahl oben auf der Startkarte. Ohne Wahl
+   erscheint nur die Kurswahl. Ein Kurswechsel löscht den Bearbeitungsstand und lädt neu.
+   ============================================================ */
+(function(){
+"use strict";
+var SIE = document.body.getAttribute('data-anrede') === 'sie';
+var KURSE = KA.kurse || [];
+var KURS_OK = !KURSE.length || KURSE.indexOf(KURS) >= 0;
+var EINHEITEN = {
+  liter:  [['l',[1,1]], ['ml',[1,1000]], ['kg',null], ['m',null]],
+  meter:  [['m',[1,1]], ['cm',[1,100]], ['km',[1000,1]], ['m²',null]],
+  gramm:  [['kg',[1,1]], ['g',[1,1000]], ['l',null], ['m',null]],
+  euro:   [['€',[1,1]], ['ct',[1,100]], ['kg',null]]
+};
+var DATEI = (location.pathname.split('/').pop() || 'seite').replace(/\.html?$/i, '');
+var KEY = 'aszym:' + DATEI + ':v' + (document.body.getAttribute('data-version') || '1');
+var S = { wahl:{}, karte:'start', a:{} };
+
+function lies(){ try { var r = sessionStorage.getItem(KEY); return r ? JSON.parse(r) : null; } catch (e) { return null; } }
+function sichern(){ try { sessionStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
+function setzeFormel(el){
+  if (window.MathJax && MathJax.typesetPromise) { try { MathJax.typesetPromise([el]); } catch (e) {} }
+}
+function $(id){ return document.getElementById(id); }
+function neu(tag, cls, html){ var e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; }
+
+/* ---------- Rechnen mit Brüchen ---------- */
+function ggt(a, b){ a = Math.abs(a); b = Math.abs(b); while (b) { var t = a % b; a = b; b = t; } return a || 1; }
+function kurz(z, n){ var t = ggt(z, n); return [z / t, n / t]; }
+function gleich(a, b){ return a[0] * b[1] === b[0] * a[1]; }
+function mal(a, b){ return kurz(a[0] * b[0], a[1] * b[1]); }
+
+/* Eingabe lesen: Dezimalzahl, Bruch a/b, gemischte Zahl g a/b, Periode 0,(3) / 0,3̅ / 0,333… */
+function lese(roh){
+  var s = String(roh || '').trim().replace(/[−–]/g, '-');
+  var kl = s.match(/^\((.*)\)$/); if (kl) s = kl[1].trim();
+  var vz = 1, r0 = s.match(/^([+-])\s*(.*)$/);
+  if (r0) { if (r0[1] === '-') vz = -1; s = r0[2]; }
+  var p0 = leseBetrag(s);
+  if (p0 && vz < 0) p0.w = [-p0.w[0], p0.w[1]];
+  if (p0) p0.vz = !!r0;
+  return p0;
+}
+function leseBetrag(s){
+  if (!s || s.length > 24) return null;
+  s = s.replace(/…|\.\.\.+/g, '~').replace(/\./g, ',').replace(/\s+/g, ' ')
+       .replace(/[÷]/g, '/').replace(/⁄/g, '/');
+  s = s.replace(/((?:\d̅)+)/g, function(t){ return '(' + t.replace(/̅/g, '') + ')'; });
+  var r;
+  if ((r = s.match(/^(\d+) (\d+) ?\/ ?(\d+)$/))) {
+    var ga = +r[1], za = +r[2], na = +r[3]; if (!na) return null;
+    return { w: kurz(ga * na + za, na), gek: ggt(za, na) === 1 };
+  }
+  var t = s.replace(/ /g, '');
+  if ((r = t.match(/^(\d+)\/(\d+)$/))) {
+    if (!+r[2]) return null;
+    return { w: kurz(+r[1], +r[2]), gek: ggt(+r[1], +r[2]) === 1 };
+  }
+  if ((r = t.match(/^(\d*),(\d*)\((\d+)\)$/)) || (r = t.match(/^(\d*),(\d*?)(\d)~$/))) {
+    var I = r[1] || '0', P = r[2], Q = r[3];
+    var N = parseInt(I + P + Q, 10), M = parseInt(I + P, 10);
+    return { w: kurz(N - M, (Math.pow(10, Q.length) - 1) * Math.pow(10, P.length)), gek: true, dez: true };
+  }
+  if ((r = t.match(/^(\d*),(\d+)$/)) || (r = t.match(/^(\d+),?()$/))) {
+    var ziff = (r[1] || '0') + r[2];
+    return { w: kurz(parseInt(ziff, 10), Math.pow(10, r[2].length)), gek: true, dez: true };
+  }
+  return null;
+}
+function endlich(w){ var n = w[1]; while (n % 2 === 0) n /= 2; while (n % 5 === 0) n /= 5; return n === 1; }
+
+/* Prüfen einer Antwort → Schlüssel für Rückmeldung */
+function bewerte(u, wert, einheit){
+  if (u.art === 'zeichen') return String(wert).trim() === u.soll ? 'ok' : 'falsch';
+  var soll = kurz(u.soll[0], u.soll[1]);
+  var p = lese(wert);
+  if (u.art === 'groesse') {
+    var liste = typeof u.einheiten === 'string' ? EINHEITEN[u.einheiten] : u.einheiten;
+    if (!p) return 'unlesbar';
+    if (!einheit) return 'keineEinheit';
+    var fak = null;
+    for (var i = 0; i < liste.length; i++) if (liste[i][0] === einheit) fak = liste[i][1];
+    if (!fak) return gleich(p.w, soll) ? 'falscheGroesse' : 'beidesFalsch';
+    var basis = mal(p.w, fak);
+    if (gleich(basis, soll)) return 'ok';
+    if (gleich(p.w, soll)) return 'einheitPasstNicht';
+    if (soll[0] !== 0 && gleich(basis, [-soll[0], soll[1]])) return 'vorzeichen';
+    return kommaFehler(basis, soll) ? 'komma' : 'falsch';
+  }
+  if (!p) return 'unlesbar';
+  if (gleich(p.w, soll)) return (u.art === 'bruch' && !p.gek) ? 'kuerzen' : 'ok';
+  if (soll[0] !== 0 && gleich(p.w, [-soll[0], soll[1]])) return 'vorzeichen';
+  if (kommaFehler(p.w, soll)) return 'komma';
+  if (u.art === 'bruch' && soll[0] !== soll[1] && gleich(p.w, [soll[1], soll[0]])) return 'kehr';
+  if (p.dez && !endlich(soll)) {
+    var a = p.w[0] / p.w[1], b = soll[0] / soll[1];
+    if (Math.abs(a - b) <= 0.011 * Math.abs(b)) return 'gerundet';
+  }
+  return 'falsch';
+}
+function kommaFehler(w, soll){
+  for (var k = 1; k <= 3; k++) {
+    var z = Math.pow(10, k);
+    if (gleich(w, [soll[0] * z, soll[1]]) || gleich(w, [soll[0], soll[1] * z])) return true;
+  }
+  return false;
+}
+var TEXT = {
+  ok: '✅ Richtig!',
+  kuerzen: '❌ Der Wert stimmt, aber der Bruch ist noch nicht vollständig gekürzt.',
+  komma: '❌ Die Ziffern passen, aber das Komma sitzt an der falschen Stelle.',
+  kehr: SIE ? '❌ Prüfen Sie, welchen Bruch Sie umgedreht haben.' : '❌ Prüfe, welchen Bruch du umgedreht hast.',
+  vorzeichen: '❌ Der Betrag stimmt, aber das Vorzeichen nicht.',
+  gerundet: '❌ Das ist gerundet. Gesucht ist das genaue Ergebnis – mit Periode oder als Bruch.',
+  falsch: SIE ? '❌ Das stimmt noch nicht. Holen Sie sich einen Tipp oder rechnen Sie noch einmal nach.' : '❌ Das stimmt noch nicht. Hol dir einen Tipp oder rechne noch einmal nach.',
+  unlesbar: '❌ Das kann ich nicht lesen. Erlaubt sind Dezimalzahlen, Brüche in der Form a/b und gemischte Zahlen in der Form g a/b – jeweils auch mit Minuszeichen davor.',
+  keineEinheit: SIE ? '❌ Wählen Sie noch eine Einheit aus.' : '❌ Wähle noch eine Einheit aus.',
+  falscheGroesse: '❌ Die Zahl passt, aber die Einheit gehört zu einer anderen Größe.',
+  beidesFalsch: '❌ Zahl und Einheit stimmen noch nicht.',
+  einheitPasstNicht: '❌ Die Zahl passt nicht zur gewählten Einheit.'
+};
+
+/* ---------- Alle Teilaufgaben einsammeln ---------- */
+var TEILE = [], TEIL = {};
+/* v5: nur die Teilaufgaben des gewählten Kurses; idKurs nummeriert um */
+KA.aufgaben.forEach(function(a){
+  a.teile = a.teile.filter(function(t){ return !t.kurs || t.kurs === KURS || (!KURS_OK && t.kurs === KURSE[0]); });
+  a.teile.forEach(function(t){
+    if (t.idKurs && t.idKurs[KURS]) t.id = t.idKurs[KURS];
+    t.aufgabe = a; TEILE.push(t); TEIL[t.id] = t;
+  });
+});
+/* v4: Kernkompetenzen (KA.kern) – gleiche Übungslogik, eigene Karte „Fit bleiben" */
+var KERN = (KA.kern || []).map(function(k){ return { id: k.kk, kern: true, name: k.name, merke: k.merke, ueb: k.ueb }; });
+function uid(t, i){ return t.id + '-' + (i + 1); }
+/* v2: Sobald irgendwo ein negatives Ergebnis vorkommt, überall Texttastatur –
+   die Ziffern-Tastatur des iPads hat kein Minuszeichen, und die Tastatur darf das Vorzeichen nicht verraten. */
+var MINUS = TEILE.concat(KERN).some(function(t){ return t.ueb.some(function(u){ return u.soll && typeof u.soll === 'object' && u.soll[0] < 0; }); });
+function zustand(id){ if (!S.a[id]) S.a[id] = { e:'', u:'', st:'offen', t:0, gp:false }; return S.a[id]; }
+
+/* ---------- Aufbau ---------- */
+function baue(){
+  $('ka-titel').innerHTML = KA.titel;
+  $('ka-untertitel').innerHTML = KA.untertitel || '';
+  var reiter = $('reiter'), main = $('main');
+
+  function tab(id, text){
+    var b = neu('button', '', text); b.type = 'button'; b.id = 'tab-' + id;
+    b.addEventListener('click', function(){ zeigeKarte(id, true); });
+    reiter.appendChild(b); return b;
+  }
+
+  /* Startkarte */
+  tab('start', '① Meine Fehler');
+  var st = neu('section', 'karte'); st.id = 'karte-start';
+  var h = '';
+  /* v5: Kurswahl bei Parallelkursen */
+  if (KURSE.length) {
+    h += '<div class="block"><h2>' + (SIE ? 'Welchen Kurs besuchen Sie?' : 'In welchem Kurs bist du?') + '</h2>' +
+      '<p>' + (KURS_OK ? 'Gewählt ist Kurs ' + KURS + '. ' + (SIE ? 'Ein Wechsel löscht Ihren bisherigen Stand auf dieser Seite.' : 'Ein Wechsel löscht deinen bisherigen Stand auf dieser Seite.')
+        : (SIE ? 'Die Arbeiten der Kurse unterscheiden sich in den Zahlen und Sachaufgaben. Wählen Sie zuerst Ihren Kurs.' : 'Die Arbeiten der Kurse unterscheiden sich in den Zahlen und Sachaufgaben. Wähle zuerst deinen Kurs.')) + '</p>' +
+      '<div class="kurswahl">' + KURSE.map(function(k){
+        return '<button type="button" id="kurs-' + k + '" aria-pressed="' + (k === KURS) + '"' + (k === KURS ? ' class="an"' : '') + '>Kurs ' + k + '</button>';
+      }).join('') + '</div></div>';
+  }
+  h += '<div class="block" id="start-wahl"' + (KURS_OK ? '' : ' hidden') + '><h2>' + (SIE ? 'Wo hatten Sie Fehler?' : 'Wo hattest du Fehler?') + '</h2>' +
+    (SIE ? '<p>Sie haben Ihre Klausur zurück. Statt einer Berichtigung rechnen Sie zu jeder Teilaufgabe, in der Sie Punkte verloren haben, <b>zwei ähnliche Aufgaben</b> neu. Vorher sehen Sie noch einmal, wie die Aufgabe aus der Klausur gelöst wird.</p>'
+      : '<p>Du hast deine Klassenarbeit zurück. Statt einer Berichtigung rechnest du zu jeder Teilaufgabe, in der du Punkte verloren hast, <b>zwei ähnliche Aufgaben</b> neu. Vorher siehst du noch einmal, wie die Aufgabe aus der Arbeit gelöst wird.</p>') +
+    (KERN.length ? (SIE ? '<p>Auf der Karte <b>🧠 Fit bleiben</b> üben Sie außerdem Rechenfertigkeiten, die Sie immer wieder brauchen – die ist für alle.</p>' : '<p>Auf der Karte <b>🧠 Fit bleiben</b> übst du außerdem Rechenfertigkeiten, die du immer wieder brauchst – die ist für alle.</p>') : '') +
+    (SIE ? '<p><b>Tippen Sie alle Teilaufgaben an, bei denen Sie Fehler hatten.</b> Sie können jederzeit hierher zurückkommen und weitere dazunehmen.</p>' : '<p><b>Tippe alle Teilaufgaben an, bei denen du Fehler hattest.</b> Du kannst jederzeit hierher zurückkommen und weitere dazunehmen.</p>');
+  KA.aufgaben.forEach(function(a){
+    h += '<div class="gruppe"><h3>Aufgabe ' + a.nr + ' · ' + a.titel + '</h3>' +
+      '<p>' + a.auftrag + '</p><div class="wahl">';
+    a.teile.forEach(function(t){
+      h += '<button type="button" id="wahl-' + t.id + '" aria-pressed="false"><span class="nr">' + t.id + '</span>' +
+        (t.knopf || t.term) + '</button>';
+    });
+    h += '</div></div>';
+  });
+  h += '<p class="zaehler" id="zaehler"></p>' +
+    '<button type="button" class="btn btn-los" id="los" disabled>Teilaufgaben auswählen</button></div>';
+  st.innerHTML = h; main.appendChild(st);
+  TEILE.forEach(function(t){
+    $('wahl-' + t.id).addEventListener('click', function(){
+      S.wahl[t.id] = !S.wahl[t.id]; if (!S.wahl[t.id]) delete S.wahl[t.id];
+      zeigeWahl(); sichern();
+    });
+  });
+  $('los').addEventListener('click', function(){
+    var erste = TEILE.filter(function(t){ return S.wahl[t.id]; })[0];
+    if (erste) zeigeKarte(erste.id, true);
+  });
+  /* v5: Kurswahl – Wechsel löscht den Stand und lädt die Seite mit dem neuen Kurs */
+  KURSE.forEach(function(k){
+    $('kurs-' + k).addEventListener('click', function(){
+      if (k === KURS) return;
+      try { sessionStorage.removeItem(KEY); sessionStorage.setItem('aszym:' + DATEI + ':kurs', k); } catch (e) {}
+      location.reload();
+    });
+  });
+
+  /* Teilaufgaben-Karten */
+  TEILE.forEach(function(t){
+    var a = t.aufgabe;
+    tab(t.id, t.id + ' · ' + t.name).hidden = true;
+    var k = neu('section', 'karte'); k.id = 'karte-' + t.id;
+    var x = '<div class="block"><p class="eyebrow">Aufgabe ' + t.id + ' · ' + a.ort + '</p>' +
+      '<h2>' + t.name + '</h2>' +
+      '<div class="ka-box"><h3>' + (SIE ? '📄 Die Aufgabe aus Ihrer Klausur' : '📄 Die Aufgabe aus deiner Arbeit') + '</h3><p>' + a.auftrag + '</p>' +
+      (a.kontext ? '<p>' + a.kontext + '</p>' : '') +
+      '<p class="ka-term">' + t.id.slice(-1) + ') ' + t.term + '</p></div>' +
+      (t.stand ? '<div class="stand-box"><b>Wo wir gerade stehen:</b> ' + t.stand + '</div>' : '') +
+      '<div class="weg-box"><h3>🔎 So wird sie gelöst</h3><ol>' +
+      t.weg.map(function(s){ return '<li>' + s + '</li>'; }).join('') + '</ol></div>' +
+      (t.fehler ? '<div class="fehler-box"><h3>⚠️ Typischer Fehler</h3><p>' + t.fehler + '</p></div>' : '') +
+      '</div><div class="block"><h3>' + (SIE ? '✏️ Jetzt Sie: zwei ähnliche Aufgaben' : '✏️ Jetzt du: zwei ähnliche Aufgaben') + '</h3>' +
+      (SIE ? '<p>Rechnen Sie im Heft und tippen Sie dann Ihr Ergebnis ein.</p>' : '<p>Rechne im Heft und tippe dann dein Ergebnis ein.</p>') +
+      (t.eingabeHinweis ? '<p class="hinweis">' + t.eingabeHinweis + '</p>' : '') +
+      uebHtml(t) + '</div>';
+    k.innerHTML = x; main.appendChild(k);
+    bindeUeb(t);
+  });
+
+  /* v4: Kernkompetenzen – für alle sichtbar */
+  if (KERN.length) {
+    tab('kern', '🧠 Fit bleiben');
+    var kk = neu('section', 'karte'); kk.id = 'karte-kern';
+    var y = '<div class="block"><h2>Fit bleiben: Kernkompetenzen</h2>' +
+      (SIE ? '<p>Diese Rechenfertigkeiten brauchen Sie immer wieder – auch in den nächsten Themen. Rechnen Sie im Heft und tippen Sie dann Ihr Ergebnis ein.</p></div>'
+        : '<p>Diese Rechenfertigkeiten brauchst du immer wieder – auch in den nächsten Themen. Rechne im Heft und tippe dann dein Ergebnis ein.</p></div>');
+    KERN.forEach(function(t){
+      y += '<div class="block"><h3><span class="kk">' + t.id + '</span>' + t.name + '</h3>' +
+        (t.merke ? '<div class="weg-box"><b>Kurz erinnert:</b> ' + t.merke + '</div>' : '') +
+        uebHtml(t) + '</div>';
+    });
+    kk.innerHTML = y; main.appendChild(kk);
+    KERN.forEach(bindeUeb);
+  }
+
+  /* Abschlusskarte */
+  tab('ende', '✅ Meine Korrektur');
+  var en = neu('section', 'karte'); en.id = 'karte-ende';
+  en.innerHTML = '<div class="block"><h2>Meine Korrektur</h2>' +
+    (SIE ? '<p>Hier sehen Sie, welche Teilaufgaben Sie schon nachgearbeitet haben. Eine Teilaufgabe ist geschafft, wenn beide ähnlichen Aufgaben richtig sind.</p>'
+      : '<p>Hier siehst du, welche Teilaufgaben du schon nachgearbeitet hast. Eine Teilaufgabe ist geschafft, wenn beide ähnlichen Aufgaben richtig sind.</p>') +
+    '<div id="ende-inhalt"></div></div>';
+  main.appendChild(en);
+  /* v5: ohne Kurswahl nur die Startkarte mit der Kurswahl */
+  if (!KURS_OK) { $('tab-ende').hidden = true; if ($('tab-kern')) $('tab-kern').hidden = true; S.karte = 'start'; }
+}
+
+/* ---------- Übungsblöcke (Teilaufgaben und Kernkompetenzen) ---------- */
+function uebHtml(t){
+  var x = '';
+  t.ueb.forEach(function(u, i){
+    var id = uid(t, i);
+    var im = u.art === 'bruch' || u.text || MINUS ? 'text' : 'decimal';
+    x += '<div class="ueb" id="u-' + id + '"><h4>Übung ' + (i + 1) + '</h4>' +
+      '<p class="frage">' + u.frage + '</p><div class="zeile">' +
+      (u.art === 'zeichen'
+        ? '<select id="in-' + id + '" aria-label="Zeichen Übung ' + (i + 1) + '"><option value="">Zeichen …</option>' +
+          '<option value="<">&lt;</option><option value=">">&gt;</option><option value="=">=</option></select>'
+        : '<input type="text" id="in-' + id + '" inputmode="' + im + '" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="Ergebnis" aria-label="Ergebnis Übung ' + (i + 1) + '">');
+    if (u.art === 'groesse') {
+      var liste = typeof u.einheiten === 'string' ? EINHEITEN[u.einheiten] : u.einheiten;
+      x += '<select id="un-' + id + '" aria-label="Einheit"><option value="">Einheit …</option>' +
+        liste.map(function(e){ return '<option value="' + e[0] + '">' + e[0] + '</option>'; }).join('') + '</select>';
+    }
+    x += '</div><div class="knoepfe">' +
+      '<button type="button" class="btn btn-pruefen" id="pr-' + id + '">Prüfen</button>' +
+      '<button type="button" class="btn btn-leeren" id="le-' + id + '" hidden>Leeren</button>' +
+      '<button type="button" class="btn btn-tipp" id="ti-' + id + '" hidden>💡 Tipp 1 zeigen</button></div>' +
+      '<div class="fb" id="fb-' + id + '"></div><div class="tipps" id="tp-' + id + '">';
+    var stufen = u.tipps.concat([u.weg]);
+    stufen.forEach(function(s, j){
+      var last = j === stufen.length - 1;
+      x += '<div class="tippstufe" id="ts-' + id + '-' + j + '"><b class="tl">' +
+        (last ? 'Lösungsweg' : 'Tipp ' + (j + 1)) + ':</b> ' + s + '</div>';
+    });
+    x += '</div></div>';
+  });
+  return x;
+}
+function bindeUeb(t){
+  t.ueb.forEach(function(u, i){
+    var id = uid(t, i);
+    $('pr-' + id).addEventListener('click', function(){ pruefe(t, i); });
+    $('le-' + id).addEventListener('click', function(){ leere(t, i); });
+    $('ti-' + id).addEventListener('click', function(){ tipp(t, i); });
+    $('in-' + id).addEventListener('input', function(){ zustand(id).e = this.value; sichern(); });
+    $('in-' + id).addEventListener('change', function(){ zustand(id).e = this.value; sichern(); });
+    $('in-' + id).addEventListener('keydown', function(ev){ if (ev.key === 'Enter') pruefe(t, i); });
+    var sel = $('un-' + id);
+    if (sel) sel.addEventListener('change', function(){ zustand(id).u = this.value; sichern(); });
+  });
+}
+
+/* ---------- Anzeige aus dem Zustand ---------- */
+function zeigeWahl(){
+  var n = 0;
+  TEILE.forEach(function(t){
+    var an = !!S.wahl[t.id]; if (an) n++;
+    var b = $('wahl-' + t.id); b.classList.toggle('an', an); b.setAttribute('aria-pressed', an ? 'true' : 'false');
+    $('tab-' + t.id).hidden = !an;
+  });
+  $('zaehler').textContent = n ? 'Ausgewählt: ' + n + (n === 1 ? ' Teilaufgabe' : ' Teilaufgaben') : 'Noch nichts ausgewählt.';
+  var erste = TEILE.filter(function(t){ return S.wahl[t.id]; })[0];
+  $('los').disabled = !erste;
+  $('los').textContent = erste ? 'Los geht’s mit ' + erste.id + ' →' : 'Teilaufgaben auswählen';
+  reiterRand();
+  fortschritt();
+}
+function zeigeUeb(t, i){
+  var id = uid(t, i), z = zustand(id), u = t.ueb[i];
+  var inp = $('in-' + id), sel = $('un-' + id), fb = $('fb-' + id);
+  inp.value = z.e; if (sel) sel.value = z.u;
+  var fertig = z.st === 'ok';
+  inp.disabled = fertig; if (sel) sel.disabled = fertig;
+  $('pr-' + id).hidden = fertig;
+  $('le-' + id).hidden = z.st !== 'nok';
+  if (z.st === 'offen') { fb.className = 'fb'; fb.innerHTML = ''; }
+  else { fb.className = 'fb ' + (fertig ? 'ok' : 'nok'); fb.innerHTML = TEXT[z.r] || TEXT.falsch; }
+  var stufen = u.tipps.length + 1;
+  $('tp-' + id).classList.toggle('an', z.gp && z.t > 0);
+  for (var j = 0; j < stufen; j++) $('ts-' + id + '-' + j).classList.toggle('an', j < z.t);
+  var tb = $('ti-' + id);
+  tb.hidden = !z.gp || fertig || z.t >= stufen;
+  tb.textContent = z.t === stufen - 1 ? '💡 Lösungsweg zeigen' : '💡 Tipp ' + (z.t + 1) + ' zeigen';
+}
+function pruefe(t, i){
+  var id = uid(t, i), z = zustand(id), u = t.ueb[i];
+  z.e = $('in-' + id).value; var sel = $('un-' + id); if (sel) z.u = sel.value;
+  if (!z.e.trim()) { var fb = $('fb-' + id); fb.className = 'fb nok'; fb.innerHTML = u.art === 'zeichen' ? (SIE ? '❌ Wählen Sie zuerst ein Zeichen aus.' : '❌ Wähle zuerst ein Zeichen aus.') : (SIE ? '❌ Tippen Sie zuerst ein Ergebnis ein.' : '❌ Tippe zuerst ein Ergebnis ein.'); return; }
+  z.r = bewerte(u, z.e, z.u);
+  z.st = z.r === 'ok' ? 'ok' : 'nok';
+  z.gp = true;
+  sichern(); zeigeUeb(t, i); setzeFormel($('fb-' + id)); fortschritt();
+}
+function leere(t, i){
+  var id = uid(t, i), z = zustand(id);
+  z.e = ''; z.u = ''; z.st = 'offen'; z.r = '';
+  sichern(); zeigeUeb(t, i); fortschritt();
+  $('in-' + id).focus();
+}
+function tipp(t, i){
+  var id = uid(t, i), z = zustand(id);
+  z.t = Math.min(z.t + 1, t.ueb[i].tipps.length + 1);
+  sichern(); zeigeUeb(t, i);
+  var stufe = $('ts-' + id + '-' + (z.t - 1)); if (stufe) setzeFormel(stufe);
+}
+function teilFertig(t){ return t.ueb.every(function(u, i){ return zustand(uid(t, i)).st === 'ok'; }); }
+function fortschritt(){
+  var gew = TEILE.filter(function(t){ return S.wahl[t.id]; }), fertig = 0;
+  TEILE.forEach(function(t){ $('tab-' + t.id).classList.toggle('fertig', teilFertig(t)); });
+  var h = '';
+  if (!gew.length) {
+    h = SIE ? '<p class="fazit offen">Sie haben noch keine Teilaufgabe ausgewählt. Wählen Sie sie auf der Karte „Meine Fehler" aus.</p>' : '<p class="fazit offen">Du hast noch keine Teilaufgabe ausgewählt. Kreuze sie auf der Karte „Meine Fehler" an.</p>';
+  } else {
+    h = '<ul class="liste">';
+    gew.forEach(function(t){
+      var ok = teilFertig(t); if (ok) fertig++;
+      h += '<li><span class="titel">' + t.id + ' · ' + t.name + '</span><br>' +
+        t.ueb.map(function(u, i){
+          var st = zustand(uid(t, i)).st;
+          return 'Übung ' + (i + 1) + ': ' + (st === 'ok' ? '<span class="status-ok">✅ richtig</span>'
+            : st === 'nok' ? '<span class="status-nok">❌ noch nicht richtig</span>' : 'noch offen');
+        }).join(' · ') + '</li>';
+    });
+    h += '</ul>';
+  }
+  /* v4: Kernkompetenzen zählen mit */
+  var kFertig = 0;
+  KERN.forEach(function(t){ var ok = teilFertig(t); if (ok) kFertig++; });
+  if (KERN.length) {
+    $('tab-kern').classList.toggle('fertig', kFertig === KERN.length);
+    h += '<h3>🧠 Fit bleiben</h3><ul class="liste">' + KERN.map(function(t){
+      return '<li><span class="titel">' + t.id + ' · ' + t.name + '</span><br>' +
+        t.ueb.map(function(u, i){
+          var st = zustand(uid(t, i)).st;
+          return 'Übung ' + (i + 1) + ': ' + (st === 'ok' ? '<span class="status-ok">✅ richtig</span>'
+            : st === 'nok' ? '<span class="status-nok">❌ noch nicht richtig</span>' : 'noch offen');
+        }).join(' · ') + '</li>';
+    }).join('') + '</ul>';
+  }
+  var alles = gew.length > 0 && fertig === gew.length && kFertig === KERN.length;
+  if (gew.length) {
+    h += alles
+      ? '<p class="fazit ok">✅ Alle ' + gew.length + ' Teilaufgaben' + (KERN.length ? ' und alle Kernkompetenzen' : '') + ' geschafft! ' + (SIE ? 'Zeigen Sie diese Karte Ihrer Lehrkraft.' : 'Zeig diese Karte deiner Lehrkraft.') + '</p>'
+      : '<p class="fazit offen">Geschafft: ' + fertig + ' von ' + gew.length + ' Teilaufgaben' +
+        (KERN.length ? ' · ' + kFertig + ' von ' + KERN.length + ' Kernkompetenzen' : '') + '.</p>';
+  }
+  $('ende-inhalt').innerHTML = h;
+  $('tab-ende').classList.toggle('fertig', alles);
+}
+/* v3: Reiterleiste seitlich rollen */
+function reiterRand(){
+  var r = $('reiter'), max = r.scrollWidth - r.clientWidth;
+  r.classList.toggle('mehr-links', r.scrollLeft > 2);
+  r.classList.toggle('mehr-rechts', r.scrollLeft < max - 2);
+}
+function reiterZu(b){
+  var r = $('reiter');
+  if (b && !b.hidden) r.scrollLeft = Math.max(0, b.offsetLeft - (r.clientWidth - b.offsetWidth) / 2);
+  reiterRand();
+}
+function zeigeKarte(id, scrollen){
+  if (id !== 'start' && id !== 'ende' && !(id === 'kern' && KERN.length) && !S.wahl[id]) id = 'start';
+  var alle = document.querySelectorAll('.karte');
+  for (var i = 0; i < alle.length; i++) alle[i].classList.remove('aktiv');
+  var tabs = document.querySelectorAll('.reiter button');
+  for (var j = 0; j < tabs.length; j++) tabs[j].classList.remove('aktiv');
+  $('karte-' + id).classList.add('aktiv'); $('tab-' + id).classList.add('aktiv');
+  S.karte = id; sichern();
+  reiterZu($('tab-' + id));
+  if (scrollen) window.scrollTo(0, 0);
+}
+
+/* ---------- Start ---------- */
+var alt = lies();
+if (alt && alt.a) S = alt;
+baue();
+TEILE.concat(KERN).forEach(function(t){ t.ueb.forEach(function(u, i){ zeigeUeb(t, i); }); });
+zeigeWahl();
+zeigeKarte(S.karte || 'start', false);
+(function(){
+  var r = $('reiter');
+  r.addEventListener('scroll', reiterRand);
+  window.addEventListener('resize', function(){ reiterZu($('tab-' + S.karte)); });
+  r.addEventListener('wheel', function(e){
+    if (r.scrollWidth > r.clientWidth && Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+      r.scrollLeft += e.deltaY; e.preventDefault();
+    }
+  }, { passive: false });
+})();
+
+/* T-Rex */
+var rex = $('trex'), rexText = $('trex-text');
+if (rex) rex.addEventListener('click', function(){
+  rexText.classList.toggle('an'); setTimeout(function(){ rexText.classList.remove('an'); }, 2000);
+});
+})();
+/* ============ ENDE BAUSTEIN Rückblick-KA-Engine ============ */
+
+/* =============================================================================
+   BAUSTEIN: MathJax-Notfall-Anzeige  (MATHJAX-FALLBACK)
+   Gepflegt im Wartungs-Projekt. Unverändert ans ENDE des Seiten-Skripts kopieren
+   (in die Seite hinein – nie per <script src> verlinken, TEIL 8.1).
+   Voraussetzung auf der Seite: das .frac-CSS mit Kind-Selektoren (TEIL 7.2):
+     .frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;
+           margin:0 .2em;line-height:1.15;}
+     .frac > span{display:block;padding:0 .35em;}
+     .frac > span:first-child{border-bottom:1.8px solid currentColor;padding-bottom:.1em;}
+     .frac > span:last-child{padding-top:.1em;}
+   ========================================================================== */
+/* =============================================================================
+   Notfall-Anzeige für Formeln (MATHJAX-FALLBACK)
+   Lädt MathJax nicht (Schul-WLAN, Vorschau, Offline-Kopie), blieben sonst
+   \( ... \) als Rohtext mit Backslashes stehen. Dann werden die TeX-Ausdrücke
+   hier in lesbares HTML gewandelt: √ mit Klammer, Brüche als .frac-Konstrukt
+   (kein Schrägstrich!), Hoch-/Tiefstellungen als sup/sub, Sonderzeichen direkt.
+   Ist MathJax da, passiert nichts.
+   ========================================================================== */
+(function(){
+  var AUF = '\u0001', ZU = '\u0002';   /* Platzhalter fuer { } aus \left\{ */
+
+  function leseGruppe(t, i){
+    if (t.charAt(i) !== '{') return null;
+    var tiefe = 0;
+    for (var j = i; j < t.length; j++){
+      if (t.charAt(j) === '{') tiefe++;
+      else if (t.charAt(j) === '}'){ tiefe--; if (tiefe === 0) return [t.slice(i+1, j), j+1]; }
+    }
+    return null;
+  }
+
+  function strukturen(t){
+    var aus = '', i = 0;
+    while (i < t.length){
+      var m = /^\\(dfrac|tfrac|frac|sqrt)/.exec(t.slice(i));
+      if (m){
+        var a = leseGruppe(t, i + m[0].length);
+        if (a){
+          if (m[1] === 'sqrt'){
+            var inn = strukturen(a[0]);
+            aus += /^[0-9A-Za-z]+$/.test(a[0]) ? '√' + inn : '√(' + inn + ')';
+            i = a[1]; continue;
+          }
+          var b = leseGruppe(t, a[1]);
+          if (b){
+            aus += '<span class="frac"><span>' + strukturen(a[0]) + '</span><span>'
+                 + strukturen(b[0]) + '</span></span>';
+            i = b[1]; continue;
+          }
+        }
+      }
+      aus += t.charAt(i); i++;
+    }
+    return aus;
+  }
+
+  function texHtml(t){
+    t = t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    t = t.replace(/\\rightarrow/g, '→').replace(/\\leftarrow/g, '←')
+         .replace(/\\Rightarrow/g, '⇒').replace(/\\Leftarrow/g, '⇐')
+         .replace(/\\left\\\{/g, AUF).replace(/\\right\\\}/g, ZU)
+         .replace(/\\left(?![a-zA-Z])/g, '').replace(/\\right(?![a-zA-Z])/g, '')
+         .replace(/\\\{/g, AUF).replace(/\\\}/g, ZU);
+    t = t.replace(/\\cdot/g, '·').replace(/\\times/g, '·')
+         .replace(/\\approx/g, '≈').replace(/\\neq/g, '≠')
+         .replace(/\\leq/g, '≤').replace(/\\le\b/g, '≤')
+         .replace(/\\geq/g, '≥').replace(/\\ge\b/g, '≥')
+         .replace(/\\pm/g, '±').replace(/\\mp/g, '∓')
+         .replace(/\\ldots/g, '…').replace(/\\dots/g, '…')
+         .replace(/\\to\b/g, '→')
+         .replace(/\\infty/g, '∞')
+         .replace(/\\pi/g, 'π').replace(/\\alpha/g, 'α')
+         .replace(/\\beta/g, 'β').replace(/\\gamma/g, 'γ')
+         .replace(/\\Delta/g, 'Δ').replace(/\\delta/g, 'δ')
+         .replace(/\\min/g, 'min').replace(/\\max/g, 'max')
+         .replace(/\\text\{([^{}]*)\}/g, '$1')
+         .replace(/\\mathrm\{([^{}]*)\}/g, '$1');
+    t = strukturen(t);
+    t = t.replace(/\^\{([^{}]*)\}/g, '<sup>$1</sup>')
+         .replace(/\^(-?[0-9A-Za-z])/g, '<sup>$1</sup>')
+         .replace(/_\{([^{}]*)\}/g, '<sub>$1</sub>')
+         .replace(/_(-?[0-9A-Za-z])/g, '<sub>$1</sub>');
+    t = t.replace(/\{,\}/g, ',').replace(/\\,/g, ' ').replace(/\\;/g, ' ')
+         .replace(/\\ /g, ' ').replace(/[{}]/g, '')
+         .replace(new RegExp(AUF, 'g'), '{').replace(new RegExp(ZU, 'g'), '}');
+    return t;
+  }
+
+  function mathNotfall(){
+    if (window.MathJax && window.MathJax.typesetPromise) return;  /* MathJax ist da */
+    var lauf = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
+      acceptNode: function(n){
+        var tag = n.parentNode && n.parentNode.nodeName;
+        if (tag === 'SCRIPT' || tag === 'STYLE') return NodeFilter.FILTER_REJECT;
+        return n.nodeValue.indexOf('\\(') > -1 ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP;
+      }
+    });
+    var treffer = [], n;
+    while ((n = lauf.nextNode())) treffer.push(n);
+    treffer.forEach(function(k){
+      var teile = k.nodeValue.split(/\\\(([\s\S]+?)\\\)/);
+      if (teile.length < 2) return;
+      var html = '';
+      for (var i = 0; i < teile.length; i++){
+        html += (i % 2)
+          ? '<span class="tex-ersatz">' + texHtml(teile[i]) + '</span>'
+          : teile[i].replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      }
+      var huelle = document.createElement('span');
+      huelle.innerHTML = html;
+      var frag = document.createDocumentFragment();
+      while (huelle.firstChild) frag.appendChild(huelle.firstChild);
+      k.parentNode.replaceChild(frag, k);
+    });
+  }
+  window.addEventListener('load', function(){ setTimeout(mathNotfall, 3500); });
+})();
+
+</script>
+
+<!-- ============================================================
+     BAUSTEIN: Navigationsleiste  (v6, 12.11.2026)
+     Pflicht auf jeder Lernseite (anweisung_lernseiten.txt, TEIL 3.6).
+     Einfügen: UNVERÄNDERT direkt vor dem T-Rex bzw. vor </body> – nicht in <main>.
+     - 🏠 schwebender Knopf unten links (immer sichtbar, T-Rex bleibt rechts) + Leiste am Seitenende.
+     - 🏠 Startseite: feste Adresse, funktioniert aus jedem Unterordner.
+     - 📚 Alles für …: liest <meta name="klasse"> und hängt ?klasse=… an.
+       Fehlt das Meta-Tag, bleibt der Knopf unsichtbar.
+     - Seit v6: Texte im Feedback-Fenster ohne Anrede (passt zu Sek I „du"
+       und Oberstufe „Sie", anweisung_lernseiten.txt 3.7).
+     - Seit v5: Alle drei Links (🏠, Startseite, Alles für …) hängen zusätzlich
+       start=<fach> an (aus <meta name="fach">, sonst aus dem Ordner bio/mathe/…).
+       Die Startseite öffnet dann zuerst den Reiter dieses Fachs; die anderen
+       Fächer bleiben als Reiter erreichbar.
+     - ✉️ Feedback: Fenster mit Art (Fehler/Idee/Lob) und Textfeld.
+       "Mail öffnen" startet das eigene Mailprogramm; Seitentitel und
+       Seitenadresse stehen automatisch drin. Kein fremder Dienst.
+       Empfänger: NUR in FB_NAME/FB_DOMAIN unten ändern.
+     - Impressum & Datenschutz: feste Adresse, seit v4 freigeschaltet
+       (impressum.html im Repo-Root existiert).
+     - Eigene Klassen mit Präfix "dino-", Systemschrift,
+       kein Speicher, Schrift ≥ 1rem, Tipp-Ziele ≥ 44 px.
+     - Die Kommentarzeilen BAUSTEIN/ENDE BAUSTEIN bleiben stehen –
+       pruefe.py und das Nachrüst-Skript erkennen den Block daran.
+     ============================================================ -->
+<style>
+.dino-nav{max-width:1024px;margin:2.5rem auto 5rem;padding:0 1rem;
+  font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;}
+.dino-nav-innen{display:flex;flex-wrap:wrap;gap:.6rem;justify-content:center;
+  border-top:2px solid #e4dcd0;padding-top:1.1rem;}
+.dino-nav a,.dino-nav button{display:inline-flex;align-items:center;gap:.4rem;
+  min-height:44px;padding:.5rem 1.1rem;border:2px solid #22303f;border-radius:.6rem;
+  background:#fff;color:#22303f;text-decoration:none;cursor:pointer;
+  font-family:inherit;font-size:1rem;font-weight:700;line-height:1.2;
+  width:auto;margin:0;box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;}
+.dino-nav a:active,.dino-nav button:active{transform:scale(.97);}
+.dino-nav a.dino-nav-start{background:#22303f;color:#fff;}
+.dino-nav a[hidden]{display:none;}
+.dino-fb{width:min(32rem,calc(100vw - 2rem));border:2px solid #22303f;border-radius:.9rem;
+  padding:1.2rem;color:#22303f;background:#fff;
+  font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;font-size:1rem;}
+.dino-fb::backdrop{background:rgba(34,48,63,.45);}
+.dino-fb h2{margin:0 0 .3rem;font-size:1.2rem;}
+.dino-fb p{margin:.4rem 0;font-size:1rem;line-height:1.45;}
+.dino-fb-seite{font-weight:700;}
+.dino-fb-arten{display:flex;flex-wrap:wrap;gap:.5rem;margin:.7rem 0;border:0;padding:0;}
+.dino-fb-arten legend{font-weight:700;margin-bottom:.4rem;font-size:1rem;}
+.dino-fb-arten label{display:inline-flex;align-items:center;gap:.35rem;min-height:44px;
+  padding:.4rem .9rem;border:2px solid #e4dcd0;border-radius:.6rem;cursor:pointer;font-size:1rem;}
+.dino-fb-arten input{width:1.1rem;height:1.1rem;margin:0;}
+.dino-fb-arten label:has(input:checked){border-color:#22303f;background:#eef0f3;}
+.dino-fb textarea{width:100%;box-sizing:border-box;min-height:7rem;padding:.6rem;
+  border:2px solid #e4dcd0;border-radius:.6rem;font-family:inherit;font-size:1rem;color:#22303f;}
+.dino-fb textarea:focus{outline:none;border-color:#22303f;}
+.dino-fb-knoepfe{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.8rem;}
+.dino-fb-knoepfe button{min-height:44px;padding:.5rem 1rem;border-radius:.6rem;
+  border:2px solid #22303f;background:#fff;color:#22303f;font-family:inherit;
+  font-size:1rem;font-weight:700;cursor:pointer;width:auto;margin:0;}
+.dino-fb-knoepfe .dino-fb-senden{background:#22303f;color:#fff;}
+.dino-fb-meldung{min-height:1.4rem;font-weight:700;}
+.dino-fb-meldung.ok{color:#1e7d32;}
+.dino-fb-meldung.nok{color:#c1272d;}
+.dino-home{position:fixed;left:.7rem;bottom:.7rem;z-index:49;width:44px;height:44px;
+  display:flex;align-items:center;justify-content:center;border-radius:50%;
+  background:#fff;border:2px solid #22303f;text-decoration:none;font-size:1.3rem;
+  box-shadow:0 2px 6px rgba(34,48,63,.25);-webkit-tap-highlight-color:transparent;}
+.dino-home:active{transform:scale(.93);}
+@media print{.dino-nav,.dino-fb,.dino-home{display:none;}}
+</style>
+<a class="dino-home" href="https://szymczak75.github.io/Schule/dino_hub.html" title="Zur Startseite" aria-label="Zur Startseite">🏠</a>
+<nav class="dino-nav" aria-label="Seitennavigation">
+  <div class="dino-nav-innen">
+    <a class="dino-nav-start" href="https://szymczak75.github.io/Schule/dino_hub.html">🏠 Startseite</a>
+    <a id="dino-nav-klasse" href="https://szymczak75.github.io/Schule/dino_hub.html" hidden>📚 Alles für …</a>
+    <button type="button" id="dino-nav-fb">✉️ Feedback zu dieser Seite</button>
+    <a class="dino-nav-impressum" href="https://szymczak75.github.io/Schule/impressum.html">Impressum &amp; Datenschutz</a>
+  </div>
+</nav>
+<dialog class="dino-fb" id="dino-fb" aria-labelledby="dino-fb-titel">
+  <h2 id="dino-fb-titel">✉️ Feedback zu dieser Seite</h2>
+  <p>Seite: <span class="dino-fb-seite" id="dino-fb-seite"></span></p>
+  <fieldset class="dino-fb-arten">
+    <legend>Worum geht es?</legend>
+    <label><input type="radio" name="dino-fb-art" value="Fehler" checked> 🐞 Fehler</label>
+    <label><input type="radio" name="dino-fb-art" value="Idee"> 💡 Idee</label>
+    <label><input type="radio" name="dino-fb-art" value="Lob"> 👍 Lob</label>
+  </fieldset>
+  <textarea id="dino-fb-text" aria-label="Nachricht"
+    placeholder="Was ist aufgefallen? Bei Fehlern: Welche Karte, welche Aufgabe?"></textarea>
+  <p>Bitte schreib keine persönlichen Daten hinein.</p>
+  <div class="dino-fb-knoepfe">
+    <button type="button" class="dino-fb-senden" id="dino-fb-senden">✉️ Mail öffnen</button>
+    <button type="button" id="dino-fb-kopieren">📋 Text kopieren</button>
+    <button type="button" id="dino-fb-zu">Schließen</button>
+  </div>
+  <p class="dino-fb-meldung" id="dino-fb-meldung" aria-live="polite"></p>
+  <p>Kein Mailprogramm? Text kopieren und an <b id="dino-fb-adresse"></b> schicken.</p>
+</dialog>
+<script>
+(function(){
+  /* Empfänger – nur hier ändern */
+  var FB_NAME = 'aszymczak', FB_DOMAIN = 'my-mcg.de';
+  var START = 'https://szymczak75.github.io/Schule/dino_hub.html';
+
+  /* Fach der Seite → Startseite öffnet zuerst diesen Reiter */
+  var FAECHER = ['mathe', 'bio', 'kompass'];
+  var mf = document.querySelector('meta[name="fach"]');
+  var fach = mf ? (mf.getAttribute('content') || '').trim().toLowerCase() : '';
+  if (FAECHER.indexOf(fach) < 0) {
+    var teile = location.pathname.split('/');
+    fach = '';
+    for (var i = 0; i < teile.length; i++) {
+      var t = teile[i].toLowerCase();
+      if (FAECHER.indexOf(t) >= 0) { fach = t; break; }
+    }
+  }
+  var startUrl = fach ? START + '?start=' + fach : START;
+  var heim = document.querySelectorAll('.dino-home, .dino-nav-start');
+  for (var j = 0; j < heim.length; j++) heim[j].href = startUrl;
+
+  /* 📚 Alles für … */
+  var m = document.querySelector('meta[name="klasse"]');
+  var k = m ? (m.getAttribute('content') || '').trim() : '';
+  var a = document.getElementById('dino-nav-klasse');
+  if (k && a) {
+    a.href = START + '?klasse=' + encodeURIComponent(k) + (fach ? '&start=' + fach : '');
+    var name = /^\d+$/.test(k) ? 'Klasse ' + parseInt(k, 10) : 'die ' + k.replace('_', '/');
+    a.textContent = '📚 Alles für ' + name;
+    a.hidden = false;
+  }
+
+  /* ✉️ Feedback */
+  var dlg = document.getElementById('dino-fb');
+  var fbBtn = document.getElementById('dino-nav-fb');
+  if (!dlg || !fbBtn) return;
+  var adresse = FB_NAME + '@' + FB_DOMAIN;
+  var titel = (document.title || '').trim() || location.pathname.split('/').pop();
+  var url = location.href.split('#')[0];
+  var text = document.getElementById('dino-fb-text');
+  var meldung = document.getElementById('dino-fb-meldung');
+  document.getElementById('dino-fb-seite').textContent = titel;
+  document.getElementById('dino-fb-adresse').textContent = adresse;
+
+  function art(){
+    var r = dlg.querySelector('input[name="dino-fb-art"]:checked');
+    return r ? r.value : 'Feedback';
+  }
+  function betreff(){ return '[Dino-Feedback] ' + art() + ': ' + titel; }
+  function inhalt(){
+    return 'Seite: ' + titel + '\nAdresse: ' + url + '\nArt: ' + art() +
+           '\n\n' + text.value.trim() + '\n';
+  }
+  function melde(t, ok){ meldung.textContent = t; meldung.className = 'dino-fb-meldung ' + (ok ? 'ok' : 'nok'); }
+  function leer(){
+    if (text.value.trim()) return false;
+    melde('Bitte schreib zuerst etwas in das Feld.', false);
+    text.focus();
+    return true;
+  }
+
+  fbBtn.addEventListener('click', function(){
+    melde('', true);
+    if (typeof dlg.showModal === 'function') dlg.showModal(); else dlg.setAttribute('open', '');
+    text.focus();
+  });
+  document.getElementById('dino-fb-zu').addEventListener('click', function(){
+    if (typeof dlg.close === 'function') dlg.close(); else dlg.removeAttribute('open');
+  });
+  document.getElementById('dino-fb-senden').addEventListener('click', function(){
+    if (leer()) return;
+    location.href = 'mailto:' + adresse + '?subject=' + encodeURIComponent(betreff()) +
+                    '&body=' + encodeURIComponent(inhalt());
+    melde('Das Mailprogramm öffnet sich. Danke! 🦖', true);
+  });
+  document.getElementById('dino-fb-kopieren').addEventListener('click', function(){
+    if (leer()) return;
+    var ganz = 'Betreff: ' + betreff() + '\n' + inhalt();
+    function ersatz(){
+      var t = document.createElement('textarea');
+      t.value = ganz; document.body.appendChild(t); t.select();
+      var ok = false; try { ok = document.execCommand('copy'); } catch (e) {}
+      document.body.removeChild(t);
+      melde(ok ? 'Kopiert! Jetzt in eine Mail einfügen.' : 'Kopieren ging nicht – bitte Text markieren und kopieren.', ok);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(ganz).then(function(){
+        melde('Kopiert! Jetzt in eine Mail einfügen.', true);
+      }, ersatz);
+    } else ersatz();
+  });
+})();
+</script>
+<!-- ============ ENDE BAUSTEIN Navigationsleiste ============ -->
+<div class="trex dino-ecke" id="trex" title="Made by ASzym" aria-label="Made by ASzym"><img class="dino-ikon" src="data:image/webp;base64,UklGRg4XAABXRUJQVlA4WAoAAAAQAAAAjwAAjwAAQUxQSEUIAAABoIVt2+I0+mZCQhoI1IvXoKV+udBu3d3d3V2g7u7u7u7u7tBVmkrqF1YWhwjzHWRmMpP/yx7tQURMAPxfYN2y/y00JV8f8eWd0hgD8ulkcMbA4GD/PG7CsOwPe/rDwU4U7r7rQezz0zPqGACAC+i+/q7pw4e/r8yvb3AH2mU2xLS+sriGd6wo+ut4hC5kbowFJVNO1uHpg7CviLe95XAdv6HMuJPRuSj7a1eOvtC396PPGOQ0/4aq/uwMALze19fXwFGlL+9bJIyXUeIlqvx50qAFey49e/rs+ooqHE3OcstQ9dxclDTVcAflzerJXkWEX2QpZXhjibo9ou4ILrWPo2GCsIpzzlhl4OZ75lQbuvgeCrzKdvwDP3Wt4CtLV236rQQ7srgACJwel42I2YlbPKV0dQ/ECcimvS8FrczomDIEJEtuSkBmk6pTAJ3TEdEepRHjW75Ghh/lI6FiPCJa2oN4px/I8jwgsWVW8t2vGClWxYQsZ7WmodTs+sYqCxuIeJ9Epu1PFtbPS4D8XllsIWLqvTGBlHhdRAJtb/rq6aiZRAFixnwdGVFIZGJdKgxXqRAGUVHsAxVJEVQ0SKdiq46KQQIRMeFA5QKkMa4NkLmOhtQxPBna0ySkjtcCHWcpEJZ4wH8LfFyf/4+B34d4kqE5RAOmR3lSAR0SacDM+Xq2GkZ6S2i6xNGAmeOYyns7q4ME5LlGBP5dnKXumXg+nwQspSI1gpn2kXs/Iubc2D6+mEjbLCLeBjNjRknrcBH/GBoSegGznU1i1k0FRGAxBUJMOw070PiHyA5fEK/8jb30PaHAst+fDsJwkNSsZc32okceYLpqEtqsiNuloFQ0YwcDgPHWmbHT+l3O2sNJQYcUtsyLQhgr3D2UA2Pz2iCz5Ae2UHjZVceUksNyGUNMWVWQCD6PSG8bc2jfnY8ETdudgQ6h79lD22AKvFZ9sz1rCgDcfIE9XEeBdhtiXCMAgOKv2bP0oQB6Z6Re83KATonMHfclIahVjVoaEX5AImPPwoFaTZe/mXpWCQgut/dfZoQr5YH1sOqcAqBvvNtkZeNhaL7goKDgQh7s6I+8Cpbj2be1CIBHse4rr/z1PVU823W+XntlMplM0dvKMeLdZ0ua/eaEIlJFVtaWcNT7hUeI1oyyuozMyz5sBL9BRPxaRYrzAHFdSJvJ3YwgXTnJ9eIqsAFNExEtQ3gpSa71mXfZaJmnkSob53q/qjJS3IxCRiNwOsKMjrFFpaonu97XUowEnlgw8nRtpwpcRtH0+lIdLK73ugAjnBcPet6pqTYxe0+pqej6p7SMOO8RVK5E/c8oOVWC38dAFNBYdFVs3OcvKCmMkSgZ43qpDWkodBHlvygqFnEv1/XM40YsW7Nm0cAanmyNsMlL7gCOmrYmZNBuR8fcpMV6pnai/LO+Dnz/eGT6V10mtIV4B26PE8lHmhiB75+IjA9hwafvvUYGAIDJgjzE1Kv9Bicg47ZuDHhuSsfE0Q7BD51BtGQg6wlVGIB+OfitmgOMy3WKwOjCLJR98eZiPofQN0jvLt5VuOpLJ/pJ6EPyB2gcFiG99n7gqk0+of2EhLT2pJQ1l4yPYQCg89KpUHLCzI6hOigfjYg5TsEMiaz5V8nY51Ou5/Izd8909lAq4B6ixXx0xDVExJ/OBezJFDnmXeIGFW+v/rAhIsY3UapjDjrmCg53nAND/78R8V01gJD9NhpkbucUmomyVysAUGZDzIUGAAD5In/QcsnTGQ9vjcNyWVm9FQGPQgYQ5SNOZ1DyuoADb+DFwrY82FZbA7BMVmyoMrKNrXf/k5qd+N5KwttCABC+9tYyPwfDIUT8OTsfjJZ1SKsagEdQneaV6/0ko8lbRGG3NwDU/xcR0Xo8dIQgI3cIuGrhP0h4mR+afUBEzBkDwK1FUeEfE8r8Eu4yBWNIuKBt8gFF/w4Dv2gxJ096KhfS31ue8T4JsaOjUXIVNEhTIqc3KM4ty+ggL89lEtAuSH2tPQeVfOWnlE9QGzPeKeenl9EkkQa5gjlZkUhQ2LDHnIJo/2IaIZXvCrrFD+FKeYxPQsef7aSGWtzDQk4p4CbZETG1KydR+Am6xZjioHxXKyJ+LQ2SXbPdQs5wUHEEfr+XnN1cQncU3eJZHzV+m1PN2GRxmETJT27hWwSozoFkL6s7sEzm1JO5At3hMR9wXf0ld/CqNLiwz1M3YK4Pruz3B31xPcClw76Rl9yXcy3/P6lLmaAF1zY+Ji6urxZcXHuCti89eXD5+aQ9q8eB6zfPoMtyJBRYLPScrE9jfIDNWURlHKnCAaPhHyiy3OxgAHYnWcmxPB5cAFjOe5KYlOuDCgHjpe4TkvPH6oZGYL/CSxqE9N93dA7igMTydwTWrElvjk9u7KcBMoNXJyvz7IYpxaaSLe3Huzu7orpVK6QFWnVtb2crMVMfUrvnmBVbL1y6+dGu0J16pYO8eSA55KUSs0CU1+kMYXPe5SpymAey+2YqYOstJsqV3KPIcqCZ12jqmlDBL+GywEOZmQRpinecvvPo8U+o5D6tHF3+jglK2HuTw5Vb/d6CSme2A0l9zchTb5JQybT61Gi6mFDFpwXFuHLbkwRU+Hs4MdzQRFRzAYi3f4fKxwYQ0+YnqplSX6zdV1TxcV5air1EVR/nEyn/D6p5WU/LTFR3NThqd6L78H+lTnpLkYo/1LnkSUrLLHXu5xMZKaiznSNlHKqa0R8c+d2o7hQgdZEqGTM9RXwfqWMuT0vT7ygonPvrQV89iOZ/oUraWI4WTfUBCg/sWzMvSPKz0mxWpTMedtOBG/aq36Wz0k0Kwv8fAgBWUDggog4AALA7AJ0BKpAAkAA+kTqYSCWjIqEulgugsBIJaA3GL+AQLO0y0PSP9j50lx/027bGz7oM4/pD/SfsC/qp03PMP5vPpV9AD/DdSd6AH6Z9bt/bv+xhLn9w+ivyZ/z/5H+d/kM93e4Hrm5S+sTNd+KP2nmT3l/EnUC9l/67evbQ+gF3n76zU18KazRQA/Tvor/+XmS+sfYJ/nP9561nob/so3GyVeOMjGAy5Vl7QF2zF7oPxne9ABlIp2AJcIYbzJvw2qZquw/tE6fsy9iP2IZiXTKHLK5sdlnTQBhM+jkN2nLN7oaO+/j5nquJFAR/uvxaBSOTs7el5f08HNGIsL9wr64311I950KRnCJd25VrDC5I7XBOXSH4xj9/vzYsRx9LkcwiAPo+Eknvqbf1sc0ApZ4Z440x+UoUj5ogo8rt22cpcy8z3roZXA38vJVv+LjYnnlx3+QE357lEmO67S5Nv51VGU1qU/80rAW6YGGJhTwl4uvdXxaIUTrKxFUBRUeN7/+5oGN6kivZZtEip4BDH9bsOsph79r9yPHAvKt8V8hnBt5EZw3NL1F9SZmwtq0bnirJjVmTUslXOnxhhbzL+8rtHvaLZfmMkrpJ3H8/3UgRY8tBXB1faKJvGjQOUhJCqp8ooO1ZMgD+/bVN/6t6qiv9ZU2rZbynXXgRY9X9SQjYDwn/+e4o3nDdDo6Blo98ezNFpL9pnVv38jLDV1YahJfoHEJB1ax+BgpFis+zllErMsJbyafCvxi0TOyM4qIvtpybnIsn69RLgy7AV+4HwAgdcZ3AFqtz5AaRSEA5fLiYswwotMBqdT7lgqhB4t0DOrbcD61dhkJ9/qn6CvDlzwxo2DxuGtGXQODJoBHUTc1FM77Z3UiYQkLK5w57jvstUrP132/zPJAOYBZvpgYDk7//eGvxWv/94e6fhfR+Ed/e/+/7/ydzQH7/zSKjrmEAHZAAKpWeK3DFHikMU/eqa3zM3xPxCWiPaZpog+Ut4XIlfjaJ1e0iPzMxv/7u+wV2d4waR//AnllHh+m1IpiWqMKbE7PAr3V4QEdmKhs8G/fhpYaDmtxei8rVv9ccgl99c28G65YQ5rC+EYBw+wyQhHKwSo4NbOi6nL8lCRj7UYFJlhgjYa4VXhwT58zDN/s/9mXzMDBVheXcFRxW0ywUzKnlefFDwn+khsPA9EcxeiyZAdPknEn/SNh2t/1MFxmOgnL7N5pbRd0CcE46Wbvo0DOMufoWXxHlGh8Sd0+sdb7jh9kfFAoMHozUMjt39fT5W5mXjZ/CYIp3BwImYGlILGnF6jTueUks8EQDwmXs0I1lGVFty//Doae5h1d8e9jTM+/uLN276Tk5KBbu1+FHs56Q0L4/WmddhNVd35j4COiKm6fdFwiATlwR4Aqg+bOEBJKVb5nj9szrileEuEtt0XZu4pS62vcJ+2YMgAsnEKsxEbBa5jHOtATRaLweFVSAnJxKDI2QVNXbwbH7vof4ZacgQqE87Acg7B6QJWpRwCwSIxsq2kRXHPNKGMWPh0CGXNJI3Ah4OIL4XCpLfUqtaNtmGBUhD51a7DqKUwqRx/aiX8NAfBaDzk45QJSK0m0LkGZX1LgESQL105/tgQZASaMnzLSh32M6Zk/smwRWHBrZ1zl6NS8BF6KLUn867B83vyWPlWFYuVDRD/OYLs/fxto/5d8sEmt39AOc/Jx6r//w12hjz5w7AM3NJFj76n5L2rVKJ6xcVMhom63uIEBlxHwhY0Uq035agH+ifam1VGcsrIVx7ODkDclZ8xAGU9/i57JdWQ2i6yUciME7gqnHf3N85zPhmT3Kwn0LRz9odYyjoRuUvEy24Q6vrsoK8rQTxxxwSTnUaY+Xq8po/0yW/1E7u7TfzUc2A3YMVk9I5yLgHpuojzd26jihTp2OXGb50YsaxNd+RZFGlISE0IAlOw9COgbM2MEtNqLrFOuPotlh8GDpACIfxD9zKx/CZ83WVbYzZZuZnAvi4OI6i65UJZVKBjhLg65MNPhLIsSWwpdl46h2li6GMvAspuqsUc7223G1vtRJmcDrM+FufiN5gq8GC3wHaVpx2LfJ7GB8gDdT3m1Zq1vPNwdvreGsJ3P2Dy4MFw9Zr5WXygi1lto43cIG3I6RuSPq8nMBWW3Q+kelzCSe5RDup9IPii070jRPSeiv9QRynD05X+WCysUPUVM3ohTRpWHMXh9HH/hq+eV3JlSJVFJq869wMd3tZMv5JkvMbY1lGMAxCSvshVcaV/TpYTCBWikocdO5AbpN2+k7Cbch25E1jiiay/JYrXAQWPGkoobeJtGWZNnTrOIVcEHUVSFlY/51tUQaJMlS9C2BhGSbsOCRGqTe7WScgb4s0f/tBWG7ARfVzuw8+tV85h5fHAyvEYX5SwA89M/TztIWno641WZYNXYw20+B9ywI1qywJkPlKPFunQOKzk7GMuUTt0LxgU+frtE7l/HoTQEFjFyBmlMcBYLa4oz1R5ntav7VCmbR0aKTzUIRFfkk7OMFp/aN4Ba22+dGPXOKm0jHFP8Yxm9vhgkqKlKRi50K/QYXYLqX+7q1bB+sG4+O36Av45/g5s0wXfdOKId6q8oUd9cXnlQy5sWt4c8Z8oURzUrD2410ICZBf2qyMyqWb014pPCjWtFWaF66dfYfkByyWK3+AhW1Y2cqoyDPVQ9GIGMO/d1Lih2urWV0h6OuMs16JiD3aEX9/4ncjTc21ZaKqcVGFwM13oh53fsKuaMMFX68cKLHEm7FvPHjF/oGwfSegMX8tIB0SMNPp1+sMnnEbAI42r9frdA1pFBd5S4rqwYtOreADWm0iXWxoUO6vjlaBklHA0QACGlo4JErryna9sghsN7rFK1GFrnEtT4NRkNsasbUW+HuRleMy3n/PAg1YjCNhHVz3nuN4AedBkhbpL1MfSNi78u+rDbYDa0Hn8PNftYmVrbugeBGt1Kb1QXzyDg/QsH7KKknpr0MIfUBz9h5ilyToU6VBMOs2J/ZaZkMGvuz/pWCcA4Q6DTzDkevZbEb72TK9FuY66dbuY0xkMzjhqf+A7//yT/5H7/+RbnueE5MWr5zGWantD117JA77bMkTT3pNfYqJPyg31+Nx3Tkp87lGpP/V6qHa8XkWIZiheWMMNROdOWoSY6Hiev6DpfY3yhYyBcv6yvTno97dGsMo/dZX7h9/MJFxBHCx3V0FACtxcK+vpHT85GURvo6PRCR81MQn197il0JHcXE8l3tnmQz4B+V4mzqfgRL/QAltD2a46ti5/+1v6LJy/lFn5iARwYR+/Q6RzPqixrBVCqrt12Vj6aLYQ9Bv7wVKcGrFw7jLptr/io0EHUDugsQ19mOYPffbDLvNHOiHUhdenDoGIvbk7Nde1yJ1jNPNnEwnY1RI6ZqO5YwaVctQLgQM1kryQqOR41hJ1f1AX4eTGzzh+oX0bTvlKscCl9MYnLtHpUZ2X6wpz9KHFZ5/9nfEVfrRpTUKmslycOaRtY4kNy9mfoL6GWmRqQKavWmdcLVPug+S4j1kfamuf94ehUPSS7qkIzmNTFaKHEOcd57OVEffRW5TcqAsWtAnFWapK4e8odPxKkrndyVrQh9odRcyPT5w9CKMhm12FiZp5er8mmK0J2fyyq9GQq1qqguNaTTmhHFSqO9C90fopwXyU/xaW74dRDznLlGITL027Ehu7r9GqVOLVOa5xJd8ekUFLuW/ZzYFF3jfnAOhx4D9cBYztHvQOzxSm/oL5KfkaLG1hBCummCiQS0sojnD/DjgpLd7uh2/xk1/BjcCGCC/T41/OnSK5LiFknirWjgd7BECmhcncqKKWqvMbBmu4cOUGDnDMLge1/BQCWhg5uBtA6q05iWPGK/7qjs8t9/WBSadA/tWeVFWVY6/KmlrU55u0OAuQqj1EzRJm7CGwf/2Et/8Xj69C8NmqTw8gmPvNMUJ+biPiYcXjQF6H8eEAVme3MSgL6tzXHuBi/zTYKpRaD/FWcK2QC5snu8mk/vud6e+GBhgoncIXQO3K+J7WZ+kmkMVufAadJtwxdfuJP6Pkkw7IAbx0vLMPbv/oz8/KnBE4TPhz74LFsQtOb5SO0lBIB1QIJbNX8A1VdOdhPNfGk0UihJuFpAzUzyJW/qzQ+K5dOSaM1ZgvITZH6xYperoC0PaAcOla0kjSxgu/rXKLvhv7aEBiGMqg0APrSb+uv8xySFqvx+Pje8C/HdjRpYH+7+3Yajk4/+T0ftrBnlRonlEQ3QjCUUxvMgAvk79ylth7MivDu0PM44Fn32cBkbf/5K6zH2DAt9qgttU9e64SvjhEFH3qQyyvLHtIgus6RUjjbWGrV08dAtr94Srb+4EZCM4qQZ+yobVjpqprmw/jWgV23hv9fMHb4iBeUal/NUJ7ILmTXtcPbAriw8CVfpY71He5Wcm7aPClgij23gFMuYMGqL+G+KA4reg8m49qHSWirqjo0q1SHPyiuqwrGMrFco38z6XUM+Lb0sy8AL0bpx1iPF53Gb9km0f/DJNcZfYRjt/LWJ85f42Vu5t8BTuRyMefJ8yCVwOX7azYvH9kQvpttn/l/1rVy+tARPoHToWMLoJQo+9vpxnwsDBmUsOxb0Y7jcfHfqwNGUcg42zl76T8VqaJ8Hx/PjPatBTcHoLKWO5n7LTe9GZ9u+jWfuxsi1fw+t+CH9cpKkwv+0T33sLmyEdCSrt2T/SCem12AxPNSWlhAawHxpKGEmvnOnMYIEuCSc5oX/M21isAmGTdkjFmM+kDpgJx6YfY/aYhBZh8efIdmrhHGUhuKZ5JQ5N4AlSNXQXnl9X2xcuxr9q3Cmv4H/6yv5fyN1Dpe53PdDnV9nWCQHkKlCAX1STDAZNF92YOOj2azwJJ8y1yCqUAcTd1HOmw4nGDcao7NSdu82Y3WMJyhu+YGckT86Gsn5dhRZ2npidfqBg4fWIznxfISmOJCiZyuz9X/jwy7wth+eO1Js60yq/NoMI0cNOgAAAAAA" alt="Dino" width="72" height="72" draggable="false"></div>
+<div class="trex-text dino-tipp-fest" id="trex-text">Made by ASzym</div>
+</body>
+</html>
