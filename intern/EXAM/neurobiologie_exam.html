@@ -16,7 +16,8 @@
      EXAM-Prototyp v1 (16.11.2026) – Wartungs-Projekt
      - Liegt in intern/ (nicht auf der Startseite gelistet).
      - Sperrt sich beim Verlassen (Tab-/App-Wechsel, Fokusverlust, Neuladen).
-       Entsperren nur mit dem Lehrer-Code (gespeichert nur als Hash).
+       Entsperren nur mit dem Lehrer-Code. Sein Hash steht im Link (?l=…), den
+       codes_generieren.html samt QR-Code erzeugt; ohne ihn startet der Test nicht.
      - Schüler-Code nach Muster aus intern/EXAM/codes_generieren.html
        (CODE_ALPHABET/CODE_SALT müssen in beiden Dateien gleich sein).
      - Keine Lösungen im Quelltext, kein Feedback: Bewertet wird das PDF.
@@ -166,6 +167,7 @@ body.gesperrt main{filter:blur(8px);}
         <li>Ihre Antworten bleiben beim Sperren erhalten. Wird der Tab geschlossen, sind sie verloren.</li>
         <li>Am Ende geben Sie ab und laden ein PDF herunter, das Sie in Teams in der Aufgabe hochladen.</li>
       </ul>
+      <div class="meldung falsch" id="linkFehlt" hidden>✘ Dieser Link ist unvollständig. Bitte scannen Sie den QR-Code Ihrer Lehrkraft erneut.</div>
       <h3><label for="codeFeld">Ihr persönlicher Code</label></h3>
       <p>Geben Sie den Code von Ihrem Zettel ein. Ihr Name wird nirgends eingetragen.</p>
       <input type="text" id="codeFeld" class="code-eingabe" maxlength="7" autocomplete="off"
@@ -280,8 +282,8 @@ body.gesperrt main{filter:blur(8px);}
 /* ====================== ANPASSEN je EXAM ====================== */
 var EXAM_THEMA   = 'Neurobiologie';         // erscheint im PDF und im Dateinamen
 var EXAMZEIT_MIN = 30;                       // Richtzeit (nur Orientierung)
-var LEHRER_HASH  = '667bf092';               // Hash des Lehrer-Codes (codes_generieren.html)
-var SPEICHER     = 'aszym:neurobiologie_exam:v1';
+/* Der Lehrer-Code kommt als Hash aus dem Link (?l=…), erzeugt mit codes_generieren.html. */
+var SPEICHER     = 'aszym:neurobiologie_exam:v2';
 
 var NEURON = [ // Nummern der Abbildung – nur Positionen, keine Lösungen
   {nr:1,x:60, y:40, zx:105,zy:88},
@@ -344,7 +346,7 @@ function hashText(s){
 /* ---------- Zustand (TEIL 6: nur sessionStorage, immer try/catch) ---------- */
 var S = null;
 function neuerZustand(){
-  return { phase:'start', code:'', start:0, ende:0, gesperrt:false, log:[], karte:'a1',
+  return { phase:'start', code:'', lh:'', start:0, ende:0, gesperrt:false, log:[], karte:'a1',
            a:{}, plaetze:[null,null,null,null,null,null,null] };
 }
 function laden(){
@@ -534,7 +536,7 @@ window.addEventListener('pagehide', function(){ sperren('Seite neu geladen oder 
 
 function entsperren(){
   var f = $('lehrerFeld'), m = $('sperreMeldung');
-  if (hashText(f.value) === LEHRER_HASH){
+  if (S.lh && hashText(f.value) === S.lh){
     S.gesperrt = false;
     S.log.push({ t: Date.now(), art: 'entsperrt durch Lehrkraft' });
     speichern(); zeigeSperre(false);
@@ -547,17 +549,22 @@ function entsperren(){
 }
 
 /* ---------- Start ---------- */
+function linkHash(){
+  var m = /[?&]l=([0-9a-f]{8})(?:&|$)/i.exec(location.search);
+  return m ? m[1].toLowerCase() : '';
+}
 function codePruefenAnzeige(){
   var f = $('codeFeld'), m = $('codeMeldung'), n = codeNorm(f.value);
-  var ok = codeGueltig(n);
+  var ok = codeGueltig(n) && !!linkHash();
   $('startKnopf').disabled = !ok;
   if (n.length < 5){ m.className = 'meldung'; m.textContent = ''; }
   else if (ok){ m.className = 'meldung ok'; m.textContent = '✔ Code gültig: ' + codeFormat(n); }
   else { m.className = 'meldung falsch'; m.textContent = '✘ Dieser Code ist ungültig. Bitte genau mit dem Zettel vergleichen.'; }
 }
 function starten(){
-  if (!codeGueltig($('codeFeld').value)) return;
+  if (!codeGueltig($('codeFeld').value) || !linkHash()) return;
   S.code = codeFormat($('codeFeld').value);
+  S.lh = linkHash();
   S.phase = 'laeuft'; S.start = Date.now(); S.gesperrt = false;
   S.log.push({ t: S.start, art: 'Test gestartet' });
   speichern();
@@ -731,6 +738,10 @@ function ansicht(){
 }
 
 /* ---------- Aufbau & Bindungen ---------- */
+if (!linkHash() && S.phase === 'start'){
+  $('linkFehlt').hidden = false;
+  $('codeFeld').disabled = true;
+}
 $('figNeuron').innerHTML = svgNeuron();
 $('figSynapse').innerHTML = svgSynapse();
 baueBeschriftung('n', NEURON);
