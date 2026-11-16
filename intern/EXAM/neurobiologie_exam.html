@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>EXAM Neurobiologie</title>
+<meta name="description" content="Prüfungsseite (EXAM) zur Neurobiologie: Neuron und Synapse beschriften, Signalübertragung sortieren und einen fehlenden Schritt erklären, Wirkung eines Gifts erklären. Die Seite sperrt sich beim Verlassen und erzeugt am Ende ein anonymes Abgabe-PDF.">
+<meta name="keywords" content="Neurobiologie, Neuron, Synapse, Signalübertragung, Neurotransmitter, EXAM, Prüfung">
+<meta name="typ" content="Exam">
+<meta name="klasse" content="Q1">
+<meta name="fach" content="bio">
+<meta name="oberthema" content="Neurobiologie">
+<meta name="thema" content="Neuron und Synapse">
+<!-- ============================================================
+     EXAM-Prototyp v1 (16.11.2026) – Wartungs-Projekt
+     - Liegt in intern/ (nicht auf der Startseite gelistet).
+     - Sperrt sich beim Verlassen (Tab-/App-Wechsel, Fokusverlust, Neuladen).
+       Entsperren nur mit dem Lehrer-Code (gespeichert nur als Hash).
+     - Schüler-Code nach Muster aus intern/EXAM/codes_generieren.html
+       (CODE_ALPHABET/CODE_SALT müssen in beiden Dateien gleich sein).
+     - Keine Lösungen im Quelltext, kein Feedback: Bewertet wird das PDF.
+     - Abgabe: PDF wird im Browser erzeugt (ohne Bibliothek), Dateiname
+       EXAM_<Thema>_<Code>.pdf, keine Namen im PDF.
+     - Zustand nur in sessionStorage (try/catch), kein Dauerspeicher.
+     - Bewusst OHNE Navigationsleiste: Jeder Link nach draußen würde
+       die Sperre auslösen (pruefe.py meldet deshalb NAV).
+     ============================================================ -->
+<style>
+:root{
+  --ink:#22303f; --card:#ffffff; --green:#1e7d32; --red:#c1272d;
+  --amber:#b8860b; --amber-light:#fdf3d9; --amber-dark:#96690a;
+  --grey:#6b7686; --grey-light:#eef0f3; --border-blue:#1f4680;
+  --bg:#f7f8fa; --line:#e2e6ec;
+}
+*{box-sizing:border-box;}
+html{-webkit-text-size-adjust:100%;}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;font-size:1rem;line-height:1.5;
+  -webkit-tap-highlight-color:transparent;
+  -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;}
+input,textarea{-webkit-user-select:text;user-select:text;}
+main{max-width:1024px;margin:0 auto;padding:1rem;}
+.kopf{background:var(--grey-light);border:3px solid var(--border-blue);border-radius:1rem;
+  padding:1rem 1.2rem;margin-bottom:1rem;}
+.kopf h1{margin:0;font-size:1.5rem;}
+.kopf p{margin:.3rem 0 0;font-size:1rem;color:var(--grey);}
+.kopfzeile{display:flex;flex-wrap:wrap;gap:.6rem;align-items:center;justify-content:space-between;}
+.uhr{font-size:1.3rem;font-weight:800;color:var(--border-blue);font-variant-numeric:tabular-nums;}
+.uhr-hinweis{font-size:1rem;color:var(--grey);}
+.codeanzeige{font-weight:700;font-size:1rem;}
+details.amber{background:var(--amber-light);border:2px solid var(--amber);border-radius:.7rem;
+  margin-top:.6rem;padding:0 .8rem;}
+details.amber summary{min-height:44px;display:flex;align-items:center;cursor:pointer;
+  font-weight:700;color:var(--amber-dark);font-size:1rem;}
+details.amber p{margin:.2rem 0 .7rem;color:var(--ink);}
+.tabs{display:flex;flex-wrap:wrap;gap:.5rem;margin:0 0 1rem;}
+.tab{min-height:44px;padding:.5rem 1rem;border:2px solid var(--border-blue);border-radius:.6rem;
+  background:#fff;color:var(--border-blue);font:inherit;font-size:1rem;font-weight:700;cursor:pointer;}
+.tab.aktiv{background:var(--border-blue);color:#fff;}
+.tab .marke{margin-left:.35rem;}
+.karte{display:none;background:var(--card);border:2px solid var(--line);border-radius:1rem;
+  padding:1.2rem;margin-bottom:1rem;}
+.karte.aktiv{display:block;}
+.karte h2{margin:0 0 .5rem;font-size:1.3rem;color:var(--border-blue);}
+.karte h3{margin:1rem 0 .4rem;font-size:1.1rem;}
+.auftrag{font-weight:700;}
+.figur{border:2px solid var(--line);border-radius:.8rem;background:#fff;padding:.4rem;margin:.6rem 0;}
+.figur > svg{display:block;width:100%;height:auto;}
+.beschriftung{display:grid;grid-template-columns:repeat(auto-fill,minmax(15rem,1fr));gap:.6rem;margin-top:.6rem;}
+.feld{display:flex;align-items:center;gap:.5rem;}
+.nr{flex:0 0 auto;width:2.2rem;height:2.2rem;border-radius:50%;background:var(--border-blue);color:#fff;
+  font-weight:800;font-size:1rem;display:flex;align-items:center;justify-content:center;}
+input[type=text],textarea{width:100%;min-height:44px;padding:.5rem .7rem;border:2px solid var(--line);
+  border-radius:.6rem;font:inherit;font-size:1rem;color:var(--ink);background:#fff;}
+textarea{min-height:9rem;resize:vertical;}
+input[type=text]:focus,textarea:focus{outline:none;border-color:var(--border-blue);}
+input:disabled,textarea:disabled{background:var(--grey-light);color:var(--ink);opacity:1;-webkit-text-fill-color:var(--ink);}
+.knopf{min-height:44px;padding:.6rem 1.2rem;border:2px solid var(--border-blue);border-radius:.6rem;
+  background:var(--border-blue);color:#fff;font:inherit;font-size:1rem;font-weight:700;cursor:pointer;}
+.knopf.hell{background:#fff;color:var(--border-blue);}
+.knopf:disabled{background:var(--grey-light);border-color:var(--line);color:var(--grey);cursor:default;}
+.knopf:active:not(:disabled){transform:scale(.98);}
+.zeile{display:flex;flex-wrap:wrap;gap:.6rem;align-items:center;margin-top:.8rem;}
+.meldung{margin-top:.6rem;font-weight:700;}
+.meldung.ok{background:var(--green);color:#fff;padding:.5rem .8rem;border-radius:.6rem;}
+.meldung.falsch{background:var(--red);color:#fff;padding:.5rem .8rem;border-radius:.6rem;}
+/* Sortieren per Antippen */
+.sort-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+@media (max-width:760px){.sort-grid{grid-template-columns:1fr;}}
+.sort-spalte h3{margin-top:0;}
+.vorrat,.plaetze{display:flex;flex-direction:column;gap:.5rem;}
+.schritt-karte{min-height:44px;padding:.6rem .8rem;border:2px solid var(--line);border-radius:.6rem;
+  background:#fff;color:var(--ink);font:inherit;font-size:1rem;text-align:left;cursor:pointer;width:100%;}
+.schritt-karte.gewaehlt{border-color:var(--border-blue);background:var(--grey-light);box-shadow:0 0 0 2px var(--border-blue);}
+.schritt-karte.fehlt{border-style:dashed;border-color:var(--amber);background:var(--amber-light);font-weight:700;}
+.platz{display:flex;align-items:stretch;gap:.5rem;}
+.platz .nr{align-self:center;}
+.platz-feld{flex:1;min-height:52px;border:2px dashed var(--grey);border-radius:.6rem;background:var(--bg);
+  font:inherit;font-size:1rem;color:var(--grey);text-align:left;padding:.5rem .8rem;cursor:pointer;}
+.platz-feld.belegt{border-style:solid;border-color:var(--border-blue);background:#fff;color:var(--ink);}
+.platz-feld.belegt.fehlt{border-color:var(--amber);background:var(--amber-light);font-weight:700;}
+.leer-hinweis{color:var(--grey);}
+/* Start & Abgabe */
+.start-box{max-width:36rem;}
+.code-eingabe{font-size:1.3rem !important;letter-spacing:.15em;text-transform:uppercase;max-width:14rem;}
+.liste-stand{margin:.4rem 0 0;padding-left:1.2rem;}
+.schritte-abgabe{margin:.4rem 0 0;padding-left:1.4rem;}
+.schritte-abgabe li{margin:.3rem 0;}
+.dateiname{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:1rem;background:var(--grey-light);
+  padding:.1rem .4rem;border-radius:.3rem;-webkit-user-select:text;user-select:text;}
+/* Sperre */
+.sperre{position:fixed;inset:0;z-index:1000;background:rgba(34,48,63,.92);display:none;
+  align-items:center;justify-content:center;padding:1rem;}
+.sperre.an{display:flex;}
+body.gesperrt main{filter:blur(8px);}
+.sperre-box{background:#fff;border:4px solid var(--red);border-radius:1rem;padding:1.4rem;max-width:30rem;width:100%;}
+.sperre-box h2{margin:0 0 .5rem;color:var(--red);font-size:1.4rem;}
+.sperre-box p{margin:.4rem 0;}
+.geheim{-webkit-text-security:disc;}
+.dialog{position:fixed;inset:0;z-index:900;background:rgba(34,48,63,.6);display:none;
+  align-items:center;justify-content:center;padding:1rem;}
+.dialog.an{display:flex;}
+.dialog-box{background:#fff;border:3px solid var(--border-blue);border-radius:1rem;padding:1.3rem;max-width:30rem;width:100%;}
+.dialog-box h2{margin:0 0 .5rem;font-size:1.3rem;}
+/* Dino – baustein_dino.html */
+  .trex{position:fixed;right:.7rem;bottom:.7rem;cursor:pointer;z-index:50;user-select:none;}
+  .trex .dino-ikon{display:block;width:72px;height:72px;-webkit-user-drag:none;}
+  .trex .bubble{
+    position:absolute;right:calc(100% + 6px);bottom:26px;white-space:nowrap;
+    background:var(--ink,#1f2937);color:#fff;padding:.3rem .6rem;border-radius:.5rem;
+    font-size:1rem;opacity:0;pointer-events:none;transition:opacity .2s;
+  }
+  .trex:hover .bubble,.trex.zeig .bubble{opacity:1;}
+
+</style>
+</head>
+<body>
+<main>
+  <div class="kopf">
+    <div class="kopfzeile">
+      <div>
+        <h1>🧠 EXAM · Neurobiologie</h1>
+        <p>Neuron, Synapse und Signalübertragung</p>
+      </div>
+      <div id="kopfRechts" hidden>
+        <div class="codeanzeige">Code: <span id="codeAnzeige"></span></div>
+        <div class="uhr" id="uhr" aria-live="off">--:--</div>
+        <div class="uhr-hinweis">Dient nur der Orientierung – wenn die Zeit abgelaufen ist, passiert nichts.</div>
+      </div>
+    </div>
+    <details class="amber" id="uhrInfo" hidden>
+      <summary>ℹ️ Zur Zeitangabe</summary>
+      <p>Die Zeit ist eine Empfehlung, kein Muss. Nach Ablauf können Sie normal weiterarbeiten und abgeben.</p>
+    </details>
+  </div>
+
+  <!-- ===== Start ===== -->
+  <section class="karte aktiv" id="startKarte">
+    <div class="start-box">
+      <h2>Bevor Sie beginnen</h2>
+      <p>Diese Seite ist eine Prüfung. Bitte lesen Sie die Regeln:</p>
+      <ul class="liste-stand">
+        <li>Bleiben Sie die ganze Zeit auf dieser Seite. Wenn Sie den Tab oder die App wechseln, die Seite neu laden oder schließen, <b>sperrt sich der Test</b>.</li>
+        <li>Entsperren kann nur Ihre Lehrkraft. Jede Sperre wird im Abgabe-PDF vermerkt.</li>
+        <li>Ihre Antworten bleiben beim Sperren erhalten. Wird der Tab geschlossen, sind sie verloren.</li>
+        <li>Am Ende geben Sie ab und laden ein PDF herunter, das Sie in Teams in der Aufgabe hochladen.</li>
+      </ul>
+      <h3><label for="codeFeld">Ihr persönlicher Code</label></h3>
+      <p>Geben Sie den Code von Ihrem Zettel ein. Ihr Name wird nirgends eingetragen.</p>
+      <input type="text" id="codeFeld" class="code-eingabe" maxlength="7" autocomplete="off"
+             autocapitalize="characters" autocorrect="off" spellcheck="false" aria-describedby="codeMeldung">
+      <div class="meldung" id="codeMeldung" aria-live="polite"></div>
+      <div class="zeile"><button class="knopf" id="startKnopf" disabled>Test starten</button></div>
+    </div>
+  </section>
+
+  <!-- ===== Test ===== -->
+  <div id="testBereich" hidden>
+    <nav class="tabs" aria-label="Aufgaben">
+      <button class="tab" data-ziel="a1">Aufgabe 1 · Neuron<span class="marke" data-marke="a1"></span></button>
+      <button class="tab" data-ziel="a2">Aufgabe 2 · Synapse<span class="marke" data-marke="a2"></span></button>
+      <button class="tab" data-ziel="a3">Aufgabe 3 · Signalübertragung<span class="marke" data-marke="a3"></span></button>
+      <button class="tab" data-ziel="a4">Aufgabe 4 · Gift<span class="marke" data-marke="a4"></span></button>
+      <button class="tab" data-ziel="ab">✅ Abgabe</button>
+    </nav>
+
+    <section class="karte" id="a1">
+      <h2>Aufgabe 1 · Bau einer Nervenzelle</h2>
+      <p>Die Abbildung zeigt eine Nervenzelle mit myelinisiertem Axon. Acht Bestandteile sind nummeriert.</p>
+      <p class="auftrag">Beschriften Sie die Abbildung: Tragen Sie zu jeder Nummer die Fachbezeichnung ein.</p>
+      <div class="figur" id="figNeuron"></div>
+      <div class="beschriftung" data-liste="n"></div>
+    </section>
+
+    <section class="karte" id="a2">
+      <h2>Aufgabe 2 · Bau einer chemischen Synapse</h2>
+      <p>Die Abbildung zeigt eine erregende chemische Synapse im Schnitt. Oben liegt die präsynaptische Endigung, unten die nachgeschaltete Zelle.</p>
+      <p class="auftrag">Beschriften Sie die Abbildung: Tragen Sie zu jeder Nummer die Fachbezeichnung ein.</p>
+      <div class="figur" id="figSynapse"></div>
+      <div class="beschriftung" data-liste="s"></div>
+    </section>
+
+    <section class="karte" id="a3">
+      <h2>Aufgabe 3 · Ablauf der Erregungsübertragung</h2>
+      <p>Unten stehen die Schritte der Erregungsübertragung an einer erregenden chemischen Synapse – allerdings durcheinander. Ein Schritt fehlt. Er wird durch die Karte „❓ Fehlender Schritt“ vertreten.</p>
+      <p class="auftrag">a) Bringen Sie alle Karten in die richtige Reihenfolge – auch die Karte „❓ Fehlender Schritt“.</p>
+      <p>Tippen Sie eine Karte an und dann den Platz, auf den sie gehört. Eine gelegte Karte tippen Sie erneut an, um sie zurückzulegen.</p>
+      <div class="sort-grid">
+        <div class="sort-spalte"><h3>Karten</h3><div class="vorrat" id="vorrat"></div></div>
+        <div class="sort-spalte"><h3>Reihenfolge</h3><div class="plaetze" id="plaetze"></div></div>
+      </div>
+      <h3><label for="fehltFeld">b) Beschreiben Sie, was im fehlenden Schritt passiert.</label></h3>
+      <textarea id="fehltFeld" data-k="fehlt" autocorrect="off" autocapitalize="sentences" spellcheck="false"></textarea>
+    </section>
+
+    <section class="karte" id="a4">
+      <h2>Aufgabe 4 · Wirkung eines Gifts</h2>
+      <p>Ein Gift sorgt dafür, dass in der präsynaptischen Endigung kein Neurotransmitter mehr gebildet wird. Alle anderen Vorgänge an der Synapse funktionieren normal.</p>
+      <p class="auftrag"><label for="giftFeld">Erklären Sie, welche Folgen das Gift für die nachgeschaltete Zelle hat.</label></p>
+      <textarea id="giftFeld" data-k="gift" autocorrect="off" autocapitalize="sentences" spellcheck="false"></textarea>
+    </section>
+
+    <section class="karte" id="ab">
+      <h2>Abgabe</h2>
+      <div id="abVorher">
+        <p>Bevor Sie abgeben, prüfen Sie, ob Sie alles bearbeitet haben:</p>
+        <ul class="liste-stand" id="standListe"></ul>
+        <p>Nach der Abgabe können Sie <b>nichts mehr ändern</b>.</p>
+        <div class="zeile"><button class="knopf" id="abgebenKnopf">Endgültig abgeben</button></div>
+      </div>
+      <div id="abNachher" hidden>
+        <div class="meldung ok">✔ Abgegeben. Ihre Antworten sind gesichert.</div>
+        <p>Ihre Datei heißt <span class="dateiname" id="dateiname"></span>.</p>
+        <ol class="schritte-abgabe">
+          <li>Tippen Sie auf „PDF herunterladen“ und bestätigen Sie den Download.</li>
+          <li>Warten Sie, bis Ihre Lehrkraft die Sperre des iPads aufhebt.</li>
+          <li>Öffnen Sie in Teams die Aufgabe zu diesem Test, tippen Sie auf „Arbeit hinzufügen“, wählen Sie die Datei aus dem Ordner „Downloads“ und tippen Sie auf „Abgeben“.</li>
+          <li>Laden Sie die Datei <b>nur in der Aufgabe</b> hoch – nicht in einen Kanal.</li>
+        </ol>
+        <div class="zeile"><button class="knopf" id="pdfKnopf">📄 PDF herunterladen</button></div>
+        <div class="meldung" id="pdfMeldung" aria-live="polite"></div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<!-- Bestätigung vor der Abgabe -->
+<div class="dialog" id="abgabeDialog" role="dialog" aria-modal="true" aria-labelledby="abgabeTitel">
+  <div class="dialog-box">
+    <h2 id="abgabeTitel">Wirklich abgeben?</h2>
+    <p id="abgabeText">Nach der Abgabe können Sie nichts mehr ändern.</p>
+    <div class="zeile">
+      <button class="knopf" id="abgabeJa">Ja, abgeben</button>
+      <button class="knopf hell" id="abgabeNein">Weiterarbeiten</button>
+    </div>
+  </div>
+</div>
+
+<!-- Sperre -->
+<div class="sperre" id="sperre" role="alertdialog" aria-modal="true" aria-labelledby="sperreTitel">
+  <div class="sperre-box">
+    <h2 id="sperreTitel">🔒 Test gesperrt</h2>
+    <p>Sie haben die Testseite verlassen (anderer Tab, andere App oder Neuladen). Das wird im Abgabe-PDF vermerkt.</p>
+    <p><b>Melden Sie sich bei Ihrer Lehrkraft.</b> Ihre bisherigen Antworten sind erhalten.</p>
+    <p><label for="lehrerFeld">Lehrer-Code zum Entsperren:</label></p>
+    <input type="text" id="lehrerFeld" class="geheim" autocomplete="off" autocorrect="off"
+           autocapitalize="off" spellcheck="false">
+    <div class="zeile"><button class="knopf" id="entsperrKnopf">Entsperren</button></div>
+    <div class="meldung" id="sperreMeldung" aria-live="polite"></div>
+  </div>
+</div>
+
+<div class="trex" id="trex"><img class="dino-ikon" src="data:image/webp;base64,UklGRg4XAABXRUJQVlA4WAoAAAAQAAAAjwAAjwAAQUxQSEUIAAABoIVt2+I0+mZCQhoI1IvXoKV+udBu3d3d3V2g7u7u7u7u7tBVmkrqF1YWhwjzHWRmMpP/yx7tQURMAPxfYN2y/y00JV8f8eWd0hgD8ulkcMbA4GD/PG7CsOwPe/rDwU4U7r7rQezz0zPqGACAC+i+/q7pw4e/r8yvb3AH2mU2xLS+sriGd6wo+ut4hC5kbowFJVNO1uHpg7CviLe95XAdv6HMuJPRuSj7a1eOvtC396PPGOQ0/4aq/uwMALze19fXwFGlL+9bJIyXUeIlqvx50qAFey49e/rs+ooqHE3OcstQ9dxclDTVcAflzerJXkWEX2QpZXhjibo9ou4ILrWPo2GCsIpzzlhl4OZ75lQbuvgeCrzKdvwDP3Wt4CtLV236rQQ7srgACJwel42I2YlbPKV0dQ/ECcimvS8FrczomDIEJEtuSkBmk6pTAJ3TEdEepRHjW75Ghh/lI6FiPCJa2oN4px/I8jwgsWVW8t2vGClWxYQsZ7WmodTs+sYqCxuIeJ9Epu1PFtbPS4D8XllsIWLqvTGBlHhdRAJtb/rq6aiZRAFixnwdGVFIZGJdKgxXqRAGUVHsAxVJEVQ0SKdiq46KQQIRMeFA5QKkMa4NkLmOhtQxPBna0ySkjtcCHWcpEJZ4wH8LfFyf/4+B34d4kqE5RAOmR3lSAR0SacDM+Xq2GkZ6S2i6xNGAmeOYyns7q4ME5LlGBP5dnKXumXg+nwQspSI1gpn2kXs/Iubc2D6+mEjbLCLeBjNjRknrcBH/GBoSegGznU1i1k0FRGAxBUJMOw070PiHyA5fEK/8jb30PaHAst+fDsJwkNSsZc32okceYLpqEtqsiNuloFQ0YwcDgPHWmbHT+l3O2sNJQYcUtsyLQhgr3D2UA2Pz2iCz5Ae2UHjZVceUksNyGUNMWVWQCD6PSG8bc2jfnY8ETdudgQ6h79lD22AKvFZ9sz1rCgDcfIE9XEeBdhtiXCMAgOKv2bP0oQB6Z6Re83KATonMHfclIahVjVoaEX5AImPPwoFaTZe/mXpWCQgut/dfZoQr5YH1sOqcAqBvvNtkZeNhaL7goKDgQh7s6I+8Cpbj2be1CIBHse4rr/z1PVU823W+XntlMplM0dvKMeLdZ0ua/eaEIlJFVtaWcNT7hUeI1oyyuozMyz5sBL9BRPxaRYrzAHFdSJvJ3YwgXTnJ9eIqsAFNExEtQ3gpSa71mXfZaJmnkSob53q/qjJS3IxCRiNwOsKMjrFFpaonu97XUowEnlgw8nRtpwpcRtH0+lIdLK73ugAjnBcPet6pqTYxe0+pqej6p7SMOO8RVK5E/c8oOVWC38dAFNBYdFVs3OcvKCmMkSgZ43qpDWkodBHlvygqFnEv1/XM40YsW7Nm0cAanmyNsMlL7gCOmrYmZNBuR8fcpMV6pnai/LO+Dnz/eGT6V10mtIV4B26PE8lHmhiB75+IjA9hwafvvUYGAIDJgjzE1Kv9Bicg47ZuDHhuSsfE0Q7BD51BtGQg6wlVGIB+OfitmgOMy3WKwOjCLJR98eZiPofQN0jvLt5VuOpLJ/pJ6EPyB2gcFiG99n7gqk0+of2EhLT2pJQ1l4yPYQCg89KpUHLCzI6hOigfjYg5TsEMiaz5V8nY51Ou5/Izd8909lAq4B6ixXx0xDVExJ/OBezJFDnmXeIGFW+v/rAhIsY3UapjDjrmCg53nAND/78R8V01gJD9NhpkbucUmomyVysAUGZDzIUGAAD5In/QcsnTGQ9vjcNyWVm9FQGPQgYQ5SNOZ1DyuoADb+DFwrY82FZbA7BMVmyoMrKNrXf/k5qd+N5KwttCABC+9tYyPwfDIUT8OTsfjJZ1SKsagEdQneaV6/0ko8lbRGG3NwDU/xcR0Xo8dIQgI3cIuGrhP0h4mR+afUBEzBkDwK1FUeEfE8r8Eu4yBWNIuKBt8gFF/w4Dv2gxJ096KhfS31ue8T4JsaOjUXIVNEhTIqc3KM4ty+ggL89lEtAuSH2tPQeVfOWnlE9QGzPeKeenl9EkkQa5gjlZkUhQ2LDHnIJo/2IaIZXvCrrFD+FKeYxPQsef7aSGWtzDQk4p4CbZETG1KydR+Am6xZjioHxXKyJ+LQ2SXbPdQs5wUHEEfr+XnN1cQncU3eJZHzV+m1PN2GRxmETJT27hWwSozoFkL6s7sEzm1JO5At3hMR9wXf0ld/CqNLiwz1M3YK4Pruz3B31xPcClw76Rl9yXcy3/P6lLmaAF1zY+Ji6urxZcXHuCti89eXD5+aQ9q8eB6zfPoMtyJBRYLPScrE9jfIDNWURlHKnCAaPhHyiy3OxgAHYnWcmxPB5cAFjOe5KYlOuDCgHjpe4TkvPH6oZGYL/CSxqE9N93dA7igMTydwTWrElvjk9u7KcBMoNXJyvz7IYpxaaSLe3Huzu7orpVK6QFWnVtb2crMVMfUrvnmBVbL1y6+dGu0J16pYO8eSA55KUSs0CU1+kMYXPe5SpymAey+2YqYOstJsqV3KPIcqCZ12jqmlDBL+GywEOZmQRpinecvvPo8U+o5D6tHF3+jglK2HuTw5Vb/d6CSme2A0l9zchTb5JQybT61Gi6mFDFpwXFuHLbkwRU+Hs4MdzQRFRzAYi3f4fKxwYQ0+YnqplSX6zdV1TxcV5air1EVR/nEyn/D6p5WU/LTFR3NThqd6L78H+lTnpLkYo/1LnkSUrLLHXu5xMZKaiznSNlHKqa0R8c+d2o7hQgdZEqGTM9RXwfqWMuT0vT7ygonPvrQV89iOZ/oUraWI4WTfUBCg/sWzMvSPKz0mxWpTMedtOBG/aq36Wz0k0Kwv8fAgBWUDggog4AALA7AJ0BKpAAkAA+kTqYSCWjIqEulgugsBIJaA3GL+AQLO0y0PSP9j50lx/027bGz7oM4/pD/SfsC/qp03PMP5vPpV9AD/DdSd6AH6Z9bt/bv+xhLn9w+ivyZ/z/5H+d/kM93e4Hrm5S+sTNd+KP2nmT3l/EnUC9l/67evbQ+gF3n76zU18KazRQA/Tvor/+XmS+sfYJ/nP9561nob/so3GyVeOMjGAy5Vl7QF2zF7oPxne9ABlIp2AJcIYbzJvw2qZquw/tE6fsy9iP2IZiXTKHLK5sdlnTQBhM+jkN2nLN7oaO+/j5nquJFAR/uvxaBSOTs7el5f08HNGIsL9wr64311I950KRnCJd25VrDC5I7XBOXSH4xj9/vzYsRx9LkcwiAPo+Eknvqbf1sc0ApZ4Z440x+UoUj5ogo8rt22cpcy8z3roZXA38vJVv+LjYnnlx3+QE357lEmO67S5Nv51VGU1qU/80rAW6YGGJhTwl4uvdXxaIUTrKxFUBRUeN7/+5oGN6kivZZtEip4BDH9bsOsph79r9yPHAvKt8V8hnBt5EZw3NL1F9SZmwtq0bnirJjVmTUslXOnxhhbzL+8rtHvaLZfmMkrpJ3H8/3UgRY8tBXB1faKJvGjQOUhJCqp8ooO1ZMgD+/bVN/6t6qiv9ZU2rZbynXXgRY9X9SQjYDwn/+e4o3nDdDo6Blo98ezNFpL9pnVv38jLDV1YahJfoHEJB1ax+BgpFis+zllErMsJbyafCvxi0TOyM4qIvtpybnIsn69RLgy7AV+4HwAgdcZ3AFqtz5AaRSEA5fLiYswwotMBqdT7lgqhB4t0DOrbcD61dhkJ9/qn6CvDlzwxo2DxuGtGXQODJoBHUTc1FM77Z3UiYQkLK5w57jvstUrP132/zPJAOYBZvpgYDk7//eGvxWv/94e6fhfR+Ed/e/+/7/ydzQH7/zSKjrmEAHZAAKpWeK3DFHikMU/eqa3zM3xPxCWiPaZpog+Ut4XIlfjaJ1e0iPzMxv/7u+wV2d4waR//AnllHh+m1IpiWqMKbE7PAr3V4QEdmKhs8G/fhpYaDmtxei8rVv9ccgl99c28G65YQ5rC+EYBw+wyQhHKwSo4NbOi6nL8lCRj7UYFJlhgjYa4VXhwT58zDN/s/9mXzMDBVheXcFRxW0ywUzKnlefFDwn+khsPA9EcxeiyZAdPknEn/SNh2t/1MFxmOgnL7N5pbRd0CcE46Wbvo0DOMufoWXxHlGh8Sd0+sdb7jh9kfFAoMHozUMjt39fT5W5mXjZ/CYIp3BwImYGlILGnF6jTueUks8EQDwmXs0I1lGVFty//Doae5h1d8e9jTM+/uLN276Tk5KBbu1+FHs56Q0L4/WmddhNVd35j4COiKm6fdFwiATlwR4Aqg+bOEBJKVb5nj9szrileEuEtt0XZu4pS62vcJ+2YMgAsnEKsxEbBa5jHOtATRaLweFVSAnJxKDI2QVNXbwbH7vof4ZacgQqE87Acg7B6QJWpRwCwSIxsq2kRXHPNKGMWPh0CGXNJI3Ah4OIL4XCpLfUqtaNtmGBUhD51a7DqKUwqRx/aiX8NAfBaDzk45QJSK0m0LkGZX1LgESQL105/tgQZASaMnzLSh32M6Zk/smwRWHBrZ1zl6NS8BF6KLUn867B83vyWPlWFYuVDRD/OYLs/fxto/5d8sEmt39AOc/Jx6r//w12hjz5w7AM3NJFj76n5L2rVKJ6xcVMhom63uIEBlxHwhY0Uq035agH+ifam1VGcsrIVx7ODkDclZ8xAGU9/i57JdWQ2i6yUciME7gqnHf3N85zPhmT3Kwn0LRz9odYyjoRuUvEy24Q6vrsoK8rQTxxxwSTnUaY+Xq8po/0yW/1E7u7TfzUc2A3YMVk9I5yLgHpuojzd26jihTp2OXGb50YsaxNd+RZFGlISE0IAlOw9COgbM2MEtNqLrFOuPotlh8GDpACIfxD9zKx/CZ83WVbYzZZuZnAvi4OI6i65UJZVKBjhLg65MNPhLIsSWwpdl46h2li6GMvAspuqsUc7223G1vtRJmcDrM+FufiN5gq8GC3wHaVpx2LfJ7GB8gDdT3m1Zq1vPNwdvreGsJ3P2Dy4MFw9Zr5WXygi1lto43cIG3I6RuSPq8nMBWW3Q+kelzCSe5RDup9IPii070jRPSeiv9QRynD05X+WCysUPUVM3ohTRpWHMXh9HH/hq+eV3JlSJVFJq869wMd3tZMv5JkvMbY1lGMAxCSvshVcaV/TpYTCBWikocdO5AbpN2+k7Cbch25E1jiiay/JYrXAQWPGkoobeJtGWZNnTrOIVcEHUVSFlY/51tUQaJMlS9C2BhGSbsOCRGqTe7WScgb4s0f/tBWG7ARfVzuw8+tV85h5fHAyvEYX5SwA89M/TztIWno641WZYNXYw20+B9ywI1qywJkPlKPFunQOKzk7GMuUTt0LxgU+frtE7l/HoTQEFjFyBmlMcBYLa4oz1R5ntav7VCmbR0aKTzUIRFfkk7OMFp/aN4Ba22+dGPXOKm0jHFP8Yxm9vhgkqKlKRi50K/QYXYLqX+7q1bB+sG4+O36Av45/g5s0wXfdOKId6q8oUd9cXnlQy5sWt4c8Z8oURzUrD2410ICZBf2qyMyqWb014pPCjWtFWaF66dfYfkByyWK3+AhW1Y2cqoyDPVQ9GIGMO/d1Lih2urWV0h6OuMs16JiD3aEX9/4ncjTc21ZaKqcVGFwM13oh53fsKuaMMFX68cKLHEm7FvPHjF/oGwfSegMX8tIB0SMNPp1+sMnnEbAI42r9frdA1pFBd5S4rqwYtOreADWm0iXWxoUO6vjlaBklHA0QACGlo4JErryna9sghsN7rFK1GFrnEtT4NRkNsasbUW+HuRleMy3n/PAg1YjCNhHVz3nuN4AedBkhbpL1MfSNi78u+rDbYDa0Hn8PNftYmVrbugeBGt1Kb1QXzyDg/QsH7KKknpr0MIfUBz9h5ilyToU6VBMOs2J/ZaZkMGvuz/pWCcA4Q6DTzDkevZbEb72TK9FuY66dbuY0xkMzjhqf+A7//yT/5H7/+RbnueE5MWr5zGWantD117JA77bMkTT3pNfYqJPyg31+Nx3Tkp87lGpP/V6qHa8XkWIZiheWMMNROdOWoSY6Hiev6DpfY3yhYyBcv6yvTno97dGsMo/dZX7h9/MJFxBHCx3V0FACtxcK+vpHT85GURvo6PRCR81MQn197il0JHcXE8l3tnmQz4B+V4mzqfgRL/QAltD2a46ti5/+1v6LJy/lFn5iARwYR+/Q6RzPqixrBVCqrt12Vj6aLYQ9Bv7wVKcGrFw7jLptr/io0EHUDugsQ19mOYPffbDLvNHOiHUhdenDoGIvbk7Nde1yJ1jNPNnEwnY1RI6ZqO5YwaVctQLgQM1kryQqOR41hJ1f1AX4eTGzzh+oX0bTvlKscCl9MYnLtHpUZ2X6wpz9KHFZ5/9nfEVfrRpTUKmslycOaRtY4kNy9mfoL6GWmRqQKavWmdcLVPug+S4j1kfamuf94ehUPSS7qkIzmNTFaKHEOcd57OVEffRW5TcqAsWtAnFWapK4e8odPxKkrndyVrQh9odRcyPT5w9CKMhm12FiZp5er8mmK0J2fyyq9GQq1qqguNaTTmhHFSqO9C90fopwXyU/xaW74dRDznLlGITL027Ehu7r9GqVOLVOa5xJd8ekUFLuW/ZzYFF3jfnAOhx4D9cBYztHvQOzxSm/oL5KfkaLG1hBCummCiQS0sojnD/DjgpLd7uh2/xk1/BjcCGCC/T41/OnSK5LiFknirWjgd7BECmhcncqKKWqvMbBmu4cOUGDnDMLge1/BQCWhg5uBtA6q05iWPGK/7qjs8t9/WBSadA/tWeVFWVY6/KmlrU55u0OAuQqj1EzRJm7CGwf/2Et/8Xj69C8NmqTw8gmPvNMUJ+biPiYcXjQF6H8eEAVme3MSgL6tzXHuBi/zTYKpRaD/FWcK2QC5snu8mk/vud6e+GBhgoncIXQO3K+J7WZ+kmkMVufAadJtwxdfuJP6Pkkw7IAbx0vLMPbv/oz8/KnBE4TPhz74LFsQtOb5SO0lBIB1QIJbNX8A1VdOdhPNfGk0UihJuFpAzUzyJW/qzQ+K5dOSaM1ZgvITZH6xYperoC0PaAcOla0kjSxgu/rXKLvhv7aEBiGMqg0APrSb+uv8xySFqvx+Pje8C/HdjRpYH+7+3Yajk4/+T0ftrBnlRonlEQ3QjCUUxvMgAvk79ylth7MivDu0PM44Fn32cBkbf/5K6zH2DAt9qgttU9e64SvjhEFH3qQyyvLHtIgus6RUjjbWGrV08dAtr94Srb+4EZCM4qQZ+yobVjpqprmw/jWgV23hv9fMHb4iBeUal/NUJ7ILmTXtcPbAriw8CVfpY71He5Wcm7aPClgij23gFMuYMGqL+G+KA4reg8m49qHSWirqjo0q1SHPyiuqwrGMrFco38z6XUM+Lb0sy8AL0bpx1iPF53Gb9km0f/DJNcZfYRjt/LWJ85f42Vu5t8BTuRyMefJ8yCVwOX7azYvH9kQvpttn/l/1rVy+tARPoHToWMLoJQo+9vpxnwsDBmUsOxb0Y7jcfHfqwNGUcg42zl76T8VqaJ8Hx/PjPatBTcHoLKWO5n7LTe9GZ9u+jWfuxsi1fw+t+CH9cpKkwv+0T33sLmyEdCSrt2T/SCem12AxPNSWlhAawHxpKGEmvnOnMYIEuCSc5oX/M21isAmGTdkjFmM+kDpgJx6YfY/aYhBZh8efIdmrhHGUhuKZ5JQ5N4AlSNXQXnl9X2xcuxr9q3Cmv4H/6yv5fyN1Dpe53PdDnV9nWCQHkKlCAX1STDAZNF92YOOj2azwJJ8y1yCqUAcTd1HOmw4nGDcao7NSdu82Y3WMJyhu+YGckT86Gsn5dhRZ2npidfqBg4fWIznxfISmOJCiZyuz9X/jwy7wth+eO1Js60yq/NoMI0cNOgAAAAAA" alt="Dino" width="72" height="72" draggable="false"><span class="bubble">Made by ASzym</span></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ====================== ANPASSEN je EXAM ====================== */
+var EXAM_THEMA   = 'Neurobiologie';         // erscheint im PDF und im Dateinamen
+var EXAMZEIT_MIN = 30;                       // Richtzeit (nur Orientierung)
+var LEHRER_HASH  = '667bf092';               // Hash des Lehrer-Codes (codes_generieren.html)
+var SPEICHER     = 'aszym:neurobiologie_exam:v1';
+
+var NEURON = [ // Nummern der Abbildung – nur Positionen, keine Lösungen
+  {nr:1,x:60, y:40, zx:105,zy:88},
+  {nr:2,x:230,y:268,zx:215,zy:198},
+  {nr:3,x:120,y:268,zx:180,zy:152},
+  {nr:4,x:290,y:44, zx:268,zy:146},
+  {nr:5,x:790,y:262,zx:752,zy:152},
+  {nr:6,x:440,y:44, zx:440,zy:134},
+  {nr:7,x:575,y:262,zx:575,zy:152},
+  {nr:8,x:860,y:36, zx:842,zy:92}
+];
+var SYNAPSE = [
+  {nr:1,x:640,y:150,zx:468,zy:172},
+  {nr:2,x:640,y:262,zx:458,zy:282},
+  {nr:3,x:60, y:180,zx:158,zy:205},
+  {nr:4,x:60, y:290,zx:262,zy:276},
+  {nr:5,x:60, y:350,zx:140,zy:301},
+  {nr:6,x:640,y:350,zx:497,zy:310},
+  {nr:7,x:60, y:240,zx:206,zy:250},
+  {nr:8,x:60, y:110,zx:208,zy:140}
+];
+/* Schritte in fester, bewusst durcheinandergewürfelter Startreihenfolge.
+   Die Kennungen sind neutral und verraten die richtige Reihenfolge nicht. */
+var KARTEN = [
+  {id:'kq', t:'Die Neurotransmitter-Moleküle diffundieren durch den synaptischen Spalt zur postsynaptischen Membran.'},
+  {id:'kd', t:'Ein Enzym spaltet die Neurotransmitter im synaptischen Spalt; die Spaltprodukte werden in die präsynaptische Endigung zurückgeholt.'},
+  {id:'kw', t:'Spannungsgesteuerte Ca²⁺-Kanäle öffnen sich, Ca²⁺-Ionen strömen in die präsynaptische Endigung ein.'},
+  {id:'kx', t:'❓ Fehlender Schritt', fehlt:true},
+  {id:'km', t:'Die postsynaptische Membran wird depolarisiert, es entsteht ein erregendes postsynaptisches Potenzial (EPSP).'},
+  {id:'kb', t:'Ein Aktionspotenzial erreicht die präsynaptische Endigung und depolarisiert die präsynaptische Membran.'},
+  {id:'kr', t:'Synaptische Vesikel verschmelzen mit der präsynaptischen Membran und geben Neurotransmitter in den synaptischen Spalt ab.'}
+];
+var FRAGE_A3B = 'Beschreiben Sie, was im fehlenden Schritt passiert.';
+var FRAGE_A4  = 'Ein Gift sorgt dafür, dass in der präsynaptischen Endigung kein Neurotransmitter mehr gebildet wird. Erklären Sie, welche Folgen das Gift für die nachgeschaltete Zelle hat.';
+/* ==================== ENDE ANPASSEN ==================== */
+
+/* ---------- Schüler-Code (identisch in codes_generieren.html) ---------- */
+var CODE_ALPHABET = 'ACDEFHJKMNPRTUVWXY34679'; // 23 Zeichen (Primzahl), ohne 0/O, 1/I/L, 2/Z, 5/S, 8/B
+var CODE_SALT = 7;
+function codeNorm(s){ return String(s || '').toUpperCase().replace(/[^A-Z0-9]/g, ''); }
+function codePruefzeichen(k4){
+  var s = CODE_SALT;
+  for (var i = 0; i < 4; i++) s += (i + 1) * CODE_ALPHABET.indexOf(k4.charAt(i));
+  return CODE_ALPHABET.charAt(s % CODE_ALPHABET.length);
+}
+function codeGueltig(s){
+  var n = codeNorm(s);
+  if (n.length !== 5) return false;
+  for (var i = 0; i < 5; i++) if (CODE_ALPHABET.indexOf(n.charAt(i)) < 0) return false;
+  return codePruefzeichen(n.slice(0, 4)) === n.charAt(4);
+}
+function codeFormat(s){ var n = codeNorm(s); return n.slice(0, 4) + '-' + n.slice(4); }
+function hashText(s){
+  s = String(s).toUpperCase().replace(/\s+/g, '');
+  var h = 0x811c9dc5;
+  for (var i = 0; i < s.length; i++){ h ^= s.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; }
+  return ('0000000' + h.toString(16)).slice(-8);
+}
+
+/* ---------- Zustand (TEIL 6: nur sessionStorage, immer try/catch) ---------- */
+var S = null;
+function neuerZustand(){
+  return { phase:'start', code:'', start:0, ende:0, gesperrt:false, log:[], karte:'a1',
+           a:{}, plaetze:[null,null,null,null,null,null,null] };
+}
+function laden(){
+  try {
+    var r = sessionStorage.getItem(SPEICHER);
+    if (r){ var d = JSON.parse(r); if (d && d.phase) return d; }
+  } catch (e) {}
+  return neuerZustand();
+}
+function speichern(){ try { sessionStorage.setItem(SPEICHER, JSON.stringify(S)); } catch (e) {} }
+S = laden();
+if (!S.a) S.a = {};
+if (!S.plaetze || S.plaetze.length !== KARTEN.length) S.plaetze = KARTEN.map(function(){ return null; });
+if (!S.log) S.log = [];
+
+function $(id){ return document.getElementById(id); }
+function esc(t){ return String(t).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+function zeit(ms){ var d = new Date(ms); return ('0'+d.getHours()).slice(-2) + ':' + ('0'+d.getMinutes()).slice(-2) + ' Uhr'; }
+function datum(ms){ var d = new Date(ms); return ('0'+d.getDate()).slice(-2) + '.' + ('0'+(d.getMonth()+1)).slice(-2) + '.' + d.getFullYear(); }
+
+/* ---------- Abbildungen (eigene SVGs, Farben aus dem Test-Schema) ---------- */
+function nummern(liste){
+  return liste.map(function(p){
+    return '<line x1="'+p.x+'" y1="'+p.y+'" x2="'+p.zx+'" y2="'+p.zy+'" stroke="#6b7686" stroke-width="2"/>' +
+           '<circle cx="'+p.zx+'" cy="'+p.zy+'" r="7" fill="none" stroke="#6b7686" stroke-width="2"/>' +
+           '<circle cx="'+p.x+'" cy="'+p.y+'" r="17" fill="#1f4680"/>' +
+           '<text x="'+p.x+'" y="'+(p.y+6)+'" text-anchor="middle" font-size="18" font-weight="700" fill="#ffffff" font-family="system-ui,-apple-system,sans-serif">'+p.nr+'</text>';
+  }).join('');
+}
+function svgNeuron(){
+  var myelin = '';
+  [310,400,490,580,670].forEach(function(x){
+    myelin += '<rect x="'+x+'" y="133" width="72" height="34" rx="15" fill="#fdf3d9" stroke="#96690a" stroke-width="2"/>';
+  });
+  return '<svg viewBox="0 0 900 300" role="img" aria-label="Schema einer Nervenzelle mit acht nummerierten Bestandteilen">' +
+    '<g fill="none" stroke="#22303f" stroke-width="6" stroke-linecap="round">' +
+      '<path d="M150 120 L105 88 L70 60 M105 88 L60 98"/>' +
+      '<path d="M140 185 L95 220 L60 250 M95 220 L55 205"/>' +
+      '<path d="M175 95 L165 50 L140 25 M165 50 L190 20"/>' +
+      '<path d="M190 205 L195 255 L175 285 M195 255 L222 282"/>' +
+    '</g>' +
+    '<path d="M150 120 C150 85 230 80 245 120 L262 141 L300 147 L300 153 L262 159 L245 180 C230 220 150 215 140 185 C125 165 135 135 150 120 Z" fill="#eef0f3" stroke="#22303f" stroke-width="4"/>' +
+    '<circle cx="182" cy="152" r="22" fill="#e2e6ec" stroke="#6b7686" stroke-width="3"/>' +
+    '<circle cx="182" cy="152" r="6" fill="#6b7686"/>' +
+    '<line x1="298" y1="150" x2="760" y2="150" stroke="#22303f" stroke-width="6"/>' + myelin +
+    '<line x1="306" y1="150" x2="752" y2="150" stroke="#22303f" stroke-width="3" stroke-dasharray="0"/>' +
+    '<g fill="none" stroke="#22303f" stroke-width="5" stroke-linecap="round">' +
+      '<path d="M758 150 L800 150 L835 98 M800 150 L842 150 M800 150 L835 202"/>' +
+    '</g>' +
+    '<g fill="#eef0f3" stroke="#22303f" stroke-width="3">' +
+      '<circle cx="842" cy="92" r="11"/><circle cx="852" cy="150" r="11"/><circle cx="842" cy="208" r="11"/>' +
+    '</g>' + nummern(NEURON) + '</svg>';
+}
+function svgSynapse(){
+  var vesikel = '';
+  [[330,140],[405,118],[468,172],[360,198],[285,190]].forEach(function(v){
+    vesikel += '<circle cx="'+v[0]+'" cy="'+v[1]+'" r="21" fill="#ffffff" stroke="#1f4680" stroke-width="3"/>';
+    [[-7,-6],[6,-7],[0,4],[-8,7],[8,6]].forEach(function(o){
+      vesikel += '<circle cx="'+(v[0]+o[0])+'" cy="'+(v[1]+o[1])+'" r="3" fill="#1f4680"/>';
+    });
+  });
+  var spalt = '';
+  [[392,268],[418,284],[440,265],[458,282],[475,268]].forEach(function(p){
+    spalt += '<circle cx="'+p[0]+'" cy="'+p[1]+'" r="3.5" fill="#1f4680"/>';
+  });
+  var rezeptoren = '';
+  [345,425,497].forEach(function(x){
+    rezeptoren += '<rect x="'+(x-11)+'" y="289" width="9" height="28" rx="3" fill="#6b7686"/>' +
+                  '<rect x="'+(x+2)+'" y="289" width="9" height="28" rx="3" fill="#6b7686"/>';
+  });
+  return '<svg viewBox="0 0 700 440" role="img" aria-label="Schema einer chemischen Synapse mit acht nummerierten Bestandteilen">' +
+    '<path d="M310 0 L310 55 C170 80 150 170 150 250 L550 250 C550 170 530 80 390 55 L390 0" fill="#eef0f3" stroke="#22303f" stroke-width="4"/>' +
+    '<ellipse cx="215" cy="140" rx="44" ry="20" fill="#fdf3d9" stroke="#96690a" stroke-width="3"/>' +
+    '<path d="M180 140 Q188 128 196 140 T212 140 T228 140 T244 140" fill="none" stroke="#96690a" stroke-width="2"/>' +
+    vesikel +
+    '<rect x="194" y="237" width="9" height="26" rx="3" fill="#6b7686"/><rect x="209" y="237" width="9" height="26" rx="3" fill="#6b7686"/>' +
+    spalt +
+    '<path d="M100 440 L100 302 L600 302 L600 440" fill="#eef0f3" stroke="#22303f" stroke-width="4"/>' +
+    rezeptoren + nummern(SYNAPSE) + '</svg>';
+}
+
+/* ---------- Eingabefelder der Beschriftung ---------- */
+function baueBeschriftung(prefix, liste){
+  var box = document.querySelector('[data-liste="'+prefix+'"]');
+  box.innerHTML = liste.slice().sort(function(a,b){ return a.nr - b.nr; }).map(function(p){
+    var k = prefix + p.nr;
+    return '<div class="feld"><span class="nr" aria-hidden="true">'+p.nr+'</span>' +
+      '<input type="text" data-k="'+k+'" aria-label="Bezeichnung für Nummer '+p.nr+'" autocomplete="off" ' +
+      'autocorrect="off" autocapitalize="off" spellcheck="false"></div>';
+  }).join('');
+}
+
+/* ---------- Sortieren per Antippen ---------- */
+var gewaehlt = null;
+function karteVon(id){ for (var i = 0; i < KARTEN.length; i++) if (KARTEN[i].id === id) return KARTEN[i]; return null; }
+function zeichneSortierung(){
+  var gesperrt = S.phase !== 'laeuft';
+  var vorrat = $('vorrat'), plaetze = $('plaetze');
+  var html = '';
+  KARTEN.forEach(function(k){
+    if (S.plaetze.indexOf(k.id) >= 0) return;
+    html += '<button class="schritt-karte' + (k.fehlt ? ' fehlt' : '') + (gewaehlt === k.id ? ' gewaehlt' : '') +
+            '" data-karte="'+k.id+'"' + (gesperrt ? ' disabled' : '') + '>' + esc(k.t) + '</button>';
+  });
+  vorrat.innerHTML = html || '<p class="leer-hinweis">Alle Karten liegen.</p>';
+  plaetze.innerHTML = S.plaetze.map(function(id, i){
+    var k = id ? karteVon(id) : null;
+    return '<div class="platz"><span class="nr" aria-hidden="true">'+(i+1)+'</span>' +
+      '<button class="platz-feld' + (k ? ' belegt' : '') + (k && k.fehlt ? ' fehlt' : '') + '" data-platz="'+i+'"' +
+      ' aria-label="Platz '+(i+1)+'"' + (gesperrt ? ' disabled' : '') + '>' +
+      (k ? esc(k.t) : 'frei – Karte wählen, dann hier tippen') + '</button></div>';
+  }).join('');
+}
+function sortKlick(e){
+  if (S.phase !== 'laeuft') return;
+  var kb = e.target.closest('[data-karte]'), pb = e.target.closest('[data-platz]');
+  if (kb){ var id = kb.getAttribute('data-karte'); gewaehlt = (gewaehlt === id) ? null : id; zeichneSortierung(); return; }
+  if (pb){
+    var i = +pb.getAttribute('data-platz');
+    if (gewaehlt){ S.plaetze[i] = gewaehlt; gewaehlt = null; }      // belegter Platz: alte Karte geht zurück
+    else if (S.plaetze[i]){ S.plaetze[i] = null; }
+    speichern(); zeichneSortierung(); marken();
+  }
+}
+
+/* ---------- Karten / Reiter ---------- */
+function zeigeKarte(z){
+  S.karte = z;
+  document.querySelectorAll('#testBereich .karte').forEach(function(k){ k.classList.toggle('aktiv', k.id === z); });
+  document.querySelectorAll('.tab').forEach(function(t){ t.classList.toggle('aktiv', t.getAttribute('data-ziel') === z); });
+  if (z === 'ab') standListe();
+  speichern();
+}
+function wert(k){ return (S.a[k] || '').trim(); }
+function stand(){
+  var n = 0, s = 0, p = 0, i;
+  for (i = 1; i <= NEURON.length; i++) if (wert('n'+i)) n++;
+  for (i = 1; i <= SYNAPSE.length; i++) if (wert('s'+i)) s++;
+  S.plaetze.forEach(function(x){ if (x) p++; });
+  return { a1:[n, NEURON.length], a2:[s, SYNAPSE.length], a3s:[p, KARTEN.length],
+           a3b: !!wert('fehlt'), a4: !!wert('gift') };
+}
+function marken(){
+  var st = stand();
+  var fertig = { a1: st.a1[0] === st.a1[1], a2: st.a2[0] === st.a2[1],
+                 a3: st.a3s[0] === st.a3s[1] && st.a3b, a4: st.a4 };
+  document.querySelectorAll('[data-marke]').forEach(function(m){ m.textContent = fertig[m.getAttribute('data-marke')] ? ' ●' : ''; });
+}
+function standListe(){
+  var st = stand();
+  function z(txt, ok){ return '<li>' + (ok ? '✔ ' : '⚠️ ') + txt + '</li>'; }
+  $('standListe').innerHTML =
+    z('Aufgabe 1: ' + st.a1[0] + ' von ' + st.a1[1] + ' Feldern ausgefüllt', st.a1[0] === st.a1[1]) +
+    z('Aufgabe 2: ' + st.a2[0] + ' von ' + st.a2[1] + ' Feldern ausgefüllt', st.a2[0] === st.a2[1]) +
+    z('Aufgabe 3a: ' + st.a3s[0] + ' von ' + st.a3s[1] + ' Karten gelegt', st.a3s[0] === st.a3s[1]) +
+    z('Aufgabe 3b: ' + (st.a3b ? 'beantwortet' : 'noch leer'), st.a3b) +
+    z('Aufgabe 4: ' + (st.a4 ? 'beantwortet' : 'noch leer'), st.a4);
+}
+
+/* ---------- Orientierungsuhr ---------- */
+function uhr(){
+  if (S.phase === 'start') return;
+  var bis = (S.phase === 'abgegeben' ? S.ende : Date.now());
+  var rest = Math.max(0, EXAMZEIT_MIN * 60 - Math.floor((bis - S.start) / 1000));
+  var txt = Math.floor(rest / 60) + ':' + ('0' + (rest % 60)).slice(-2);
+  $('uhr').textContent = '⏱ ' + txt + (rest === 0 ? ' – Richtzeit erreicht' : '');
+}
+
+/* ---------- Sperre ---------- */
+function zeigeSperre(an){
+  $('sperre').classList.toggle('an', !!an);
+  document.body.classList.toggle('gesperrt', !!an);
+  if (an){ $('lehrerFeld').value = ''; $('sperreMeldung').textContent = ''; $('sperreMeldung').className = 'meldung'; }
+}
+function sperren(anlass){
+  if (S.phase !== 'laeuft' || S.gesperrt) return;
+  S.gesperrt = true;
+  S.log.push({ t: Date.now(), art: anlass });
+  speichern();
+  zeigeSperre(true);
+}
+document.addEventListener('visibilitychange', function(){
+  if (document.visibilityState === 'hidden') sperren('Seite verlassen (Tab oder App gewechselt)');
+});
+window.addEventListener('blur', function(){ sperren('Fokus verloren (anderes Fenster oder App)'); });
+window.addEventListener('pagehide', function(){ sperren('Seite neu geladen oder geschlossen'); });
+
+function entsperren(){
+  var f = $('lehrerFeld'), m = $('sperreMeldung');
+  if (hashText(f.value) === LEHRER_HASH){
+    S.gesperrt = false;
+    S.log.push({ t: Date.now(), art: 'entsperrt durch Lehrkraft' });
+    speichern(); zeigeSperre(false);
+  } else {
+    S.log.push({ t: Date.now(), art: 'falscher Entsperr-Code' });
+    speichern();
+    f.value = '';
+    m.className = 'meldung falsch'; m.textContent = '✘ Code falsch. Der Versuch wurde vermerkt.';
+  }
+}
+
+/* ---------- Start ---------- */
+function codePruefenAnzeige(){
+  var f = $('codeFeld'), m = $('codeMeldung'), n = codeNorm(f.value);
+  var ok = codeGueltig(n);
+  $('startKnopf').disabled = !ok;
+  if (n.length < 5){ m.className = 'meldung'; m.textContent = ''; }
+  else if (ok){ m.className = 'meldung ok'; m.textContent = '✔ Code gültig: ' + codeFormat(n); }
+  else { m.className = 'meldung falsch'; m.textContent = '✘ Dieser Code ist ungültig. Bitte genau mit dem Zettel vergleichen.'; }
+}
+function starten(){
+  if (!codeGueltig($('codeFeld').value)) return;
+  S.code = codeFormat($('codeFeld').value);
+  S.phase = 'laeuft'; S.start = Date.now(); S.gesperrt = false;
+  S.log.push({ t: S.start, art: 'Test gestartet' });
+  speichern();
+  ansicht();
+}
+
+/* ---------- Abgabe ---------- */
+function abgeben(){
+  S.phase = 'abgegeben'; S.ende = Date.now(); S.gesperrt = false;
+  S.log.push({ t: S.ende, art: 'abgegeben' });
+  speichern();
+  $('abgabeDialog').classList.remove('an');
+  ansicht();
+  zeigeKarte('ab');
+}
+function dateiname(){
+  return 'EXAM_' + EXAM_THEMA.replace(/[^A-Za-z0-9]+/g, '_') + '_' + S.code + '.pdf';
+}
+
+/* ---------- PDF ohne Bibliothek (Courier, WinAnsi) ---------- */
+var WIN = {'€':128,'‚':130,'„':132,'…':133,'‘':145,'’':146,'“':147,'”':148,'•':149,'–':150,'—':151};
+var ERSATZ = {'⁺':'+','⁻':'-','→':'->','❓':'?','✔':'','✘':'','⚠':'','️':'','\t':' '};
+function pdfText(s){
+  s = String(s).normalize ? String(s).normalize('NFC') : String(s);
+  var out = '';
+  for (var i = 0; i < s.length; i++){
+    var ch = s.charAt(i), c;
+    if (ERSATZ.hasOwnProperty(ch)){ out += pdfText(ERSATZ[ch]); continue; }
+    c = WIN.hasOwnProperty(ch) ? WIN[ch] : s.charCodeAt(i);
+    if (c >= 0xD800 && c <= 0xDBFF){ i++; out += '?'; continue; }      // Emoji u. Ä.
+    if (c < 32) continue;
+    if (c > 255) { out += '?'; continue; }
+    if (c === 40 || c === 41 || c === 92){ out += '\\' + ch; continue; }
+    if (c > 126){ out += '\\' + ('00' + c.toString(8)).slice(-3); continue; }
+    out += ch;
+  }
+  return out;
+}
+function umbrechen(text, breite, einzug){
+  var zeilen = [];
+  String(text).split(/\r?\n/).forEach(function(absatz){
+    var woerter = absatz.split(/\s+/).filter(Boolean), z = '';
+    if (!woerter.length){ zeilen.push(''); return; }
+    woerter.forEach(function(w){
+      while (w.length > breite - einzug.length){                    // überlange Wörter teilen
+        if (z){ zeilen.push(z); z = ''; }
+        zeilen.push(einzug + w.slice(0, breite - einzug.length)); w = w.slice(breite - einzug.length);
+      }
+      if (!z) z = einzug + w;
+      else if ((z + ' ' + w).length <= breite) z += ' ' + w;
+      else { zeilen.push(z); z = einzug + w; }
+    });
+    if (z) zeilen.push(z);
+  });
+  return zeilen;
+}
+function pdfInhalt(){
+  var Z = [], B = 80;
+  function t(x, fett){ umbrechen(x, B, '').forEach(function(l){ Z.push({t:l, b:!!fett}); }); }
+  function e(x, einz){ umbrechen(x, B, einz || '   ').forEach(function(l){ Z.push({t:l}); }); }
+  function leer(){ Z.push({t:''}); }
+  var dauer = Math.round((S.ende - S.start) / 60000);
+  t('EXAM ' + EXAM_THEMA + ' - Abgabe', true);
+  t('Code: ' + S.code, true);
+  t('Begonnen:  ' + datum(S.start) + ', ' + zeit(S.start));
+  t('Abgegeben: ' + datum(S.ende) + ', ' + zeit(S.ende));
+  t('Bearbeitungszeit: ' + dauer + ' min (Richtzeit ' + EXAMZEIT_MIN + ' min)');
+  var sperren = S.log.filter(function(l){ return /verlassen|verloren|geladen/.test(l.art); });
+  var falsch = S.log.filter(function(l){ return l.art === 'falscher Entsperr-Code'; });
+  t('Sperren während des Tests: ' + sperren.length + (falsch.length ? ', falsche Entsperr-Codes: ' + falsch.length : ''), true);
+  S.log.forEach(function(l){
+    if (l.art === 'Test gestartet' || l.art === 'abgegeben') return;
+    e(zeit(l.t) + ' - ' + l.art);
+  });
+  leer();
+  t('Aufgabe 1 - Bau einer Nervenzelle (Abbildung beschriften)', true);
+  for (var i = 1; i <= NEURON.length; i++) e(i + ': ' + (wert('n'+i) || '(keine Angabe)'));
+  leer();
+  t('Aufgabe 2 - Bau einer chemischen Synapse (Abbildung beschriften)', true);
+  for (i = 1; i <= SYNAPSE.length; i++) e(i + ': ' + (wert('s'+i) || '(keine Angabe)'));
+  leer();
+  t('Aufgabe 3 - Ablauf der Erregungsübertragung', true);
+  t('a) Gelegte Reihenfolge:');
+  S.plaetze.forEach(function(id, j){
+    var k = id ? karteVon(id) : null;
+    var txt = k ? (k.fehlt ? '[FEHLENDER SCHRITT]' : k.t) : '(Platz leer)';
+    umbrechen((j + 1) + '. ' + txt, B, '   ').forEach(function(l, n){ Z.push({t: (n ? '      ' : '   ') + l.trim()}); });
+  });
+  var uebrig = KARTEN.filter(function(k){ return S.plaetze.indexOf(k.id) < 0; });
+  if (uebrig.length){
+    t('   Nicht gelegte Karten:');
+    uebrig.forEach(function(k){ e('- ' + (k.fehlt ? '[FEHLENDER SCHRITT]' : k.t), '     '); });
+  }
+  t('b) ' + FRAGE_A3B);
+  e(wert('fehlt') || '(keine Angabe)');
+  leer();
+  t('Aufgabe 4 - Wirkung eines Gifts', true);
+  t(FRAGE_A4);
+  t('Antwort:');
+  e(wert('gift') || '(keine Angabe)');
+  return Z;
+}
+function pdfBauen(Z){
+  var PRO_SEITE = 54, seiten = [];
+  for (var i = 0; i < Z.length; i += PRO_SEITE) seiten.push(Z.slice(i, i + PRO_SEITE));
+  var objekte = [], n = seiten.length;
+  // 1 Katalog, 2 Seiten, 3 Courier, 4 Courier-Bold, 5 Info, dann je Seite: Seite + Inhalt
+  var kids = seiten.map(function(_, j){ return (6 + 2*j) + ' 0 R'; }).join(' ');
+  objekte[1] = '<< /Type /Catalog /Pages 2 0 R >>';
+  objekte[2] = '<< /Type /Pages /Kids [' + kids + '] /Count ' + n + ' >>';
+  objekte[3] = '<< /Type /Font /Subtype /Type1 /BaseFont /Courier /Encoding /WinAnsiEncoding >>';
+  objekte[4] = '<< /Type /Font /Subtype /Type1 /BaseFont /Courier-Bold /Encoding /WinAnsiEncoding >>';
+  objekte[5] = '<< /Title (' + pdfText('EXAM ' + EXAM_THEMA + ' ' + S.code) + ') /Producer (Lernseiten EXAM) >>';
+  seiten.forEach(function(zeilen, j){
+    var s = 'BT\n/F1 10 Tf\n13.5 TL\n50 795 Td\n';
+    zeilen.forEach(function(z){
+      s += (z.b ? '/F2' : '/F1') + ' 10 Tf\n(' + pdfText(z.t) + ') Tj\nT*\n';
+    });
+    s += 'ET\nBT\n/F1 10 Tf\n50 30 Td\n(' + pdfText('Code ' + S.code + ' - Seite ' + (j+1) + ' von ' + n) + ') Tj\nET\n';
+    objekte[6 + 2*j] = '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents ' + (7 + 2*j) + ' 0 R >>';
+    objekte[7 + 2*j] = '<< /Length ' + s.length + ' >>\nstream\n' + s + 'endstream';
+  });
+  var pdf = '%PDF-1.4\n%âãÏÓ\n', lagen = [];
+  for (i = 1; i < objekte.length; i++){
+    lagen[i] = pdf.length;
+    pdf += i + ' 0 obj\n' + objekte[i] + '\nendobj\n';
+  }
+  var xref = pdf.length;
+  pdf += 'xref\n0 ' + objekte.length + '\n0000000000 65535 f \n';
+  for (i = 1; i < objekte.length; i++) pdf += ('000000000' + lagen[i]).slice(-10) + ' 00000 n \n';
+  pdf += 'trailer\n<< /Size ' + objekte.length + ' /Root 1 0 R /Info 5 0 R >>\nstartxref\n' + xref + '\n%%EOF\n';
+  var bytes = new Uint8Array(pdf.length);
+  for (i = 0; i < pdf.length; i++) bytes[i] = pdf.charCodeAt(i) & 255;
+  return bytes;
+}
+function pdfLaden(){
+  var m = $('pdfMeldung');
+  try {
+    var blob = new Blob([pdfBauen(pdfInhalt())], { type: 'application/pdf' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = dateiname(); a.rel = 'noopener';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 60000);
+    m.className = 'meldung ok';
+    m.textContent = '✔ PDF erstellt. Auf dem iPad liegt es in der Dateien-App im Ordner „Downloads“.';
+  } catch (e) {
+    m.className = 'meldung falsch';
+    m.textContent = '✘ Das PDF konnte nicht erstellt werden. Bitte die Lehrkraft holen.';
+  }
+}
+
+/* ---------- Ansicht aus dem Zustand aufbauen ---------- */
+function ansicht(){
+  var laeuft = S.phase === 'laeuft', fertig = S.phase === 'abgegeben';
+  $('startKarte').classList.toggle('aktiv', S.phase === 'start');
+  $('testBereich').hidden = S.phase === 'start';
+  $('kopfRechts').hidden = S.phase === 'start';
+  $('uhrInfo').hidden = S.phase === 'start';
+  $('codeAnzeige').textContent = S.code;
+  document.querySelectorAll('[data-k]').forEach(function(el){
+    el.value = S.a[el.getAttribute('data-k')] || '';
+    el.disabled = !laeuft;
+  });
+  $('abVorher').hidden = fertig;
+  $('abNachher').hidden = !fertig;
+  if (fertig) $('dateiname').textContent = dateiname();
+  zeichneSortierung(); marken(); uhr();
+  if (S.phase !== 'start') zeigeKarte(fertig ? 'ab' : (S.karte || 'a1'));
+  zeigeSperre(laeuft && S.gesperrt);
+}
+
+/* ---------- Aufbau & Bindungen ---------- */
+$('figNeuron').innerHTML = svgNeuron();
+$('figSynapse').innerHTML = svgSynapse();
+baueBeschriftung('n', NEURON);
+baueBeschriftung('s', SYNAPSE);
+
+document.addEventListener('input', function(e){
+  var k = e.target.getAttribute && e.target.getAttribute('data-k');
+  if (!k || S.phase !== 'laeuft') return;
+  S.a[k] = e.target.value; speichern(); marken();
+});
+$('codeFeld').addEventListener('input', codePruefenAnzeige);
+$('codeFeld').addEventListener('keydown', function(e){ if (e.key === 'Enter' && !$('startKnopf').disabled) starten(); });
+$('startKnopf').addEventListener('click', starten);
+document.querySelector('.tabs').addEventListener('click', function(e){
+  var t = e.target.closest('.tab'); if (t) zeigeKarte(t.getAttribute('data-ziel'));
+});
+$('vorrat').addEventListener('click', sortKlick);
+$('plaetze').addEventListener('click', sortKlick);
+$('abgebenKnopf').addEventListener('click', function(){
+  var st = stand(), offen = [];
+  if (st.a1[0] < st.a1[1]) offen.push('Aufgabe 1');
+  if (st.a2[0] < st.a2[1]) offen.push('Aufgabe 2');
+  if (st.a3s[0] < st.a3s[1] || !st.a3b) offen.push('Aufgabe 3');
+  if (!st.a4) offen.push('Aufgabe 4');
+  $('abgabeText').textContent = (offen.length ? 'Noch nicht vollständig: ' + offen.join(', ') + '. ' : '') +
+    'Nach der Abgabe können Sie nichts mehr ändern.';
+  $('abgabeDialog').classList.add('an');
+});
+$('abgabeNein').addEventListener('click', function(){ $('abgabeDialog').classList.remove('an'); });
+$('abgabeJa').addEventListener('click', abgeben);
+$('pdfKnopf').addEventListener('click', pdfLaden);
+$('entsperrKnopf').addEventListener('click', entsperren);
+$('lehrerFeld').addEventListener('keydown', function(e){ if (e.key === 'Enter') entsperren(); });
+
+ansicht();
+setInterval(uhr, 1000);
+})();
+</script>
+<script>
+(function(){
+  var trex = document.getElementById('trex');
+  if (!trex) return;
+  trex.addEventListener('click', function(){
+    trex.classList.add('zeig');
+    setTimeout(function(){ trex.classList.remove('zeig'); }, 1800);
+  });
+})();
+</script>
+</body>
+</html>
