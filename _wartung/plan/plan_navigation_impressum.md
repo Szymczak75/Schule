@@ -268,6 +268,8 @@ Ordner-Übersichten `_*.html` über `linking.txt`). Änderungen an der Startseit
   Kopien in `baustein_schritt_fuer_schritt` und `baustein_rueckblick_klassenarbeit`
   mitgezogen; `pruefe.py` `NAV_VERSION`→v7 (+ Prüfung auf QR-Knopf), `nachruesten.py`-Marker→v7;
   Lernseiten-Anweisung 3.6 und Checkliste ergänzt. Website-Seiten per Nachrüst-Skript v6→v7.
+  **v7.1** (16.11.2026): QR-Code im Fenster 30 % kleiner (iPad zeigte Überschrift nicht), Fenster
+  bei Bedarf scrollbar; ebenso im EXAM-Generator.
 
 **Noch offen:**
 1. **Neulade-Schutz Stufe 2** (voller Schutz inkl. Bewertungen, wie im Baukasten) nach und
