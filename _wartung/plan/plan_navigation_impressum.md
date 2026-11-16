@@ -262,6 +262,13 @@ Ordner-Übersichten `_*.html` über `linking.txt`). Änderungen an der Startseit
   Gruppenergebnis immer „x von max möglichen" + Balken – nachgerüstet in den drei
   Zuordnungs-Seiten Kl. 7. `pruefe.py`: `GC`, `GCALT`, `GRUPPE`.
 
+- **QR-Knopf** (16.11.2026, Branch `navigation-v7-qr`): Navigations-Baustein **v7** –
+  schwebender QR-Knopf rechts neben 🏠, zeigt die Adresse der Seite als großen QR-Code
+  (eigener Encoder `dinoQr`, Byte-Modus, Fehlerkorrektur M; mit OpenCV gegengeprüft).
+  Kopien in `baustein_schritt_fuer_schritt` und `baustein_rueckblick_klassenarbeit`
+  mitgezogen; `pruefe.py` `NAV_VERSION`→v7 (+ Prüfung auf QR-Knopf), `nachruesten.py`-Marker→v7;
+  Lernseiten-Anweisung 3.6 und Checkliste ergänzt. Website-Seiten per Nachrüst-Skript v6→v7.
+
 **Noch offen:**
 1. **Neulade-Schutz Stufe 2** (voller Schutz inkl. Bewertungen, wie im Baukasten) nach und
    nach für bestehende Seiten im laufenden Unterricht bzw. beim nächsten Überarbeiten.

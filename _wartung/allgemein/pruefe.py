@@ -23,7 +23,8 @@ Was dieser Linter NICHT kann (bleibt Handarbeit bzw. Browsertest):
   - ob der Stand ein Neuladen wirklich vollständig übersteht (Browsertest: Seite
     bearbeiten, neu laden, vergleichen)
 
-Stand: 13.11.2026 (Gruppenarbeit: Baustein Gruppen-Check, Regeln GC/GCALT/GRUPPE, TEIL 2.10;
+Stand: 16.11.2026 (Navigationsleiste v7 mit schwebendem QR-Knopf, Prüfung NAV;
+       Gruppenarbeit: Baustein Gruppen-Check, Regeln GC/GCALT/GRUPPE, TEIL 2.10;
        Kernkompetenzen: Meta-Tag kernkompetenzen, Prüfung KERN, TEIL 2.9;
        Rückblick-KA-Engine v5: Anrede über data-anrede, Kurswahl für Parallelkurse (KA.kurse);
        Rückblick-KA-Engine v4 mit KA.kern / Karte „Fit bleiben";
@@ -78,7 +79,7 @@ KERN_TYPEN = ('Übung', 'Test', 'Rückblick', 'KA-Vorbereitung', 'Rückblick KA'
 KERN_KUERZEL = re.compile(r'^K(\d{1,2})-(\d{1,2})$')
 
 # Navigationsleiste (baustein_navigation.html, TEIL 3.6)
-NAV_VERSION = 'v6'
+NAV_VERSION = 'v7'
 NAV_START = 'https://szymczak75.github.io/Schule/dino_hub.html'
 NAV_BLOCK = re.compile(r'<!-- =+\s*BAUSTEIN: Navigationsleiste.*?ENDE BAUSTEIN Navigationsleiste =+ -->',
                        re.S)
@@ -539,6 +540,8 @@ def pruefe(pfad):
                     or NAV_START not in n or 'dino-nav-fb' not in n):
                 fehler('NAV', 'Navigationsleiste unvollständig oder verändert – Baustein neu '
                               'einsetzen (TEIL 3.6)')
+            elif 'Navigationsleiste  (v7' in n and ('id="dino-qr"' not in n or 'function dinoQr' not in n):
+                fehler('NAV', 'Navigationsleiste v7 ohne QR-Knopf – Baustein neu einsetzen (TEIL 3.6)')
             elif 'Navigationsleiste  (%s' % NAV_VERSION not in n:
                 hinweis('NAVALT', 'Navigationsleiste ist nicht die aktuelle Fassung %s – '
                                   'Baustein ersetzen' % NAV_VERSION)

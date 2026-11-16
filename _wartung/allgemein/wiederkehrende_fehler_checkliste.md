@@ -269,6 +269,8 @@ Diese Punkte standen offen und sind inzwischen als Regel in
   🏠/Startseite/„Alles für …" die Startseite im Reiter des eigenen Fachs (`?start=bio` usw.,
   aus dem Meta-Tag `fach`) – falsches `fach`-Tag = falscher Reiter. Seit v6 (12.11.2026)
   sind die Texte im Feedback-Fenster ohne Anrede, damit sie auch auf Oberstufenseiten passen.
+  Seit v7 (16.11.2026) gibt es neben dem 🏠-Knopf einen schwebenden QR-Knopf, der die
+  Adresse der Seite als großen QR-Code zeigt.
   `pruefe.py` meldet eine fehlende oder veränderte Leiste als `NAV`.
 - **Keine Google Fonts mehr** (Oktober 2026, Datenschutz). Einzige erlaubte externe Quelle
   ist MathJax; Schrift kommt aus dem System.
