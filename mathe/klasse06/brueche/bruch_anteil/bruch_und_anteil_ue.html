@@ -72,9 +72,9 @@ h2{font-size:1.5rem;line-height:1.3;margin:0 0 10px;color:var(--blue-dark)}
 .opt.bad,.opt.bad:disabled{background:var(--red);border-color:var(--red);color:#fff;box-shadow:none}
 
 input.num{font:inherit;font-size:1.125rem;min-height:44px;width:5.5rem;text-align:center;font-weight:800;border:2px solid var(--ink);border-radius:8px;background:var(--card);color:var(--ink);padding:4px 8px}
-input:disabled{opacity:1;color:var(--ink);-webkit-text-fill-color:var(--ink)}
-input.ok,input.ok:disabled{background:var(--green);border-color:var(--green);color:#fff;-webkit-text-fill-color:#fff}
-input.bad,input.bad:disabled{background:var(--red);border-color:var(--red);color:#fff;-webkit-text-fill-color:#fff}
+input:disabled,input.zu{opacity:1;color:var(--ink);-webkit-text-fill-color:var(--ink)}
+input.ok,input.ok:disabled,input.ok.zu{background:var(--green);border-color:var(--green);color:#fff;-webkit-text-fill-color:#fff}
+input.bad,input.bad:disabled,input.bad.zu{background:var(--red);border-color:var(--red);color:#fff;-webkit-text-fill-color:#fff}
 .frac-in{display:inline-flex;flex-direction:column;align-items:center;gap:5px;vertical-align:middle}
 .frac-in input{width:4.2rem}
 .frac-in .bar{display:block;width:100%;height:3px;background:var(--ink);border-radius:2px}
@@ -163,6 +163,38 @@ details.ml summary{min-height:44px;padding:10px 0;font-weight:800;color:var(--am
 .dino-ecke>:not(.dino-huelle):not(.dino-ikon){position:absolute!important;right:calc(100% + 6px)!important;bottom:26px!important;left:auto!important;top:auto!important;white-space:nowrap}
 .dino-tipp-fest{right:96px!important;bottom:34px!important;left:auto!important;top:auto!important}
 </style>
+<!-- =============================================================================
+     BAUSTEIN: iPad-Feldsperre  (v1, 18.11.2026)
+     Einfügen: UNVERÄNDERT als letztes Element in den <head> jeder Seite, deren Skript
+     Texteingaben per  feld.disabled = …  sperrt.
+     Hintergrund: Safari (iPad) zeichnet gesperrte (disabled) Eingabefelder nach dem
+     Wieder-Einblenden einer Karte fast durchsichtig – die Zahlen scheinen weg.
+     Der Baustein lenkt  .disabled  bei Texteingaben (text, number, search, tel, email,
+     url) auf  readOnly  + Klasse  .zu  um. Das Feld bleibt unveränderbar, wird aber
+     normal gezeichnet. Lesen von  .disabled  liefert weiter den Sperrzustand.
+     Nicht betroffen: Buttons, Checkboxen, Radios, Selects.
+     Neue Seiten sperren Felder direkt per readOnly + .zu; dann ist der Baustein unnötig.
+     ========================================================================== -->
+<script>
+(function(){
+  try{
+    var P=HTMLInputElement.prototype, d=Object.getOwnPropertyDescriptor(P,'disabled');
+    if(!d||!d.set||P.__dinoSperre) return;
+    var TXT={text:1,number:1,search:1,tel:1,email:1,url:1};
+    Object.defineProperty(P,'disabled',{configurable:true,enumerable:d.enumerable,
+      get:function(){ return TXT[this.type] ? (d.get.call(this)||this.classList.contains('zu')) : d.get.call(this); },
+      set:function(v){
+        if(!TXT[this.type]){ d.set.call(this,v); return; }
+        d.set.call(this,false);
+        if(v){ if(!this.readOnly){ this.readOnly=true; this.__zuRO=true; } this.classList.add('zu'); }
+        else { if(this.__zuRO){ this.readOnly=false; this.__zuRO=false; } this.classList.remove('zu'); }
+      }});
+    P.__dinoSperre=true;
+  }catch(e){}
+})();
+</script>
+<style>input.zu{cursor:default}</style>
+<!-- ===== ENDE BAUSTEIN iPad-Feldsperre ===== -->
 </head>
 <body>
 
