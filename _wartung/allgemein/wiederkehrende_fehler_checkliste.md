@@ -269,6 +269,8 @@ Diese Punkte standen offen und sind inzwischen als Regel in
   🏠/Startseite/„Alles für …" die Startseite im Reiter des eigenen Fachs (`?start=bio` usw.,
   aus dem Meta-Tag `fach`) – falsches `fach`-Tag = falscher Reiter. Seit v6 (12.11.2026)
   sind die Texte im Feedback-Fenster ohne Anrede, damit sie auch auf Oberstufenseiten passen.
+  Seit v7 (16.11.2026) gibt es neben dem 🏠-Knopf einen schwebenden QR-Knopf, der die
+  Adresse der Seite als großen QR-Code zeigt.
   `pruefe.py` meldet eine fehlende oder veränderte Leiste als `NAV`.
 - **Keine Google Fonts mehr** (Oktober 2026, Datenschutz). Einzige erlaubte externe Quelle
   ist MathJax; Schrift kommt aus dem System.
@@ -288,6 +290,10 @@ Diese Punkte standen offen und sind inzwischen als Regel in
   Ziffern als Reiter, Schrift unter 1rem, eigene Blautöne und einen toten Weiter-Knopf.
   `pruefe.py` meldet fehlende Engine, doppelte Teilaufgaben-IDs und Teilaufgaben ohne genau
   zwei Übungen als `RBKA`.
+- **Rückblick KA in der Oberstufe duzte** (13.11.2026). Die Engine bis v4 hatte feste
+  Du-Texte – jede EF/Q-Seite scheiterte an `ANREDE`. Seit v5 schaltet `<body data-anrede="sie">`
+  alle Engine-Texte um. Parallelkurse mit derselben Arbeit, aber anderen Zahlen bekommen **eine**
+  Seite mit Kurswahl (`KA.kurse`, `jeKurs`, TEIL 2.8) statt zwei fast gleicher Dateien.
 - **Kernkompetenzen werden laufend mitgeübt** (12.11.2026). Die Fachschaft hat je Jahrgang
   Kernkompetenzen festgelegt (`kernkompetenzen.md`, Kürzel `K6-3`). Neue Mathe-Seiten nutzen
   sie in den normalen Aufgaben, bevorzugt in der Wiederholungskarte und in einer eigenen Karte

@@ -203,24 +203,30 @@ Die **Auswertungskarte** ist bei Übung und Wissenstest ebenfalls Pflicht und st
  
 ## Produkt 3: Planungsdokument (.docx) 📄
  
-Das Word-Dokument ist für die Ablage in **OneNote** optimiert. Es enthält eine strukturierte Tabelle nach folgendem Schema (orientiert an den Screenshots der Lehrkraft):
- 
-### Tabellenstruktur
- 
+Das Word-Dokument ist für die Ablage in **OneNote** optimiert. Aufbau und Optik sind seit 17.11.2026 verbindlich festgelegt (Wunsch der Lehrkraft; erstes Beispiel: `planung_procyte_endosymbiont_ef.docx`, Biologie EF).
+
+### Aufbau
+- Kopfzeile klein in Grau (`#6B7686`): Fach · Stufe · Oberthema · Thema; darunter Inhaltsfeld/Unterrichtsvorhaben und Buchseiten.
+- **Je Stunde eine Überschrift** im Stil „Doppelstunde 1 – Was ist eine Zuordnung? (Tabelle und Term)“: Arial 15 pt, fett, Orange `#C97A2E`. Jede weitere Stunde beginnt auf einer neuen Seite (eine OneNote-Seite pro Stunde).
+- Darunter **je Stunde eine zweispaltige Tabelle** mit diesen Zeilen in dieser Reihenfolge:
+
 | Abschnitt | Inhalt |
 |---|---|
-| **Ziel der Stunde** | Kompetenz / Lernziel klar und knapp formuliert |
-| **Zentrale Erkenntnisse / neue Techniken** | Definitionen, Vorgehen, Kriterien – ausführlich. Platzhalter für Bilder/Grafiken (werden von Lehrkraft ergänzt). |
+| **Ziel der Stunde** | Kompetenz / Lernziel klar und knapp, mit Kompetenzkürzeln aus dem Kernlehrplan; dazu eine Zeile „Rahmen“ (Zeit, Sozialform, Methode) |
+| **Ablauf** | Aufzählung je Phase: **Zeit · Phase** (Sozialform): Inhalt, mit Verweis auf Karte der Lernseite bzw. Buchseite; Puffer nennen |
+| **Zentrale Erkenntnisse / neue Techniken** | Definitionen, Vorgehen, Kriterien – ausführlich, Fachbegriffe fett. Platzhalter für Bilder/Grafiken (werden von Lehrkraft ergänzt). |
 | **Benötigte Kenntnisse** | Vorwissen, das SuS mitbringen müssen – in Mathematik mit den Kernkompetenz-Kürzeln (z. B. „K6-1 Brüche kürzen") |
-| **Verwendete Materialien** | Buchseiten (mit Seitenangabe), Websites (mit Link), Arbeitsblätter, Experimente |
-| **Hausaufgaben / Weitere Übungen** | Aufgaben aus dem Buch oder ergänzendes Material |
- 
-### Gestaltung
-- Klare Tabellenstruktur, gut lesbar in OneNote
-- Linke Spalte: Kategorie (fett, farblich hervorgehoben)
-- Rechte Spalte: Inhalt (Fließtext, Aufzählungen wo sinnvoll)
-- Keine übermäßige Formatierung – OneNote-kompatibel
-- Seitenformat: A4
+| **Verwendete Materialien** | Buchseiten (mit Seitenangabe), Arbeitsblätter, Experimente; ein Block **„Websites:“** mit anklickbaren Links – sprechender Name plus kurzer Zweck, nie eine nackte URL |
+| **Hausaufgaben / Weitere Übungen** | Aufgaben aus dem Buch oder ergänzendes Material, verlinkt, wo es eine Seite dazu gibt |
+
+Verlinkt werden nur Seiten, die tatsächlich veröffentlicht werden (z. B. keine Lehrer-Website, die nicht ins Repo kommt).
+
+### Gestaltung (verbindliche Werte)
+- A4, Ränder 2 cm, Schrift Arial 11 pt, keine weitere Formatierung (OneNote-kompatibel).
+- Tabelle: Spaltenbreiten ca. 4,2 cm / 11,7 cm, dünne **graue** Rahmen (`#7F7F7F`).
+- Linke Spalte: Hintergrund `#FBEEE0`, Kategorie fett in `#A5611E`.
+- Rechte Spalte: normaler schwarzer Text, Aufzählungen als echte Listen (keine eingetippten „•“).
+- Links in `#1F4680`, unterstrichen.
 ### Mathematische Darstellung im Dokument
 - Formeln als Unicode-Text oder klar lesbaren Klartext (kein LaTeX im Docx)
 - Brüche als „a/b" im Fließtext sind **nur im Docx** akzeptabel (auf den Websites bleibt die div-basierte Bruchdarstellung Pflicht – siehe Lernseiten-Projektanweisungen; ein Schrägstrich steht dort ausschließlich als wörtlicher Eingabetext für GeoGebra in `<code>`, nie als dargestellter Bruch)
@@ -359,7 +365,7 @@ Zuerst `wiederkehrende_fehler_checkliste.md` durchgehen und `pruefe.py` laufen l
 - [ ] Sind Timer sinnvoll eingebaut (wo passend)?
 - [ ] Meldet `pruefe.py` keinen FEHLER mehr?
 **Planungsdokument:**
-- [ ] Alle fünf Tabellenabschnitte vorhanden?
+- [ ] Alle sechs Tabellenabschnitte vorhanden (einschließlich „Ablauf“), je Stunde eine Tabelle mit orangefarbener Überschrift?
 - [ ] Buchseitenverweise mit Seitenzahl?
-- [ ] Links zu Websites eingefügt?
+- [ ] Websites als anklickbare Links mit Namen eingefügt – nur veröffentlichte Seiten?
 - [ ] OneNote-kompatible Formatierung?
