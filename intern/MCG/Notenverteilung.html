@@ -93,6 +93,7 @@ thead th{ position:sticky; top:0; background:#eef1f4; z-index:1; }
 .pill.good{ background:var(--okbg); color:var(--ok); } .pill.bad{ background:var(--badbg); color:var(--bad); } .pill.warn{ background:var(--warnbg); color:var(--warn); } .pill.info{ background:var(--infobg); color:var(--info); }
 .g-y{ background:#FFE699 !important; color:#000 !important; } .g-o{ background:#F4B183 !important; color:#000 !important; }
 .g-r{ background:#C00000 !important; color:#fff !important; font-weight:700; } .g-d{ background:#6B0000 !important; color:#fff !important; font-weight:700; }
+.g-x{ background:#7030A0 !important; color:#fff !important; font-weight:700; }
 #busy{ position:fixed; inset:0; background:rgba(20,30,40,.35); display:flex; align-items:center; justify-content:center; z-index:50; }
 #busy[hidden]{ display:none; }
 #busy .box{ background:#fff; padding:1rem 1.4rem; border-radius:10px; min-width:280px; box-shadow:0 6px 24px rgba(0,0,0,.2); }
@@ -1448,6 +1449,10 @@ const PUNKTE_OF = { '1+':15,'1':14,'1-':13,'2+':12,'2':11,'2-':10,'3+':9,'3':8,'
 const NOTE_OF_P = Object.fromEntries(Object.entries(PUNKTE_OF).map(([n, p]) => [p, n]));
 const NOTEN_O = ['1','2','3','4','5','6'];
 const PUNKTE = Array.from({ length:16 }, (_, i) => String(15 - i));
+/* Striche, die als „-“ gelten (z. B. aus Word, Mail oder vom Handy eingefügt):
+   ‐ ‑ ‒ – — ― (U+2010–2015), − Minuszeichen, ﹘ ﹣ kleine, － breites Minus */
+const STRICHE = ['‐','‑','‒','–','—','―','−','﹘','﹣','－'];
+const STRICH_RE = new RegExp('[' + STRICHE.join('') + ']', 'g');
 
 /* Spalten: S1 SoMi 1, K1 Klausur 1, Q Quartal, S2 SoMi 2, K2 Klausur 2, E Endnote */
 const SPALTEN = ['S1','K1','Q','S2','K2','E'];
@@ -1460,6 +1465,8 @@ function spaltenFuer(bereich, runde){
 }
 /* Spalten, die ein Bereich überhaupt haben kann */
 const spaltenBereich = bereich => bereich === 'SekI' ? ['Q','E'] : SPALTEN.slice();
+/* Runde-1-Spalten eines Bereichs (für „Nachtrag“ nach Lehrerwechsel): Sek I nur Quartal, Oberstufe SoMi 1, Klausur 1, Quartal */
+const nachtragSpalten = bereich => RUNDE1.filter(k => spaltenBereich(bereich).includes(k));
 /* Sichtbare Spalten für eine Stufe: offene Spalten + bei der Oberstufe die Werte aus Runde 1 (gesperrt sichtbar).
    In der Sek I ist die Quartalsnote in Runde 2 NICHT sichtbar. */
 function sichtbar(bereich, offen){
@@ -1478,18 +1485,32 @@ function listeFuer(fmt){
   const base = fmt === VERTIEFUNG ? VERT : fmt === 'Punkte' ? PUNKTE : fmt === 'Note ohne Tendenz' ? NOTEN_O : NOTEN_T;
   return uniq([...base, ...SONDER]);
 }
+/* Anzeige mit Zusatz in Klammern (Auswahllisten in Excel und auf Seite B): „3+ (9 Pkt)“, „9 (3+ befriedigend)“, „NT (nicht teilgenommen)“ */
+const WORT = { 1:'sehr gut', 2:'gut', 3:'befriedigend', 4:'ausreichend', 5:'mangelhaft', 6:'ungenügend' };
+const KUERZEL_TEXT = { NT:'nicht teilgenommen', AT:'Attest', E1:'mit besonderem Erfolg', E2:'mit Erfolg', E3:'teilgenommen' };
+function label(v, fmt){
+  if (v == null || v === '') return '';
+  v = String(v);
+  if (KUERZEL_TEXT[v] && (SONDER.includes(v) || VERT.includes(v))) return `${v} (${KUERZEL_TEXT[v]})`;
+  if (fmt === 'Punkte' && /^\d{1,2}$/.test(v)){ const n = NOTE_OF_P[+v]; return n ? `${v} (${n} ${WORT[n[0]]})` : v; }
+  if (fmt === 'Note ohne Tendenz' && WORT[v]) return `${v} (${WORT[v]})`;
+  if (PUNKTE_OF[v] != null) return `${v} (${PUNKTE_OF[v]} Pkt)`;
+  return v;
+}
 const istKuerzel = (v, fmt) => SONDER.includes(v) || (fmt === VERTIEFUNG && VERT.includes(v));
 
 /* Eingabe prüfen und vereinheitlichen. Liefert { v } (kanonischer Text, '' = leer) oder { invalid, raw } */
 function parseGrade(raw, fmt){
   if (raw == null) return { v:'' };
   if (typeof raw === 'number'){ raw = String(raw); }
-  let s = String(raw).trim().replace(/[−–—]/g, '-').replace(/\s+/g, '');
+  let s = String(raw).trim().replace(STRICH_RE, '-').replace(/\s+/g, '');
   if (!s) return { v:'' };
-  if (istKuerzel(s.toUpperCase(), fmt)) return { v:s.toUpperCase() };
-  if (fmt === VERTIEFUNG) return { invalid:true, raw:String(raw).trim() };
   // Altes Format aus Version 1: „2- (10)“
   const old = s.match(/^([1-6][+-]?)\((\d{1,2})\)$/); if (old) s = fmt === 'Punkte' ? old[2] : old[1];
+  // Anzeige mit Klammerzusatz („3+ (9 Pkt)“, „9 (3+ befriedigend)“): nur der Teil vor der Klammer zählt
+  else if (/^[^(]+\(.*\)$/.test(s)) s = s.replace(/\(.*\)$/, '');
+  if (istKuerzel(s.toUpperCase(), fmt)) return { v:s.toUpperCase() };
+  if (fmt === VERTIEFUNG) return { invalid:true, raw:String(raw).trim() };
   if (fmt === 'Punkte'){
     if (/^\d{1,2}$/.test(s) && +s <= 15) return { v:String(+s) };
     return { invalid:true, raw:String(raw).trim() };
@@ -1518,6 +1539,7 @@ const FARBEN = {
   o:{ bg:'FFF4B183', fg:'FF000000', bold:false },
   r:{ bg:'FFC00000', fg:'FFFFFFFF', bold:true },
   d:{ bg:'FF6B0000', fg:'FFFFFFFF', bold:true },
+  x:{ bg:'FF7030A0', fg:'FFFFFFFF', bold:true },   // ungültiger Eintrag (z. B. „3--“): lila, bitte korrigieren
 };
 const FILL_OFFEN = 'FFFFF8DC', FILL_GESPERRT = 'FFE7E6E6', FILL_KOPF = 'FFE3E8EC', FILL_KOPF_OFFEN = 'FFFCE9A8';
 /* Für den Import nach SchILD: Note und Punkte aus kanonischem Wert */
@@ -1526,6 +1548,8 @@ function importWerte(v, fmt){
   if (fmt === 'Punkte' && /^\d{1,2}$/.test(v)){ const p = +v; return { note:NOTE_OF_P[p] ?? '', punkte:p }; }
   return { note:v, punkte:null };
 }
+/* Wert für eine Eingabezelle der Lehrerdatei: immer die Anzeige mit Zusatz (passend zur Auswahlliste) */
+const excelZelle = (v, fmt) => v === '' || v == null ? null : label(v, fmt);
 /* Wert für Excel-Zelle: Punkte als Zahl, Noten als Text */
 const excelWert = (v, fmt) => v === '' || v == null ? null : fmt === 'Punkte' && /^\d{1,2}$/.test(String(v)) ? Number(v) : String(v);
 /* Erlaubte Eingaben als lesbarer Text (für Fehlermeldungen) */
@@ -1570,14 +1594,14 @@ function addListen(wb){
   const ref = {};
   LISTEN_FORMATE.forEach((fmt, i) => {
     const L = String.fromCharCode(65 + i), list = listeFuer(fmt);
-    list.forEach((v, j) => ws.getCell(j + 1, i + 1).value = /^\d{1,2}$/.test(v) && fmt === 'Punkte' ? Number(v) : v);
+    list.forEach((v, j) => ws.getCell(j + 1, i + 1).value = label(v, fmt));
     ref[fmt] = `Listen!$${L}$1:$${L}$${list.length}`;
   });
   return ref;
 }
 function dvFor(ref, fmt){
   return { type:'list', allowBlank:true, formulae:[ref], showErrorMessage:true, errorStyle:'stop', errorTitle:'Ungültige Eingabe',
-    error:'Erlaubt: ' + erlaubtText(fmt) + '. Bitte aus der Auswahlliste wählen.' };
+    error:'Bitte aus der Auswahlliste wählen (z. B. „' + label(listeFuer(fmt)[Math.min(7, listeFuer(fmt).length - 1)], fmt) + '“). Erlaubt: ' + erlaubtText(fmt) + '.' };
 }
 /* Zeilen zu zusammenhängenden Bereichen zusammenfassen: [[von, bis], …] */
 function runs(nums){
@@ -1585,14 +1609,25 @@ function runs(nums){
   for (let i = 0; i < rs.length;){ let j = i; while (j + 1 < rs.length && rs[j+1] === rs[j] + 1) j++; out.push([rs[i], rs[j]]); i = j + 1; }
   return out;
 }
+/* Excel-Ausdruck, der den Zellinhalt wie parseGrade vereinheitlicht:
+   lange Striche → „-“, Klammerzusatz („4- (4 Pkt)“) weg, Leerzeichen weg. So färben sich auch eingefügte Werte wie „4–“. */
+function gradeExpr(c){
+  const d = STRICHE.reduce((t, z) => `SUBSTITUTE(${t},"${z}","-")`, `TRIM(${c}&"")`);
+  return `SUBSTITUTE(SUBSTITUTE(LEFT(${d},FIND("(",${d}&"(")-1)," ","")," ","")`;
+}
 /* Bedingte Formatierung (Notenfarben) für einen Bereich mit bekanntem Notenformat */
 function addGradeCF(ws, L, r1, r2, fmt){
-  const vals = FARB_WERTE[fmt] || {}, c = `${L}${r1}`, rules = [];
+  const vals = FARB_WERTE[fmt] || {}, x = gradeExpr(`${L}${r1}`), rules = [];
+  // Zuerst: ungültige Einträge (nicht in der Auswahlliste, z. B. per Copy-Paste „3--“) lila mit weißer Schrift
+  const ok = listeFuer(fmt).map(v => `"${String(v).replace(/"/g, '""')}"`).join(',');
+  rules.push({ type:'expression', priority:1, stopIfTrue:true,
+    formulae:[`AND(TRIM(${L}${r1}&"")<>"",ISNA(MATCH(${x},{${ok}},0)))`],
+    style:{ fill:{ type:'pattern', pattern:'solid', bgColor:{ argb:FARBEN.x.bg } }, font:{ color:{ argb:FARBEN.x.fg }, bold:true } } });
   for (const k of ['d','r','o','y']){
     if (!vals[k]) continue;
     const f = FARBEN[k];
     rules.push({ type:'expression', priority:rules.length + 1, stopIfTrue:true,
-      formulae:[`OR(${vals[k].map(v => `TRIM(${c}&"")="${v}"`).join(',')})`],
+      formulae:[`OR(${vals[k].map(v => `${x}="${v}"`).join(',')})`],
       style:{ fill:{ type:'pattern', pattern:'solid', bgColor:{ argb:f.bg } }, font:{ color:{ argb:f.fg }, bold:f.bold } } });
   }
   if (rules.length) ws.addConditionalFormatting({ ref:`${L}${r1}:${L}${r2}`, rules });
@@ -1849,7 +1884,7 @@ function buildGesamtWb(G){
     const fmt = fmtRow(G, r);
     const vals = G_COLS.map(k => {
       switch (k){
-        case '_ID': return r.id; case '_Schlüssel': return rowSKey(r); case '_Quelle': return JSON.stringify({ q:r.quelle || {}, m:r.manuell ? 1 : 0, v:r.vertiefung ? 1 : 0 });
+        case '_ID': return r.id; case '_Schlüssel': return rowSKey(r); case '_Quelle': return JSON.stringify(Object.assign({ q:r.quelle || {}, m:r.manuell ? 1 : 0, v:r.vertiefung ? 1 : 0 }, r.nachtrag?.length ? { n:r.nachtrag } : {}));
         case 'Stufe': return r.stufe; case 'Klasse': return r.klasse; case 'Fach': return r.fach; case 'Kursart': return r.kursart; case 'Kurs': return r.kurs;
         case 'Lehrkraft': return r.lehrer; case 'Nachname': return r.name; case 'Vorname': return r.vorname; case 'Geburtsdatum': return isoToDate(r.geb);
         case 'Status': return r.status; case 'Hinweis': return r.hinweis || '';
@@ -1890,7 +1925,7 @@ function readGesamtWb(wb){
     let q = {}; try { q = JSON.parse(str(g('_Quelle')) || '{}'); } catch(e){}
     const o = { id:Number(id), stufe:str(g('Stufe')), klasse:str(g('Klasse')), fach:str(g('Fach')), kursart:str(g('Kursart')), kurs:str(g('Kurs')),
       lehrer:str(g('Lehrkraft')), name:str(g('Nachname')), vorname:str(g('Vorname')), geb:dateKey(g('Geburtsdatum')), status:str(g('Status')) || 'aktiv',
-      hinweis:str(g('Hinweis')), quelle:q.q || {}, manuell:!!q.m, vertiefung:!!q.v };
+      hinweis:str(g('Hinweis')), quelle:q.q || {}, manuell:!!q.m, vertiefung:!!q.v, nachtrag:Array.isArray(q.n) ? q.n : [] };
     const fmt = fmtRow(G, o);
     for (const k of SPALTEN){ const p = parseGrade(cellVal(g(k)), fmt); o[k] = p.v || ''; }
     G.rows.push(o);
@@ -1924,7 +1959,12 @@ function readTeacherWb(wb){
   const kopf = {}; ws.getRow(1).eachCell((c, i) => kopf[i] = str(c.value));
   const verschoben = keys.some((k, i) => !k.startsWith('_') && !SPALTEN.includes(k) && kopf[i + 1] && kopf[i + 1] !== k);
   if (verschoben) return { error:'Die Spalten der Datei wurden verändert (z. B. eingefügt oder gelöscht). Bitte die Originaldatei verwenden.' };
-  return { info, ws, idx, keys, rows, offen, formate, spaltennamen:infoJSON(info, 'Spaltennamen', {}) };
+  return { info, ws, idx, keys, rows, offen, formate, spaltennamen:infoJSON(info, 'Spaltennamen', {}), nachtrag:infoJSON(info, 'Nachtrag', {}) };
+}
+/* Offene Spalten einer Zeile: offene Spalten der Stufe + Nachtrag-Spalten dieser Zeile (nach Lehrerwechsel) */
+function offenRow(t, r){
+  const n = (t.nachtrag || {})[r.id] || [];
+  return uniq([...(t.offen[r.stufe] || []), ...n]);
 }
 /* Notenfarben in einer Lehrerdatei neu setzen (nach dem Speichern durch Seite B) */
 function reapplyTeacherCF(t){
@@ -2127,16 +2167,19 @@ function computePlan(){
     const oldBy = new Map(S.alt.rows.map(o => [rowKey(o), o])), oldStud = new Set(S.alt.rows.map(o => studKey(o)));
     const newStud = new Set(base.map(r => studKey(r)));
     maxId = Math.max(0, ...S.alt.rows.map(o => o.id));
-    const lw = { id:'lw', title:'Lehrerwechsel – bitte jeden Wechsel bestätigen', kind:'bad', must:true, items:[], bulk:[{ v:'neu', label:'alle Wechsel bestätigen' }],
+    const lw = { id:'lw', title:'Lehrerwechsel – bitte jeden Wechsel bestätigen', kind:'bad', must:true, items:[],
+      bulk:[{ v:'neu', label:'alle Wechsel bestätigen' }, { v:'neuN', label:'alle bestätigen + Runde-1-Noten nachtragen lassen' }],
+      note:'„Nachtragen lassen“: Die neue Lehrkraft kann in dieser Zeile die Noten aus Runde 1 (Sek I: Quartal; Oberstufe: SoMi 1, Klausur 1, Quartal) nachtragen oder korrigieren – z. B. wenn die Zuordnung in SchILD falsch war. Alle anderen Zeilen bleiben gesperrt.',
       head:['Klasse','Fach','Name','bisher','neu'] };
-    const fn = { id:'fn', title:'Fach neu (Schüler:in war schon da, das Fach ist neu)', kind:'bad', must:true, items:[], bulk:[{ v:'add', label:'alle übernehmen' }],
+    const fn = { id:'fn', title:'Fach neu (Schüler:in war schon da, das Fach ist neu)', kind:'bad', must:true, items:[],
+      bulk:[{ v:'add', label:'alle übernehmen' }, { v:'addN', label:'alle übernehmen + Runde-1-Noten nachtragen lassen' }],
       head:['Klasse','Fach','Name','Lehrkraft'] };
     const neu = [], used = new Set(); rows = [];
     for (const r of base){
       const old = oldBy.get(r.key);
       if (old){
         used.add(old);
-        Object.assign(r, { id:old.id, quelle:old.quelle || {}, hinweis:[old.hinweis, r.manuell && !old.manuell ? r.hinweis : ''].filter(Boolean).join(' · '),
+        Object.assign(r, { id:old.id, quelle:old.quelle || {}, nachtrag:old.nachtrag || [], hinweis:[old.hinweis, r.manuell && !old.manuell ? r.hinweis : ''].filter(Boolean).join(' · '),
           manuell:old.manuell || r.manuell, status:old.status === 'neu' || old.manuell ? 'neu' : 'aktiv' });
         SPALTEN.forEach(k => r[k] = old[k] || '');
         if (old.status === 'abgegangen' || old.status === 'entfallen') r.hinweis = [r.hinweis, `wieder in den SchILD-Daten (${nowDe()})`].filter(Boolean).join(' · ');
@@ -2144,15 +2187,20 @@ function computePlan(){
         if (oL.length && nL.length && (oL.length !== nL.length || oL.some(x => !nL.includes(x)))){
           const key = 'lw:' + r.key, d = decv(key);
           lw.items.push({ key, cols:[r.klasse, r.fach, `${r.name}, ${r.vorname}`, old.lehrer, r.lehrer],
-            options:[{ v:'neu', label:`Wechsel bestätigen (an ${r.lehrer})` }, { v:'alt', label:`bei ${old.lehrer} lassen` }] });
+            options:[{ v:'neu', label:`Wechsel bestätigen (an ${r.lehrer})` }, { v:'neuN', label:`bestätigen + Runde-1-Noten nachtragen lassen` }, { v:'alt', label:`bei ${old.lehrer} lassen` }] });
           if (d && d.v === 'alt'){ r.lehrer = old.lehrer; r.kurs = old.kurs; }
-          else if (d && d.v === 'neu') r.hinweis = [r.hinweis, `Lehrerwechsel ${old.lehrer} → ${r.lehrer} (${nowDe()})`].filter(Boolean).join(' · ');
+          else if (d && (d.v === 'neu' || d.v === 'neuN')){
+            r.hinweis = [r.hinweis, `Lehrerwechsel ${old.lehrer} → ${r.lehrer} (${nowDe()})${d.v === 'neuN' ? ', Runde 1 nachtragen' : ''}`].filter(Boolean).join(' · ');
+            r.nachtrag = d.v === 'neuN' ? nachtragSpalten(bereichOf(r.stufe, os)) : [];
+          }
         }
         rows.push(r);
       } else if (oldStud.has(studKey(r))){
         const key = 'fn:' + r.key, d = decv(key);
-        fn.items.push({ key, cols:[r.klasse, r.fach, `${r.name}, ${r.vorname}`, r.lehrer || '–'], options:[{ v:'add', label:'übernehmen' }, { v:'ign', label:'ignorieren' }] });
-        if (d && d.v === 'add'){ r.id = ++maxId; r.hinweis = [r.hinweis, `Fach neu ab ${S.set.runde}`].filter(Boolean).join(' · '); rows.push(r); }
+        fn.items.push({ key, cols:[r.klasse, r.fach, `${r.name}, ${r.vorname}`, r.lehrer || '–'],
+          options:[{ v:'add', label:'übernehmen' }, { v:'addN', label:'übernehmen + Runde-1-Noten nachtragen lassen' }, { v:'ign', label:'ignorieren' }] });
+        if (d && (d.v === 'add' || d.v === 'addN')){ r.id = ++maxId; r.hinweis = [r.hinweis, `Fach neu ab ${S.set.runde}${d.v === 'addN' ? ', Runde 1 nachtragen' : ''}`].filter(Boolean).join(' · ');
+          r.nachtrag = d.v === 'addN' ? nachtragSpalten(bereichOf(r.stufe, os)) : []; rows.push(r); }
       } else {
         r.id = ++maxId; r.status = 'neu'; r.hinweis = [r.hinweis, `neu ab ${S.set.runde} (${nowDe()})`].filter(Boolean).join(' · '); neu.push(r); rows.push(r);
       }
@@ -2413,30 +2461,32 @@ function buildG(){
 const pwFor = (lehrer) => S.set.pwMode === 'individuell' ? OfficeCrypto.derivePassword(S.set.pw, lehrer) : S.set.pw;
 const teacherFileName = (G, f) => fileName(S.set.pattern, { SJ:G.info.SJ, HJ:'HJ' + G.info.HJ, RUNDE:G.info.Runde, LEHRER:f.lehrer, BEREICH:f.bereich });
 async function buildTeacherWb(G, f, lauf){
-  const rows = f.rows.slice().sort((a, b) => cmpDe(a.klasse, b.klasse) || cmpDe(a.fach, b.fach) || cmpDe(a.kurs, b.kurs) || cmpDe(a.name, b.name) || cmpDe(a.vorname, b.vorname));
+  const rows = f.rows.slice().sort((a, b) => cmpDe(a.stufe, b.stufe) || cmpDe(a.klasse, b.klasse) || cmpDe(a.fach, b.fach) || cmpDe(a.kurs, b.kurs) || cmpDe(a.name, b.name) || cmpDe(a.vorname, b.vorname));
   const stufen = uniq(rows.map(r => r.stufe));
-  const vis = SPALTEN.filter(k => stufen.some(st => sichtbar(f.bereich, lauf.offen[st] || []).includes(k)));
+  const nt = r => (r.nachtrag || []).filter(k => !(lauf.offen[r.stufe] || []).includes(k));   // zusätzlich offene Spalten dieser Zeile
+  const vis = SPALTEN.filter(k => stufen.some(st => sichtbar(f.bereich, lauf.offen[st] || []).includes(k)) || rows.some(r => nt(r).includes(k)));
   const keys = [...T_COLS_FEST, ...vis];
   const wb = new ExcelJS.Workbook(); wb.creator = APP_NAME; wb.created = new Date();
-  const ws = wb.addWorksheet('Noten', { views:[{ state:'frozen', ySplit:1, xSplit:0 }] });
+  const ws = wb.addWorksheet('Noten', { views:[{ state:'frozen', ySplit:1, xSplit:0 }],
+    pageSetup:{ orientation:'landscape', fitToPage:true, fitToWidth:1, fitToHeight:0, paperSize:9 } });
   const listRef = addListen(wb);
-  const widths = { _ID:5, _Schlüssel:5, _Stufe:5, _Art:4, Klasse:8, Fach:7, Kurs:11, Kursart:9, Nachname:22, Vorname:20, Geburtsdatum:12 };
+  const widths = { _ID:5, _Schlüssel:5, _Stufe:5, _Art:4, Klasse:8, Fach:7, Kurs:11, Kursart:9, Nachname:22, Vorname:20, Geburtsdatum:12, S1:23, K1:23, Q:23, S2:23, K2:23, E:23 };
   ws.columns = keys.map(k => ({ header:SPALTEN.includes(k) ? spName(G, stufen.length === 1 ? stufen[0] : null, k) : k, width:widths[k] || 12,
     hidden:k.startsWith('_') || k === 'Geburtsdatum' }));
-  const openIdx = new Set(vis.filter(k => stufen.some(st => (lauf.offen[st] || []).includes(k))).map(k => keys.indexOf(k) + 1));
+  const openIdx = new Set(vis.filter(k => stufen.some(st => (lauf.offen[st] || []).includes(k)) || rows.some(r => nt(r).includes(k))).map(k => keys.indexOf(k) + 1));
   styleHeader(ws.getRow(1), openIdx);
   const dv = new Map(), cf = new Map(), add = (m, k, n) => { if (!m.has(k)) m.set(k, []); m.get(k).push(n); };
   rows.forEach((r, i) => {
-    const rn = i + 2, row = ws.getRow(rn), fmt = fmtRow(G, r), off = lauf.offen[r.stufe] || [], sv = sichtbar(f.bereich, off);
+    const rn = i + 2, row = ws.getRow(rn), fmt = fmtRow(G, r), off = uniq([...(lauf.offen[r.stufe] || []), ...nt(r)]), sv = uniq([...sichtbar(f.bereich, lauf.offen[r.stufe] || []), ...nt(r)]);
     const fest = { _ID:r.id, _Schlüssel:rowSKey(r), _Stufe:r.stufe, _Art:r.vertiefung ? 'V' : '', Klasse:r.klasse, Fach:r.fach, Kurs:r.kurs, Kursart:r.kursart, Nachname:r.name, Vorname:r.vorname, Geburtsdatum:isoToDate(r.geb) };
     keys.forEach((k, j) => {
       const cell = row.getCell(j + 1);
       if (!SPALTEN.includes(k)){ cell.value = fest[k] ?? ''; if (k === 'Geburtsdatum') cell.numFmt = 'DD.MM.YYYY'; return; }
       const show = sv.includes(k), open = off.includes(k);
-      cell.value = show ? excelWert(r[k], fmt) : null;
+      cell.value = show ? excelZelle(r[k], fmt) : null;
       cell.alignment = { horizontal:'center' };
       cell.fill = { type:'pattern', pattern:'solid', fgColor:{ argb:open ? FILL_OFFEN : FILL_GESPERRT } };
-      if (open){ cell.protection = { locked:false }; if (fmt !== 'Punkte') cell.numFmt = '@'; add(dv, k + '|' + fmt, rn); }
+      if (open){ cell.protection = { locked:false }; cell.numFmt = '@'; add(dv, k + '|' + fmt, rn); }
       if (show) add(cf, k + '|' + fmt, rn);
     });
   });
@@ -2446,33 +2496,35 @@ async function buildTeacherWb(G, f, lauf){
     for (const [a, b] of runs(nums)) addGradeCF(ws, L, a, b, fmt); }
   if (rows.length) ws.autoFilter = { from:{ row:1, column:keys.indexOf('Klasse') + 1 }, to:{ row:rows.length + 1, column:keys.length } };
   if (S.set.schutz) await ws.protect('', { selectLockedCells:true, selectUnlockedCells:true, autoFilter:true, sort:true, formatColumns:false, formatRows:true, spinCount:1000 });
-  addAnleitung(wb, G, f, stufen, lauf);
+  const nachtrag = Object.fromEntries(rows.filter(r => nt(r).length).map(r => [r.id, nt(r)]));
+  addAnleitung(wb, G, f, stufen, lauf, rows.filter(r => nt(r).length).length);
   writeInfo(wb, { Typ:'Lehrerdatei', SJ:G.info.SJ, Schuljahr:G.info.Schuljahr, HJ:G.info.HJ, Runde:G.info.Runde, LaufID:lauf.id,
     Lehrer:f.lehrer, Bereich:f.bereich, RueckgabeAn:G.settings.rueckgabeAn, RueckgabeWeg:G.settings.rueckgabeWeg,
     Spalten:keys, Offen:Object.fromEntries(stufen.map(s => [s, lauf.offen[s] || []])), Formate:Object.fromEntries(stufen.map(s => [s, fmtFuer(G, s)])),
-    Sonderkuerzel:G.settings.sonderkuerzel, VertiefungKuerzel:G.settings.vertiefungKuerzel,
+    Nachtrag:nachtrag, Sonderkuerzel:G.settings.sonderkuerzel, VertiefungKuerzel:G.settings.vertiefungKuerzel,
     Spaltennamen:Object.fromEntries(SPALTEN.map(k => [k, spName(G, null, k)])), Erstellt:new Date().toISOString(), Zeilen:rows.length });
   return wb;
 }
-function addAnleitung(wb, G, f, stufen, lauf){
+function addAnleitung(wb, G, f, stufen, lauf, nNachtrag){
   const ws = wb.addWorksheet('Anleitung'); ws.getColumn(1).width = 14; ws.getColumn(2).width = 100;
   const offen = uniq(stufen.flatMap(s => lauf.offen[s] || [])).map(k => spName(G, null, k));
   const lines = [
     [`Notenerfassung ${G.info.Schuljahr}, ${G.info.HJ}. Halbjahr – ${G.info.Runde === 'Zeugnis' ? 'Zeugnisnoten (Runde 2)' : 'Quartalsnoten (Runde 1)'}`, null, 'title'],
     [`Lehrkraft: ${f.lehrer} · Bereich: ${bereichName(f.bereich)}`],
     [''],
-    [`Bitte nach dem Eintragen zurückschicken an: ${G.settings.rueckgabeAn} (${G.settings.rueckgabeWeg}).`, null, 'bold'],
+    [`Bitte schick die Datei nach dem Eintragen zurück an: ${G.settings.rueckgabeAn} (${G.settings.rueckgabeWeg}).`, null, 'bold'],
     [''],
     ['So geht es:', null, 'bold'],
-    ['1. Im Blatt „Noten“ stehen alle Ihre Schüler:innen – eine Zeile pro Schüler:in und Fach.'],
-    [`2. Eintragen in den gelben Spalten: ${offen.join(', ') || '–'}. Graue Spalten sind gesperrt (nur zur Ansicht).`],
-    ['3. Die Note aus der Auswahlliste wählen oder eintippen (z. B. „2-“ bzw. Punkte „10“).'],
+    ['1. Im Blatt „Noten“ stehen alle deine Schüler:innen – eine Zeile pro Schüler:in und Fach, sortiert nach Stufe, Klasse, Fach, Kurs und Nachname.'],
+    [`2. Trag die Noten in den gelben Spalten ein: ${offen.join(', ') || '–'}. Graue Spalten sind gesperrt (nur zur Ansicht).`],
+    ['3. Wähl die Note aus der Auswahlliste, z. B. „3+ (9 Pkt)“ bzw. bei Punkten „9 (3+ befriedigend)“. Nur der Wert vor der Klammer zählt.'],
     [`   In allen Kursen zusätzlich erlaubt: ${G.settings.sonderkuerzel.join(', ') || '–'}. In Vertiefungskursen statt Noten: ${G.settings.vertiefungKuerzel.join(', ')}.`],
-    ['4. Mit den Filterpfeilen in der Kopfzeile lässt sich nach Klasse, Fach, Kurs oder Name filtern.'],
-    ['5. Datei unter demselben Namen speichern und zurückschicken. Das Passwort bleibt erhalten.'],
+    ['   Wenn du Noten per Kopieren und Einfügen einträgst: Ungültige Einträge (z. B. „3--“) werden LILA – bitte dann aus der Liste neu wählen.'],
+    ...(nNachtrag ? [[`   NACHTRAG: In ${nNachtrag} Zeile(n) hast du die Schüler:in neu übernommen. Dort sind zusätzlich die Noten aus Runde 1 gelb und offen – bitte fehlende Noten nachtragen (oder korrigieren).`, null, 'bold']] : []),
+    ['4. Mit den Filterpfeilen in der Kopfzeile kannst du nach Klasse, Fach, Kurs oder Name filtern.'],
+    ['5. Speichere die Datei unter demselben Namen und schick sie zurück. Das Passwort bleibt erhalten.'],
     [''],
-    ['Alternativ: die Datei in der Seite „Noteneingabe.html“ öffnen – dort wird automatisch gespeichert.'],
-    ['Bitte keine Zeilen oder Spalten einfügen oder löschen. Sortieren ist wegen des Blattschutzes nicht möglich, Filtern schon.'],
+    ['Bitte keine Zeilen oder Spalten einfügen oder löschen. Sortieren geht wegen des Blattschutzes nicht, Filtern schon.'],
     [''],
     ['Farben der Noten:', null, 'bold'],
   ];
@@ -2480,6 +2532,11 @@ function addAnleitung(wb, G, f, stufen, lauf){
     if (st === 'title') c.font = { bold:true, size:14 }; if (st === 'bold') c.font = { bold:true }; });
   const leg = [['4+ / 4 (6–5 P.)', '4+'], ['4- (4 P.)', '4-'], ['5+ / 5 / 5- (3–1 P.)', '5'], ['6 (0 P.)', '6']];
   leg.forEach(([t, v], i) => { const r = lines.length + 1 + i; const c = ws.getCell(r, 1); c.value = v; gradeStyle(c, v, 'Note mit Tendenz'); ws.getCell(r, 2).value = t; });
+  // Lila = ungültiger Eintrag (z. B. per Kopieren eingefügt): bitte korrigieren
+  const rx = lines.length + 1 + leg.length, cx = ws.getCell(rx, 1);
+  cx.value = '3--'; cx.fill = { type:'pattern', pattern:'solid', fgColor:{ argb:FARBEN.x.bg } }; cx.font = { color:{ argb:FARBEN.x.fg }, bold:true };
+  ws.getCell(rx, 2).value = 'LILA = ungültiger Eintrag (z. B. „3--“ oder „sehr gut“, oft nach Kopieren und Einfügen) – bitte aus der Auswahlliste neu wählen!';
+  ws.getCell(rx, 2).font = { bold:true };
 }
 function buildReport(G, files){
   const wb = new ExcelJS.Workbook(); const x = G.info;

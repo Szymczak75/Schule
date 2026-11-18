@@ -4,13 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ortskurven – Wohin wandern die besonderen Punkte? (Q1)</title>
-<meta name="description" content="Erarbeitung zu Ortskurven: die Spur eines Hochpunkts in GeoGebra beobachten, Ortskurven in vier Schritten berechnen, den Definitionsbereich bestimmen und eine Ortskurve zur Gewinnoptimierung nutzen.">
-<meta name="keywords" content="Ortskurve, Funktionenschar, Parameter, Extrempunkte, Definitionsbereich, GeoGebra, Spur, Optimierung, Q1">
+<meta name="description" content="Erarbeitung zu Ortskurven als Expertenpuzzle in EA, PA oder GA (Think–Pair–Share, Experten für Hoch-, Tief- und Wendepunkte, Gruppen-Check): die Spur eines Hochpunkts in GeoGebra beobachten, Ortskurven in vier Schritten berechnen, den Definitionsbereich bestimmen und eine Ortskurve zur Gewinnoptimierung nutzen.">
+<meta name="keywords" content="Ortskurve, Funktionenschar, Parameter, Extrempunkte, Wendepunkte, Gruppenpuzzle, Definitionsbereich, GeoGebra, Spur, Optimierung, Q1">
 <meta name="typ" content="Lernseite">
 <meta name="klasse" content="Q1">
 <meta name="fach" content="mathe">
 <meta name="oberthema" content="Funktionenscharen">
 <meta name="thema" content="Ortskurven">
+<meta name="kernkompetenzen" content="K6-3, K7-2, K7-8">
 <meta name="anzeigename" content="Funktionenscharen – Ortskurven">
 <script>
   MathJax = {
@@ -25,6 +26,7 @@
   --amber:#b8860b; --amber-light:#fdf3d9; --amber-dark:#96690a;
   --orange:#c97a2e; --orange-dark:#a5611e; --orange-light:#fbeee0;
   --bg:#faf7f2; --line:#e4dcd0;
+  --h:var(--orange); --hd:var(--orange-dark); --hl:var(--orange-light);  /* für baustein_gruppencheck */
 }
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
@@ -55,23 +57,45 @@ nav.tabs button:active{transform:scale(.97)}
 .karte.aktiv{display:block}
 .karte h2{margin:.1rem 0 .7rem;font-size:1.4rem;color:var(--orange-dark);line-height:1.3}
 .karte h3{margin:1.2rem 0 .4rem;font-size:1.15rem;line-height:1.3}
-/* Sozialform & Fahrplan */
-.sozial{background:var(--card);border:2px solid var(--orange);border-radius:14px;padding:.8rem 1rem;margin:0 0 1rem}
-.sozial h2{margin:0 0 .3rem;font-size:1.25rem;color:var(--orange-dark)}
-.sf-knoepfe{display:flex;flex-wrap:wrap;gap:.5rem;margin:.5rem 0 .2rem}
-.sfbtn{min-height:52px;min-width:44px;padding:.45rem 1rem;border:2px solid var(--orange);background:var(--card);border-radius:12px;cursor:pointer;font-weight:600;color:var(--orange-dark);text-align:left}
-.sfbtn.sel{background:var(--orange);color:#ffffff}
-.sf-gewaehlt{display:none}
-body.sf-ea .sf-gewaehlt,body.sf-pa .sf-gewaehlt,body.sf-ga .sf-gewaehlt{display:block}
-body.sf-ea .sf-wahl,body.sf-pa .sf-wahl,body.sf-ga .sf-wahl{display:none}
-.sf-wahl.offen{display:block !important}
-.fahrplan{margin:.6rem 0 0}
-.fahrplan table{border-collapse:collapse;width:100%}
+/* Sozialform-Etiketten, Fahrplan, Phasen-Uhr, Lerntempoduett, Folie, Los */
+.sf{display:inline-block;font-size:1rem;font-weight:600;background:var(--orange-light);border:1px solid var(--orange);
+  color:var(--orange-dark);border-radius:999px;padding:.05rem .65rem;margin-left:.35rem;vertical-align:middle;line-height:1.5}
+.fahrplan{margin:0 0 1rem;background:var(--card);border:2px solid var(--orange);border-radius:14px;padding:.6rem 1rem}
+.fahrplan > summary{cursor:pointer;min-height:44px;display:flex;align-items:center;font-weight:700;color:var(--orange-dark)}
+.tabwrap{overflow-x:auto}
+.fahrplan table{border-collapse:collapse;width:100%;margin:.5rem 0}
 .fahrplan th,.fahrplan td{border:1px solid var(--line);padding:.35rem .55rem;text-align:left;font-size:1rem;vertical-align:top}
 .fahrplan th{background:var(--orange-light)}
-.nur-ea,.nur-pa,.nur-ga,.nur-team{display:none}
-body.sf-ea .nur-ea,body.sf-pa .nur-pa,body.sf-ga .nur-ga,body.sf-pa .nur-team,body.sf-ga .nur-team{display:block}
 .team{background:var(--orange-light);border:2px dashed var(--orange);border-radius:10px;padding:.5rem .8rem;margin:.7rem 0}
+.phase{border-left:5px solid var(--orange);background:var(--bg);border-radius:8px;padding:.6rem .9rem;margin:.9rem 0}
+.phase-kopf{margin:1.2rem 0 .2rem;font-size:1.1rem;color:var(--orange-dark)}
+.phase > h4{margin:0 0 .4rem;font-size:1.1rem;color:var(--orange-dark)}
+.uhr{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem;background:var(--card);border:2px solid var(--orange);border-radius:12px;padding:.6rem .8rem;margin:.7rem 0}
+.uhr .phbtn{min-height:44px;padding:.4rem .8rem;border:2px solid var(--orange);background:var(--card);border-radius:10px;cursor:pointer;font-weight:600;color:var(--orange-dark)}
+.uhr .phbtn.aktiv{background:var(--orange);color:#ffffff}
+.uhr .anz{font-size:1.6rem;font-weight:700;min-width:5.5rem;text-align:center;color:var(--orange-dark);font-variant-numeric:tabular-nums}
+.uhr.um .anz{color:var(--red)}
+.duett{display:none;background:var(--card);border:3px solid var(--orange-dark);border-radius:12px;padding:.7rem 1rem;margin:.8rem 0}
+.duett.zeig{display:block}
+.duett > h4{margin:0 0 .4rem;color:var(--orange-dark);font-size:1.1rem}
+.folie{display:grid;grid-template-columns:1.2fr 1fr;grid-template-rows:auto auto auto;gap:.5rem;aspect-ratio:16/9;max-width:560px;
+  border:3px solid var(--ink);border-radius:8px;background:#ffffff;padding:.6rem;margin:.6rem 0}
+.folie > div{border:2px dashed var(--line);border-radius:6px;padding:.3rem .5rem;font-size:1rem;display:flex;align-items:center;justify-content:center;text-align:center}
+.folie > .f-titel{grid-column:1 / 3;font-weight:700}
+.folie > .f-satz{grid-column:1 / 3}
+.losergebnis{display:none;background:var(--orange-light);border:3px solid var(--orange-dark);border-radius:12px;padding:.7rem 1rem;margin:.8rem 0;font-size:1.15rem}
+.losergebnis.zeig{display:block}
+.losergebnis p{margin:.25rem 0}
+.losteil{border:2px solid var(--line);border-radius:12px;padding:.8rem 1rem;margin:1rem 0}
+.losteil > h3{margin-top:0}
+.pzwahl{display:flex;flex-wrap:wrap;gap:.5rem;margin:.6rem 0}
+.pzbtn{flex:1 1 200px;min-height:52px;padding:.5rem .9rem;border:2px solid var(--orange);background:var(--card);border-radius:12px;cursor:pointer;font-weight:700;color:var(--orange-dark);text-align:left}
+.pzbtn.aktiv{background:var(--orange);color:#ffffff}
+.verteilung{display:grid;gap:.35rem;margin:.6rem 0}
+.verteilung > div{border:1px solid var(--line);border-radius:8px;padding:.4rem .7rem;background:#ffffff}
+.spick{background:var(--card);border:3px solid var(--orange-dark);border-radius:12px;padding:.7rem 1rem;margin:1rem 0}
+.spick > h4{margin:0 0 .4rem;color:var(--orange-dark);font-size:1.1rem}
+#gc-key-info{min-height:1.6em}   /* Platz reservieren: sonst verrutscht die erste Check-Aufgabe beim Antippen */
 .check{list-style:none;padding:0;margin:.4rem 0}
 .check li{margin:.4rem 0}
 .chk{display:block;width:100%;min-height:48px;text-align:left;padding:.45rem .8rem .45rem 2.6rem;position:relative;border:2px solid var(--line);border-radius:10px;background:var(--card);cursor:pointer}
@@ -193,6 +217,52 @@ input.term:disabled{background:var(--bg)}
 .trex .sig{display:none;position:absolute;right:60px;bottom:8px;white-space:nowrap;background:var(--ink);color:#ffffff;font-size:1rem;
   padding:.2rem .6rem;border-radius:6px}
 .trex:hover .sig,.trex.zeig .sig{display:block}
+
+/* ===== BAUSTEIN-CSS: Gruppen-Check (v2, 13.11.2026) ===== */
+.gc-box{background:#fff;border:3px solid var(--h);border-radius:12px;padding:12px 16px;margin-bottom:12px}
+.gc-box h2{margin:0 0 8px;font-size:1.15rem;color:var(--hd)}
+.gc-box h3{margin:12px 0 6px;font-size:1.05rem;color:var(--hd)}
+.gc-knoepfe{display:flex;flex-wrap:wrap;gap:8px}
+.gc-knoepfe .gc-zbtn{flex:1 1 180px}
+.gc-zbtn{min-width:64px;min-height:52px;padding:8px 14px;font-size:1.1rem;font-weight:700;border:2px solid var(--h);
+  background:#fff;color:var(--hd);border-radius:10px;cursor:pointer;font-family:inherit}
+.gc-zbtn.aktiv{background:var(--h);color:#fff}
+.gc-zahlwahl{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+.gc-btn{min-height:48px;padding:12px 18px;font-size:1rem;font-weight:700;border:2px solid var(--hd);
+  background:var(--hd);color:#fff;border-radius:10px;cursor:pointer;font-family:inherit}
+.gc-btn.sek{background:#fff;color:var(--hd)}
+.gc-zeile{display:none}
+.gc-box.gewaehlt .gc-wahl{display:none}
+.gc-box.gewaehlt .gc-zeile{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.gc-zeile .gc-btn{min-height:44px;padding:8px 14px}
+.gc-hinweis{margin:8px 0 0;font-weight:600;color:var(--hd)}
+.gc-nur-ea,.gc-nur-pa,.gc-nur-ga,.gc-nur-team{display:none}
+body.sf-ea .gc-nur-ea,body.sf-pa .gc-nur-pa,body.sf-ga .gc-nur-ga,body.sf-pa .gc-nur-team,body.sf-ga .gc-nur-team{display:block}
+body.sf-ea .gc-nicht-ea{display:none}
+.gc-merk{background:#fff;border:3px solid var(--h);border-radius:12px;padding:12px 16px;margin:14px 0}
+.gc-merk h4{margin:0 0 6px;font-size:1.1rem;color:var(--hd)}
+.gc-eingabe{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+input.gc-code{width:150px;min-height:48px;font-size:1.1rem;text-transform:uppercase;letter-spacing:2px;
+  border:2px solid var(--line);border-radius:10px;padding:6px 10px;font-family:inherit}
+.gc-codebox{display:none;margin-top:16px;background:#fff;border:3px solid var(--hd);border-radius:12px;padding:14px 16px}
+.gc-codebox.zeig{display:block}
+.gc-codebox .gc-codetext{font-size:1.8rem;font-weight:700;letter-spacing:4px;color:var(--hd)}
+.gc-sterne{font-size:1.5rem}
+.gc-liste{display:grid;gap:8px;margin-top:8px}
+.gc-mzeile{display:flex;flex-wrap:wrap;align-items:center;gap:10px;border:1px solid var(--line);border-radius:10px;padding:8px 12px;background:#fff}
+.gc-mname{min-width:110px;font-weight:700}
+.gc-erg{display:none;margin-top:14px}
+.gc-erg.zeig{display:block}
+.gc-erow{border-radius:10px;padding:10px 14px;margin-top:8px;font-size:1rem;font-weight:600}
+.gc-erow.ok{background:var(--green);color:#fff}
+.gc-erow.bad{background:var(--red);color:#fff}
+.gc-erow.neutral{background:#fff;border:2px solid var(--line)}
+.gc-gesamt{margin-top:12px;background:var(--hl);border:3px solid var(--hd);border-radius:12px;padding:14px 16px;font-size:1.2rem;font-weight:700}
+.gc-von{font-weight:600}
+.gc-balken{margin-top:10px;height:18px;background:#fff;border:2px solid var(--hd);border-radius:9px;overflow:hidden}
+.gc-balken > div{height:100%;background:var(--hd)}
+.gc-prozent{margin:8px 0 0;font-size:1.05rem;font-weight:600}
+/* ===== ENDE BAUSTEIN-CSS Gruppen-Check ===== */
 </style>
 <style id="dino-stil">
 /* Markenzeichen: feiernder Dino (Lernseiten-Anweisung 8.3) */
@@ -212,52 +282,88 @@ input.term:disabled{background:var(--bg)}
 </header>
 
 <main>
-<section class="sozial" id="sozial" aria-label="Sozialform wählen">
-  <div class="sf-wahl" id="sf-wahl">
+<!-- ===== TEIL A: Sozialform-Wahl (baustein_gruppencheck.html v2, Oberstufe: Sie) ===== -->
+<section class="gc-box" id="gc-box">
+  <div class="gc-wahl">
     <h2>Wie arbeiten Sie heute?</h2>
-    <p>Wählen Sie zuerst. Die Seite passt Hinweise und das Ergebnis, das Sie am Ende festhalten, an Ihre Wahl an. Auch wer allein zu Hause arbeitet, kann die Seite vollständig nutzen.</p>
-    <div class="sf-knoepfe">
-      <button type="button" class="sfbtn" data-sf="ea">🧑 Allein (EA)</button>
-      <button type="button" class="sfbtn" data-sf="pa">🧑‍🤝‍🧑 Zu zweit (PA)</button>
-      <button type="button" class="sfbtn" data-sf="ga">👥 In der Gruppe (GA)</button>
+    <div class="gc-knoepfe">
+      <button type="button" class="gc-zbtn" data-sf="ea">&#128100; Allein (EA)</button>
+      <button type="button" class="gc-zbtn" data-sf="pa">&#128101; Zu zweit (PA)</button>
+      <button type="button" class="gc-zbtn" data-sf="ga">&#128106; In der Gruppe (GA)</button>
+    </div>
+    <div id="gc-groesse" hidden>
+      <h3>Wie viele sind Sie in der Gruppe?</h3>
+      <div class="gc-zahlwahl">
+        <button type="button" class="gc-zbtn" data-gr="3">3</button>
+        <button type="button" class="gc-zbtn" data-gr="4">4</button>
+        <button type="button" class="gc-zbtn" data-gr="5">5</button>
+        <button type="button" class="gc-zbtn" data-gr="6">6</button>
+        <button type="button" class="gc-zbtn" data-gr="7">7</button>
+      </div>
     </div>
   </div>
-  <div class="sf-gewaehlt">
-    <p><b>Sie arbeiten:</b> <span id="sf-name"></span> <button type="button" class="btn btn-weiter" id="sf-aendern">ändern</button></p>
-    <details class="fahrplan" id="fahrplan">
-      <summary class="btn btn-weiter">🗺️ Fahrplan für diese Doppelstunde anzeigen</summary>
-      <table>
-        <thead><tr><th>Karte</th><th>Richtzeit</th><th>Was am Ende im Heft steht</th></tr></thead>
-        <tbody>
-          <tr><td>1 Spur</td><td>10 min</td><td>Ihre Vermutung zur Spur der Hochpunkte</td></tr>
-          <tr><td>2 Das Verfahren</td><td>15 min</td><td>Merkkasten „Ortskurve in vier Schritten“ und das Fontänen-Beispiel</td></tr>
-          <tr><td>3 Tiefpunkte</td><td>15 min</td><td>Ortskurve der Tiefpunkte von \(f_a\) mit Definitionsbereich</td></tr>
-          <tr><td>4 Hoch- und Tiefpunkte (LK)</td><td>15 min</td><td>Ortskurve mit Fallunterscheidung beim Wurzelziehen</td></tr>
-          <tr><td>5 Gewinn optimieren</td><td>20 min</td><td>Rechnung zum besten Werbebudget mit Antwortsatz</td></tr>
-          <tr><td>6 Ergebnis sichern</td><td>10 min</td><td>Ihr Ergebnis-Produkt (siehe Karte 6)</td></tr>
-          <tr><td>Im Plenum</td><td>5 min</td><td>Vorstellen oder Abfrage – sagt Ihre Lehrkraft an</td></tr>
-        </tbody>
-      </table>
-    </details>
-  </div>
+  <div class="gc-zeile"><span id="gc-text"></span><button type="button" class="gc-btn sek" id="gc-aendern">ändern</button></div>
+  <!-- ANPASSEN: Texte je Sozialform (Think–Pair–Share auf Karte 1, Gruppenpuzzle auf den Karten 3 bis 7) -->
+  <div class="gc-nur-ea"><p style="margin:10px 0 0"><b>Allein:</b> Sie bearbeiten alle drei Expertenkarten A, B und C nacheinander. Wo „zu zweit“ oder „in der Gruppe“ steht, gibt es einen Auftrag für Sie allein. Das Los und die Teampunkte entfallen; Ihre Sterne aus dem Gruppen-Check notieren Sie im Heft.</p></div>
+  <div class="gc-nur-pa"><p style="margin:10px 0 0"><b>Zu zweit:</b> Eine Person wird Expert:in für A (Hochpunkte), die andere für B (Tiefpunkte); C (Wendepunkte) bearbeiten Sie danach gemeinsam. Dann erklären Sie sich Ihre Themen gegenseitig.</p></div>
+  <div class="gc-nur-ga"><p style="margin:10px 0 0"><b>In der Gruppe (Gruppenpuzzle):</b> Ihre Gruppe ist die Stammgruppe. Jede:r wird Expert:in für A (Hochpunkte), B (Tiefpunkte) oder C (Wendepunkte), arbeitet mit den anderen Expert:innen desselben Buchstabens und erklärt das Thema danach der Stammgruppe. Wer vorstellt, entscheidet das Los auf Karte 8 – nie die Expertin oder der Experte für das geloste Thema.</p></div>
 </section>
+
+<details class="fahrplan" id="fahrplan">
+  <summary>&#128506;&#65039; Fahrplan für diese Doppelstunde (75 Minuten) – zum Aufklappen tippen</summary>
+  <div class="tabwrap"><table>
+    <thead><tr><th>Karte</th><th>Richtzeit</th><th>Sozialform</th><th>Was am Ende im Heft steht</th></tr></thead>
+    <tbody>
+      <tr><td>1 Spur</td><td>10 min</td><td>Think–Pair–Share: &#128100; 3 min, &#128101; 3 min, &#128106; 4 min</td><td>Wertetabelle der Hochpunkte und gemeinsame Vermutung</td></tr>
+      <tr><td>2 Das Verfahren</td><td>8 min</td><td>&#128101; zu zweit aufdecken</td><td>Merkkasten „Ortskurve in vier Schritten“ und das Fontänen-Beispiel</td></tr>
+      <tr><td>3 Gruppenpuzzle</td><td>2 min</td><td>&#128106; Stammgruppe</td><td>Wer ist Expert:in für A, B, C?</td></tr>
+      <tr><td>4–6 Expertenkarten A, B, C</td><td>15 min</td><td>&#128101; Expertengruppe</td><td>Eigene Ortskurve und Spickzettel</td></tr>
+      <tr><td>7 Stammgruppe</td><td>20 min</td><td>&#128106; Stammgruppe</td><td>Alle drei Ortskurven, bestes Werbebudget, Gruppen-Folie</td></tr>
+      <tr><td>8 Wer stellt vor?</td><td>9 min</td><td>&#128106; vor dem Kurs</td><td>Gelost: Gruppe, Thema und Sprecher:in, je höchstens 2 min</td></tr>
+      <tr><td>9 Gruppen-Check</td><td>9 min</td><td>&#128100; allein</td><td>Sterne und persönlicher Code</td></tr>
+      <tr><td>10 Teampunkte</td><td>2 min</td><td>&#128106; in der Gruppe</td><td>Teampunkte der Gruppe</td></tr>
+      <tr><td>11 Ergebnis sichern</td><td>zu Hause</td><td>&#128100; allein</td><td>Heft-Checkliste, Selbstkontrolle, Übungsaufgaben</td></tr>
+      <tr><td>12 LK-Extra</td><td>zu Hause</td><td>&#128100; allein</td><td>Ortskurve mit \(\sqrt{x^2}=|x|\) (nur LK)</td></tr>
+    </tbody>
+  </table></div>
+  <p class="gc-nur-ea"><b>Allein:</b> Sie bearbeiten die Karten 4, 5 und 6 nacheinander; Karte 8 und 10 entfallen.</p>
+  <p class="gc-nur-pa"><b>Zu zweit:</b> A und B teilen Sie auf, C rechnen Sie gemeinsam. Planen Sie dafür die Zeit der Stammgruppe mit ein.</p>
+</details>
 
 <nav class="tabs" id="tabs">
   <button type="button" data-k="k1">1 Spur</button>
   <button type="button" data-k="k2">2 Das Verfahren</button>
-  <button type="button" data-k="k3">3 Tiefpunkte</button>
-  <button type="button" data-k="k4">4 Hoch- und Tiefpunkte (LK)</button>
-  <button type="button" data-k="k5">5 Gewinn optimieren</button>
-  <button type="button" data-k="k6">6 Ergebnis sichern</button>
+  <button type="button" data-k="k3">3 Gruppenpuzzle &#128106;</button>
+  <button type="button" data-k="k4">4 Experte A · Hochpunkte</button>
+  <button type="button" data-k="k5">5 Experte B · Tiefpunkte</button>
+  <button type="button" data-k="k6">6 Experte C · Wendepunkte</button>
+  <button type="button" data-k="k7">7 Stammgruppe</button>
+  <button type="button" data-k="k8">8 Wer stellt vor? &#127922;</button>
+  <button type="button" data-k="k9">9 Gruppen-Check &#128100;</button>
+  <button type="button" data-k="k10">10 Teampunkte &#127942;</button>
+  <button type="button" data-k="k11">11 Ergebnis sichern</button>
+  <button type="button" data-k="k12">12 LK-Extra</button>
 </nav>
 
 <!-- ======================= KARTE 1 ======================= -->
 <section class="karte" id="k1">
-  <h2>1 · Wohin wandert der höchste Punkt der Fontäne?</h2>
+  <h2>1 · Wohin wandert der höchste Punkt der Fontäne? <span class="sf">Think – Pair – Share</span></h2>
   <div class="stand"><b>Wo wir gerade stehen:</b> In der ersten Doppelstunde haben Sie die Fontäne \(h_a(x)=x-a\cdot x^2\) mit \(a&gt;0\) untersucht. Ändert man \(a\), ändert sich der Wasserstrahl – und mit ihm sein höchster Punkt. Heute geht es um die Frage: <b>Auf welcher Kurve bewegt sich dieser Punkt?</b> Eine solche Kurve heißt <b>Ortskurve</b>.</div>
+  <p><b>Zeit für die Phasen:</b> Wählen Sie die Phase und starten Sie die Uhr. Wenn die Zeit um ist, passiert nichts – die Uhr dient nur der Orientierung.</p>
+  <div class="uhr" id="tps">
+    <button type="button" class="phbtn" data-ph="0">Think 3&nbsp;min</button>
+    <button type="button" class="phbtn" data-ph="1">Pair 3&nbsp;min</button>
+    <button type="button" class="phbtn" data-ph="2">Share 4&nbsp;min</button>
+    <span class="anz" id="tps-anz" aria-live="off">03:00</span>
+    <button type="button" class="btn btn-pruefen" id="tps-start">Start</button>
+    <button type="button" class="btn btn-weiter" id="tps-reset">Zurück auf Anfang</button>
+  </div>
+
   <div class="aufgabe">
     <h3>Aufgabe 1 · Die Spur des Hochpunkts</h3>
     <div class="op-tags"><span class="op-tag">mit GeoGebra</span><span class="op-tag">am Graphen beobachten</span></div>
+    <div class="phase">
+    <h4>Think · Allein beobachten <span class="sf">&#128100; allein</span></h4>
     <div class="ggb">
       <b>🎯 In GeoGebra (Grafikrechner):</b>
       <ol>
@@ -267,10 +373,16 @@ input.term:disabled{background:var(--bg)}
         <li>Den Regler langsam durchziehen. Zoomen Sie heraus, wenn der Punkt aus dem Bild läuft.</li>
       </ol>
     </div>
-    <div class="team nur-team">🧑‍🤝‍🧑 <b>Im Team:</b> Eine Person bedient GeoGebra, die anderen notieren für drei Reglerwerte die Koordinaten von \(H\). Wechseln Sie danach.</div>
-    <div class="team nur-ea">🧑 <b>Allein:</b> Notieren Sie für drei verschiedene Reglerwerte die Koordinaten von \(H\) in einer kleinen Tabelle.</div>
+    <p>Notieren Sie im Heft für drei verschiedene Reglerwerte die Koordinaten von \(H\) in einer kleinen Tabelle. Sprechen Sie in dieser Phase noch nicht mit anderen.</p>
     <a class="linkkarte" href="https://szymczak75.github.io/Schule/mathe/Geogebra_alle_JgSt/Q1/geogebra_funktionenscharen_q1_ls.html" target="_blank" rel="noopener">🧭 Spur vergessen? GeoGebra-Seite „Funktionenscharen“ öffnen</a>
 
+    </div>
+
+    <div class="phase">
+    <h4>Pair · Form und Vermutung <span class="sf">&#128101; zu zweit</span></h4>
+    <p class="gc-nur-team">Legen Sie Ihre beiden Tabellen nebeneinander. Entscheiden Sie a) gemeinsam und stellen Sie dann zusammen eine Vermutung für b) auf. Prüfen Sie erst, wenn Sie sich einig sind.</p>
+    <p class="gc-nur-ga">In der Gruppe bilden Sie dafür Paare; bei ungerader Gruppengröße arbeitet ein Team zu dritt.</p>
+    <p class="gc-nur-ea"><b>Allein:</b> Bearbeiten Sie a) und b) mithilfe Ihrer Tabelle.</p>
     <div class="teil" id="t-form">
       <p class="frage">a) Welche Form hat die Spur der Hochpunkte?</p>
       <div class="mc" data-mc="m1">
@@ -309,15 +421,23 @@ input.term:disabled{background:var(--bg)}
         <div class="tipp-inhalt">Für \(a=0{,}5\) zeigt GeoGebra \(H(1|0{,}5)\). Also \(m=\frac{0{,}5}{1}=0{,}5\) und \(o(x)=0{,}5\cdot x\). Ob das für <b>alle</b> \(a\) stimmt, beweist erst die Rechnung auf Karte 2.</div>
       </div>
     </div>
+    </div>
+
+    <div class="phase">
+    <h4>Share · Eine Vermutung für die Gruppe <span class="sf">&#128106; in der Gruppe</span></h4>
+    <p class="gc-nur-ga">Jedes Paar stellt seine Vermutung vor und zeigt, mit welchem Punkt es sie geprüft hat. Einigen Sie sich auf eine Vermutung. Jede:r schreibt sie mit einem Satz ins Heft: „Wir vermuten, dass alle Hochpunkte auf … liegen, weil …“</p>
+    <p class="gc-nur-pa"><b>Zu zweit:</b> Vergleichen Sie Ihre Vermutung mit einem anderen Paar und schreiben Sie den Satz „Wir vermuten, dass alle Hochpunkte auf … liegen, weil …“ ins Heft.</p>
+    <p class="gc-nur-ea"><b>Allein:</b> Schreiben Sie Ihre Vermutung als Satz ins Heft: „Ich vermute, dass alle Hochpunkte auf … liegen, weil …“</p>
+    </div>
   </div>
 </section>
 
 <!-- ======================= KARTE 2 ======================= -->
 <section class="karte" id="k2">
-  <h2>2 · Die Ortskurve berechnen – das Verfahren</h2>
+  <h2>2 · Die Ortskurve berechnen – das Verfahren <span class="sf">&#128101; zu zweit</span></h2>
   <div class="stand"><b>Wo wir gerade stehen:</b> GeoGebra zeigt eine Spur, aber keinen Beweis. Jetzt berechnen wir die Ortskurve der Hochpunkte der Fontäne. Ausgangspunkt ist der Hochpunkt, den Sie in der ersten Doppelstunde berechnet haben.</div>
   <div class="merke">
-    <b class="titel">Merke: Ortskurve in vier Schritten</b>
+    <b class="titel">Merksatz: Ortskurve in vier Schritten</b>
     <ol>
       <li>Koordinaten des besonderen Punktes in Abhängigkeit vom Parameter bestimmen: \(x=\ldots\) und \(y=\ldots\)</li>
       <li>Die Gleichung für \(x\) nach dem Parameter auflösen.</li>
@@ -326,6 +446,8 @@ input.term:disabled{background:var(--bg)}
     </ol>
   </div>
   <p>Decken Sie das Beispiel Schritt für Schritt auf. Überlegen Sie vor jedem Schritt, was als Nächstes kommt.</p>
+  <div class="team gc-nur-team"><b>&#128101; Zu zweit:</b> Decken Sie abwechselnd auf. Wer an der Reihe ist, sagt vorher an, welcher der vier Schritte aus dem Merksatz jetzt kommt und was dabei gerechnet wird. Die andere Person kontrolliert.</div>
+  <div class="team gc-nur-ea"><b>&#128100; Allein:</b> Schreiben Sie vor jedem Aufdecken einen Satz ins Heft, was im nächsten Schritt gerechnet wird.</div>
   <div id="beispiel">
     <div class="schritt" data-s="1"><h4>Schritt 1 · Koordinaten in Abhängigkeit von \(a\)</h4>
       <p>Aus \(h_a'(x)=1-2a\cdot x=0\) folgt die Hochstelle, eingesetzt in \(h_a\) die Höhe:</p>
@@ -347,10 +469,104 @@ input.term:disabled{background:var(--bg)}
 
 <!-- ======================= KARTE 3 ======================= -->
 <section class="karte" id="k3">
-  <h2>3 · Ortskurve der Tiefpunkte (Arbeitsblatt, Aufgabe 2)</h2>
-  <div class="stand"><b>Wo wir gerade stehen:</b> Sie kennen das Verfahren in vier Schritten (Karte 2). Hier wenden Sie es auf die Schar vom Arbeitsblatt an. Schritt 1 ist schon erledigt – den Tiefpunkt haben Sie in der ersten Doppelstunde im Beispiel gesehen.</div>
+  <h2>3 · Gruppenpuzzle: Wer wird Expert:in? <span class="sf">&#128106; Stammgruppe</span></h2>
+  <div class="stand"><b>Wo wir gerade stehen:</b> Sie kennen das Verfahren in vier Schritten (Karte 2). Jetzt wenden Sie es auf drei Arten besonderer Punkte an: Hochpunkte, Tiefpunkte und Wendepunkte. Jede:r wird Expert:in für eine Art und erklärt sie danach der Stammgruppe.</div>
+  <div class="merke">
+    <b class="titel">So läuft das Gruppenpuzzle</b>
+    <ol>
+      <li>&#128106; <b>Stammgruppe (2 min):</b> Nummerieren Sie sich nach dem Vornamen im Alphabet. Die Tabelle unten zeigt, wer welches Thema übernimmt.</li>
+      <li>&#128101; <b>Expertengruppe (15 min):</b> Alle mit demselben Buchstaben setzen sich zusammen, rechnen ihre Expertenkarte und schreiben einen Spickzettel.</li>
+      <li>&#128106; <b>Zurück in die Stammgruppe (20 min):</b> Jede:r erklärt sein Thema in höchstens 3 Minuten. Danach lösen Sie gemeinsam die Werbebudget-Frage und bauen eine Folie (Karte 7).</li>
+      <li>&#127922; <b>Los (Karte 8):</b> Das Los bestimmt das Thema und wer spricht – nie die Expertin oder der Experte für dieses Thema.</li>
+    </ol>
+  </div>
+  <h3>Wer übernimmt welches Thema?</h3>
+  <div class="verteilung" id="pz-verteilung" aria-live="polite"></div>
+  <h3>Ich bin Expert:in für …</h3>
+  <div class="pzwahl" id="pzwahl">
+    <button type="button" class="pzbtn" data-pz="A">A · Hochpunkte (Karte 4)</button>
+    <button type="button" class="pzbtn" data-pz="B">B · Tiefpunkte (Karte 5)</button>
+    <button type="button" class="pzbtn" data-pz="C">C · Wendepunkte (Karte 6)</button>
+  </div>
+  <p class="gc-nur-ea"><b>&#128100; Allein:</b> Bearbeiten Sie die Karten 4, 5 und 6 nacheinander.</p>
+</section>
+
+<!-- ======================= KARTE 4 ======================= -->
+<section class="karte" id="k4">
+  <h2>4 · Experte A: Ortskurve der Hochpunkte <span class="sf">&#128101; Expertengruppe</span></h2>
+  <div class="stand"><b>Wo wir gerade stehen:</b> Sie kennen das Verfahren in vier Schritten (Karte 2). Als Expert:in A wenden Sie es auf die Hochpunkte einer Gewinnfunktion an. Die Frage nach dem besten Werbebudget löst danach die Stammgruppe gemeinsam (Karte 7).</div>
+  <p>Ein kleines Unternehmen verkauft kabellose Kopfhörer. Der Gewinn hängt von der Produktionsmenge \(x\) (in 1000 Stück) und vom Werbebudget \(a\) (in 100 000 €) ab:</p>
+  <p style="text-align:center">\( G_a(x)=-x^3+3a\cdot x^2-3a^4 \quad\text{mit } a&gt;0,\ x\ge 0 \)</p>
+  <p>\(G_a(x)\) ist der Gewinn in 100 000 €. Mehr Werbung steigert den Absatz, kostet aber auch: Der Summand \(-3a^4\) beschreibt die Werbekosten.</p>
   <div class="aufgabe">
-    <h3>Aufgabe 2 · Tiefpunkte von \(f_a(x)=x^3-a\cdot x^2\)</h3>
+    <h3>Aufgabe A · Gewinnmaximum und Ortskurve</h3>
+    <div class="op-tags"><span class="op-tag">ohne Hilfsmittel</span><span class="op-tag">rechnerisch</span></div>
+    <p class="hinweis">Eingabe: Malzeichen <code>*</code>, Potenz <code>^</code>, Bruch mit <code>/</code>; Nenner mit mehr als einem Zeichen in Klammern.</p>
+    <div class="teil" id="t-g1">
+      <p class="frage">a) Bei welcher Menge \(x\) ist der Gewinn für festes \(a\) maximal? Weisen Sie im Heft nach, dass es ein Maximum ist.</p>
+      <div class="eingabe-zeile"><span class="lbl">\(x_H=\)</span><input class="term" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="gewinnmaximale Menge"></div>
+      <div class="knoepfe">
+        <button type="button" class="btn btn-pruefen" data-pruefe="t-g1">Prüfen</button>
+        <button type="button" class="btn btn-leeren" data-leere="t-g1">Leeren</button>
+      </div>
+      <div class="lesung"></div>
+      <div class="fb"></div>
+      <div class="tipp-box">
+        <b>💡 Hilfe</b>
+        <button type="button" class="tipp-btn" data-stufe="1">Tipp 1 anzeigen</button>
+        <div class="tipp-inhalt">Leiten Sie nach \(x\) ab und klammern Sie in \(G_a'(x)=0\) einen gemeinsamen Faktor aus.</div>
+        <button type="button" class="tipp-btn" data-stufe="2">Lösungsweg anzeigen</button>
+        <div class="tipp-inhalt">\(G_a'(x)=-3x^2+6a\cdot x=-3x\cdot(x-2a)=0\Rightarrow x=0\) oder \(x=2a\). \(G_a''(x)=-6x+6a\), \(G_a''(2a)=-6a&lt;0\): Maximum bei \(x=2a\).</div>
+      </div>
+    </div>
+    <div class="teil" id="t-g2">
+      <p class="frage">b) Wie groß ist dieser maximale Gewinn in Abhängigkeit von \(a\)?</p>
+      <div class="eingabe-zeile"><span class="lbl">\(G_{\max}=\)</span><input class="term" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="maximaler Gewinn"></div>
+      <div class="knoepfe">
+        <button type="button" class="btn btn-pruefen" data-pruefe="t-g2">Prüfen</button>
+        <button type="button" class="btn btn-leeren" data-leere="t-g2">Leeren</button>
+      </div>
+      <div class="lesung"></div>
+      <div class="fb"></div>
+      <div class="tipp-box">
+        <b>💡 Hilfe</b>
+        <button type="button" class="tipp-btn" data-stufe="1">Tipp 1 anzeigen</button>
+        <div class="tipp-inhalt">Setzen Sie Ihre Stelle aus a) in \(G_a\) ein und fassen Sie gleiche Potenzen von \(a\) zusammen.</div>
+        <button type="button" class="tipp-btn" data-stufe="2">Lösungsweg anzeigen</button>
+        <div class="tipp-inhalt">\(G_a(2a)=-8a^3+3a\cdot 4a^2-3a^4=4a^3-3a^4\).</div>
+      </div>
+    </div>
+    <div class="teil" id="t-g3">
+      <p class="frage">c) Bestimmen Sie die Ortskurve der Hochpunkte mit dem Verfahren aus Karte 2.</p>
+      <div class="eingabe-zeile"><span class="lbl">\(o(x)=\)</span><input class="term" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Ortskurve der Hochpunkte"></div>
+      <div class="knoepfe">
+        <button type="button" class="btn btn-pruefen" data-pruefe="t-g3">Prüfen</button>
+        <button type="button" class="btn btn-leeren" data-leere="t-g3">Leeren</button>
+      </div>
+      <div class="lesung"></div>
+      <div class="fb"></div>
+      <div class="tipp-box">
+        <b>💡 Hilfe</b>
+        <button type="button" class="tipp-btn" data-stufe="1">Tipp 1 anzeigen</button>
+        <div class="tipp-inhalt">Lösen Sie Ihre Stelle aus a) nach \(a\) auf und setzen Sie das in Ihr Ergebnis aus b) ein.</div>
+        <button type="button" class="tipp-btn" data-stufe="2">Lösungsweg anzeigen</button>
+        <div class="tipp-inhalt">\(x=2a\Rightarrow a=\frac{x}{2}\). \(o(x)=4\cdot\frac{x^3}{8}-3\cdot\frac{x^4}{16}=\frac{1}{2}x^3-\frac{3}{16}x^4\) für \(x&gt;0\).</div>
+      </div>
+    </div>
+  </div>
+  <div class="spick">
+    <h4>&#128221; Ihr Spickzettel für die Stammgruppe <span class="sf">&#128101; Expertengruppe</span></h4>
+    <p>Schreiben Sie auf eine halbe Heftseite: die Schar, den besonderen Punkt in Abhängigkeit von \(a\), die vier Schritte mit je einer Zeile Rechnung und die Ortskurve mit Definitionsbereich. Erklären Sie auch, was die Ortskurve hier im Sachzusammenhang bedeutet: Zu jedem Werbebudget gehört ein größtmöglicher Gewinn.</p>
+    <p>Üben Sie in der Expertengruppe: Jede:r erklärt das Thema einmal in höchstens 3 Minuten. Die anderen achten darauf, dass jeder Schritt begründet wird.</p>
+  </div>
+</section>
+
+<!-- ======================= KARTE 5 ======================= -->
+<section class="karte" id="k5">
+  <h2>5 · Experte B: Ortskurve der Tiefpunkte <span class="sf">&#128101; Expertengruppe</span></h2>
+  <div class="stand"><b>Wo wir gerade stehen:</b> Sie kennen das Verfahren in vier Schritten (Karte 2). Als Expert:in B wenden Sie es auf die Tiefpunkte der Schar vom Arbeitsblatt (Aufgabe 2) an. Schritt 1 ist schon erledigt – den Tiefpunkt haben Sie in der ersten Doppelstunde im Beispiel gesehen.</div>
+  <div class="aufgabe">
+    <h3>Aufgabe B · Tiefpunkte von \(f_a(x)=x^3-a\cdot x^2\)</h3>
     <div class="op-tags"><span class="op-tag">ohne Hilfsmittel</span><span class="op-tag">rechnerisch</span></div>
     <p>Für \(a&gt;0\) hat der Graph von \(f_a\) den Tiefpunkt \(T\left(\frac{2a}{3}\,\middle|\,-\frac{4a^3}{27}\right)\). Bestimmen Sie die Ortskurve der Tiefpunkte. Rechnen Sie im Heft und tragen Sie die Ergebnisse ein.</p>
     <p class="hinweis">Eingabe: Malzeichen <code>*</code>, Potenz <code>^</code>, Bruch mit <code>/</code>; Nenner mit mehr als einem Zeichen in Klammern.</p>
@@ -412,15 +628,469 @@ input.term:disabled{background:var(--bg)}
         <div class="tipp-inhalt">\(f_a''\left(\frac{2a}{3}\right)=2a\). Für \(a&lt;0\) ist das negativ, der Punkt ist dann ein Hochpunkt (und der Tiefpunkt liegt bei \(x=0\)). Für \(a=0\) ist \(f_0(x)=x^3\) ohne Extrempunkt. Deshalb gilt die Ortskurve der Tiefpunkte \(o(x)=-\frac12 x^3\) für \(x&gt;0\).</div>
       </div>
     </div>
+    <div class="team gc-nur-team"><b>&#128101; In der Expertengruppe:</b> Vergleichen Sie Ihre Heftrechnungen zu b). Haben alle den Bruch beim Hoch-3-Nehmen in Klammern gesetzt?</div>
+  </div>
+  <div class="spick">
+    <h4>&#128221; Ihr Spickzettel für die Stammgruppe <span class="sf">&#128101; Expertengruppe</span></h4>
+    <p>Schreiben Sie auf eine halbe Heftseite: die Schar, den besonderen Punkt in Abhängigkeit von \(a\), die vier Schritte mit je einer Zeile Rechnung und die Ortskurve mit Definitionsbereich. Erklären Sie besonders, warum die Ortskurve nur für \(x&gt;0\) gilt.</p>
+    <p>Üben Sie in der Expertengruppe: Jede:r erklärt das Thema einmal in höchstens 3 Minuten. Die anderen achten darauf, dass jeder Schritt begründet wird.</p>
   </div>
 </section>
 
-<!-- ======================= KARTE 4 ======================= -->
-<section class="karte" id="k4">
-  <h2>4 · Hoch- und Tiefpunkte auf derselben Kurve</h2>
+<!-- ======================= KARTE 6 ======================= -->
+<section class="karte" id="k6">
+  <h2>6 · Experte C: Ortskurve der Wendepunkte <span class="sf">&#128101; Expertengruppe</span></h2>
+  <div class="stand"><b>Wo wir gerade stehen:</b> Sie kennen das Verfahren in vier Schritten (Karte 2). Als Expert:in C untersuchen Sie dieselbe Schar wie Expert:in B – aber nicht die Tiefpunkte, sondern die Wendepunkte. Wendepunkte kennen Sie aus der EF: notwendige Bedingung \(f''(x)=0\), hinreichend zusätzlich \(f^{\prime\prime\prime}(x)\neq 0\).</div>
+  <div class="aufgabe">
+    <h3>Aufgabe C · Wendepunkte von \(f_a(x)=x^3-a\cdot x^2\)</h3>
+    <div class="op-tags"><span class="op-tag">ohne Hilfsmittel</span><span class="op-tag">rechnerisch</span></div>
+    <p>Gegeben ist die Schar \(f_a(x)=x^3-a\cdot x^2\) mit \(a\in\mathbb{R}\). Bestimmen Sie die Wendepunkte und deren Ortskurve. Rechnen Sie im Heft und tragen Sie die Ergebnisse ein.</p>
+    <p class="hinweis">Eingabe: Malzeichen <code>*</code>, Potenz <code>^</code>, Bruch mit <code>/</code>; Nenner mit mehr als einem Zeichen in Klammern.</p>
+
+    <div class="teil" id="t-w1">
+      <p class="frage">a) Schritt 1, erster Teil: Berechnen Sie die Wendestelle in Abhängigkeit von \(a\). Weisen Sie im Heft mit der dritten Ableitung nach, dass es eine Wendestelle ist.</p>
+      <div class="eingabe-zeile"><span class="lbl">\(x_W=\)</span><input class="term" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Wendestelle"></div>
+      <div class="knoepfe">
+        <button type="button" class="btn btn-pruefen" data-pruefe="t-w1">Prüfen</button>
+        <button type="button" class="btn btn-leeren" data-leere="t-w1">Leeren</button>
+      </div>
+      <div class="lesung"></div>
+      <div class="fb"></div>
+      <div class="tipp-box">
+        <b>&#128161; Hilfe</b>
+        <button type="button" class="tipp-btn" data-stufe="1">Tipp 1 anzeigen</button>
+        <div class="tipp-inhalt">Leiten Sie zweimal nach \(x\) ab und setzen Sie die zweite Ableitung gleich null.</div>
+        <button type="button" class="tipp-btn" data-stufe="2">Lösungsweg anzeigen</button>
+        <div class="tipp-inhalt">\(f_a'(x)=3x^2-2a\cdot x\), \(f_a''(x)=6x-2a=0 \;\Rightarrow\; x=\frac{a}{3}\). \(f_a'''(x)=6\neq 0\): Wendestelle für jedes \(a\).</div>
+      </div>
+    </div>
+
+    <div class="teil" id="t-w2">
+      <p class="frage">b) Schritt 1, zweiter Teil: Berechnen Sie die \(y\)-Koordinate des Wendepunkts.</p>
+      <div class="eingabe-zeile"><span class="lbl">\(y_W=\)</span><input class="term" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="y-Koordinate des Wendepunkts"></div>
+      <div class="knoepfe">
+        <button type="button" class="btn btn-pruefen" data-pruefe="t-w2">Prüfen</button>
+        <button type="button" class="btn btn-leeren" data-leere="t-w2">Leeren</button>
+      </div>
+      <div class="lesung"></div>
+      <div class="fb"></div>
+      <div class="tipp-box">
+        <b>&#128161; Hilfe</b>
+        <button type="button" class="tipp-btn" data-stufe="1">Tipp 1 anzeigen</button>
+        <div class="tipp-inhalt">Setzen Sie Ihre Wendestelle in \(f_a\) ein – mit Klammern. Bringen Sie die beiden Brüche auf den Nenner 27.</div>
+        <button type="button" class="tipp-btn" data-stufe="2">Lösungsweg anzeigen</button>
+        <div class="tipp-inhalt">\(f_a\left(\frac{a}{3}\right)=\frac{a^3}{27}-a\cdot\frac{a^2}{9}=\frac{a^3}{27}-\frac{3a^3}{27}=-\frac{2a^3}{27}\)</div>
+      </div>
+    </div>
+
+    <div class="teil" id="t-w3">
+      <p class="frage">c) Schritt 2: Lösen Sie die Gleichung für die Wendestelle nach \(a\) auf.</p>
+      <div class="eingabe-zeile"><span class="lbl">\(a=\)</span><input class="term" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="a in Abhängigkeit von x"></div>
+      <div class="knoepfe">
+        <button type="button" class="btn btn-pruefen" data-pruefe="t-w3">Prüfen</button>
+        <button type="button" class="btn btn-leeren" data-leere="t-w3">Leeren</button>
+      </div>
+      <div class="lesung"></div>
+      <div class="fb"></div>
+      <div class="tipp-box">
+        <b>&#128161; Hilfe</b>
+        <button type="button" class="tipp-btn" data-stufe="1">Lösungsweg anzeigen</button>
+        <div class="tipp-inhalt">\(x=\frac{a}{3} \;\Leftrightarrow\; a=3x\)</div>
+      </div>
+    </div>
+
+    <div class="teil" id="t-w4">
+      <p class="frage">d) Schritt 3: Ersetzen Sie \(a\) in der \(y\)-Koordinate. Wie lautet die Ortskurve der Wendepunkte?</p>
+      <div class="eingabe-zeile"><span class="lbl">\(o(x)=\)</span><input class="term" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Ortskurve der Wendepunkte"></div>
+      <div class="knoepfe">
+        <button type="button" class="btn btn-pruefen" data-pruefe="t-w4">Prüfen</button>
+        <button type="button" class="btn btn-leeren" data-leere="t-w4">Leeren</button>
+      </div>
+      <div class="lesung"></div>
+      <div class="fb"></div>
+      <div class="tipp-box">
+        <b>&#128161; Hilfe</b>
+        <button type="button" class="tipp-btn" data-stufe="1">Tipp 1 anzeigen</button>
+        <div class="tipp-inhalt">Beim Hoch-3-Nehmen eines Produkts wird jeder Faktor hoch 3 genommen. Kürzen Sie danach.</div>
+        <button type="button" class="tipp-btn" data-stufe="2">Lösungsweg anzeigen</button>
+        <div class="tipp-inhalt">\(y=-\frac{2}{27}\cdot(3x)^3=-\frac{2}{27}\cdot 27x^3=-2x^3\), also \(o(x)=-2x^3\).</div>
+      </div>
+    </div>
+
+    <div class="teil" id="t-w5">
+      <p class="frage">e) Schritt 4: Für welche \(x\) gilt die Ortskurve der Wendepunkte?</p>
+      <div class="mc" data-mc="t-w5">
+        <button type="button" class="mcbtn" data-ok="1">Für alle \(x\in\mathbb{R}\), weil jede Funktion der Schar genau einen Wendepunkt hat und \(x=\frac{a}{3}\) jeden Wert annimmt.</button>
+        <button type="button" class="mcbtn" data-ok="0">Nur für \(x&gt;0\), wie bei den Tiefpunkten.</button>
+        <button type="button" class="mcbtn" data-ok="0">Für alle \(x\neq 0\), weil \(f_0\) keinen Wendepunkt hat.</button>
+        <button type="button" class="mcbtn" data-ok="0">Nur für \(x&lt;0\), weil die Wendepunkte unterhalb der \(x\)-Achse liegen.</button>
+      </div>
+      <div class="knoepfe">
+        <button type="button" class="btn btn-pruefen" data-pruefe="t-w5">Prüfen</button>
+        <button type="button" class="btn btn-leeren" data-leere="t-w5">Leeren</button>
+      </div>
+      <div class="fb"></div>
+      <div class="tipp-box">
+        <b>&#128161; Hilfe</b>
+        <button type="button" class="tipp-btn" data-stufe="1">Lösungsweg anzeigen</button>
+        <div class="tipp-inhalt">Hier ist \(a\in\mathbb{R}\) erlaubt, und \(f_a'''(x)=6\neq 0\) gilt immer – auch \(f_0(x)=x^3\) hat bei \(x=0\) einen Wendepunkt. Da \(x=\frac{a}{3}\) jede reelle Zahl annimmt, gilt \(o(x)=-2x^3\) für alle \(x\in\mathbb{R}\). Anders als bei den Tiefpunkten gibt es keine Einschränkung.</div>
+      </div>
+    </div>
+    <div class="ggb"><b>&#127919; Kontrolle in GeoGebra (freiwillig):</b> <code>a=Schieberegler(-3, 3, 0.1)</code>, <code>f(x)=x^3-a*x^2</code>, <code>W=Wendepunkt(f)</code>, Spur von <code>W</code> einschalten, dann Ihre Ortskurve eingeben und vergleichen. Wie das mit der Spur geht, zeigt die <a href="https://szymczak75.github.io/Schule/mathe/Geogebra_alle_JgSt/Q1/geogebra_funktionenscharen_q1_ls.html" target="_blank" rel="noopener">GeoGebra-Seite „Funktionenscharen“</a>.</div>
+  </div>
+  <div class="spick">
+    <h4>&#128221; Ihr Spickzettel für die Stammgruppe <span class="sf">&#128101; Expertengruppe</span></h4>
+    <p>Schreiben Sie auf eine halbe Heftseite: die Schar, den besonderen Punkt in Abhängigkeit von \(a\), die vier Schritte mit je einer Zeile Rechnung und die Ortskurve mit Definitionsbereich. Erklären Sie besonders, warum es hier – anders als bei Expert:in B – keine Einschränkung für \(x\) gibt.</p>
+    <p>Üben Sie in der Expertengruppe: Jede:r erklärt das Thema einmal in höchstens 3 Minuten. Die anderen achten darauf, dass jeder Schritt begründet wird.</p>
+  </div>
+</section>
+
+<!-- ======================= KARTE 7 ======================= -->
+<section class="karte" id="k7">
+  <h2>7 · Zurück in der Stammgruppe <span class="sf">&#128106; Stammgruppe</span></h2>
+  <div class="stand"><b>Wo wir gerade stehen:</b> Jede:r ist Expert:in für eine Ortskurve: A Hochpunkte des Gewinns, B Tiefpunkte, C Wendepunkte. Jetzt bringen Sie alles zusammen.</div>
+  <p class="gc-nur-ea"><b>&#128100; Allein:</b> Vergleichen Sie Ihre Ergebnisse der Karten 4 bis 6 und lösen Sie dann Phase 2. Die Folie gestalten Sie als Heftseite.</p>
+  <h3>Phase 1 · Erklärrunde <span class="sf">&#128106; Stammgruppe</span></h3>
+  <ol>
+    <li>Reihenfolge A, B, C. Jede:r erklärt mit dem Spickzettel in höchstens 3 Minuten; die anderen schreiben die Ortskurve mit Definitionsbereich ins Heft.</li>
+    <li>B und C haben dieselbe Schar untersucht. Vergleichen Sie: Auf welchen Kurven liegen Tief- und Wendepunkte, und warum gilt die eine nur für \(x&gt;0\), die andere für alle \(x\)?</li>
+    <li>Wer eine Erklärung nicht versteht, fragt sofort nach – beim Los auf Karte 8 kann jede:r jedes Thema treffen.</li>
+  </ol>
+  <p class="gc-nur-pa"><b>&#128101; Zu zweit:</b> Erklären Sie sich A und B gegenseitig und vergleichen Sie dann mit Ihrer gemeinsamen Rechnung zu C.</p>
+
+  <div class="aufgabe">
+    <h3>Phase 2 · Das beste Werbebudget <span class="sf">&#128106; Stammgruppe</span></h3>
+    <div class="op-tags"><span class="op-tag">ohne Hilfsmittel</span><span class="op-tag">rechnerisch</span></div>
+    <p>Zur Erinnerung (Karte 4): \( G_a(x)=-x^3+3a\cdot x^2-3a^4 \) mit \(a&gt;0\); \(x\) in 1000 Stück, \(a\) und \(G_a\) in 100 000 €.</p>
+    <div class="teil" id="t-g4">
+      <p class="frage">Nehmen Sie die Ortskurve, die Expert:in A berechnet hat. Bestimmen Sie ihren höchsten Punkt. Welches Werbebudget \(a\) (in 100 000 €) ist am besten?</p>
+      <div class="eingabe-zeile"><span class="lbl">\(a=\)</span><input class="term" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" aria-label="bestes Werbebudget"></div>
+      <div class="knoepfe">
+        <button type="button" class="btn btn-pruefen" data-pruefe="t-g4">Prüfen</button>
+        <button type="button" class="btn btn-leeren" data-leere="t-g4">Leeren</button>
+      </div>
+      <div class="fb"></div>
+      <div class="tipp-box">
+        <b>💡 Hilfe</b>
+        <button type="button" class="tipp-btn" data-stufe="1">Tipp 1 anzeigen</button>
+        <div class="tipp-inhalt">Untersuchen Sie die Ortskurve wie eine gewöhnliche Funktion: \(o'(x)=0\), dann hinreichende Bedingung.</div>
+        <button type="button" class="tipp-btn" data-stufe="2">Tipp 2 anzeigen</button>
+        <div class="tipp-inhalt">Sie erhalten eine Stelle \(x\). Das zugehörige \(a\) liefert Ihr Ergebnis aus a) bzw. c).</div>
+        <button type="button" class="tipp-btn" data-stufe="3">Lösungsweg anzeigen</button>
+        <div class="tipp-inhalt">\(o'(x)=\frac{3}{2}x^2-\frac{3}{4}x^3=\frac{3}{4}x^2\cdot(2-x)=0\Rightarrow x=2\) (für \(x&gt;0\)); \(o'\) wechselt dort von + nach −: Maximum. \(a=\frac{x}{2}=1\), \(o(2)=4-3=1\). <b>Antwort:</b> Bei 100 000 € Werbebudget und 2000 Stück wird der größte Gewinn erzielt, nämlich 100 000 €. Mehr Werbung lohnt sich nicht, weil die Kosten schneller wachsen als der Absatz.</div>
+      </div>
+    </div>
+    <p class="hinweis"><b>Zum Nachdenken:</b> Dasselbe Ergebnis liefert auch die Funktion \(g(a)=4a^3-3a^4\) aus b). Warum? Die Ortskurve und \(g\) beschreiben dieselben Punkte – einmal in \(x\), einmal in \(a\) ausgedrückt.</p>
+  </div>
+
+  <div class="merke">
+    <b class="titel">Das nehmen Sie mit</b>
+    <ul>
+      <li>Die besonderen Punkte einer Schar wandern mit dem Parameter. Die Kurve, auf der sie liegen, heißt <b>Ortskurve</b>.</li>
+      <li>Verfahren: Koordinaten in Abhängigkeit vom Parameter – \(x\)-Gleichung nach dem Parameter auflösen – in \(y\) einsetzen – Definitionsbereich angeben.</li>
+      <li>Der Definitionsbereich folgt aus den erlaubten Parameterwerten. Oft liegt nur ein Teil der Kurve vor.</li>
+      <li>Auch Wendepunkte haben eine Ortskurve. Ihr Definitionsbereich kann größer sein als der der Extrempunkte, weil es für jeden Parameterwert einen Wendepunkt gibt.</li>
+      <li>Vorsicht beim Wurzelziehen: \(\sqrt{x^2}=|x|\).</li>
+      <li>Eine Ortskurve kann man selbst untersuchen, zum Beispiel um den besten Parameterwert zu finden.</li>
+    </ul>
+  </div>
+  <h3>Phase 3 · Die Gruppen-Folie <span class="sf">&#128106; Stammgruppe</span></h3>
+  <p class="gc-nur-ga"><b>&#128106; In der Gruppe:</b> Erstellen Sie auf <b>einem</b> iPad <b>eine</b> Folie. Rollen: Folienbauer:in (baut die Folie), Grafiker:in (Screenshot aus GeoGebra), Rechenprüfer:in (kontrolliert die Rechnung auf der Folie), Zeitwächter:in (6 Minuten). Am Ende muss jede:r die Folie erklären können – das Los auf Karte 8 entscheidet, wer spricht.</p>
+  <p class="gc-nur-pa"><b>&#128101; Zu zweit:</b> Erstellen Sie gemeinsam eine Folie auf einem iPad. Beide müssen sie erklären können – das Los auf Karte 8 entscheidet, wer spricht.</p>
+  <p class="gc-nur-ea"><b>&#128100; Allein:</b> Erstellen Sie die Folie allein, oder gestalten Sie eine Heftseite nach denselben Vorgaben.</p>
+  <p>Nehmen Sie eine Präsentations-App (zum Beispiel Keynote) oder eine einzige Seite in einer Notiz-App. Wie die Folie auf den Beamer kommt, sagt Ihre Lehrkraft an.</p>
+
+  <h3>So soll die Folie aussehen – kein Schnickschnack</h3>
+  <div class="folie" role="img" aria-label="Skizze einer Folie: oben die Überschrift, links ein GeoGebra-Bild mit allen drei Ortskurven, rechts die drei Gleichungen mit Definitionsbereich, unten das beste Werbebudget">
+    <div class="f-titel"><span>Überschrift: Ortskurven von Hoch-, Tief- und Wendepunkten</span></div>
+    <div><span>GeoGebra-Bild: Spuren und die drei Ortskurven</span></div>
+    <div><span>A, B, C: je die Ortskurve mit Definitionsbereich</span></div>
+    <div class="f-satz"><span>Ein Satz: das beste Werbebudget und warum</span></div>
+  </div>
+  <ul>
+    <li><b>Eine Folie</b> ist das Ziel. Wird es zu eng, verteilen Sie den Inhalt auf <b>höchstens drei</b> Folien: eine je Expertenthema.</li>
+    <li>Weißer Hintergrund, dunkle Schrift, <b>keine</b> Animationen, Übergänge, Sticker oder Hintergrundbilder.</li>
+    <li>Groß genug für die letzte Reihe: Überschrift mindestens 40&nbsp;pt, übriger Text mindestens 24&nbsp;pt.</li>
+    <li>Die Rechnung darf ein <b>Foto Ihrer Heftseite</b> sein – zugeschnitten auf das Wesentliche und gut lesbar.</li>
+    <li>Nur Stichworte und Formeln auf der Folie. Den Rest erzählt die Person, die vorstellt.</li>
+  </ul>
+
+  <h3>Checkliste – haken Sie ab, was auf Ihrer Folie steht</h3>
+  <ul class="check" id="check-folie">
+    <li><button type="button" class="chk" data-chk="f1">Überschrift und die Schar zu jeder Ortskurve</button></li>
+    <li><button type="button" class="chk" data-chk="f2">GeoGebra-Bild mit Spur und berechneter Ortskurve</button></li>
+    <li><button type="button" class="chk" data-chk="f3">Ortskurven A, B und C, jeweils mit Definitionsbereich</button></li>
+    <li><button type="button" class="chk" data-chk="f4">Ein Satz zum besten Werbebudget</button></li>
+    <li><button type="button" class="chk" data-chk="f5">Probe aus der letzten Reihe: Ist alles lesbar?</button></li>
+  </ul>
+</section>
+
+<!-- ======================= KARTE 8 ======================= -->
+<section class="karte" id="k8">
+  <h2>8 · Wer stellt vor? <span class="sf">&#128106; vor dem Kurs</span></h2>
+  <div class="stand"><b>Wo wir gerade stehen:</b> Ihre Gruppen-Folie (Karte 7) ist fertig. Jetzt entscheidet das Los, welche Gruppe vorstellt, welches Thema sie vorstellt und wer spricht. Die Vorträge zählen nicht zu den Teampunkten.</div>
+  <p class="gc-nur-ea"><b>&#128100; Allein:</b> Das Los entfällt für Sie. Halten Sie Ihre Folie oder Heftseite bereit – Ihre Lehrkraft kann Sie trotzdem aufrufen.</p>
+
+  <div class="losteil">
+    <h3>Los 1 · Welche Gruppe stellt vor? <span class="sf">Lehrkraft</span></h3>
+    <p>Die Lehrkraft lost am eigenen Gerät. Bereits gezogene Gruppen kommen nicht noch einmal dran.</p>
+    <p><b>Wie viele Gruppen gibt es?</b></p>
+    <div class="gc-zahlwahl" id="losg-n">
+      <button type="button" class="gc-zbtn" data-n="2">2</button>
+      <button type="button" class="gc-zbtn" data-n="3">3</button>
+      <button type="button" class="gc-zbtn" data-n="4">4</button>
+      <button type="button" class="gc-zbtn" data-n="5">5</button>
+      <button type="button" class="gc-zbtn" data-n="6">6</button>
+      <button type="button" class="gc-zbtn" data-n="7">7</button>
+      <button type="button" class="gc-zbtn" data-n="8">8</button>
+      <button type="button" class="gc-zbtn" data-n="9">9</button>
+      <button type="button" class="gc-zbtn" data-n="10">10</button>
+    </div>
+    <div class="knoepfe">
+      <button type="button" class="btn btn-pruefen" id="losg-btn">&#127922; Gruppe losen</button>
+      <button type="button" class="btn btn-weiter" id="losg-neu">Alle Gruppen wieder ins Los</button>
+    </div>
+    <div class="losergebnis" id="losg-erg" aria-live="polite"></div>
+  </div>
+
+  <div class="losteil gc-nicht-ea">
+    <h3>Los 2 · Welches Thema – und wer spricht?</h3>
+    <p>Losen Sie erst, wenn die Lehrkraft es ansagt. Es gilt die Nummerierung aus Karte 3. Das Los wählt ein Thema A, B oder C und eine Person, die <b>nicht</b> Expert:in für dieses Thema ist.</p>
+    <p><b>Wie viele sind Sie?</b></p>
+    <div class="gc-zahlwahl" id="losp-n">
+      <button type="button" class="gc-zbtn" data-n="2">2</button>
+      <button type="button" class="gc-zbtn" data-n="3">3</button>
+      <button type="button" class="gc-zbtn" data-n="4">4</button>
+      <button type="button" class="gc-zbtn" data-n="5">5</button>
+      <button type="button" class="gc-zbtn" data-n="6">6</button>
+      <button type="button" class="gc-zbtn" data-n="7">7</button>
+    </div>
+    <div class="knoepfe">
+      <button type="button" class="btn btn-pruefen" id="losp-btn">&#127922; Thema und Sprecher:in losen</button>
+    </div>
+    <div class="losergebnis" id="losp-erg" aria-live="polite"></div>
+  </div>
+
+  <div class="merke">
+    <b class="titel">Ihr Vortrag (höchstens 2 Minuten)</b>
+    <ol>
+      <li>Zeigen Sie auf der Folie die Ortskurve des gelosten Themas mit dem GeoGebra-Bild.</li>
+      <li>Erklären Sie die vier Schritte für dieses Thema – besonders, woher der Definitionsbereich kommt.</li>
+      <li>Nennen Sie zum Schluss das beste Werbebudget und warum man dafür die Ortskurve untersucht.</li>
+    </ol>
+    <p>Bei Rückfragen aus dem Kurs darf die Gruppe helfen; sprechen tut die geloste Person.</p>
+  </div>
+  <div class="team gc-nicht-ea"><b>&#128101; Beim Zuhören:</b> Notieren Sie zu jedem Vortrag eine Sache, die anders gelöst oder dargestellt war als bei Ihnen.</div>
+</section>
+
+<!-- ======================= KARTE 9 ======================= -->
+<section class="karte" id="k9">
+  <h2>9 · Gruppen-Check <span class="sf">&#128100; allein</span></h2>
+  <div class="stand"><b>Wo wir gerade stehen:</b> Sie haben Ortskurven von Hoch-, Tief- und Wendepunkten berechnet und genutzt. Jede:r zeigt jetzt allein, was die Gruppe gelernt hat.</div>
+  <div class="hinweis"><b>So zählt der Gruppen-Check:</b> Fünf Aufgaben aus allen drei Expertenthemen. Für jede Aufgabe zählt nur der <b>erste</b> Prüfversuch – je richtiger Aufgabe ein Stern. Danach dürfen Sie mit Tipps und „Leeren“ weiterüben; das ändert Ihre Sterne nicht mehr. Arbeiten Sie im Heft mit.</div>
+<!-- ===== TEIL B: Gruppenschlüssel (vor die Check-Aufgaben) ===== -->
+<div class="gc-merk gc-nicht-ea" id="gc-schluessel">
+  <h4>&#128273; Ihr Gruppenschlüssel</h4>
+  <p><b>Eine</b> Person aus Ihrer Gruppe tippt auf „Schlüssel erzeugen“ und sagt den Schlüssel an. Alle anderen tippen genau diesen Schlüssel ein. Ohne Schlüssel gibt es keinen Code &ndash; und ein Code gilt nur für Ihre Gruppe.</p>
+  <div class="gc-eingabe">
+    <input type="text" class="gc-code" id="gc-key" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Gruppenschlüssel">
+    <button type="button" class="gc-btn sek" id="gc-key-neu">Schlüssel für unsere Gruppe erzeugen</button>
+  </div>
+  <p id="gc-key-info" style="margin-top:8px"></p>
+</div>
+  <div class="aufgabe">
+    <h3>Check 1 · Was ist eine Ortskurve?</h3>
+    <div class="op-tags"><span class="op-tag">ohne Hilfsmittel</span><span class="op-tag">Begriff erklären</span></div>
+    <div class="teil" id="g1">
+      <p class="frage">Welche Beschreibung passt zum Begriff <b>Ortskurve</b> einer Funktionenschar?</p>
+      <div class="mc" data-mc="g1">
+        <button type="button" class="mcbtn" data-ok="1">Die Kurve, auf der ein besonderer Punkt (zum Beispiel der Hochpunkt) aller Graphen der Schar liegt.</button>
+        <button type="button" class="mcbtn" data-ok="0" data-fehler="null">Der Graph der Schar für den Parameterwert null.</button>
+        <button type="button" class="mcbtn" data-ok="0" data-fehler="abl">Der Graph der Ableitung einer Funktion der Schar.</button>
+        <button type="button" class="mcbtn" data-ok="0" data-fehler="alle">Eine Kurve, die alle Graphen der Schar in genau einem gemeinsamen Punkt schneidet.</button>
+      </div>
+      <div class="knoepfe">
+        <button type="button" class="btn btn-pruefen" data-pruefe="g1">Prüfen</button>
+        <button type="button" class="btn btn-leeren" data-leere="g1">Leeren</button>
+      </div>
+      <div class="fb"></div>
+      <div class="tipp-box">
+        <b>&#128161; Hilfe</b>
+        <button type="button" class="tipp-btn" data-stufe="1">Lösungsweg anzeigen</button>
+        <div class="tipp-inhalt">Zu jedem Parameterwert gehört ein Graph mit seinem besonderen Punkt. Ändert man den Parameter, wandert der Punkt. Die Kurve, auf der er dabei liegt, ist die Ortskurve – in GeoGebra sichtbar als Spur.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="aufgabe">
+    <h3>Check 2 · Nach dem Parameter auflösen</h3>
+    <div class="op-tags"><span class="op-tag">ohne Hilfsmittel</span><span class="op-tag">rechnerisch</span></div>
+    <div class="teil" id="g2">
+      <p class="frage">Die Hochpunkte einer Schar (wie bei Expert:in A) haben die \(x\)-Koordinate \(x=\frac{3a}{4}\). Lösen Sie diese Gleichung nach \(a\) auf (Schritt 2 des Verfahrens).</p>
+      <p class="hinweis">Eingabe wie bisher: <code>*</code>, <code>^</code>, <code>/</code>; Nenner mit mehr als einem Zeichen in Klammern.</p>
+      <div class="eingabe-zeile"><span class="lbl">\(a=\)</span><input class="term" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="a in Abhängigkeit von x"></div>
+      <div class="knoepfe">
+        <button type="button" class="btn btn-pruefen" data-pruefe="g2">Prüfen</button>
+        <button type="button" class="btn btn-leeren" data-leere="g2">Leeren</button>
+      </div>
+      <div class="lesung"></div>
+      <div class="fb"></div>
+      <div class="tipp-box">
+        <b>&#128161; Hilfe</b>
+        <button type="button" class="tipp-btn" data-stufe="1">Tipp 1 anzeigen</button>
+        <div class="tipp-inhalt">Multiplizieren Sie zuerst mit dem Nenner, dann teilen Sie durch den Faktor vor \(a\) – wie beim Lösen von Gleichungen in Klasse 7.</div>
+        <button type="button" class="tipp-btn" data-stufe="2">Lösungsweg anzeigen</button>
+        <div class="tipp-inhalt">\( x=\frac{3a}{4} \;\Leftrightarrow\; 4x=3a \;\Leftrightarrow\; a=\frac{4x}{3} \)</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="aufgabe">
+    <h3>Check 3 · Die Ortskurve aufstellen</h3>
+    <div class="op-tags"><span class="op-tag">ohne Hilfsmittel</span><span class="op-tag">rechnerisch</span></div>
+    <div class="teil" id="g3">
+      <p class="frage">Die Tiefpunkte einer Schar (wie bei Expert:in B) sind \(T_a\left(2a\,\middle|\,a^2+1\right)\) mit \(a&gt;0\). Bestimmen Sie die Gleichung der Ortskurve der Tiefpunkte.</p>
+      <p class="hinweis">Eingabe wie bisher: <code>*</code>, <code>^</code>, <code>/</code>; Nenner mit mehr als einem Zeichen in Klammern.</p>
+      <div class="eingabe-zeile"><span class="lbl">\(o(x)=\)</span><input class="term" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Ortskurve der Tiefpunkte"></div>
+      <div class="knoepfe">
+        <button type="button" class="btn btn-pruefen" data-pruefe="g3">Prüfen</button>
+        <button type="button" class="btn btn-leeren" data-leere="g3">Leeren</button>
+      </div>
+      <div class="lesung"></div>
+      <div class="fb"></div>
+      <div class="tipp-box">
+        <b>&#128161; Hilfe</b>
+        <button type="button" class="tipp-btn" data-stufe="1">Tipp 1 anzeigen</button>
+        <div class="tipp-inhalt">Lösen Sie \(x=2a\) nach \(a\) auf und setzen Sie das Ergebnis mit Klammern in die \(y\)-Koordinate ein.</div>
+        <button type="button" class="tipp-btn" data-stufe="2">Lösungsweg anzeigen</button>
+        <div class="tipp-inhalt">\(x=2a\Rightarrow a=\frac{x}{2}\). \(y=\left(\frac{x}{2}\right)^2+1=\frac{x^2}{4}+1\), also \(o(x)=\frac{1}{4}x^2+1\) für \(x&gt;0\).</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="aufgabe">
+    <h3>Check 4 · Der Definitionsbereich</h3>
+    <div class="op-tags"><span class="op-tag">ohne Hilfsmittel</span><span class="op-tag">am Term begründen</span></div>
+    <div class="teil" id="g4">
+      <p class="frage">Die Hochpunkte einer Schar (wie bei Expert:in A) haben die \(x\)-Koordinate \(x=-\frac{2}{a}\) mit \(a&gt;0\). Für welche \(x\) gilt die Ortskurve der Hochpunkte?</p>
+      <div class="mc" data-mc="g4">
+        <button type="button" class="mcbtn" data-ok="1">nur für \(x&lt;0\)</button>
+        <button type="button" class="mcbtn" data-ok="0" data-fehler="pos">nur für \(x&gt;0\)</button>
+        <button type="button" class="mcbtn" data-ok="0" data-fehler="alle">für alle \(x\neq 0\)</button>
+        <button type="button" class="mcbtn" data-ok="0" data-fehler="zwei">nur für \(x&gt;-2\)</button>
+      </div>
+      <div class="knoepfe">
+        <button type="button" class="btn btn-pruefen" data-pruefe="g4">Prüfen</button>
+        <button type="button" class="btn btn-leeren" data-leere="g4">Leeren</button>
+      </div>
+      <div class="fb"></div>
+      <div class="tipp-box">
+        <b>&#128161; Hilfe</b>
+        <button type="button" class="tipp-btn" data-stufe="1">Lösungsweg anzeigen</button>
+        <div class="tipp-inhalt">Für \(a&gt;0\) ist \(\frac{2}{a}&gt;0\), also \(x=-\frac{2}{a}&lt;0\). Jeder negative Wert kommt vor (großes \(a\): nahe null, kleines \(a\): weit links). Die Ortskurve gilt also für \(x&lt;0\).</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="aufgabe">
+    <h3>Check 5 · Ein Wendepunkt</h3>
+    <div class="op-tags"><span class="op-tag">ohne Hilfsmittel</span><span class="op-tag">rechnerisch</span></div>
+    <div class="teil" id="g5">
+      <p class="frage">Gegeben ist die Schar \(g_a(x)=x^3-3a\cdot x^2\) mit \(a\in\mathbb{R}\) (wie bei Expert:in C). Berechnen Sie die \(y\)-Koordinate des Wendepunkts für \(a=\frac{1}{2}\).</p>
+      <div class="eingabe-zeile"><span class="lbl">\(y_W=\)</span><input class="term" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="y-Koordinate des Wendepunkts für a gleich ein Halb"></div>
+      <div class="knoepfe">
+        <button type="button" class="btn btn-pruefen" data-pruefe="g5">Prüfen</button>
+        <button type="button" class="btn btn-leeren" data-leere="g5">Leeren</button>
+      </div>
+      <div class="fb"></div>
+      <div class="tipp-box">
+        <b>&#128161; Hilfe</b>
+        <button type="button" class="tipp-btn" data-stufe="1">Tipp 1 anzeigen</button>
+        <div class="tipp-inhalt">Setzen Sie zuerst \(a=\frac{1}{2}\) ein, dann zweite Ableitung gleich null. Rechnen Sie mit Brüchen wie in Klasse 6.</div>
+        <button type="button" class="tipp-btn" data-stufe="2">Lösungsweg anzeigen</button>
+        <div class="tipp-inhalt">\(g_{1/2}(x)=x^3-\frac{3}{2}x^2\), \(g''(x)=6x-3=0 \Rightarrow x=\frac{1}{2}\), \(g'''(x)=6\neq 0\). \(g\left(\frac12\right)=\frac18-\frac32\cdot\frac14=\frac18-\frac38=-\frac14\).</div>
+      </div>
+    </div>
+  </div>
+<!-- ===== TEIL B: Codebox (nach den Check-Aufgaben) ===== -->
+<p id="gc-offen">Noch nicht alle Aufgaben geprüft &ndash; Ihre Sterne erscheinen danach hier.</p>
+<div class="gc-codebox" id="gc-codebox"></div>
+</section>
+
+<!-- ===== TEIL C: Teampunkte-Karte (baustein_gruppencheck.html) ===== -->
+<section class="karte" id="k10">
+  <h2>10 · Teampunkte <span class="sf">&#128106; in der Gruppe</span></h2>
+  <div class="stand"><p><b>Wo wir gerade stehen:</b> Jede:r von Ihnen hat beim Gruppen-Check einen Code bekommen. Ein Mitglied gibt jetzt den Gruppenschlüssel und alle Codes ein. Jeder Code darf nur einmal vorkommen.</p></div>
+  <p class="gc-nur-ea"><b>Allein:</b> Die Teampunkte entfallen. Notieren Sie Ihre Sterne aus dem Gruppen-Check im Heft.</p>
+  <div class="gc-merk" id="gc-regeln"></div>
+  <div class="gc-nicht-ea">
+    <h3>Der Gruppenrechner</h3>
+    <p><b>Ihr Gruppenschlüssel:</b></p>
+    <div class="gc-eingabe"><input type="text" class="gc-code" id="gc-re-key" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Gruppenschlüssel für den Rechner"></div>
+    <p style="margin-top:12px"><b>Wie viele sind Sie?</b></p>
+    <div class="gc-zahlwahl" id="gc-re-n">
+      <button type="button" class="gc-zbtn" data-n="2">2</button>
+      <button type="button" class="gc-zbtn" data-n="3">3</button>
+      <button type="button" class="gc-zbtn" data-n="4">4</button>
+      <button type="button" class="gc-zbtn" data-n="5">5</button>
+      <button type="button" class="gc-zbtn" data-n="6">6</button>
+      <button type="button" class="gc-zbtn" data-n="7">7</button>
+    </div>
+    <p>Tragen Sie die Codes aller Mitglieder ein:</p>
+    <div class="gc-liste" id="gc-re-liste"></div>
+    <div id="gc-re-praes-box">
+      <p style="margin-top:14px"><b>Präsentationsbonus</b> (tippt die Lehrkraft an):</p>
+      <div class="gc-zahlwahl" id="gc-re-p">
+        <button type="button" class="gc-zbtn" data-p="0">+0</button>
+        <button type="button" class="gc-zbtn" data-p="1">+1</button>
+        <button type="button" class="gc-zbtn" data-p="2">+2</button>
+      </div>
+    </div>
+    <div style="margin-top:14px"><button type="button" class="gc-btn" id="gc-re-btn">&#127942; Teampunkte berechnen</button></div>
+    <div class="gc-erg" id="gc-re-erg"></div>
+  </div>
+</section>
+
+<!-- ======================= KARTE 11 ======================= -->
+<section class="karte" id="k11">
+  <h2>11 · Ergebnis sichern <span class="sf">&#128100; allein</span></h2>
+  <div class="stand"><b>Wo wir gerade stehen:</b> Die Folien sind vorgestellt, der Gruppen-Check ist geschafft. Zum Schluss sorgen Sie dafür, dass alles Wichtige in Ihrem Heft steht – das geht auch zu Hause.</div>
+  <h3>Heft-Checkliste – haken Sie ab, was in Ihrem Heft steht</h3>
+  <ul class="check" id="check">
+    <li><button type="button" class="chk" data-chk="c1">Merkkasten „Ortskurve in vier Schritten“ übernommen</button></li>
+    <li><button type="button" class="chk" data-chk="c2">Ortskurven der Hoch-, Tief- und Wendepunkte (Karten 4–6) mit Definitionsbereich</button></li>
+    <li><button type="button" class="chk" data-chk="c3">Bestes Werbebudget (Karte 7) mit Antwortsatz</button></li>
+    <li><button type="button" class="chk" data-chk="c4">Vermutungssatz von Karte 1 notiert und mit dem Ergebnis von Karte 2 verglichen</button></li>
+    <li><button type="button" class="chk" data-chk="c5">Eine Frage notiert, die noch offen ist (oder: „keine offene Frage“)</button></li>
+  </ul>
+
+  <h3>Überprüfen Sie sich – erst überlegen, dann aufdecken</h3>
+  <div class="auf" data-id="a1"><p>Warum gibt man bei einer Ortskurve einen Definitionsbereich an?</p>
+    <button type="button" class="btn btn-weiter">Antwort aufdecken</button>
+    <div class="antwort">Nur die \(x\)-Werte, die für erlaubte Parameterwerte tatsächlich vorkommen, gehören zu besonderen Punkten der Schar. Bei der Fontäne entstehen nur \(x&gt;0\).</div></div>
+  <div class="auf" data-id="a2"><p>Bei einer Schar liegen alle Wendepunkte bei \(x=0\), ihre \(y\)-Koordinate hängt aber von \(a\) ab. Warum lässt sich die Ortskurve nicht als Funktion angeben?</p>
+    <button type="button" class="btn btn-weiter">Antwort aufdecken</button>
+    <div class="antwort">Alle Punkte liegen übereinander auf der \(y\)-Achse. Zu \(x=0\) gehören viele \(y\)-Werte – das ist keine Funktion. Man kann die \(x\)-Gleichung auch nicht nach \(a\) auflösen.</div></div>
+  <div class="auf" data-id="a3"><p>Was ist der Unterschied zwischen der Spur in GeoGebra und der berechneten Ortskurve?</p>
+    <button type="button" class="btn btn-weiter">Antwort aufdecken</button>
+    <div class="antwort">Die Spur ist nur gemalt und zeigt einzelne Reglerwerte – sie liefert eine Vermutung. Die berechnete Ortskurve gilt für alle Parameterwerte und ist ein Beweis.</div></div>
+  <h3>Weiter üben</h3>
+  <ul>
+    <li><a href="ortskurven_ue.html">Übung „Ortskurven üben“</a> – Hoch-, Tief- und Wendepunkte, Definitionsbereich und den besten Parameter finden, in drei Niveaustufen.</li>
+    <li><a href="steckbrief_funktionsschar_gk_sfs.html">Steckbriefaufgabe mit Parameter (GK)</a> bzw. <a href="steckbrief_funktionsschar_lk_sfs.html">Steckbriefaufgabe mit Parameter (LK)</a> – Schritt für Schritt im Heft, mit Ortskurve.</li>
+    <li>Arbeitsblatt „Funktionsschar“, Aufgabe 2 a) und b) – vollständig im Heft.</li>
+    <li>Lambacher Schweizer Q1, S. 28: Nr. 17 b) (liegen alle Extrempunkte auf einer Potenzfunktion?) und Nr. 18 b).</li>
+    <li>Für den LK: Ortskurve der Wendepunkte von \(f_a(x)=x^3+a\cdot x^2-1\) bestimmen und mit GeoGebra kontrollieren.</li>
+  </ul>
+</section>
+
+<!-- ======================= KARTE 12 ======================= -->
+<section class="karte" id="k12">
+  <h2>12 · LK-Extra: Hoch- und Tiefpunkte auf derselben Kurve <span class="sf">&#128100; allein</span></h2>
+  <p class="hinweis"><b>Für den Leistungskurs</b> – zu Hause oder für Schnelle. Im Grundkurs freiwillig.</p>
   <div class="stand"><b>Wo wir gerade stehen:</b> Auf der Schritt-für-Schritt-Seite haben Sie die Schar \(f_a(x)=x^3-3a\cdot x\) untersucht. Für \(a&gt;0\) gilt: Hochpunkt \(H\left(-\sqrt{a}\,\middle|\,2a\sqrt{a}\right)\), Tiefpunkt \(T\left(\sqrt{a}\,\middle|\,-2a\sqrt{a}\right)\). Hier steckt eine Stolperfalle beim Wurzelziehen.</div>
   <div class="aufgabe">
-    <h3>Aufgabe 3 · Ortskurve der Hochpunkte</h3>
+    <h3>Aufgabe LK · Ortskurve der Hochpunkte</h3>
     <div class="op-tags"><span class="op-tag">ohne Hilfsmittel</span><span class="op-tag">rechnerisch</span><span class="lk-tag">LK</span></div>
     <p class="hinweis">Eingabe wie bisher; Potenz mit <code>^</code>.</p>
 
@@ -484,155 +1154,17 @@ input.term:disabled{background:var(--bg)}
     <div class="ggb"><b>🎯 Kontrolle in GeoGebra (freiwillig):</b> <code>a=Schieberegler(0.1, 3, 0.1)</code>, <code>f(x)=x^3-3*a*x</code>, <code>Extremum(f)</code>, Spur beider Punkte einschalten, dann <code>o(x)=-2*x^3</code> eingeben und vergleichen.</div>
   </div>
 </section>
-
-<!-- ======================= KARTE 5 ======================= -->
-<section class="karte" id="k5">
-  <h2>5 · Ortskurve nutzen: das beste Werbebudget</h2>
-  <div class="stand"><b>Wo wir gerade stehen:</b> Eine Ortskurve ist eine ganz normale Funktion. Man kann sie also selbst wieder untersuchen – zum Beispiel ihren höchsten Punkt suchen. Das nutzen wir jetzt in einem Sachzusammenhang.</div>
-  <p>Ein kleines Unternehmen verkauft kabellose Kopfhörer. Der Gewinn hängt von der Produktionsmenge \(x\) (in 1000 Stück) und vom Werbebudget \(a\) (in 100 000 €) ab:</p>
-  <p style="text-align:center">\( G_a(x)=-x^3+3a\cdot x^2-3a^4 \quad\text{mit } a&gt;0,\ x\ge 0 \)</p>
-  <p>\(G_a(x)\) ist der Gewinn in 100 000 €. Mehr Werbung steigert den Absatz, kostet aber auch: Der Summand \(-3a^4\) beschreibt die Werbekosten.</p>
-  <div class="aufgabe">
-    <h3>Aufgabe 4 · Gewinn maximieren – zweimal</h3>
-    <div class="op-tags"><span class="op-tag">ohne Hilfsmittel</span><span class="op-tag">rechnerisch</span></div>
-    <div class="team nur-pa">🧑‍🤝‍🧑 <b>Zu zweit:</b> Die Teile bauen aufeinander auf – bearbeiten Sie sie gemeinsam der Reihe nach. Eine/r rechnet laut vor, die/der andere schreibt mit und achtet auf jeden Schritt. Nach jedem Teil tauschen Sie die Rollen.</div>
-    <div class="team nur-ga">👥 <b>In der Gruppe:</b> Die Teile bauen aufeinander auf. Rechnen Sie a) und b) zuerst jede/r für sich und vergleichen Sie dann. c) und d) lösen Sie gemeinsam auf einem Blatt: Die Schreiberin bzw. der Schreiber notiert, alle anderen sagen an. Zum Schluss macht die Prüferin bzw. der Prüfer die Probe mit \(a=1\).</div>
-    <p class="hinweis">Eingabe: Malzeichen <code>*</code>, Potenz <code>^</code>, Bruch mit <code>/</code>.</p>
-
-    <div class="teil" id="t-g1">
-      <p class="frage">a) Bei welcher Menge \(x\) ist der Gewinn für festes \(a\) maximal? Weisen Sie im Heft nach, dass es ein Maximum ist.</p>
-      <div class="eingabe-zeile"><span class="lbl">\(x_H=\)</span><input class="term" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="gewinnmaximale Menge"></div>
-      <div class="knoepfe">
-        <button type="button" class="btn btn-pruefen" data-pruefe="t-g1">Prüfen</button>
-        <button type="button" class="btn btn-leeren" data-leere="t-g1">Leeren</button>
-      </div>
-      <div class="lesung"></div>
-      <div class="fb"></div>
-      <div class="tipp-box">
-        <b>💡 Hilfe</b>
-        <button type="button" class="tipp-btn" data-stufe="1">Tipp 1 anzeigen</button>
-        <div class="tipp-inhalt">Leiten Sie nach \(x\) ab und klammern Sie in \(G_a'(x)=0\) einen gemeinsamen Faktor aus.</div>
-        <button type="button" class="tipp-btn" data-stufe="2">Lösungsweg anzeigen</button>
-        <div class="tipp-inhalt">\(G_a'(x)=-3x^2+6a\cdot x=-3x\cdot(x-2a)=0\Rightarrow x=0\) oder \(x=2a\). \(G_a''(x)=-6x+6a\), \(G_a''(2a)=-6a&lt;0\): Maximum bei \(x=2a\).</div>
-      </div>
-    </div>
-
-    <div class="teil" id="t-g2">
-      <p class="frage">b) Wie groß ist dieser maximale Gewinn in Abhängigkeit von \(a\)?</p>
-      <div class="eingabe-zeile"><span class="lbl">\(G_{\max}=\)</span><input class="term" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="maximaler Gewinn"></div>
-      <div class="knoepfe">
-        <button type="button" class="btn btn-pruefen" data-pruefe="t-g2">Prüfen</button>
-        <button type="button" class="btn btn-leeren" data-leere="t-g2">Leeren</button>
-      </div>
-      <div class="lesung"></div>
-      <div class="fb"></div>
-      <div class="tipp-box">
-        <b>💡 Hilfe</b>
-        <button type="button" class="tipp-btn" data-stufe="1">Tipp 1 anzeigen</button>
-        <div class="tipp-inhalt">Setzen Sie Ihre Stelle aus a) in \(G_a\) ein und fassen Sie gleiche Potenzen von \(a\) zusammen.</div>
-        <button type="button" class="tipp-btn" data-stufe="2">Lösungsweg anzeigen</button>
-        <div class="tipp-inhalt">\(G_a(2a)=-8a^3+3a\cdot 4a^2-3a^4=4a^3-3a^4\).</div>
-      </div>
-    </div>
-
-    <div class="teil" id="t-g3">
-      <p class="frage">c) Bestimmen Sie die Ortskurve der Hochpunkte mit dem Verfahren aus Karte 2.</p>
-      <div class="eingabe-zeile"><span class="lbl">\(o(x)=\)</span><input class="term" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Ortskurve der Hochpunkte"></div>
-      <div class="knoepfe">
-        <button type="button" class="btn btn-pruefen" data-pruefe="t-g3">Prüfen</button>
-        <button type="button" class="btn btn-leeren" data-leere="t-g3">Leeren</button>
-      </div>
-      <div class="lesung"></div>
-      <div class="fb"></div>
-      <div class="tipp-box">
-        <b>💡 Hilfe</b>
-        <button type="button" class="tipp-btn" data-stufe="1">Tipp 1 anzeigen</button>
-        <div class="tipp-inhalt">Lösen Sie Ihre Stelle aus a) nach \(a\) auf und setzen Sie das in Ihr Ergebnis aus b) ein.</div>
-        <button type="button" class="tipp-btn" data-stufe="2">Lösungsweg anzeigen</button>
-        <div class="tipp-inhalt">\(x=2a\Rightarrow a=\frac{x}{2}\). \(o(x)=4\cdot\frac{x^3}{8}-3\cdot\frac{x^4}{16}=\frac{1}{2}x^3-\frac{3}{16}x^4\) für \(x&gt;0\).</div>
-      </div>
-    </div>
-
-    <div class="teil" id="t-g4">
-      <p class="frage">d) Bestimmen Sie den höchsten Punkt der Ortskurve. Welches Werbebudget \(a\) (in 100 000 €) ist am besten?</p>
-      <div class="eingabe-zeile"><span class="lbl">\(a=\)</span><input class="term" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" aria-label="bestes Werbebudget"></div>
-      <div class="knoepfe">
-        <button type="button" class="btn btn-pruefen" data-pruefe="t-g4">Prüfen</button>
-        <button type="button" class="btn btn-leeren" data-leere="t-g4">Leeren</button>
-      </div>
-      <div class="fb"></div>
-      <div class="tipp-box">
-        <b>💡 Hilfe</b>
-        <button type="button" class="tipp-btn" data-stufe="1">Tipp 1 anzeigen</button>
-        <div class="tipp-inhalt">Untersuchen Sie die Ortskurve wie eine gewöhnliche Funktion: \(o'(x)=0\), dann hinreichende Bedingung.</div>
-        <button type="button" class="tipp-btn" data-stufe="2">Tipp 2 anzeigen</button>
-        <div class="tipp-inhalt">Sie erhalten eine Stelle \(x\). Das zugehörige \(a\) liefert Ihr Ergebnis aus a) bzw. c).</div>
-        <button type="button" class="tipp-btn" data-stufe="3">Lösungsweg anzeigen</button>
-        <div class="tipp-inhalt">\(o'(x)=\frac{3}{2}x^2-\frac{3}{4}x^3=\frac{3}{4}x^2\cdot(2-x)=0\Rightarrow x=2\) (für \(x&gt;0\)); \(o'\) wechselt dort von + nach −: Maximum. \(a=\frac{x}{2}=1\), \(o(2)=4-3=1\). <b>Antwort:</b> Bei 100 000 € Werbebudget und 2000 Stück wird der größte Gewinn erzielt, nämlich 100 000 €. Mehr Werbung lohnt sich nicht, weil die Kosten schneller wachsen als der Absatz.</div>
-      </div>
-    </div>
-    <p class="hinweis"><b>Zum Nachdenken:</b> Dasselbe Ergebnis liefert auch die Funktion \(g(a)=4a^3-3a^4\) aus b). Warum? Die Ortskurve und \(g\) beschreiben dieselben Punkte – einmal in \(x\), einmal in \(a\) ausgedrückt.</p>
-  </div>
-</section>
-
-<!-- ======================= KARTE 6 ======================= -->
-<section class="karte" id="k6">
-  <h2>6 · Ergebnis sichern</h2>
-  <div class="merke">
-    <b class="titel">Das nehmen Sie mit</b>
-    <ul>
-      <li>Die besonderen Punkte einer Schar wandern mit dem Parameter. Die Kurve, auf der sie liegen, heißt <b>Ortskurve</b>.</li>
-      <li>Verfahren: Koordinaten in Abhängigkeit vom Parameter – \(x\)-Gleichung nach dem Parameter auflösen – in \(y\) einsetzen – Definitionsbereich angeben.</li>
-      <li>Der Definitionsbereich folgt aus den erlaubten Parameterwerten. Oft liegt nur ein Teil der Kurve vor.</li>
-      <li>Vorsicht beim Wurzelziehen: \(\sqrt{x^2}=|x|\).</li>
-      <li>Eine Ortskurve kann man selbst untersuchen, zum Beispiel um den besten Parameterwert zu finden.</li>
-    </ul>
-  </div>
-
-  <h3>Ihr Ergebnis-Produkt</h3>
-  <div class="produkt nur-ea"><p>🧑 <b>Allein:</b> Eine Heftseite „Ortskurven“ mit dem Merkkasten (vier Schritte), der Rechnung zu Karte 3 und dem Antwortsatz zum besten Werbebudget.</p></div>
-  <div class="produkt nur-pa"><p>🧑‍🤝‍🧑 <b>Zu zweit:</b> Jede/r hat die Heftseite. Bereiten Sie eine <b>1-Minuten-Erklärung</b> vor: Wie bestimmt man eine Ortskurve, am Beispiel der Fontäne? Jede/r muss sie halten können.</p></div>
-  <div class="produkt nur-ga"><p>👥 <b>In der Gruppe:</b> Ein <b>Mini-Plakat</b> (A3 oder digitale Folie): links die vier Schritte am Fontänen-Beispiel, rechts das Gewinnbeispiel mit Skizze von zwei Gewinnkurven und der Ortskurve durch ihre Hochpunkte. Rollen: Erklärer/in, Schreiber/in, Zeitwächter/in, Prüfer/in. Jede/r kann das Plakat in 2 Minuten vorstellen.</p></div>
-
-  <h3>Checkliste – haken Sie ab, was in Ihrem Ergebnis steht</h3>
-  <ul class="check" id="check">
-    <li><button type="button" class="chk" data-chk="c1">Merkkasten „Ortskurve in vier Schritten“ übernommen</button></li>
-    <li><button type="button" class="chk" data-chk="c2">Ortskurve der Tiefpunkte (Karte 3) mit Definitionsbereich</button></li>
-    <li><button type="button" class="chk" data-chk="c3">Bestes Werbebudget (Karte 5) mit Antwortsatz</button></li>
-    <li><button type="button" class="chk" data-chk="c4">Eine Frage notiert, die noch offen ist (oder: „keine offene Frage“)</button></li>
-  </ul>
-  <div class="hinweis"><b>So kann es im Unterricht weitergehen</b> – Ihre Lehrkraft sagt an, ob und wie:
-    <ul>
-      <li>Eine zufällig ausgewählte Person erklärt die vier Schritte an der Fontäne.</li>
-      <li>Heftseite oder Plakat wird kurz angesehen oder abgezeichnet.</li>
-      <li>Partner-Check: Sie erklären einer anderen Person aus dem Kurs, warum das beste Budget bei \(a=1\) liegt.</li>
-    </ul>
-    Arbeiten Sie allein zu Hause oder in einem anderen Kurs? Bringen Sie Ihre Heftseite zur nächsten Stunde mit.</div>
-
-  <h3>Überprüfen Sie sich – erst überlegen, dann aufdecken</h3>
-  <div class="auf" data-id="a1"><p>Warum gibt man bei einer Ortskurve einen Definitionsbereich an?</p>
-    <button type="button" class="btn btn-weiter">Antwort aufdecken</button>
-    <div class="antwort">Nur die \(x\)-Werte, die für erlaubte Parameterwerte tatsächlich vorkommen, gehören zu besonderen Punkten der Schar. Bei der Fontäne entstehen nur \(x&gt;0\).</div></div>
-  <div class="auf" data-id="a2"><p>Bei einer Schar liegen alle Wendepunkte bei \(x=0\), ihre \(y\)-Koordinate hängt aber von \(a\) ab. Warum lässt sich die Ortskurve nicht als Funktion angeben?</p>
-    <button type="button" class="btn btn-weiter">Antwort aufdecken</button>
-    <div class="antwort">Alle Punkte liegen übereinander auf der \(y\)-Achse. Zu \(x=0\) gehören viele \(y\)-Werte – das ist keine Funktion. Man kann die \(x\)-Gleichung auch nicht nach \(a\) auflösen.</div></div>
-  <div class="auf" data-id="a3"><p>Was ist der Unterschied zwischen der Spur in GeoGebra und der berechneten Ortskurve?</p>
-    <button type="button" class="btn btn-weiter">Antwort aufdecken</button>
-    <div class="antwort">Die Spur ist nur gemalt und zeigt einzelne Reglerwerte – sie liefert eine Vermutung. Die berechnete Ortskurve gilt für alle Parameterwerte und ist ein Beweis.</div></div>
-  <h3>Weiter üben</h3>
-  <ul>
-    <li>Arbeitsblatt „Funktionsschar“, Aufgabe 2 a) und b) – vollständig im Heft.</li>
-    <li>Lambacher Schweizer Q1, S. 28: Nr. 17 b) (liegen alle Extrempunkte auf einer Potenzfunktion?) und Nr. 18 b).</li>
-    <li>Für den LK: Ortskurve der Wendepunkte von \(f_a(x)=x^3+a\cdot x^2-1\) bestimmen und mit GeoGebra kontrollieren.</li>
-  </ul>
-</section>
 </main>
 
 <!-- ============================================================
-     BAUSTEIN: Navigationsleiste  (v6, 12.11.2026)
+     BAUSTEIN: Navigationsleiste  (v7.1, 16.11.2026)
      Pflicht auf jeder Lernseite (anweisung_lernseiten.txt, TEIL 3.6).
      Einfügen: UNVERÄNDERT direkt vor dem T-Rex bzw. vor </body> – nicht in <main>.
      - 🏠 schwebender Knopf unten links (immer sichtbar, T-Rex bleibt rechts) + Leiste am Seitenende.
+     - Seit v7: schwebender QR-Knopf rechts neben 🏠. Antippen zeigt einen großen
+       QR-Code mit der Adresse dieser Seite (ohne #…), dazu Titel und Adresse;
+       Antippen schließt ihn. Eigener Encoder (dinoQr), keine Bibliothek, kein Dienst.
+     - v7.1: QR-Code 30 % kleiner, damit Überschrift und Adresse auf dem iPad ganz sichtbar sind.
      - 🏠 Startseite: feste Adresse, funktioniert aus jedem Unterordner.
      - 📚 Alles für …: liest <meta name="klasse"> und hängt ?klasse=… an.
        Fehlt das Meta-Tag, bleibt der Knopf unsichtbar.
@@ -696,9 +1228,32 @@ input.term:disabled{background:var(--bg)}
   background:#fff;border:2px solid #22303f;text-decoration:none;font-size:1.3rem;
   box-shadow:0 2px 6px rgba(34,48,63,.25);-webkit-tap-highlight-color:transparent;}
 .dino-home:active{transform:scale(.93);}
-@media print{.dino-nav,.dino-fb,.dino-home{display:none;}}
+.dino-qr{position:fixed;left:calc(.7rem + 52px);bottom:.7rem;z-index:49;width:44px;height:44px;
+  display:flex;align-items:center;justify-content:center;border-radius:50%;margin:0;padding:0;
+  background:#fff;border:2px solid #22303f;color:#22303f;cursor:pointer;
+  font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;font-size:1rem;font-weight:800;
+  box-shadow:0 2px 6px rgba(34,48,63,.25);-webkit-tap-highlight-color:transparent;}
+.dino-qr:active{transform:scale(.93);}
+.dino-qrfenster{position:fixed;inset:0;margin:auto;height:fit-content;
+  width:min(40rem,calc(100vw - 1.5rem));max-height:calc(100vh - 1.5rem);overflow:auto;border:3px solid #22303f;
+  border-radius:1rem;padding:1rem;background:#fff;color:#22303f;text-align:center;cursor:pointer;
+  font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;font-size:1rem;}
+.dino-qrfenster::backdrop{background:rgba(34,48,63,.6);}
+.dino-qrfenster h2{margin:0 0 .3rem;font-size:1.3rem;line-height:1.3;}
+.dino-qrfenster p{margin:.3rem 0;font-size:1rem;line-height:1.4;}
+.dino-qr-adresse{word-break:break-all;color:#6b7686;}
+.dino-qr-bild{margin:.5rem auto;width:min(70%,calc(70vh - 9rem));width:min(70%,calc(70dvh - 9rem));}
+.dino-qr-bild > svg{display:block;width:100%;height:auto;}
+@media print{.dino-nav,.dino-fb,.dino-home,.dino-qr,.dino-qrfenster{display:none;}}
 </style>
 <a class="dino-home" href="https://szymczak75.github.io/Schule/dino_hub.html" title="Zur Startseite" aria-label="Zur Startseite">🏠</a>
+<button type="button" class="dino-qr" id="dino-qr" title="QR-Code dieser Seite" aria-label="QR-Code dieser Seite groß anzeigen">QR</button>
+<dialog class="dino-qrfenster" id="dino-qrfenster" aria-labelledby="dino-qr-titel">
+  <h2 id="dino-qr-titel"></h2>
+  <div class="dino-qr-bild" id="dino-qr-bild"></div>
+  <p class="dino-qr-adresse" id="dino-qr-adresse"></p>
+  <p>Zum Schließen antippen.</p>
+</dialog>
 <nav class="dino-nav" aria-label="Seitennavigation">
   <div class="dino-nav-innen">
     <a class="dino-nav-start" href="https://szymczak75.github.io/Schule/dino_hub.html">🏠 Startseite</a>
@@ -758,6 +1313,178 @@ input.term:disabled{background:var(--bg)}
     var name = /^\d+$/.test(k) ? 'Klasse ' + parseInt(k, 10) : 'die ' + k.replace('_', '/');
     a.textContent = '📚 Alles für ' + name;
     a.hidden = false;
+  }
+
+  /* 📱 QR-Code dieser Seite – eigener Encoder (Byte-Modus, Fehlerkorrektur M),
+     keine Bibliothek, kein fremder Dienst. Aufbau nach ISO/IEC 18004. */
+  function dinoQr(text){
+    var ECC = [0,10,16,26,18,24,16,18,22,22,26,30,22,22,24,24,28,28,26,26,26,26,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28];
+    var BLK = [0,1,1,1,2,2,4,4,4,5,5,5,8,9,9,10,10,11,13,14,16,17,17,18,20,21,23,25,26,28,29,31,33,35,37,38,40,43,45,47,49];
+    var daten = [], i, j, v;
+    var u = unescape(encodeURIComponent(text));                     // UTF-8-Bytes
+    for (i = 0; i < u.length; i++) daten.push(u.charCodeAt(i));
+    function roh(v){ var r = (16*v + 128)*v + 64;
+      if (v >= 2){ var n = Math.floor(v/7) + 2; r -= (25*n - 10)*n - 55; if (v >= 7) r -= 36; } return r; }
+    function nutz(v){ return Math.floor(roh(v)/8) - ECC[v]*BLK[v]; }
+    for (v = 1; v <= 40; v++) if (4 + (v < 10 ? 8 : 16) + 8*daten.length <= nutz(v)*8) break;
+    if (v > 40) return null;
+    // Bitstrom
+    var bits = [];
+    function put(w, n){ for (var k = n - 1; k >= 0; k--) bits.push((w >>> k) & 1); }
+    put(4, 4); put(daten.length, v < 10 ? 8 : 16);
+    daten.forEach(function(b){ put(b, 8); });
+    var kap = nutz(v)*8;
+    put(0, Math.min(4, kap - bits.length));
+    put(0, (8 - bits.length % 8) % 8);
+    for (var pad = 0xEC; bits.length < kap; pad ^= 0xEC ^ 0x11) put(pad, 8);
+    var cw = [];
+    for (i = 0; i < bits.length; i += 8){ var b = 0; for (j = 0; j < 8; j++) b = (b << 1) | bits[i+j]; cw.push(b); }
+    // Reed-Solomon
+    function mul(x, y){ var z = 0; for (var k = 7; k >= 0; k--){ z = (z << 1) ^ ((z >>> 7)*0x11D); z ^= ((y >>> k) & 1)*x; } return z; }
+    var grad = ECC[v], div = [], wurzel = 1;
+    for (i = 0; i < grad - 1; i++) div.push(0); div.push(1);
+    for (i = 0; i < grad; i++){
+      for (j = 0; j < grad; j++){ div[j] = mul(div[j], wurzel); if (j + 1 < grad) div[j] ^= div[j+1]; }
+      wurzel = mul(wurzel, 2);
+    }
+    function rest(d){ var r = div.map(function(){ return 0; });
+      d.forEach(function(b){ var f = b ^ r.shift(); r.push(0); div.forEach(function(c, k){ r[k] ^= mul(c, f); }); });
+      return r; }
+    var nb = BLK[v], rohCw = Math.floor(roh(v)/8), kurz = nb - rohCw % nb, kl = Math.floor(rohCw/nb), bloecke = [], pos = 0;
+    for (i = 0; i < nb; i++){
+      var d = cw.slice(pos, pos + kl - grad + (i < kurz ? 0 : 1)); pos += d.length;
+      var e = rest(d); if (i < kurz) d.push(0); bloecke.push(d.concat(e));
+    }
+    var folge = [];
+    for (i = 0; i < bloecke[0].length; i++)
+      for (j = 0; j < nb; j++) if (i !== kl - grad || j >= kurz) folge.push(bloecke[j][i]);
+    // Matrix
+    var n = 4*v + 17, M = [], F = [];
+    for (i = 0; i < n; i++){ M.push([]); F.push([]); for (j = 0; j < n; j++){ M[i].push(false); F[i].push(false); } }
+    function setz(x, y, d){ M[y][x] = d; F[y][x] = true; }
+    for (i = 0; i < n; i++){ setz(6, i, i % 2 === 0); setz(i, 6, i % 2 === 0); }
+    [[3,3],[n-4,3],[3,n-4]].forEach(function(p){
+      for (var dy = -4; dy <= 4; dy++) for (var dx = -4; dx <= 4; dx++){
+        var x = p[0]+dx, y = p[1]+dy, dist = Math.max(Math.abs(dx), Math.abs(dy));
+        if (x >= 0 && x < n && y >= 0 && y < n) setz(x, y, dist !== 2 && dist !== 4);
+      }
+    });
+    var ap = [];
+    if (v > 1){
+      var na = Math.floor(v/7) + 2, schritt = v === 32 ? 26 : Math.ceil((4*v + 4)/(2*na - 2))*2;
+      ap = [6]; for (var p2 = n - 7; ap.length < na; p2 -= schritt) ap.splice(1, 0, p2);
+    }
+    ap.forEach(function(ax, ia){ ap.forEach(function(ay, ib){
+      var letzt = ap.length - 1;
+      if ((ia === 0 && ib === 0) || (ia === 0 && ib === letzt) || (ia === letzt && ib === 0)) return;
+      for (var dy = -2; dy <= 2; dy++) for (var dx = -2; dx <= 2; dx++)
+        setz(ax+dx, ay+dy, Math.max(Math.abs(dx), Math.abs(dy)) !== 1);
+    }); });
+    function format(maske){
+      var dat = maske, r = dat;                                    // Stufe M = 00
+      for (var k = 0; k < 10; k++) r = (r << 1) ^ ((r >>> 9)*0x537);
+      var fb = ((dat << 10) | r) ^ 0x5412;
+      function bit(k){ return ((fb >>> k) & 1) !== 0; }
+      for (k = 0; k <= 5; k++) setz(8, k, bit(k));
+      setz(8, 7, bit(6)); setz(8, 8, bit(7)); setz(7, 8, bit(8));
+      for (k = 9; k < 15; k++) setz(14 - k, 8, bit(k));
+      for (k = 0; k < 8; k++) setz(n - 1 - k, 8, bit(k));
+      for (k = 8; k < 15; k++) setz(8, n - 15 + k, bit(k));
+      setz(8, n - 8, true);
+    }
+    format(0);
+    if (v >= 7){
+      var r = v;
+      for (i = 0; i < 12; i++) r = (r << 1) ^ ((r >>> 11)*0x1F25);
+      var vb = (v << 12) | r;
+      for (i = 0; i < 18; i++){
+        var bt = ((vb >>> i) & 1) !== 0, a = n - 11 + i % 3, bb = Math.floor(i/3);
+        setz(a, bb, bt); setz(bb, a, bt);
+      }
+    }
+    var z = 0;
+    for (var rechts = n - 1; rechts >= 1; rechts -= 2){
+      if (rechts === 6) rechts = 5;
+      for (var vert = 0; vert < n; vert++) for (j = 0; j < 2; j++){
+        var x = rechts - j, hoch = ((rechts + 1) & 2) === 0, y = hoch ? n - 1 - vert : vert;
+        if (!F[y][x] && z < folge.length*8){ M[y][x] = ((folge[z >>> 3] >>> (7 - (z & 7))) & 1) !== 0; z++; }
+      }
+    }
+    function maskiere(m){
+      for (var y = 0; y < n; y++) for (var x = 0; x < n; x++){
+        if (F[y][x]) continue;
+        var t;
+        switch (m){
+          case 0: t = (x + y) % 2 === 0; break;
+          case 1: t = y % 2 === 0; break;
+          case 2: t = x % 3 === 0; break;
+          case 3: t = (x + y) % 3 === 0; break;
+          case 4: t = (Math.floor(x/3) + Math.floor(y/2)) % 2 === 0; break;
+          case 5: t = x*y % 2 + x*y % 3 === 0; break;
+          case 6: t = (x*y % 2 + x*y % 3) % 2 === 0; break;
+          default: t = ((x + y) % 2 + x*y % 3) % 2 === 0;
+        }
+        if (t) M[y][x] = !M[y][x];
+      }
+    }
+    function strafe(){
+      var s = 0, dunkel = 0, x, y, k;
+      function zeile(get){
+        var lauf = 1;
+        for (k = 1; k <= n; k++){
+          if (k < n && get(k) === get(k-1)) lauf++;
+          else { if (lauf >= 5) s += lauf - 2; lauf = 1; }
+        }
+        for (k = 0; k + 7 <= n; k++){
+          if (get(k) && !get(k+1) && get(k+2) && get(k+3) && get(k+4) && !get(k+5) && get(k+6)){
+            var vor = true, nach = true;
+            for (var q = 1; q <= 4; q++){ if (k - q >= 0 && get(k - q)) vor = false; if (k + 6 + q < n && get(k + 6 + q)) nach = false; }
+            if (vor || nach) s += 40;
+          }
+        }
+      }
+      for (y = 0; y < n; y++) zeile(function(k){ return M[y][k]; });
+      for (x = 0; x < n; x++) zeile(function(k){ return M[k][x]; });
+      for (y = 0; y < n - 1; y++) for (x = 0; x < n - 1; x++)
+        if (M[y][x] === M[y][x+1] && M[y][x] === M[y+1][x] && M[y][x] === M[y+1][x+1]) s += 3;
+      for (y = 0; y < n; y++) for (x = 0; x < n; x++) if (M[y][x]) dunkel++;
+      s += Math.floor(Math.abs(dunkel*20 - n*n*10) / (n*n)) * 10;
+      return s;
+    }
+    var beste = 0, min = Infinity;
+    for (var m = 0; m < 8; m++){
+      maskiere(m); format(m); var st = strafe();
+      if (st < min){ min = st; beste = m; }
+      maskiere(m);
+    }
+    maskiere(beste); format(beste);
+    var pfad = '';
+    for (var yy = 0; yy < n; yy++) for (var xx = 0; xx < n; xx++)
+      if (M[yy][xx]) pfad += 'M' + (xx + 4) + ' ' + (yy + 4) + 'h1v1h-1z';
+    return '<svg viewBox="0 0 ' + (n + 8) + ' ' + (n + 8) + '" role="img" aria-label="QR-Code mit der Adresse dieser Seite" shape-rendering="crispEdges">' +
+           '<rect width="100%" height="100%" fill="#fff"/><path d="' + pfad + '" fill="#22303f"/></svg>';
+  }
+
+  var qrKnopf = document.getElementById('dino-qr');
+  var qrFenster = document.getElementById('dino-qrfenster');
+  if (qrKnopf && qrFenster) {
+    var qrFertig = false;
+    qrKnopf.addEventListener('click', function(){
+      if (!qrFertig) {
+        var ziel = location.href.split('#')[0];
+        var svg = null;
+        try { svg = dinoQr(ziel); } catch (e) {}
+        document.getElementById('dino-qr-bild').innerHTML = svg || '<p>Adresse zu lang für einen QR-Code.</p>';
+        document.getElementById('dino-qr-titel').textContent =
+          (document.title || '').trim() || location.pathname.split('/').pop();
+        document.getElementById('dino-qr-adresse').textContent = ziel;
+        qrFertig = true;
+      }
+      if (typeof qrFenster.showModal === 'function') qrFenster.showModal(); else qrFenster.setAttribute('open', '');
+    });
+    qrFenster.addEventListener('click', function(){
+      if (typeof qrFenster.close === 'function') qrFenster.close(); else qrFenster.removeAttribute('open');
+    });
   }
 
   /* ✉️ Feedback */
@@ -825,10 +1552,212 @@ input.term:disabled{background:var(--bg)}
 <div class="trex dino-ecke" role="button" tabindex="0" aria-label="Made by ASzym" onclick="this.classList.toggle('zeig')"><img class="dino-ikon" src="data:image/webp;base64,UklGRg4XAABXRUJQVlA4WAoAAAAQAAAAjwAAjwAAQUxQSEUIAAABoIVt2+I0+mZCQhoI1IvXoKV+udBu3d3d3V2g7u7u7u7u7tBVmkrqF1YWhwjzHWRmMpP/yx7tQURMAPxfYN2y/y00JV8f8eWd0hgD8ulkcMbA4GD/PG7CsOwPe/rDwU4U7r7rQezz0zPqGACAC+i+/q7pw4e/r8yvb3AH2mU2xLS+sriGd6wo+ut4hC5kbowFJVNO1uHpg7CviLe95XAdv6HMuJPRuSj7a1eOvtC396PPGOQ0/4aq/uwMALze19fXwFGlL+9bJIyXUeIlqvx50qAFey49e/rs+ooqHE3OcstQ9dxclDTVcAflzerJXkWEX2QpZXhjibo9ou4ILrWPo2GCsIpzzlhl4OZ75lQbuvgeCrzKdvwDP3Wt4CtLV236rQQ7srgACJwel42I2YlbPKV0dQ/ECcimvS8FrczomDIEJEtuSkBmk6pTAJ3TEdEepRHjW75Ghh/lI6FiPCJa2oN4px/I8jwgsWVW8t2vGClWxYQsZ7WmodTs+sYqCxuIeJ9Epu1PFtbPS4D8XllsIWLqvTGBlHhdRAJtb/rq6aiZRAFixnwdGVFIZGJdKgxXqRAGUVHsAxVJEVQ0SKdiq46KQQIRMeFA5QKkMa4NkLmOhtQxPBna0ySkjtcCHWcpEJZ4wH8LfFyf/4+B34d4kqE5RAOmR3lSAR0SacDM+Xq2GkZ6S2i6xNGAmeOYyns7q4ME5LlGBP5dnKXumXg+nwQspSI1gpn2kXs/Iubc2D6+mEjbLCLeBjNjRknrcBH/GBoSegGznU1i1k0FRGAxBUJMOw070PiHyA5fEK/8jb30PaHAst+fDsJwkNSsZc32okceYLpqEtqsiNuloFQ0YwcDgPHWmbHT+l3O2sNJQYcUtsyLQhgr3D2UA2Pz2iCz5Ae2UHjZVceUksNyGUNMWVWQCD6PSG8bc2jfnY8ETdudgQ6h79lD22AKvFZ9sz1rCgDcfIE9XEeBdhtiXCMAgOKv2bP0oQB6Z6Re83KATonMHfclIahVjVoaEX5AImPPwoFaTZe/mXpWCQgut/dfZoQr5YH1sOqcAqBvvNtkZeNhaL7goKDgQh7s6I+8Cpbj2be1CIBHse4rr/z1PVU823W+XntlMplM0dvKMeLdZ0ua/eaEIlJFVtaWcNT7hUeI1oyyuozMyz5sBL9BRPxaRYrzAHFdSJvJ3YwgXTnJ9eIqsAFNExEtQ3gpSa71mXfZaJmnkSob53q/qjJS3IxCRiNwOsKMjrFFpaonu97XUowEnlgw8nRtpwpcRtH0+lIdLK73ugAjnBcPet6pqTYxe0+pqej6p7SMOO8RVK5E/c8oOVWC38dAFNBYdFVs3OcvKCmMkSgZ43qpDWkodBHlvygqFnEv1/XM40YsW7Nm0cAanmyNsMlL7gCOmrYmZNBuR8fcpMV6pnai/LO+Dnz/eGT6V10mtIV4B26PE8lHmhiB75+IjA9hwafvvUYGAIDJgjzE1Kv9Bicg47ZuDHhuSsfE0Q7BD51BtGQg6wlVGIB+OfitmgOMy3WKwOjCLJR98eZiPofQN0jvLt5VuOpLJ/pJ6EPyB2gcFiG99n7gqk0+of2EhLT2pJQ1l4yPYQCg89KpUHLCzI6hOigfjYg5TsEMiaz5V8nY51Ou5/Izd8909lAq4B6ixXx0xDVExJ/OBezJFDnmXeIGFW+v/rAhIsY3UapjDjrmCg53nAND/78R8V01gJD9NhpkbucUmomyVysAUGZDzIUGAAD5In/QcsnTGQ9vjcNyWVm9FQGPQgYQ5SNOZ1DyuoADb+DFwrY82FZbA7BMVmyoMrKNrXf/k5qd+N5KwttCABC+9tYyPwfDIUT8OTsfjJZ1SKsagEdQneaV6/0ko8lbRGG3NwDU/xcR0Xo8dIQgI3cIuGrhP0h4mR+afUBEzBkDwK1FUeEfE8r8Eu4yBWNIuKBt8gFF/w4Dv2gxJ096KhfS31ue8T4JsaOjUXIVNEhTIqc3KM4ty+ggL89lEtAuSH2tPQeVfOWnlE9QGzPeKeenl9EkkQa5gjlZkUhQ2LDHnIJo/2IaIZXvCrrFD+FKeYxPQsef7aSGWtzDQk4p4CbZETG1KydR+Am6xZjioHxXKyJ+LQ2SXbPdQs5wUHEEfr+XnN1cQncU3eJZHzV+m1PN2GRxmETJT27hWwSozoFkL6s7sEzm1JO5At3hMR9wXf0ld/CqNLiwz1M3YK4Pruz3B31xPcClw76Rl9yXcy3/P6lLmaAF1zY+Ji6urxZcXHuCti89eXD5+aQ9q8eB6zfPoMtyJBRYLPScrE9jfIDNWURlHKnCAaPhHyiy3OxgAHYnWcmxPB5cAFjOe5KYlOuDCgHjpe4TkvPH6oZGYL/CSxqE9N93dA7igMTydwTWrElvjk9u7KcBMoNXJyvz7IYpxaaSLe3Huzu7orpVK6QFWnVtb2crMVMfUrvnmBVbL1y6+dGu0J16pYO8eSA55KUSs0CU1+kMYXPe5SpymAey+2YqYOstJsqV3KPIcqCZ12jqmlDBL+GywEOZmQRpinecvvPo8U+o5D6tHF3+jglK2HuTw5Vb/d6CSme2A0l9zchTb5JQybT61Gi6mFDFpwXFuHLbkwRU+Hs4MdzQRFRzAYi3f4fKxwYQ0+YnqplSX6zdV1TxcV5air1EVR/nEyn/D6p5WU/LTFR3NThqd6L78H+lTnpLkYo/1LnkSUrLLHXu5xMZKaiznSNlHKqa0R8c+d2o7hQgdZEqGTM9RXwfqWMuT0vT7ygonPvrQV89iOZ/oUraWI4WTfUBCg/sWzMvSPKz0mxWpTMedtOBG/aq36Wz0k0Kwv8fAgBWUDggog4AALA7AJ0BKpAAkAA+kTqYSCWjIqEulgugsBIJaA3GL+AQLO0y0PSP9j50lx/027bGz7oM4/pD/SfsC/qp03PMP5vPpV9AD/DdSd6AH6Z9bt/bv+xhLn9w+ivyZ/z/5H+d/kM93e4Hrm5S+sTNd+KP2nmT3l/EnUC9l/67evbQ+gF3n76zU18KazRQA/Tvor/+XmS+sfYJ/nP9561nob/so3GyVeOMjGAy5Vl7QF2zF7oPxne9ABlIp2AJcIYbzJvw2qZquw/tE6fsy9iP2IZiXTKHLK5sdlnTQBhM+jkN2nLN7oaO+/j5nquJFAR/uvxaBSOTs7el5f08HNGIsL9wr64311I950KRnCJd25VrDC5I7XBOXSH4xj9/vzYsRx9LkcwiAPo+Eknvqbf1sc0ApZ4Z440x+UoUj5ogo8rt22cpcy8z3roZXA38vJVv+LjYnnlx3+QE357lEmO67S5Nv51VGU1qU/80rAW6YGGJhTwl4uvdXxaIUTrKxFUBRUeN7/+5oGN6kivZZtEip4BDH9bsOsph79r9yPHAvKt8V8hnBt5EZw3NL1F9SZmwtq0bnirJjVmTUslXOnxhhbzL+8rtHvaLZfmMkrpJ3H8/3UgRY8tBXB1faKJvGjQOUhJCqp8ooO1ZMgD+/bVN/6t6qiv9ZU2rZbynXXgRY9X9SQjYDwn/+e4o3nDdDo6Blo98ezNFpL9pnVv38jLDV1YahJfoHEJB1ax+BgpFis+zllErMsJbyafCvxi0TOyM4qIvtpybnIsn69RLgy7AV+4HwAgdcZ3AFqtz5AaRSEA5fLiYswwotMBqdT7lgqhB4t0DOrbcD61dhkJ9/qn6CvDlzwxo2DxuGtGXQODJoBHUTc1FM77Z3UiYQkLK5w57jvstUrP132/zPJAOYBZvpgYDk7//eGvxWv/94e6fhfR+Ed/e/+/7/ydzQH7/zSKjrmEAHZAAKpWeK3DFHikMU/eqa3zM3xPxCWiPaZpog+Ut4XIlfjaJ1e0iPzMxv/7u+wV2d4waR//AnllHh+m1IpiWqMKbE7PAr3V4QEdmKhs8G/fhpYaDmtxei8rVv9ccgl99c28G65YQ5rC+EYBw+wyQhHKwSo4NbOi6nL8lCRj7UYFJlhgjYa4VXhwT58zDN/s/9mXzMDBVheXcFRxW0ywUzKnlefFDwn+khsPA9EcxeiyZAdPknEn/SNh2t/1MFxmOgnL7N5pbRd0CcE46Wbvo0DOMufoWXxHlGh8Sd0+sdb7jh9kfFAoMHozUMjt39fT5W5mXjZ/CYIp3BwImYGlILGnF6jTueUks8EQDwmXs0I1lGVFty//Doae5h1d8e9jTM+/uLN276Tk5KBbu1+FHs56Q0L4/WmddhNVd35j4COiKm6fdFwiATlwR4Aqg+bOEBJKVb5nj9szrileEuEtt0XZu4pS62vcJ+2YMgAsnEKsxEbBa5jHOtATRaLweFVSAnJxKDI2QVNXbwbH7vof4ZacgQqE87Acg7B6QJWpRwCwSIxsq2kRXHPNKGMWPh0CGXNJI3Ah4OIL4XCpLfUqtaNtmGBUhD51a7DqKUwqRx/aiX8NAfBaDzk45QJSK0m0LkGZX1LgESQL105/tgQZASaMnzLSh32M6Zk/smwRWHBrZ1zl6NS8BF6KLUn867B83vyWPlWFYuVDRD/OYLs/fxto/5d8sEmt39AOc/Jx6r//w12hjz5w7AM3NJFj76n5L2rVKJ6xcVMhom63uIEBlxHwhY0Uq035agH+ifam1VGcsrIVx7ODkDclZ8xAGU9/i57JdWQ2i6yUciME7gqnHf3N85zPhmT3Kwn0LRz9odYyjoRuUvEy24Q6vrsoK8rQTxxxwSTnUaY+Xq8po/0yW/1E7u7TfzUc2A3YMVk9I5yLgHpuojzd26jihTp2OXGb50YsaxNd+RZFGlISE0IAlOw9COgbM2MEtNqLrFOuPotlh8GDpACIfxD9zKx/CZ83WVbYzZZuZnAvi4OI6i65UJZVKBjhLg65MNPhLIsSWwpdl46h2li6GMvAspuqsUc7223G1vtRJmcDrM+FufiN5gq8GC3wHaVpx2LfJ7GB8gDdT3m1Zq1vPNwdvreGsJ3P2Dy4MFw9Zr5WXygi1lto43cIG3I6RuSPq8nMBWW3Q+kelzCSe5RDup9IPii070jRPSeiv9QRynD05X+WCysUPUVM3ohTRpWHMXh9HH/hq+eV3JlSJVFJq869wMd3tZMv5JkvMbY1lGMAxCSvshVcaV/TpYTCBWikocdO5AbpN2+k7Cbch25E1jiiay/JYrXAQWPGkoobeJtGWZNnTrOIVcEHUVSFlY/51tUQaJMlS9C2BhGSbsOCRGqTe7WScgb4s0f/tBWG7ARfVzuw8+tV85h5fHAyvEYX5SwA89M/TztIWno641WZYNXYw20+B9ywI1qywJkPlKPFunQOKzk7GMuUTt0LxgU+frtE7l/HoTQEFjFyBmlMcBYLa4oz1R5ntav7VCmbR0aKTzUIRFfkk7OMFp/aN4Ba22+dGPXOKm0jHFP8Yxm9vhgkqKlKRi50K/QYXYLqX+7q1bB+sG4+O36Av45/g5s0wXfdOKId6q8oUd9cXnlQy5sWt4c8Z8oURzUrD2410ICZBf2qyMyqWb014pPCjWtFWaF66dfYfkByyWK3+AhW1Y2cqoyDPVQ9GIGMO/d1Lih2urWV0h6OuMs16JiD3aEX9/4ncjTc21ZaKqcVGFwM13oh53fsKuaMMFX68cKLHEm7FvPHjF/oGwfSegMX8tIB0SMNPp1+sMnnEbAI42r9frdA1pFBd5S4rqwYtOreADWm0iXWxoUO6vjlaBklHA0QACGlo4JErryna9sghsN7rFK1GFrnEtT4NRkNsasbUW+HuRleMy3n/PAg1YjCNhHVz3nuN4AedBkhbpL1MfSNi78u+rDbYDa0Hn8PNftYmVrbugeBGt1Kb1QXzyDg/QsH7KKknpr0MIfUBz9h5ilyToU6VBMOs2J/ZaZkMGvuz/pWCcA4Q6DTzDkevZbEb72TK9FuY66dbuY0xkMzjhqf+A7//yT/5H7/+RbnueE5MWr5zGWantD117JA77bMkTT3pNfYqJPyg31+Nx3Tkp87lGpP/V6qHa8XkWIZiheWMMNROdOWoSY6Hiev6DpfY3yhYyBcv6yvTno97dGsMo/dZX7h9/MJFxBHCx3V0FACtxcK+vpHT85GURvo6PRCR81MQn197il0JHcXE8l3tnmQz4B+V4mzqfgRL/QAltD2a46ti5/+1v6LJy/lFn5iARwYR+/Q6RzPqixrBVCqrt12Vj6aLYQ9Bv7wVKcGrFw7jLptr/io0EHUDugsQ19mOYPffbDLvNHOiHUhdenDoGIvbk7Nde1yJ1jNPNnEwnY1RI6ZqO5YwaVctQLgQM1kryQqOR41hJ1f1AX4eTGzzh+oX0bTvlKscCl9MYnLtHpUZ2X6wpz9KHFZ5/9nfEVfrRpTUKmslycOaRtY4kNy9mfoL6GWmRqQKavWmdcLVPug+S4j1kfamuf94ehUPSS7qkIzmNTFaKHEOcd57OVEffRW5TcqAsWtAnFWapK4e8odPxKkrndyVrQh9odRcyPT5w9CKMhm12FiZp5er8mmK0J2fyyq9GQq1qqguNaTTmhHFSqO9C90fopwXyU/xaW74dRDznLlGITL027Ehu7r9GqVOLVOa5xJd8ekUFLuW/ZzYFF3jfnAOhx4D9cBYztHvQOzxSm/oL5KfkaLG1hBCummCiQS0sojnD/DjgpLd7uh2/xk1/BjcCGCC/T41/OnSK5LiFknirWjgd7BECmhcncqKKWqvMbBmu4cOUGDnDMLge1/BQCWhg5uBtA6q05iWPGK/7qjs8t9/WBSadA/tWeVFWVY6/KmlrU55u0OAuQqj1EzRJm7CGwf/2Et/8Xj69C8NmqTw8gmPvNMUJ+biPiYcXjQF6H8eEAVme3MSgL6tzXHuBi/zTYKpRaD/FWcK2QC5snu8mk/vud6e+GBhgoncIXQO3K+J7WZ+kmkMVufAadJtwxdfuJP6Pkkw7IAbx0vLMPbv/oz8/KnBE4TPhz74LFsQtOb5SO0lBIB1QIJbNX8A1VdOdhPNfGk0UihJuFpAzUzyJW/qzQ+K5dOSaM1ZgvITZH6xYperoC0PaAcOla0kjSxgu/rXKLvhv7aEBiGMqg0APrSb+uv8xySFqvx+Pje8C/HdjRpYH+7+3Yajk4/+T0ftrBnlRonlEQ3QjCUUxvMgAvk79ylth7MivDu0PM44Fn32cBkbf/5K6zH2DAt9qgttU9e64SvjhEFH3qQyyvLHtIgus6RUjjbWGrV08dAtr94Srb+4EZCM4qQZ+yobVjpqprmw/jWgV23hv9fMHb4iBeUal/NUJ7ILmTXtcPbAriw8CVfpY71He5Wcm7aPClgij23gFMuYMGqL+G+KA4reg8m49qHSWirqjo0q1SHPyiuqwrGMrFco38z6XUM+Lb0sy8AL0bpx1iPF53Gb9km0f/DJNcZfYRjt/LWJ85f42Vu5t8BTuRyMefJ8yCVwOX7azYvH9kQvpttn/l/1rVy+tARPoHToWMLoJQo+9vpxnwsDBmUsOxb0Y7jcfHfqwNGUcg42zl76T8VqaJ8Hx/PjPatBTcHoLKWO5n7LTe9GZ9u+jWfuxsi1fw+t+CH9cpKkwv+0T33sLmyEdCSrt2T/SCem12AxPNSWlhAawHxpKGEmvnOnMYIEuCSc5oX/M21isAmGTdkjFmM+kDpgJx6YfY/aYhBZh8efIdmrhHGUhuKZ5JQ5N4AlSNXQXnl9X2xcuxr9q3Cmv4H/6yv5fyN1Dpe53PdDnV9nWCQHkKlCAX1STDAZNF92YOOj2azwJJ8y1yCqUAcTd1HOmw4nGDcao7NSdu82Y3WMJyhu+YGckT86Gsn5dhRZ2npidfqBg4fWIznxfISmOJCiZyuz9X/jwy7wth+eO1Js60yq/NoMI0cNOgAAAAAA" alt="Dino" width="72" height="72" draggable="false"><span class="sig">Made by ASzym</span></div>
 
 <script>
+/* ===== ANPASSEN: Datenblock Gruppenarbeit ===== */
+var GRUPPE = {
+  key: 'q1-ortskurven-ls',
+  methode: 'Gruppenpuzzle',       /* Karte 1; Gruppenpuzzle auf den Karten 3–7 */
+  checks: [ 'g1', 'g2', 'g3', 'g4', 'g5' ],
+  rechnerKarte: 'Karte 10',
+  praesentation: false               /* Vorträge werden gelost (Karte 8), aber nicht bepunktet */
+};
+/* ===== ENDE ANPASSEN ===== */
+</script>
+<script>
+/* ============================================================
+   BAUSTEIN: Gruppen-Check-Engine (v2, 13.11.2026) – nicht ändern
+   Hier nur die Texte für die Oberstufe auf „Sie“ umgestellt (TEIL 3.7).
+   ============================================================ */
+(function(){
+  "use strict";
+  var KEY = 'gc|' + GRUPPE.key;
+  var G;
+  try { G = JSON.parse(sessionStorage.getItem(KEY) || 'null'); } catch (e) { G = null; }
+  G = G || {};
+  G.sf = G.sf || null; G.gr = G.gr || null; G.erster = G.erster || {};
+  G.key = G.key || ''; G.keyNeu = !!G.keyNeu; G.code = G.code || null;
+  G.rech = G.rech || { n:null, codes:[], praes:null, ber:false, key:'' };
+  function sichern(){ try { sessionStorage.setItem(KEY, JSON.stringify(G)); } catch (e) {} }
+  function $(id){ return document.getElementById(id); }
+
+  /* ---------- Sozialform ---------- */
+  var NAME = { ea:'allein (EA)', pa:'zu zweit (PA)', ga:'in der Gruppe (GA)' };
+  function groesse(){ return G.sf === 'ea' ? 1 : G.sf === 'pa' ? 2 : G.sf === 'ga' ? G.gr : null; }
+  function sfZeig(){
+    var box = $('gc-box'); if (!box) return;
+    var fertig = G.sf === 'ea' || G.sf === 'pa' || (G.sf === 'ga' && G.gr);
+    var b = document.body;
+    b.classList.remove('sf-ea', 'sf-pa', 'sf-ga', 'gr-3', 'gr-4', 'gr-5', 'gr-6', 'gr-7');
+    if (fertig) { b.classList.add('sf-' + G.sf); if (G.sf === 'ga') b.classList.add('gr-' + G.gr); }
+    box.classList.toggle('gewaehlt', !!fertig);
+    $('gc-groesse').hidden = G.sf !== 'ga';
+    box.querySelectorAll('[data-sf]').forEach(function(x){ x.classList.toggle('aktiv', x.getAttribute('data-sf') === G.sf); });
+    box.querySelectorAll('[data-gr]').forEach(function(x){ x.classList.toggle('aktiv', +x.getAttribute('data-gr') === G.gr); });
+    $('gc-text').innerHTML = fertig ? 'Sie arbeiten: <b>' + NAME[G.sf] + (G.sf === 'ga' ? ', ' + G.gr + ' Personen' : '') + '</b>' : '';
+    try { document.dispatchEvent(new CustomEvent('gc-sozialform', { detail:{ sf:G.sf, groesse:groesse() } })); } catch (e) {}
+  }
+  if ($('gc-box')) {
+    $('gc-box').querySelectorAll('[data-sf]').forEach(function(x){
+      x.addEventListener('click', function(){
+        G.sf = x.getAttribute('data-sf'); if (G.sf !== 'ga') G.gr = null;
+        if (G.sf === 'pa') G.rech.n = 2;
+        sfZeig(); reBau(); codeZeig(); sichern();
+      });
+    });
+    $('gc-box').querySelectorAll('[data-gr]').forEach(function(x){
+      x.addEventListener('click', function(){ G.gr = +x.getAttribute('data-gr'); G.rech.n = G.gr; sfZeig(); reBau(); codeZeig(); sichern(); });
+    });
+    $('gc-aendern').addEventListener('click', function(){ G.sf = null; G.gr = null; sfZeig(); sichern(); });
+  }
+
+  /* ---------- Code (Gruppenschlüssel + Prüfsumme) ----------
+     7 Zeichen: 3 Zufallszeichen, 1 verschlüsseltes Sterne-Zeichen, 3 Prüfzeichen.
+     Prüfsumme hängt von Schlüssel und Seite ab. */
+  var ZEICHEN = 'ACDEFGHJKMNPQRTUVWXY3479', NZ = ZEICHEN.length;
+  var CHECKS = GRUPPE.checks || [], MAXS = CHECKS.length;
+  var MAXP = GRUPPE.praesentation ? 2 : 0;
+  var SCHWELLE = Math.ceil(MAXS * 0.6);
+  function streu(str){ var h = 2166136261; for (var i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; } return h >>> 0; }
+  function norm(c){ return String(c || '').toUpperCase().replace(/[^A-Z0-9]/g, ''); }
+  function gueltig(k){ k = norm(k); if (k.length !== 3) return false; for (var i = 0; i < 3; i++) if (ZEICHEN.indexOf(k.charAt(i)) < 0) return false; return true; }
+  function baueCode(schl, r, s){
+    var basis = GRUPPE.key + '|' + norm(schl) + '|' + r.join('.');
+    var h = streu(basis), sz = (h % NZ + 7 * s) % NZ, p = streu(basis + '|' + s + '#');
+    var k0 = p % NZ, k1 = Math.floor(p / NZ) % NZ, k2 = Math.floor(p / (NZ * NZ)) % NZ;
+    var t = [ r[0], k0, sz, r[1], k1, r[2], k2 ].map(function(i){ return ZEICHEN.charAt(i); }).join('');
+    return t.slice(0, 3) + '-' + t.slice(3);
+  }
+  function liesCode(c, schl){
+    c = norm(c);
+    if (c.length !== 7 || !gueltig(schl)) return null;
+    var idx = [];
+    for (var i = 0; i < 7; i++) { var j = ZEICHEN.indexOf(c.charAt(i)); if (j < 0) return null; idx.push(j); }
+    var r = [ idx[0], idx[3], idx[5] ];
+    var h = streu(GRUPPE.key + '|' + norm(schl) + '|' + r.join('.'));
+    var s = (((idx[2] - h % NZ) % NZ + NZ) % NZ * 7) % NZ;   /* 7 ist zu sich selbst invers (mod 24) */
+    if (s > MAXS) return null;
+    return baueCode(schl, r, s).replace('-', '') === c ? s : null;
+  }
+  function sterneText(s){ var t = ''; for (var i = 0; i < MAXS; i++) t += i < s ? '&#11088;' : '&#9734;'; return t; }
+  function komma(x){ return String(Math.round(x * 10) / 10).replace('.', ','); }
+
+  /* ---------- Gruppenschlüssel + Codebox ---------- */
+  function keyZeig(){
+    var inp = $('gc-key'), info = $('gc-key-info'); if (!inp) return;
+    inp.value = G.key || '';
+    if (!G.key) info.innerHTML = '';
+    else if (!gueltig(G.key)) info.innerHTML = '&#10007; Ein Schlüssel hat genau 3 Zeichen. Bitte genau abschreiben.';
+    else info.innerHTML = G.keyNeu ? '&#10004; Diesen Schlüssel sagen Sie Ihrer Gruppe an: <b>' + norm(G.key) + '</b>' : '&#10004; Schlüssel eingetragen.';
+  }
+  if ($('gc-key')) {
+    $('gc-key').addEventListener('input', function(){ G.key = norm(this.value).slice(0, 3); G.keyNeu = false; $('gc-key-info').innerHTML = ''; sichern(); codeZeig(); });
+    $('gc-key').addEventListener('change', keyZeig);
+    $('gc-key-neu').addEventListener('click', function(){
+      var k = ''; for (var i = 0; i < 3; i++) k += ZEICHEN.charAt(Math.floor(Math.random() * NZ));
+      G.key = k; G.keyNeu = true; if (!G.rech.key) G.rech.key = k;
+      keyZeig(); reBau(); sichern(); codeZeig();
+    });
+  }
+  function codeZeig(){
+    var box = $('gc-codebox'), off = $('gc-offen'); if (!box || !MAXS) return;
+    var fertig = CHECKS.every(function(id){ return G.erster[id] !== undefined; });
+    if (!fertig) { box.classList.remove('zeig'); if (off) off.style.display = ''; return; }
+    var s = CHECKS.reduce(function(a, id){ return a + G.erster[id]; }, 0);
+    if (!G.code || G.code.s !== s) { G.code = { s:s, r:[0, 1, 2].map(function(){ return Math.floor(Math.random() * NZ); }) }; sichern(); }
+    if (off) off.style.display = 'none';
+    var h = '<p class="gc-sterne">' + sterneText(s) + '</p><p><b>Ihre Sterne: ' + s + ' von ' + MAXS + '</b> (erster Versuch).</p>';
+    if (G.sf === 'ea') h += '<p>Notieren Sie Ihre Sterne im Heft. Wenn Sie möchten, können Sie die Aufgaben jetzt mit den Tipps weiterüben.</p>';
+    else if (!gueltig(G.key)) h += '<p><b>Ihr Code fehlt noch:</b> Tragen Sie oben Ihren Gruppenschlüssel ein. Dann erscheint Ihr Code hier.</p>';
+    else h += '<p>Ihr Code für den Gruppenrechner (Gruppenschlüssel ' + norm(G.key) + '):</p><p class="gc-codetext">' + baueCode(G.key, G.code.r, s) + '</p>' +
+      '<p>Geben Sie diesen Code an das Mitglied, das den Gruppenrechner auf ' + GRUPPE.rechnerKarte + ' bedient. Der Code gilt nur für Ihre Gruppe und nur einmal. Wenn Sie möchten, können Sie die Aufgaben jetzt mit den Tipps weiterüben.</p>';
+    box.innerHTML = h; box.classList.add('zeig');
+  }
+
+  /* ---------- Teampunkte ---------- */
+  function regelnZeig(){
+    var r = $('gc-regeln'); if (!r) return;
+    var max = MAXS + 1 + MAXP;
+    r.innerHTML = '<h4>&#127942; So zählen die Teampunkte</h4><ol>' +
+      '<li><b>Sterne:</b> Jede:r holt beim Gruppen-Check 0 bis ' + MAXS + ' Sterne. Es zählt der erste Versuch.</li>' +
+      '<li><b>Teamwert:</b> Alle Sterne werden zusammengezählt. Das Mitglied mit den <b>wenigsten</b> Sternen zählt dabei <b>doppelt</b>. Dann wird durch (Anzahl der Mitglieder + 1) geteilt. Höchstens ' + MAXS + '.</li>' +
+      '<li><b>+1 Bonus „Alle dabei":</b> wenn jedes Mitglied mindestens ' + SCHWELLE + ' Sterne hat.</li>' +
+      (MAXP ? '<li><b>+0, +1 oder +2 Präsentationsbonus:</b> vergibt die Lehrkraft nach Ihrem Vortrag.</li>' : '') +
+      '</ol><p>Höchstens sind ' + MAXS + ' + 1' + (MAXP ? ' + ' + MAXP : '') + ' = ' + max + ' Teampunkte möglich. Große und kleine Gruppen haben die gleichen Chancen. Es lohnt sich, dass <b>alle</b> es verstehen &ndash; also helfen Sie sich gegenseitig!</p>';
+    if ($('gc-re-praes-box')) $('gc-re-praes-box').hidden = !MAXP;
+  }
+  function reBau(){
+    var liste = $('gc-re-liste'); if (!liste) return;
+    var n = G.rech.n || 4;
+    $('gc-re-key').value = G.rech.key || '';
+    liste.innerHTML = '';
+    for (var i = 0; i < n; i++) (function(i){
+      var z = document.createElement('div'); z.className = 'gc-mzeile';
+      z.innerHTML = '<span class="gc-mname">Mitglied ' + (i + 1) + '</span>';
+      var inp = document.createElement('input');
+      inp.type = 'text'; inp.className = 'gc-code'; inp.setAttribute('autocomplete', 'off'); inp.setAttribute('autocapitalize', 'characters');
+      inp.setAttribute('spellcheck', 'false'); inp.setAttribute('aria-label', 'Code von Mitglied ' + (i + 1));
+      inp.value = G.rech.codes[i] || '';
+      inp.addEventListener('input', function(){ G.rech.codes[i] = inp.value; sichern(); });
+      z.appendChild(inp); liste.appendChild(z);
+    })(i);
+    document.querySelectorAll('#gc-re-n [data-n]').forEach(function(x){ x.classList.toggle('aktiv', +x.getAttribute('data-n') === n); });
+    document.querySelectorAll('#gc-re-p [data-p]').forEach(function(x){ x.classList.toggle('aktiv', G.rech.praes !== null && +x.getAttribute('data-p') === G.rech.praes); });
+  }
+  function rechne(){
+    var erg = $('gc-re-erg'), n = G.rech.n || 4, sterne = [], h = '', fehler = false, gesehen = {};
+    if (!gueltig(G.rech.key)) { erg.innerHTML = '<div class="gc-erow bad">&#10007; Tragen Sie zuerst Ihren Gruppenschlüssel (3 Zeichen) ein.</div>'; erg.classList.add('zeig'); return; }
+    for (var i = 0; i < n; i++) {
+      var c = norm(G.rech.codes[i]), s = liesCode(c, G.rech.key);
+      if (c && gesehen[c]) { fehler = true; h += '<div class="gc-erow bad">&#10007; Mitglied ' + (i + 1) + ': Dieser Code wurde schon bei Mitglied ' + gesehen[c] + ' eingegeben. Jede:r hat einen eigenen Code.</div>'; continue; }
+      if (c) gesehen[c] = i + 1;
+      if (s === null) { fehler = true; h += '<div class="gc-erow bad">&#10007; Mitglied ' + (i + 1) + ': Dieser Code ist ungültig oder gehört nicht zu Ihrem Gruppenschlüssel. Bitte genau abschreiben.</div>'; }
+      else { sterne.push(s); h += '<div class="gc-erow neutral">Mitglied ' + (i + 1) + ': &#10004; Code gültig</div>'; }   /* keine Einzelsterne zeigen (TEIL 2.10) */
+    }
+    if (fehler) { erg.innerHTML = h; erg.classList.add('zeig'); return; }
+    var summe = sterne.reduce(function(a, b){ return a + b; }, 0), min = Math.min.apply(null, sterne);
+    var team = (summe + min) / (n + 1), alle = min >= SCHWELLE ? 1 : 0, p = MAXP ? G.rech.praes : 0;
+    var gesamt = team + alle + (p === null ? 0 : p);
+    var maxGes = MAXS + 1 + MAXP, bezug = p === null ? MAXS + 1 : maxGes;
+    var anteil = Math.round(gesamt / bezug * 100);
+    h += '<div class="gc-erow neutral"><b>Teamwert:</b> ' + komma(team) + ' <span class="gc-von">von höchstens ' + MAXS + '</span></div>';
+    h += '<div class="gc-erow ' + (alle ? 'ok' : 'neutral') + '"><b>Bonus „Alle dabei":</b> ' + (alle ? '+1 von 1 &ndash; alle haben mindestens ' + SCHWELLE + ' Sterne!' : '+0 von 1 &ndash; nicht alle haben mindestens ' + SCHWELLE + ' Sterne.') + '</div>';
+    if (MAXP) h += '<div class="gc-erow neutral"><b>Präsentationsbonus:</b> ' + (p === null ? 'noch offen (höchstens +' + MAXP + ') &ndash; die Lehrkraft tippt ihn nach Ihrem Vortrag an.' : '+' + p + ' von ' + MAXP) + '</div>';
+    h += '<div class="gc-gesamt">&#127942; Teampunkte: ' + komma(gesamt) + ' <span class="gc-von">von ' + bezug + ' möglichen' + (p === null ? ' (ohne Präsentationsbonus; mit Bonus höchstens ' + maxGes + ')' : '') + '</span>' +
+      '<div class="gc-balken" role="img" aria-label="' + komma(gesamt) + ' von ' + bezug + ' Teampunkten"><div style="width:' + Math.min(100, anteil) + '%"></div></div>' +
+      '<p class="gc-prozent">Das sind ' + anteil + '&nbsp;% der möglichen Punkte.</p></div>';
+    erg.innerHTML = h; erg.classList.add('zeig');
+  }
+  if ($('gc-re-liste')) {
+    $('gc-re-key').addEventListener('input', function(){ G.rech.key = norm(this.value).slice(0, 3); sichern(); });
+    document.querySelectorAll('#gc-re-n [data-n]').forEach(function(x){
+      x.addEventListener('click', function(){ G.rech.n = +x.getAttribute('data-n'); G.rech.ber = false; $('gc-re-erg').classList.remove('zeig'); reBau(); sichern(); });
+    });
+    document.querySelectorAll('#gc-re-p [data-p]').forEach(function(x){
+      x.addEventListener('click', function(){ G.rech.praes = +x.getAttribute('data-p'); reBau(); if (G.rech.ber) rechne(); sichern(); });
+    });
+    $('gc-re-btn').addEventListener('click', function(){ G.rech.ber = true; rechne(); sichern(); });
+  }
+
+  /* ---------- Schnittstelle für die Seite ---------- */
+  window.GC = {
+    melde: function(id, richtig){
+      if (CHECKS.indexOf(id) < 0 || G.erster[id] !== undefined) return;
+      G.erster[id] = richtig ? 1 : 0; sichern(); codeZeig();
+    },
+    sozialform: function(){ return G.sf; },
+    groesse: groesse
+  };
+
+  sfZeig(); keyZeig(); regelnZeig(); reBau(); codeZeig();
+  if (G.rech.ber) rechne();
+})();
+/* ============ ENDE BAUSTEIN Gruppen-Check-Engine ============ */
+
+</script>
+<script>
 (function(){
 'use strict';
 /* ---------- Zustand (TEIL 6): ein Status-Objekt, gesichert in sessionStorage ---------- */
-var SCHLUESSEL = 'aszym:ortskurven_ls:v1';
+var SCHLUESSEL = 'aszym:ortskurven_ls:v3';
 var S = null;
 try { var roh = sessionStorage.getItem(SCHLUESSEL); S = roh ? JSON.parse(roh) : null; } catch (e) { S = null; }
 if (!S || typeof S !== 'object') S = {};
@@ -838,12 +1767,15 @@ S.ord = S.ord || {};         // gemischte Reihenfolgen
 S.flip = S.flip || {};
 S.auf = S.auf || {};
 S.schritt = S.schritt || 0;
-S.sf = S.sf || null;
 S.check = S.check || {};
-function sichern(){ try { sessionStorage.setItem(SCHLUESSEL, JSON.stringify(S)); } catch (e) {} }
+S.uhr = S.uhr || {p:0, rest:180, lauf:false, ts:0};   // Think–Pair–Share-Uhr
+S.exp = S.exp || null;                                 // Gruppenpuzzle: eigenes Expertenthema
+S.losG = S.losG || {n:null, gezogen:[]};              // Los 1: Gruppe
+S.losP = S.losP || {n:null, thema:null, platz:null};  // Los 2: Thema + Sprecher:in (nie Expert:in)
+function speichere(){ try { sessionStorage.setItem(SCHLUESSEL, JSON.stringify(S)); } catch (e) {} }
 
 function tex(el){ if (window.MathJax && MathJax.typesetPromise) { try { MathJax.typesetPromise([el]).catch(function(){}); } catch (e) {} } }
-function $(sel, root){ return (root || document).querySelector(sel); }
+function qs(sel, root){ return (root || document).querySelector(sel); }
 function $$(sel, root){ return Array.prototype.slice.call((root || document).querySelectorAll(sel)); }
 function teil(id){ if (!S.teile[id]) S.teile[id] = {v:null, st:null, tipps:0}; return S.teile[id]; }
 
@@ -997,6 +1929,25 @@ var TEILE = {
              falsch:[{f:function(x, a){ return 2 * x * x * x; }, txt:'Das ist die Stolperfalle: Für \\(x<0\\) ist \\(\\sqrt{x^2}\\) nicht \\(x\\). Probe mit \\(a=1\\): Der Hochpunkt ist \\(H(-1|2)\\).'}],
              hinweis:'Noch nicht richtig. Machen Sie die Probe mit a = 1: Der Hochpunkt muss auf Ihrer Kurve liegen.'},
   't-t4':   {art:'mc', fehler:{}, hinweis:'Noch nicht richtig. Rechnen Sie wie in b), aber jetzt ist x positiv.'},
+  /* Experte C: Wendepunkte von f_a(x) = x^3 - a x^2 */
+  't-w1':   {art:'term', nurA:true, soll:function(x, a){ return a / 3; },
+             falsch:[{f:function(x, a){ return 2 * a / 3; }, txt:'Das ist die Tiefstelle. Für den Wendepunkt setzen Sie die <b>zweite</b> Ableitung gleich null.'},
+                     {f:function(x, a){ return 3 * a; }, txt:'Beim Auflösen nach \\(x\\) wird durch 6 geteilt – prüfen Sie Zähler und Nenner.'}],
+             hinweis:'Noch nicht richtig. Zweite Ableitung gleich null setzen und nach \\(x\\) auflösen.'},
+  't-w2':   {art:'term', nurA:true, soll:function(x, a){ return -2 * a * a * a / 27; },
+             falsch:[{f:function(x, a){ return -4 * a * a * a / 27; }, txt:'Das ist die Höhe des Tiefpunkts. Setzen Sie Ihre Wendestelle ein.'},
+                     {f:function(x, a){ return 2 * a * a * a / 27; }, txt:'Prüfen Sie das Vorzeichen.'},
+                     {f:function(x, a){ return a * a * a / 27 - a * a * a / 3; }, txt:'Fast: Beim Quadrieren von \\(\\frac{a}{3}\\) wird auch der Nenner quadriert.'}],
+             hinweis:'Noch nicht richtig. Wendestelle mit Klammern in \\(f_a\\) einsetzen und auf den Nenner 27 bringen.'},
+  't-w3':   {art:'term', nurX:true, soll:function(x, a){ return 3 * x; },
+             falsch:[{f:function(x, a){ return x / 3; }, txt:'Machen Sie die Probe: Setzen Sie Ihr \\(a\\) in \\(\\frac{a}{3}\\) ein – kommt \\(x\\) heraus?'}],
+             hinweis:'Noch nicht richtig. Mit 3 multiplizieren.'},
+  't-w4':   {art:'term', nurX:true, soll:function(x, a){ return -2 * x * x * x; },
+             falsch:[{f:function(x, a){ return 2 * x * x * x; }, txt:'Prüfen Sie das Vorzeichen.'},
+                     {f:function(x, a){ return -2 * x * x * x / 27; }, txt:'\\((3x)^3\\) ist nicht \\(3x^3\\) und auch nicht \\(x^3\\): Auch die 3 wird hoch 3 genommen.'},
+                     {f:function(x, a){ return -6 * x * x * x / 27; }, txt:'\\((3x)^3\\) ist nicht \\(3x^3\\): Auch die 3 wird hoch 3 genommen.'}],
+             hinweis:'Noch nicht richtig. Probe mit \\(a=3\\): Der Wendepunkt \\(W(1|-2)\\) muss auf Ihrer Kurve liegen.'},
+  't-w5':   {art:'mc', fehler:{}, hinweis:'Noch nicht richtig. Hat jede Funktion der Schar einen Wendepunkt – auch für \\(a=0\\) und für negative \\(a\\)?'},
   't-g1':   {art:'term', nurA:true, soll:function(x, a){ return 2 * a; },
              falsch:[{f:function(x, a){ return 0; }, txt:'Bei \\(x=0\\) liegt ein Minimum. Gesucht ist die andere Stelle.'}],
              hinweis:'Noch nicht richtig. Ableiten, gleich null setzen, ausklammern.'},
@@ -1007,17 +1958,38 @@ var TEILE = {
              hinweis:'Noch nicht richtig. a durch x ausdrücken und in das Ergebnis aus b) einsetzen.'},
   't-g4':   {art:'zahl', soll:1,
              falsch:[{w:2, txt:'Das ist die Menge (in 1000 Stück). Gefragt ist das Werbebudget a.'}],
-             hinweis:'Noch nicht richtig. Bestimmen Sie den Hochpunkt der Ortskurve und rechnen Sie die Stelle in a um.'}
+             hinweis:'Noch nicht richtig. Bestimmen Sie den Hochpunkt der Ortskurve und rechnen Sie die Stelle in a um.'},
+  /* Gruppen-Check (Karte 8): erster Prüfversuch zählt – GC.melde in pruefe() */
+  'g1': {art:'mc', fehler:{null:'Für einen einzelnen Parameterwert erhält man nur einen Graphen der Schar – die Ortskurve verbindet Punkte aus vielen Graphen.',
+                           abl:'Die Ableitung beschreibt Steigungen eines Graphen. Gesucht ist die Kurve, auf der ein Punkt beim Ändern des Parameters wandert.',
+                           alle:'Denken Sie an die Spur in GeoGebra: Auf welcher Kurve lagen die Hochpunkte für die verschiedenen Reglerwerte?'}},
+  'g2': {art:'term', nurX:true, soll:function(x, a){ return 4 * x / 3; },
+         falsch:[{f:function(x, a){ return 3 * x / 4; }, txt:'Machen Sie die Probe: Setzen Sie Ihr \\(a\\) in \\(\\frac{3a}{4}\\) ein – kommt \\(x\\) heraus?'},
+                 {f:function(x, a){ return 4 * x - 3; }, txt:'Der Faktor 3 steht mal \\(a\\) – teilen Sie durch ihn, statt ihn abzuziehen.'}],
+         hinweis:'Noch nicht richtig. Erst mit dem Nenner multiplizieren, dann durch den Faktor vor \\(a\\) teilen.'},
+  'g3': {art:'term', nurX:true, soll:function(x, a){ return x * x / 4 + 1; },
+         falsch:[{f:function(x, a){ return x * x / 2 + 1; }, txt:'Beim Quadrieren von \\(\\frac{x}{2}\\) wird auch der Nenner quadriert.'},
+                 {f:function(x, a){ return 4 * x * x + 1; }, txt:'Prüfen Sie Ihr \\(a\\): Aus \\(x=2a\\) folgt nicht \\(a=2x\\).'},
+                 {f:function(x, a){ return x * x / 4; }, txt:'Fast: Die \\(+1\\) aus der \\(y\\)-Koordinate fehlt.'}],
+         hinweis:'Noch nicht richtig. Probe mit \\(a=1\\): Der Tiefpunkt \\(T(2|2)\\) muss auf Ihrer Kurve liegen.'},
+  'g4': {art:'mc', fehler:{pos:'Achten Sie auf das Minuszeichen vor dem Bruch.',
+                           alle:'Setzen Sie einige erlaubte Werte für \\(a\\) ein: Kommt jemals ein positives \\(x\\) heraus?',
+                           zwei:'Setzen Sie ein kleines \\(a\\) ein, zum Beispiel \\(a=0{,}5\\). Welches \\(x\\) entsteht?'}},
+  'g5': {art:'zahl', soll:-0.25,
+         falsch:[{w:0.5, txt:'Das ist die \\(x\\)-Koordinate. Gefragt ist die \\(y\\)-Koordinate.'},
+                 {w:0.25, txt:'Prüfen Sie das Vorzeichen.'},
+                 {w:-0.5, txt:'Das ist der Tiefpunkt. Gefragt ist der Wendepunkt: zweite Ableitung gleich null.'}],
+         hinweis:'Noch nicht richtig. Setzen Sie \\(a=\\frac{1}{2}\\) ein, bestimmen Sie die Wendestelle und dann den Funktionswert.'}
 };
 
 /* ---------- Gemeinsame Bausteine eines Teils ---------- */
 function box(id){ return document.getElementById(id); }
 function setzeFb(id, klasse, html){
-  var fb = $('.fb', box(id)); fb.className = 'fb' + (klasse ? ' ' + klasse : ''); fb.innerHTML = html || ''; tex(fb);
+  var fb = qs('.fb', box(id)); fb.className = 'fb' + (klasse ? ' ' + klasse : ''); fb.innerHTML = html || ''; tex(fb);
 }
-function zeigeLesung(id, html){ var l = $('.lesung', box(id)); if (!l) return; if (html) { l.innerHTML = html; l.className = 'lesung zeigen'; tex(l); } else { l.innerHTML = ''; l.className = 'lesung'; } }
+function zeigeLesung(id, html){ var l = qs('.lesung', box(id)); if (!l) return; if (html) { l.innerHTML = html; l.className = 'lesung zeigen'; tex(l); } else { l.innerHTML = ''; l.className = 'lesung'; } }
 function tippsAnzeigen(id){
-  var tb = $('.tipp-box', box(id)); if (!tb) return;
+  var tb = qs('.tipp-box', box(id)); if (!tb) return;
   var z = teil(id);
   tb.classList.toggle('offen', z.st === 'falsch' || z.tipps > 0);
   var btns = $$('.tipp-btn', tb), inh = $$('.tipp-inhalt', tb);
@@ -1025,15 +1997,15 @@ function tippsAnzeigen(id){
 }
 function knoepfe(id){
   var z = teil(id), b = box(id);
-  $('.btn-leeren', b).classList.toggle('zeigen', z.st === 'falsch');
-  $('.btn-pruefen', b).disabled = (z.st === 'ok' || z.st === 'falsch');
+  qs('.btn-leeren', b).classList.toggle('zeigen', z.st === 'falsch');
+  qs('.btn-pruefen', b).disabled = (z.st === 'ok' || z.st === 'falsch');
 }
 
 /* ---------- Anzeige eines Teils aus dem Zustand (nur Klassen/Werte, nie neu aufbauen) ---------- */
 function zeige(id){
   var cfg = TEILE[id], z = teil(id), b = box(id);
   if (cfg.art === 'term' || cfg.art === 'zahl') {
-    var inp = $('input.term', b);
+    var inp = qs('input.term', b);
     inp.value = z.v || '';
     inp.disabled = !!z.st;
     inp.classList.toggle('ok', z.st === 'ok'); inp.classList.toggle('falsch', z.st === 'falsch');
@@ -1044,7 +2016,7 @@ function zeige(id){
       m.classList.toggle('ok', sel && z.st === 'ok');
       m.classList.toggle('falsch', sel && z.st === 'falsch');
     });
-    $('.mc', b).classList.toggle('gesperrt', !!z.st);
+    qs('.mc', b).classList.toggle('gesperrt', !!z.st);
   }
   knoepfe(id); tippsAnzeigen(id); kartenMarken();
 }
@@ -1054,10 +2026,10 @@ function pruefe(id){
   var cfg = TEILE[id], z = teil(id), b = box(id);
   if (z.st) return;
   if (cfg.art === 'term') {
-    var roh = $('input.term', b).value; z.v = roh;
-    if (!roh.trim()) { setzeFb(id, 'falsch', '✗ Bitte geben Sie zuerst einen Term ein.'); sichern(); return; }
+    var roh = qs('input.term', b).value; z.v = roh;
+    if (!roh.trim()) { setzeFb(id, 'falsch', '✗ Bitte geben Sie zuerst einen Term ein.'); speichere(); return; }
     var baum = parse(roh);
-    if (!baum) { setzeFb(id, 'falsch', '✗ Die Eingabe kann nicht gelesen werden. Prüfen Sie Klammern und Rechenzeichen.'); zeigeLesung(id, ''); sichern(); return; }
+    if (!baum) { setzeFb(id, 'falsch', '✗ Die Eingabe kann nicht gelesen werden. Prüfen Sie Klammern und Rechenzeichen.'); zeigeLesung(id, ''); speichere(); return; }
     zeigeLesung(id, 'Ihre Eingabe wurde gelesen als \\(' + zuTex(baum) + '\\).');
     if (cfg.nurX && enthaelt(baum, 'a')) { z.st = 'falsch'; setzeFb(id, 'falsch', '✗ Ihr Ergebnis darf nur \\(x\\) enthalten, keinen Parameter.'); }
     else if (cfg.nurA && enthaelt(baum, 'x')) { z.st = 'falsch'; setzeFb(id, 'falsch', '✗ Ihr Ergebnis darf nur den Parameter \\(a\\) enthalten, kein \\(x\\).'); }
@@ -1070,12 +2042,12 @@ function pruefe(id){
       setzeFb(id, 'falsch', '✗ ' + txt);
     }
   } else if (cfg.art === 'zahl') {
-    var r = $('input.term', b).value; z.v = r;
-    if (!r.trim()) { setzeFb(id, 'falsch', '✗ Bitte geben Sie zuerst eine Zahl ein.'); sichern(); return; }
+    var r = qs('input.term', b).value; z.v = r;
+    if (!r.trim()) { setzeFb(id, 'falsch', '✗ Bitte geben Sie zuerst eine Zahl ein.'); speichere(); return; }
     var bz = parse(r);
-    if (!bz || enthaelt(bz, 'x') || enthaelt(bz, 'a')) { setzeFb(id, 'falsch', '✗ Bitte geben Sie eine Zahl ein (auch als Bruch in der Form p/q möglich).'); sichern(); return; }
+    if (!bz || enthaelt(bz, 'x') || enthaelt(bz, 'a')) { setzeFb(id, 'falsch', '✗ Bitte geben Sie eine Zahl ein (auch als Bruch in der Form p/q möglich).'); speichere(); return; }
     var w = werte(bz, 0, 0);
-    if (Math.abs(w - cfg.soll) < 1e-6) { z.st = 'ok'; setzeFb(id, 'ok', '✓ Richtig!'); }
+    if (Math.abs(w - cfg.soll) < 1e-6) { z.st = 'ok'; setzeFb(id, 'ok', cfg.ok || '✓ Richtig!'); }
     else {
       z.st = 'falsch'; var t2 = cfg.hinweis;
       (cfg.falsch || []).some(function(f){ if (Math.abs(w - f.w) < 1e-6) { t2 = f.txt; return true; } return false; });
@@ -1083,27 +2055,29 @@ function pruefe(id){
     }
   } else if (cfg.art === 'mc') {
     if (z.v === null || z.v === undefined) { setzeFb(id, 'falsch', '✗ Bitte wählen Sie zuerst eine Antwort.'); return; }
-    var gew = $('.mcbtn[data-nr="' + z.v + '"]', b);
+    var gew = qs('.mcbtn[data-nr="' + z.v + '"]', b);
     if (gew.getAttribute('data-ok') === '1') { z.st = 'ok'; setzeFb(id, 'ok', '✓ Richtig!'); }
     else { z.st = 'falsch'; var fk = gew.getAttribute('data-fehler'); setzeFb(id, 'falsch', '✗ ' + ((fk && cfg.fehler[fk]) || cfg.hinweis || 'Noch nicht richtig.')); }
   }
-  sichern(); zeige(id);
+  /* Gruppen-Check: nur der erste bewertete Prüfversuch zählt (die Engine ignoriert spätere Meldungen) */
+  if (z.st && GRUPPE.checks.indexOf(id) >= 0 && window.GC) GC.melde(id, z.st === 'ok');
+  speichere(); zeige(id);
 }
 function leere(id){
   var cfg = TEILE[id];
   S.teile[id] = {v:null, st:null, tipps:0};
   setzeFb(id, '', ''); zeigeLesung(id, '');
-  sichern(); zeige(id);
+  speichere(); zeige(id);
 }
 
 /* ---------- MC aufbauen: erst mischen, dann binden ---------- */
 function baueMC(id){
-  var b = box(id), mcbox = $('.mc', b);
+  var b = box(id), mcbox = qs('.mc', b);
   ordneKinder(mcbox, id, '.mcbtn');
   $$('.mcbtn', mcbox).forEach(function(m){
     m.addEventListener('click', function(){
       var z = teil(id); if (z.st) return;
-      z.v = m.getAttribute('data-nr'); sichern(); zeige(id);
+      z.v = m.getAttribute('data-nr'); speichere(); zeige(id);
     });
   });
 }
@@ -1111,11 +2085,11 @@ function baueMC(id){
 /* ---------- Tipps stufenweise ---------- */
 function baueTipps(){
   Object.keys(TEILE).forEach(function(id){
-    var tb = $('.tipp-box', box(id)); if (!tb) return;
+    var tb = qs('.tipp-box', box(id)); if (!tb) return;
     $$('.tipp-btn', tb).forEach(function(bt, i){
       bt.addEventListener('click', function(){
         var z = teil(id); if (i !== z.tipps) return;
-        z.tipps = i + 1; sichern(); tippsAnzeigen(id);
+        z.tipps = i + 1; speichere(); tippsAnzeigen(id);
         var inh = $$('.tipp-inhalt', tb)[i]; tex(inh);
       });
     });
@@ -1126,26 +2100,26 @@ function baueTipps(){
 function zeigeSchritte(){
   var s = $$('#beispiel .schritt');
   s.forEach(function(e, i){ e.classList.toggle('offen', i < S.schritt); });
-  var bt = $('#btn-schritt');
+  var bt = qs('#btn-schritt');
   if (S.schritt >= s.length) bt.style.display = 'none'; else { bt.style.display = ''; bt.textContent = 'Schritt ' + (S.schritt + 1) + ' aufdecken'; }
 }
 function baueRest(){
-  $('#btn-schritt').addEventListener('click', function(){ S.schritt++; sichern(); zeigeSchritte(); });
+  qs('#btn-schritt').addEventListener('click', function(){ S.schritt++; speichere(); zeigeSchritte(); });
   $$('.flip').forEach(function(f){
     var id = f.getAttribute('data-id');
     f.classList.toggle('gedreht', !!S.flip[id]);
-    f.addEventListener('click', function(){ S.flip[id] = !S.flip[id]; f.classList.toggle('gedreht', S.flip[id]); sichern(); });
+    f.addEventListener('click', function(){ S.flip[id] = !S.flip[id]; f.classList.toggle('gedreht', S.flip[id]); speichere(); });
   });
   $$('.auf').forEach(function(a){
-    var id = a.getAttribute('data-id'), bt = $('button', a);
+    var id = a.getAttribute('data-id'), bt = qs('button', a);
     function zeig(){ a.classList.toggle('offen', !!S.auf[id]); bt.style.display = S.auf[id] ? 'none' : ''; }
     zeig();
-    bt.addEventListener('click', function(){ S.auf[id] = true; sichern(); zeig(); });
+    bt.addEventListener('click', function(){ S.auf[id] = true; speichere(); zeig(); });
   });
 }
 
 /* ---------- Karten ---------- */
-var KARTE_TEILE = {k1:['t-form', 't-verm'], k3:['t-a3', 't-o3', 't-d3'], k4:['t-a4', 't-o4', 't-t4'], k5:['t-g1', 't-g2', 't-g3', 't-g4']};
+var KARTE_TEILE = {k1:['t-form', 't-verm'], k4:['t-g1', 't-g2', 't-g3'], k5:['t-a3', 't-o3', 't-d3'], k6:['t-w1', 't-w2', 't-w3', 't-w4', 't-w5'], k7:['t-g4'], k9:['g1', 'g2', 'g3', 'g4', 'g5'], k12:['t-a4', 't-o4', 't-t4']};
 function kartenMarken(){
   $$('#tabs button').forEach(function(b){
     var ids = KARTE_TEILE[b.getAttribute('data-k')];
@@ -1156,45 +2130,141 @@ function kartenMarken(){
   var w = document.getElementById('weiter'); if (w) w.classList.toggle('zeigen', alle);
 }
 function zeigeKarte(k, scrollen){
-  S.karte = k; sichern();
+  S.karte = k; speichere();
   $$('.karte').forEach(function(c){ c.classList.toggle('aktiv', c.id === k); });
   $$('#tabs button').forEach(function(b){ b.classList.toggle('aktiv', b.getAttribute('data-k') === k); });
   if (scrollen) window.scrollTo(0, 0);
 }
 
-/* ---------- Start ---------- */
-/* ---------- Sozialform und Ergebnis-Checkliste ---------- */
-var SF_NAME = {ea:'allein (EA)', pa:'zu zweit (PA)', ga:'in der Gruppe (GA)'};
-function zeigeSozialform(){
-  document.body.classList.remove('sf-ea', 'sf-pa', 'sf-ga');
-  if (S.sf) document.body.classList.add('sf-' + S.sf);
-  $$('.sfbtn').forEach(function(b){ b.classList.toggle('sel', b.getAttribute('data-sf') === S.sf); });
-  $('#sf-name').textContent = S.sf ? SF_NAME[S.sf] : '';
-  $('#sf-wahl').classList.remove('offen');
-}
-function baueSozialform(){
-  $$('.sfbtn').forEach(function(b){ b.addEventListener('click', function(){ S.sf = b.getAttribute('data-sf'); sichern(); zeigeSozialform(); }); });
-  $('#sf-aendern').addEventListener('click', function(){ $('#sf-wahl').classList.add('offen'); });
-  $$('#check .chk').forEach(function(c){
+/* ---------- Checklisten (Folie, Heft) ---------- */
+function baueChecklisten(){
+  $$('.chk[data-chk]').forEach(function(c){
     var id = c.getAttribute('data-chk');
     c.classList.toggle('an', !!S.check[id]);
-    c.addEventListener('click', function(){ S.check[id] = !S.check[id]; c.classList.toggle('an', S.check[id]); sichern(); kartenMarken(); });
+    c.addEventListener('click', function(){ S.check[id] = !S.check[id]; c.classList.toggle('an', S.check[id]); speichere(); kartenMarken(); });
   });
-  zeigeSozialform();
 }
+
+/* ---------- Think–Pair–Share-Uhr (Karte 1): dient nur der Orientierung ---------- */
+var PHASEN = [180, 180, 240], uhrTakt = null;
+function uhrZeig(){
+  var r = Math.max(0, S.uhr.rest), m = Math.floor(r / 60), s = r % 60;
+  qs('#tps-anz').textContent = (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+  qs('#tps-start').textContent = r === 0 ? 'Zeit ist um' : (S.uhr.lauf ? 'Pause' : 'Start');
+  qs('#tps').classList.toggle('um', r === 0);
+  $$('#tps .phbtn').forEach(function(b){ b.classList.toggle('aktiv', +b.getAttribute('data-ph') === S.uhr.p); });
+}
+function uhrTick(){
+  var verg = Math.floor((Date.now() - S.uhr.ts) / 1000);
+  if (verg > 0) { S.uhr.rest = Math.max(0, S.uhr.rest - verg); S.uhr.ts += verg * 1000; speichere(); }
+  if (S.uhr.rest === 0) uhrStopp();
+  uhrZeig();
+}
+function uhrLos(){ S.uhr.lauf = true; S.uhr.ts = Date.now(); if (!uhrTakt) uhrTakt = setInterval(uhrTick, 500); speichere(); uhrZeig(); }
+function uhrStopp(){ S.uhr.lauf = false; if (uhrTakt) { clearInterval(uhrTakt); uhrTakt = null; } speichere(); }
+function baueUhr(){
+  qs('#tps-start').addEventListener('click', function(){
+    if (S.uhr.lauf) { uhrTick(); uhrStopp(); uhrZeig(); } else if (S.uhr.rest > 0) uhrLos();
+  });
+  qs('#tps-reset').addEventListener('click', function(){ uhrStopp(); S.uhr.rest = PHASEN[S.uhr.p]; speichere(); uhrZeig(); });
+  $$('#tps .phbtn').forEach(function(b){
+    b.addEventListener('click', function(){ uhrStopp(); S.uhr.p = +b.getAttribute('data-ph'); S.uhr.rest = PHASEN[S.uhr.p]; speichere(); uhrZeig(); });
+  });
+  if (S.uhr.lauf) { uhrTick(); if (S.uhr.lauf && !uhrTakt) uhrTakt = setInterval(uhrTick, 500); }
+  uhrZeig();
+}
+
+/* ---------- Gruppenpuzzle (Karte 3) ---------- */
+var THEMEN = {A:'A · Hochpunkte', B:'B · Tiefpunkte', C:'C · Wendepunkte'}, KARTE_VON = {A:'k4', B:'k5', C:'k6'};
+function buchstaben(n){
+  if (n === 2) return ['A', 'B'];
+  var r = []; for (var i = 0; i < n; i++) r.push('ABC'.charAt(i % 3)); return r;
+}
+function verteilungZeig(){
+  var box = qs('#pz-verteilung'), sf = window.GC ? GC.sozialform() : null, n = window.GC ? GC.groesse() : null;
+  if (sf === 'ea') { box.innerHTML = '<div>Sie bearbeiten A, B und C nacheinander (Karten 4, 5, 6).</div>'; return; }
+  if (!n || n < 2) { box.innerHTML = '<div>Wählen Sie oben, wie Sie arbeiten – bei „In der Gruppe“ auch die Gruppengröße.</div>'; return; }
+  var h = buchstaben(n).map(function(b, i){ return '<div><b>Person ' + (i + 1) + ':</b> Experte ' + THEMEN[b] + '</div>'; }).join('');
+  if (n === 2) h += '<div><b>Beide gemeinsam:</b> Experte ' + THEMEN.C + '</div>';
+  box.innerHTML = h;
+}
+function pzZeig(){ $$('#pzwahl .pzbtn').forEach(function(b){ b.classList.toggle('aktiv', b.getAttribute('data-pz') === S.exp); }); }
+function bauePuzzle(){
+  $$('#pzwahl .pzbtn').forEach(function(b){
+    b.addEventListener('click', function(){ S.exp = b.getAttribute('data-pz'); speichere(); pzZeig(); zeigeKarte(KARTE_VON[S.exp], true); });
+  });
+  document.addEventListener('gc-sozialform', verteilungZeig);
+  verteilungZeig(); pzZeig();
+}
+
+/* ---------- Los (Karte 8): Gruppe; Thema + Sprecher:in, nie Expert:in des Themas ---------- */
+function zufall(n){ return Math.floor(Math.random() * n); }
+function losZeig(){
+  $$('#losg-n [data-n]').forEach(function(b){ b.classList.toggle('aktiv', +b.getAttribute('data-n') === S.losG.n); });
+  $$('#losp-n [data-n]').forEach(function(b){ b.classList.toggle('aktiv', +b.getAttribute('data-n') === S.losP.n); });
+  var g = qs('#losg-erg'), z = S.losG.gezogen;
+  if (z.length) {
+    var rest = S.losG.n ? S.losG.n - z.length : 0;
+    g.innerHTML = '<p><b>Es stellt vor: Gruppe ' + z[z.length - 1] + '</b></p>' +
+      (z.length > 1 ? '<p>Bereits gezogen: Gruppe ' + z.slice(0, -1).join(', ') + '</p>' : '') +
+      '<p>' + (rest > 0 ? 'Noch im Los: ' + rest + (rest === 1 ? ' Gruppe' : ' Gruppen') : 'Alle Gruppen sind gezogen.') + '</p>';
+    g.classList.add('zeig');
+  } else g.classList.remove('zeig');
+  var p = qs('#losp-erg');
+  if (S.losP.platz !== null && S.losP.thema) {
+    var bu = buchstaben(S.losP.n), eig = bu[S.losP.platz];
+    p.innerHTML = '<p><b>Thema: Experte ' + THEMEN[S.losP.thema] + '</b></p>' +
+      '<p><b>Es spricht: Person ' + (S.losP.platz + 1) + '</b> (Expert:in für ' + THEMEN[eig] + ')</p>' +
+      '<p>Wer Expert:in für ' + THEMEN[S.losP.thema] + ' ist, darf bei Rückfragen helfen, aber nicht selbst vortragen.</p>';
+    p.classList.add('zeig');
+  } else p.classList.remove('zeig');
+  qs('#losp-btn').textContent = S.losP.platz !== null ? '\u{1F3B2} Neu losen (nur wenn die Lehrkraft es sagt)' : '\u{1F3B2} Thema und Sprecher:in losen';
+}
+function losMeldung(el, txt){ el.innerHTML = '<p>' + txt + '</p>'; el.classList.add('zeig'); }
+function baueLos(){
+  $$('#losg-n [data-n]').forEach(function(b){
+    b.addEventListener('click', function(){ S.losG.n = +b.getAttribute('data-n'); S.losG.gezogen = S.losG.gezogen.filter(function(x){ return x <= S.losG.n; }); speichere(); losZeig(); });
+  });
+  $$('#losp-n [data-n]').forEach(function(b){
+    b.addEventListener('click', function(){ S.losP.n = +b.getAttribute('data-n'); S.losP.platz = null; S.losP.thema = null; speichere(); losZeig(); });
+  });
+  qs('#losg-btn').addEventListener('click', function(){
+    if (!S.losG.n) { losMeldung(qs('#losg-erg'), 'Wählen Sie zuerst, wie viele Gruppen es gibt.'); return; }
+    var frei = [];
+    for (var i = 1; i <= S.losG.n; i++) if (S.losG.gezogen.indexOf(i) < 0) frei.push(i);
+    if (!frei.length) { losZeig(); return; }
+    S.losG.gezogen.push(frei[zufall(frei.length)]); speichere(); losZeig();
+  });
+  qs('#losg-neu').addEventListener('click', function(){ S.losG.gezogen = []; speichere(); losZeig(); });
+  qs('#losp-btn').addEventListener('click', function(){
+    if (!S.losP.n) { losMeldung(qs('#losp-erg'), 'Wählen Sie zuerst, wie viele Sie sind.'); return; }
+    var bu = buchstaben(S.losP.n), th = 'ABC'.charAt(zufall(3)), frei = [];
+    for (var i = 0; i < bu.length; i++) if (bu[i] !== th) frei.push(i);
+    S.losP.thema = th; S.losP.platz = frei[zufall(frei.length)]; speichere(); losZeig();
+  });
+  function ausWahl(){
+    var g = window.GC ? GC.groesse() : null;
+    if (g && g >= 2 && S.losP.platz === null) { S.losP.n = g; speichere(); }
+    losZeig();
+  }
+  document.addEventListener('gc-sozialform', ausWahl);
+  ausWahl();
+}
+
+/* ---------- Start ---------- */
 function init(){
-  baueSozialform();
+  baueChecklisten(); baueUhr(); baueLos(); bauePuzzle();
   Object.keys(TEILE).forEach(function(id){ if (TEILE[id].art === 'mc') baueMC(id); });
   baueTipps(); baueRest();
   $$('[data-pruefe]').forEach(function(b){ b.addEventListener('click', function(){ pruefe(b.getAttribute('data-pruefe')); }); });
   $$('[data-leere]').forEach(function(b){ b.addEventListener('click', function(){ leere(b.getAttribute('data-leere')); }); });
   $$('input.term').forEach(function(inp){
     var id = inp.closest('.teil').id;
-    inp.addEventListener('input', function(){ var z = teil(id); if (!z.st) { z.v = inp.value; sichern(); } });
+    inp.addEventListener('input', function(){ var z = teil(id); if (!z.st) { z.v = inp.value; speichere(); } });
     inp.addEventListener('keydown', function(e){ if (e.key === 'Enter') pruefe(id); });
   });
   $$('#tabs button').forEach(function(b){ b.addEventListener('click', function(){ zeigeKarte(b.getAttribute('data-k'), true); }); });
-  sichern();
+  speichere();
   Object.keys(TEILE).forEach(function(id){ zeige(id); wiederFb(id); });
   zeigeSchritte();
   zeigeKarte(S.karte, false);

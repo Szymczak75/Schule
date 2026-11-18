@@ -24,6 +24,10 @@ Projektwissen und werden vor jeder Abgabe einer Website durchgegangen.
 
 **Immer laufen lassen:** `pruefe.py` aus dem Projektwissen über jede fertige Website
 (Lehrer- und Schüler-Website), bevor sie ausgegeben wird (Lernseiten-Anweisung, TEIL 11).
+
+**Mathematik – Kernkompetenzen:** `kernkompetenzen.md` (Projektwissen) listet, was die
+Kinder am Ende jeder Jahrgangsstufe sicher können sollen. Jede Einheit wiederholt sie
+verstärkt (Lernseiten-Anweisung TEIL 2.9) – siehe „Kernkompetenzen in der Einheit" unten.
 ---
  
 ## Fächer & Lehrpläne (NRW)
@@ -142,6 +146,9 @@ Die Schüler-Website passt sich der jeweiligen Sozialform an:
 | **Think–Pair–Share** | Drei-Phasen-Struktur klar getrennt (Timer pro Phase sinnvoll) |
 | **Museumsgang** | Stations-Karten einzeln aufrufbar |
 | **Gruppenpuzzle** | Expertenmaterial und Stammmaterial klar getrennt |
+| **Expertenrunde, Placemat, Kugellager, Lerntempoduett, Stationenlernen** | wie in Lernseiten-Anweisung TEIL 2.10 beschrieben |
+
+Für die Schüler-Website gilt Lernseiten-Anweisung **TEIL 2.10**: Bei GA am Anfang die Wahl EA / PA / GA mit Gruppengröße 3–7 (`baustein_gruppencheck.html`, EA und PA immer wählbar); jede Karte trägt ihr eigenes Sozialform-Etikett, Karten dürfen unterschiedlich arbeiten. Ob am Ende ein **Gruppen-Check mit Gruppenergebnis** kommt, wird beim Planen abgefragt (zusammen mit Sozialform und Methode). Gruppenergebnisse nennen immer die Höchstpunktzahl („x von max möglichen").
  
 ### Timer auf Schüler-Websites
 Wenn es inhaltlich sinnvoll ist (z. B. Think-Phase, Partnerarbeit, Testphasen), können Countdown-Timer eingebunden werden:
@@ -182,32 +189,44 @@ Abwechslung ist Pflicht. Die Form soll zum Lernziel passen:
 - **Feedback mit Formeln per `innerHTML` + `MathJax.typesetPromise([el])`** setzen – nie `textContent`, sonst bleibt die Formel Rohtext. Den Aufruf immer in `if (window.MathJax && …)` + `try/catch` einpacken.
 - **Zuordnungen bleiben nach dem Prüfen stehen (Pflicht):** Bei Zuordnungs-, Sortier-, Paare-verbinden-, Kategorien- und Hotspot-Aufgaben bleiben die gesetzten Elemente nach dem Prüfen **sichtbar an ihrem Platz**; die grün/rot-Auswertung kommt **zusätzlich** dazu. Danach ist die Zuordnung **gesperrt** (nicht mehr verschiebbar) und wird ausschließlich durch den **Leeren-Button** wieder freigegeben. Beim Prüfen dürfen nur Statusklassen an den vorhandenen Elementen gesetzt werden – die Karte darf nicht neu gerendert werden (typische Ursache dafür, dass die Zuordnung verschwindet). Details siehe Lernseiten-Projektanweisungen („Zuordnungen bleiben nach dem Prüfen sichtbar").
 ### Pflicht-Wiederholungskarte und Pflicht-Auswertungskarte
-Bei Übungen und Wissenstests immer eine Karte zu einem früheren Lehrplanthema einfügen (mit Niveaustufen). Als Wiederholungsinhalt zählt ausdrücklich auch die Bedienung der GeoGebra Suite aus einer früheren Jahrgangsstufe, nicht nur fachliche Vorthemen (siehe Lernseiten-Projektanweisungen, ANHANG B „GeoGebra in diesen Projekten"; passende Bedienungsseiten liefert das Projekt „GeoGebra", Auswahl über den Hub). Reihenfolge: erst die Karte(n) zum aktuellen Thema, die Wiederholungskarte kommt als vorletzte Karte – direkt vor der Auswertungskarte, nicht an den Anfang. (Bei Erarbeitungs-Seiten ist eine Wiederholungskarte nur optional und dann als erste Karte – siehe Lernseiten-Projektanweisungen.)
+Bei Übungen und Wissenstests immer eine Karte zu einem früheren Lehrplanthema einfügen (mit Niveaustufen) – in Mathematik **bevorzugt eine Kernkompetenz** aus `kernkompetenzen.md`. Als Ausnahme zählt auch die Bedienung der GeoGebra Suite aus einer früheren Jahrgangsstufe, nicht nur fachliche Vorthemen (siehe Lernseiten-Projektanweisungen, ANHANG B „GeoGebra in diesen Projekten"; passende Bedienungsseiten liefert das Projekt „GeoGebra", Auswahl über den Hub). Reihenfolge: erst die Karte(n) zum aktuellen Thema, die Wiederholungskarte kommt als vorletzte Karte – direkt vor der Auswertungskarte, nicht an den Anfang. (Bei Erarbeitungs-Seiten ist eine Wiederholungskarte nur optional und dann als erste Karte – siehe Lernseiten-Projektanweisungen.)
 
 Die **Auswertungskarte** ist bei Übung und Wissenstest ebenfalls Pflicht und steht als letzte Karte. Eine Übung ohne Auswertungs- oder ohne Wiederholungskarte ist unvollständig.
+
+### Kernkompetenzen in der Einheit (Mathematik)
+- **Schüler-Website:** Mindestens eine Aufgabe braucht eine passende Kernkompetenz als Rechenschritt (bevorzugt Fortgeschritten/Profi oder Sachkontext); Meta-Tag `kernkompetenzen` mit den Kürzeln (Lernseiten-Anweisung TEIL 2.9 und 3.4).
+- **Lehrer-Website:** Wo es passt, ein kurzes Kernkompetenz-Warm-up im Einstieg (2–5 Minuten, z. B. zwei Kopfrechenaufgaben zum Kürzen) – mit Kürzel auf der Karte, damit die Lehrkraft weiß, was wiederholt wird.
+- **Planungsdokument:** „Benötigte Kenntnisse" nennt die Kernkompetenzen mit Kürzel (z. B. „K6-1 Brüche kürzen"); „Hausaufgaben / Weitere Übungen" enthält regelmäßig eine Kernkompetenz-Aufgabe.
+- Nur Kernkompetenzen, die laut Stoffverteilungsplan schon behandelt sind – nie aus einem späteren Jahrgang.
  
 ---
  
 ## Produkt 3: Planungsdokument (.docx) 📄
  
-Das Word-Dokument ist für die Ablage in **OneNote** optimiert. Es enthält eine strukturierte Tabelle nach folgendem Schema (orientiert an den Screenshots der Lehrkraft):
- 
-### Tabellenstruktur
- 
+Das Word-Dokument ist für die Ablage in **OneNote** optimiert. Aufbau und Optik sind seit 17.11.2026 verbindlich festgelegt (Wunsch der Lehrkraft; erstes Beispiel: `planung_procyte_endosymbiont_ef.docx`, Biologie EF).
+
+### Aufbau
+- Kopfzeile klein in Grau (`#6B7686`): Fach · Stufe · Oberthema · Thema; darunter Inhaltsfeld/Unterrichtsvorhaben und Buchseiten.
+- **Je Stunde eine Überschrift** im Stil „Doppelstunde 1 – Was ist eine Zuordnung? (Tabelle und Term)“: Arial 15 pt, fett, Orange `#C97A2E`. Jede weitere Stunde beginnt auf einer neuen Seite (eine OneNote-Seite pro Stunde).
+- Darunter **je Stunde eine zweispaltige Tabelle** mit diesen Zeilen in dieser Reihenfolge:
+
 | Abschnitt | Inhalt |
 |---|---|
-| **Ziel der Stunde** | Kompetenz / Lernziel klar und knapp formuliert |
-| **Zentrale Erkenntnisse / neue Techniken** | Definitionen, Vorgehen, Kriterien – ausführlich. Platzhalter für Bilder/Grafiken (werden von Lehrkraft ergänzt). |
-| **Benötigte Kenntnisse** | Vorwissen, das SuS mitbringen müssen |
-| **Verwendete Materialien** | Buchseiten (mit Seitenangabe), Websites (mit Link), Arbeitsblätter, Experimente |
-| **Hausaufgaben / Weitere Übungen** | Aufgaben aus dem Buch oder ergänzendes Material |
- 
-### Gestaltung
-- Klare Tabellenstruktur, gut lesbar in OneNote
-- Linke Spalte: Kategorie (fett, farblich hervorgehoben)
-- Rechte Spalte: Inhalt (Fließtext, Aufzählungen wo sinnvoll)
-- Keine übermäßige Formatierung – OneNote-kompatibel
-- Seitenformat: A4
+| **Ziel der Stunde** | Kompetenz / Lernziel klar und knapp, mit Kompetenzkürzeln aus dem Kernlehrplan; dazu eine Zeile „Rahmen“ (Zeit, Sozialform, Methode) |
+| **Ablauf** | Aufzählung je Phase: **Zeit · Phase** (Sozialform): Inhalt, mit Verweis auf Karte der Lernseite bzw. Buchseite; Puffer nennen |
+| **Zentrale Erkenntnisse / neue Techniken** | Definitionen, Vorgehen, Kriterien – ausführlich, Fachbegriffe fett. Platzhalter für Bilder/Grafiken (werden von Lehrkraft ergänzt). |
+| **Benötigte Kenntnisse** | Vorwissen, das SuS mitbringen müssen – in Mathematik mit den Kernkompetenz-Kürzeln (z. B. „K6-1 Brüche kürzen") |
+| **Verwendete Materialien** | Buchseiten (mit Seitenangabe), Arbeitsblätter, Experimente; ein Block **„Websites:“** mit anklickbaren Links – sprechender Name plus kurzer Zweck, nie eine nackte URL |
+| **Hausaufgaben / Weitere Übungen** | Aufgaben aus dem Buch oder ergänzendes Material, verlinkt, wo es eine Seite dazu gibt |
+
+Verlinkt werden nur Seiten, die tatsächlich veröffentlicht werden (z. B. keine Lehrer-Website, die nicht ins Repo kommt).
+
+### Gestaltung (verbindliche Werte)
+- A4, Ränder 2 cm, Schrift Arial 11 pt, keine weitere Formatierung (OneNote-kompatibel).
+- Tabelle: Spaltenbreiten ca. 4,2 cm / 11,7 cm, dünne **graue** Rahmen (`#7F7F7F`).
+- Linke Spalte: Hintergrund `#FBEEE0`, Kategorie fett in `#A5611E`.
+- Rechte Spalte: normaler schwarzer Text, Aufzählungen als echte Listen (keine eingetippten „•“).
+- Links in `#1F4680`, unterstrichen.
 ### Mathematische Darstellung im Dokument
 - Formeln als Unicode-Text oder klar lesbaren Klartext (kein LaTeX im Docx)
 - Brüche als „a/b" im Fließtext sind **nur im Docx** akzeptabel (auf den Websites bleibt die div-basierte Bruchdarstellung Pflicht – siehe Lernseiten-Projektanweisungen; ein Schrägstrich steht dort ausschließlich als wörtlicher Eingabetext für GeoGebra in `<code>`, nie als dargestellter Bruch)
@@ -333,6 +352,7 @@ Zuerst `wiederkehrende_fehler_checkliste.md` durchgehen und `pruefe.py` laufen l
 - [ ] Werden Dezimalzahl und Bruch akzeptiert, haben gerundete Werte eine Toleranz, und nennt die Aufgabe die Rundung?
 - [ ] Bleiben bei Zuordnungs-/Sortieraufgaben die gesetzten Elemente nach dem Prüfen sichtbar (nur gesperrt und markiert, nie geleert), und gibt der Leeren-Button sie wieder frei?
 - [ ] Haben Übung/Wissenstest eine Wiederholungskarte (vorletzte) und eine Auswertungskarte (letzte)?
+- [ ] Mathematik: Nutzt mindestens eine Aufgabe eine Kernkompetenz als Rechenschritt, nimmt die Wiederholungskarte bevorzugt eine Kernkompetenz, und steht das Meta-Tag `kernkompetenzen`?
 - [ ] Trägt jede Oberstufen-Aufgabenkarte die `.op-tags`-Zeile?
 - [ ] Beginnt jede Karte, die auf der vorigen aufbaut, mit „Wo wir gerade stehen"? Sind alle Aufgaben ausformuliert?
 - [ ] Gibt es keinen toten „Weiter"-Button (`href="#"`, `location.href='#'`)?
@@ -345,7 +365,7 @@ Zuerst `wiederkehrende_fehler_checkliste.md` durchgehen und `pruefe.py` laufen l
 - [ ] Sind Timer sinnvoll eingebaut (wo passend)?
 - [ ] Meldet `pruefe.py` keinen FEHLER mehr?
 **Planungsdokument:**
-- [ ] Alle fünf Tabellenabschnitte vorhanden?
+- [ ] Alle sechs Tabellenabschnitte vorhanden (einschließlich „Ablauf“), je Stunde eine Tabelle mit orangefarbener Überschrift?
 - [ ] Buchseitenverweise mit Seitenzahl?
-- [ ] Links zu Websites eingefügt?
+- [ ] Websites als anklickbare Links mit Namen eingefügt – nur veröffentlichte Seiten?
 - [ ] OneNote-kompatible Formatierung?

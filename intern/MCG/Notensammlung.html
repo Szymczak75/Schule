@@ -79,6 +79,7 @@ thead th{ position:sticky; top:0; background:#eef1f4; z-index:1; }
 .pill.good{ background:var(--okbg); color:var(--ok); } .pill.bad{ background:var(--badbg); color:var(--bad); } .pill.warn{ background:var(--warnbg); color:var(--warn); } .pill.info{ background:var(--infobg); color:var(--info); }
 .g-y{ background:#FFE699 !important; color:#000 !important; } .g-o{ background:#F4B183 !important; color:#000 !important; }
 .g-r{ background:#C00000 !important; color:#fff !important; font-weight:700; } .g-d{ background:#6B0000 !important; color:#fff !important; font-weight:700; }
+.g-x{ background:#7030A0 !important; color:#fff !important; font-weight:700; }
 #busy{ position:fixed; inset:0; background:rgba(20,30,40,.35); display:flex; align-items:center; justify-content:center; z-index:50; }
 #busy[hidden]{ display:none; }
 #busy .box{ background:#fff; padding:1rem 1.4rem; border-radius:10px; min-width:280px; box-shadow:0 6px 24px rgba(0,0,0,.2); }
@@ -1409,6 +1410,10 @@ const PUNKTE_OF = { '1+':15,'1':14,'1-':13,'2+':12,'2':11,'2-':10,'3+':9,'3':8,'
 const NOTE_OF_P = Object.fromEntries(Object.entries(PUNKTE_OF).map(([n, p]) => [p, n]));
 const NOTEN_O = ['1','2','3','4','5','6'];
 const PUNKTE = Array.from({ length:16 }, (_, i) => String(15 - i));
+/* Striche, die als „-“ gelten (z. B. aus Word, Mail oder vom Handy eingefügt):
+   ‐ ‑ ‒ – — ― (U+2010–2015), − Minuszeichen, ﹘ ﹣ kleine, － breites Minus */
+const STRICHE = ['‐','‑','‒','–','—','―','−','﹘','﹣','－'];
+const STRICH_RE = new RegExp('[' + STRICHE.join('') + ']', 'g');
 
 /* Spalten: S1 SoMi 1, K1 Klausur 1, Q Quartal, S2 SoMi 2, K2 Klausur 2, E Endnote */
 const SPALTEN = ['S1','K1','Q','S2','K2','E'];
@@ -1421,6 +1426,8 @@ function spaltenFuer(bereich, runde){
 }
 /* Spalten, die ein Bereich überhaupt haben kann */
 const spaltenBereich = bereich => bereich === 'SekI' ? ['Q','E'] : SPALTEN.slice();
+/* Runde-1-Spalten eines Bereichs (für „Nachtrag“ nach Lehrerwechsel): Sek I nur Quartal, Oberstufe SoMi 1, Klausur 1, Quartal */
+const nachtragSpalten = bereich => RUNDE1.filter(k => spaltenBereich(bereich).includes(k));
 /* Sichtbare Spalten für eine Stufe: offene Spalten + bei der Oberstufe die Werte aus Runde 1 (gesperrt sichtbar).
    In der Sek I ist die Quartalsnote in Runde 2 NICHT sichtbar. */
 function sichtbar(bereich, offen){
@@ -1457,7 +1464,7 @@ const istKuerzel = (v, fmt) => SONDER.includes(v) || (fmt === VERTIEFUNG && VERT
 function parseGrade(raw, fmt){
   if (raw == null) return { v:'' };
   if (typeof raw === 'number'){ raw = String(raw); }
-  let s = String(raw).trim().replace(/[−–—]/g, '-').replace(/\s+/g, '');
+  let s = String(raw).trim().replace(STRICH_RE, '-').replace(/\s+/g, '');
   if (!s) return { v:'' };
   // Altes Format aus Version 1: „2- (10)“
   const old = s.match(/^([1-6][+-]?)\((\d{1,2})\)$/); if (old) s = fmt === 'Punkte' ? old[2] : old[1];
@@ -1493,6 +1500,7 @@ const FARBEN = {
   o:{ bg:'FFF4B183', fg:'FF000000', bold:false },
   r:{ bg:'FFC00000', fg:'FFFFFFFF', bold:true },
   d:{ bg:'FF6B0000', fg:'FFFFFFFF', bold:true },
+  x:{ bg:'FF7030A0', fg:'FFFFFFFF', bold:true },   // ungültiger Eintrag (z. B. „3--“): lila, bitte korrigieren
 };
 const FILL_OFFEN = 'FFFFF8DC', FILL_GESPERRT = 'FFE7E6E6', FILL_KOPF = 'FFE3E8EC', FILL_KOPF_OFFEN = 'FFFCE9A8';
 /* Für den Import nach SchILD: Note und Punkte aus kanonischem Wert */
@@ -1562,14 +1570,25 @@ function runs(nums){
   for (let i = 0; i < rs.length;){ let j = i; while (j + 1 < rs.length && rs[j+1] === rs[j] + 1) j++; out.push([rs[i], rs[j]]); i = j + 1; }
   return out;
 }
+/* Excel-Ausdruck, der den Zellinhalt wie parseGrade vereinheitlicht:
+   lange Striche → „-“, Klammerzusatz („4- (4 Pkt)“) weg, Leerzeichen weg. So färben sich auch eingefügte Werte wie „4–“. */
+function gradeExpr(c){
+  const d = STRICHE.reduce((t, z) => `SUBSTITUTE(${t},"${z}","-")`, `TRIM(${c}&"")`);
+  return `SUBSTITUTE(SUBSTITUTE(LEFT(${d},FIND("(",${d}&"(")-1)," ","")," ","")`;
+}
 /* Bedingte Formatierung (Notenfarben) für einen Bereich mit bekanntem Notenformat */
 function addGradeCF(ws, L, r1, r2, fmt){
-  const vals = FARB_WERTE[fmt] || {}, c = `${L}${r1}`, rules = [];
+  const vals = FARB_WERTE[fmt] || {}, x = gradeExpr(`${L}${r1}`), rules = [];
+  // Zuerst: ungültige Einträge (nicht in der Auswahlliste, z. B. per Copy-Paste „3--“) lila mit weißer Schrift
+  const ok = listeFuer(fmt).map(v => `"${String(v).replace(/"/g, '""')}"`).join(',');
+  rules.push({ type:'expression', priority:1, stopIfTrue:true,
+    formulae:[`AND(TRIM(${L}${r1}&"")<>"",ISNA(MATCH(${x},{${ok}},0)))`],
+    style:{ fill:{ type:'pattern', pattern:'solid', bgColor:{ argb:FARBEN.x.bg } }, font:{ color:{ argb:FARBEN.x.fg }, bold:true } } });
   for (const k of ['d','r','o','y']){
     if (!vals[k]) continue;
     const f = FARBEN[k];
     rules.push({ type:'expression', priority:rules.length + 1, stopIfTrue:true,
-      formulae:[`OR(${vals[k].map(v => `TRIM(${c}&"")="${v}",LEFT(TRIM(${c}&""),${v.length + 2})="${v} ("`).join(',')})`],
+      formulae:[`OR(${vals[k].map(v => `${x}="${v}"`).join(',')})`],
       style:{ fill:{ type:'pattern', pattern:'solid', bgColor:{ argb:f.bg } }, font:{ color:{ argb:f.fg }, bold:f.bold } } });
   }
   if (rules.length) ws.addConditionalFormatting({ ref:`${L}${r1}:${L}${r2}`, rules });
@@ -1826,7 +1845,7 @@ function buildGesamtWb(G){
     const fmt = fmtRow(G, r);
     const vals = G_COLS.map(k => {
       switch (k){
-        case '_ID': return r.id; case '_Schlüssel': return rowSKey(r); case '_Quelle': return JSON.stringify({ q:r.quelle || {}, m:r.manuell ? 1 : 0, v:r.vertiefung ? 1 : 0 });
+        case '_ID': return r.id; case '_Schlüssel': return rowSKey(r); case '_Quelle': return JSON.stringify(Object.assign({ q:r.quelle || {}, m:r.manuell ? 1 : 0, v:r.vertiefung ? 1 : 0 }, r.nachtrag?.length ? { n:r.nachtrag } : {}));
         case 'Stufe': return r.stufe; case 'Klasse': return r.klasse; case 'Fach': return r.fach; case 'Kursart': return r.kursart; case 'Kurs': return r.kurs;
         case 'Lehrkraft': return r.lehrer; case 'Nachname': return r.name; case 'Vorname': return r.vorname; case 'Geburtsdatum': return isoToDate(r.geb);
         case 'Status': return r.status; case 'Hinweis': return r.hinweis || '';
@@ -1867,7 +1886,7 @@ function readGesamtWb(wb){
     let q = {}; try { q = JSON.parse(str(g('_Quelle')) || '{}'); } catch(e){}
     const o = { id:Number(id), stufe:str(g('Stufe')), klasse:str(g('Klasse')), fach:str(g('Fach')), kursart:str(g('Kursart')), kurs:str(g('Kurs')),
       lehrer:str(g('Lehrkraft')), name:str(g('Nachname')), vorname:str(g('Vorname')), geb:dateKey(g('Geburtsdatum')), status:str(g('Status')) || 'aktiv',
-      hinweis:str(g('Hinweis')), quelle:q.q || {}, manuell:!!q.m, vertiefung:!!q.v };
+      hinweis:str(g('Hinweis')), quelle:q.q || {}, manuell:!!q.m, vertiefung:!!q.v, nachtrag:Array.isArray(q.n) ? q.n : [] };
     const fmt = fmtRow(G, o);
     for (const k of SPALTEN){ const p = parseGrade(cellVal(g(k)), fmt); o[k] = p.v || ''; }
     G.rows.push(o);
@@ -1901,7 +1920,12 @@ function readTeacherWb(wb){
   const kopf = {}; ws.getRow(1).eachCell((c, i) => kopf[i] = str(c.value));
   const verschoben = keys.some((k, i) => !k.startsWith('_') && !SPALTEN.includes(k) && kopf[i + 1] && kopf[i + 1] !== k);
   if (verschoben) return { error:'Die Spalten der Datei wurden verändert (z. B. eingefügt oder gelöscht). Bitte die Originaldatei verwenden.' };
-  return { info, ws, idx, keys, rows, offen, formate, spaltennamen:infoJSON(info, 'Spaltennamen', {}) };
+  return { info, ws, idx, keys, rows, offen, formate, spaltennamen:infoJSON(info, 'Spaltennamen', {}), nachtrag:infoJSON(info, 'Nachtrag', {}) };
+}
+/* Offene Spalten einer Zeile: offene Spalten der Stufe + Nachtrag-Spalten dieser Zeile (nach Lehrerwechsel) */
+function offenRow(t, r){
+  const n = (t.nachtrag || {})[r.id] || [];
+  return uniq([...(t.offen[r.stufe] || []), ...n]);
 }
 /* Notenfarben in einer Lehrerdatei neu setzen (nach dem Speichern durch Seite B) */
 function reapplyTeacherCF(t){
@@ -1957,7 +1981,7 @@ const SCHEMA_C = {
   klassenuebersicht:{ def:'Tabelle und Liste', type:'text', allowed:['Tabelle und Liste','nur Tabelle','nur Liste'] },
 };
 const C = { cfg:null, G:null, gName:'', pw:'', dirty:false, log:[], pending:[], issues:{ invalid:[], notFound:[], conflict:[], changed:[], fremd:[], inaktiv:[] },
-            vorlage:null, importSel:{}, backup:false };
+            vorlage:null, importSel:{}, nurMitNote:true, outSel:{}, backup:false };
 const W = () => C.G;
 const pwFor = label => C.cfg.passwortModus === 'individuell' ? OfficeCrypto.derivePassword(C.pw, label) : C.pw;
 const fmtOfRow = g => fmtRow(W(), g);
@@ -2041,13 +2065,14 @@ function applyReturn(x, force){
     if (!g){ C.issues.notFound.push({ datei:x.file, lehrer:i.Lehrer, label }); err++; continue; }
     if (!lehrerList(g.lehrer).includes(i.Lehrer)){ if (Object.values(r.vals).some(v => v != null && v !== '')) C.issues.fremd.push({ datei:x.file, lehrer:i.Lehrer, g }); continue; }
     if (!STATUS_AKTIV(g.status)){ if (Object.values(r.vals).some(v => v != null && v !== '')) C.issues.inaktiv.push({ datei:x.file, lehrer:i.Lehrer, g }); continue; }
-    const open = (x.t.offen[r.stufe] || []).filter(k => x.t.idx[k]);
+    const open = offenRow(x.t, r).filter(k => x.t.idx[k]);
+    const nach = (x.t.nachtrag || {})[r.id] || [];   // Nachtrag nach Lehrerwechsel: die neue Lehrkraft darf hier auch Werte der alten ersetzen
     const fmt = r.vertiefung ? VERTIEFUNG : (x.t.formate[r.stufe] || fmtOfRow(g));
     for (const k of open){
       if (force.runde && !RUNDE1.includes(k)) continue;
       const p = parseGrade(r.vals[k], fmt);
       if (p.invalid){ C.issues.invalid.push({ datei:x.file, lehrer:i.Lehrer, g, k, raw:p.raw }); err++; continue; }
-      const v = p.v, cur = g[k] || '', src = g.quelle?.[k];
+      const v = p.v, cur = g[k] || '', src = nach.includes(k) && g.quelle?.[k] ? i.Lehrer : g.quelle?.[k];
       g.quelle = g.quelle || {};
       if (v === cur){ if (v){ n++; g.quelle[k] = src || i.Lehrer; } continue; }
       if (!v){ if (cur && src === i.Lehrer){ C.issues.changed.push({ g, k, alt:cur, neu:'(gelöscht)', lehrer:i.Lehrer }); g[k] = ''; delete g.quelle[k]; ch++; } continue; }
@@ -2086,8 +2111,10 @@ const runde = () => W().info.Runde;
 const baseName = () => `${W().info.SJ}_HJ${W().info.HJ}_${W().info.Runde}`;
 const sortRows = rows => rows.slice().sort((a, b) => cmpDe(a.name, b.name) || cmpDe(a.vorname, b.vorname) || cmpDe(a.geb, b.geb) || cmpDe(a.fach, b.fach));
 const vcell = (g, k) => g[k] ? { v:excelWert(g[k], fmtOfRow(g)), fmt:fmtOfRow(g) } : '';
-function klassen(){ return sortDe(uniq(W().rows.filter(g => isSekI(g.stufe)).map(g => g.klasse))); }
-function stufenOS(){ return sortDe(uniq(W().rows.filter(g => !isSekI(g.stufe)).map(g => g.stufe))); }
+/* Stufenauswahl für die Übersichten (Standard: alle). sel = true → nur die angehakten Stufen */
+const outOk = st => C.outSel[st] !== false;
+function klassen(sel){ return sortDe(uniq(W().rows.filter(g => isSekI(g.stufe) && (!sel || outOk(g.stufe))).map(g => g.klasse))); }
+function stufenOS(sel){ return sortDe(uniq(W().rows.filter(g => !isSekI(g.stufe) && (!sel || outOk(g.stufe))).map(g => g.stufe))); }
 function kopf(ws, title, G){
   ws.spliceRows(1, 0, [title], []); ws.getRow(1).font = { bold:true, size:13 };
   ws.views = [{ state:'frozen', ySplit:3 }];
@@ -2159,20 +2186,21 @@ function buildKontrollliste(rows){
 async function zipOverviews(which){
   const G = W(), zip = new JSZip(), jobs = [];
   if (which !== 'stufen'){
-    for (const kl of klassen()){
+    for (const kl of klassen(true)){
       if (C.cfg.klassenuebersicht !== 'nur Liste') jobs.push([`Klassenuebersichten_SekI/Klasse_${safeName(kl)}_Tabelle_${baseName()}.xlsx`, () => buildKlasseTabelle(kl), 'Klasse ' + kl]);
       if (C.cfg.klassenuebersicht !== 'nur Tabelle') jobs.push([`Klassenuebersichten_SekI/Klasse_${safeName(kl)}_Liste_${baseName()}.xlsx`, () => buildKlasseListe(kl), 'Klasse ' + kl]);
     }
   }
-  if (which !== 'klassen') for (const st of stufenOS()) jobs.push([`Stufenuebersichten_Oberstufe/Stufe_${safeName(st)}_${baseName()}.xlsx`, () => buildStufe(st), 'Stufe ' + st]);
-  if (!jobs.length) throw new Error('Keine Übersichten zu erzeugen.');
+  if (which !== 'klassen') for (const st of stufenOS(true)) jobs.push([`Stufenuebersichten_Oberstufe/Stufe_${safeName(st)}_${baseName()}.xlsx`, () => buildStufe(st), 'Stufe ' + st]);
+  if (!jobs.length) throw new Error('Keine Übersichten zu erzeugen – bitte oben mindestens eine passende Stufe anhaken.');
   let i = 0;
   for (const [name, fn, label] of jobs){ busy(`Erzeuge und verschlüssele Übersichten … ${++i}/${jobs.length}`, i / jobs.length); await tick(5);
     zip.file(name, await wbBytes(await nurAnsicht(fn()), pwFor(label))); }
   zip.file(`_Admin/Offene_Punkte_${baseName()}.xlsx`, await wbBytes(buildOffenePunkte(), null));
   if (C.cfg.passwortModus === 'individuell'){ const pwb = new ExcelJS.Workbook();
     addSheet(pwb, 'Passwörter', ['Datei für','Passwort'], uniq(jobs.map(j => j[2])).map(l => [l, pwFor(l)])); zip.file(`_Admin/Passwoerter_Uebersichten.xlsx`, await wbBytes(pwb, null)); }
-  busy('Packe ZIP …'); saveBlob(await zip.generateAsync({ type:'blob' }), `Uebersichten_${baseName()}.zip`); busy();
+  busy('Packe ZIP …'); const teil = sortDe(uniq(W().rows.map(g => g.stufe))).filter(st => !outOk(st)).length ? '_' + sortDe(uniq(W().rows.map(g => g.stufe))).filter(outOk).join('-') : '';
+  saveBlob(await zip.generateAsync({ type:'blob' }), `Uebersichten_${baseName()}${teil}.zip`); busy();
   toast(`${jobs.length} Übersichten erzeugt (verschlüsselt).`);
 }
 
@@ -2207,8 +2235,11 @@ function importPlan(sel){
   const neu = G.rows.filter(g => sel.includes(g.stufe) && g.status === 'neu').map(g => Object.assign({}, g, { inVorlage:used.has(g) }));
   return { write, missing, append, neu, present };
 }
+/* Importdatei: Kopie der Vorlage mit den Endnoten der gewählten Stufen.
+   Mit „nur mit Endnote“ (Standard) bleiben nur Kopfzeile(n) und die Zeilen mit Endnote übrig –
+   andere Stufen und Zeilen ohne Note fallen weg. */
 async function buildImport(sel){
-  const G = W(), V = C.vorlage, P = importPlan(sel), t = V.t, col = V.col;
+  const G = W(), V = C.vorlage, P = importPlan(sel), t = V.t, col = V.col, kopfZeile = V.c.hi.row, nur = C.nurMitNote;
   if (t.kind === 'xlsx'){
     // Die Vorlage wird NICHT neu geschrieben, sondern nur an den nötigen Zellen geändert (sonst meldet Excel ggf. „Problem mit Inhalten“).
     const edits = new Map(), cell = (r, c, v) => { if (!edits.has(r)) edits.set(r, new Map()); edits.get(r).set(c, v); };
@@ -2221,10 +2252,13 @@ async function buildImport(sel){
       m.set(col.name + 1, { s:g.name }); m.set(col.vorname + 1, { s:g.vorname }); m.set(col.geb + 1, { d:g.geb }); m.set(col.klasse + 1, { s:g.klasse });
       m.set(col.fach + 1, { s:g.fach }); if (col.kursart != null) m.set(col.kursart + 1, { s:g.kursart }); m.set(col.note + 1, { s:iw.note });
       if (col.punkte != null && iw.punkte != null) m.set(col.punkte + 1, { n:iw.punkte }); return m; });
-    return { bytes:await patchXlsx(t.buf, V.sheet, edits, appendRows, col.geb + 1), ext:'xlsx', P };
+    const keep = nur ? { first:kopfZeile + 2, rows:new Set(P.write.map(x => x.n.r + 1)) } : null;
+    const res = await patchXlsx(t.buf, V.sheet, edits, appendRows, col.geb + 1, keep);
+    return { bytes:res.bytes, ext:'xlsx', P, gefiltert:res.gefiltert };
   }
-  const rows = t.rows.map(r => r.slice());
+  let rows = t.rows.map(r => r.slice());
   for (const { n, g } of P.write){ const iw = importWerte(g.E, fmtOfRow(g)); rows[n.r][col.note] = iw.note; if (col.punkte != null) rows[n.r][col.punkte] = iw.punkte ?? ''; }
+  if (nur){ const keep = new Set(P.write.map(x => x.n.r)); rows = rows.filter((r, i) => i <= kopfZeile || keep.has(i)); }
   const w = rows[c0(t)].length;
   for (const g of P.append){ const iw = importWerte(g.E, fmtOfRow(g)), a = new Array(w).fill('');
     a[col.name] = g.name; a[col.vorname] = g.vorname; a[col.geb] = deDate(g.geb); a[col.klasse] = g.klasse; a[col.fach] = g.fach;
@@ -2232,13 +2266,15 @@ async function buildImport(sel){
   const d = t.text.data || t.text.head || ';', q = v => { v = String(v ?? ''); return v.includes(d) || v.includes('"') ? '"' + v.replace(/"/g, '""') + '"' : v; };
   const txt = rows.map((r, i) => r.map(q).join(i === 0 ? (t.text.head || d) : d)).join(t.text.crlf ? '\r\n' : '\n') + (t.text.crlf ? '\r\n' : '\n');
   const bytes = t.text.enc === 'windows-1252' ? encodeCp1252(txt) : t.text.enc === 'utf-8-bom' || t.text.enc.startsWith('utf-16') ? new Uint8Array([0xEF, 0xBB, 0xBF, ...new TextEncoder().encode(txt)]) : new TextEncoder().encode(txt);
-  return { bytes, ext:(t.name.match(/\.(\w+)$/) || [, 'csv'])[1], P };
+  return { bytes, ext:(t.name.match(/\.(\w+)$/) || [, 'csv'])[1], P, gefiltert:nur };
 }
 const c0 = t => 0;
 /* ---------- Vorlage gezielt ändern (XML), statt sie mit ExcelJS neu zu schreiben ---------- */
 const colLetter = n => { let s = ''; while (n > 0){ const m = (n - 1) % 26; s = String.fromCharCode(65 + m) + s; n = Math.floor((n - 1) / 26); } return s; };
 const colNumOf = ref => ref.replace(/\d+/g, '').split('').reduce((n, ch) => n * 26 + ch.charCodeAt(0) - 64, 0);
-async function patchXlsx(buf, sheetName, edits, appendRows, gebCol){
+/* keep (optional): { first, rows } – Datenzeilen ab „first“, die nicht in „rows“ stehen, werden entfernt und die übrigen neu nummeriert.
+   Enthält das Blatt Formeln, wird aus Sicherheitsgründen nichts entfernt (gefiltert:false). */
+async function patchXlsx(buf, sheetName, edits, appendRows, gebCol, keep){
   const zip = await JSZip.loadAsync(buf), P = new DOMParser(), S = new XMLSerializer();
   const wbx = P.parseFromString(await zip.file('xl/workbook.xml').async('string'), 'application/xml');
   const rels = P.parseFromString(await zip.file('xl/_rels/workbook.xml.rels').async('string'), 'application/xml');
@@ -2249,7 +2285,7 @@ async function patchXlsx(buf, sheetName, edits, appendRows, gebCol){
   const doc = P.parseFromString(await zip.file(path).async('string'), 'application/xml');
   const NS = doc.documentElement.namespaceURI, el = n => doc.createElementNS(NS, n);
   const data = doc.getElementsByTagName('sheetData')[0];
-  const rowsByNum = new Map([...data.getElementsByTagName('row')].map(r => [+r.getAttribute('r'), r]));
+  let rowsByNum = new Map([...data.getElementsByTagName('row')].map(r => [+r.getAttribute('r'), r]));
   let dateStyle = null;
   const setVal = (c, v) => {
     while (c.firstChild) c.removeChild(c.firstChild);
@@ -2274,27 +2310,65 @@ async function patchXlsx(buf, sheetName, edits, appendRows, gebCol){
     if (!row){ row = el('row'); row.setAttribute('r', rn); const after = [...rowsByNum.keys()].sort((a, b) => a - b).find(k => k > rn); data.insertBefore(row, after ? rowsByNum.get(after) : null); rowsByNum.set(rn, row); }
     for (const [cn, v] of [...m].sort((a, b) => a[0] - b[0])) putCell(row, rn, cn, v);
   }
+  // Nur gewählte Zeilen behalten: übrige Datenzeilen entfernen, Rest lückenlos neu nummerieren
+  let gefiltert = false;
+  const setRow = (ref, n) => ref.replace(/\d+$/, String(n));
+  if (keep && !doc.getElementsByTagName('f').length){
+    gefiltert = true;
+    const map = new Map(); let cur = keep.first - 1;
+    for (const rn of [...rowsByNum.keys()].sort((a, b) => a - b)){
+      const row = rowsByNum.get(rn);
+      if (rn >= keep.first && !keep.rows.has(rn)){ data.removeChild(row); continue; }
+      const nr = rn < keep.first ? rn : ++cur; map.set(rn, nr);
+      if (nr !== rn){ row.setAttribute('r', nr); for (const c of row.getElementsByTagName('c')) c.setAttribute('r', setRow(c.getAttribute('r'), nr)); }
+    }
+    rowsByNum = new Map([...data.getElementsByTagName('row')].map(r => [+r.getAttribute('r'), r]));
+    // Verbundene Zellen in entfernten Zeilen entfallen, die übrigen wandern mit
+    for (const mc of [...doc.getElementsByTagName('mergeCell')]){
+      const [a, b = a] = mc.getAttribute('ref').split(':'), ra = map.get(+a.match(/\d+$/)[0]), rb = map.get(+b.match(/\d+$/)[0]);
+      if (ra == null || rb == null) mc.parentNode.removeChild(mc); else mc.setAttribute('ref', `${setRow(a, ra)}:${setRow(b, rb)}`);
+    }
+    const mcs = doc.getElementsByTagName('mergeCells')[0]; if (mcs){ const n = mcs.getElementsByTagName('mergeCell').length; if (n) mcs.setAttribute('count', n); else mcs.parentNode.removeChild(mcs); }
+  }
   let last = Math.max(0, ...rowsByNum.keys()), maxCol = 0;
   for (const m of appendRows){
     const rn = ++last, row = el('row'); row.setAttribute('r', rn); data.appendChild(row);
     for (const [cn, v] of [...m].sort((a, b) => a[0] - b[0])){ const c = el('c'); c.setAttribute('r', colLetter(cn) + rn); row.appendChild(c); setVal(c, v); maxCol = Math.max(maxCol, cn); }
   }
   const dim = doc.getElementsByTagName('dimension')[0];
-  if (dim && appendRows.length){ const ref = dim.getAttribute('ref') || 'A1'; const [a, b = a] = ref.split(':');
-    const endCol = Math.max(colNumOf(b), maxCol); dim.setAttribute('ref', `${a}:${colLetter(endCol)}${last}`); }
-  // Tabellen/Filter-Bereiche, die nur bis zur alten letzten Zeile reichen, bleiben unverändert (Excel akzeptiert das).
+  if (dim && (appendRows.length || gefiltert)){ const ref = dim.getAttribute('ref') || 'A1'; const [a, b = a] = ref.split(':');
+    const endCol = Math.max(colNumOf(b), maxCol); dim.setAttribute('ref', `${a}:${colLetter(endCol)}${Math.max(last, 1)}`); }
+  if (gefiltert){
+    // Filter- und Tabellenbereiche auf die neue letzte Zeile setzen
+    const fix = (node, attr = 'ref') => { const ref = node.getAttribute(attr); if (!ref || !ref.includes(':')) return; const [a, b] = ref.split(':'); node.setAttribute(attr, `${a}:${setRow(b, Math.max(last, +a.match(/\d+$/)[0] + 1))}`); };
+    for (const af of doc.getElementsByTagName('autoFilter')) fix(af);
+    const relPath = path.replace(/([^/]+)$/, '_rels/$1.rels');
+    if (zip.file(relPath)){
+      const sr = P.parseFromString(await zip.file(relPath).async('string'), 'application/xml');
+      for (const r of sr.getElementsByTagName('Relationship')){
+        if (!/\/table$/.test(r.getAttribute('Type') || '')) continue;
+        const tp = r.getAttribute('Target'), tpath = tp.startsWith('/') ? tp.slice(1) : path.replace(/[^/]+$/, '') + tp;
+        const norm = tpath.split('/').reduce((a, s) => { if (s === '..') a.pop(); else if (s !== '.') a.push(s); return a; }, []).join('/');
+        if (!zip.file(norm)) continue;
+        const td = P.parseFromString(await zip.file(norm).async('string'), 'application/xml');
+        fix(td.documentElement); for (const af of td.getElementsByTagName('autoFilter')) fix(af);
+        zip.file(norm, S.serializeToString(td));
+      }
+    }
+  }
   zip.file(path, S.serializeToString(doc));
-  return new Uint8Array(await zip.generateAsync({ type:'uint8array', compression:'DEFLATE' }));
+  return { bytes:new Uint8Array(await zip.generateAsync({ type:'uint8array', compression:'DEFLATE' })), gefiltert };
 }
 async function doImport(){
   const G = W(), sel = Object.keys(C.importSel).filter(s => C.importSel[s]);
   if (!C.vorlage) throw new Error('Bitte zuerst die Notendatei-Vorlage laden.');
   if (!sel.length) throw new Error('Bitte mindestens eine Stufe auswählen.');
+  if (!importPlan(sel).write.length && !importPlan(sel).append.length) throw new Error('Für die gewählten Stufen gibt es noch keine Endnoten – es wird keine Importdatei erzeugt.');
   const schon = sel.map(s => [s, G.protokoll.filter(p => p.stufe === s)]).filter(([, p]) => p.length);
   if (schon.length && !await confirmDlg('Schon übertragen!', `<p class="badline">${schon.map(([s, p]) => `Stufe ${esc(s)} wurde bereits am ${esc(p[p.length - 1].datum)} übertragen.`).join('<br>')}</p>
     <p>Eine doppelte Übertragung kann Noten in SchILD überschreiben. Trotzdem eine neue Importdatei erzeugen?</p>`, 'Ja, trotzdem erzeugen')) return;
   busy('Erzeuge Importdatei …'); await tick(10);
-  const { bytes, ext, P } = await buildImport(sel);
+  const { bytes, ext, P, gefiltert } = await buildImport(sel);
   busy();
   const name = `Import_SchILD_${G.info.SJ}_HJ${G.info.HJ}_${sel.join('-')}.${ext}`;
   saveBlob(new Blob([bytes], { type:ext === 'xlsx' ? XLSX_MIME : 'text/plain' }), name);
@@ -2305,7 +2379,8 @@ async function doImport(){
     await confirmDlg('⚠ Bitte beachten', `<p><b>Neue Schüler:innen, waren zum Quartal noch nicht in SchILD.</b> Nach der Übertragung bitte das Notenbild kontrollieren.</p>
       <p>${uniq(P.neu.map(g => `${g.name}, ${g.vorname} (${g.klasse})`)).map(esc).join('<br>')}</p><p>Die Kontrollliste wurde zusätzlich heruntergeladen.</p>`, 'Verstanden', 'Schließen');
   }
-  toast(`Importdatei erzeugt: ${P.write.length + P.append.length} Endnoten${P.missing.length ? `, ${P.missing.length} ohne Endnote` : ''}. Übertragung im Protokoll vermerkt – bitte die Gesamtdatei speichern.`, P.missing.length ? 'warn' : 'info');
+  if (C.nurMitNote && !gefiltert) toast('Hinweis: Die Vorlage enthält Formeln. Damit nichts kaputtgeht, enthält die Importdatei ausnahmsweise alle Zeilen der Vorlage.', 'warn');
+  toast(`Importdatei erzeugt: ${P.write.length + P.append.length} Endnoten${gefiltert ? ' (nur diese Zeilen)' : ''}${P.missing.length ? `, ${P.missing.length} ohne Endnote` : ''}. Übertragung im Protokoll vermerkt – bitte die Gesamtdatei speichern.`, P.missing.length ? 'warn' : 'info');
   renderAll();
 }
 
@@ -2351,14 +2426,20 @@ function renderSave(){
   $('#btnSave').onclick = () => guard(saveGesamt);
 }
 function renderOut(){
-  const k = klassen(), s = stufenOS();
+  const G = W(), alle = sortDe(uniq(G.rows.map(g => g.stufe))), k = klassen(true), s = stufenOS(true);
+  for (const st of alle) if (C.outSel[st] == null) C.outSel[st] = true;
   $('#oBody').innerHTML = `<p class="small">Die Übersichten sind mit dem Passwort verschlüsselt und gehen über die Abteilungsleitungen an die Klassen- bzw. Stufenleitungen.</p>
+    <p class="small">Für welche Stufen? <button class="small ghost" id="oAlle">alle</button> <button class="small ghost" id="oKeine">keine</button></p>
+    <div class="actions">${alle.map(st => `<label class="cb" style="border:1px solid var(--line);border-radius:6px;padding:.3rem .6rem"><input type="checkbox" data-out="${esc(st)}" ${outOk(st) ? 'checked' : ''}> <b>${esc(st)}</b></label>`).join('')}</div>
     <div class="actions">
-      <button class="primary" id="oAll">Alle Übersichten (ZIP)</button>
-      <button id="oK" ${k.length ? '' : 'disabled'}>Klassenübersichten Sek I (${k.length} Klassen)</button>
-      <button id="oS" ${s.length ? '' : 'disabled'}>Stufenübersichten Oberstufe (${s.length})</button>
+      <button class="primary" id="oAll" ${k.length + s.length ? '' : 'disabled'}>Übersichten der gewählten Stufen (ZIP)</button>
+      <button id="oK" ${k.length ? '' : 'disabled'}>nur Klassenübersichten Sek I (${k.length} Klassen)</button>
+      <button id="oS" ${s.length ? '' : 'disabled'}>nur Stufenübersichten Oberstufe (${s.length})</button>
       <button id="oP">Offene Punkte (Excel)</button>
     </div>`;
+  $('#oBody').querySelectorAll('[data-out]').forEach(c => c.onchange = () => { C.outSel[c.dataset.out] = c.checked; renderOut(); });
+  $('#oAlle').onclick = () => { alle.forEach(st => C.outSel[st] = true); renderOut(); };
+  $('#oKeine').onclick = () => { alle.forEach(st => C.outSel[st] = false); renderOut(); };
   $('#oAll').onclick = () => guard(() => zipOverviews('alle'));
   $('#oK').onclick = () => guard(() => zipOverviews('klassen'));
   $('#oS').onclick = () => guard(() => zipOverviews('stufen'));
@@ -2373,21 +2454,23 @@ function renderImport(){
     const p = G.protokoll.filter(x => x.stufe === s), last = p[p.length - 1];
     const n = G.rows.filter(g => g.stufe === s && STATUS_AKTIV(g.status)), e = n.filter(g => g.E).length;
     return `<label class="cb" style="border:1px solid var(--line);border-radius:6px;padding:.3rem .6rem"><input type="checkbox" data-imp="${esc(s)}" ${C.importSel[s] ? 'checked' : ''}>
-      <b>${esc(s)}</b> <span class="small muted">${e}/${n.length} Endnoten</span>${last ? ` <span class="pill warn">übertragen ${esc(last.datum)}</span>` : ''}</label>`; }).join('')}</div>`;
+      <b>${esc(s)}</b> <span class="small muted">${e}/${n.length} Endnoten</span>${last ? ` <span class="pill warn">übertragen ${esc(last.datum)}</span>` : ''}</label>`; }).join('')}</div>
+    <label class="cb"><input type="checkbox" id="nurMitNote" ${C.nurMitNote ? 'checked' : ''}> <b>Nur Zeilen mit Endnote</b> in die Importdatei (empfohlen) – andere Stufen und Zeilen ohne Note bleiben draußen</label>`;
   const sel = st.filter(s => C.importSel[s]);
   if (C.vorlage && sel.length){
     const P = importPlan(sel);
     h += `<div class="tiles"><div class="tile good"><b>${P.write.length + P.append.length}</b><span>Endnoten</span></div>
-      <div class="tile ${P.missing.length ? 'warn' : 'good'}"><b>${P.missing.length}</b><span>ohne Endnote</span></div>
+      <div class="tile ${P.missing.length ? 'warn' : 'good'}"><b>${P.missing.length}</b><span>ohne Endnote${C.nurMitNote ? ' (nicht in der Datei)' : ''}</span></div>
       <div class="tile ${P.neu.length ? 'warn' : ''}"><b>${uniq(P.neu.map(g => g.name + g.vorname + g.geb)).length}</b><span>neue Schüler:innen</span></div></div>`;
     if (P.neu.length) h += `<p class="warnline">⚠ Bitte beachten – neue Schüler:innen, waren zum Quartal noch nicht in SchILD. Nach der Übertragung bitte das Notenbild kontrollieren. Eine Kontrollliste wird mit erzeugt.</p>`;
     if (P.present.length) h += `<p class="warnline">${P.present.length} Zeilen der Vorlage enthalten schon eine Note – sie wird überschrieben. Ist das die richtige (leere) Vorlage?</p>`;
     h += details('Zeilen ohne Endnote', P.missing.length, 'warn', table(['Klasse','Fach','Name','Grund'], P.missing.map(x => [x.n.klasse, x.n.fach, `${x.n.name}, ${x.n.vorname}`, x.grund])));
   }
   h += `<div class="actions"><button class="primary" id="btnImp" ${C.vorlage && sel.length ? '' : 'disabled'}>Importdatei erzeugen</button></div>
-    <p class="small muted">Die Importdatei ist eine Kopie der Vorlage mit den Endnoten. Sie wird nicht verschlüsselt und bleibt beim Admin. Die Übertragung wird in der Gesamtdatei vermerkt.</p>`;
+    <p class="small muted">Die Importdatei ist eine Kopie der Vorlage mit den Endnoten${C.nurMitNote ? ', gekürzt auf die Zeilen mit Endnote' : ''}. Sie wird nicht verschlüsselt und bleibt beim Admin. Die Übertragung wird in der Gesamtdatei vermerkt.</p>`;
   $('#iBody').innerHTML = h;
   $('#iBody').querySelectorAll('[data-imp]').forEach(c => c.onchange = () => { C.importSel[c.dataset.imp] = c.checked; renderImport(); });
+  $('#nurMitNote').onchange = e => { C.nurMitNote = e.target.checked; renderImport(); };
   $('#btnImp').onclick = () => guard(doImport);
 }
 

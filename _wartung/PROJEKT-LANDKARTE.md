@@ -18,7 +18,7 @@ von claude.ai ein (siehe `_wartung/LIESMICH.md`). Nach einer Änderung genügt i
 | **Wartung Unterrichtsprojekte** | ganzer Ordner `_wartung` | alles | | | | | | |
 
 **Allgemeine Dateien** (`_wartung/allgemein/`: Lernseiten-Anweisung, Fehler-Checkliste,
-`pruefe.py`, MathJax-Notfall, Navigationsleiste, Schritt-für-Schritt-Vorlage,
+Kernkompetenzen (`kernkompetenzen.md`, seit 12.11.2026), Gruppen-Check-Baustein (`baustein_gruppencheck.html`, seit 13.11.2026), `pruefe.py`, MathJax-Notfall, Navigationsleiste, Schritt-für-Schritt-Vorlage,
 Rückblick-KA-Vorlage) sind in allen Projekten **identisch** und werden nur hier
 geändert.
 
@@ -133,7 +133,7 @@ BAUSTEIN-CSS, Schreibhilfen, Rückblick-KA-Engine, MathJax-Notfall und Navigatio
 darin enthalten; pro Klassenarbeit wird nur der Datenblock `ANPASSEN` geschrieben.
 `pruefe.py` kennt die Engine-Fassung (`RBKA_VERSION`). Bei einer Änderung an CSS oder Engine:
 Versionsnummer in den Kopfkommentaren **und** `RBKA_VERSION` erhöhen, danach die
-`_rbka`-Seiten nachziehen (derzeit `bruch_dezimal_rbka`, `rationale_zahlen_ka1_rbka`; beide v2). Der Hub (`build_hub.py`) zeigt
+`_rbka`-Seiten nachziehen (derzeit `bruch_dezimal_rbka` und `rueckblick_KA/rationale_zahlen_rbka`, beide v4; `rationale_zahlen_ka1_rbka` ist seit 13.11.2026 nur noch Weiterleitung). Oberstufen-Klausurnacharbeit mit eigenem Aufbau (`klausur1_q1_lk_rbka`, `klausur_fehler_rbka`) behält `typ="Rückblick"`. Der Hub (`build_hub.py`) zeigt
 `typ="Rückblick KA"` mit 📋 und `typ="KA-Vorbereitung"` (`_kavb`) mit 🎯.
 
 ## Geodreieck

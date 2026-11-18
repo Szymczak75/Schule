@@ -1,0 +1,365 @@
+<!-- ======================================================================
+     BAUSTEIN: Gruppenarbeit & Gruppen-Check  v2, 13.11.2026
+     v2: Gruppenrechner zeigt keine Sterne einzelner Mitglieder und keine Teamwert-Rechnung
+         mit den wenigsten Sternen – nur gültig/ungültig je Code und das Gruppenergebnis.
+     Herkunft: zuordnungen_tabelle_term_ls.html (Klasse 7), dort entwickelt.
+     Regeln: anweisung_lernseiten.txt TEIL 2.10.
+
+     WAS DER BAUSTEIN KANN
+     1. Sozialform-Wahl ganz oben: EA / PA / GA. Bei GA Pflicht: Gruppengröße 3–7.
+        EA und PA sind IMMER wählbar (Kinder können allein oder zu zweit sein).
+        Body-Klassen: sf-ea | sf-pa | sf-ga und gr-3 … gr-7.
+        Hilfsklassen für die Seite: .gc-nur-ea .gc-nur-pa .gc-nur-ga .gc-nur-team (PA+GA) .gc-nicht-ea
+     2. Gruppen-Check (optional, Rückfrage beim Erstellen): Gruppenschlüssel (3 Zeichen),
+        Sterne = erster Versuch je Check-Aufgabe, persönlicher Code (7 Zeichen) mit Prüfsumme –
+        gilt nur für diese Gruppe und diese Seite, doppelte Codes werden erkannt.
+     3. Teampunkte-Karte mit Gruppenrechner. Gruppenergebnis IMMER mit Höchstpunktzahl:
+        „x von max" je Zeile (nie Einzelsterne von Mitgliedern), Gesamt „x von max möglichen", Balken und Prozent.
+        Teamwert = (Summe + wenigste Sterne) : (n + 1), höchstens Anzahl Checks;
+        +1 „Alle dabei" (alle mindestens 60 % der Sterne); +0…+2 Präsentation (abschaltbar).
+
+     EINBAUEN
+     a) CSS-Block unten in den <style>-Bereich der Seite (nutzt --h, --hd, --hl, --line,
+        --green, --red, --ink der Seite – passt zu Orange und Blau).
+     b) TEIL A (Sozialform-Box) direkt nach </header>, vor die Reiter.
+        Den Rollentext unter „In der Gruppe" an die Methode anpassen.
+     c) TEIL B (Schlüssel + Codebox) in die Gruppen-Check-Karte: Schlüssel VOR die
+        Check-Aufgaben, Codebox DANACH. Check-Karte ist Einzelarbeit („👤 allein").
+     d) TEIL C (Teampunkte-Karte) als eigene Karte nach dem Gruppen-Check.
+     e) Datenblock GRUPPE anpassen und Engine unverändert vor </body> (vor das Seitenskript).
+     f) Die Aufgaben-Engine der Seite meldet bei JEDER Check-Aufgabe den ERSTEN Prüfversuch:
+           if (window.GC) GC.melde('g1', richtig);    // richtig = true/false; spätere Aufrufe zählen nicht
+        Weitere Schnittstellen: GC.sozialform() → 'ea'|'pa'|'ga'|null, GC.groesse() → 1|2|3…7|null.
+        Bei jeder Änderung der Sozialform feuert document das Ereignis 'gc-sozialform'.
+     Ohne Gruppen-Check: TEIL B und C weglassen, GRUPPE.checks = [] – die Sozialform-Wahl
+     funktioniert allein.
+
+     NICHT ÄNDERN: Engine und CSS. Fehler werden hier behoben (Version erhöhen) und dann in
+     alle Seiten übertragen, die den Baustein nutzen (pruefe.py meldet alte Fassungen).
+     ====================================================================== -->
+
+<style>
+/* ===== BAUSTEIN-CSS: Gruppen-Check (v2, 13.11.2026) ===== */
+.gc-box{background:#fff;border:3px solid var(--h);border-radius:12px;padding:12px 16px;margin-bottom:12px}
+.gc-box h2{margin:0 0 8px;font-size:1.15rem;color:var(--hd)}
+.gc-box h3{margin:12px 0 6px;font-size:1.05rem;color:var(--hd)}
+.gc-knoepfe{display:flex;flex-wrap:wrap;gap:8px}
+.gc-knoepfe .gc-zbtn{flex:1 1 180px}
+.gc-zbtn{min-width:64px;min-height:52px;padding:8px 14px;font-size:1.1rem;font-weight:700;border:2px solid var(--h);
+  background:#fff;color:var(--hd);border-radius:10px;cursor:pointer;font-family:inherit}
+.gc-zbtn.aktiv{background:var(--h);color:#fff}
+.gc-zahlwahl{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+.gc-btn{min-height:48px;padding:12px 18px;font-size:1rem;font-weight:700;border:2px solid var(--hd);
+  background:var(--hd);color:#fff;border-radius:10px;cursor:pointer;font-family:inherit}
+.gc-btn.sek{background:#fff;color:var(--hd)}
+.gc-zeile{display:none}
+.gc-box.gewaehlt .gc-wahl{display:none}
+.gc-box.gewaehlt .gc-zeile{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.gc-zeile .gc-btn{min-height:44px;padding:8px 14px}
+.gc-hinweis{margin:8px 0 0;font-weight:600;color:var(--hd)}
+.gc-nur-ea,.gc-nur-pa,.gc-nur-ga,.gc-nur-team{display:none}
+body.sf-ea .gc-nur-ea,body.sf-pa .gc-nur-pa,body.sf-ga .gc-nur-ga,body.sf-pa .gc-nur-team,body.sf-ga .gc-nur-team{display:block}
+body.sf-ea .gc-nicht-ea{display:none}
+.gc-merk{background:#fff;border:3px solid var(--h);border-radius:12px;padding:12px 16px;margin:14px 0}
+.gc-merk h4{margin:0 0 6px;font-size:1.1rem;color:var(--hd)}
+.gc-eingabe{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+input.gc-code{width:150px;min-height:48px;font-size:1.1rem;text-transform:uppercase;letter-spacing:2px;
+  border:2px solid var(--line);border-radius:10px;padding:6px 10px;font-family:inherit}
+.gc-codebox{display:none;margin-top:16px;background:#fff;border:3px solid var(--hd);border-radius:12px;padding:14px 16px}
+.gc-codebox.zeig{display:block}
+.gc-codebox .gc-codetext{font-size:1.8rem;font-weight:700;letter-spacing:4px;color:var(--hd)}
+.gc-sterne{font-size:1.5rem}
+.gc-liste{display:grid;gap:8px;margin-top:8px}
+.gc-mzeile{display:flex;flex-wrap:wrap;align-items:center;gap:10px;border:1px solid var(--line);border-radius:10px;padding:8px 12px;background:#fff}
+.gc-mname{min-width:110px;font-weight:700}
+.gc-erg{display:none;margin-top:14px}
+.gc-erg.zeig{display:block}
+.gc-erow{border-radius:10px;padding:10px 14px;margin-top:8px;font-size:1rem;font-weight:600}
+.gc-erow.ok{background:var(--green);color:#fff}
+.gc-erow.bad{background:var(--red);color:#fff}
+.gc-erow.neutral{background:#fff;border:2px solid var(--line)}
+.gc-gesamt{margin-top:12px;background:var(--hl);border:3px solid var(--hd);border-radius:12px;padding:14px 16px;font-size:1.2rem;font-weight:700}
+.gc-von{font-weight:600}
+.gc-balken{margin-top:10px;height:18px;background:#fff;border:2px solid var(--hd);border-radius:9px;overflow:hidden}
+.gc-balken > div{height:100%;background:var(--hd)}
+.gc-prozent{margin:8px 0 0;font-size:1.05rem;font-weight:600}
+/* ===== ENDE BAUSTEIN-CSS Gruppen-Check ===== */
+</style>
+
+<!-- ===== TEIL A: Sozialform-Wahl (nach </header>) ===== -->
+<section class="gc-box" id="gc-box">
+  <div class="gc-wahl">
+    <h2>Wie arbeitest du heute?</h2>
+    <div class="gc-knoepfe">
+      <button type="button" class="gc-zbtn" data-sf="ea">&#128100; Allein (EA)</button>
+      <button type="button" class="gc-zbtn" data-sf="pa">&#128101; Zu zweit (PA)</button>
+      <button type="button" class="gc-zbtn" data-sf="ga">&#128106; In der Gruppe (GA)</button>
+    </div>
+    <div id="gc-groesse" hidden>
+      <h3>Wie viele seid ihr in der Gruppe?</h3>
+      <div class="gc-zahlwahl">
+        <button type="button" class="gc-zbtn" data-gr="3">3</button>
+        <button type="button" class="gc-zbtn" data-gr="4">4</button>
+        <button type="button" class="gc-zbtn" data-gr="5">5</button>
+        <button type="button" class="gc-zbtn" data-gr="6">6</button>
+        <button type="button" class="gc-zbtn" data-gr="7">7</button>
+      </div>
+    </div>
+  </div>
+  <div class="gc-zeile"><span id="gc-text"></span><button type="button" class="gc-btn sek" id="gc-aendern">ändern</button></div>
+  <!-- ANPASSEN: Texte je Sozialform passend zur Methode der Seite -->
+  <div class="gc-nur-ea"><p style="margin:10px 0 0"><b>Allein:</b> Du bearbeitest alles allein. Wo „zu zweit" oder „in der Gruppe" steht, gibt es einen Auftrag für dich allein.</p></div>
+  <div class="gc-nur-pa"><p style="margin:10px 0 0"><b>Zu zweit:</b> Teilt euch Aufgaben auf und erklärt sie euch danach gegenseitig.</p></div>
+  <div class="gc-nur-ga"><p style="margin:10px 0 0"><b>In der Gruppe:</b> Verteilt die Rollen Zeitwächter:in, Schreiber:in, Prüfer:in und Sprecher:in. Zu dritt übernimmt eine Person zwei Rollen, ab fünf Personen gibt es Rollen doppelt. Wechselt die Rollen bei jeder Karte.</p></div>
+</section>
+
+<!-- ===== TEIL B: Gruppenschlüssel (vor die Check-Aufgaben) ===== -->
+<div class="gc-merk gc-nicht-ea" id="gc-schluessel">
+  <h4>&#128273; Euer Gruppenschlüssel</h4>
+  <p><b>Eine</b> Person aus eurer Gruppe tippt auf „Schlüssel erzeugen" und sagt den Schlüssel an. Alle anderen tippen genau diesen Schlüssel ein. Ohne Schlüssel gibt es keinen Code &ndash; und ein Code gilt nur für eure Gruppe.</p>
+  <div class="gc-eingabe">
+    <input type="text" class="gc-code" id="gc-key" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Gruppenschlüssel">
+    <button type="button" class="gc-btn sek" id="gc-key-neu">Schlüssel für unsere Gruppe erzeugen</button>
+  </div>
+  <p id="gc-key-info" style="margin-top:8px"></p>
+</div>
+<!-- … hier die Check-Aufgaben der Seite (erster Versuch zählt, GC.melde) … -->
+<!-- ===== TEIL B: Codebox (nach die Check-Aufgaben) ===== -->
+<p id="gc-offen">Noch nicht alle Aufgaben geprüft &ndash; deine Sterne erscheinen danach hier.</p>
+<div class="gc-codebox" id="gc-codebox"></div>
+
+<!-- ===== TEIL C: Teampunkte-Karte (eigene Karte; id/Reiter an die Seite anpassen) ===== -->
+<section class="karte" id="kTEAM">
+  <h2>Teampunkte <span class="sf">&#128106; in der Gruppe</span></h2>
+  <div class="stand"><p><b>Wo wir gerade stehen:</b> Jede:r von euch hat beim Gruppen-Check einen Code bekommen. Ein Mitglied gibt jetzt den Gruppenschlüssel und alle Codes ein. Jeder Code darf nur einmal vorkommen.</p></div>
+  <p class="gc-nur-ea"><b>Allein:</b> Die Teampunkte entfallen. Notiere deine Sterne aus dem Gruppen-Check im Heft.</p>
+  <div class="gc-merk" id="gc-regeln"></div>
+  <div class="gc-nicht-ea">
+    <h3>Der Gruppenrechner</h3>
+    <p><b>Euer Gruppenschlüssel:</b></p>
+    <div class="gc-eingabe"><input type="text" class="gc-code" id="gc-re-key" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Gruppenschlüssel für den Rechner"></div>
+    <p style="margin-top:12px"><b>Wie viele seid ihr?</b></p>
+    <div class="gc-zahlwahl" id="gc-re-n">
+      <button type="button" class="gc-zbtn" data-n="2">2</button>
+      <button type="button" class="gc-zbtn" data-n="3">3</button>
+      <button type="button" class="gc-zbtn" data-n="4">4</button>
+      <button type="button" class="gc-zbtn" data-n="5">5</button>
+      <button type="button" class="gc-zbtn" data-n="6">6</button>
+      <button type="button" class="gc-zbtn" data-n="7">7</button>
+    </div>
+    <p>Tragt die Codes aller Mitglieder ein:</p>
+    <div class="gc-liste" id="gc-re-liste"></div>
+    <div id="gc-re-praes-box">
+      <p style="margin-top:14px"><b>Präsentationsbonus</b> (tippt die Lehrkraft an):</p>
+      <div class="gc-zahlwahl" id="gc-re-p">
+        <button type="button" class="gc-zbtn" data-p="0">+0</button>
+        <button type="button" class="gc-zbtn" data-p="1">+1</button>
+        <button type="button" class="gc-zbtn" data-p="2">+2</button>
+      </div>
+    </div>
+    <div style="margin-top:14px"><button type="button" class="gc-btn" id="gc-re-btn">&#127942; Teampunkte berechnen</button></div>
+    <div class="gc-erg" id="gc-re-erg"></div>
+  </div>
+</section>
+
+<script>
+/* ===== ANPASSEN: Datenblock Gruppenarbeit ===== */
+var GRUPPE = {
+  key: 'ANPASSEN-seitenname',        /* eindeutig je Seite, z. B. 'm7-zuordnungen-ls' */
+  methode: 'Gruppenpuzzle',          /* Gruppenpuzzle | Expertenrunde | Think–Pair–Share | Museumsgang | Placemat | Kugellager | Lerntempoduett | Stationenlernen */
+  checks: [ 'g1', 'g2', 'g3', 'g4', 'g5' ],   /* IDs der Check-Aufgaben; [] = kein Gruppen-Check */
+  rechnerKarte: 'Karte 7',           /* Name der Teampunkte-Karte, wie im Reiter */
+  praesentation: true                /* Präsentationsbonus 0–2 der Lehrkraft */
+};
+/* ===== ENDE ANPASSEN ===== */
+</script>
+
+<script>
+/* ============================================================
+   BAUSTEIN: Gruppen-Check-Engine (v2, 13.11.2026) – nicht ändern
+   ============================================================ */
+(function(){
+  "use strict";
+  var KEY = 'gc|' + GRUPPE.key;
+  var G;
+  try { G = JSON.parse(sessionStorage.getItem(KEY) || 'null'); } catch (e) { G = null; }
+  G = G || {};
+  G.sf = G.sf || null; G.gr = G.gr || null; G.erster = G.erster || {};
+  G.key = G.key || ''; G.keyNeu = !!G.keyNeu; G.code = G.code || null;
+  G.rech = G.rech || { n:null, codes:[], praes:null, ber:false, key:'' };
+  function sichern(){ try { sessionStorage.setItem(KEY, JSON.stringify(G)); } catch (e) {} }
+  function $(id){ return document.getElementById(id); }
+
+  /* ---------- Sozialform ---------- */
+  var NAME = { ea:'allein (EA)', pa:'zu zweit (PA)', ga:'in der Gruppe (GA)' };
+  function groesse(){ return G.sf === 'ea' ? 1 : G.sf === 'pa' ? 2 : G.sf === 'ga' ? G.gr : null; }
+  function sfZeig(){
+    var box = $('gc-box'); if (!box) return;
+    var fertig = G.sf === 'ea' || G.sf === 'pa' || (G.sf === 'ga' && G.gr);
+    var b = document.body;
+    b.classList.remove('sf-ea', 'sf-pa', 'sf-ga', 'gr-3', 'gr-4', 'gr-5', 'gr-6', 'gr-7');
+    if (fertig) { b.classList.add('sf-' + G.sf); if (G.sf === 'ga') b.classList.add('gr-' + G.gr); }
+    box.classList.toggle('gewaehlt', !!fertig);
+    $('gc-groesse').hidden = G.sf !== 'ga';
+    box.querySelectorAll('[data-sf]').forEach(function(x){ x.classList.toggle('aktiv', x.getAttribute('data-sf') === G.sf); });
+    box.querySelectorAll('[data-gr]').forEach(function(x){ x.classList.toggle('aktiv', +x.getAttribute('data-gr') === G.gr); });
+    $('gc-text').innerHTML = fertig ? 'Du arbeitest: <b>' + NAME[G.sf] + (G.sf === 'ga' ? ', ' + G.gr + ' Personen' : '') + '</b>' : '';
+    try { document.dispatchEvent(new CustomEvent('gc-sozialform', { detail:{ sf:G.sf, groesse:groesse() } })); } catch (e) {}
+  }
+  if ($('gc-box')) {
+    $('gc-box').querySelectorAll('[data-sf]').forEach(function(x){
+      x.addEventListener('click', function(){
+        G.sf = x.getAttribute('data-sf'); if (G.sf !== 'ga') G.gr = null;
+        if (G.sf === 'pa') G.rech.n = 2;
+        sfZeig(); reBau(); codeZeig(); sichern();
+      });
+    });
+    $('gc-box').querySelectorAll('[data-gr]').forEach(function(x){
+      x.addEventListener('click', function(){ G.gr = +x.getAttribute('data-gr'); G.rech.n = G.gr; sfZeig(); reBau(); codeZeig(); sichern(); });
+    });
+    $('gc-aendern').addEventListener('click', function(){ G.sf = null; G.gr = null; sfZeig(); sichern(); });
+  }
+
+  /* ---------- Code (Gruppenschlüssel + Prüfsumme) ----------
+     7 Zeichen: 3 Zufallszeichen, 1 verschlüsseltes Sterne-Zeichen, 3 Prüfzeichen.
+     Prüfsumme hängt von Schlüssel und Seite ab. */
+  var ZEICHEN = 'ACDEFGHJKMNPQRTUVWXY3479', NZ = ZEICHEN.length;
+  var CHECKS = GRUPPE.checks || [], MAXS = CHECKS.length;
+  var MAXP = GRUPPE.praesentation ? 2 : 0;
+  var SCHWELLE = Math.ceil(MAXS * 0.6);
+  function streu(str){ var h = 2166136261; for (var i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619) >>> 0; } return h >>> 0; }
+  function norm(c){ return String(c || '').toUpperCase().replace(/[^A-Z0-9]/g, ''); }
+  function gueltig(k){ k = norm(k); if (k.length !== 3) return false; for (var i = 0; i < 3; i++) if (ZEICHEN.indexOf(k.charAt(i)) < 0) return false; return true; }
+  function baueCode(schl, r, s){
+    var basis = GRUPPE.key + '|' + norm(schl) + '|' + r.join('.');
+    var h = streu(basis), sz = (h % NZ + 7 * s) % NZ, p = streu(basis + '|' + s + '#');
+    var k0 = p % NZ, k1 = Math.floor(p / NZ) % NZ, k2 = Math.floor(p / (NZ * NZ)) % NZ;
+    var t = [ r[0], k0, sz, r[1], k1, r[2], k2 ].map(function(i){ return ZEICHEN.charAt(i); }).join('');
+    return t.slice(0, 3) + '-' + t.slice(3);
+  }
+  function liesCode(c, schl){
+    c = norm(c);
+    if (c.length !== 7 || !gueltig(schl)) return null;
+    var idx = [];
+    for (var i = 0; i < 7; i++) { var j = ZEICHEN.indexOf(c.charAt(i)); if (j < 0) return null; idx.push(j); }
+    var r = [ idx[0], idx[3], idx[5] ];
+    var h = streu(GRUPPE.key + '|' + norm(schl) + '|' + r.join('.'));
+    var s = (((idx[2] - h % NZ) % NZ + NZ) % NZ * 7) % NZ;   /* 7 ist zu sich selbst invers (mod 24) */
+    if (s > MAXS) return null;
+    return baueCode(schl, r, s).replace('-', '') === c ? s : null;
+  }
+  function sterneText(s){ var t = ''; for (var i = 0; i < MAXS; i++) t += i < s ? '&#11088;' : '&#9734;'; return t; }
+  function komma(x){ return String(Math.round(x * 10) / 10).replace('.', ','); }
+
+  /* ---------- Gruppenschlüssel + Codebox ---------- */
+  function keyZeig(){
+    var inp = $('gc-key'), info = $('gc-key-info'); if (!inp) return;
+    inp.value = G.key || '';
+    if (!G.key) info.innerHTML = '';
+    else if (!gueltig(G.key)) info.innerHTML = '&#10007; Ein Schlüssel hat genau 3 Zeichen. Bitte genau abschreiben.';
+    else info.innerHTML = G.keyNeu ? '&#10004; Diesen Schlüssel sagst du deiner Gruppe an: <b>' + norm(G.key) + '</b>' : '&#10004; Schlüssel eingetragen.';
+  }
+  if ($('gc-key')) {
+    $('gc-key').addEventListener('input', function(){ G.key = norm(this.value).slice(0, 3); G.keyNeu = false; $('gc-key-info').innerHTML = ''; sichern(); codeZeig(); });
+    $('gc-key').addEventListener('change', keyZeig);
+    $('gc-key-neu').addEventListener('click', function(){
+      var k = ''; for (var i = 0; i < 3; i++) k += ZEICHEN.charAt(Math.floor(Math.random() * NZ));
+      G.key = k; G.keyNeu = true; if (!G.rech.key) G.rech.key = k;
+      keyZeig(); reBau(); sichern(); codeZeig();
+    });
+  }
+  function codeZeig(){
+    var box = $('gc-codebox'), off = $('gc-offen'); if (!box || !MAXS) return;
+    var fertig = CHECKS.every(function(id){ return G.erster[id] !== undefined; });
+    if (!fertig) { box.classList.remove('zeig'); if (off) off.style.display = ''; return; }
+    var s = CHECKS.reduce(function(a, id){ return a + G.erster[id]; }, 0);
+    if (!G.code || G.code.s !== s) { G.code = { s:s, r:[0, 1, 2].map(function(){ return Math.floor(Math.random() * NZ); }) }; sichern(); }
+    if (off) off.style.display = 'none';
+    var h = '<p class="gc-sterne">' + sterneText(s) + '</p><p><b>Deine Sterne: ' + s + ' von ' + MAXS + '</b> (erster Versuch).</p>';
+    if (G.sf === 'ea') h += '<p>Notiere deine Sterne im Heft. Wenn du willst, kannst du die Aufgaben jetzt mit den Tipps weiterüben.</p>';
+    else if (!gueltig(G.key)) h += '<p><b>Dein Code fehlt noch:</b> Trage oben euren Gruppenschlüssel ein. Dann erscheint dein Code hier.</p>';
+    else h += '<p>Dein Code für den Gruppenrechner (Gruppenschlüssel ' + norm(G.key) + '):</p><p class="gc-codetext">' + baueCode(G.key, G.code.r, s) + '</p>' +
+      '<p>Gib diesen Code an das Mitglied, das den Gruppenrechner auf ' + GRUPPE.rechnerKarte + ' bedient. Der Code gilt nur für deine Gruppe und nur einmal. Wenn du willst, kannst du die Aufgaben jetzt mit den Tipps weiterüben.</p>';
+    box.innerHTML = h; box.classList.add('zeig');
+  }
+
+  /* ---------- Teampunkte ---------- */
+  function regelnZeig(){
+    var r = $('gc-regeln'); if (!r) return;
+    var max = MAXS + 1 + MAXP;
+    r.innerHTML = '<h4>&#127942; So zählen die Teampunkte</h4><ol>' +
+      '<li><b>Sterne:</b> Jede:r holt beim Gruppen-Check 0 bis ' + MAXS + ' Sterne. Es zählt der erste Versuch.</li>' +
+      '<li><b>Teamwert:</b> Alle Sterne werden zusammengezählt. Das Mitglied mit den <b>wenigsten</b> Sternen zählt dabei <b>doppelt</b>. Dann wird durch (Anzahl der Mitglieder + 1) geteilt. Höchstens ' + MAXS + '.</li>' +
+      '<li><b>+1 Bonus „Alle dabei":</b> wenn jedes Mitglied mindestens ' + SCHWELLE + ' Sterne hat.</li>' +
+      (MAXP ? '<li><b>+0, +1 oder +2 Präsentationsbonus:</b> vergibt die Lehrkraft nach eurem Vortrag.</li>' : '') +
+      '</ol><p>Höchstens sind ' + MAXS + ' + 1' + (MAXP ? ' + ' + MAXP : '') + ' = ' + max + ' Teampunkte möglich. Große und kleine Gruppen haben die gleichen Chancen. Es lohnt sich, dass <b>alle</b> es verstehen &ndash; also helft euch gegenseitig!</p>';
+    if ($('gc-re-praes-box')) $('gc-re-praes-box').hidden = !MAXP;
+  }
+  function reBau(){
+    var liste = $('gc-re-liste'); if (!liste) return;
+    var n = G.rech.n || 4;
+    $('gc-re-key').value = G.rech.key || '';
+    liste.innerHTML = '';
+    for (var i = 0; i < n; i++) (function(i){
+      var z = document.createElement('div'); z.className = 'gc-mzeile';
+      z.innerHTML = '<span class="gc-mname">Mitglied ' + (i + 1) + '</span>';
+      var inp = document.createElement('input');
+      inp.type = 'text'; inp.className = 'gc-code'; inp.setAttribute('autocomplete', 'off'); inp.setAttribute('autocapitalize', 'characters');
+      inp.setAttribute('spellcheck', 'false'); inp.setAttribute('aria-label', 'Code von Mitglied ' + (i + 1));
+      inp.value = G.rech.codes[i] || '';
+      inp.addEventListener('input', function(){ G.rech.codes[i] = inp.value; sichern(); });
+      z.appendChild(inp); liste.appendChild(z);
+    })(i);
+    document.querySelectorAll('#gc-re-n [data-n]').forEach(function(x){ x.classList.toggle('aktiv', +x.getAttribute('data-n') === n); });
+    document.querySelectorAll('#gc-re-p [data-p]').forEach(function(x){ x.classList.toggle('aktiv', G.rech.praes !== null && +x.getAttribute('data-p') === G.rech.praes); });
+  }
+  function rechne(){
+    var erg = $('gc-re-erg'), n = G.rech.n || 4, sterne = [], h = '', fehler = false, gesehen = {};
+    if (!gueltig(G.rech.key)) { erg.innerHTML = '<div class="gc-erow bad">&#10007; Tragt zuerst euren Gruppenschlüssel (3 Zeichen) ein.</div>'; erg.classList.add('zeig'); return; }
+    for (var i = 0; i < n; i++) {
+      var c = norm(G.rech.codes[i]), s = liesCode(c, G.rech.key);
+      if (c && gesehen[c]) { fehler = true; h += '<div class="gc-erow bad">&#10007; Mitglied ' + (i + 1) + ': Dieser Code wurde schon bei Mitglied ' + gesehen[c] + ' eingegeben. Jede:r hat einen eigenen Code.</div>'; continue; }
+      if (c) gesehen[c] = i + 1;
+      if (s === null) { fehler = true; h += '<div class="gc-erow bad">&#10007; Mitglied ' + (i + 1) + ': Dieser Code ist ungültig oder gehört nicht zu eurem Gruppenschlüssel. Bitte genau abschreiben.</div>'; }
+      else { sterne.push(s); h += '<div class="gc-erow neutral">Mitglied ' + (i + 1) + ': &#10004; Code gültig</div>'; }   /* keine Einzelsterne zeigen (TEIL 2.10) */
+    }
+    if (fehler) { erg.innerHTML = h; erg.classList.add('zeig'); return; }
+    var summe = sterne.reduce(function(a, b){ return a + b; }, 0), min = Math.min.apply(null, sterne);
+    var team = (summe + min) / (n + 1), alle = min >= SCHWELLE ? 1 : 0, p = MAXP ? G.rech.praes : 0;
+    var gesamt = team + alle + (p === null ? 0 : p);
+    var maxGes = MAXS + 1 + MAXP, bezug = p === null ? MAXS + 1 : maxGes;
+    var anteil = Math.round(gesamt / bezug * 100);
+    h += '<div class="gc-erow neutral"><b>Teamwert:</b> ' + komma(team) + ' <span class="gc-von">von höchstens ' + MAXS + '</span></div>';
+    h += '<div class="gc-erow ' + (alle ? 'ok' : 'neutral') + '"><b>Bonus „Alle dabei":</b> ' + (alle ? '+1 von 1 &ndash; alle haben mindestens ' + SCHWELLE + ' Sterne!' : '+0 von 1 &ndash; nicht alle haben mindestens ' + SCHWELLE + ' Sterne.') + '</div>';
+    if (MAXP) h += '<div class="gc-erow neutral"><b>Präsentationsbonus:</b> ' + (p === null ? 'noch offen (höchstens +' + MAXP + ') &ndash; die Lehrkraft tippt ihn nach eurem Vortrag an.' : '+' + p + ' von ' + MAXP) + '</div>';
+    h += '<div class="gc-gesamt">&#127942; Teampunkte: ' + komma(gesamt) + ' <span class="gc-von">von ' + bezug + ' möglichen' + (p === null ? ' (ohne Präsentationsbonus; mit Bonus höchstens ' + maxGes + ')' : '') + '</span>' +
+      '<div class="gc-balken" role="img" aria-label="' + komma(gesamt) + ' von ' + bezug + ' Teampunkten"><div style="width:' + Math.min(100, anteil) + '%"></div></div>' +
+      '<p class="gc-prozent">Das sind ' + anteil + '&nbsp;% der möglichen Punkte.</p></div>';
+    erg.innerHTML = h; erg.classList.add('zeig');
+  }
+  if ($('gc-re-liste')) {
+    $('gc-re-key').addEventListener('input', function(){ G.rech.key = norm(this.value).slice(0, 3); sichern(); });
+    document.querySelectorAll('#gc-re-n [data-n]').forEach(function(x){
+      x.addEventListener('click', function(){ G.rech.n = +x.getAttribute('data-n'); G.rech.ber = false; $('gc-re-erg').classList.remove('zeig'); reBau(); sichern(); });
+    });
+    document.querySelectorAll('#gc-re-p [data-p]').forEach(function(x){
+      x.addEventListener('click', function(){ G.rech.praes = +x.getAttribute('data-p'); reBau(); if (G.rech.ber) rechne(); sichern(); });
+    });
+    $('gc-re-btn').addEventListener('click', function(){ G.rech.ber = true; rechne(); sichern(); });
+  }
+
+  /* ---------- Schnittstelle für die Seite ---------- */
+  window.GC = {
+    melde: function(id, richtig){
+      if (CHECKS.indexOf(id) < 0 || G.erster[id] !== undefined) return;
+      G.erster[id] = richtig ? 1 : 0; sichern(); codeZeig();
+    },
+    sozialform: function(){ return G.sf; },
+    groesse: groesse
+  };
+
+  sfZeig(); keyZeig(); regelnZeig(); reBau(); codeZeig();
+  if (G.rech.ber) rechne();
+})();
+/* ============ ENDE BAUSTEIN Gruppen-Check-Engine ============ */
+</script>
