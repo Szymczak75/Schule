@@ -207,6 +207,14 @@ eine Marke. `pruefe.py` meldet das seitdem als `DOPPELT`.
 den Kreis links vor der Zeile" – falsch, der Kreis blendet nur ein/aus. Richtig sind die
 **drei Punkte am rechten Zeilenrand**. Bedienangaben nicht raten, sondern nachschlagen.
 
+**26. Gesperrte Zahlenfelder am iPad unsichtbar** (November 2026, rund 240 Seiten). Nach
+„Prüfen“ wurden Eingabefelder per `disabled` gesperrt. Safari auf dem iPad zeichnet solche
+Felder nach dem Wieder-Einblenden einer Karte fast durchsichtig – die Zahlen schienen weg,
+erst Neuladen zeigte sie wieder. Felder deshalb per `readOnly` + Klasse `.zu` sperren, nie per
+`disabled` (Buttons dürfen `disabled` bleiben). Bestandsseiten tragen dafür
+`baustein_ipad_feldsperre.html` im `<head>`; der SFS-Baustein macht es seit v2 selbst.
+`pruefe.py` meldet `disabled`-gesperrte Felder ohne Baustein als `IPADSPERRE`.
+
 ### Einzelfälle mit Signalwirkung
 
 - **Externe Bibliothek eingebunden** (GeoGebra `deployggb.js`) und dazu eine `.ggb`-Datei

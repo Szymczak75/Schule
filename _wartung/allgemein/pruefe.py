@@ -527,6 +527,12 @@ def pruefe(pfad):
         fehler('TREX', 'T-Rex ohne Hinweis „Made by ASzym"')
     if 'backface-visibility' in css and 'min-height' not in css:
         fehler('FLIP', 'Flip-Card ohne min-height')
+    # iPad: disabled-Textfelder werden nach dem Wieder-Einblenden blass gezeichnet (18.11.2026)
+    if (re.search(r'\.disabled\s*=[^=]', js) and re.search(r'<input|createElement\([\'"]input', h)
+            and 'BAUSTEIN: iPad-Feldsperre' not in h and 'readOnly' not in js):
+        hinweis('IPADSPERRE', 'Eingabefelder werden per disabled gesperrt – am iPad verblassen die '
+                              'Zahlen nach einem Kartenwechsel; readOnly + .zu verwenden oder '
+                              'baustein_ipad_feldsperre.html einsetzen')
 
     # Navigationsleiste (TEIL 3.6) – nicht auf Ordner-Übersichten/Weiterleitungen (hubignore)
     if 'name="hubignore"' not in h:

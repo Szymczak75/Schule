@@ -99,9 +99,9 @@ input.num,input.txt,select{font:inherit;font-size:1.125rem;min-height:44px;borde
 input.num{width:4.2rem;text-align:center}
 input.txt{width:14rem;max-width:100%}
 select{-webkit-appearance:none;appearance:none;padding-right:30px;background-image:linear-gradient(45deg,transparent 50%,var(--ink) 50%),linear-gradient(135deg,var(--ink) 50%,transparent 50%);background-position:calc(100% - 16px) 50%,calc(100% - 10px) 50%;background-size:6px 6px,6px 6px;background-repeat:no-repeat;vertical-align:middle;margin:2px 0}
-input:disabled,select:disabled{opacity:1;color:var(--ink);-webkit-text-fill-color:var(--ink)}
-input.ok,input.ok:disabled,select.ok,select.ok:disabled{background-color:var(--green);border-color:var(--green);color:#fff;-webkit-text-fill-color:#fff}
-input.bad,input.bad:disabled,select.bad,select.bad:disabled{background-color:var(--red);border-color:var(--red);color:#fff;-webkit-text-fill-color:#fff}
+input:disabled,input.zu,select:disabled{opacity:1;color:var(--ink);-webkit-text-fill-color:var(--ink)}
+input.ok,input.ok:disabled,input.ok.zu,select.ok,select.ok:disabled{background-color:var(--green);border-color:var(--green);color:#fff;-webkit-text-fill-color:#fff}
+input.bad,input.bad:disabled,input.bad.zu,select.bad,select.bad:disabled{background-color:var(--red);border-color:var(--red);color:#fff;-webkit-text-fill-color:#fff}
 .frac-in{display:inline-flex;flex-direction:column;align-items:center;gap:5px;vertical-align:middle}
 .frac-in input{width:4.2rem;text-align:center;font-weight:800}
 .frac-in .bar{display:block;width:100%;height:3px;background:var(--ink);border-radius:2px}
@@ -226,6 +226,38 @@ details.ml summary{min-height:44px;padding:10px 0;font-weight:800;color:var(--am
 .dino-ecke>:not(.dino-huelle):not(.dino-ikon){position:absolute!important;right:calc(100% + 6px)!important;bottom:26px!important;left:auto!important;top:auto!important;white-space:nowrap}
 .dino-tipp-fest{right:96px!important;bottom:34px!important;left:auto!important;top:auto!important}
 </style>
+<!-- =============================================================================
+     BAUSTEIN: iPad-Feldsperre  (v1, 18.11.2026)
+     Einfügen: UNVERÄNDERT als letztes Element in den <head> jeder Seite, deren Skript
+     Texteingaben per  feld.disabled = …  sperrt.
+     Hintergrund: Safari (iPad) zeichnet gesperrte (disabled) Eingabefelder nach dem
+     Wieder-Einblenden einer Karte fast durchsichtig – die Zahlen scheinen weg.
+     Der Baustein lenkt  .disabled  bei Texteingaben (text, number, search, tel, email,
+     url) auf  readOnly  + Klasse  .zu  um. Das Feld bleibt unveränderbar, wird aber
+     normal gezeichnet. Lesen von  .disabled  liefert weiter den Sperrzustand.
+     Nicht betroffen: Buttons, Checkboxen, Radios, Selects.
+     Neue Seiten sperren Felder direkt per readOnly + .zu; dann ist der Baustein unnötig.
+     ========================================================================== -->
+<script>
+(function(){
+  try{
+    var P=HTMLInputElement.prototype, d=Object.getOwnPropertyDescriptor(P,'disabled');
+    if(!d||!d.set||P.__dinoSperre) return;
+    var TXT={text:1,number:1,search:1,tel:1,email:1,url:1};
+    Object.defineProperty(P,'disabled',{configurable:true,enumerable:d.enumerable,
+      get:function(){ return TXT[this.type] ? (d.get.call(this)||this.classList.contains('zu')) : d.get.call(this); },
+      set:function(v){
+        if(!TXT[this.type]){ d.set.call(this,v); return; }
+        d.set.call(this,false);
+        if(v){ if(!this.readOnly){ this.readOnly=true; this.__zuRO=true; } this.classList.add('zu'); }
+        else { if(this.__zuRO){ this.readOnly=false; this.__zuRO=false; } this.classList.remove('zu'); }
+      }});
+    P.__dinoSperre=true;
+  }catch(e){}
+})();
+</script>
+<style>input.zu{cursor:default}</style>
+<!-- ===== ENDE BAUSTEIN iPad-Feldsperre ===== -->
 </head>
 <body>
 
