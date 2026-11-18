@@ -15,7 +15,7 @@ Aufruf:
 import argparse, io, os, re, sys, pathlib
 
 DATEIEN = [
-    'bio/klasse09/lernseiten/blutzucker_kl9_erarbeitung.html',
+    'bio/klasse09/lernseiten/blutzucker_kl9_ls.html',
     'mathe/klasse07/konstruieren_argumentieren/winkel_geraden/winkel_dreieck_test.html',
     'mathe/klasse07/konstruieren_argumentieren/winkel_geraden/winkel_parallelen_ls.html',
     'mathe/klasse07/konstruieren_argumentieren/winkel_geraden/winkel_parallelen_ue.html',
