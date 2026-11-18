@@ -101,7 +101,7 @@ table.tabelle th{background:var(--blue-light)}
 /* Eingaben */
 input.in{font:inherit;font-size:1.125rem;min-height:44px;padding:6px 10px;border:2px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);width:8rem}
 input.in:focus{outline:none;border-color:var(--blue)}
-input.in:disabled{-webkit-text-fill-color:var(--ink);opacity:1;background:var(--bg)}
+input.in:disabled,input.in.zu{-webkit-text-fill-color:#22303f;color:#22303f;-webkit-opacity:1;opacity:1;background:var(--bg)}
 input.in.richtig{border-color:var(--green);border-width:3px}
 input.in.falsch{border-color:var(--red);border-width:3px}
 .felder{margin:8px 0}
@@ -333,7 +333,7 @@ function felderZustand(ts,ins){
   });
 }
 function felderLeeren(ts,ins,s){
-  ins.forEach(function(i,k){ if(i.classList.contains('falsch')) i.value=''; i.classList.remove('richtig','falsch'); i.disabled=false; ts.v[k]=i.value; });
+  ins.forEach(function(i,k){ if(i.classList.contains('falsch')) i.value=''; i.classList.remove('richtig','falsch'); i.readOnly=false; i.classList.remove('zu'); ts.v[k]=i.value; });
   ts.gep=false; s.bP.disabled=false; s.fb.hidden=true; s.bL.hidden=true; speichern();
 }
 
@@ -354,7 +354,7 @@ function mountCond(root,cfg){
     if(leer){ zeigeFb(s.fb,'info','Füllen Sie alle Felder aus.'); return; }
     if(unles){ zeigeFb(s.fb,'info','Mindestens ein Wert ist nicht lesbar. Erlaubt sind Dezimalzahlen mit Komma oder Punkt und Brüche in der Form <code>a/b</code>.'); return; }
     ts.gep=true;
-    ins.forEach(function(i){ i.disabled=true; i.classList.remove('richtig','falsch'); });
+    ins.forEach(function(i){ i.readOnly=true; i.classList.add('zu'); i.classList.remove('richtig','falsch'); });
     s.bP.disabled=true;
     var ok=co.every(function(v,i){ return nahe(v,cfg.T[i]); }); ts.ok=ok;
     if(ok){ ins.forEach(function(i){ i.classList.add('richtig'); }); zeigeFb(s.fb,'ok','✓ Richtig!'); return; }
@@ -385,7 +385,7 @@ function mountNum(root,cfg){
     if(ins.some(function(i){ return i.value.trim()===''; })){ zeigeFb(s.fb,'info','Füllen Sie alle Felder aus.'); return; }
     ts.gep=true;
     var fehler=0;
-    ins.forEach(function(i,k){ var v=parseNum(i.value), f=cfg.felder[k], ok=!isNaN(v)&&nahe(v,f[1],f[2]); i.classList.remove('richtig','falsch'); i.classList.add(ok?'richtig':'falsch'); i.disabled=true; if(!ok) fehler++; });
+    ins.forEach(function(i,k){ var v=parseNum(i.value), f=cfg.felder[k], ok=!isNaN(v)&&nahe(v,f[1],f[2]); i.classList.remove('richtig','falsch'); i.classList.add(ok?'richtig':'falsch'); i.readOnly=true; i.classList.add('zu'); if(!ok) fehler++; });
     s.bP.disabled=true; ts.ok=(fehler===0);
     if(fehler===0) zeigeFb(s.fb,'ok','✓ Richtig!');
     else { zeigeFb(s.fb,'bad','✗ '+(fehler===1?'Ein Wert stimmt':fehler+' Werte stimmen')+' noch nicht. Prüfen Sie die rot markierten Felder.'); s.bL.hidden=false; h.style.display='block'; ts.hilfe=true; }
