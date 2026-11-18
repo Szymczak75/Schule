@@ -60,7 +60,7 @@ ERLAUBTE_HOSTS = ('cdn.jsdelivr.net/npm/mathjax',)   # Google Fonts seit 16.10.2
 
 # Schritt-für-Schritt-Engine (baustein_schritt_fuer_schritt.html, TEIL 2.7)
 SFS_TYP = 'Schritt für Schritt'
-SFS_VERSION = 'v1'
+SFS_VERSION = 'v2'
 SFS_MARKE = 'BAUSTEIN: Schritt-für-Schritt-Engine'
 
 # Rückblick-KA-Engine (baustein_rueckblick_klassenarbeit.html, TEIL 2.8)
