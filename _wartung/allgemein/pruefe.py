@@ -465,11 +465,12 @@ def pruefe(pfad):
     koerper = re.sub(r'<!--.*?-->', ' ', text, flags=re.S)
     koerper = koerper[koerper.find('<body'):] if '<body' in koerper else koerper
     # Als Ablaufplan gilt eine Tabelle mit Zeit-/Dauer-Spalte oder der Wortlaut „Ablaufplan“ –
-    # nicht jede Tabelle mit der CSS-Klasse ablauf (Merk-Tabellen). Lehrerseiten mit eigenem
-    # Reiter „Ablaufplan“ sind ausgenommen.
+    # nicht jede Tabelle mit der CSS-Klasse ablauf (Merk-Tabellen). Ausgenommen sind Lehrerseiten
+    # und Seiten ohne <meta name="typ"> (Orga-/Workshop-Skripte): dort ist der Plan Inhalt eines
+    # eigenen Reiters.
     zeitplan = any(re.search(r'<th>\s*(?:Zeit|Dauer)\s*</th>', t)
                    for t in re.findall(r'<table\b.*?</table>', koerper, re.S))
-    if 'lehrer' not in name.lower() and (
+    if 'lehrer' not in name.lower() and '<meta name="typ"' in text and (
             zeitplan or re.search(r'Ablaufplan|So läuft die (?:Doppel)?[Ss]tunde', koerper)):
         plan = re.search(r'<details\b[^>]*class="[^"]*\bplan\b[^"]*"[^>]*>', koerper)
         reiter = re.search(r'<(?:nav|div)\b[^>]*(?:class="[^"]*\btabs\b|role="tablist")', koerper)
