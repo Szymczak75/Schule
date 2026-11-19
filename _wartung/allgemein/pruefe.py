@@ -23,7 +23,8 @@ Was dieser Linter NICHT kann (bleibt Handarbeit bzw. Browsertest):
   - ob der Stand ein Neuladen wirklich vollständig übersteht (Browsertest: Seite
     bearbeiten, neu laden, vergleichen)
 
-Stand: 16.11.2026 (Navigationsleiste v7 mit schwebendem QR-Knopf, Prüfung NAV;
+Stand: 19.11.2026 (Ablaufplan oben und aufklappbar, Prüfung ABLAUF, TEIL 3.8;
+       Navigationsleiste v7 mit schwebendem QR-Knopf, Prüfung NAV;
        Gruppenarbeit: Baustein Gruppen-Check, Regeln GC/GCALT/GRUPPE, TEIL 2.10;
        Kernkompetenzen: Meta-Tag kernkompetenzen, Prüfung KERN, TEIL 2.9;
        Rückblick-KA-Engine v5: Anrede über data-anrede, Kurswahl für Parallelkurse (KA.kurse);
@@ -459,6 +460,29 @@ def pruefe(pfad):
                 zahl[w] = zahl.get(w, 0) + 1
             fehler('ANREDE', 'Oberstufe wird gesiezt (TEIL 3.7) – Du-Formen gefunden: ' +
                    ', '.join('„%s" ×%d' % (w, n) for w, n in sorted(zahl.items(), key=lambda x: -x[1])))
+
+    # Ablaufplan (TEIL 3.8): eingeklappter <details class="plan"> über der Reiterleiste
+    koerper = re.sub(r'<!--.*?-->', ' ', text, flags=re.S)
+    koerper = koerper[koerper.find('<body'):] if '<body' in koerper else koerper
+    # Als Ablaufplan gilt eine Tabelle mit Zeit-/Dauer-Spalte oder der Wortlaut „Ablaufplan“ –
+    # nicht jede Tabelle mit der CSS-Klasse ablauf (Merk-Tabellen). Lehrerseiten mit eigenem
+    # Reiter „Ablaufplan“ sind ausgenommen.
+    zeitplan = any(re.search(r'<th>\s*(?:Zeit|Dauer)\s*</th>', t)
+                   for t in re.findall(r'<table\b.*?</table>', koerper, re.S))
+    if 'lehrer' not in name.lower() and (
+            zeitplan or re.search(r'Ablaufplan|So läuft die (?:Doppel)?[Ss]tunde', koerper)):
+        plan = re.search(r'<details\b[^>]*class="[^"]*\bplan\b[^"]*"[^>]*>', koerper)
+        reiter = re.search(r'<(?:nav|div)\b[^>]*(?:class="[^"]*\btabs\b|role="tablist")', koerper)
+        karte = re.search(r'<(?:section|div)\b[^>]*class="[^"]*\bcard\b', koerper)
+        oben = min([m.start() for m in (reiter, karte) if m] or [len(koerper)])
+        if not plan:
+            fehler('ABLAUF', 'Ablaufplan nicht aufklappbar oben – als <details class="plan"> '
+                             'über die Reiterleiste setzen (TEIL 3.8)')
+        elif plan.start() > oben:
+            fehler('ABLAUF', 'Ablaufplan steht unter der Reiterleiste bzw. in einer Karte – '
+                             'gehört über die Reiterleiste (TEIL 3.8)')
+        elif re.search(r'\sopen\b', plan.group(0)):
+            hinweis('ABLAUF', 'Ablaufplan startet aufgeklappt – eingeklappt beginnen (TEIL 3.8)')
 
     if 'href="#"' in h or "location.href='#'" in h or 'location.href="#"' in h:
         fehler('WEITER', 'toter Weiter-Button (Ziel "#")')
