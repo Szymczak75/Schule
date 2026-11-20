@@ -106,6 +106,8 @@ TeX-Quelltext.
 2. Es entstehen: **alphabetisch sortierte Codes** (4 Buchstaben + Prüfbuchstabe, z. B. `HKWP-Z` – nur Buchstaben, ohne I, L, O),
    ein **Freischaltcode** (entsperrt ein gesperrtes iPad), der **Link für die Klasse**
    (`…_exam.html?l=<Hash des Freischaltcodes>`) und ein **QR-Code** (groß für den Beamer).
+   Der Freischaltcode steht nicht neben dem QR-Code, sondern zum **Aufklappen unter der
+   Code-Liste** – so ist er am Beamer nicht zu sehen.
 3. **Drucken:** Liste für die Lehrkraft (Freischaltcode, Link, Code + Namenszeile) und Zettel
    zum Ausschneiden. Codes in der Reihenfolge der Klassenliste vergeben – dann stimmt die
    alphabetische Reihenfolge der Codes später mit der Namensliste in Excel überein.
