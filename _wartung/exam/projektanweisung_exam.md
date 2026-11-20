@@ -21,7 +21,9 @@ Maßgeblich sind ausschließlich die Dateien aus dem GitHub-Sync `_wartung/exam/
    und Teil, Regeln für geschlossene Teile, erwartete Inhalte und Fachbegriffe für
    Freitext) und den Schlüssel (`schluessel_<thema>.json`). Beide kommen nie ins Repo.
 5. Vor der Ausgabe: `pruefe.py` ohne FEHLER und Browser-Durchlauf mit PDF (Abschnitt 8).
-6. Erst im Chat zeigen, nach dem OK per Pull Request nach `intern/EXAM/`. Danach nenne ich
+6. Erst im Chat zeigen, nach dem OK per Pull Request nach
+   `intern/EXAM/<fach>/<klassenordner>/<thema>_exam.html` (z. B. `intern/EXAM/bio/klasse10/`).
+   Danach nenne ich
    den Link zu `intern/EXAM/vorbereitung.html`.
 
 ## Test bewerten

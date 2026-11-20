@@ -293,6 +293,9 @@ Ordner-Übersichten `_*.html` über `linking.txt`). Änderungen an der Startseit
   Nachtrag 20.11.: Engine **v1.2** – `punkte` je Aufgabe auf der Seite und im Abgabe-PDF
   („____ von X Punkten"); Auswertung **v1.1** – Gesamt-PDF nur noch Deckblatt + ein
   Korrekturblatt je Code (ohne Original-Abgabe), Punkte trägt die Lehrkraft mit dem Stift ein.
+  Nachtrag 20.11.: Projekt heißt **„WEB EXAM"**; Projektanweisung = Datei `projektanweisung_exam.md`
+  (im Feld nur Verweis). Testseiten liegen in `intern/EXAM/<fach>/<klassenordner>/`
+  (Neurobiologie → `bio/klasse10/`, Meta-Tag klasse 10; Testlauf → `probe/`).
   **Früher offen – Schritt 2:** Bewertungsablauf (Auswertungs-Skript liest `abgabe.json`, Excel aus der
   Vorlage „Punkteerfassung" – Achtung: openpyxl verliert deren Datenprüfung/bedingte
   Formatierung, also XML direkt bearbeiten –, Gesamt-PDF mit Korrekturen), mit ausgedachten

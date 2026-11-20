@@ -50,7 +50,7 @@ Testseite und Erwartungshorizont, und dorthin kommen später die abgegebenen PDF
    Schule im Inhalt.
 9. **Prüfen vor der Ausgabe:** `pruefe.py` ohne FEHLER und ein Durchlauf im Browser
    (Abschnitt 8). Danach gilt TEIL 0 Nr. 26 der Lernseiten-Anweisung: erst im Chat zeigen,
-   nach dem OK per Pull Request nach `intern/EXAM/`.
+   nach dem OK per Pull Request nach `intern/EXAM/<fach>/<klassenordner>/` (Abschnitt 9).
 
 ---
 
@@ -159,7 +159,7 @@ möglich, ins Projektwissen von „WEB EXAM"). **Nie ins Repo.** Aufbau:
 
 ```markdown
 # Erwartungshorizont – EXAM Neurobiologie (Q1)
-Testseite: intern/EXAM/neurobiologie_exam.html · speicher: aszym:neurobiologie_exam:v1
+Testseite: intern/EXAM/bio/klasse10/neurobiologie_exam.html · speicher: aszym:neurobiologie_exam:v1
 Höchstpunkte gesamt: 34
 
 ## Aufgabe 1 · Bau einer Nervenzelle – 8 P.
@@ -301,5 +301,12 @@ Punkte in Excel prüfen und ändern; in „Schülerliste" die Codes durch die Na
 | `anweisung_exam.md` | `_wartung/exam/` | diese Anweisung |
 | `projektanweisung_exam.md` | `_wartung/exam/` | die Projektanweisung von „WEB EXAM" (im Feld „Anweisungen" nur ein Verweis) |
 | `vorbereitung.html` | `intern/EXAM/` | Codes, Freischaltcode, Link, QR-Code |
-| `thema_exam.html` | `intern/EXAM/` | die einzelnen Testseiten |
+| `thema_exam.html` | `intern/EXAM/<fach>/<klassenordner>/` | die einzelnen Testseiten |
+
+**Ablage der Testseiten** (seit 20.11.2026): `intern/EXAM/<fach>/<klassenordner>/<thema>_exam.html`
+– Fach und Klassenordner wie auf der Website (`mathe`, `bio`, … · `klasse05` … `klasse10`,
+`klasseEF`, `klasseQ1_Q2`), passend zu den Meta-Tags `fach` und `klasse`. Beispiel:
+`intern/EXAM/bio/klasse10/neurobiologie_exam.html`. Probe-Tests liegen in `intern/EXAM/probe/`.
+`vorbereitung.html` bleibt direkt in `intern/EXAM/`. `pruefe.py` gibt einen Hinweis bei falscher
+Ablage.
 | `pruefe.py` | `_wartung/allgemein/` | kennt `typ="Exam"` (Regel `EXAM`) |
