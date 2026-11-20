@@ -13,7 +13,7 @@
 <meta name="oberthema" content="Neurobiologie">
 <meta name="thema" content="Neuron und Synapse">
 <!-- =============================================================================
-     BAUSTEIN: EXAM-Seite  (v1.1, 20.11.2026 – Codes nur aus Buchstaben) – _wartung/exam/baustein_exam.html
+     BAUSTEIN: EXAM-Seite  (v1.2, 20.11.2026 – Punkte je Aufgabe) – _wartung/exam/baustein_exam.html
      Anleitung: _wartung/exam/anweisung_exam.md
      Neue EXAM-Seite = Kopie dieser Datei. Geändert werden NUR
        - die Meta-Tags und <title> oben,
@@ -29,6 +29,8 @@
          Freischaltcode; jede Sperre steht im PDF.
        - Aufgabentypen: beschriften, sortieren (Antippen), auswahl, freitext.
        - Keine Lösungen im Quelltext, keine Bewertung auf der Seite.
+       - Punkte je Aufgabe (aufgabe.punkte) stehen auf der Seite und im PDF als
+         „___ von X Punkten" (zum Eintragen mit dem Stift).
        - Abgabe mit Rückfrage; danach PDF (Helvetica, Abbildungen als JPEG,
          Antworten zusätzlich als eingebettete Datei abgabe.json).
        - Zustand nur in sessionStorage (try/catch). Gesperrte Felder per
@@ -68,6 +70,7 @@ main{max-width:1024px;margin:0 auto;padding:1rem;}
 .karte h2{margin:0 0 .5rem;font-size:1.3rem;color:var(--border-blue);}
 .karte h3{margin:1.1rem 0 .4rem;font-size:1.1rem;}
 .auftrag{font-weight:700;}
+.punkte{font-size:1rem;font-weight:700;color:var(--grey);white-space:nowrap;}
 .hinweis{color:var(--grey);}
 .figur{border:2px solid var(--line);border-radius:.8rem;background:#fff;padding:.4rem;margin:.6rem 0;}
 .figur > svg{display:block;width:100%;height:auto;}
@@ -251,8 +254,8 @@ body.gesperrt main{filter:blur(8px);}
    - zeit:    Richtzeit in Minuten (nur Orientierung)
    - flugmodus: true (Standard) = Test nur im Flugmodus; false = ohne Netzprüfung
    - speicher: eindeutiger Schlüssel 'aszym:<datei>:v1'
-   - aufgaben: Liste; jede Aufgabe hat titel, kurz (Reiter), einleitung (HTML)
-     und teile. Teil-Typen:
+   - aufgaben: Liste; jede Aufgabe hat titel, kurz (Reiter), punkte (Höchstpunkte,
+     gleich wie im Schlüssel), einleitung (HTML) und teile. Teil-Typen:
        beschriften: svg (ohne Nummern), nummern [{nr,x,y,zx,zy}]
        sortieren:   karten [{id,t}] in bewusst NICHT richtiger Startreihenfolge;
                     optional eine Karte {id,t,fehlt:true} als Platzhalter
@@ -270,7 +273,7 @@ var EXAM = {
   flugmodus: true,
   speicher: 'aszym:neurobiologie_exam:v3',
   aufgaben: [
-    { titel: 'Aufgabe 1 · Bau einer Nervenzelle', kurz: 'Neuron',
+    { titel: 'Aufgabe 1 · Bau einer Nervenzelle', kurz: 'Neuron', punkte: 8,
       einleitung: '<p>Die Abbildung zeigt eine Nervenzelle mit myelinisiertem Axon. Acht Bestandteile sind nummeriert.</p>',
       teile: [
         { id: '1', typ: 'beschriften',
@@ -280,7 +283,7 @@ var EXAM = {
                      {nr:4,x:290,y:44,zx:268,zy:146}, {nr:5,x:790,y:262,zx:752,zy:152}, {nr:6,x:440,y:44,zx:440,zy:134},
                      {nr:7,x:575,y:262,zx:575,zy:152}, {nr:8,x:860,y:36,zx:842,zy:92} ] }
       ] },
-    { titel: 'Aufgabe 2 · Bau einer chemischen Synapse', kurz: 'Synapse',
+    { titel: 'Aufgabe 2 · Bau einer chemischen Synapse', kurz: 'Synapse', punkte: 8,
       einleitung: '<p>Die Abbildung zeigt eine erregende chemische Synapse im Schnitt. Oben liegt die präsynaptische Endigung, unten die nachgeschaltete Zelle.</p>',
       teile: [
         { id: '2', typ: 'beschriften',
@@ -290,7 +293,7 @@ var EXAM = {
                      {nr:4,x:60,y:290,zx:262,zy:276}, {nr:5,x:60,y:350,zx:140,zy:301}, {nr:6,x:640,y:350,zx:497,zy:310},
                      {nr:7,x:60,y:240,zx:206,zy:250}, {nr:8,x:60,y:110,zx:208,zy:140} ] }
       ] },
-    { titel: 'Aufgabe 3 · Ablauf der Erregungsübertragung', kurz: 'Signalübertragung',
+    { titel: 'Aufgabe 3 · Ablauf der Erregungsübertragung', kurz: 'Signalübertragung', punkte: 10,
       einleitung: '<p>Unten stehen die Schritte der Erregungsübertragung an einer erregenden chemischen Synapse – allerdings durcheinander. Ein Schritt fehlt. Er wird durch die Karte „❓ Fehlender Schritt“ vertreten.</p>',
       teile: [
         { id: '3a', typ: 'sortieren',
@@ -306,7 +309,7 @@ var EXAM = {
           ] },
         { id: '3b', typ: 'freitext', auftrag: 'b) Beschreiben Sie, was im fehlenden Schritt passiert.' }
       ] },
-    { titel: 'Aufgabe 4 · Wirkung eines Gifts', kurz: 'Gift',
+    { titel: 'Aufgabe 4 · Wirkung eines Gifts', kurz: 'Gift', punkte: 4,
       einleitung: '<p>Ein Gift sorgt dafür, dass in der präsynaptischen Endigung kein Neurotransmitter mehr gebildet wird. Alle anderen Vorgänge an der Synapse funktionieren normal.</p>',
       teile: [
         { id: '4', typ: 'freitext', auftrag: 'Erklären Sie, welche Folgen das Gift für die nachgeschaltete Zelle hat.' }
@@ -481,7 +484,9 @@ function baueAufgaben(){
   var tabs = '', karten = '';
   EXAM.aufgaben.forEach(function(a, i){
     tabs += '<button class="tab" data-ziel="a'+i+'">Aufgabe ' + (i+1) + ' · ' + esc(a.kurz) + '<span data-marke="a'+i+'"></span></button>';
-    karten += '<section class="karte" id="a'+i+'"><h2>' + esc(a.titel) + '</h2>' + (a.einleitung || '') +
+    karten += '<section class="karte" id="a'+i+'"><h2>' + esc(a.titel) +
+              (a.punkte ? ' <span class="punkte">(' + a.punkte + ' ' + (a.punkte === 1 ? 'Punkt' : 'Punkte') + ')</span>' : '') +
+              '</h2>' + (a.einleitung || '') +
               a.teile.map(baueTeil).join('') + '</section>';
   });
   tabs += '<button class="tab" data-ziel="ab">✅ Abgabe</button>';
@@ -748,6 +753,7 @@ function antwortDaten(){
     if (t.typ === 'freitext') e.antwort = a;
     d.teile.push(e);
   });
+  d.aufgaben = EXAM.aufgaben.map(function(a, i){ return { nr: i + 1, titel: a.titel, punkte: a.punkte || null }; });
   return d;
 }
 function pdfBauen(){
@@ -799,7 +805,11 @@ function pdfBauen(){
   // Aufgaben
   EXAM.aufgaben.forEach(function(a){
     luft(6);
-    absatz(a.titel, 14, true);
+    text(umbruch(a.titel, BREIT - (a.punkte ? 130 : 0), true, 14), 14, true, RAND);
+    if (a.punkte){
+      var pt = winCodes('____ von ' + a.punkte + (a.punkte === 1 ? ' Punkt' : ' Punkten'));
+      ops.push('BT 0.133 0.188 0.247 rg /F2 11 Tf ' + (B - RAND - breite(pt, true, 11)).toFixed(1) + ' ' + y.toFixed(1) + ' Td (' + pdfStr(pt) + ') Tj ET');
+    }
     var ein = (a.einleitung || '').replace(/<br\s*\/?>/gi, '\n').replace(/<\/p>\s*<p[^>]*>/gi, '\n').replace(/<[^>]+>/g, '')
       .replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').trim();
     if (ein) absatz(ein, 10.5, false);

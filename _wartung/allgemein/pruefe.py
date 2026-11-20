@@ -598,6 +598,10 @@ def pruefe(pfad):
                 fehler('EXAM', 'Lösungsangaben im EXAM-INHALT – Lösungen gehören nur in den Erwartungshorizont')
             if NAV_BLOCK.search(h):
                 fehler('EXAM', 'Navigationsleiste auf einer EXAM-Seite – jeder Link nach draußen sperrt den Test')
+            n_aufg = len(re.findall(r"\bkurz:\s*'", exam_inhalt))
+            n_pkt = len(re.findall(r"\bpunkte:\s*\d", exam_inhalt))
+            if n_pkt < n_aufg:
+                hinweis('EXAM', 'Nicht jede Aufgabe hat punkte: (Höchstpunkte, wie im Schlüssel)')
             if 'localStorage' in exam_inhalt:
                 fehler('STORAGE', 'localStorage im EXAM-INHALT')
 

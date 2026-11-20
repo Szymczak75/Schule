@@ -1,6 +1,6 @@
 # Anweisung EXAM – bewertete Tests auf dem iPad
 
-Stand: 20.11.2026 · Engine `baustein_exam.html` v1.1 · Auswertung `exam_auswerten.py` v1 · gilt für das Projekt **„EXAM"**
+Stand: 20.11.2026 · Engine `baustein_exam.html` v1.2 · Auswertung `exam_auswerten.py` v1.1 · gilt für das Projekt **„EXAM"**
 (Sync: `_wartung/exam`, `_wartung/allgemein`).
 
 Ein EXAM ist ein **bewerteter Test**, den die Klasse auf dem iPad schreibt. Die Seite gibt
@@ -66,7 +66,7 @@ var EXAM = {
   flugmodus: true,                        // Standard: Test nur im Flugmodus (false = ohne Netzprüfung)
   speicher: 'aszym:neurobiologie_exam:v1',// eindeutig je Seite; bei Inhaltsänderung hochzählen
   aufgaben: [
-    { titel: 'Aufgabe 1 · Bau einer Nervenzelle', kurz: 'Neuron',
+    { titel: 'Aufgabe 1 · Bau einer Nervenzelle', kurz: 'Neuron', punkte: 8,
       einleitung: '<p>…</p>',             // HTML, darf leer sein
       teile: [ { id: '1', typ: 'beschriften', auftrag: '…', svg: '<svg …>…</svg>',
                  nummern: [ {nr:1, x:60, y:40, zx:105, zy:88}, … ] } ] },
@@ -76,6 +76,9 @@ var EXAM = {
 ```
 
 - **Aufgabe** = ein Reiter und eine Spalte in Excel. **Teil** = Teilaufgabe (a, b, …).
+- **`punkte`** = Höchstpunkte der Aufgabe – Pflicht, genau wie `max` im Schlüssel. Die Seite
+  zeigt sie in der Überschrift („(4 Punkte)"), das Abgabe-PDF als „____ von 4 Punkten" zum
+  Eintragen mit dem Stift. `exam_auswerten.py` warnt, wenn Seite und Schlüssel abweichen.
 - **`id`** des Teils: `'1'`, `'3a'`, `'3b'` … – eindeutig, sie verbindet Seite, PDF und
   Erwartungshorizont.
 - **`auftrag`** ist der Arbeitsauftrag mit Operator; bei mehreren Teilen mit „a)", „b)".
@@ -255,9 +258,12 @@ ich eine gute Note?" –, dann gilt:
      („hilfsmittelfrei"), darüber im zweiten. Notengrenzen stellt die Lehrkraft in
      „Einstellungen" ein.
    - **`Gesamt_EXAM_<thema>.pdf`** – Deckblatt mit allen Codes und Auffälligkeiten, dann je
-     Code ein **Korrekturblatt** (Warnkasten, Sperrprotokoll, geschlossene Teile mit Punkten,
-     Beschriftungen mit Korrektur, Freitext mit markierten Fehlern – **ohne** Punkte für
-     Freitext und Beschriftung) und dahinter das abgegebene PDF. Lesezeichen je Code.
+     Code **ein Korrekturblatt** (Warnkasten, Sperrprotokoll; Auswahl mit ✔/✘/○, Sortieren mit
+     richtiger Reihenfolge, Beschriftungen mit Korrektur, Freitext mit rot durchgestrichenen
+     Fehlern und grüner Korrektur). Bei **jeder Aufgabe** steht „____ von X Punkten" – die Punkte
+     überträgt die Lehrkraft mit dem Stift aus Excel; gedruckte Punkte gibt es im PDF nicht.
+     Die Original-Abgabe wird **nicht** angehängt (der Schüler hat sie selbst). Lesezeichen je
+     Code.
    - **`Vorbewertung_EXAM_<thema>.md`** – Punktetabelle und alle Begründungen.
 5. Claude nennt in der Antwort: Warnungen (Manipulation, Sperren, ungültige Codes) zuerst, dann
    die Punktetabelle und offene Entscheidungen für die Lehrkraft.
