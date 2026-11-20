@@ -21,9 +21,17 @@ Maßgeblich sind ausschließlich die Dateien aus dem GitHub-Sync `_wartung/exam/
    und Teil, Regeln für geschlossene Teile, erwartete Inhalte und Fachbegriffe für
    Freitext) und den Schlüssel (`schluessel_<thema>.json`). Beide kommen nie ins Repo.
 5. Vor der Ausgabe: `pruefe.py` ohne FEHLER und Browser-Durchlauf mit PDF (Abschnitt 8).
-6. Erst im Chat zeigen, nach dem OK per Pull Request nach
-   `intern/EXAM/<fach>/<klassenordner>/<thema>_exam.html` (z. B. `intern/EXAM/bio/klasse10/`).
-   Danach nenne ich den Link zu `intern/EXAM/vorbereitung.html` und die Adresse der Testseite.
+6. **Stufe 1 – Entwicklung:** Erst im Chat zeigen, und zwar als **Entwickleransicht**:
+   `exam_vorschau.py inhalt.js schluessel_<thema>.json erwartungshorizont_<thema>.md vorschau.html`
+   erzeugt eine Seite mit allen Aufgaben, Abbildungen samt Nummern, Startreihenfolge der Karten
+   und Musterlösungen. Ich veröffentliche sie als **privates Artefakt** im Test-Chat und
+   aktualisiere dasselbe Artefakt nach jeder Änderung. Ins Repo kommt in dieser Stufe nichts –
+   auch nicht die Entwickleransicht.
+7. **Stufe 2 – scharf:** Nach dem OK der Lehrkraft per Pull Request nur die Testseite (ohne
+   Lösungen) nach `intern/EXAM/<fach>/<klassenordner>/<thema>_exam.html` (z. B.
+   `intern/EXAM/bio/klasse10/`). Danach nenne ich den Link zu `intern/EXAM/vorbereitung.html` und
+   die Adresse der Testseite; die Lehrkraft testet einmal mit einem Code. Erwartungshorizont und
+   Schlüssel bleiben im Chat und im Projektwissen.
 
 ## Bestehenden Test überarbeiten (Fehler beheben, Inhalt ändern)
 1. Die aktuelle Seite aus dem Repo holen (`intern/EXAM/…/<thema>_exam.html`), daraus den Block
@@ -35,7 +43,7 @@ Maßgeblich sind ausschließlich die Dateien aus dem GitHub-Sync `_wartung/exam/
    Anrede, Tippziele, Speichern), und der Browser-Durchlauf mit PDF (Abschnitt 8).
 4. Ändern sich Aufgaben oder Punkte: Erwartungshorizont und Schlüssel im selben Zug anpassen;
    bei geändertem Inhalt `speicher` hochzählen (…:v2).
-5. Zeigen → OK → Pull Request (wie oben).
+5. Entwickleransicht aktualisieren (Stufe 1) → OK → Pull Request (Stufe 2, wie oben).
 Fehler in der Engine selbst (Sperre, PDF, Speichern …) behebe ich hier nicht: Ich beschreibe
 sie für das Wartungs-Projekt, dort wird `baustein_exam.html` geändert.
 
