@@ -1,6 +1,6 @@
 # Anweisung EXAM – bewertete Tests auf dem iPad
 
-Stand: 19.11.2026 · Engine `baustein_exam.html` v1 · gilt für das Projekt **„EXAM"**
+Stand: 20.11.2026 · Engine `baustein_exam.html` v1.1 · gilt für das Projekt **„EXAM"**
 (Sync: `_wartung/exam`, `_wartung/allgemein`).
 
 Ein EXAM ist ein **bewerteter Test**, den die Klasse auf dem iPad schreibt. Die Seite gibt
@@ -103,7 +103,7 @@ TeX-Quelltext.
 `https://szymczak75.github.io/Schule/intern/EXAM/vorbereitung.html` – eine Seite für alle Tests:
 
 1. Adresse der Testseite und Anzahl der Codes eintragen → **Test vorbereiten**.
-2. Es entstehen: **alphabetisch sortierte Codes** (4 Zeichen + Prüfzeichen, z. B. `HK3P-T`),
+2. Es entstehen: **alphabetisch sortierte Codes** (4 Buchstaben + Prüfbuchstabe, z. B. `HKWP-Z` – nur Buchstaben, ohne I, L, O),
    ein **Freischaltcode** (entsperrt ein gesperrtes iPad), der **Link für die Klasse**
    (`…_exam.html?l=<Hash des Freischaltcodes>`) und ein **QR-Code** (groß für den Beamer).
 3. **Drucken:** Liste für die Lehrkraft (Freischaltcode, Link, Code + Namenszeile) und Zettel
