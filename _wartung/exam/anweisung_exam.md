@@ -166,7 +166,7 @@ Höchstpunkte gesamt: 34
 ## Aufgabe 3 · … – 10 P.
 ### Teil 3a (sortieren) – 6 P.
 Richtige Reihenfolge (Karten-id): kb, kw, kr, kq, kx, km, kd
-Punkte: je Karte am richtigen Platz 1 P. … (Regel ausformulieren)
+Punkte: Standardregel Sortieren (längste richtige Kette − 1, max. 6 P.)
 ### Teil 3b (freitext) – 4 P.
 Erwartete Inhalte (je 1 P.): …
 Fachbegriffe, die richtig geschrieben sein müssen: …
@@ -175,6 +175,16 @@ Fachbegriffe, die richtig geschrieben sein müssen: …
 - Punkte **je Aufgabe** müssen zu den Spalten der Excel-Vorlage passen (max. 20 Aufgaben).
 - Für geschlossene Teile (beschriften, sortieren, auswahl) eine **eindeutige Regel**, damit die
   Vorbewertung nachvollziehbar ist.
+- **Standardregel Sortieren** (seit 20.11.2026, Erprobung): Gezählt wird die **längste Kette
+  von Karten, die untereinander in richtiger Reihenfolge liegen** – egal, an welchen Plätzen
+  (längste Teilfolge in richtiger Reihenfolge; leere Plätze werden übersprungen, die Karte
+  „❓ Fehlender Schritt" zählt wie jede andere Karte). **Punkte = Länge der Kette − 1**,
+  höchstens Kartenzahl − 1. Ein falsch gelegter Fehler kostet so genau einen Punkt, egal wo er
+  liegt; eine völlig verdrehte Reihenfolge gibt 0 Punkte.
+  Beispiele bei 5 Karten (max. 4 P.): `1 2 3 4 5` → 4 · `2 3 4 5 1` → 3 · `1 3 2 4 5` → 3 ·
+  `3 1 4 5 2` → 2 · `5 4 3 2 1` → 0.
+  Nicht „je Karte am richtigen Platz": Dort kostet ein einziger verschobener Fehler alle Punkte
+  (`2 3 4 5 1` → 0). Eine abweichende Regel steht ausdrücklich im Erwartungshorizont.
 - Für Freitext: erwartete Inhalte mit Teilpunkten, typische Fehlvorstellungen, Umgang mit
   Rechtschreibung und Fachbegriffen.
 - Die Lehrkraft prüft den Erwartungshorizont, **bevor** der Test geschrieben wird.
