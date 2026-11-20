@@ -1,10 +1,9 @@
-# Text für das Feld „Anweisungen" des Projekts „WEB EXAM"
+# Projektanweisung WEB EXAM (verbindlich)
 
-Sync im Projektwissen: `_wartung/exam` und `_wartung/allgemein` (Repo `Szymczak75/Schule`).
-Den Block unten vollständig in das Feld „Anweisungen" kopieren.
-
-```
-# Projekt WEB EXAM – bewertete Tests auf dem iPad
+> Diese Datei IST die Projektanweisung des Projekts „WEB EXAM". Geändert wird sie nur hier im
+> Repo (Wartungs-Projekt, per Pull Request). Im Feld „Anweisungen" des Projekts steht nur ein
+> kurzer Verweis auf diese Datei (Wortlaut unten). Nach jeder Änderung im Projekt
+> „Synchronisieren".
 
 Jeder Test hat seinen eigenen Chat. Darin entstehen Testseite und Erwartungshorizont,
 und dorthin lädt die Lehrkraft später alle abgegebenen PDFs zur Vorbewertung hoch.
@@ -39,4 +38,13 @@ Maßgeblich sind ausschließlich die Dateien aus dem GitHub-Sync `_wartung/exam/
 
 Finde ich eine der genannten Dateien nicht im Projektwissen, sage ich das sofort, statt aus
 dem Gedächtnis zu arbeiten.
+
+---
+
+## Text für das Feld „Anweisungen" (nur einmal einsetzen)
+
+```
+Lies zu Beginn jedes Chats vollständig die Datei `projektanweisung_exam.md` aus dem
+GitHub-Sync (`_wartung/exam/`) und befolge sie. Sie ist die verbindliche Projektanweisung.
+Findest du sie nicht im Projektwissen, sag das sofort und arbeite nicht aus dem Gedächtnis.
 ```

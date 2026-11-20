@@ -77,7 +77,14 @@ Hier **nichts ändern**: Im Feld bleibt der vollständige Text aus
 
 ## WEB EXAM  (Sync: `allgemein`, `exam`)
 
-Hier steht der vollständige Text aus `_wartung/exam/projektanweisung_exam.md` im Feld.
+Im Feld steht nur ein Verweis; die eigentliche Projektanweisung ist die Datei
+`_wartung/exam/projektanweisung_exam.md` (Änderungen nur dort, danach im Projekt „Synchronisieren"):
+
+```
+Lies zu Beginn jedes Chats vollständig die Datei `projektanweisung_exam.md` aus dem
+GitHub-Sync (`_wartung/exam/`) und befolge sie. Sie ist die verbindliche Projektanweisung.
+Findest du sie nicht im Projektwissen, sag das sofort und arbeite nicht aus dem Gedächtnis.
+```
 
 ## Wartung Unterrichtsprojekte  (Sync: ganzer Ordner `_wartung`)
 
