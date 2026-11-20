@@ -28,7 +28,7 @@ einem Baustein oder einer Regel wird hier EINMAL umgesetzt und gilt dann in alle
 - **HTML erzeugen** – `allgemein`, `geodreieck`
 - **Debugging** – `allgemein`, `geodreieck`
 - **GeoGebra** – `allgemein`, `geogebra`
-- **EXAM** – `allgemein`, `exam` (bewertete Tests; ein Chat je Test)
+- **WEB EXAM** – `allgemein`, `exam` (bewertete Tests; ein Chat je Test)
 
 ## Vorgehen, wenn ich eine Änderung nenne
 1. Betroffene Dateien aus dem Repo vollständig lesen. Nichts aus dem Gedächtnis.

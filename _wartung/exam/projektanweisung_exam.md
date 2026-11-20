@@ -1,10 +1,10 @@
-# Text für das Feld „Anweisungen" des Projekts „EXAM"
+# Text für das Feld „Anweisungen" des Projekts „WEB EXAM"
 
 Sync im Projektwissen: `_wartung/exam` und `_wartung/allgemein` (Repo `Szymczak75/Schule`).
 Den Block unten vollständig in das Feld „Anweisungen" kopieren.
 
 ```
-# Projekt EXAM – bewertete Tests auf dem iPad
+# Projekt WEB EXAM – bewertete Tests auf dem iPad
 
 Jeder Test hat seinen eigenen Chat. Darin entstehen Testseite und Erwartungshorizont,
 und dorthin lädt die Lehrkraft später alle abgegebenen PDFs zur Vorbewertung hoch.
