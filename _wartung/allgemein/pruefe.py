@@ -24,6 +24,8 @@ Was dieser Linter NICHT kann (bleibt Handarbeit bzw. Browsertest):
     bearbeiten, neu laden, vergleichen)
 
 Stand: 19.11.2026 (Ablaufplan oben und aufklappbar, Prüfung ABLAUF, TEIL 3.8;
+       EXAM-Seiten _exam aus _wartung/exam/baustein_exam.html: typ Exam, ohne
+       Navigationsleiste, MathJax nur bei Formeln, Anrede nur im EXAM-INHALT, Prüfung EXAM;
        Navigationsleiste v7 mit schwebendem QR-Knopf, Prüfung NAV;
        Gruppenarbeit: Baustein Gruppen-Check, Regeln GC/GCALT/GRUPPE, TEIL 2.10;
        Kernkompetenzen: Meta-Tag kernkompetenzen, Prüfung KERN, TEIL 2.9;
@@ -56,7 +58,7 @@ META_PFLICHT = ['description', 'keywords', 'typ', 'klasse', 'fach', 'oberthema',
 SUFFIX_TYP = {'_ls': 'Lernseite', '_ue': 'Übung', '_test': 'Test',
               '_rbka': 'Rückblick KA', '_kavb': 'KA-Vorbereitung',
               '_rb': 'Rückblick', '_ka': 'Klassenarbeit',
-              '_bonus': 'Bonus', '_sfs': 'Schritt für Schritt'}
+              '_bonus': 'Bonus', '_sfs': 'Schritt für Schritt', '_exam': 'Exam'}
 ERLAUBTE_HOSTS = ('cdn.jsdelivr.net/npm/mathjax',)   # Google Fonts seit 16.10.2026 nicht mehr
 
 # Schritt-für-Schritt-Engine (baustein_schritt_fuer_schritt.html, TEIL 2.7)
@@ -68,6 +70,12 @@ SFS_MARKE = 'BAUSTEIN: Schritt-für-Schritt-Engine'
 RBKA_TYP = 'Rückblick KA'
 RBKA_VERSION = 'v5'
 RBKA_MARKE = 'BAUSTEIN: Rückblick-KA-Engine'
+
+# EXAM-Seiten (_wartung/exam/baustein_exam.html, anweisung_exam.md)
+EXAM_TYP = 'Exam'
+EXAM_VERSION = 'v1'
+EXAM_MARKE = 'BAUSTEIN: EXAM-Seite'
+EXAM_INHALT = re.compile(r'var EXAM = \{.*?\n\};', re.S)
 
 # Gruppenarbeit & Gruppen-Check (baustein_gruppencheck.html, TEIL 2.10)
 GC_VERSION = 'v2'
@@ -194,7 +202,12 @@ def pruefe(pfad):
     if suffix is None:
         hinweis('TYP', 'Dateiname trägt kein bekanntes Suffix')
 
-    if 'tex-svg.js' not in h:
+    exam = EXAM_MARKE in h
+    exam_inhalt = EXAM_INHALT.search(h)
+    exam_inhalt = exam_inhalt.group(0) if exam_inhalt else ''
+    if exam and '\\(' not in exam_inhalt and '\\[' not in exam_inhalt:
+        pass                                   # EXAM ohne Formeln braucht kein MathJax
+    elif 'tex-svg.js' not in h:
         fehler('MATHJAX', 'MathJax nicht eingebunden')
     elif 'inlineMath' not in h:
         fehler('MATHJAX', 'MathJax-Konfiguration (inlineMath) fehlt')
@@ -453,7 +466,12 @@ def pruefe(pfad):
         sfs = SFS_MARKE in h
         if sfs and 'data-anrede="sie"' not in h:
             fehler('ANREDE', 'Schritt-für-Schritt-Seite der Oberstufe ohne <body data-anrede="sie"> (TEIL 3.7)')
-        du = _du_formen(eigen, js, not sfs)
+        if exam:
+            du = _du_formen('', exam_inhalt, True)
+            if not re.search(r"\banrede:\s*'sie'", exam_inhalt):
+                fehler('ANREDE', "EXAM der Oberstufe ohne anrede: 'sie' im EXAM-INHALT (TEIL 3.7)")
+        else:
+            du = _du_formen(eigen, js, not sfs)
         if du:
             zahl = {}
             for w in du:
@@ -559,8 +577,32 @@ def pruefe(pfad):
                               'Zahlen nach einem Kartenwechsel; readOnly + .zu verwenden oder '
                               'baustein_ipad_feldsperre.html einsetzen')
 
+    # EXAM-Seiten (anweisung_exam.md): Engine unverändert, keine Leiste, kein Lösungsblock
+    if exam or typ == EXAM_TYP:
+        if not exam:
+            fehler('EXAM', 'typ="Exam" ohne EXAM-Engine – Seite aus _wartung/exam/baustein_exam.html bauen')
+        else:
+            if typ != EXAM_TYP:
+                fehler('TYP', 'Seite nutzt die EXAM-Engine, trägt aber typ="%s" – richtig ist typ="Exam" '
+                              'und Suffix _exam' % typ)
+            if 'EXAM-Seite  (%s' % EXAM_VERSION not in h:
+                hinweis('EXAM', 'EXAM-Engine ist nicht die aktuelle Fassung %s' % EXAM_VERSION)
+            if 'noindex' not in h:
+                fehler('EXAM', 'EXAM-Seite ohne <meta name="robots" content="noindex, nofollow">')
+            if not exam_inhalt:
+                fehler('EXAM', 'Block „var EXAM = {…};" fehlt oder ist verändert')
+            ids = re.findall(r"\bid:\s*'([^']+)'\s*,\s*typ:", exam_inhalt)
+            for x in sorted(set(i for i in ids if ids.count(i) > 1)):
+                fehler('EXAM', 'Teil-Kennung id="%s" mehrfach vergeben' % x)
+            if re.search(r'\b(?:loesung|lösung|richtig|korrekt)\w*\s*:', exam_inhalt, re.I):
+                fehler('EXAM', 'Lösungsangaben im EXAM-INHALT – Lösungen gehören nur in den Erwartungshorizont')
+            if NAV_BLOCK.search(h):
+                fehler('EXAM', 'Navigationsleiste auf einer EXAM-Seite – jeder Link nach draußen sperrt den Test')
+            if 'localStorage' in exam_inhalt:
+                fehler('STORAGE', 'localStorage im EXAM-INHALT')
+
     # Navigationsleiste (TEIL 3.6) – nicht auf Ordner-Übersichten/Weiterleitungen (hubignore)
-    if 'name="hubignore"' not in h:
+    if 'name="hubignore"' not in h and not exam:
         nav = NAV_BLOCK.search(h)
         if not nav:
             fehler('NAV', 'Navigationsleiste fehlt – baustein_navigation.html unverändert vor '

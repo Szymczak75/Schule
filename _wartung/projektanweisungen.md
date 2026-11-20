@@ -75,6 +75,10 @@ Maßgeblich sind ausschließlich die Dateien aus dem GitHub-Sync `_wartung/allge
 Hier **nichts ändern**: Im Feld bleibt der vollständige Text aus
 `_wartung/geogebra/anweisung_geogebra_projekt.md` (nicht diese Zeile einfügen).
 
+## EXAM  (Sync: `allgemein`, `exam`)
+
+Hier steht der vollständige Text aus `_wartung/exam/projektanweisung_exam.md` im Feld.
+
 ## Wartung Unterrichtsprojekte  (Sync: ganzer Ordner `_wartung`)
 
 Hier **nichts ändern**: Im Feld bleibt der vollständige Text aus

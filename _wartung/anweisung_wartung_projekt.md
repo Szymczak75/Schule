@@ -16,16 +16,19 @@ einem Baustein oder einer Regel wird hier EINMAL umgesetzt und gilt dann in alle
 - `_wartung/geogebra/` – Baukasten (`css.txt`, `helfer.js`, `bauer.py`, `koord.py`, `test.js`,
   `LIESMICH.md`) und `anweisung_geogebra_projekt.md`, `geogebra_befehle_geprueft.md`,
   `geogebra_roadmap.md`, `projekt_aufbau.md`
+- `_wartung/exam/` – `anweisung_exam.md`, `baustein_exam.html` (EXAM-Engine), `exam_bauen.py`,
+  `projektanweisung_exam.md`; dazu auf der Website `intern/EXAM/vorbereitung.html`
 - `_wartung/plan/` – laufende Planung (`plan_navigation_impressum.md`) und Entwürfe
 - `_wartung/PROJEKT-LANDKARTE.md` – welches Projekt welche Ordner synchronisiert
 - Die Website selbst (Lernseiten, `build_hub.py`) liegt im selben Repo.
   `dino_hub.html` wird von der GitHub-Action erzeugt – nie von Hand ändern.
 
-## Die vier realen Projekte (GitHub-Ordner)
+## Die fünf realen Projekte (GitHub-Ordner)
 - **Unterrichtsvorbereitung** – `allgemein`, `geodreieck`, `unterrichtsvorbereitung`
 - **HTML erzeugen** – `allgemein`, `geodreieck`
 - **Debugging** – `allgemein`, `geodreieck`
 - **GeoGebra** – `allgemein`, `geogebra`
+- **EXAM** – `allgemein`, `exam` (bewertete Tests; ein Chat je Test)
 
 ## Vorgehen, wenn ich eine Änderung nenne
 1. Betroffene Dateien aus dem Repo vollständig lesen. Nichts aus dem Gedächtnis.
@@ -36,6 +39,9 @@ einem Baustein oder einer Regel wird hier EINMAL umgesetzt und gilt dann in alle
      Nachrüst-Skript aktualisieren (eigener PR).
    - Allgemeine Regel → Lernseiten-Anweisung; prüfen, ob Dach-Anweisung, Checkliste und
      `pruefe.py` mitziehen müssen.
+   - EXAM-Engine → `baustein_exam.html`; Versionsnummer im Kopfkommentar und `EXAM_VERSION`
+     in `pruefe.py` gemeinsam erhöhen; Code-Muster (`CODE_ALPHABET`, `CODE_SALT`) immer
+     gleichzeitig in `intern/EXAM/vorbereitung.html` ändern.
    - **GeoGebra mitdenken:** Betrifft die Regel Farben, Schriftgrößen, CSS-Selektoren,
      Meta-Tags, MathJax, Speichern oder Koordinatensysteme, auch den Baukasten und
      „Die harten Formatregeln" in `anweisung_geogebra_projekt.md` nachziehen.

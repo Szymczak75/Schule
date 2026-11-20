@@ -16,6 +16,7 @@ Die Projekte holen sich die Dateien über die GitHub-Synchronisation von claude.
 | `geodreieck/` | `geodreieck_baustein.html` |
 | `unterrichtsvorbereitung/` | `anweisung_C_unterrichtsvorbereitung.md` |
 | `geogebra/` | Baukasten (`css.txt`, `helfer.js`, `bauer.py`, `koord.py`, `test.js`, `LIESMICH.md`) und `anweisung_geogebra_projekt.md`, `geogebra_befehle_geprueft.md`, `geogebra_roadmap.md`, `projekt_aufbau.md` |
+| `exam/` | `anweisung_exam.md`, `baustein_exam.html` (EXAM-Engine), `exam_bauen.py`, `projektanweisung_exam.md` |
 | `plan/` | laufende Planung (`plan_navigation_impressum.md`), `ideenliste.md` (zurückgestellte Ideen) und Entwürfe |
 | `PROJEKT-LANDKARTE.md` | welche Datei in welches Projekt gehört |
 | `anweisung_wartung_projekt.md` | Text für das Feld „Anweisungen" des Wartungs-Projekts |
@@ -29,6 +30,7 @@ Die Projekte holen sich die Dateien über die GitHub-Synchronisation von claude.
 | **HTML erzeugen** | `allgemein`, `geodreieck` |
 | **Debugging** | `allgemein`, `geodreieck` |
 | **GeoGebra** | `allgemein`, `geogebra` |
+| **EXAM** | `allgemein`, `exam` |
 | **Wartung Unterrichtsprojekte** | ganzer Ordner `_wartung` |
 
 Stoffverteilungspläne und Lehrpläne liegen **nicht** hier – sie bleiben als eigene Uploads
