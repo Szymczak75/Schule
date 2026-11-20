@@ -61,7 +61,9 @@ einem Baustein oder einer Regel wird hier EINMAL umgesetzt und gilt dann in alle
 5. **Abschluss:** Branch + Pull Request, Link nennen. Danach immer die Checkliste:
    - **A) Reale Projekte:** welche Projekte nach dem Mergen „Synchronisieren" müssen; ob ein
      Projektanweisungs-Text (Feld „Anweisungen") von Hand ersetzt werden muss – dann den
-     fertigen Text mitliefern.
+     fertigen Text mitliefern. Ausnahme **WEB EXAM**: Dort steht im Feld nur ein Verweis auf
+     `_wartung/exam/projektanweisung_exam.md` – Änderungen also nur in dieser Datei, danach
+     genügt „Synchronisieren".
    - **B) Wartungs-Projekt:** ebenfalls „Synchronisieren".
    - **C) Zusammenfassung** in 1–3 Sätzen.
    Geänderte Dateien zusätzlich einzeln zum Download, wenn ich sie direkt brauche

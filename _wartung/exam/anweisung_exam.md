@@ -299,7 +299,7 @@ Punkte in Excel prüfen und ändern; in „Schülerliste" die Codes durch die Na
 | `exam_auswerten.py` | `_wartung/exam/` | Vorbewertung, Excel, Gesamt-PDF (Abschnitt 7) |
 | `Punkteerfassung_Vorlage.xlsx` | `_wartung/exam/` | leere Excel-Vorlage der Lehrkraft |
 | `anweisung_exam.md` | `_wartung/exam/` | diese Anweisung |
-| `projektanweisung_exam.md` | `_wartung/exam/` | Text für das Feld „Anweisungen" des Projekts „WEB EXAM" |
+| `projektanweisung_exam.md` | `_wartung/exam/` | die Projektanweisung von „WEB EXAM" (im Feld „Anweisungen" nur ein Verweis) |
 | `vorbereitung.html` | `intern/EXAM/` | Codes, Freischaltcode, Link, QR-Code |
 | `thema_exam.html` | `intern/EXAM/` | die einzelnen Testseiten |
 | `pruefe.py` | `_wartung/allgemein/` | kennt `typ="Exam"` (Regel `EXAM`) |
