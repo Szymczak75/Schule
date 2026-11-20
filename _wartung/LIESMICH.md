@@ -30,7 +30,7 @@ Die Projekte holen sich die Dateien über die GitHub-Synchronisation von claude.
 | **HTML erzeugen** | `allgemein`, `geodreieck` |
 | **Debugging** | `allgemein`, `geodreieck` |
 | **GeoGebra** | `allgemein`, `geogebra` |
-| **EXAM** | `allgemein`, `exam` |
+| **WEB EXAM** | `allgemein`, `exam` |
 | **Wartung Unterrichtsprojekte** | ganzer Ordner `_wartung` |
 
 Stoffverteilungspläne und Lehrpläne liegen **nicht** hier – sie bleiben als eigene Uploads

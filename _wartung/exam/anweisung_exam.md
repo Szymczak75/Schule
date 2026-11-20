@@ -1,6 +1,6 @@
 # Anweisung EXAM – bewertete Tests auf dem iPad
 
-Stand: 20.11.2026 · Engine `baustein_exam.html` v1.2 · Auswertung `exam_auswerten.py` v1.1 · gilt für das Projekt **„EXAM"**
+Stand: 20.11.2026 · Engine `baustein_exam.html` v1.2 · Auswertung `exam_auswerten.py` v1.1 · gilt für das Projekt **„WEB EXAM"**
 (Sync: `_wartung/exam`, `_wartung/allgemein`).
 
 Ein EXAM ist ein **bewerteter Test**, den die Klasse auf dem iPad schreibt. Die Seite gibt
@@ -8,7 +8,7 @@ kein Feedback, enthält keine Lösungen, sperrt sich beim Verlassen und erzeugt 
 anonymes PDF. Claude bewertet die PDFs **vor** – die endgültige Bewertung macht immer die
 Lehrkraft.
 
-**Jeder Test bekommt einen eigenen Chat im Projekt „EXAM".** In diesem Chat entstehen
+**Jeder Test bekommt einen eigenen Chat im Projekt „WEB EXAM".** In diesem Chat entstehen
 Testseite und Erwartungshorizont, und dorthin kommen später die abgegebenen PDFs.
 
 ---
@@ -35,7 +35,7 @@ Testseite und Erwartungshorizont, und dorthin kommen später die abgegebenen PDF
 2. **Keine Lösungen auf der Seite.** Nicht im Text, nicht in Kennungen (`id`), nicht in der
    Reihenfolge, nicht in Kommentaren. Lösungen stehen nur im Erwartungshorizont.
 3. **Erwartungshorizont nie ins Repo.** Die Website ist öffentlich – der Erwartungshorizont
-   bleibt im Test-Chat bzw. im Projektwissen des Projekts „EXAM".
+   bleibt im Test-Chat bzw. im Projektwissen des Projekts „WEB EXAM".
 4. **Startreihenfolge ist nie die Lösung.** Sortierkarten und Auswahl-Optionen stehen in einer
    bewusst durcheinandergewürfelten Reihenfolge; die richtige Reihenfolge darf auch nicht
    zufällig herauskommen.
@@ -155,7 +155,7 @@ Antworten maschinenlesbar (Format `exam-abgabe-1`) – daraus liest Claude bei d
 ## 6. Erwartungshorizont (entsteht mit der Testseite)
 
 Claude liefert ihn als Datei `erwartungshorizont_<thema>.md` im Test-Chat (und legt ihn, wenn
-möglich, ins Projektwissen von „EXAM"). **Nie ins Repo.** Aufbau:
+möglich, ins Projektwissen von „WEB EXAM"). **Nie ins Repo.** Aufbau:
 
 ```markdown
 # Erwartungshorizont – EXAM Neurobiologie (Q1)
@@ -299,7 +299,7 @@ Punkte in Excel prüfen und ändern; in „Schülerliste" die Codes durch die Na
 | `exam_auswerten.py` | `_wartung/exam/` | Vorbewertung, Excel, Gesamt-PDF (Abschnitt 7) |
 | `Punkteerfassung_Vorlage.xlsx` | `_wartung/exam/` | leere Excel-Vorlage der Lehrkraft |
 | `anweisung_exam.md` | `_wartung/exam/` | diese Anweisung |
-| `projektanweisung_exam.md` | `_wartung/exam/` | Text für das Feld „Anweisungen" des Projekts „EXAM" |
+| `projektanweisung_exam.md` | `_wartung/exam/` | Text für das Feld „Anweisungen" des Projekts „WEB EXAM" |
 | `vorbereitung.html` | `intern/EXAM/` | Codes, Freischaltcode, Link, QR-Code |
 | `thema_exam.html` | `intern/EXAM/` | die einzelnen Testseiten |
 | `pruefe.py` | `_wartung/allgemein/` | kennt `typ="Exam"` (Regel `EXAM`) |

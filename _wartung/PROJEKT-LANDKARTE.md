@@ -15,7 +15,7 @@ von claude.ai ein (siehe `_wartung/LIESMICH.md`). Nach einer Änderung genügt i
 | **HTML erzeugen** | `allgemein`, `geodreieck` | ja | ja | ja | ja | ja | — (nicht nötig) | ja |
 | **Debugging** | `allgemein`, `geodreieck` | ja | ja | ja | ja | ja | — (nicht nötig) | ja |
 | **GeoGebra** (Bedienungsseiten) | `allgemein`, `geogebra` | ja | ja | ja | — (steckt in `helfer.js`; liegt über `allgemein` trotzdem mit an, schadet nicht) | ja (`bauer.py` setzt sie; Datei muss mit nach `/tmp/gg/`) | — | — (nicht nötig) |
-| **EXAM** (bewertete Tests, ein Chat je Test) | `allgemein`, `exam` | nur Farbschema/Anrede (2.2, 3.7) | — | ja (Regel `EXAM`) | nur bei Formeln | **nein** (EXAM-Seiten haben keine Leiste) | `anweisung_exam.md` | — |
+| **WEB EXAM** (bewertete Tests, ein Chat je Test) | `allgemein`, `exam` | nur Farbschema/Anrede (2.2, 3.7) | — | ja (Regel `EXAM`) | nur bei Formeln | **nein** (EXAM-Seiten haben keine Leiste) | `anweisung_exam.md` | — |
 | **Wartung Unterrichtsprojekte** | ganzer Ordner `_wartung` | alles | | | | | | |
 
 **Allgemeine Dateien** (`_wartung/allgemein/`: Lernseiten-Anweisung, Fehler-Checkliste,
@@ -50,7 +50,7 @@ werden deshalb hier im Wartungs-Projekt per PR eingetragen.
 **Nicht mehr gebraucht:** `ANHANG_B_neu.md` – der Text steht als ANHANG B in
 `anweisung_lernseiten.txt`.
 
-## Nur im Projekt „EXAM" (`_wartung/exam/`)
+## Nur im Projekt „WEB EXAM" (`_wartung/exam/`)
 
 | Datei | Zweck | Bei Änderungen mitprüfen |
 |---|---|---|
@@ -59,11 +59,11 @@ werden deshalb hier im Wartungs-Projekt per PR eingetragen.
 | `exam_bauen.py` | setzt den Block `var EXAM = {…};` und die Meta-Angaben in den Baustein | selten |
 | `exam_auswerten.py` | Vorbewertung aus den Abgabe-PDFs, Excel aus der Vorlage, Gesamt-PDF mit Korrekturen | Code-Muster wie im Baustein; Zellen der Vorlage |
 | `Punkteerfassung_Vorlage.xlsx` | leere Excel-Vorlage „Punkteerfassung" der Lehrkraft | bei geänderter Vorlage: Zellen in `exam_auswerten.py` prüfen |
-| `projektanweisung_exam.md` | Text für das Feld „Anweisungen" des Projekts „EXAM" – **muss von Hand ins Feld** | bei neuer Datei oder neuem Ablaufschritt |
+| `projektanweisung_exam.md` | Text für das Feld „Anweisungen" des Projekts „WEB EXAM" – **muss von Hand ins Feld** | bei neuer Datei oder neuem Ablaufschritt |
 
 Auf der Website (nicht in `_wartung`): `intern/EXAM/vorbereitung.html` (Codes, Freischaltcode,
 Link, QR-Code für jeden Test) und die Testseiten `intern/EXAM/*_exam.html`.
-**Erwartungshorizonte liegen nie im Repo** (öffentlich) – nur im Projekt „EXAM".
+**Erwartungshorizonte liegen nie im Repo** (öffentlich) – nur im Projekt „WEB EXAM".
 
 ## Nur noch EINE Lernseiten-Anweisung
 Alle vier Projekte nutzen dieselbe Lernseiten-Anweisung (`anweisung_lernseiten.txt`).
