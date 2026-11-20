@@ -57,6 +57,8 @@ werden deshalb hier im Wartungs-Projekt per PR eingetragen.
 | `anweisung_exam.md` | Regeln für EXAM-Seiten, Vorbereitung, Durchführung, Erwartungshorizont, Bewertung | bei Änderungen an Farbschema/Anrede der Lernseiten-Anweisung |
 | `baustein_exam.html` | EXAM-Engine (Sperre, Code + Initialen, Teil-Typen, PDF mit `abgabe.json`) + Beispiel-Inhalt | Versionsnummer **und** `EXAM_VERSION` in `pruefe.py`; Code-Muster gleich in `intern/EXAM/vorbereitung.html` |
 | `exam_bauen.py` | setzt den Block `var EXAM = {…};` und die Meta-Angaben in den Baustein | selten |
+| `exam_auswerten.py` | Vorbewertung aus den Abgabe-PDFs, Excel aus der Vorlage, Gesamt-PDF mit Korrekturen | Code-Muster wie im Baustein; Zellen der Vorlage |
+| `Punkteerfassung_Vorlage.xlsx` | leere Excel-Vorlage „Punkteerfassung" der Lehrkraft | bei geänderter Vorlage: Zellen in `exam_auswerten.py` prüfen |
 | `projektanweisung_exam.md` | Text für das Feld „Anweisungen" des Projekts „EXAM" – **muss von Hand ins Feld** | bei neuer Datei oder neuem Ablaufschritt |
 
 Auf der Website (nicht in `_wartung`): `intern/EXAM/vorbereitung.html` (Codes, Freischaltcode,
