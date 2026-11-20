@@ -602,6 +602,14 @@ def pruefe(pfad):
             n_pkt = len(re.findall(r"\bpunkte:\s*\d", exam_inhalt))
             if n_pkt < n_aufg:
                 hinweis('EXAM', 'Nicht jede Aufgabe hat punkte: (Höchstpunkte, wie im Schlüssel)')
+            teile_pfad = os.path.normpath(pfad).replace(os.sep, '/').split('/')
+            if 'EXAM' in teile_pfad and 'intern' in teile_pfad:
+                kl = meta.get('klasse', '')
+                kl_ordner = 'klasseQ1_Q2' if kl in ('Q1', 'Q2') else 'klasse' + kl
+                soll = '/'.join(['intern', 'EXAM', meta.get('fach', ''), kl_ordner])
+                ist = '/'.join(teile_pfad[teile_pfad.index('intern'):-1])
+                if ist != soll and not ist.startswith('intern/EXAM/probe'):
+                    hinweis('EXAM', 'Ablage: EXAM-Seite gehört nach %s/ (liegt in %s/)' % (soll, ist))
             if 'localStorage' in exam_inhalt:
                 fehler('STORAGE', 'localStorage im EXAM-INHALT')
 

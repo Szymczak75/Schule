@@ -62,7 +62,7 @@ werden deshalb hier im Wartungs-Projekt per PR eingetragen.
 | `projektanweisung_exam.md` | **die** Projektanweisung von „WEB EXAM" – im Feld „Anweisungen" steht nur ein Verweis darauf; Änderungen wirken nach „Synchronisieren" | bei neuer Datei oder neuem Ablaufschritt |
 
 Auf der Website (nicht in `_wartung`): `intern/EXAM/vorbereitung.html` (Codes, Freischaltcode,
-Link, QR-Code für jeden Test) und die Testseiten `intern/EXAM/*_exam.html`.
+Link, QR-Code für jeden Test) und die Testseiten `intern/EXAM/<fach>/<klassenordner>/*_exam.html`.
 **Erwartungshorizonte liegen nie im Repo** (öffentlich) – nur im Projekt „WEB EXAM".
 
 ## Nur noch EINE Lernseiten-Anweisung
