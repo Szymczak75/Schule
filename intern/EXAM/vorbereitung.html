@@ -20,6 +20,8 @@
        Klasse, Druck: Liste für die Lehrkraft + Zettel zum Ausschneiden.
      - Code-Muster: 4 Buchstaben + Prüfbuchstabe (z. B. HKWP-Z), seit 20.11.2026 ohne Ziffern. CODE_ALPHABET und
        CODE_SALT müssen mit der EXAM-Engine (baustein_exam.html) übereinstimmen.
+     - Freischaltcode nur zum Aufklappen unter der Code-Liste (nicht neben dem QR-Code,
+       damit er am Beamer nicht sichtbar ist); im Ausdruck für die Lehrkraft steht er oben.
      - Namen werden nirgends digital gespeichert (Zuordnung nur auf Papier).
      - Zustand nur in sessionStorage (try/catch).
      ============================================================ -->
@@ -60,6 +62,9 @@ input[type=text]:focus{outline:none;border-color:var(--border-blue);}
   color:var(--border-blue);background:var(--grey-light);border:2px solid var(--border-blue);border-radius:.6rem;
   display:inline-block;padding:.2rem .8rem;}
 .link{word-break:break-all;}
+.frei-box{margin-top:1rem;background:var(--amber-light);border:2px solid var(--amber);border-radius:.7rem;padding:0 .9rem;}
+.frei-box summary{min-height:44px;display:flex;align-items:center;cursor:pointer;font-weight:700;color:var(--amber-dark);}
+.frei-box p{margin:.3rem 0 .8rem;}
 .ergebnis{display:grid;grid-template-columns:1fr 13rem;gap:1rem;align-items:start;}
 @media (max-width:700px){.ergebnis{grid-template-columns:1fr;}}
 .qr-klein > svg{display:block;width:100%;height:auto;}
@@ -120,10 +125,10 @@ table.liste td.name{width:55%;border-bottom:1px solid var(--grey);}
   <div id="ausgabe" hidden>
     <section class="karte">
       <p class="nur-druck"><b>EXAM – nur für die Lehrkraft</b> · <span id="druckDatum"></span></p>
+      <p class="nur-druck"><b>Freischaltcode:</b> <span class="mono" id="freiDruck"></span></p>
       <h2 id="testTitel"></h2>
       <div class="ergebnis">
         <div>
-          <p><b>Freischaltcode</b> (entsperrt ein gesperrtes iPad):<br><span class="frei" id="freiCode"></span></p>
           <p><b>Link für die Klasse:</b><br><span class="mono link" id="linkText"></span></p>
           <div class="zeile nicht-drucken">
             <button class="knopf" id="qrGross">📱 QR-Code groß zeigen</button>
@@ -138,6 +143,11 @@ table.liste td.name{width:55%;border-bottom:1px solid var(--grey);}
         <thead><tr><th>Nr.</th><th>Code</th><th>Name</th></tr></thead>
         <tbody id="listeKoerper"></tbody>
       </table>
+      <details class="frei-box nicht-drucken" id="freiBox">
+        <summary>🔑 Freischaltcode anzeigen</summary>
+        <p>Entsperrt ein gesperrtes iPad. Nicht am Beamer zeigen.</p>
+        <p><span class="frei" id="freiCode"></span></p>
+      </details>
     </section>
     <section class="karte zettel-seite">
       <h2 class="nicht-drucken">Zettel zum Ausschneiden</h2>
@@ -372,6 +382,8 @@ function zeigen(){
   $('druckDatum').textContent = ('0'+d.getDate()).slice(-2) + '.' + ('0'+(d.getMonth()+1)).slice(-2) + '.' + d.getFullYear();
   $('testTitel').textContent = 'Test: ' + testName(S.adresse) + ' · ' + S.codes.length + ' Codes';
   $('freiCode').textContent = S.frei;
+  $('freiDruck').textContent = S.frei;
+  $('freiBox').open = false;
   $('linkText').textContent = S.link;
   var svg = dinoQr(S.link) || '';
   $('qrKlein').innerHTML = svg; $('qrGrossBild').innerHTML = svg;
