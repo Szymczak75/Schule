@@ -282,6 +282,8 @@ Ordner-Übersichten `_*.html` über `linking.txt`). Änderungen an der Startseit
   Teile; Initialen kommen ins PDF; Erwartungshorizont nie ins Repo.
   Nachtrag 20.11.: **Flugmodus statt Classroom** (Standard `flugmodus: true`): Code-Eingabe erst
   offline, Netz während des Tests sperrt, Entsperren nur offline.
+  Nachtrag 20.11.: **Codes nur aus Buchstaben** (`CODE_ALPHABET` = 23 Buchstaben ohne I, L, O;
+  Engine v1.1, `vorbereitung.html` v1.1, beide EXAM-Seiten). Alte Codes mit Ziffern gelten nicht mehr.
   **Offen – Schritt 2:** Bewertungsablauf (Auswertungs-Skript liest `abgabe.json`, Excel aus der
   Vorlage „Punkteerfassung" – Achtung: openpyxl verliert deren Datenprüfung/bedingte
   Formatierung, also XML direkt bearbeiten –, Gesamt-PDF mit Korrekturen), mit ausgedachten
