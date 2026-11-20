@@ -53,7 +53,9 @@ Oberstufen-Aufgabenkarte unter dem Titel die `.op-tags`-Zeile mit Hilfsmittel- u
 Lösungsart-Kennzeichnung? Gibt es einen „Weiter"-Button – und wenn ja, mit echtem Ziel?
 Beginnt jede Karte, die auf der vorigen aufbaut, mit „Wo wir gerade stehen"? Sind alle
 Aufgaben ausformuliert (keine Tabellen-Stichworte)? Steht die Navigationsleiste
-(`baustein_navigation.html`) unverändert vor dem T-Rex, außerhalb von `<main>`?
+(`baustein_navigation.html`) unverändert vor dem T-Rex, außerhalb von `<main>`? Steht ein
+Ablaufplan als eingeklappter `<details class="plan">`-Block über der Reiterleiste – nicht
+unten auf einer Karte?
 
 **4. Aufgaben- und Antwortlogik**
 Hat jede Eingabe einen erreichbaren Prüfen-Button? Werden MC-Optionen beim Laden einmal
@@ -280,6 +282,11 @@ Diese Punkte standen offen und sind inzwischen als Regel in
   Seit v7 (16.11.2026) gibt es neben dem 🏠-Knopf einen schwebenden QR-Knopf, der die
   Adresse der Seite als großen QR-Code zeigt.
   `pruefe.py` meldet eine fehlende oder veränderte Leiste als `NAV`.
+- **Ablaufplan steht oben und ist aufklappbar** (19.11.2026). Auf
+  `ganzrationale_funktionen_aufbau_ls` stand der Plan der Doppelstunde als Tabelle unten auf
+  Karte 1 – nach dem Weiterschalten war er weg. Seitdem gilt TEIL 3.8: eingeklappter
+  `<details class="plan">`-Block über der Reiterleiste, Spalten Karte · Was? · Dauer · Minute ·
+  Sozialform · Auftrag. `pruefe.py` meldet Verstöße als `ABLAUF`.
 - **Keine Google Fonts mehr** (Oktober 2026, Datenschutz). Einzige erlaubte externe Quelle
   ist MathJax; Schrift kommt aus dem System.
 - **Schritt für Schritt ist eine eigene Seitenart** (November 2026). Steht „Schritt für
@@ -326,4 +333,4 @@ Diese Punkte standen offen und sind inzwischen als Regel in
 
 ---
 
-*Stand: 13.11.2026 (Sozialformen/Gruppen-Check; Kernkompetenzen; Seitenart Rückblick KA, Suffix _kavb; Schritt für Schritt; Navigationsleiste, keine Google Fonts) – gepflegt im Wartungs-Projekt „Wartung Unterrichtsprojekte".*
+*Stand: 19.11.2026 (Ablaufplan oben und aufklappbar; Sozialformen/Gruppen-Check; Kernkompetenzen; Seitenart Rückblick KA, Suffix _kavb; Schritt für Schritt; Navigationsleiste, keine Google Fonts) – gepflegt im Wartungs-Projekt „Wartung Unterrichtsprojekte".*
