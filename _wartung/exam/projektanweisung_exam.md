@@ -23,8 +23,21 @@ Maßgeblich sind ausschließlich die Dateien aus dem GitHub-Sync `_wartung/exam/
 5. Vor der Ausgabe: `pruefe.py` ohne FEHLER und Browser-Durchlauf mit PDF (Abschnitt 8).
 6. Erst im Chat zeigen, nach dem OK per Pull Request nach
    `intern/EXAM/<fach>/<klassenordner>/<thema>_exam.html` (z. B. `intern/EXAM/bio/klasse10/`).
-   Danach nenne ich
-   den Link zu `intern/EXAM/vorbereitung.html`.
+   Danach nenne ich den Link zu `intern/EXAM/vorbereitung.html` und die Adresse der Testseite.
+
+## Bestehenden Test überarbeiten (Fehler beheben, Inhalt ändern)
+1. Die aktuelle Seite aus dem Repo holen (`intern/EXAM/…/<thema>_exam.html`), daraus den Block
+   `var EXAM = {…};` und die Meta-Angaben übernehmen – nie aus dem Gedächtnis.
+2. Nur den Block ändern und mit `exam_bauen.py` aus dem **aktuellen** `baustein_exam.html` neu
+   bauen. So bekommt die Seite automatisch die neueste Engine.
+3. Fehlerchecks wie bei einer neuen Seite: `pruefe.py` (aus `_wartung/allgemein/`), die
+   `wiederkehrende_fehler_checkliste.md`, soweit sie für EXAM gilt (Farben, Schrift,
+   Anrede, Tippziele, Speichern), und der Browser-Durchlauf mit PDF (Abschnitt 8).
+4. Ändern sich Aufgaben oder Punkte: Erwartungshorizont und Schlüssel im selben Zug anpassen;
+   bei geändertem Inhalt `speicher` hochzählen (…:v2).
+5. Zeigen → OK → Pull Request (wie oben).
+Fehler in der Engine selbst (Sperre, PDF, Speichern …) behebe ich hier nicht: Ich beschreibe
+sie für das Wartungs-Projekt, dort wird `baustein_exam.html` geändert.
 
 ## Test bewerten
 - Ablauf nach `anweisung_exam.md` Abschnitt 7 mit `exam_auswerten.py` (vorbewerten →
