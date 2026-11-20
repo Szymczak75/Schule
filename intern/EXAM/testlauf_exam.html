@@ -13,7 +13,7 @@
 <meta name="oberthema" content="EXAM">
 <meta name="thema" content="Testlauf">
 <!-- =============================================================================
-     BAUSTEIN: EXAM-Seite  (v1.1, 20.11.2026 – Codes nur aus Buchstaben) – _wartung/exam/baustein_exam.html
+     BAUSTEIN: EXAM-Seite  (v1.2, 20.11.2026 – Punkte je Aufgabe) – _wartung/exam/baustein_exam.html
      Anleitung: _wartung/exam/anweisung_exam.md
      Neue EXAM-Seite = Kopie dieser Datei. Geändert werden NUR
        - die Meta-Tags und <title> oben,
@@ -29,6 +29,8 @@
          Freischaltcode; jede Sperre steht im PDF.
        - Aufgabentypen: beschriften, sortieren (Antippen), auswahl, freitext.
        - Keine Lösungen im Quelltext, keine Bewertung auf der Seite.
+       - Punkte je Aufgabe (aufgabe.punkte) stehen auf der Seite und im PDF als
+         „___ von X Punkten" (zum Eintragen mit dem Stift).
        - Abgabe mit Rückfrage; danach PDF (Helvetica, Abbildungen als JPEG,
          Antworten zusätzlich als eingebettete Datei abgabe.json).
        - Zustand nur in sessionStorage (try/catch). Gesperrte Felder per
@@ -68,6 +70,7 @@ main{max-width:1024px;margin:0 auto;padding:1rem;}
 .karte h2{margin:0 0 .5rem;font-size:1.3rem;color:var(--border-blue);}
 .karte h3{margin:1.1rem 0 .4rem;font-size:1.1rem;}
 .auftrag{font-weight:700;}
+.punkte{font-size:1rem;font-weight:700;color:var(--grey);white-space:nowrap;}
 .hinweis{color:var(--grey);}
 .figur{border:2px solid var(--line);border-radius:.8rem;background:#fff;padding:.4rem;margin:.6rem 0;}
 .figur > svg{display:block;width:100%;height:auto;}
@@ -251,8 +254,8 @@ body.gesperrt main{filter:blur(8px);}
    - zeit:    Richtzeit in Minuten (nur Orientierung)
    - flugmodus: true (Standard) = Test nur im Flugmodus; false = ohne Netzprüfung
    - speicher: eindeutiger Schlüssel 'aszym:<datei>:v1'
-   - aufgaben: Liste; jede Aufgabe hat titel, kurz (Reiter), einleitung (HTML)
-     und teile. Teil-Typen:
+   - aufgaben: Liste; jede Aufgabe hat titel, kurz (Reiter), punkte (Höchstpunkte,
+     gleich wie im Schlüssel), einleitung (HTML) und teile. Teil-Typen:
        beschriften: svg (ohne Nummern), nummern [{nr,x,y,zx,zy}]
        sortieren:   karten [{id,t}] in bewusst NICHT richtiger Startreihenfolge;
                     optional eine Karte {id,t,fehlt:true} als Platzhalter
@@ -270,28 +273,28 @@ var EXAM = {
   flugmodus: true,
   speicher: 'aszym:testlauf_exam:v1',
   aufgaben: [
-    { titel: 'Aufgabe 1 · Eine Antwort wählen', kurz: 'Einfachauswahl',
+    { titel: 'Aufgabe 1 · Eine Antwort wählen', kurz: 'Einfachauswahl', punkte: 1,
       einleitung: '',
       teile: [
         { id: '1', typ: 'auswahl', mehrfach: false,
           auftrag: 'Welche Stadt ist die Hauptstadt von Deutschland? Wähle eine Antwort.',
           optionen: [ {id:'oh', t:'Hamburg'}, {id:'ok', t:'Köln'}, {id:'ob', t:'Berlin'}, {id:'om', t:'München'} ] }
       ] },
-    { titel: 'Aufgabe 2 · Mehrere Antworten wählen', kurz: 'Mehrfachauswahl',
+    { titel: 'Aufgabe 2 · Mehrere Antworten wählen', kurz: 'Mehrfachauswahl', punkte: 3,
       einleitung: '',
       teile: [
         { id: '2', typ: 'auswahl', mehrfach: true,
           auftrag: 'Welche Zahlen sind gerade? Wähle alle passenden aus.',
           optionen: [ {id:'oc', t:'15'}, {id:'ot', t:'8'}, {id:'ow', t:'3'}, {id:'oe', t:'20'}, {id:'or', t:'12'} ] }
       ] },
-    { titel: 'Aufgabe 3 · Zahlen sortieren', kurz: 'Sortieren',
+    { titel: 'Aufgabe 3 · Zahlen sortieren', kurz: 'Sortieren', punkte: 4,
       einleitung: '',
       teile: [
         { id: '3', typ: 'sortieren',
           auftrag: 'Sortiere die Zahlen der Größe nach – die kleinste Zahl kommt auf Platz 1.',
           karten: [ {id:'kv', t:'42'}, {id:'kf', t:'7'}, {id:'ky', t:'19'}, {id:'kn', t:'3'}, {id:'kh', t:'25'} ] }
       ] },
-    { titel: 'Aufgabe 4 · Freitext', kurz: 'Freitext',
+    { titel: 'Aufgabe 4 · Freitext', kurz: 'Freitext', punkte: 4,
       einleitung: '',
       teile: [
         { id: '4', typ: 'freitext',
@@ -467,7 +470,9 @@ function baueAufgaben(){
   var tabs = '', karten = '';
   EXAM.aufgaben.forEach(function(a, i){
     tabs += '<button class="tab" data-ziel="a'+i+'">Aufgabe ' + (i+1) + ' · ' + esc(a.kurz) + '<span data-marke="a'+i+'"></span></button>';
-    karten += '<section class="karte" id="a'+i+'"><h2>' + esc(a.titel) + '</h2>' + (a.einleitung || '') +
+    karten += '<section class="karte" id="a'+i+'"><h2>' + esc(a.titel) +
+              (a.punkte ? ' <span class="punkte">(' + a.punkte + ' ' + (a.punkte === 1 ? 'Punkt' : 'Punkte') + ')</span>' : '') +
+              '</h2>' + (a.einleitung || '') +
               a.teile.map(baueTeil).join('') + '</section>';
   });
   tabs += '<button class="tab" data-ziel="ab">✅ Abgabe</button>';
@@ -734,6 +739,7 @@ function antwortDaten(){
     if (t.typ === 'freitext') e.antwort = a;
     d.teile.push(e);
   });
+  d.aufgaben = EXAM.aufgaben.map(function(a, i){ return { nr: i + 1, titel: a.titel, punkte: a.punkte || null }; });
   return d;
 }
 function pdfBauen(){
@@ -785,7 +791,11 @@ function pdfBauen(){
   // Aufgaben
   EXAM.aufgaben.forEach(function(a){
     luft(6);
-    absatz(a.titel, 14, true);
+    text(umbruch(a.titel, BREIT - (a.punkte ? 130 : 0), true, 14), 14, true, RAND);
+    if (a.punkte){
+      var pt = winCodes('____ von ' + a.punkte + (a.punkte === 1 ? ' Punkt' : ' Punkten'));
+      ops.push('BT 0.133 0.188 0.247 rg /F2 11 Tf ' + (B - RAND - breite(pt, true, 11)).toFixed(1) + ' ' + y.toFixed(1) + ' Td (' + pdfStr(pt) + ') Tj ET');
+    }
     var ein = (a.einleitung || '').replace(/<br\s*\/?>/gi, '\n').replace(/<\/p>\s*<p[^>]*>/gi, '\n').replace(/<[^>]+>/g, '')
       .replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').trim();
     if (ein) absatz(ein, 10.5, false);

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""EXAM-Abgaben auswerten  (v1, 20.11.2026) – _wartung/exam/exam_auswerten.py
+"""EXAM-Abgaben auswerten  (v1.1, 20.11.2026) – _wartung/exam/exam_auswerten.py
 
 Ablauf im Test-Chat (anweisung_exam.md, Abschnitt 7):
 
@@ -12,7 +12,8 @@ Ablauf im Test-Chat (anweisung_exam.md, Abschnitt 7):
      korrekturen, kommentar) und trägt Auffälligkeiten ein (manipulation, hinweise).
 
   3) Ausgeben – Excel aus der Vorlage (Zeilen = Codes alphabetisch, Spalten = Aufgaben),
-     Gesamt-PDF (je Code: Korrekturblatt + abgegebenes PDF) und Begründungen (Markdown):
+     Gesamt-PDF (Deckblatt + je Code EIN Korrekturblatt mit „___ von X Punkten" je Aufgabe,
+     ohne die Original-Abgabe) und Begründungen (Markdown):
        python3 exam_auswerten.py ausgeben PDF_ORDNER schluessel_<thema>.json bewertung_<thema>.json \\
                Punkteerfassung_Vorlage.xlsx AUSGABE_ORDNER [--kurs "7b"]
 
@@ -180,7 +181,7 @@ def vorbewerten(pdf_ordner, schluessel_pfad, ziel):
     print('%d Abgaben gelesen → %s' % (len(abgaben), ziel))
     for f in fehler:
         print('FEHLER  ', f)
-    for w in warnungen:
+    for w in warnungen + punkte_abgleich(k, abgaben):
         print('WARNUNG ', w)
     offen = sum(1 for e in erg['abgaben'].values() for t in e['teile'].values() if t['punkte'] is None)
     print('Offene Teile für Claude: %d' % offen)
@@ -188,6 +189,17 @@ def vorbewerten(pdf_ordner, schluessel_pfad, ziel):
         zu = ['%s=%s' % (tid, ('%g' % t['punkte']) if t['punkte'] is not None else '?') for tid, t in e['teile'].items()]
         print('  %s %-3s %s' % (code, e['initialen'], '  '.join(zu)))
     return 1 if fehler else 0
+
+
+def punkte_abgleich(k, abgaben):
+    """Vergleicht die Höchstpunkte der Testseite (abgabe.json) mit dem Schlüssel."""
+    w = []
+    for ab in list(abgaben.values())[:1]:
+        seite = [a.get('punkte') for a in ab['daten'].get('aufgaben', [])]
+        schl = [a['max'] for a in k['aufgaben']]
+        if seite and seite != schl:
+            w.append('Höchstpunkte der Testseite %s ≠ Schlüssel %s – bitte angleichen' % (seite, schl))
+    return w
 
 
 def pruefe_bewertung(k, b):
@@ -378,6 +390,7 @@ def gesamt_pdf(ziel, k, b, abgaben):
         'klein': ParagraphStyle('k', fontName=f, fontSize=8.5, leading=11, textColor=GRAU),
         'box': ParagraphStyle('b', fontName=f, fontSize=10.5, leading=14.5, textColor=TINTE),
         'warn': ParagraphStyle('w', fontName=fb, fontSize=12, leading=16, textColor=colors.white),
+        'punkte': ParagraphStyle('pk', fontName=fb, fontSize=11, leading=14, textColor=TINTE, alignment=2),
     }
 
     def kasten(inhalt, rand, grund, breite=1.6):
@@ -417,8 +430,8 @@ def gesamt_pdf(ziel, k, b, abgaben):
         s.append(Paragraph('%s – Korrektur' % html.escape(k.get('titel', 'EXAM ' + k['thema'])), st['h1']))
         s.append(Paragraph('<b>Code %s</b> · Initialen %s · abgegeben %s' % (
             code, html.escape(e['initialen']), zeit_lokal(d.get('ende', ''), True)), st['p']))
-        s.append(Paragraph('Vorbewertung durch Claude – endgültig bewertet die Lehrkraft. Punkte für '
-                           'Freitext und Beschriftungen stehen nur in der Excel-Tabelle.', st['klein']))
+        s.append(Paragraph('Vorbewertung durch Claude – endgültig bewertet die Lehrkraft. Die Punkte stehen in '
+                           'der Excel-Tabelle und werden hier von Hand eingetragen.', st['klein']))
         s.append(Spacer(1, 4))
         if e.get('manipulation'):
             s.append(kasten(Paragraph('⚠ ACHTUNG – ANWEISUNG AN DIE KI IM SCHÜLERTEXT<br/>'
@@ -435,7 +448,13 @@ def gesamt_pdf(ziel, k, b, abgaben):
         if e.get('hinweise'):
             s.append(kasten(Paragraph('<b>Hinweis:</b> ' + html.escape(e['hinweise']), st['box']), BLAU, '#eef0f3'))
         for aufg in k['aufgaben']:
-            s.append(Paragraph(html.escape(aufg.get('titel', 'Aufgabe %s' % aufg['nr'])), st['h2']))
+            kopf = Table([[Paragraph(html.escape(aufg.get('titel', 'Aufgabe %s' % aufg['nr'])), st['h2']),
+                           Paragraph('<b>____ von %g %s</b>' % (aufg['max'], 'Punkt' if aufg['max'] == 1 else 'Punkten'),
+                                     st['punkte'])]], colWidths=[125 * mm, 45 * mm])
+            kopf.setStyle(TableStyle([('VALIGN', (0, 0), (-1, -1), 'BOTTOM'), ('LEFTPADDING', (0, 0), (-1, -1), 0),
+                                      ('RIGHTPADDING', (0, 0), (-1, -1), 0), ('TOPPADDING', (0, 0), (-1, -1), 0),
+                                      ('BOTTOMPADDING', (0, 0), (-1, -1), 0)]))
+            s.append(kopf)
             for t in aufg['teile']:
                 x = e['teile'][t['id']]
                 ant = teil_antwort(d, t['id'])
@@ -454,7 +473,6 @@ def gesamt_pdf(ziel, k, b, abgaben):
                             z = '<font color="%s">· %s</font>' % (GRAU, html.escape(o['text']))
                         zeilen.append(z)
                     block.append(Paragraph('<br/>'.join(zeilen), st['p']))
-                    block.append(Paragraph('<b>%g / %g P.</b>' % (x['punkte'], t['max']), st['p']))
                 elif t['typ'] == 'sortieren':
                     soll = t['reihenfolge']
                     gelegt = x['details'].get('gelegt', [])
@@ -466,8 +484,8 @@ def gesamt_pdf(ziel, k, b, abgaben):
                     richtig = ' → '.join(html.escape(karten_text(code, t['id'], kid)) for kid in soll)
                     block.append(Paragraph('<br/>'.join(zeilen), st['p']))
                     block.append(Paragraph('<font color="%s">Richtig: %s</font>' % (GRUEN, richtig), st['p']))
-                    block.append(Paragraph('<b>%g / %g P.</b> (längste richtige Kette: %d Karten)' % (
-                        x['punkte'], t['max'], x['details'].get('kette', 0)), st['p']))
+                    block.append(Paragraph('Längste richtig geordnete Kette: %d Karten' % x['details'].get('kette', 0),
+                                           st['klein']))
                 elif t['typ'] == 'beschriften':
                     reihen = [['Nr.', 'Antwort', 'Korrektur']]
                     for a_ in (ant or {}).get('antwort', []):
@@ -498,8 +516,9 @@ def gesamt_pdf(ziel, k, b, abgaben):
     # Deckblatt
     deck = os.path.join(tmp, '_deckblatt.pdf')
     s = [Paragraph('%s – Gesamt-PDF' % html.escape(k.get('titel', 'EXAM ' + k['thema'])), st['h1']),
-         Paragraph('%d Abgaben, alphabetisch nach Code. Je Code: Korrekturblatt, dann die Abgabe. '
-                   'Vorbewertung durch Claude – endgültig bewertet die Lehrkraft.' % len(b['abgaben']), st['p']),
+         Paragraph('%d Abgaben, alphabetisch nach Code. Je Code ein Korrekturblatt; die Original-Abgabe '
+                   'hat der Schüler selbst. Vorbewertung durch Claude – endgültig bewertet die Lehrkraft.'
+                   % len(b['abgaben']), st['p']),
          Spacer(1, 6)]
     reihen = [['Code', 'Init.', 'Auffälligkeiten']]
     for code, e in b['abgaben'].items():
@@ -526,10 +545,8 @@ def gesamt_pdf(ziel, k, b, abgaben):
         start = len(w.pages)
         for p in PdfReader(korr_pdfs[code]).pages:
             w.add_page(p)
-        for p in PdfReader(abgaben[code]['datei']).pages:
-            w.add_page(p)
         w.add_outline_item('%s · %s' % (code, b['abgaben'][code]['initialen']), start)
-    w.add_metadata({'/Title': 'Gesamt-PDF ' + k.get('titel', k['thema']), '/Producer': 'EXAM-Auswertung v1'})
+    w.add_metadata({'/Title': 'Gesamt-PDF ' + k.get('titel', k['thema']), '/Producer': 'EXAM-Auswertung v1.1'})
     with open(ziel, 'wb') as fh:
         w.write(fh)
     shutil.rmtree(tmp, ignore_errors=True)
@@ -564,7 +581,7 @@ def begruendungen_md(ziel, k, b):
 def ausgeben(pdf_ordner, schluessel_pfad, bewertung_pfad, vorlage, ordner, kurs=''):
     k, b = lade_json(schluessel_pfad), lade_json(bewertung_pfad)
     abgaben, fehler, warnungen = abgaben_lesen(pdf_ordner, k['thema'])
-    for w in warnungen:
+    for w in warnungen + punkte_abgleich(k, abgaben):
         print('WARNUNG ', w)
     probleme = fehler + pruefe_bewertung(k, b)
     fehlt = [c for c in b['abgaben'] if c not in abgaben]

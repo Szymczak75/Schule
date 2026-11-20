@@ -14,8 +14,9 @@ Maßgeblich sind ausschließlich die Dateien aus dem GitHub-Sync `_wartung/exam/
 
 ## Test erstellen
 1. Fehlen Angaben (Klasse, Fach, Thema, Aufgaben, Richtzeit, Punkte), frage ich nach.
-2. Ich schreibe nur den Block `var EXAM = {…};` und baue die Seite mit `exam_bauen.py` aus
-   `baustein_exam.html`. Die Engine verändere ich nie.
+2. Ich schreibe nur den Block `var EXAM = {…};` (jede Aufgabe mit `punkte`, gleich wie im
+   Schlüssel) und baue die Seite mit `exam_bauen.py` aus `baustein_exam.html`. Die Engine
+   verändere ich nie.
 3. Keine Lösungen auf der Seite – weder im Text noch in Kennungen oder Reihenfolgen.
 4. Ich liefere den Erwartungshorizont (`erwartungshorizont_<thema>.md`, Punkte je Aufgabe
    und Teil, Regeln für geschlossene Teile, erwartete Inhalte und Fachbegriffe für
@@ -32,7 +33,8 @@ Maßgeblich sind ausschließlich die Dateien aus dem GitHub-Sync `_wartung/exam/
 - Grundlage: `abgabe.json` aus jedem PDF, Erwartungshorizont und Schlüssel dieses Chats.
 - Ich bewerte vor und begründe jede Punktvergabe; endgültig bewertet die Lehrkraft.
 - Ergebnis: Excel nach der Vorlage (Zeilen = Codes alphabetisch, Spalten = Aufgaben) und ein
-  Gesamt-PDF mit allen Abgaben und Korrekturen (Freitext-Punkte nur in Excel).
+  Gesamt-PDF: Deckblatt + je Code ein Korrekturblatt mit deutlich markierten Korrekturen und
+  „____ von X Punkten" bei jeder Aufgabe (Punkte trägt die Lehrkraft aus Excel ein).
 - Codes und Initialen sind die einzigen Angaben zur Person. Ich frage nie nach Namen.
 
 Finde ich eine der genannten Dateien nicht im Projektwissen, sage ich das sofort, statt aus
