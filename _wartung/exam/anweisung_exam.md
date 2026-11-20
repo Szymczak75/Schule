@@ -51,6 +51,11 @@ Testseite und Erwartungshorizont, und dorthin kommen später die abgegebenen PDF
 9. **Prüfen vor der Ausgabe:** `pruefe.py` ohne FEHLER und ein Durchlauf im Browser
    (Abschnitt 8). Danach gilt TEIL 0 Nr. 26 der Lernseiten-Anweisung: erst im Chat zeigen,
    nach dem OK per Pull Request nach `intern/EXAM/<fach>/<klassenordner>/` (Abschnitt 9).
+10. **Zwei Stufen** (seit 20.11.2026): Während der Entwicklung sieht die Lehrkraft den Test als
+   **Entwickleransicht** mit Musterlösungen (`exam_vorschau.py`, privates Artefakt im
+   Test-Chat, nie im Repo). Erst nach ihrem OK wird die Testseite „scharf geschaltet“: Pull
+   Request, danach nur noch mit Code erreichbar; der Erwartungshorizont steht dann nur im Chat
+   und im Projektwissen.
 
 ---
 
@@ -296,6 +301,7 @@ Punkte in Excel prüfen und ändern; in „Schülerliste" die Codes durch die Na
 |---|---|---|
 | `baustein_exam.html` | `_wartung/exam/` | Engine + Beispiel-Inhalt mit allen Teil-Typen |
 | `exam_bauen.py` | `_wartung/exam/` | setzt EXAM-INHALT und Meta-Angaben in den Baustein |
+| `exam_vorschau.py` | `_wartung/exam/` | Entwickleransicht mit Musterlösungen (Stufe 1, nie ins Repo) |
 | `exam_auswerten.py` | `_wartung/exam/` | Vorbewertung, Excel, Gesamt-PDF (Abschnitt 7) |
 | `Punkteerfassung_Vorlage.xlsx` | `_wartung/exam/` | leere Excel-Vorlage der Lehrkraft |
 | `anweisung_exam.md` | `_wartung/exam/` | diese Anweisung |
