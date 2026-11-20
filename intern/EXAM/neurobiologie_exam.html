@@ -4,29 +4,37 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<title>EXAM Neurobiologie</title>
-<meta name="description" content="Prüfungsseite (EXAM) zur Neurobiologie: Neuron und Synapse beschriften, Signalübertragung sortieren und einen fehlenden Schritt erklären, Wirkung eines Gifts erklären. Die Seite sperrt sich beim Verlassen und erzeugt am Ende ein anonymes Abgabe-PDF.">
-<meta name="keywords" content="Neurobiologie, Neuron, Synapse, Signalübertragung, Neurotransmitter, EXAM, Prüfung">
+<title>EXAM · Neurobiologie</title>
+<meta name="description" content="Prüfungsseite (EXAM) zur Neurobiologie: Neuron und Synapse beschriften, Erregungsübertragung sortieren und einen fehlenden Schritt erklären, Wirkung eines Gifts erklären.">
+<meta name="keywords" content="Neurobiologie, Neuron, Synapse, Erregungsübertragung, Neurotransmitter, EXAM">
 <meta name="typ" content="Exam">
 <meta name="klasse" content="Q1">
 <meta name="fach" content="bio">
 <meta name="oberthema" content="Neurobiologie">
 <meta name="thema" content="Neuron und Synapse">
-<!-- ============================================================
-     EXAM-Prototyp v1 (16.11.2026) – Wartungs-Projekt
-     - Liegt in intern/ (nicht auf der Startseite gelistet).
-     - Sperrt sich beim Verlassen (Tab-/App-Wechsel, Fokusverlust, Neuladen).
-       Entsperren nur mit dem Lehrer-Code. Sein Hash steht im Link (?l=…), den
-       codes_generieren.html samt QR-Code erzeugt; ohne ihn startet der Test nicht.
-     - Schüler-Code nach Muster aus intern/EXAM/codes_generieren.html
-       (CODE_ALPHABET/CODE_SALT müssen in beiden Dateien gleich sein).
-     - Keine Lösungen im Quelltext, kein Feedback: Bewertet wird das PDF.
-     - Abgabe: PDF wird im Browser erzeugt (ohne Bibliothek), Dateiname
-       EXAM_<Thema>_<Code>.pdf, keine Namen im PDF.
-     - Zustand nur in sessionStorage (try/catch), kein Dauerspeicher.
-     - Bewusst OHNE Navigationsleiste: Jeder Link nach draußen würde
-       die Sperre auslösen (pruefe.py meldet deshalb NAV).
-     ============================================================ -->
+<!-- =============================================================================
+     BAUSTEIN: EXAM-Seite  (v1, 19.11.2026) – _wartung/exam/baustein_exam.html
+     Anleitung: _wartung/exam/anweisung_exam.md
+     Neue EXAM-Seite = Kopie dieser Datei. Geändert werden NUR
+       - die Meta-Tags und <title> oben,
+       - der Block  EXAM-INHALT  im Skript (Texte, Aufgaben, Abbildungen).
+     Alles andere (Engine) bleibt unverändert.
+     Engine:
+       - Start nur über den Link aus intern/EXAM/vorbereitung.html (?l=<Hash des
+         Freischaltcodes>). Code (Muster mit Prüfzeichen) + Initialen, erst dann
+         erscheinen die Aufgaben; die Orientierungsuhr startet.
+       - Flugmodus (Standard, EXAM.flugmodus !== false): Code-Eingabe erst offline;
+         Netz während des Tests = Sperre; Entsperren nur offline.
+       - Sperre beim Verlassen (Tab/App, Fokus, Neuladen); Entsperren mit dem
+         Freischaltcode; jede Sperre steht im PDF.
+       - Aufgabentypen: beschriften, sortieren (Antippen), auswahl, freitext.
+       - Keine Lösungen im Quelltext, keine Bewertung auf der Seite.
+       - Abgabe mit Rückfrage; danach PDF (Helvetica, Abbildungen als JPEG,
+         Antworten zusätzlich als eingebettete Datei abgabe.json).
+       - Zustand nur in sessionStorage (try/catch). Gesperrte Felder per
+         readOnly + .zu (iPad), nie per disabled.
+       - Bewusst ohne Navigationsleiste: jeder Link nach draußen würde sperren.
+     ========================================================================== -->
 <style>
 :root{
   --ink:#22303f; --card:#ffffff; --green:#1e7d32; --red:#c1272d;
@@ -49,23 +57,18 @@ main{max-width:1024px;margin:0 auto;padding:1rem;}
 .kopfzeile{display:flex;flex-wrap:wrap;gap:.6rem;align-items:center;justify-content:space-between;}
 .uhr{font-size:1.3rem;font-weight:800;color:var(--border-blue);font-variant-numeric:tabular-nums;}
 .uhr-hinweis{font-size:1rem;color:var(--grey);}
-.codeanzeige{font-weight:700;font-size:1rem;}
-details.amber{background:var(--amber-light);border:2px solid var(--amber);border-radius:.7rem;
-  margin-top:.6rem;padding:0 .8rem;}
-details.amber summary{min-height:44px;display:flex;align-items:center;cursor:pointer;
-  font-weight:700;color:var(--amber-dark);font-size:1rem;}
-details.amber p{margin:.2rem 0 .7rem;color:var(--ink);}
+.wer{font-weight:700;font-size:1rem;}
 .tabs{display:flex;flex-wrap:wrap;gap:.5rem;margin:0 0 1rem;}
 .tab{min-height:44px;padding:.5rem 1rem;border:2px solid var(--border-blue);border-radius:.6rem;
   background:#fff;color:var(--border-blue);font:inherit;font-size:1rem;font-weight:700;cursor:pointer;}
 .tab.aktiv{background:var(--border-blue);color:#fff;}
-.tab .marke{margin-left:.35rem;}
 .karte{display:none;background:var(--card);border:2px solid var(--line);border-radius:1rem;
   padding:1.2rem;margin-bottom:1rem;}
 .karte.aktiv{display:block;}
 .karte h2{margin:0 0 .5rem;font-size:1.3rem;color:var(--border-blue);}
-.karte h3{margin:1rem 0 .4rem;font-size:1.1rem;}
+.karte h3{margin:1.1rem 0 .4rem;font-size:1.1rem;}
 .auftrag{font-weight:700;}
+.hinweis{color:var(--grey);}
 .figur{border:2px solid var(--line);border-radius:.8rem;background:#fff;padding:.4rem;margin:.6rem 0;}
 .figur > svg{display:block;width:100%;height:auto;}
 .beschriftung{display:grid;grid-template-columns:repeat(auto-fill,minmax(15rem,1fr));gap:.6rem;margin-top:.6rem;}
@@ -76,7 +79,7 @@ input[type=text],textarea{width:100%;min-height:44px;padding:.5rem .7rem;border:
   border-radius:.6rem;font:inherit;font-size:1rem;color:var(--ink);background:#fff;}
 textarea{min-height:9rem;resize:vertical;}
 input[type=text]:focus,textarea:focus{outline:none;border-color:var(--border-blue);}
-input:disabled,input.zu,textarea:disabled{background:var(--grey-light);color:var(--ink);opacity:1;-webkit-text-fill-color:var(--ink);}
+input.zu,textarea.zu{background:var(--grey-light);color:var(--ink);-webkit-text-fill-color:var(--ink);cursor:default;}
 .knopf{min-height:44px;padding:.6rem 1.2rem;border:2px solid var(--border-blue);border-radius:.6rem;
   background:var(--border-blue);color:#fff;font:inherit;font-size:1rem;font-weight:700;cursor:pointer;}
 .knopf.hell{background:#fff;color:var(--border-blue);}
@@ -84,33 +87,46 @@ input:disabled,input.zu,textarea:disabled{background:var(--grey-light);color:var
 .knopf:active:not(:disabled){transform:scale(.98);}
 .zeile{display:flex;flex-wrap:wrap;gap:.6rem;align-items:center;margin-top:.8rem;}
 .meldung{margin-top:.6rem;font-weight:700;}
+.meldung:empty{display:none;}
 .meldung.ok{background:var(--green);color:#fff;padding:.5rem .8rem;border-radius:.6rem;}
 .meldung.falsch{background:var(--red);color:#fff;padding:.5rem .8rem;border-radius:.6rem;}
+.meldung.info{background:var(--amber-light);border:2px solid var(--amber);color:var(--ink);padding:.5rem .8rem;border-radius:.6rem;}
 /* Sortieren per Antippen */
 .sort-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
 @media (max-width:760px){.sort-grid{grid-template-columns:1fr;}}
 .sort-spalte h3{margin-top:0;}
-.vorrat,.plaetze{display:flex;flex-direction:column;gap:.5rem;}
-.schritt-karte{min-height:44px;padding:.6rem .8rem;border:2px solid var(--line);border-radius:.6rem;
+.vorrat,.plaetze,.optionen{display:flex;flex-direction:column;gap:.5rem;}
+.karte-btn{min-height:44px;padding:.6rem .8rem;border:2px solid var(--line);border-radius:.6rem;
   background:#fff;color:var(--ink);font:inherit;font-size:1rem;text-align:left;cursor:pointer;width:100%;}
-.schritt-karte.gewaehlt{border-color:var(--border-blue);background:var(--grey-light);box-shadow:0 0 0 2px var(--border-blue);}
-.schritt-karte.fehlt{border-style:dashed;border-color:var(--amber);background:var(--amber-light);font-weight:700;}
+.karte-btn.gewaehlt{border-color:var(--border-blue);background:var(--grey-light);box-shadow:0 0 0 2px var(--border-blue);}
+.karte-btn.fehlt{border-style:dashed;border-color:var(--amber);background:var(--amber-light);font-weight:700;}
 .platz{display:flex;align-items:stretch;gap:.5rem;}
 .platz .nr{align-self:center;}
 .platz-feld{flex:1;min-height:52px;border:2px dashed var(--grey);border-radius:.6rem;background:var(--bg);
   font:inherit;font-size:1rem;color:var(--grey);text-align:left;padding:.5rem .8rem;cursor:pointer;}
 .platz-feld.belegt{border-style:solid;border-color:var(--border-blue);background:#fff;color:var(--ink);}
 .platz-feld.belegt.fehlt{border-color:var(--amber);background:var(--amber-light);font-weight:700;}
-.leer-hinweis{color:var(--grey);}
+/* Auswahl */
+.option{display:flex;align-items:center;gap:.7rem;}
+.option .marke{flex:0 0 auto;width:1.6rem;height:1.6rem;border:2px solid var(--border-blue);background:#fff;
+  display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;}
+.option.einzel .marke{border-radius:50%;}
+.option.einzel.an .marke{background:var(--border-blue);box-shadow:inset 0 0 0 4px #fff;}
+.option.mehr .marke{border-radius:.3rem;}
+.option.an{border-color:var(--border-blue);background:var(--grey-light);}
+.option.mehr.an .marke{background:var(--border-blue);}
+.option.mehr.an .marke::after{content:'✓';}
 /* Start & Abgabe */
-.start-box{max-width:36rem;}
-.code-eingabe{font-size:1.3rem !important;letter-spacing:.15em;text-transform:uppercase;max-width:14rem;}
-.liste-stand{margin:.4rem 0 0;padding-left:1.2rem;}
-.schritte-abgabe{margin:.4rem 0 0;padding-left:1.4rem;}
-.schritte-abgabe li{margin:.3rem 0;}
+.start-box{max-width:38rem;}
+.start-felder{display:flex;flex-wrap:wrap;gap:1rem;}
+.start-felder > div{flex:1 1 12rem;}
+.start-felder label{display:block;font-weight:700;margin-bottom:.3rem;}
+.gross{font-size:1.3rem !important;letter-spacing:.15em;text-transform:uppercase;}
+.liste{margin:.4rem 0 0;padding-left:1.3rem;}
+.liste li{margin:.3rem 0;}
 .dateiname{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:1rem;background:var(--grey-light);
-  padding:.1rem .4rem;border-radius:.3rem;-webkit-user-select:text;user-select:text;}
-/* Sperre */
+  padding:.1rem .4rem;border-radius:.3rem;}
+/* Sperre & Dialog */
 .sperre{position:fixed;inset:0;z-index:1000;background:rgba(34,48,63,.92);display:none;
   align-items:center;justify-content:center;padding:1rem;}
 .sperre.an{display:flex;}
@@ -135,170 +151,87 @@ body.gesperrt main{filter:blur(8px);}
   .trex:hover .bubble,.trex.zeig .bubble{opacity:1;}
 
 </style>
-<!-- =============================================================================
-     BAUSTEIN: iPad-Feldsperre  (v1, 18.11.2026)
-     Einfügen: UNVERÄNDERT als letztes Element in den <head> jeder Seite, deren Skript
-     Texteingaben per  feld.disabled = …  sperrt.
-     Hintergrund: Safari (iPad) zeichnet gesperrte (disabled) Eingabefelder nach dem
-     Wieder-Einblenden einer Karte fast durchsichtig – die Zahlen scheinen weg.
-     Der Baustein lenkt  .disabled  bei Texteingaben (text, number, search, tel, email,
-     url) auf  readOnly  + Klasse  .zu  um. Das Feld bleibt unveränderbar, wird aber
-     normal gezeichnet. Lesen von  .disabled  liefert weiter den Sperrzustand.
-     Nicht betroffen: Buttons, Checkboxen, Radios, Selects.
-     Neue Seiten sperren Felder direkt per readOnly + .zu; dann ist der Baustein unnötig.
-     ========================================================================== -->
-<script>
-(function(){
-  try{
-    var P=HTMLInputElement.prototype, d=Object.getOwnPropertyDescriptor(P,'disabled');
-    if(!d||!d.set||P.__dinoSperre) return;
-    var TXT={text:1,number:1,search:1,tel:1,email:1,url:1};
-    Object.defineProperty(P,'disabled',{configurable:true,enumerable:d.enumerable,
-      get:function(){ return TXT[this.type] ? (d.get.call(this)||this.classList.contains('zu')) : d.get.call(this); },
-      set:function(v){
-        if(!TXT[this.type]){ d.set.call(this,v); return; }
-        d.set.call(this,false);
-        if(v){ if(!this.readOnly){ this.readOnly=true; this.__zuRO=true; } this.classList.add('zu'); }
-        else { if(this.__zuRO){ this.readOnly=false; this.__zuRO=false; } this.classList.remove('zu'); }
-      }});
-    P.__dinoSperre=true;
-  }catch(e){}
-})();
-</script>
-<style>input.zu{cursor:default}</style>
-<!-- ===== ENDE BAUSTEIN iPad-Feldsperre ===== -->
 </head>
 <body>
 <main>
   <div class="kopf">
     <div class="kopfzeile">
       <div>
-        <h1>🧠 EXAM · Neurobiologie</h1>
-        <p>Neuron, Synapse und Signalübertragung</p>
+        <h1 id="examTitel"></h1>
+        <p id="examUntertitel"></p>
       </div>
       <div id="kopfRechts" hidden>
-        <div class="codeanzeige">Code: <span id="codeAnzeige"></span></div>
-        <div class="uhr" id="uhr" aria-live="off">--:--</div>
-        <div class="uhr-hinweis">Dient nur der Orientierung – wenn die Zeit abgelaufen ist, passiert nichts.</div>
+        <div class="wer" id="werAnzeige"></div>
+        <div class="uhr" id="uhr">--:--</div>
+        <div class="uhr-hinweis" id="uhrHinweis"></div>
       </div>
     </div>
-    <details class="amber" id="uhrInfo" hidden>
-      <summary>ℹ️ Zur Zeitangabe</summary>
-      <p>Die Zeit ist eine Empfehlung, kein Muss. Nach Ablauf können Sie normal weiterarbeiten und abgeben.</p>
-    </details>
   </div>
 
-  <!-- ===== Start ===== -->
   <section class="karte aktiv" id="startKarte">
     <div class="start-box">
-      <h2>Bevor Sie beginnen</h2>
-      <p>Diese Seite ist eine Prüfung. Bitte lesen Sie die Regeln:</p>
-      <ul class="liste-stand">
-        <li>Bleiben Sie die ganze Zeit auf dieser Seite. Wenn Sie den Tab oder die App wechseln, die Seite neu laden oder schließen, <b>sperrt sich der Test</b>.</li>
-        <li>Entsperren kann nur Ihre Lehrkraft. Jede Sperre wird im Abgabe-PDF vermerkt.</li>
-        <li>Ihre Antworten bleiben beim Sperren erhalten. Wird der Tab geschlossen, sind sie verloren.</li>
-        <li>Am Ende geben Sie ab und laden ein PDF herunter, das Sie in Teams in der Aufgabe hochladen.</li>
-      </ul>
-      <div class="meldung falsch" id="linkFehlt" hidden>✘ Dieser Link ist unvollständig. Bitte scannen Sie den QR-Code Ihrer Lehrkraft erneut.</div>
-      <h3><label for="codeFeld">Ihr persönlicher Code</label></h3>
-      <p>Geben Sie den Code von Ihrem Zettel ein. Ihr Name wird nirgends eingetragen.</p>
-      <input type="text" id="codeFeld" class="code-eingabe" maxlength="7" autocomplete="off"
-             autocapitalize="characters" autocorrect="off" spellcheck="false" aria-describedby="codeMeldung">
-      <div class="meldung" id="codeMeldung" aria-live="polite"></div>
-      <div class="zeile"><button class="knopf" id="startKnopf" disabled>Test starten</button></div>
+      <h2 id="startTitel"></h2>
+      <ul class="liste" id="startRegeln"></ul>
+      <div class="meldung falsch" id="linkFehlt" hidden></div>
+      <div class="meldung info" id="flugHinweis" hidden></div>
+      <h3 id="startFelderTitel"></h3>
+      <div class="start-felder">
+        <div>
+          <label for="codeFeld" id="codeLabel"></label>
+          <input type="text" id="codeFeld" class="gross" maxlength="7" autocomplete="off"
+                 autocapitalize="characters" autocorrect="off" spellcheck="false">
+        </div>
+        <div>
+          <label for="initFeld" id="initLabel"></label>
+          <input type="text" id="initFeld" class="gross" maxlength="3" autocomplete="off"
+                 autocapitalize="characters" autocorrect="off" spellcheck="false">
+        </div>
+      </div>
+      <div class="meldung" id="startMeldung" aria-live="polite"></div>
+      <div class="zeile"><button class="knopf" id="startKnopf" disabled></button></div>
     </div>
   </section>
 
-  <!-- ===== Test ===== -->
   <div id="testBereich" hidden>
-    <nav class="tabs" aria-label="Aufgaben">
-      <button class="tab" data-ziel="a1">Aufgabe 1 · Neuron<span class="marke" data-marke="a1"></span></button>
-      <button class="tab" data-ziel="a2">Aufgabe 2 · Synapse<span class="marke" data-marke="a2"></span></button>
-      <button class="tab" data-ziel="a3">Aufgabe 3 · Signalübertragung<span class="marke" data-marke="a3"></span></button>
-      <button class="tab" data-ziel="a4">Aufgabe 4 · Gift<span class="marke" data-marke="a4"></span></button>
-      <button class="tab" data-ziel="ab">✅ Abgabe</button>
-    </nav>
-
-    <section class="karte" id="a1">
-      <h2>Aufgabe 1 · Bau einer Nervenzelle</h2>
-      <p>Die Abbildung zeigt eine Nervenzelle mit myelinisiertem Axon. Acht Bestandteile sind nummeriert.</p>
-      <p class="auftrag">Beschriften Sie die Abbildung: Tragen Sie zu jeder Nummer die Fachbezeichnung ein.</p>
-      <div class="figur" id="figNeuron"></div>
-      <div class="beschriftung" data-liste="n"></div>
-    </section>
-
-    <section class="karte" id="a2">
-      <h2>Aufgabe 2 · Bau einer chemischen Synapse</h2>
-      <p>Die Abbildung zeigt eine erregende chemische Synapse im Schnitt. Oben liegt die präsynaptische Endigung, unten die nachgeschaltete Zelle.</p>
-      <p class="auftrag">Beschriften Sie die Abbildung: Tragen Sie zu jeder Nummer die Fachbezeichnung ein.</p>
-      <div class="figur" id="figSynapse"></div>
-      <div class="beschriftung" data-liste="s"></div>
-    </section>
-
-    <section class="karte" id="a3">
-      <h2>Aufgabe 3 · Ablauf der Erregungsübertragung</h2>
-      <p>Unten stehen die Schritte der Erregungsübertragung an einer erregenden chemischen Synapse – allerdings durcheinander. Ein Schritt fehlt. Er wird durch die Karte „❓ Fehlender Schritt“ vertreten.</p>
-      <p class="auftrag">a) Bringen Sie alle Karten in die richtige Reihenfolge – auch die Karte „❓ Fehlender Schritt“.</p>
-      <p>Tippen Sie eine Karte an und dann den Platz, auf den sie gehört. Eine gelegte Karte tippen Sie erneut an, um sie zurückzulegen.</p>
-      <div class="sort-grid">
-        <div class="sort-spalte"><h3>Karten</h3><div class="vorrat" id="vorrat"></div></div>
-        <div class="sort-spalte"><h3>Reihenfolge</h3><div class="plaetze" id="plaetze"></div></div>
-      </div>
-      <h3><label for="fehltFeld">b) Beschreiben Sie, was im fehlenden Schritt passiert.</label></h3>
-      <textarea id="fehltFeld" data-k="fehlt" autocorrect="off" autocapitalize="sentences" spellcheck="false"></textarea>
-    </section>
-
-    <section class="karte" id="a4">
-      <h2>Aufgabe 4 · Wirkung eines Gifts</h2>
-      <p>Ein Gift sorgt dafür, dass in der präsynaptischen Endigung kein Neurotransmitter mehr gebildet wird. Alle anderen Vorgänge an der Synapse funktionieren normal.</p>
-      <p class="auftrag"><label for="giftFeld">Erklären Sie, welche Folgen das Gift für die nachgeschaltete Zelle hat.</label></p>
-      <textarea id="giftFeld" data-k="gift" autocorrect="off" autocapitalize="sentences" spellcheck="false"></textarea>
-    </section>
-
+    <nav class="tabs" id="tabs" aria-label="Aufgaben"></nav>
+    <div id="aufgabenKarten"></div>
     <section class="karte" id="ab">
       <h2>Abgabe</h2>
       <div id="abVorher">
-        <p>Bevor Sie abgeben, prüfen Sie, ob Sie alles bearbeitet haben:</p>
-        <ul class="liste-stand" id="standListe"></ul>
-        <p>Nach der Abgabe können Sie <b>nichts mehr ändern</b>.</p>
+        <p id="abVorherText"></p>
+        <ul class="liste" id="standListe"></ul>
+        <p id="abWarnung"></p>
         <div class="zeile"><button class="knopf" id="abgebenKnopf">Endgültig abgeben</button></div>
       </div>
       <div id="abNachher" hidden>
-        <div class="meldung ok">✔ Abgegeben. Ihre Antworten sind gesichert.</div>
-        <p>Ihre Datei heißt <span class="dateiname" id="dateiname"></span>.</p>
-        <ol class="schritte-abgabe">
-          <li>Tippen Sie auf „PDF herunterladen“ und bestätigen Sie den Download.</li>
-          <li>Warten Sie, bis Ihre Lehrkraft die Sperre des iPads aufhebt.</li>
-          <li>Öffnen Sie in Teams die Aufgabe zu diesem Test, tippen Sie auf „Arbeit hinzufügen“, wählen Sie die Datei aus dem Ordner „Downloads“ und tippen Sie auf „Abgeben“.</li>
-          <li>Laden Sie die Datei <b>nur in der Aufgabe</b> hoch – nicht in einen Kanal.</li>
-        </ol>
-        <div class="zeile"><button class="knopf" id="pdfKnopf">📄 PDF herunterladen</button></div>
+        <div class="meldung ok" id="abFertig"></div>
+        <p><span id="abDateiText"></span> <span class="dateiname" id="dateiname"></span></p>
+        <ol class="liste" id="abSchritte"></ol>
+        <div class="zeile"><button class="knopf" id="pdfKnopf" disabled>📄 PDF herunterladen</button></div>
         <div class="meldung" id="pdfMeldung" aria-live="polite"></div>
       </div>
     </section>
   </div>
 </main>
 
-<!-- Bestätigung vor der Abgabe -->
 <div class="dialog" id="abgabeDialog" role="dialog" aria-modal="true" aria-labelledby="abgabeTitel">
   <div class="dialog-box">
-    <h2 id="abgabeTitel">Wirklich abgeben?</h2>
-    <p id="abgabeText">Nach der Abgabe können Sie nichts mehr ändern.</p>
+    <h2 id="abgabeTitel"></h2>
+    <p id="abgabeText"></p>
     <div class="zeile">
-      <button class="knopf" id="abgabeJa">Ja, abgeben</button>
-      <button class="knopf hell" id="abgabeNein">Weiterarbeiten</button>
+      <button class="knopf" id="abgabeJa"></button>
+      <button class="knopf hell" id="abgabeNein"></button>
     </div>
   </div>
 </div>
 
-<!-- Sperre -->
 <div class="sperre" id="sperre" role="alertdialog" aria-modal="true" aria-labelledby="sperreTitel">
   <div class="sperre-box">
     <h2 id="sperreTitel">🔒 Test gesperrt</h2>
-    <p>Sie haben die Testseite verlassen (anderer Tab, andere App oder Neuladen). Das wird im Abgabe-PDF vermerkt.</p>
-    <p><b>Melden Sie sich bei Ihrer Lehrkraft.</b> Ihre bisherigen Antworten sind erhalten.</p>
-    <p><label for="lehrerFeld">Lehrer-Code zum Entsperren:</label></p>
-    <input type="text" id="lehrerFeld" class="geheim" autocomplete="off" autocorrect="off"
+    <p id="sperreText1"></p>
+    <p id="sperreText2"></p>
+    <p><label for="freiFeld">Freischaltcode (Lehrkraft):</label></p>
+    <input type="text" id="freiFeld" class="geheim" autocomplete="off" autocorrect="off"
            autocapitalize="off" spellcheck="false">
     <div class="zeile"><button class="knopf" id="entsperrKnopf">Entsperren</button></div>
     <div class="meldung" id="sperreMeldung" aria-live="polite"></div>
@@ -311,48 +244,141 @@ body.gesperrt main{filter:blur(8px);}
 (function(){
 "use strict";
 
-/* ====================== ANPASSEN je EXAM ====================== */
-var EXAM_THEMA   = 'Neurobiologie';         // erscheint im PDF und im Dateinamen
-var EXAMZEIT_MIN = 30;                       // Richtzeit (nur Orientierung)
-/* Der Lehrer-Code kommt als Hash aus dem Link (?l=…), erzeugt mit codes_generieren.html. */
-var SPEICHER     = 'aszym:neurobiologie_exam:v2';
+/* ============================ EXAM-INHALT ============================
+   Nur dieser Block wird je EXAM angepasst (anweisung_exam.md, Abschnitt 3).
+   - thema:   kurz, für Dateiname und PDF (EXAM_<thema>_<Code>.pdf)
+   - anrede:  'du' oder 'sie'
+   - zeit:    Richtzeit in Minuten (nur Orientierung)
+   - flugmodus: true (Standard) = Test nur im Flugmodus; false = ohne Netzprüfung
+   - speicher: eindeutiger Schlüssel 'aszym:<datei>:v1'
+   - aufgaben: Liste; jede Aufgabe hat titel, kurz (Reiter), einleitung (HTML)
+     und teile. Teil-Typen:
+       beschriften: svg (ohne Nummern), nummern [{nr,x,y,zx,zy}]
+       sortieren:   karten [{id,t}] in bewusst NICHT richtiger Startreihenfolge;
+                    optional eine Karte {id,t,fehlt:true} als Platzhalter
+       auswahl:     optionen [{id,t}], mehrfach true/false
+       freitext:    (nur auftrag)
+     Kennungen (id) neutral wählen – sie dürfen die Lösung nicht verraten.
+     KEINE Lösungen hier eintragen: Der Erwartungshorizont liegt im EXAM-Projekt.
+   ==================================================================== */
+var EXAM = {
+  thema: 'Neurobiologie',
+  titel: '🧠 EXAM · Neurobiologie',
+  untertitel: 'Neuron, Synapse und Signalübertragung',
+  anrede: 'sie',
+  zeit: 30,
+  flugmodus: true,
+  speicher: 'aszym:neurobiologie_exam:v3',
+  aufgaben: [
+    { titel: 'Aufgabe 1 · Bau einer Nervenzelle', kurz: 'Neuron',
+      einleitung: '<p>Die Abbildung zeigt eine Nervenzelle mit myelinisiertem Axon. Acht Bestandteile sind nummeriert.</p>',
+      teile: [
+        { id: '1', typ: 'beschriften',
+          auftrag: 'Beschriften Sie die Abbildung: Tragen Sie zu jeder Nummer die Fachbezeichnung ein.',
+          svg: '<svg viewBox=\"0 0 900 300\" role=\"img\" aria-label=\"Schema einer Nervenzelle mit acht nummerierten Bestandteilen\"><g fill=\"none\" stroke=\"#22303f\" stroke-width=\"6\" stroke-linecap=\"round\"><path d=\"M150 120 L105 88 L70 60 M105 88 L60 98\"/><path d=\"M140 185 L95 220 L60 250 M95 220 L55 205\"/><path d=\"M175 95 L165 50 L140 25 M165 50 L190 20\"/><path d=\"M190 205 L195 255 L175 285 M195 255 L222 282\"/></g><path d=\"M150 120 C150 85 230 80 245 120 L262 141 L300 147 L300 153 L262 159 L245 180 C230 220 150 215 140 185 C125 165 135 135 150 120 Z\" fill=\"#eef0f3\" stroke=\"#22303f\" stroke-width=\"4\"/><circle cx=\"182\" cy=\"152\" r=\"22\" fill=\"#e2e6ec\" stroke=\"#6b7686\" stroke-width=\"3\"/><circle cx=\"182\" cy=\"152\" r=\"6\" fill=\"#6b7686\"/><line x1=\"298\" y1=\"150\" x2=\"760\" y2=\"150\" stroke=\"#22303f\" stroke-width=\"6\"/><rect x=\"310\" y=\"133\" width=\"72\" height=\"34\" rx=\"15\" fill=\"#fdf3d9\" stroke=\"#96690a\" stroke-width=\"2\"/><rect x=\"400\" y=\"133\" width=\"72\" height=\"34\" rx=\"15\" fill=\"#fdf3d9\" stroke=\"#96690a\" stroke-width=\"2\"/><rect x=\"490\" y=\"133\" width=\"72\" height=\"34\" rx=\"15\" fill=\"#fdf3d9\" stroke=\"#96690a\" stroke-width=\"2\"/><rect x=\"580\" y=\"133\" width=\"72\" height=\"34\" rx=\"15\" fill=\"#fdf3d9\" stroke=\"#96690a\" stroke-width=\"2\"/><rect x=\"670\" y=\"133\" width=\"72\" height=\"34\" rx=\"15\" fill=\"#fdf3d9\" stroke=\"#96690a\" stroke-width=\"2\"/><line x1=\"306\" y1=\"150\" x2=\"752\" y2=\"150\" stroke=\"#22303f\" stroke-width=\"3\"/><g fill=\"none\" stroke=\"#22303f\" stroke-width=\"5\" stroke-linecap=\"round\"><path d=\"M758 150 L800 150 L835 98 M800 150 L842 150 M800 150 L835 202\"/></g><g fill=\"#eef0f3\" stroke=\"#22303f\" stroke-width=\"3\"><circle cx=\"842\" cy=\"92\" r=\"11\"/><circle cx=\"852\" cy=\"150\" r=\"11\"/><circle cx=\"842\" cy=\"208\" r=\"11\"/></g></svg>',
+          nummern: [ {nr:1,x:60,y:40,zx:105,zy:88}, {nr:2,x:230,y:268,zx:215,zy:198}, {nr:3,x:120,y:268,zx:180,zy:152},
+                     {nr:4,x:290,y:44,zx:268,zy:146}, {nr:5,x:790,y:262,zx:752,zy:152}, {nr:6,x:440,y:44,zx:440,zy:134},
+                     {nr:7,x:575,y:262,zx:575,zy:152}, {nr:8,x:860,y:36,zx:842,zy:92} ] }
+      ] },
+    { titel: 'Aufgabe 2 · Bau einer chemischen Synapse', kurz: 'Synapse',
+      einleitung: '<p>Die Abbildung zeigt eine erregende chemische Synapse im Schnitt. Oben liegt die präsynaptische Endigung, unten die nachgeschaltete Zelle.</p>',
+      teile: [
+        { id: '2', typ: 'beschriften',
+          auftrag: 'Beschriften Sie die Abbildung: Tragen Sie zu jeder Nummer die Fachbezeichnung ein.',
+          svg: '<svg viewBox=\"0 0 700 440\" role=\"img\" aria-label=\"Schema einer chemischen Synapse mit acht nummerierten Bestandteilen\"><path d=\"M310 0 L310 55 C170 80 150 170 150 250 L550 250 C550 170 530 80 390 55 L390 0\" fill=\"#eef0f3\" stroke=\"#22303f\" stroke-width=\"4\"/><ellipse cx=\"215\" cy=\"140\" rx=\"44\" ry=\"20\" fill=\"#fdf3d9\" stroke=\"#96690a\" stroke-width=\"3\"/><path d=\"M180 140 Q188 128 196 140 T212 140 T228 140 T244 140\" fill=\"none\" stroke=\"#96690a\" stroke-width=\"2\"/><circle cx=\"330\" cy=\"140\" r=\"21\" fill=\"#ffffff\" stroke=\"#1f4680\" stroke-width=\"3\"/><circle cx=\"323\" cy=\"134\" r=\"3\" fill=\"#1f4680\"/><circle cx=\"336\" cy=\"133\" r=\"3\" fill=\"#1f4680\"/><circle cx=\"330\" cy=\"144\" r=\"3\" fill=\"#1f4680\"/><circle cx=\"322\" cy=\"147\" r=\"3\" fill=\"#1f4680\"/><circle cx=\"338\" cy=\"146\" r=\"3\" fill=\"#1f4680\"/><circle cx=\"405\" cy=\"118\" r=\"21\" fill=\"#ffffff\" stroke=\"#1f4680\" stroke-width=\"3\"/><circle cx=\"398\" cy=\"112\" r=\"3\" fill=\"#1f4680\"/><circle cx=\"411\" cy=\"111\" r=\"3\" fill=\"#1f4680\"/><circle cx=\"405\" cy=\"122\" r=\"3\" fill=\"#1f4680\"/><circle cx=\"397\" cy=\"125\" r=\"3\" fill=\"#1f4680\"/><circle cx=\"413\" cy=\"124\" r=\"3\" fill=\"#1f4680\"/><circle cx=\"468\" cy=\"172\" r=\"21\" fill=\"#ffffff\" stroke=\"#1f4680\" stroke-width=\"3\"/><circle cx=\"461\" cy=\"166\" r=\"3\" fill=\"#1f4680\"/><circle cx=\"474\" cy=\"165\" r=\"3\" fill=\"#1f4680\"/><circle cx=\"468\" cy=\"176\" r=\"3\" fill=\"#1f4680\"/><circle cx=\"460\" cy=\"179\" r=\"3\" fill=\"#1f4680\"/><circle cx=\"476\" cy=\"178\" r=\"3\" fill=\"#1f4680\"/><circle cx=\"360\" cy=\"198\" r=\"21\" fill=\"#ffffff\" stroke=\"#1f4680\" stroke-width=\"3\"/><circle cx=\"353\" cy=\"192\" r=\"3\" fill=\"#1f4680\"/><circle cx=\"366\" cy=\"191\" r=\"3\" fill=\"#1f4680\"/><circle cx=\"360\" cy=\"202\" r=\"3\" fill=\"#1f4680\"/><circle cx=\"352\" cy=\"205\" r=\"3\" fill=\"#1f4680\"/><circle cx=\"368\" cy=\"204\" r=\"3\" fill=\"#1f4680\"/><circle cx=\"285\" cy=\"190\" r=\"21\" fill=\"#ffffff\" stroke=\"#1f4680\" stroke-width=\"3\"/><circle cx=\"278\" cy=\"184\" r=\"3\" fill=\"#1f4680\"/><circle cx=\"291\" cy=\"183\" r=\"3\" fill=\"#1f4680\"/><circle cx=\"285\" cy=\"194\" r=\"3\" fill=\"#1f4680\"/><circle cx=\"277\" cy=\"197\" r=\"3\" fill=\"#1f4680\"/><circle cx=\"293\" cy=\"196\" r=\"3\" fill=\"#1f4680\"/><rect x=\"194\" y=\"237\" width=\"9\" height=\"26\" rx=\"3\" fill=\"#6b7686\"/><rect x=\"209\" y=\"237\" width=\"9\" height=\"26\" rx=\"3\" fill=\"#6b7686\"/><circle cx=\"392\" cy=\"268\" r=\"3.5\" fill=\"#1f4680\"/><circle cx=\"418\" cy=\"284\" r=\"3.5\" fill=\"#1f4680\"/><circle cx=\"440\" cy=\"265\" r=\"3.5\" fill=\"#1f4680\"/><circle cx=\"458\" cy=\"282\" r=\"3.5\" fill=\"#1f4680\"/><circle cx=\"475\" cy=\"268\" r=\"3.5\" fill=\"#1f4680\"/><path d=\"M100 440 L100 302 L600 302 L600 440\" fill=\"#eef0f3\" stroke=\"#22303f\" stroke-width=\"4\"/><rect x=\"334\" y=\"289\" width=\"9\" height=\"28\" rx=\"3\" fill=\"#6b7686\"/><rect x=\"347\" y=\"289\" width=\"9\" height=\"28\" rx=\"3\" fill=\"#6b7686\"/><rect x=\"414\" y=\"289\" width=\"9\" height=\"28\" rx=\"3\" fill=\"#6b7686\"/><rect x=\"427\" y=\"289\" width=\"9\" height=\"28\" rx=\"3\" fill=\"#6b7686\"/><rect x=\"486\" y=\"289\" width=\"9\" height=\"28\" rx=\"3\" fill=\"#6b7686\"/><rect x=\"499\" y=\"289\" width=\"9\" height=\"28\" rx=\"3\" fill=\"#6b7686\"/></svg>',
+          nummern: [ {nr:1,x:640,y:150,zx:468,zy:172}, {nr:2,x:640,y:262,zx:458,zy:282}, {nr:3,x:60,y:180,zx:158,zy:205},
+                     {nr:4,x:60,y:290,zx:262,zy:276}, {nr:5,x:60,y:350,zx:140,zy:301}, {nr:6,x:640,y:350,zx:497,zy:310},
+                     {nr:7,x:60,y:240,zx:206,zy:250}, {nr:8,x:60,y:110,zx:208,zy:140} ] }
+      ] },
+    { titel: 'Aufgabe 3 · Ablauf der Erregungsübertragung', kurz: 'Signalübertragung',
+      einleitung: '<p>Unten stehen die Schritte der Erregungsübertragung an einer erregenden chemischen Synapse – allerdings durcheinander. Ein Schritt fehlt. Er wird durch die Karte „❓ Fehlender Schritt“ vertreten.</p>',
+      teile: [
+        { id: '3a', typ: 'sortieren',
+          auftrag: 'a) Bringen Sie alle Karten in die richtige Reihenfolge – auch die Karte „❓ Fehlender Schritt“.',
+          karten: [
+            {id:'kq', t:'Die Neurotransmitter-Moleküle diffundieren durch den synaptischen Spalt zur postsynaptischen Membran.'},
+            {id:'kd', t:'Ein Enzym spaltet die Neurotransmitter im synaptischen Spalt; die Spaltprodukte werden in die präsynaptische Endigung zurückgeholt.'},
+            {id:'kw', t:'Spannungsgesteuerte Ca²⁺-Kanäle öffnen sich, Ca²⁺-Ionen strömen in die präsynaptische Endigung ein.'},
+            {id:'kx', t:'❓ Fehlender Schritt', fehlt:true},
+            {id:'km', t:'Die postsynaptische Membran wird depolarisiert, es entsteht ein erregendes postsynaptisches Potenzial (EPSP).'},
+            {id:'kb', t:'Ein Aktionspotenzial erreicht die präsynaptische Endigung und depolarisiert die präsynaptische Membran.'},
+            {id:'kr', t:'Synaptische Vesikel verschmelzen mit der präsynaptischen Membran und geben Neurotransmitter in den synaptischen Spalt ab.'}
+          ] },
+        { id: '3b', typ: 'freitext', auftrag: 'b) Beschreiben Sie, was im fehlenden Schritt passiert.' }
+      ] },
+    { titel: 'Aufgabe 4 · Wirkung eines Gifts', kurz: 'Gift',
+      einleitung: '<p>Ein Gift sorgt dafür, dass in der präsynaptischen Endigung kein Neurotransmitter mehr gebildet wird. Alle anderen Vorgänge an der Synapse funktionieren normal.</p>',
+      teile: [
+        { id: '4', typ: 'freitext', auftrag: 'Erklären Sie, welche Folgen das Gift für die nachgeschaltete Zelle hat.' }
+      ] }
+  ]
+};
+/* ========================= ENDE EXAM-INHALT ========================= */
 
-var NEURON = [ // Nummern der Abbildung – nur Positionen, keine Lösungen
-  {nr:1,x:60, y:40, zx:105,zy:88},
-  {nr:2,x:230,y:268,zx:215,zy:198},
-  {nr:3,x:120,y:268,zx:180,zy:152},
-  {nr:4,x:290,y:44, zx:268,zy:146},
-  {nr:5,x:790,y:262,zx:752,zy:152},
-  {nr:6,x:440,y:44, zx:440,zy:134},
-  {nr:7,x:575,y:262,zx:575,zy:152},
-  {nr:8,x:860,y:36, zx:842,zy:92}
-];
-var SYNAPSE = [
-  {nr:1,x:640,y:150,zx:468,zy:172},
-  {nr:2,x:640,y:262,zx:458,zy:282},
-  {nr:3,x:60, y:180,zx:158,zy:205},
-  {nr:4,x:60, y:290,zx:262,zy:276},
-  {nr:5,x:60, y:350,zx:140,zy:301},
-  {nr:6,x:640,y:350,zx:497,zy:310},
-  {nr:7,x:60, y:240,zx:206,zy:250},
-  {nr:8,x:60, y:110,zx:208,zy:140}
-];
-/* Schritte in fester, bewusst durcheinandergewürfelter Startreihenfolge.
-   Die Kennungen sind neutral und verraten die richtige Reihenfolge nicht. */
-var KARTEN = [
-  {id:'kq', t:'Die Neurotransmitter-Moleküle diffundieren durch den synaptischen Spalt zur postsynaptischen Membran.'},
-  {id:'kd', t:'Ein Enzym spaltet die Neurotransmitter im synaptischen Spalt; die Spaltprodukte werden in die präsynaptische Endigung zurückgeholt.'},
-  {id:'kw', t:'Spannungsgesteuerte Ca²⁺-Kanäle öffnen sich, Ca²⁺-Ionen strömen in die präsynaptische Endigung ein.'},
-  {id:'kx', t:'❓ Fehlender Schritt', fehlt:true},
-  {id:'km', t:'Die postsynaptische Membran wird depolarisiert, es entsteht ein erregendes postsynaptisches Potenzial (EPSP).'},
-  {id:'kb', t:'Ein Aktionspotenzial erreicht die präsynaptische Endigung und depolarisiert die präsynaptische Membran.'},
-  {id:'kr', t:'Synaptische Vesikel verschmelzen mit der präsynaptischen Membran und geben Neurotransmitter in den synaptischen Spalt ab.'}
-];
-var FRAGE_A3B = 'Beschreiben Sie, was im fehlenden Schritt passiert.';
-var FRAGE_A4  = 'Ein Gift sorgt dafür, dass in der präsynaptischen Endigung kein Neurotransmitter mehr gebildet wird. Erklären Sie, welche Folgen das Gift für die nachgeschaltete Zelle hat.';
-/* ==================== ENDE ANPASSEN ==================== */
 
-/* ---------- Schüler-Code (identisch in codes_generieren.html) ---------- */
+/* ================= ENGINE – ab hier nichts verändern ================= */
+var SIE = EXAM.anrede === 'sie';
+var T = SIE ? {
+  flugAn: '✈️ Schalten Sie jetzt den <b>Flugmodus</b> ein (WLAN aus). Erst dann können Sie Code und Initialen eingeben.',
+  flugOk: '✔ Flugmodus ist an.',
+  flugRegel: 'Der Test läuft nur im <b>Flugmodus</b>. Schalten Sie WLAN oder Flugmodus während des Tests aus, sperrt sich der Test.',
+  flugEntsperren: 'Erst den Flugmodus wieder einschalten (WLAN aus), dann entsperren.',
+  regeln: ['Bleiben Sie die ganze Zeit auf dieser Seite. Wenn Sie den Tab oder die App wechseln, die Seite neu laden oder schließen, <b>sperrt sich der Test</b>.',
+           'Entsperren kann nur Ihre Lehrkraft. Jede Sperre wird im Abgabe-PDF vermerkt.',
+           'Ihre Antworten bleiben beim Sperren erhalten. Wird der Tab geschlossen, sind sie verloren.',
+           'Sie können zwischen den Aufgaben frei wechseln.',
+           'Am Ende geben Sie ab und laden ein PDF herunter, das Sie in Teams in der Aufgabe hochladen.'],
+  startTitel: 'Bevor Sie beginnen', felder: 'Ihre Angaben',
+  code: 'Ihr Code (vom Zettel)', init: 'Ihre Initialen (z. B. MS)', start: 'Test starten',
+  linkFehlt: '✘ Dieser Link ist unvollständig. Bitte scannen Sie den QR-Code Ihrer Lehrkraft erneut.',
+  codeFalsch: '✘ Dieser Code ist ungültig. Bitte genau mit dem Zettel vergleichen.',
+  initFalsch: 'Bitte 2 oder 3 Buchstaben als Initialen eingeben.',
+  sperre1: 'Sie haben die Testseite verlassen (anderer Tab, andere App, Neuladen) oder das Netz eingeschaltet. Das wird im Abgabe-PDF vermerkt.',
+  sperre2: '<b>Melden Sie sich bei Ihrer Lehrkraft.</b> Ihre bisherigen Antworten sind erhalten.',
+  abVorher: 'Bevor Sie abgeben, prüfen Sie, ob Sie alles bearbeitet haben:',
+  abWarn: 'Nach der Abgabe können Sie <b>nichts mehr ändern</b>.',
+  frage: 'Wirklich abgeben?', fragText: 'Nach der Abgabe können Sie nichts mehr ändern.',
+  ja: 'Ja, abgeben', nein: 'Weiterarbeiten',
+  fertig: '✔ Abgegeben. Ihre Antworten sind gesichert.', datei: 'Ihre Datei heißt',
+  schritte: ['Tippen Sie auf „PDF herunterladen“ und bestätigen Sie den Download.',
+             'Schalten Sie danach den Flugmodus aus und warten Sie, bis das WLAN verbunden ist.',
+             'Öffnen Sie in Teams die Aufgabe zu diesem Test, tippen Sie auf „Arbeit hinzufügen“, wählen Sie die Datei aus dem Ordner „Downloads“ und tippen Sie auf „Abgeben“.',
+             'Laden Sie die Datei <b>nur in der Aufgabe</b> hoch – nicht in einen Kanal.'],
+  sortHinweis: 'Tippen Sie eine Karte an und dann den Platz, auf den sie gehört. Eine gelegte Karte tippen Sie erneut an, um sie zurückzulegen.',
+  uhr: 'Dient nur der Orientierung – wenn die Zeit abgelaufen ist, passiert nichts.',
+  pdfFehler: '✘ Das PDF konnte nicht erstellt werden. Bitte die Lehrkraft holen.'
+} : {
+  flugAn: '✈️ Schalte jetzt den <b>Flugmodus</b> ein (WLAN aus). Erst dann kannst du Code und Initialen eingeben.',
+  flugOk: '✔ Flugmodus ist an.',
+  flugRegel: 'Der Test läuft nur im <b>Flugmodus</b>. Schaltest du WLAN oder Flugmodus während des Tests aus, sperrt sich der Test.',
+  flugEntsperren: 'Erst den Flugmodus wieder einschalten (WLAN aus), dann entsperren.',
+  regeln: ['Bleib die ganze Zeit auf dieser Seite. Wenn du den Tab oder die App wechselst, die Seite neu lädst oder schließt, <b>sperrt sich der Test</b>.',
+           'Entsperren kann nur deine Lehrkraft. Jede Sperre wird im Abgabe-PDF vermerkt.',
+           'Deine Antworten bleiben beim Sperren erhalten. Wird der Tab geschlossen, sind sie verloren.',
+           'Du kannst zwischen den Aufgaben frei wechseln.',
+           'Am Ende gibst du ab und lädst ein PDF herunter, das du in Teams in der Aufgabe hochlädst.'],
+  startTitel: 'Bevor du beginnst', felder: 'Deine Angaben',
+  code: 'Dein Code (vom Zettel)', init: 'Deine Initialen (z. B. MS)', start: 'Test starten',
+  linkFehlt: '✘ Dieser Link ist unvollständig. Bitte scanne den QR-Code deiner Lehrkraft erneut.',
+  codeFalsch: '✘ Dieser Code ist ungültig. Bitte genau mit dem Zettel vergleichen.',
+  initFalsch: 'Bitte 2 oder 3 Buchstaben als Initialen eingeben.',
+  sperre1: 'Du hast die Testseite verlassen (anderer Tab, andere App, Neuladen) oder das Netz eingeschaltet. Das wird im Abgabe-PDF vermerkt.',
+  sperre2: '<b>Melde dich bei deiner Lehrkraft.</b> Deine bisherigen Antworten sind erhalten.',
+  abVorher: 'Bevor du abgibst, prüfe, ob du alles bearbeitet hast:',
+  abWarn: 'Nach der Abgabe kannst du <b>nichts mehr ändern</b>.',
+  frage: 'Wirklich abgeben?', fragText: 'Nach der Abgabe kannst du nichts mehr ändern.',
+  ja: 'Ja, abgeben', nein: 'Weiterarbeiten',
+  fertig: '✔ Abgegeben. Deine Antworten sind gesichert.', datei: 'Deine Datei heißt',
+  schritte: ['Tippe auf „PDF herunterladen“ und bestätige den Download.',
+             'Schalte danach den Flugmodus aus und warte, bis das WLAN verbunden ist.',
+             'Öffne in Teams die Aufgabe zu diesem Test, tippe auf „Arbeit hinzufügen“, wähle die Datei aus dem Ordner „Downloads“ und tippe auf „Abgeben“.',
+             'Lade die Datei <b>nur in der Aufgabe</b> hoch – nicht in einen Kanal.'],
+  sortHinweis: 'Tippe eine Karte an und dann den Platz, auf den sie gehört. Eine gelegte Karte tippst du erneut an, um sie zurückzulegen.',
+  uhr: 'Dient nur der Orientierung – wenn die Zeit abgelaufen ist, passiert nichts.',
+  pdfFehler: '✘ Das PDF konnte nicht erstellt werden. Bitte die Lehrkraft holen.'
+};
+
+/* ---------- Schüler-Code (identisch in intern/EXAM/vorbereitung.html) ---------- */
 var CODE_ALPHABET = 'ACDEFHJKMNPRTUVWXY34679'; // 23 Zeichen (Primzahl), ohne 0/O, 1/I/L, 2/Z, 5/S, 8/B
 var CODE_SALT = 7;
 function codeNorm(s){ return String(s || '').toUpperCase().replace(/[^A-Z0-9]/g, ''); }
@@ -374,360 +400,466 @@ function hashText(s){
   for (var i = 0; i < s.length; i++){ h ^= s.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; }
   return ('0000000' + h.toString(16)).slice(-8);
 }
+function initNorm(s){ return String(s || '').toUpperCase().replace(/[^A-ZÄÖÜ]/g, ''); }
+var FLUG = EXAM.flugmodus !== false;
+function online(){ return FLUG && navigator.onLine !== false; }
+function linkHash(){
+  var m = /[?&]l=([0-9a-f]{8})(?:&|$)/i.exec(location.search);
+  return m ? m[1].toLowerCase() : '';
+}
 
-/* ---------- Zustand (TEIL 6: nur sessionStorage, immer try/catch) ---------- */
-var S = null;
+/* ---------- Teile ---------- */
+var TEILE = [];
+EXAM.aufgaben.forEach(function(a, ai){ a.teile.forEach(function(t){ t.aufgabe = ai; TEILE.push(t); }); });
+function teil(id){ for (var i = 0; i < TEILE.length; i++) if (TEILE[i].id === id) return TEILE[i]; return null; }
+
+/* ---------- Zustand (nur sessionStorage, immer try/catch) ---------- */
 function neuerZustand(){
-  return { phase:'start', code:'', lh:'', start:0, ende:0, gesperrt:false, log:[], karte:'a1',
-           a:{}, plaetze:[null,null,null,null,null,null,null] };
+  return { phase:'start', code:'', init:'', lh:'', start:0, ende:0, gesperrt:false, log:[], karte:'a0', a:{} };
 }
-function laden(){
-  try {
-    var r = sessionStorage.getItem(SPEICHER);
-    if (r){ var d = JSON.parse(r); if (d && d.phase) return d; }
-  } catch (e) {}
+var S = (function(){
+  try { var r = sessionStorage.getItem(EXAM.speicher); if (r){ var d = JSON.parse(r); if (d && d.phase) return d; } } catch (e) {}
   return neuerZustand();
-}
-function speichern(){ try { sessionStorage.setItem(SPEICHER, JSON.stringify(S)); } catch (e) {} }
-S = laden();
+})();
 if (!S.a) S.a = {};
-if (!S.plaetze || S.plaetze.length !== KARTEN.length) S.plaetze = KARTEN.map(function(){ return null; });
 if (!S.log) S.log = [];
+TEILE.forEach(function(t){
+  if (t.typ === 'beschriften' && (typeof S.a[t.id] !== 'object' || !S.a[t.id])) S.a[t.id] = {};
+  if (t.typ === 'sortieren' && !(S.a[t.id] instanceof Array && S.a[t.id].length === t.karten.length))
+    S.a[t.id] = t.karten.map(function(){ return null; });
+  if (t.typ === 'auswahl' && !(S.a[t.id] instanceof Array)) S.a[t.id] = [];
+  if (t.typ === 'freitext' && typeof S.a[t.id] !== 'string') S.a[t.id] = '';
+});
+function speichern(){ try { sessionStorage.setItem(EXAM.speicher, JSON.stringify(S)); } catch (e) {} }
 
 function $(id){ return document.getElementById(id); }
 function esc(t){ return String(t).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
 function zeit(ms){ var d = new Date(ms); return ('0'+d.getHours()).slice(-2) + ':' + ('0'+d.getMinutes()).slice(-2) + ' Uhr'; }
 function datum(ms){ var d = new Date(ms); return ('0'+d.getDate()).slice(-2) + '.' + ('0'+(d.getMonth()+1)).slice(-2) + '.' + d.getFullYear(); }
+function laeuft(){ return S.phase === 'laeuft'; }
 
-/* ---------- Abbildungen (eigene SVGs, Farben aus dem Test-Schema) ---------- */
-function nummern(liste){
-  return liste.map(function(p){
+/* ---------- Abbildung mit Nummern ---------- */
+function figurSvg(t){
+  var n = t.nummern.map(function(p){
     return '<line x1="'+p.x+'" y1="'+p.y+'" x2="'+p.zx+'" y2="'+p.zy+'" stroke="#6b7686" stroke-width="2"/>' +
            '<circle cx="'+p.zx+'" cy="'+p.zy+'" r="7" fill="none" stroke="#6b7686" stroke-width="2"/>' +
            '<circle cx="'+p.x+'" cy="'+p.y+'" r="17" fill="#1f4680"/>' +
-           '<text x="'+p.x+'" y="'+(p.y+6)+'" text-anchor="middle" font-size="18" font-weight="700" fill="#ffffff" font-family="system-ui,-apple-system,sans-serif">'+p.nr+'</text>';
+           '<text x="'+p.x+'" y="'+(p.y+6)+'" text-anchor="middle" font-size="18" font-weight="700" fill="#ffffff" font-family="Helvetica,Arial,sans-serif">'+p.nr+'</text>';
   }).join('');
+  var i = t.svg.lastIndexOf('</svg>');
+  return t.svg.slice(0, i) + n + '</svg>';
 }
-function svgNeuron(){
-  var myelin = '';
-  [310,400,490,580,670].forEach(function(x){
-    myelin += '<rect x="'+x+'" y="133" width="72" height="34" rx="15" fill="#fdf3d9" stroke="#96690a" stroke-width="2"/>';
-  });
-  return '<svg viewBox="0 0 900 300" role="img" aria-label="Schema einer Nervenzelle mit acht nummerierten Bestandteilen">' +
-    '<g fill="none" stroke="#22303f" stroke-width="6" stroke-linecap="round">' +
-      '<path d="M150 120 L105 88 L70 60 M105 88 L60 98"/>' +
-      '<path d="M140 185 L95 220 L60 250 M95 220 L55 205"/>' +
-      '<path d="M175 95 L165 50 L140 25 M165 50 L190 20"/>' +
-      '<path d="M190 205 L195 255 L175 285 M195 255 L222 282"/>' +
-    '</g>' +
-    '<path d="M150 120 C150 85 230 80 245 120 L262 141 L300 147 L300 153 L262 159 L245 180 C230 220 150 215 140 185 C125 165 135 135 150 120 Z" fill="#eef0f3" stroke="#22303f" stroke-width="4"/>' +
-    '<circle cx="182" cy="152" r="22" fill="#e2e6ec" stroke="#6b7686" stroke-width="3"/>' +
-    '<circle cx="182" cy="152" r="6" fill="#6b7686"/>' +
-    '<line x1="298" y1="150" x2="760" y2="150" stroke="#22303f" stroke-width="6"/>' + myelin +
-    '<line x1="306" y1="150" x2="752" y2="150" stroke="#22303f" stroke-width="3" stroke-dasharray="0"/>' +
-    '<g fill="none" stroke="#22303f" stroke-width="5" stroke-linecap="round">' +
-      '<path d="M758 150 L800 150 L835 98 M800 150 L842 150 M800 150 L835 202"/>' +
-    '</g>' +
-    '<g fill="#eef0f3" stroke="#22303f" stroke-width="3">' +
-      '<circle cx="842" cy="92" r="11"/><circle cx="852" cy="150" r="11"/><circle cx="842" cy="208" r="11"/>' +
-    '</g>' + nummern(NEURON) + '</svg>';
-}
-function svgSynapse(){
-  var vesikel = '';
-  [[330,140],[405,118],[468,172],[360,198],[285,190]].forEach(function(v){
-    vesikel += '<circle cx="'+v[0]+'" cy="'+v[1]+'" r="21" fill="#ffffff" stroke="#1f4680" stroke-width="3"/>';
-    [[-7,-6],[6,-7],[0,4],[-8,7],[8,6]].forEach(function(o){
-      vesikel += '<circle cx="'+(v[0]+o[0])+'" cy="'+(v[1]+o[1])+'" r="3" fill="#1f4680"/>';
+
+/* ---------- Aufbau der Karten ---------- */
+function feldAttr(){ return 'autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"'; }
+function baueTeil(t){
+  var h = '<h3 class="auftrag">' + esc(t.auftrag) + '</h3>';
+  if (t.typ === 'beschriften'){
+    h += '<div class="figur">' + figurSvg(t) + '</div><div class="beschriftung">';
+    t.nummern.slice().sort(function(a,b){ return a.nr - b.nr; }).forEach(function(p){
+      h += '<div class="feld"><span class="nr" aria-hidden="true">'+p.nr+'</span>' +
+           '<input type="text" data-teil="'+t.id+'" data-nr="'+p.nr+'" aria-label="Bezeichnung für Nummer '+p.nr+'" '+feldAttr()+'></div>';
     });
+    h += '</div>';
+  } else if (t.typ === 'sortieren'){
+    h += '<p class="hinweis">' + esc(T.sortHinweis) + '</p>' +
+         '<div class="sort-grid"><div class="sort-spalte"><h3>Karten</h3><div class="vorrat" data-vorrat="'+t.id+'"></div></div>' +
+         '<div class="sort-spalte"><h3>Reihenfolge</h3><div class="plaetze" data-plaetze="'+t.id+'"></div></div></div>';
+  } else if (t.typ === 'auswahl'){
+    h += '<div class="optionen" role="' + (t.mehrfach ? 'group' : 'radiogroup') + '">';
+    t.optionen.forEach(function(o){
+      h += '<button class="karte-btn option ' + (t.mehrfach ? 'mehr' : 'einzel') + '" data-teil="'+t.id+'" data-option="'+o.id+'" role="' +
+           (t.mehrfach ? 'checkbox' : 'radio') + '" aria-checked="false"><span class="marke" aria-hidden="true"></span><span>' + esc(o.t) + '</span></button>';
+    });
+    h += '</div>';
+  } else if (t.typ === 'freitext'){
+    h += '<textarea data-teil="'+t.id+'" aria-label="' + esc(t.auftrag) + '" autocorrect="off" autocapitalize="sentences" spellcheck="false"></textarea>';
+  }
+  return h;
+}
+function baueAufgaben(){
+  var tabs = '', karten = '';
+  EXAM.aufgaben.forEach(function(a, i){
+    tabs += '<button class="tab" data-ziel="a'+i+'">Aufgabe ' + (i+1) + ' · ' + esc(a.kurz) + '<span data-marke="a'+i+'"></span></button>';
+    karten += '<section class="karte" id="a'+i+'"><h2>' + esc(a.titel) + '</h2>' + (a.einleitung || '') +
+              a.teile.map(baueTeil).join('') + '</section>';
   });
-  var spalt = '';
-  [[392,268],[418,284],[440,265],[458,282],[475,268]].forEach(function(p){
-    spalt += '<circle cx="'+p[0]+'" cy="'+p[1]+'" r="3.5" fill="#1f4680"/>';
-  });
-  var rezeptoren = '';
-  [345,425,497].forEach(function(x){
-    rezeptoren += '<rect x="'+(x-11)+'" y="289" width="9" height="28" rx="3" fill="#6b7686"/>' +
-                  '<rect x="'+(x+2)+'" y="289" width="9" height="28" rx="3" fill="#6b7686"/>';
-  });
-  return '<svg viewBox="0 0 700 440" role="img" aria-label="Schema einer chemischen Synapse mit acht nummerierten Bestandteilen">' +
-    '<path d="M310 0 L310 55 C170 80 150 170 150 250 L550 250 C550 170 530 80 390 55 L390 0" fill="#eef0f3" stroke="#22303f" stroke-width="4"/>' +
-    '<ellipse cx="215" cy="140" rx="44" ry="20" fill="#fdf3d9" stroke="#96690a" stroke-width="3"/>' +
-    '<path d="M180 140 Q188 128 196 140 T212 140 T228 140 T244 140" fill="none" stroke="#96690a" stroke-width="2"/>' +
-    vesikel +
-    '<rect x="194" y="237" width="9" height="26" rx="3" fill="#6b7686"/><rect x="209" y="237" width="9" height="26" rx="3" fill="#6b7686"/>' +
-    spalt +
-    '<path d="M100 440 L100 302 L600 302 L600 440" fill="#eef0f3" stroke="#22303f" stroke-width="4"/>' +
-    rezeptoren + nummern(SYNAPSE) + '</svg>';
+  tabs += '<button class="tab" data-ziel="ab">✅ Abgabe</button>';
+  $('tabs').innerHTML = tabs;
+  $('aufgabenKarten').innerHTML = karten;
 }
 
-/* ---------- Eingabefelder der Beschriftung ---------- */
-function baueBeschriftung(prefix, liste){
-  var box = document.querySelector('[data-liste="'+prefix+'"]');
-  box.innerHTML = liste.slice().sort(function(a,b){ return a.nr - b.nr; }).map(function(p){
-    var k = prefix + p.nr;
-    return '<div class="feld"><span class="nr" aria-hidden="true">'+p.nr+'</span>' +
-      '<input type="text" data-k="'+k+'" aria-label="Bezeichnung für Nummer '+p.nr+'" autocomplete="off" ' +
-      'autocorrect="off" autocapitalize="off" spellcheck="false"></div>';
-  }).join('');
-}
-
-/* ---------- Sortieren per Antippen ---------- */
-var gewaehlt = null;
-function karteVon(id){ for (var i = 0; i < KARTEN.length; i++) if (KARTEN[i].id === id) return KARTEN[i]; return null; }
-function zeichneSortierung(){
-  var gesperrt = S.phase !== 'laeuft';
-  var vorrat = $('vorrat'), plaetze = $('plaetze');
-  var html = '';
-  KARTEN.forEach(function(k){
-    if (S.plaetze.indexOf(k.id) >= 0) return;
-    html += '<button class="schritt-karte' + (k.fehlt ? ' fehlt' : '') + (gewaehlt === k.id ? ' gewaehlt' : '') +
-            '" data-karte="'+k.id+'"' + (gesperrt ? ' disabled' : '') + '>' + esc(k.t) + '</button>';
+/* ---------- Sortieren ---------- */
+var gewaehlt = {};
+function karteVon(t, id){ for (var i = 0; i < t.karten.length; i++) if (t.karten[i].id === id) return t.karten[i]; return null; }
+function zeichneSort(t){
+  var plaetze = S.a[t.id], zu = !laeuft(), h = '';
+  t.karten.forEach(function(k){
+    if (plaetze.indexOf(k.id) >= 0) return;
+    h += '<button class="karte-btn' + (k.fehlt ? ' fehlt' : '') + (gewaehlt[t.id] === k.id ? ' gewaehlt' : '') +
+         '" data-teil="'+t.id+'" data-karte="'+k.id+'"' + (zu ? ' disabled' : '') + '>' + esc(k.t) + '</button>';
   });
-  vorrat.innerHTML = html || '<p class="leer-hinweis">Alle Karten liegen.</p>';
-  plaetze.innerHTML = S.plaetze.map(function(id, i){
-    var k = id ? karteVon(id) : null;
+  document.querySelector('[data-vorrat="'+t.id+'"]').innerHTML = h || '<p class="hinweis">Alle Karten liegen.</p>';
+  document.querySelector('[data-plaetze="'+t.id+'"]').innerHTML = plaetze.map(function(id, i){
+    var k = id ? karteVon(t, id) : null;
     return '<div class="platz"><span class="nr" aria-hidden="true">'+(i+1)+'</span>' +
-      '<button class="platz-feld' + (k ? ' belegt' : '') + (k && k.fehlt ? ' fehlt' : '') + '" data-platz="'+i+'"' +
-      ' aria-label="Platz '+(i+1)+'"' + (gesperrt ? ' disabled' : '') + '>' +
-      (k ? esc(k.t) : 'frei – Karte wählen, dann hier tippen') + '</button></div>';
+      '<button class="platz-feld' + (k ? ' belegt' : '') + (k && k.fehlt ? ' fehlt' : '') + '" data-teil="'+t.id+'" data-platz="'+i+'"' +
+      ' aria-label="Platz '+(i+1)+'"' + (zu ? ' disabled' : '') + '>' + (k ? esc(k.t) : 'frei') + '</button></div>';
   }).join('');
 }
-function sortKlick(e){
-  if (S.phase !== 'laeuft') return;
-  var kb = e.target.closest('[data-karte]'), pb = e.target.closest('[data-platz]');
-  if (kb){ var id = kb.getAttribute('data-karte'); gewaehlt = (gewaehlt === id) ? null : id; zeichneSortierung(); return; }
-  if (pb){
-    var i = +pb.getAttribute('data-platz');
-    if (gewaehlt){ S.plaetze[i] = gewaehlt; gewaehlt = null; }      // belegter Platz: alte Karte geht zurück
-    else if (S.plaetze[i]){ S.plaetze[i] = null; }
-    speichern(); zeichneSortierung(); marken();
+/* ---------- Auswahl ---------- */
+function zeichneAuswahl(t){
+  var an = S.a[t.id];
+  document.querySelectorAll('[data-teil="'+t.id+'"][data-option]').forEach(function(b){
+    var ist = an.indexOf(b.getAttribute('data-option')) >= 0;
+    b.classList.toggle('an', ist); b.setAttribute('aria-checked', ist ? 'true' : 'false');
+    b.disabled = !laeuft();
+  });
+}
+function klick(e){
+  if (!laeuft()) return;
+  var b = e.target.closest('button[data-teil]'); if (!b) return;
+  var t = teil(b.getAttribute('data-teil')); if (!t) return;
+  if (t.typ === 'sortieren'){
+    var p = S.a[t.id];
+    if (b.hasAttribute('data-karte')){
+      var id = b.getAttribute('data-karte'); gewaehlt[t.id] = (gewaehlt[t.id] === id) ? null : id;
+    } else if (b.hasAttribute('data-platz')){
+      var i = +b.getAttribute('data-platz');
+      if (gewaehlt[t.id]){ p[i] = gewaehlt[t.id]; gewaehlt[t.id] = null; }   // alte Karte geht zurück
+      else if (p[i]) p[i] = null;
+      speichern();
+    }
+    zeichneSort(t); marken();
+  } else if (t.typ === 'auswahl'){
+    var o = b.getAttribute('data-option'), an = S.a[t.id], j = an.indexOf(o);
+    if (t.mehrfach){ if (j >= 0) an.splice(j, 1); else an.push(o); }
+    else S.a[t.id] = (j >= 0) ? [] : [o];
+    speichern(); zeichneAuswahl(t); marken();
   }
 }
 
-/* ---------- Karten / Reiter ---------- */
+/* ---------- Stand ---------- */
+function teilFertig(t){
+  var a = S.a[t.id];
+  if (t.typ === 'beschriften') return t.nummern.every(function(p){ return (a[p.nr] || '').trim(); });
+  if (t.typ === 'sortieren') return a.every(function(x){ return !!x; });
+  if (t.typ === 'auswahl') return a.length > 0;
+  return !!(a || '').trim();
+}
+function teilStand(t){
+  var a = S.a[t.id];
+  if (t.typ === 'beschriften'){
+    var n = t.nummern.filter(function(p){ return (a[p.nr] || '').trim(); }).length;
+    return n + ' von ' + t.nummern.length + ' Feldern ausgefüllt';
+  }
+  if (t.typ === 'sortieren') return a.filter(Boolean).length + ' von ' + a.length + ' Karten gelegt';
+  if (t.typ === 'auswahl') return a.length ? 'ausgewählt' : 'noch nichts ausgewählt';
+  return (a || '').trim() ? 'beantwortet' : 'noch leer';
+}
+function marken(){
+  EXAM.aufgaben.forEach(function(a, i){
+    var m = document.querySelector('[data-marke="a'+i+'"]');
+    if (m) m.textContent = a.teile.every(teilFertig) ? ' ●' : '';
+  });
+}
+function standListe(){
+  $('standListe').innerHTML = TEILE.map(function(t){
+    return '<li>' + (teilFertig(t) ? '✔ ' : '⚠️ ') + 'Teil ' + esc(t.id) + ': ' + teilStand(t) + '</li>';
+  }).join('');
+}
+
+/* ---------- Karten wechseln ---------- */
 function zeigeKarte(z){
   S.karte = z;
   document.querySelectorAll('#testBereich .karte').forEach(function(k){ k.classList.toggle('aktiv', k.id === z); });
   document.querySelectorAll('.tab').forEach(function(t){ t.classList.toggle('aktiv', t.getAttribute('data-ziel') === z); });
   if (z === 'ab') standListe();
+  window.scrollTo(0, 0);
   speichern();
 }
-function wert(k){ return (S.a[k] || '').trim(); }
-function stand(){
-  var n = 0, s = 0, p = 0, i;
-  for (i = 1; i <= NEURON.length; i++) if (wert('n'+i)) n++;
-  for (i = 1; i <= SYNAPSE.length; i++) if (wert('s'+i)) s++;
-  S.plaetze.forEach(function(x){ if (x) p++; });
-  return { a1:[n, NEURON.length], a2:[s, SYNAPSE.length], a3s:[p, KARTEN.length],
-           a3b: !!wert('fehlt'), a4: !!wert('gift') };
-}
-function marken(){
-  var st = stand();
-  var fertig = { a1: st.a1[0] === st.a1[1], a2: st.a2[0] === st.a2[1],
-                 a3: st.a3s[0] === st.a3s[1] && st.a3b, a4: st.a4 };
-  document.querySelectorAll('[data-marke]').forEach(function(m){ m.textContent = fertig[m.getAttribute('data-marke')] ? ' ●' : ''; });
-}
-function standListe(){
-  var st = stand();
-  function z(txt, ok){ return '<li>' + (ok ? '✔ ' : '⚠️ ') + txt + '</li>'; }
-  $('standListe').innerHTML =
-    z('Aufgabe 1: ' + st.a1[0] + ' von ' + st.a1[1] + ' Feldern ausgefüllt', st.a1[0] === st.a1[1]) +
-    z('Aufgabe 2: ' + st.a2[0] + ' von ' + st.a2[1] + ' Feldern ausgefüllt', st.a2[0] === st.a2[1]) +
-    z('Aufgabe 3a: ' + st.a3s[0] + ' von ' + st.a3s[1] + ' Karten gelegt', st.a3s[0] === st.a3s[1]) +
-    z('Aufgabe 3b: ' + (st.a3b ? 'beantwortet' : 'noch leer'), st.a3b) +
-    z('Aufgabe 4: ' + (st.a4 ? 'beantwortet' : 'noch leer'), st.a4);
-}
 
-/* ---------- Orientierungsuhr ---------- */
+/* ---------- Uhr ---------- */
 function uhr(){
   if (S.phase === 'start') return;
-  var bis = (S.phase === 'abgegeben' ? S.ende : Date.now());
-  var rest = Math.max(0, EXAMZEIT_MIN * 60 - Math.floor((bis - S.start) / 1000));
-  var txt = Math.floor(rest / 60) + ':' + ('0' + (rest % 60)).slice(-2);
-  $('uhr').textContent = '⏱ ' + txt + (rest === 0 ? ' – Richtzeit erreicht' : '');
+  var bis = S.phase === 'abgegeben' ? S.ende : Date.now();
+  var rest = Math.max(0, EXAM.zeit * 60 - Math.floor((bis - S.start) / 1000));
+  $('uhr').textContent = '⏱ ' + Math.floor(rest / 60) + ':' + ('0' + (rest % 60)).slice(-2) + (rest === 0 ? ' – Richtzeit erreicht' : '');
 }
 
 /* ---------- Sperre ---------- */
 function zeigeSperre(an){
   $('sperre').classList.toggle('an', !!an);
   document.body.classList.toggle('gesperrt', !!an);
-  if (an){ $('lehrerFeld').value = ''; $('sperreMeldung').textContent = ''; $('sperreMeldung').className = 'meldung'; }
+  if (an){ $('freiFeld').value = ''; $('sperreMeldung').textContent = ''; $('sperreMeldung').className = 'meldung'; }
 }
 function sperren(anlass){
-  if (S.phase !== 'laeuft' || S.gesperrt) return;
+  if (!laeuft() || S.gesperrt) return;
   S.gesperrt = true;
   S.log.push({ t: Date.now(), art: anlass });
-  speichern();
-  zeigeSperre(true);
+  speichern(); zeigeSperre(true);
 }
-document.addEventListener('visibilitychange', function(){
-  if (document.visibilityState === 'hidden') sperren('Seite verlassen (Tab oder App gewechselt)');
-});
+document.addEventListener('visibilitychange', function(){ if (document.visibilityState === 'hidden') sperren('Seite verlassen (Tab oder App gewechselt)'); });
 window.addEventListener('blur', function(){ sperren('Fokus verloren (anderes Fenster oder App)'); });
 window.addEventListener('pagehide', function(){ sperren('Seite neu geladen oder geschlossen'); });
-
+function netzPruefen(){
+  if (laeuft() && online()) sperren('Internetverbindung während des Tests (Flugmodus aus)');
+  if (S.phase === 'start') startPruefen();
+}
+window.addEventListener('online', netzPruefen);
+window.addEventListener('offline', netzPruefen);
 function entsperren(){
-  var f = $('lehrerFeld'), m = $('sperreMeldung');
+  var f = $('freiFeld'), m = $('sperreMeldung');
+  if (online()){ m.className = 'meldung info'; m.textContent = T.flugEntsperren; return; }
   if (S.lh && hashText(f.value) === S.lh){
-    S.gesperrt = false;
-    S.log.push({ t: Date.now(), art: 'entsperrt durch Lehrkraft' });
+    S.gesperrt = false; S.log.push({ t: Date.now(), art: 'entsperrt durch Lehrkraft' });
     speichern(); zeigeSperre(false);
   } else {
-    S.log.push({ t: Date.now(), art: 'falscher Entsperr-Code' });
-    speichern();
-    f.value = '';
-    m.className = 'meldung falsch'; m.textContent = '✘ Code falsch. Der Versuch wurde vermerkt.';
+    S.log.push({ t: Date.now(), art: 'falscher Freischaltcode' }); speichern();
+    f.value = ''; m.className = 'meldung falsch'; m.textContent = '✘ Freischaltcode falsch. Der Versuch wurde vermerkt.';
   }
 }
 
 /* ---------- Start ---------- */
-function linkHash(){
-  var m = /[?&]l=([0-9a-f]{8})(?:&|$)/i.exec(location.search);
-  return m ? m[1].toLowerCase() : '';
-}
-function codePruefenAnzeige(){
-  var f = $('codeFeld'), m = $('codeMeldung'), n = codeNorm(f.value);
-  var ok = codeGueltig(n) && !!linkHash();
-  $('startKnopf').disabled = !ok;
-  if (n.length < 5){ m.className = 'meldung'; m.textContent = ''; }
-  else if (ok){ m.className = 'meldung ok'; m.textContent = '✔ Code gültig: ' + codeFormat(n); }
-  else { m.className = 'meldung falsch'; m.textContent = '✘ Dieser Code ist ungültig. Bitte genau mit dem Zettel vergleichen.'; }
+function startPruefen(){
+  var c = codeNorm($('codeFeld').value), i = initNorm($('initFeld').value), m = $('startMeldung');
+  var codeOk = codeGueltig(c), initOk = i.length >= 2 && i.length <= 3, netz = online();
+  if (FLUG && linkHash()){
+    $('flugHinweis').hidden = false;
+    $('flugHinweis').className = netz ? 'meldung info' : 'meldung ok';
+    $('flugHinweis').innerHTML = netz ? T.flugAn : T.flugOk;
+    ['codeFeld', 'initFeld'].forEach(function(id){ $(id).readOnly = netz; $(id).classList.toggle('zu', netz); });
+  }
+  $('startKnopf').disabled = !(codeOk && initOk && linkHash() && !netz);
+  if (c.length >= 5 && !codeOk){ m.className = 'meldung falsch'; m.textContent = T.codeFalsch; }
+  else if (codeOk && !initOk){ m.className = 'meldung info'; m.textContent = T.initFalsch; }
+  else if (codeOk && initOk){ m.className = 'meldung ok'; m.textContent = '✔ ' + codeFormat(c) + ' · ' + i; }
+  else { m.className = 'meldung'; m.textContent = ''; }
 }
 function starten(){
-  if (!codeGueltig($('codeFeld').value) || !linkHash()) return;
-  S.code = codeFormat($('codeFeld').value);
-  S.lh = linkHash();
-  S.phase = 'laeuft'; S.start = Date.now(); S.gesperrt = false;
+  if ($('startKnopf').disabled) return;
+  S.code = codeFormat($('codeFeld').value); S.init = initNorm($('initFeld').value);
+  S.lh = linkHash(); S.phase = 'laeuft'; S.start = Date.now(); S.gesperrt = false; S.karte = 'a0';
   S.log.push({ t: S.start, art: 'Test gestartet' });
-  speichern();
-  ansicht();
+  speichern(); ansicht();
 }
 
 /* ---------- Abgabe ---------- */
+function dateiname(){ return 'EXAM_' + EXAM.thema.replace(/[^A-Za-z0-9]+/g, '_') + '_' + S.code + '.pdf'; }
 function abgeben(){
   S.phase = 'abgegeben'; S.ende = Date.now(); S.gesperrt = false;
   S.log.push({ t: S.ende, art: 'abgegeben' });
-  speichern();
-  $('abgabeDialog').classList.remove('an');
-  ansicht();
-  zeigeKarte('ab');
-}
-function dateiname(){
-  return 'EXAM_' + EXAM_THEMA.replace(/[^A-Za-z0-9]+/g, '_') + '_' + S.code + '.pdf';
+  speichern(); $('abgabeDialog').classList.remove('an');
+  ansicht(); zeigeKarte('ab');
 }
 
-/* ---------- PDF ohne Bibliothek (Courier, WinAnsi) ---------- */
+/* ======================= PDF (ohne Bibliothek) =======================
+   A4, Helvetica/Helvetica-Bold (WinAnsi), Abbildungen als JPEG,
+   Antworten zusätzlich als eingebettete Datei abgabe.json. */
+var BREITE_N = [278,278,355,556,556,889,667,191,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,278,278,584,584,584,556,1015,667,667,722,722,667,611,778,722,278,500,667,556,833,722,778,667,778,722,667,611,722,667,944,667,667,611,278,278,278,469,556,333,556,556,500,556,556,278,556,556,222,222,500,222,833,556,556,556,556,333,500,278,556,500,722,500,500,500,334,260,334,584,350,556,350,222,556,333,1000,556,556,333,1000,667,333,1000,350,611,350,350,222,222,333,333,350,556,1000,333,1000,500,333,944,350,500,667,278,333,556,556,556,556,260,556,333,737,370,556,584,333,737,333,400,584,333,333,333,556,537,278,333,333,365,556,834,834,834,611,667,667,667,667,667,667,1000,722,667,667,667,667,278,278,278,278,722,722,778,778,778,778,778,584,778,722,722,722,722,667,667,611,556,556,556,556,556,556,889,500,556,556,556,556,278,278,278,278,556,556,556,556,556,556,556,584,611,556,556,556,556,500,556,500];
+var BREITE_F = [278,333,474,556,556,889,722,238,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,333,333,584,584,584,611,975,722,722,722,722,667,611,778,722,278,556,722,611,833,722,778,667,778,722,667,611,722,667,944,667,667,611,333,278,333,584,556,333,556,611,556,611,556,333,611,611,278,278,556,278,889,611,611,611,611,389,556,333,611,556,778,556,556,500,389,280,389,584,350,556,350,278,556,500,1000,556,556,333,1000,667,333,1000,350,611,350,350,278,278,500,500,350,556,1000,333,1000,556,333,944,350,500,667,278,333,556,556,556,556,280,556,333,737,370,556,584,333,737,333,400,584,333,333,333,611,556,278,333,333,365,556,834,834,834,611,722,722,722,722,722,722,1000,722,667,667,667,667,278,278,278,278,722,722,778,778,778,778,778,584,778,722,722,722,722,667,667,611,556,556,556,556,556,556,889,556,556,556,556,556,278,278,278,278,611,611,611,611,611,611,611,584,611,611,611,611,611,556,611,556];
 var WIN = {'€':128,'‚':130,'„':132,'…':133,'‘':145,'’':146,'“':147,'”':148,'•':149,'–':150,'—':151};
-var ERSATZ = {'⁺':'+','⁻':'-','→':'->','❓':'?','✔':'','✘':'','⚠':'','️':'','\t':' '};
-function pdfText(s){
-  s = String(s).normalize ? String(s).normalize('NFC') : String(s);
-  var out = '';
+var ERSATZ = {'⁺':'+','⁻':'-','→':'->','←':'<-','❓':'?','✔':'','✘':'','⚠':'','️':'','\t':' ','₂':'2','₃':'3','₁':'1','⇌':'<->'};
+function winCodes(s){
+  s = String(s); if (s.normalize) s = s.normalize('NFC');
+  var out = [];
   for (var i = 0; i < s.length; i++){
     var ch = s.charAt(i), c;
-    if (ERSATZ.hasOwnProperty(ch)){ out += pdfText(ERSATZ[ch]); continue; }
+    if (ERSATZ.hasOwnProperty(ch) && ERSATZ[ch] !== ch){ out = out.concat(winCodes(ERSATZ[ch])); continue; }
     c = WIN.hasOwnProperty(ch) ? WIN[ch] : s.charCodeAt(i);
-    if (c >= 0xD800 && c <= 0xDBFF){ i++; out += '?'; continue; }      // Emoji u. Ä.
+    if (c >= 0xD800 && c <= 0xDBFF){ i++; out.push(63); continue; }
     if (c < 32) continue;
-    if (c > 255) { out += '?'; continue; }
-    if (c === 40 || c === 41 || c === 92){ out += '\\' + ch; continue; }
-    if (c > 126){ out += '\\' + ('00' + c.toString(8)).slice(-3); continue; }
-    out += ch;
+    if (c > 255 || (c >= 127 && c < 160 && !WIN.hasOwnProperty(ch))) { out.push(63); continue; }
+    out.push(c);
   }
   return out;
 }
-function umbrechen(text, breite, einzug){
+function pdfStr(codes){
+  var o = '';
+  codes.forEach(function(c){
+    if (c === 40 || c === 41 || c === 92) o += '\\' + String.fromCharCode(c);
+    else if (c > 126) o += '\\' + ('00' + c.toString(8)).slice(-3);
+    else o += String.fromCharCode(c);
+  });
+  return o;
+}
+function breite(codes, fett, gr){
+  var b = fett ? BREITE_F : BREITE_N, s = 0;
+  codes.forEach(function(c){ s += b[c - 32] || 556; });
+  return s * gr / 1000;
+}
+function umbruch(text, maxB, fett, gr){
   var zeilen = [];
-  String(text).split(/\r?\n/).forEach(function(absatz){
-    var woerter = absatz.split(/\s+/).filter(Boolean), z = '';
-    if (!woerter.length){ zeilen.push(''); return; }
+  String(text).split(/\r?\n/).forEach(function(abs){
+    var woerter = abs.split(/\s+/).filter(Boolean), z = [];
+    if (!woerter.length){ zeilen.push([]); return; }
     woerter.forEach(function(w){
-      while (w.length > breite - einzug.length){                    // überlange Wörter teilen
-        if (z){ zeilen.push(z); z = ''; }
-        zeilen.push(einzug + w.slice(0, breite - einzug.length)); w = w.slice(breite - einzug.length);
+      var wc = winCodes(w);
+      while (breite(wc, fett, gr) > maxB){                       // überlange Wörter teilen
+        var k = wc.length; while (k > 1 && breite(wc.slice(0, k), fett, gr) > maxB) k--;
+        if (z.length){ zeilen.push(z); z = []; }
+        zeilen.push(wc.slice(0, k)); wc = wc.slice(k);
       }
-      if (!z) z = einzug + w;
-      else if ((z + ' ' + w).length <= breite) z += ' ' + w;
-      else { zeilen.push(z); z = einzug + w; }
+      if (!wc.length) return;
+      var probe = z.length ? z.concat([32], wc) : wc;
+      if (breite(probe, fett, gr) <= maxB) z = probe; else { zeilen.push(z); z = wc; }
     });
-    if (z) zeilen.push(z);
+    zeilen.push(z);
   });
   return zeilen;
 }
-function pdfInhalt(){
-  var Z = [], B = 80;
-  function t(x, fett){ umbrechen(x, B, '').forEach(function(l){ Z.push({t:l, b:!!fett}); }); }
-  function e(x, einz){ umbrechen(x, B, einz || '   ').forEach(function(l){ Z.push({t:l}); }); }
-  function leer(){ Z.push({t:''}); }
-  var dauer = Math.round((S.ende - S.start) / 60000);
-  t('EXAM ' + EXAM_THEMA + ' - Abgabe', true);
-  t('Code: ' + S.code, true);
-  t('Begonnen:  ' + datum(S.start) + ', ' + zeit(S.start));
-  t('Abgegeben: ' + datum(S.ende) + ', ' + zeit(S.ende));
-  t('Bearbeitungszeit: ' + dauer + ' min (Richtzeit ' + EXAMZEIT_MIN + ' min)');
-  var sperren = S.log.filter(function(l){ return /verlassen|verloren|geladen/.test(l.art); });
-  var falsch = S.log.filter(function(l){ return l.art === 'falscher Entsperr-Code'; });
-  t('Sperren während des Tests: ' + sperren.length + (falsch.length ? ', falsche Entsperr-Codes: ' + falsch.length : ''), true);
-  S.log.forEach(function(l){
-    if (l.art === 'Test gestartet' || l.art === 'abgegeben') return;
-    e(zeit(l.t) + ' - ' + l.art);
+var BILDER = {};          // Teil-ID -> {w,h,bytes}
+function svgZuJpeg(svg, breitePx){
+  return new Promise(function(ok, fehl){
+    var vb = /viewBox="([\d.\s-]+)"/.exec(svg), w = 900, h = 300;
+    if (vb){ var p = vb[1].trim().split(/\s+/); w = +p[2]; h = +p[3]; }
+    var skal = breitePx / w, cw = Math.round(w * skal), ch = Math.round(h * skal);
+    var s = svg.replace('<' + 'svg ', '<' + 'svg xmlns="http://www.w3.org/2000/svg" width="' + cw + '" height="' + ch + '" ');
+    var img = new Image();
+    img.onload = function(){
+      try {
+        var c = document.createElement('canvas'); c.width = cw; c.height = ch;
+        var g = c.getContext('2d'); g.fillStyle = '#ffffff'; g.fillRect(0, 0, cw, ch); g.drawImage(img, 0, 0, cw, ch);
+        var b64 = c.toDataURL('image/jpeg', 0.88).split(',')[1], bin = atob(b64);
+        ok({ w: cw, h: ch, bytes: bin });
+      } catch (e) { fehl(e); }
+    };
+    img.onerror = fehl;
+    img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(s);
   });
-  leer();
-  t('Aufgabe 1 - Bau einer Nervenzelle (Abbildung beschriften)', true);
-  for (var i = 1; i <= NEURON.length; i++) e(i + ': ' + (wert('n'+i) || '(keine Angabe)'));
-  leer();
-  t('Aufgabe 2 - Bau einer chemischen Synapse (Abbildung beschriften)', true);
-  for (i = 1; i <= SYNAPSE.length; i++) e(i + ': ' + (wert('s'+i) || '(keine Angabe)'));
-  leer();
-  t('Aufgabe 3 - Ablauf der Erregungsübertragung', true);
-  t('a) Gelegte Reihenfolge:');
-  S.plaetze.forEach(function(id, j){
-    var k = id ? karteVon(id) : null;
-    var txt = k ? (k.fehlt ? '[FEHLENDER SCHRITT]' : k.t) : '(Platz leer)';
-    umbrechen((j + 1) + '. ' + txt, B, '   ').forEach(function(l, n){ Z.push({t: (n ? '      ' : '   ') + l.trim()}); });
-  });
-  var uebrig = KARTEN.filter(function(k){ return S.plaetze.indexOf(k.id) < 0; });
-  if (uebrig.length){
-    t('   Nicht gelegte Karten:');
-    uebrig.forEach(function(k){ e('- ' + (k.fehlt ? '[FEHLENDER SCHRITT]' : k.t), '     '); });
-  }
-  t('b) ' + FRAGE_A3B);
-  e(wert('fehlt') || '(keine Angabe)');
-  leer();
-  t('Aufgabe 4 - Wirkung eines Gifts', true);
-  t(FRAGE_A4);
-  t('Antwort:');
-  e(wert('gift') || '(keine Angabe)');
-  return Z;
 }
-function pdfBauen(Z){
-  var PRO_SEITE = 54, seiten = [];
-  for (var i = 0; i < Z.length; i += PRO_SEITE) seiten.push(Z.slice(i, i + PRO_SEITE));
-  var objekte = [], n = seiten.length;
-  // 1 Katalog, 2 Seiten, 3 Courier, 4 Courier-Bold, 5 Info, dann je Seite: Seite + Inhalt
-  var kids = seiten.map(function(_, j){ return (6 + 2*j) + ' 0 R'; }).join(' ');
-  objekte[1] = '<< /Type /Catalog /Pages 2 0 R >>';
-  objekte[2] = '<< /Type /Pages /Kids [' + kids + '] /Count ' + n + ' >>';
-  objekte[3] = '<< /Type /Font /Subtype /Type1 /BaseFont /Courier /Encoding /WinAnsiEncoding >>';
-  objekte[4] = '<< /Type /Font /Subtype /Type1 /BaseFont /Courier-Bold /Encoding /WinAnsiEncoding >>';
-  objekte[5] = '<< /Title (' + pdfText('EXAM ' + EXAM_THEMA + ' ' + S.code) + ') /Producer (Lernseiten EXAM) >>';
-  seiten.forEach(function(zeilen, j){
-    var s = 'BT\n/F1 10 Tf\n13.5 TL\n50 795 Td\n';
-    zeilen.forEach(function(z){
-      s += (z.b ? '/F2' : '/F1') + ' 10 Tf\n(' + pdfText(z.t) + ') Tj\nT*\n';
-    });
-    s += 'ET\nBT\n/F1 10 Tf\n50 30 Td\n(' + pdfText('Code ' + S.code + ' - Seite ' + (j+1) + ' von ' + n) + ') Tj\nET\n';
-    objekte[6 + 2*j] = '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents ' + (7 + 2*j) + ' 0 R >>';
-    objekte[7 + 2*j] = '<< /Length ' + s.length + ' >>\nstream\n' + s + 'endstream';
+function bilderVorbereiten(){
+  var auftraege = TEILE.filter(function(t){ return t.typ === 'beschriften'; }).map(function(t){
+    return svgZuJpeg(figurSvg(t), 1400).then(function(b){ BILDER[t.id] = b; }, function(){ BILDER[t.id] = null; });
   });
-  var pdf = '%PDF-1.4\n%âãÏÓ\n', lagen = [];
-  for (i = 1; i < objekte.length; i++){
-    lagen[i] = pdf.length;
-    pdf += i + ' 0 obj\n' + objekte[i] + '\nendobj\n';
+  return Promise.all(auftraege);
+}
+function antwortDaten(){
+  var d = { format: 'exam-abgabe-1', thema: EXAM.thema, titel: EXAM.titel, code: S.code, initialen: S.init,
+            flugmodus: FLUG, start: new Date(S.start).toISOString(), ende: new Date(S.ende).toISOString(),
+            protokoll: S.log.map(function(l){ return { zeit: new Date(l.t).toISOString(), art: l.art }; }),
+            teile: [] };
+  TEILE.forEach(function(t){
+    var a = S.a[t.id], e = { id: t.id, typ: t.typ, auftrag: t.auftrag };
+    if (t.typ === 'beschriften') e.antwort = t.nummern.map(function(p){ return { nr: p.nr, text: (a[p.nr] || '').trim() }; });
+    if (t.typ === 'sortieren') e.antwort = a.map(function(id, i){ var k = id ? karteVon(t, id) : null;
+      return { platz: i + 1, karte: id, text: k ? (k.fehlt ? '[FEHLENDER SCHRITT]' : k.t) : null }; });
+    if (t.typ === 'auswahl') e.antwort = t.optionen.map(function(o){ return { option: o.id, text: o.t, gewaehlt: a.indexOf(o.id) >= 0 }; });
+    if (t.typ === 'freitext') e.antwort = a;
+    d.teile.push(e);
+  });
+  return d;
+}
+function pdfBauen(){
+  var B = 595, H = 842, RAND = 50, BREIT = B - 2*RAND, OBEN = H - 50, UNTEN = 60;
+  var seiten = [], ops = null, y = 0, bildNr = 0, bildObjs = [];
+  function neueSeite(){ ops = []; seiten.push({ ops: ops, bilder: [] }); y = OBEN; }
+  function platz(h){ if (y - h < UNTEN) neueSeite(); }
+  function text(zeilen, gr, fett, x, farbe){
+    var lh = gr * 1.35;
+    zeilen.forEach(function(z){
+      platz(lh); y -= lh;
+      ops.push('BT ' + (farbe || '0.133 0.188 0.247') + ' rg /' + (fett ? 'F2' : 'F1') + ' ' + gr + ' Tf ' + x.toFixed(1) + ' ' + y.toFixed(1) + ' Td (' + pdfStr(z) + ') Tj ET');
+    });
   }
+  function absatz(t, gr, fett, einzug){ text(umbruch(t, BREIT - (einzug || 0), fett, gr), gr, fett, RAND + (einzug || 0)); }
+  function luft(h){ y -= h; }
+  function antwortBox(t){
+    var gr = 11, lh = gr * 1.35, zeilen = umbruch(t || '(keine Angabe)', BREIT - 16, false, gr), i = 0;
+    while (i < zeilen.length){
+      platz(lh + 10);
+      var passt = Math.max(1, Math.floor((y - UNTEN - 10) / lh)), stueck = zeilen.slice(i, i + passt);
+      var h = stueck.length * lh + 10;
+      ops.push('q 0.933 0.941 0.953 rg ' + RAND + ' ' + (y - h).toFixed(1) + ' ' + BREIT + ' ' + h.toFixed(1) + ' re f Q');
+      y -= 5; text(stueck, gr, false, RAND + 8); y -= 5; i += passt;
+    }
+  }
+  function linie(){ platz(8); y -= 4; ops.push('q 0.6 0.65 0.7 RG 0.8 w ' + RAND + ' ' + y.toFixed(1) + ' m ' + (B - RAND) + ' ' + y.toFixed(1) + ' l S Q'); y -= 4; }
+  function bild(b){
+    var w = BREIT, h = b.h * w / b.w;
+    if (h > OBEN - UNTEN - 20){ h = OBEN - UNTEN - 20; w = b.w * h / b.h; }
+    platz(h + 6); y -= h;
+    var name = 'Im' + (++bildNr); bildObjs.push({ name: name, b: b }); seiten[seiten.length - 1].bilder.push(name);
+    ops.push('q ' + w.toFixed(1) + ' 0 0 ' + h.toFixed(1) + ' ' + RAND + ' ' + y.toFixed(1) + ' cm /' + name + ' Do Q');
+    y -= 6;
+  }
+  neueSeite();
+  // Kopf
+  absatz('EXAM ' + EXAM.titel.replace(/^[^A-Za-zÄÖÜäöü0-9]+/, '').replace(/^EXAM\s*·\s*/, '') + ' – Abgabe', 16, true);
+  luft(4);
+  absatz('Code: ' + S.code + '      Initialen: ' + S.init, 13, true);
+  absatz('Begonnen: ' + datum(S.start) + ', ' + zeit(S.start) + '      Abgegeben: ' + datum(S.ende) + ', ' + zeit(S.ende) +
+         '      Bearbeitungszeit: ' + Math.round((S.ende - S.start) / 60000) + ' min (Richtzeit ' + EXAM.zeit + ' min)', 10, false);
+  var sp = S.log.filter(function(l){ return /verlassen|verloren|geladen|Internet/.test(l.art); }).length;
+  absatz('Modus: ' + (FLUG ? 'Flugmodus (ohne Internet)' : 'ohne Netzprüfung'), 10, false);
+  var fa = S.log.filter(function(l){ return l.art === 'falscher Freischaltcode'; }).length;
+  absatz('Sperren während des Tests: ' + sp + (fa ? '   ·   falsche Freischaltcodes: ' + fa : ''), 10, true);
+  S.log.forEach(function(l){ if (l.art !== 'Test gestartet' && l.art !== 'abgegeben') absatz(zeit(l.t) + ' – ' + l.art, 9, false, 12); });
+  linie();
+  // Aufgaben
+  EXAM.aufgaben.forEach(function(a){
+    luft(6);
+    absatz(a.titel, 14, true);
+    var ein = (a.einleitung || '').replace(/<br\s*\/?>/gi, '\n').replace(/<\/p>\s*<p[^>]*>/gi, '\n').replace(/<[^>]+>/g, '')
+      .replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').trim();
+    if (ein) absatz(ein, 10.5, false);
+    a.teile.forEach(function(t){
+      luft(6); absatz(t.auftrag, 11, true);
+      var an = S.a[t.id];
+      if (t.typ === 'beschriften'){
+        if (BILDER[t.id]) bild(BILDER[t.id]); else absatz('(Abbildung siehe Testseite)', 9, false);
+        t.nummern.slice().sort(function(x, z){ return x.nr - z.nr; }).forEach(function(p){
+          absatz(p.nr + ':  ' + ((an[p.nr] || '').trim() || '(keine Angabe)'), 11, false, 10);
+        });
+      } else if (t.typ === 'sortieren'){
+        an.forEach(function(id, i){
+          var k = id ? karteVon(t, id) : null;
+          absatz((i + 1) + '.  ' + (k ? (k.fehlt ? '[FEHLENDER SCHRITT]' : k.t) : '(Platz leer)'), 11, false, 10);
+        });
+        var rest = t.karten.filter(function(k){ return an.indexOf(k.id) < 0; });
+        if (rest.length){
+          absatz('Nicht gelegte Karten:', 10, true, 10);
+          rest.forEach(function(k){ absatz('–  ' + (k.fehlt ? '[FEHLENDER SCHRITT]' : k.t), 10, false, 20); });
+        }
+      } else if (t.typ === 'auswahl'){
+        t.optionen.forEach(function(o){ absatz((an.indexOf(o.id) >= 0 ? '[X]  ' : '[  ]  ') + o.t, 11, an.indexOf(o.id) >= 0, 10); });
+      } else {
+        luft(2); antwortBox((an || '').trim());
+      }
+    });
+  });
+  // PDF zusammensetzen
+  var obj = [], i;
+  function neu(inhalt){ obj.push(inhalt); return obj.length; }        // Objektnummer
+  var json = unescape(encodeURIComponent(JSON.stringify(antwortDaten(), null, 1)));
+  var katalogNr = neu(null), seitenNr = neu(null);
+  var f1 = neu('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>');
+  var f2 = neu('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>');
+  var ef = neu('<< /Type /EmbeddedFile /Subtype /application#2Fjson /Length ' + json.length + ' >>\nstream\n' + json + '\nendstream');
+  var fs = neu('<< /Type /Filespec /F (abgabe.json) /UF (abgabe.json) /Desc (Antworten maschinenlesbar) /EF << /F ' + ef + ' 0 R >> >>');
+  var info = neu('<< /Title (' + pdfStr(winCodes('EXAM ' + EXAM.thema + ' ' + S.code)) + ') /Subject (EXAM-Abgabe) /Keywords (' +
+                 pdfStr(winCodes(S.code + ' ' + S.init)) + ') /Producer (Lernseiten EXAM v1) >>');
+  var bildNrMap = {};
+  bildObjs.forEach(function(x){
+    bildNrMap[x.name] = neu('<< /Type /XObject /Subtype /Image /Width ' + x.b.w + ' /Height ' + x.b.h +
+      ' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ' + x.b.bytes.length + ' >>\nstream\n' + x.b.bytes + '\nendstream');
+  });
+  var kids = [], n = seiten.length;
+  seiten.forEach(function(s, j){
+    var fuss = 'BT 0.42 0.46 0.53 rg /F1 9 Tf ' + RAND + ' 30 Td (' + pdfStr(winCodes('EXAM ' + EXAM.thema + '  ·  Code ' + S.code + '  ·  ' + S.init + '  ·  Seite ' + (j+1) + ' von ' + n)) + ') Tj ET';
+    var inhalt = s.ops.concat([fuss]).join('\n');
+    var cNr = neu('<< /Length ' + inhalt.length + ' >>\nstream\n' + inhalt + '\nendstream');
+    var xo = s.bilder.length ? ' /XObject << ' + s.bilder.map(function(nm){ return '/' + nm + ' ' + bildNrMap[nm] + ' 0 R'; }).join(' ') + ' >>' : '';
+    kids.push(neu('<< /Type /Page /Parent ' + seitenNr + ' 0 R /MediaBox [0 0 ' + B + ' ' + H + '] /Resources << /Font << /F1 ' + f1 + ' 0 R /F2 ' + f2 + ' 0 R >>' + xo + ' >> /Contents ' + cNr + ' 0 R >>'));
+  });
+  obj[katalogNr - 1] = '<< /Type /Catalog /Pages ' + seitenNr + ' 0 R /Names << /EmbeddedFiles << /Names [(abgabe.json) ' + fs + ' 0 R] >> >> /PageMode /UseAttachments >>';
+  obj[seitenNr - 1] = '<< /Type /Pages /Kids [' + kids.map(function(k){ return k + ' 0 R'; }).join(' ') + '] /Count ' + n + ' >>';
+  var pdf = '%PDF-1.7\n%âãÏÓ\n', lagen = [];
+  for (i = 0; i < obj.length; i++){ lagen.push(pdf.length); pdf += (i + 1) + ' 0 obj\n' + obj[i] + '\nendobj\n'; }
   var xref = pdf.length;
-  pdf += 'xref\n0 ' + objekte.length + '\n0000000000 65535 f \n';
-  for (i = 1; i < objekte.length; i++) pdf += ('000000000' + lagen[i]).slice(-10) + ' 00000 n \n';
-  pdf += 'trailer\n<< /Size ' + objekte.length + ' /Root 1 0 R /Info 5 0 R >>\nstartxref\n' + xref + '\n%%EOF\n';
+  pdf += 'xref\n0 ' + (obj.length + 1) + '\n0000000000 65535 f \n';
+  lagen.forEach(function(l){ pdf += ('000000000' + l).slice(-10) + ' 00000 n \n'; });
+  pdf += 'trailer\n<< /Size ' + (obj.length + 1) + ' /Root ' + katalogNr + ' 0 R /Info ' + info + ' 0 R >>\nstartxref\n' + xref + '\n%%EOF\n';
   var bytes = new Uint8Array(pdf.length);
   for (i = 0; i < pdf.length; i++) bytes[i] = pdf.charCodeAt(i) & 255;
   return bytes;
@@ -735,81 +867,91 @@ function pdfBauen(Z){
 function pdfLaden(){
   var m = $('pdfMeldung');
   try {
-    var blob = new Blob([pdfBauen(pdfInhalt())], { type: 'application/pdf' });
-    var url = URL.createObjectURL(blob);
-    var a = document.createElement('a');
+    var blob = new Blob([pdfBauen()], { type: 'application/pdf' });
+    var url = URL.createObjectURL(blob), a = document.createElement('a');
     a.href = url; a.download = dateiname(); a.rel = 'noopener';
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
     setTimeout(function(){ URL.revokeObjectURL(url); }, 60000);
-    m.className = 'meldung ok';
-    m.textContent = '✔ PDF erstellt. Auf dem iPad liegt es in der Dateien-App im Ordner „Downloads“.';
-  } catch (e) {
-    m.className = 'meldung falsch';
-    m.textContent = '✘ Das PDF konnte nicht erstellt werden. Bitte die Lehrkraft holen.';
-  }
+    m.className = 'meldung ok'; m.textContent = '✔ PDF erstellt. Auf dem iPad liegt es in der Dateien-App im Ordner „Downloads“.';
+  } catch (e) { m.className = 'meldung falsch'; m.textContent = T.pdfFehler; }
 }
 
-/* ---------- Ansicht aus dem Zustand aufbauen ---------- */
+/* ---------- Ansicht aus dem Zustand ---------- */
 function ansicht(){
-  var laeuft = S.phase === 'laeuft', fertig = S.phase === 'abgegeben';
-  $('startKarte').classList.toggle('aktiv', S.phase === 'start');
-  $('testBereich').hidden = S.phase === 'start';
-  $('kopfRechts').hidden = S.phase === 'start';
-  $('uhrInfo').hidden = S.phase === 'start';
-  $('codeAnzeige').textContent = S.code;
-  document.querySelectorAll('[data-k]').forEach(function(el){
-    el.value = S.a[el.getAttribute('data-k')] || '';
-    el.disabled = !laeuft;
+  var start = S.phase === 'start', fertig = S.phase === 'abgegeben';
+  $('startKarte').classList.toggle('aktiv', start);
+  $('testBereich').hidden = start;
+  $('kopfRechts').hidden = start;
+  $('werAnzeige').textContent = start ? '' : 'Code ' + S.code + ' · ' + S.init;
+  document.querySelectorAll('[data-teil]').forEach(function(el){
+    if (el.tagName !== 'INPUT' && el.tagName !== 'TEXTAREA') return;
+    var t = teil(el.getAttribute('data-teil'));
+    el.value = t.typ === 'beschriften' ? (S.a[t.id][el.getAttribute('data-nr')] || '') : (S.a[t.id] || '');
+    el.readOnly = !laeuft(); el.classList.toggle('zu', !laeuft());
   });
-  $('abVorher').hidden = fertig;
-  $('abNachher').hidden = !fertig;
-  if (fertig) $('dateiname').textContent = dateiname();
-  zeichneSortierung(); marken(); uhr();
-  if (S.phase !== 'start') zeigeKarte(fertig ? 'ab' : (S.karte || 'a1'));
-  zeigeSperre(laeuft && S.gesperrt);
+  TEILE.forEach(function(t){ if (t.typ === 'sortieren') zeichneSort(t); if (t.typ === 'auswahl') zeichneAuswahl(t); });
+  $('abVorher').hidden = fertig; $('abNachher').hidden = !fertig;
+  if (fertig){
+    $('dateiname').textContent = dateiname();
+    $('pdfKnopf').disabled = true;
+    $('pdfMeldung').className = 'meldung info'; $('pdfMeldung').textContent = 'PDF wird vorbereitet …';
+    bilderVorbereiten().then(function(){
+      $('pdfKnopf').disabled = false; $('pdfMeldung').className = 'meldung'; $('pdfMeldung').textContent = '';
+    });
+  }
+  marken(); uhr();
+  if (!start) zeigeKarte(fertig ? 'ab' : (S.karte || 'a0'));
+  zeigeSperre(laeuft() && S.gesperrt);
 }
 
 /* ---------- Aufbau & Bindungen ---------- */
+document.title = EXAM.titel.replace(/^[^A-Za-zÄÖÜäöü]+/, '');
+$('examTitel').textContent = EXAM.titel;
+$('examUntertitel').textContent = EXAM.untertitel;
+$('uhrHinweis').textContent = T.uhr;
+$('startTitel').textContent = T.startTitel;
+$('startRegeln').innerHTML = (FLUG ? [T.flugRegel] : []).concat(T.regeln).map(function(r){ return '<li>' + r + '</li>'; }).join('');
+$('startFelderTitel').textContent = T.felder;
+$('codeLabel').textContent = T.code; $('initLabel').textContent = T.init; $('startKnopf').textContent = T.start;
+$('linkFehlt').textContent = T.linkFehlt;
+$('sperreText1').textContent = T.sperre1; $('sperreText2').innerHTML = T.sperre2;
+$('abVorherText').textContent = T.abVorher; $('abWarnung').innerHTML = T.abWarn;
+$('abgabeTitel').textContent = T.frage; $('abgabeJa').textContent = T.ja; $('abgabeNein').textContent = T.nein;
+$('abFertig').textContent = T.fertig; $('abDateiText').textContent = T.datei;
+$('abSchritte').innerHTML = T.schritte.map(function(r){ return '<li>' + r + '</li>'; }).join('');
+baueAufgaben();
 if (!linkHash() && S.phase === 'start'){
   $('linkFehlt').hidden = false;
-  $('codeFeld').disabled = true;
+  ['codeFeld', 'initFeld'].forEach(function(id){ $(id).readOnly = true; $(id).classList.add('zu'); });
 }
-$('figNeuron').innerHTML = svgNeuron();
-$('figSynapse').innerHTML = svgSynapse();
-baueBeschriftung('n', NEURON);
-baueBeschriftung('s', SYNAPSE);
 
 document.addEventListener('input', function(e){
-  var k = e.target.getAttribute && e.target.getAttribute('data-k');
-  if (!k || S.phase !== 'laeuft') return;
-  S.a[k] = e.target.value; speichern(); marken();
+  if (!laeuft()) return;
+  var el = e.target, id = el.getAttribute && el.getAttribute('data-teil'); if (!id) return;
+  var t = teil(id);
+  if (t.typ === 'beschriften') S.a[id][el.getAttribute('data-nr')] = el.value; else S.a[id] = el.value;
+  speichern(); marken();
 });
-$('codeFeld').addEventListener('input', codePruefenAnzeige);
-$('codeFeld').addEventListener('keydown', function(e){ if (e.key === 'Enter' && !$('startKnopf').disabled) starten(); });
+$('codeFeld').addEventListener('input', startPruefen);
+$('initFeld').addEventListener('input', startPruefen);
+$('initFeld').addEventListener('keydown', function(e){ if (e.key === 'Enter') starten(); });
 $('startKnopf').addEventListener('click', starten);
-document.querySelector('.tabs').addEventListener('click', function(e){
-  var t = e.target.closest('.tab'); if (t) zeigeKarte(t.getAttribute('data-ziel'));
-});
-$('vorrat').addEventListener('click', sortKlick);
-$('plaetze').addEventListener('click', sortKlick);
+$('tabs').addEventListener('click', function(e){ var t = e.target.closest('.tab'); if (t) zeigeKarte(t.getAttribute('data-ziel')); });
+$('aufgabenKarten').addEventListener('click', klick);
 $('abgebenKnopf').addEventListener('click', function(){
-  var st = stand(), offen = [];
-  if (st.a1[0] < st.a1[1]) offen.push('Aufgabe 1');
-  if (st.a2[0] < st.a2[1]) offen.push('Aufgabe 2');
-  if (st.a3s[0] < st.a3s[1] || !st.a3b) offen.push('Aufgabe 3');
-  if (!st.a4) offen.push('Aufgabe 4');
-  $('abgabeText').textContent = (offen.length ? 'Noch nicht vollständig: ' + offen.join(', ') + '. ' : '') +
-    'Nach der Abgabe können Sie nichts mehr ändern.';
+  var offen = EXAM.aufgaben.map(function(a, i){ return a.teile.every(teilFertig) ? null : 'Aufgabe ' + (i + 1); }).filter(Boolean);
+  $('abgabeText').textContent = (offen.length ? 'Noch nicht vollständig: ' + offen.join(', ') + '. ' : '') + T.fragText;
   $('abgabeDialog').classList.add('an');
 });
 $('abgabeNein').addEventListener('click', function(){ $('abgabeDialog').classList.remove('an'); });
 $('abgabeJa').addEventListener('click', abgeben);
 $('pdfKnopf').addEventListener('click', pdfLaden);
 $('entsperrKnopf').addEventListener('click', entsperren);
-$('lehrerFeld').addEventListener('keydown', function(e){ if (e.key === 'Enter') entsperren(); });
+$('freiFeld').addEventListener('keydown', function(e){ if (e.key === 'Enter') entsperren(); });
 
 ansicht();
-setInterval(uhr, 1000);
+startPruefen();
+setInterval(function(){ uhr(); netzPruefen(); }, 1000);
 })();
 </script>
 <script>

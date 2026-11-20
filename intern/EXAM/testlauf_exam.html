@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>EXAM · Testlauf</title>
+<meta name="description" content="Probe-EXAM mit vier kurzen Aufgaben (Einfachauswahl, Mehrfachauswahl, Sortieren, Freitext) zum Ausprobieren von Flugmodus, Sperre und PDF-Abgabe.">
+<meta name="keywords" content="EXAM, Testlauf, Probe">
+<meta name="typ" content="Exam">
+<meta name="klasse" content="07">
+<meta name="fach" content="mathe">
+<meta name="oberthema" content="EXAM">
+<meta name="thema" content="Testlauf">
+<!-- =============================================================================
+     BAUSTEIN: EXAM-Seite  (v1, 19.11.2026) – _wartung/exam/baustein_exam.html
+     Anleitung: _wartung/exam/anweisung_exam.md
+     Neue EXAM-Seite = Kopie dieser Datei. Geändert werden NUR
+       - die Meta-Tags und <title> oben,
+       - der Block  EXAM-INHALT  im Skript (Texte, Aufgaben, Abbildungen).
+     Alles andere (Engine) bleibt unverändert.
+     Engine:
+       - Start nur über den Link aus intern/EXAM/vorbereitung.html (?l=<Hash des
+         Freischaltcodes>). Code (Muster mit Prüfzeichen) + Initialen, erst dann
+         erscheinen die Aufgaben; die Orientierungsuhr startet.
+       - Flugmodus (Standard, EXAM.flugmodus !== false): Code-Eingabe erst offline;
+         Netz während des Tests = Sperre; Entsperren nur offline.
+       - Sperre beim Verlassen (Tab/App, Fokus, Neuladen); Entsperren mit dem
+         Freischaltcode; jede Sperre steht im PDF.
+       - Aufgabentypen: beschriften, sortieren (Antippen), auswahl, freitext.
+       - Keine Lösungen im Quelltext, keine Bewertung auf der Seite.
+       - Abgabe mit Rückfrage; danach PDF (Helvetica, Abbildungen als JPEG,
+         Antworten zusätzlich als eingebettete Datei abgabe.json).
+       - Zustand nur in sessionStorage (try/catch). Gesperrte Felder per
+         readOnly + .zu (iPad), nie per disabled.
+       - Bewusst ohne Navigationsleiste: jeder Link nach draußen würde sperren.
+     ========================================================================== -->
+<style>
+:root{
+  --ink:#22303f; --card:#ffffff; --green:#1e7d32; --red:#c1272d;
+  --amber:#b8860b; --amber-light:#fdf3d9; --amber-dark:#96690a;
+  --grey:#6b7686; --grey-light:#eef0f3; --border-blue:#1f4680;
+  --bg:#f7f8fa; --line:#e2e6ec;
+}
+*{box-sizing:border-box;}
+html{-webkit-text-size-adjust:100%;}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;font-size:1rem;line-height:1.5;
+  -webkit-tap-highlight-color:transparent;
+  -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;}
+input,textarea{-webkit-user-select:text;user-select:text;}
+main{max-width:1024px;margin:0 auto;padding:1rem;}
+.kopf{background:var(--grey-light);border:3px solid var(--border-blue);border-radius:1rem;
+  padding:1rem 1.2rem;margin-bottom:1rem;}
+.kopf h1{margin:0;font-size:1.5rem;}
+.kopf p{margin:.3rem 0 0;font-size:1rem;color:var(--grey);}
+.kopfzeile{display:flex;flex-wrap:wrap;gap:.6rem;align-items:center;justify-content:space-between;}
+.uhr{font-size:1.3rem;font-weight:800;color:var(--border-blue);font-variant-numeric:tabular-nums;}
+.uhr-hinweis{font-size:1rem;color:var(--grey);}
+.wer{font-weight:700;font-size:1rem;}
+.tabs{display:flex;flex-wrap:wrap;gap:.5rem;margin:0 0 1rem;}
+.tab{min-height:44px;padding:.5rem 1rem;border:2px solid var(--border-blue);border-radius:.6rem;
+  background:#fff;color:var(--border-blue);font:inherit;font-size:1rem;font-weight:700;cursor:pointer;}
+.tab.aktiv{background:var(--border-blue);color:#fff;}
+.karte{display:none;background:var(--card);border:2px solid var(--line);border-radius:1rem;
+  padding:1.2rem;margin-bottom:1rem;}
+.karte.aktiv{display:block;}
+.karte h2{margin:0 0 .5rem;font-size:1.3rem;color:var(--border-blue);}
+.karte h3{margin:1.1rem 0 .4rem;font-size:1.1rem;}
+.auftrag{font-weight:700;}
+.hinweis{color:var(--grey);}
+.figur{border:2px solid var(--line);border-radius:.8rem;background:#fff;padding:.4rem;margin:.6rem 0;}
+.figur > svg{display:block;width:100%;height:auto;}
+.beschriftung{display:grid;grid-template-columns:repeat(auto-fill,minmax(15rem,1fr));gap:.6rem;margin-top:.6rem;}
+.feld{display:flex;align-items:center;gap:.5rem;}
+.nr{flex:0 0 auto;width:2.2rem;height:2.2rem;border-radius:50%;background:var(--border-blue);color:#fff;
+  font-weight:800;font-size:1rem;display:flex;align-items:center;justify-content:center;}
+input[type=text],textarea{width:100%;min-height:44px;padding:.5rem .7rem;border:2px solid var(--line);
+  border-radius:.6rem;font:inherit;font-size:1rem;color:var(--ink);background:#fff;}
+textarea{min-height:9rem;resize:vertical;}
+input[type=text]:focus,textarea:focus{outline:none;border-color:var(--border-blue);}
+input.zu,textarea.zu{background:var(--grey-light);color:var(--ink);-webkit-text-fill-color:var(--ink);cursor:default;}
+.knopf{min-height:44px;padding:.6rem 1.2rem;border:2px solid var(--border-blue);border-radius:.6rem;
+  background:var(--border-blue);color:#fff;font:inherit;font-size:1rem;font-weight:700;cursor:pointer;}
+.knopf.hell{background:#fff;color:var(--border-blue);}
+.knopf:disabled{background:var(--grey-light);border-color:var(--line);color:var(--grey);cursor:default;}
+.knopf:active:not(:disabled){transform:scale(.98);}
+.zeile{display:flex;flex-wrap:wrap;gap:.6rem;align-items:center;margin-top:.8rem;}
+.meldung{margin-top:.6rem;font-weight:700;}
+.meldung:empty{display:none;}
+.meldung.ok{background:var(--green);color:#fff;padding:.5rem .8rem;border-radius:.6rem;}
+.meldung.falsch{background:var(--red);color:#fff;padding:.5rem .8rem;border-radius:.6rem;}
+.meldung.info{background:var(--amber-light);border:2px solid var(--amber);color:var(--ink);padding:.5rem .8rem;border-radius:.6rem;}
+/* Sortieren per Antippen */
+.sort-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+@media (max-width:760px){.sort-grid{grid-template-columns:1fr;}}
+.sort-spalte h3{margin-top:0;}
+.vorrat,.plaetze,.optionen{display:flex;flex-direction:column;gap:.5rem;}
+.karte-btn{min-height:44px;padding:.6rem .8rem;border:2px solid var(--line);border-radius:.6rem;
+  background:#fff;color:var(--ink);font:inherit;font-size:1rem;text-align:left;cursor:pointer;width:100%;}
+.karte-btn.gewaehlt{border-color:var(--border-blue);background:var(--grey-light);box-shadow:0 0 0 2px var(--border-blue);}
+.karte-btn.fehlt{border-style:dashed;border-color:var(--amber);background:var(--amber-light);font-weight:700;}
+.platz{display:flex;align-items:stretch;gap:.5rem;}
+.platz .nr{align-self:center;}
+.platz-feld{flex:1;min-height:52px;border:2px dashed var(--grey);border-radius:.6rem;background:var(--bg);
+  font:inherit;font-size:1rem;color:var(--grey);text-align:left;padding:.5rem .8rem;cursor:pointer;}
+.platz-feld.belegt{border-style:solid;border-color:var(--border-blue);background:#fff;color:var(--ink);}
+.platz-feld.belegt.fehlt{border-color:var(--amber);background:var(--amber-light);font-weight:700;}
+/* Auswahl */
+.option{display:flex;align-items:center;gap:.7rem;}
+.option .marke{flex:0 0 auto;width:1.6rem;height:1.6rem;border:2px solid var(--border-blue);background:#fff;
+  display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;}
+.option.einzel .marke{border-radius:50%;}
+.option.einzel.an .marke{background:var(--border-blue);box-shadow:inset 0 0 0 4px #fff;}
+.option.mehr .marke{border-radius:.3rem;}
+.option.an{border-color:var(--border-blue);background:var(--grey-light);}
+.option.mehr.an .marke{background:var(--border-blue);}
+.option.mehr.an .marke::after{content:'✓';}
+/* Start & Abgabe */
+.start-box{max-width:38rem;}
+.start-felder{display:flex;flex-wrap:wrap;gap:1rem;}
+.start-felder > div{flex:1 1 12rem;}
+.start-felder label{display:block;font-weight:700;margin-bottom:.3rem;}
+.gross{font-size:1.3rem !important;letter-spacing:.15em;text-transform:uppercase;}
+.liste{margin:.4rem 0 0;padding-left:1.3rem;}
+.liste li{margin:.3rem 0;}
+.dateiname{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:1rem;background:var(--grey-light);
+  padding:.1rem .4rem;border-radius:.3rem;}
+/* Sperre & Dialog */
+.sperre{position:fixed;inset:0;z-index:1000;background:rgba(34,48,63,.92);display:none;
+  align-items:center;justify-content:center;padding:1rem;}
+.sperre.an{display:flex;}
+body.gesperrt main{filter:blur(8px);}
+.sperre-box{background:#fff;border:4px solid var(--red);border-radius:1rem;padding:1.4rem;max-width:30rem;width:100%;}
+.sperre-box h2{margin:0 0 .5rem;color:var(--red);font-size:1.4rem;}
+.sperre-box p{margin:.4rem 0;}
+.geheim{-webkit-text-security:disc;}
+.dialog{position:fixed;inset:0;z-index:900;background:rgba(34,48,63,.6);display:none;
+  align-items:center;justify-content:center;padding:1rem;}
+.dialog.an{display:flex;}
+.dialog-box{background:#fff;border:3px solid var(--border-blue);border-radius:1rem;padding:1.3rem;max-width:30rem;width:100%;}
+.dialog-box h2{margin:0 0 .5rem;font-size:1.3rem;}
+/* Dino – baustein_dino.html */
+  .trex{position:fixed;right:.7rem;bottom:.7rem;cursor:pointer;z-index:50;user-select:none;}
+  .trex .dino-ikon{display:block;width:72px;height:72px;-webkit-user-drag:none;}
+  .trex .bubble{
+    position:absolute;right:calc(100% + 6px);bottom:26px;white-space:nowrap;
+    background:var(--ink,#1f2937);color:#fff;padding:.3rem .6rem;border-radius:.5rem;
+    font-size:1rem;opacity:0;pointer-events:none;transition:opacity .2s;
+  }
+  .trex:hover .bubble,.trex.zeig .bubble{opacity:1;}
+
+</style>
+</head>
+<body>
+<main>
+  <div class="kopf">
+    <div class="kopfzeile">
+      <div>
+        <h1 id="examTitel"></h1>
+        <p id="examUntertitel"></p>
+      </div>
+      <div id="kopfRechts" hidden>
+        <div class="wer" id="werAnzeige"></div>
+        <div class="uhr" id="uhr">--:--</div>
+        <div class="uhr-hinweis" id="uhrHinweis"></div>
+      </div>
+    </div>
+  </div>
+
+  <section class="karte aktiv" id="startKarte">
+    <div class="start-box">
+      <h2 id="startTitel"></h2>
+      <ul class="liste" id="startRegeln"></ul>
+      <div class="meldung falsch" id="linkFehlt" hidden></div>
+      <div class="meldung info" id="flugHinweis" hidden></div>
+      <h3 id="startFelderTitel"></h3>
+      <div class="start-felder">
+        <div>
+          <label for="codeFeld" id="codeLabel"></label>
+          <input type="text" id="codeFeld" class="gross" maxlength="7" autocomplete="off"
+                 autocapitalize="characters" autocorrect="off" spellcheck="false">
+        </div>
+        <div>
+          <label for="initFeld" id="initLabel"></label>
+          <input type="text" id="initFeld" class="gross" maxlength="3" autocomplete="off"
+                 autocapitalize="characters" autocorrect="off" spellcheck="false">
+        </div>
+      </div>
+      <div class="meldung" id="startMeldung" aria-live="polite"></div>
+      <div class="zeile"><button class="knopf" id="startKnopf" disabled></button></div>
+    </div>
+  </section>
+
+  <div id="testBereich" hidden>
+    <nav class="tabs" id="tabs" aria-label="Aufgaben"></nav>
+    <div id="aufgabenKarten"></div>
+    <section class="karte" id="ab">
+      <h2>Abgabe</h2>
+      <div id="abVorher">
+        <p id="abVorherText"></p>
+        <ul class="liste" id="standListe"></ul>
+        <p id="abWarnung"></p>
+        <div class="zeile"><button class="knopf" id="abgebenKnopf">Endgültig abgeben</button></div>
+      </div>
+      <div id="abNachher" hidden>
+        <div class="meldung ok" id="abFertig"></div>
+        <p><span id="abDateiText"></span> <span class="dateiname" id="dateiname"></span></p>
+        <ol class="liste" id="abSchritte"></ol>
+        <div class="zeile"><button class="knopf" id="pdfKnopf" disabled>📄 PDF herunterladen</button></div>
+        <div class="meldung" id="pdfMeldung" aria-live="polite"></div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<div class="dialog" id="abgabeDialog" role="dialog" aria-modal="true" aria-labelledby="abgabeTitel">
+  <div class="dialog-box">
+    <h2 id="abgabeTitel"></h2>
+    <p id="abgabeText"></p>
+    <div class="zeile">
+      <button class="knopf" id="abgabeJa"></button>
+      <button class="knopf hell" id="abgabeNein"></button>
+    </div>
+  </div>
+</div>
+
+<div class="sperre" id="sperre" role="alertdialog" aria-modal="true" aria-labelledby="sperreTitel">
+  <div class="sperre-box">
+    <h2 id="sperreTitel">🔒 Test gesperrt</h2>
+    <p id="sperreText1"></p>
+    <p id="sperreText2"></p>
+    <p><label for="freiFeld">Freischaltcode (Lehrkraft):</label></p>
+    <input type="text" id="freiFeld" class="geheim" autocomplete="off" autocorrect="off"
+           autocapitalize="off" spellcheck="false">
+    <div class="zeile"><button class="knopf" id="entsperrKnopf">Entsperren</button></div>
+    <div class="meldung" id="sperreMeldung" aria-live="polite"></div>
+  </div>
+</div>
+
+<div class="trex" id="trex"><img class="dino-ikon" src="data:image/webp;base64,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" alt="Dino" width="72" height="72" draggable="false"><span class="bubble">Made by ASzym</span></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ============================ EXAM-INHALT ============================
+   Nur dieser Block wird je EXAM angepasst (anweisung_exam.md, Abschnitt 3).
+   - thema:   kurz, für Dateiname und PDF (EXAM_<thema>_<Code>.pdf)
+   - anrede:  'du' oder 'sie'
+   - zeit:    Richtzeit in Minuten (nur Orientierung)
+   - flugmodus: true (Standard) = Test nur im Flugmodus; false = ohne Netzprüfung
+   - speicher: eindeutiger Schlüssel 'aszym:<datei>:v1'
+   - aufgaben: Liste; jede Aufgabe hat titel, kurz (Reiter), einleitung (HTML)
+     und teile. Teil-Typen:
+       beschriften: svg (ohne Nummern), nummern [{nr,x,y,zx,zy}]
+       sortieren:   karten [{id,t}] in bewusst NICHT richtiger Startreihenfolge;
+                    optional eine Karte {id,t,fehlt:true} als Platzhalter
+       auswahl:     optionen [{id,t}], mehrfach true/false
+       freitext:    (nur auftrag)
+     Kennungen (id) neutral wählen – sie dürfen die Lösung nicht verraten.
+     KEINE Lösungen hier eintragen: Der Erwartungshorizont liegt im EXAM-Projekt.
+   ==================================================================== */
+var EXAM = {
+  thema: 'Testlauf',
+  titel: '🧪 EXAM · Testlauf',
+  untertitel: 'Vier kurze Probeaufgaben',
+  anrede: 'du',
+  zeit: 10,
+  flugmodus: true,
+  speicher: 'aszym:testlauf_exam:v1',
+  aufgaben: [
+    { titel: 'Aufgabe 1 · Eine Antwort wählen', kurz: 'Einfachauswahl',
+      einleitung: '',
+      teile: [
+        { id: '1', typ: 'auswahl', mehrfach: false,
+          auftrag: 'Welche Stadt ist die Hauptstadt von Deutschland? Wähle eine Antwort.',
+          optionen: [ {id:'oh', t:'Hamburg'}, {id:'ok', t:'Köln'}, {id:'ob', t:'Berlin'}, {id:'om', t:'München'} ] }
+      ] },
+    { titel: 'Aufgabe 2 · Mehrere Antworten wählen', kurz: 'Mehrfachauswahl',
+      einleitung: '',
+      teile: [
+        { id: '2', typ: 'auswahl', mehrfach: true,
+          auftrag: 'Welche Zahlen sind gerade? Wähle alle passenden aus.',
+          optionen: [ {id:'oc', t:'15'}, {id:'ot', t:'8'}, {id:'ow', t:'3'}, {id:'oe', t:'20'}, {id:'or', t:'12'} ] }
+      ] },
+    { titel: 'Aufgabe 3 · Zahlen sortieren', kurz: 'Sortieren',
+      einleitung: '',
+      teile: [
+        { id: '3', typ: 'sortieren',
+          auftrag: 'Sortiere die Zahlen der Größe nach – die kleinste Zahl kommt auf Platz 1.',
+          karten: [ {id:'kv', t:'42'}, {id:'kf', t:'7'}, {id:'ky', t:'19'}, {id:'kn', t:'3'}, {id:'kh', t:'25'} ] }
+      ] },
+    { titel: 'Aufgabe 4 · Freitext', kurz: 'Freitext',
+      einleitung: '',
+      teile: [
+        { id: '4', typ: 'freitext',
+          auftrag: 'Nenne zwei Haustiere und beschreibe eines davon in einem ganzen Satz.' }
+      ] }
+  ]
+};
+/* ========================= ENDE EXAM-INHALT ========================= */
+
+
+/* ================= ENGINE – ab hier nichts verändern ================= */
+var SIE = EXAM.anrede === 'sie';
+var T = SIE ? {
+  flugAn: '✈️ Schalten Sie jetzt den <b>Flugmodus</b> ein (WLAN aus). Erst dann können Sie Code und Initialen eingeben.',
+  flugOk: '✔ Flugmodus ist an.',
+  flugRegel: 'Der Test läuft nur im <b>Flugmodus</b>. Schalten Sie WLAN oder Flugmodus während des Tests aus, sperrt sich der Test.',
+  flugEntsperren: 'Erst den Flugmodus wieder einschalten (WLAN aus), dann entsperren.',
+  regeln: ['Bleiben Sie die ganze Zeit auf dieser Seite. Wenn Sie den Tab oder die App wechseln, die Seite neu laden oder schließen, <b>sperrt sich der Test</b>.',
+           'Entsperren kann nur Ihre Lehrkraft. Jede Sperre wird im Abgabe-PDF vermerkt.',
+           'Ihre Antworten bleiben beim Sperren erhalten. Wird der Tab geschlossen, sind sie verloren.',
+           'Sie können zwischen den Aufgaben frei wechseln.',
+           'Am Ende geben Sie ab und laden ein PDF herunter, das Sie in Teams in der Aufgabe hochladen.'],
+  startTitel: 'Bevor Sie beginnen', felder: 'Ihre Angaben',
+  code: 'Ihr Code (vom Zettel)', init: 'Ihre Initialen (z. B. MS)', start: 'Test starten',
+  linkFehlt: '✘ Dieser Link ist unvollständig. Bitte scannen Sie den QR-Code Ihrer Lehrkraft erneut.',
+  codeFalsch: '✘ Dieser Code ist ungültig. Bitte genau mit dem Zettel vergleichen.',
+  initFalsch: 'Bitte 2 oder 3 Buchstaben als Initialen eingeben.',
+  sperre1: 'Sie haben die Testseite verlassen (anderer Tab, andere App, Neuladen) oder das Netz eingeschaltet. Das wird im Abgabe-PDF vermerkt.',
+  sperre2: '<b>Melden Sie sich bei Ihrer Lehrkraft.</b> Ihre bisherigen Antworten sind erhalten.',
+  abVorher: 'Bevor Sie abgeben, prüfen Sie, ob Sie alles bearbeitet haben:',
+  abWarn: 'Nach der Abgabe können Sie <b>nichts mehr ändern</b>.',
+  frage: 'Wirklich abgeben?', fragText: 'Nach der Abgabe können Sie nichts mehr ändern.',
+  ja: 'Ja, abgeben', nein: 'Weiterarbeiten',
+  fertig: '✔ Abgegeben. Ihre Antworten sind gesichert.', datei: 'Ihre Datei heißt',
+  schritte: ['Tippen Sie auf „PDF herunterladen“ und bestätigen Sie den Download.',
+             'Schalten Sie danach den Flugmodus aus und warten Sie, bis das WLAN verbunden ist.',
+             'Öffnen Sie in Teams die Aufgabe zu diesem Test, tippen Sie auf „Arbeit hinzufügen“, wählen Sie die Datei aus dem Ordner „Downloads“ und tippen Sie auf „Abgeben“.',
+             'Laden Sie die Datei <b>nur in der Aufgabe</b> hoch – nicht in einen Kanal.'],
+  sortHinweis: 'Tippen Sie eine Karte an und dann den Platz, auf den sie gehört. Eine gelegte Karte tippen Sie erneut an, um sie zurückzulegen.',
+  uhr: 'Dient nur der Orientierung – wenn die Zeit abgelaufen ist, passiert nichts.',
+  pdfFehler: '✘ Das PDF konnte nicht erstellt werden. Bitte die Lehrkraft holen.'
+} : {
+  flugAn: '✈️ Schalte jetzt den <b>Flugmodus</b> ein (WLAN aus). Erst dann kannst du Code und Initialen eingeben.',
+  flugOk: '✔ Flugmodus ist an.',
+  flugRegel: 'Der Test läuft nur im <b>Flugmodus</b>. Schaltest du WLAN oder Flugmodus während des Tests aus, sperrt sich der Test.',
+  flugEntsperren: 'Erst den Flugmodus wieder einschalten (WLAN aus), dann entsperren.',
+  regeln: ['Bleib die ganze Zeit auf dieser Seite. Wenn du den Tab oder die App wechselst, die Seite neu lädst oder schließt, <b>sperrt sich der Test</b>.',
+           'Entsperren kann nur deine Lehrkraft. Jede Sperre wird im Abgabe-PDF vermerkt.',
+           'Deine Antworten bleiben beim Sperren erhalten. Wird der Tab geschlossen, sind sie verloren.',
+           'Du kannst zwischen den Aufgaben frei wechseln.',
+           'Am Ende gibst du ab und lädst ein PDF herunter, das du in Teams in der Aufgabe hochlädst.'],
+  startTitel: 'Bevor du beginnst', felder: 'Deine Angaben',
+  code: 'Dein Code (vom Zettel)', init: 'Deine Initialen (z. B. MS)', start: 'Test starten',
+  linkFehlt: '✘ Dieser Link ist unvollständig. Bitte scanne den QR-Code deiner Lehrkraft erneut.',
+  codeFalsch: '✘ Dieser Code ist ungültig. Bitte genau mit dem Zettel vergleichen.',
+  initFalsch: 'Bitte 2 oder 3 Buchstaben als Initialen eingeben.',
+  sperre1: 'Du hast die Testseite verlassen (anderer Tab, andere App, Neuladen) oder das Netz eingeschaltet. Das wird im Abgabe-PDF vermerkt.',
+  sperre2: '<b>Melde dich bei deiner Lehrkraft.</b> Deine bisherigen Antworten sind erhalten.',
+  abVorher: 'Bevor du abgibst, prüfe, ob du alles bearbeitet hast:',
+  abWarn: 'Nach der Abgabe kannst du <b>nichts mehr ändern</b>.',
+  frage: 'Wirklich abgeben?', fragText: 'Nach der Abgabe kannst du nichts mehr ändern.',
+  ja: 'Ja, abgeben', nein: 'Weiterarbeiten',
+  fertig: '✔ Abgegeben. Deine Antworten sind gesichert.', datei: 'Deine Datei heißt',
+  schritte: ['Tippe auf „PDF herunterladen“ und bestätige den Download.',
+             'Schalte danach den Flugmodus aus und warte, bis das WLAN verbunden ist.',
+             'Öffne in Teams die Aufgabe zu diesem Test, tippe auf „Arbeit hinzufügen“, wähle die Datei aus dem Ordner „Downloads“ und tippe auf „Abgeben“.',
+             'Lade die Datei <b>nur in der Aufgabe</b> hoch – nicht in einen Kanal.'],
+  sortHinweis: 'Tippe eine Karte an und dann den Platz, auf den sie gehört. Eine gelegte Karte tippst du erneut an, um sie zurückzulegen.',
+  uhr: 'Dient nur der Orientierung – wenn die Zeit abgelaufen ist, passiert nichts.',
+  pdfFehler: '✘ Das PDF konnte nicht erstellt werden. Bitte die Lehrkraft holen.'
+};
+
+/* ---------- Schüler-Code (identisch in intern/EXAM/vorbereitung.html) ---------- */
+var CODE_ALPHABET = 'ACDEFHJKMNPRTUVWXY34679'; // 23 Zeichen (Primzahl), ohne 0/O, 1/I/L, 2/Z, 5/S, 8/B
+var CODE_SALT = 7;
+function codeNorm(s){ return String(s || '').toUpperCase().replace(/[^A-Z0-9]/g, ''); }
+function codePruefzeichen(k4){
+  var s = CODE_SALT;
+  for (var i = 0; i < 4; i++) s += (i + 1) * CODE_ALPHABET.indexOf(k4.charAt(i));
+  return CODE_ALPHABET.charAt(s % CODE_ALPHABET.length);
+}
+function codeGueltig(s){
+  var n = codeNorm(s);
+  if (n.length !== 5) return false;
+  for (var i = 0; i < 5; i++) if (CODE_ALPHABET.indexOf(n.charAt(i)) < 0) return false;
+  return codePruefzeichen(n.slice(0, 4)) === n.charAt(4);
+}
+function codeFormat(s){ var n = codeNorm(s); return n.slice(0, 4) + '-' + n.slice(4); }
+function hashText(s){
+  s = String(s).toUpperCase().replace(/\s+/g, '');
+  var h = 0x811c9dc5;
+  for (var i = 0; i < s.length; i++){ h ^= s.charCodeAt(i); h = Math.imul(h, 0x01000193) >>> 0; }
+  return ('0000000' + h.toString(16)).slice(-8);
+}
+function initNorm(s){ return String(s || '').toUpperCase().replace(/[^A-ZÄÖÜ]/g, ''); }
+var FLUG = EXAM.flugmodus !== false;
+function online(){ return FLUG && navigator.onLine !== false; }
+function linkHash(){
+  var m = /[?&]l=([0-9a-f]{8})(?:&|$)/i.exec(location.search);
+  return m ? m[1].toLowerCase() : '';
+}
+
+/* ---------- Teile ---------- */
+var TEILE = [];
+EXAM.aufgaben.forEach(function(a, ai){ a.teile.forEach(function(t){ t.aufgabe = ai; TEILE.push(t); }); });
+function teil(id){ for (var i = 0; i < TEILE.length; i++) if (TEILE[i].id === id) return TEILE[i]; return null; }
+
+/* ---------- Zustand (nur sessionStorage, immer try/catch) ---------- */
+function neuerZustand(){
+  return { phase:'start', code:'', init:'', lh:'', start:0, ende:0, gesperrt:false, log:[], karte:'a0', a:{} };
+}
+var S = (function(){
+  try { var r = sessionStorage.getItem(EXAM.speicher); if (r){ var d = JSON.parse(r); if (d && d.phase) return d; } } catch (e) {}
+  return neuerZustand();
+})();
+if (!S.a) S.a = {};
+if (!S.log) S.log = [];
+TEILE.forEach(function(t){
+  if (t.typ === 'beschriften' && (typeof S.a[t.id] !== 'object' || !S.a[t.id])) S.a[t.id] = {};
+  if (t.typ === 'sortieren' && !(S.a[t.id] instanceof Array && S.a[t.id].length === t.karten.length))
+    S.a[t.id] = t.karten.map(function(){ return null; });
+  if (t.typ === 'auswahl' && !(S.a[t.id] instanceof Array)) S.a[t.id] = [];
+  if (t.typ === 'freitext' && typeof S.a[t.id] !== 'string') S.a[t.id] = '';
+});
+function speichern(){ try { sessionStorage.setItem(EXAM.speicher, JSON.stringify(S)); } catch (e) {} }
+
+function $(id){ return document.getElementById(id); }
+function esc(t){ return String(t).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+function zeit(ms){ var d = new Date(ms); return ('0'+d.getHours()).slice(-2) + ':' + ('0'+d.getMinutes()).slice(-2) + ' Uhr'; }
+function datum(ms){ var d = new Date(ms); return ('0'+d.getDate()).slice(-2) + '.' + ('0'+(d.getMonth()+1)).slice(-2) + '.' + d.getFullYear(); }
+function laeuft(){ return S.phase === 'laeuft'; }
+
+/* ---------- Abbildung mit Nummern ---------- */
+function figurSvg(t){
+  var n = t.nummern.map(function(p){
+    return '<line x1="'+p.x+'" y1="'+p.y+'" x2="'+p.zx+'" y2="'+p.zy+'" stroke="#6b7686" stroke-width="2"/>' +
+           '<circle cx="'+p.zx+'" cy="'+p.zy+'" r="7" fill="none" stroke="#6b7686" stroke-width="2"/>' +
+           '<circle cx="'+p.x+'" cy="'+p.y+'" r="17" fill="#1f4680"/>' +
+           '<text x="'+p.x+'" y="'+(p.y+6)+'" text-anchor="middle" font-size="18" font-weight="700" fill="#ffffff" font-family="Helvetica,Arial,sans-serif">'+p.nr+'</text>';
+  }).join('');
+  var i = t.svg.lastIndexOf('</svg>');
+  return t.svg.slice(0, i) + n + '</svg>';
+}
+
+/* ---------- Aufbau der Karten ---------- */
+function feldAttr(){ return 'autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"'; }
+function baueTeil(t){
+  var h = '<h3 class="auftrag">' + esc(t.auftrag) + '</h3>';
+  if (t.typ === 'beschriften'){
+    h += '<div class="figur">' + figurSvg(t) + '</div><div class="beschriftung">';
+    t.nummern.slice().sort(function(a,b){ return a.nr - b.nr; }).forEach(function(p){
+      h += '<div class="feld"><span class="nr" aria-hidden="true">'+p.nr+'</span>' +
+           '<input type="text" data-teil="'+t.id+'" data-nr="'+p.nr+'" aria-label="Bezeichnung für Nummer '+p.nr+'" '+feldAttr()+'></div>';
+    });
+    h += '</div>';
+  } else if (t.typ === 'sortieren'){
+    h += '<p class="hinweis">' + esc(T.sortHinweis) + '</p>' +
+         '<div class="sort-grid"><div class="sort-spalte"><h3>Karten</h3><div class="vorrat" data-vorrat="'+t.id+'"></div></div>' +
+         '<div class="sort-spalte"><h3>Reihenfolge</h3><div class="plaetze" data-plaetze="'+t.id+'"></div></div></div>';
+  } else if (t.typ === 'auswahl'){
+    h += '<div class="optionen" role="' + (t.mehrfach ? 'group' : 'radiogroup') + '">';
+    t.optionen.forEach(function(o){
+      h += '<button class="karte-btn option ' + (t.mehrfach ? 'mehr' : 'einzel') + '" data-teil="'+t.id+'" data-option="'+o.id+'" role="' +
+           (t.mehrfach ? 'checkbox' : 'radio') + '" aria-checked="false"><span class="marke" aria-hidden="true"></span><span>' + esc(o.t) + '</span></button>';
+    });
+    h += '</div>';
+  } else if (t.typ === 'freitext'){
+    h += '<textarea data-teil="'+t.id+'" aria-label="' + esc(t.auftrag) + '" autocorrect="off" autocapitalize="sentences" spellcheck="false"></textarea>';
+  }
+  return h;
+}
+function baueAufgaben(){
+  var tabs = '', karten = '';
+  EXAM.aufgaben.forEach(function(a, i){
+    tabs += '<button class="tab" data-ziel="a'+i+'">Aufgabe ' + (i+1) + ' · ' + esc(a.kurz) + '<span data-marke="a'+i+'"></span></button>';
+    karten += '<section class="karte" id="a'+i+'"><h2>' + esc(a.titel) + '</h2>' + (a.einleitung || '') +
+              a.teile.map(baueTeil).join('') + '</section>';
+  });
+  tabs += '<button class="tab" data-ziel="ab">✅ Abgabe</button>';
+  $('tabs').innerHTML = tabs;
+  $('aufgabenKarten').innerHTML = karten;
+}
+
+/* ---------- Sortieren ---------- */
+var gewaehlt = {};
+function karteVon(t, id){ for (var i = 0; i < t.karten.length; i++) if (t.karten[i].id === id) return t.karten[i]; return null; }
+function zeichneSort(t){
+  var plaetze = S.a[t.id], zu = !laeuft(), h = '';
+  t.karten.forEach(function(k){
+    if (plaetze.indexOf(k.id) >= 0) return;
+    h += '<button class="karte-btn' + (k.fehlt ? ' fehlt' : '') + (gewaehlt[t.id] === k.id ? ' gewaehlt' : '') +
+         '" data-teil="'+t.id+'" data-karte="'+k.id+'"' + (zu ? ' disabled' : '') + '>' + esc(k.t) + '</button>';
+  });
+  document.querySelector('[data-vorrat="'+t.id+'"]').innerHTML = h || '<p class="hinweis">Alle Karten liegen.</p>';
+  document.querySelector('[data-plaetze="'+t.id+'"]').innerHTML = plaetze.map(function(id, i){
+    var k = id ? karteVon(t, id) : null;
+    return '<div class="platz"><span class="nr" aria-hidden="true">'+(i+1)+'</span>' +
+      '<button class="platz-feld' + (k ? ' belegt' : '') + (k && k.fehlt ? ' fehlt' : '') + '" data-teil="'+t.id+'" data-platz="'+i+'"' +
+      ' aria-label="Platz '+(i+1)+'"' + (zu ? ' disabled' : '') + '>' + (k ? esc(k.t) : 'frei') + '</button></div>';
+  }).join('');
+}
+/* ---------- Auswahl ---------- */
+function zeichneAuswahl(t){
+  var an = S.a[t.id];
+  document.querySelectorAll('[data-teil="'+t.id+'"][data-option]').forEach(function(b){
+    var ist = an.indexOf(b.getAttribute('data-option')) >= 0;
+    b.classList.toggle('an', ist); b.setAttribute('aria-checked', ist ? 'true' : 'false');
+    b.disabled = !laeuft();
+  });
+}
+function klick(e){
+  if (!laeuft()) return;
+  var b = e.target.closest('button[data-teil]'); if (!b) return;
+  var t = teil(b.getAttribute('data-teil')); if (!t) return;
+  if (t.typ === 'sortieren'){
+    var p = S.a[t.id];
+    if (b.hasAttribute('data-karte')){
+      var id = b.getAttribute('data-karte'); gewaehlt[t.id] = (gewaehlt[t.id] === id) ? null : id;
+    } else if (b.hasAttribute('data-platz')){
+      var i = +b.getAttribute('data-platz');
+      if (gewaehlt[t.id]){ p[i] = gewaehlt[t.id]; gewaehlt[t.id] = null; }   // alte Karte geht zurück
+      else if (p[i]) p[i] = null;
+      speichern();
+    }
+    zeichneSort(t); marken();
+  } else if (t.typ === 'auswahl'){
+    var o = b.getAttribute('data-option'), an = S.a[t.id], j = an.indexOf(o);
+    if (t.mehrfach){ if (j >= 0) an.splice(j, 1); else an.push(o); }
+    else S.a[t.id] = (j >= 0) ? [] : [o];
+    speichern(); zeichneAuswahl(t); marken();
+  }
+}
+
+/* ---------- Stand ---------- */
+function teilFertig(t){
+  var a = S.a[t.id];
+  if (t.typ === 'beschriften') return t.nummern.every(function(p){ return (a[p.nr] || '').trim(); });
+  if (t.typ === 'sortieren') return a.every(function(x){ return !!x; });
+  if (t.typ === 'auswahl') return a.length > 0;
+  return !!(a || '').trim();
+}
+function teilStand(t){
+  var a = S.a[t.id];
+  if (t.typ === 'beschriften'){
+    var n = t.nummern.filter(function(p){ return (a[p.nr] || '').trim(); }).length;
+    return n + ' von ' + t.nummern.length + ' Feldern ausgefüllt';
+  }
+  if (t.typ === 'sortieren') return a.filter(Boolean).length + ' von ' + a.length + ' Karten gelegt';
+  if (t.typ === 'auswahl') return a.length ? 'ausgewählt' : 'noch nichts ausgewählt';
+  return (a || '').trim() ? 'beantwortet' : 'noch leer';
+}
+function marken(){
+  EXAM.aufgaben.forEach(function(a, i){
+    var m = document.querySelector('[data-marke="a'+i+'"]');
+    if (m) m.textContent = a.teile.every(teilFertig) ? ' ●' : '';
+  });
+}
+function standListe(){
+  $('standListe').innerHTML = TEILE.map(function(t){
+    return '<li>' + (teilFertig(t) ? '✔ ' : '⚠️ ') + 'Teil ' + esc(t.id) + ': ' + teilStand(t) + '</li>';
+  }).join('');
+}
+
+/* ---------- Karten wechseln ---------- */
+function zeigeKarte(z){
+  S.karte = z;
+  document.querySelectorAll('#testBereich .karte').forEach(function(k){ k.classList.toggle('aktiv', k.id === z); });
+  document.querySelectorAll('.tab').forEach(function(t){ t.classList.toggle('aktiv', t.getAttribute('data-ziel') === z); });
+  if (z === 'ab') standListe();
+  window.scrollTo(0, 0);
+  speichern();
+}
+
+/* ---------- Uhr ---------- */
+function uhr(){
+  if (S.phase === 'start') return;
+  var bis = S.phase === 'abgegeben' ? S.ende : Date.now();
+  var rest = Math.max(0, EXAM.zeit * 60 - Math.floor((bis - S.start) / 1000));
+  $('uhr').textContent = '⏱ ' + Math.floor(rest / 60) + ':' + ('0' + (rest % 60)).slice(-2) + (rest === 0 ? ' – Richtzeit erreicht' : '');
+}
+
+/* ---------- Sperre ---------- */
+function zeigeSperre(an){
+  $('sperre').classList.toggle('an', !!an);
+  document.body.classList.toggle('gesperrt', !!an);
+  if (an){ $('freiFeld').value = ''; $('sperreMeldung').textContent = ''; $('sperreMeldung').className = 'meldung'; }
+}
+function sperren(anlass){
+  if (!laeuft() || S.gesperrt) return;
+  S.gesperrt = true;
+  S.log.push({ t: Date.now(), art: anlass });
+  speichern(); zeigeSperre(true);
+}
+document.addEventListener('visibilitychange', function(){ if (document.visibilityState === 'hidden') sperren('Seite verlassen (Tab oder App gewechselt)'); });
+window.addEventListener('blur', function(){ sperren('Fokus verloren (anderes Fenster oder App)'); });
+window.addEventListener('pagehide', function(){ sperren('Seite neu geladen oder geschlossen'); });
+function netzPruefen(){
+  if (laeuft() && online()) sperren('Internetverbindung während des Tests (Flugmodus aus)');
+  if (S.phase === 'start') startPruefen();
+}
+window.addEventListener('online', netzPruefen);
+window.addEventListener('offline', netzPruefen);
+function entsperren(){
+  var f = $('freiFeld'), m = $('sperreMeldung');
+  if (online()){ m.className = 'meldung info'; m.textContent = T.flugEntsperren; return; }
+  if (S.lh && hashText(f.value) === S.lh){
+    S.gesperrt = false; S.log.push({ t: Date.now(), art: 'entsperrt durch Lehrkraft' });
+    speichern(); zeigeSperre(false);
+  } else {
+    S.log.push({ t: Date.now(), art: 'falscher Freischaltcode' }); speichern();
+    f.value = ''; m.className = 'meldung falsch'; m.textContent = '✘ Freischaltcode falsch. Der Versuch wurde vermerkt.';
+  }
+}
+
+/* ---------- Start ---------- */
+function startPruefen(){
+  var c = codeNorm($('codeFeld').value), i = initNorm($('initFeld').value), m = $('startMeldung');
+  var codeOk = codeGueltig(c), initOk = i.length >= 2 && i.length <= 3, netz = online();
+  if (FLUG && linkHash()){
+    $('flugHinweis').hidden = false;
+    $('flugHinweis').className = netz ? 'meldung info' : 'meldung ok';
+    $('flugHinweis').innerHTML = netz ? T.flugAn : T.flugOk;
+    ['codeFeld', 'initFeld'].forEach(function(id){ $(id).readOnly = netz; $(id).classList.toggle('zu', netz); });
+  }
+  $('startKnopf').disabled = !(codeOk && initOk && linkHash() && !netz);
+  if (c.length >= 5 && !codeOk){ m.className = 'meldung falsch'; m.textContent = T.codeFalsch; }
+  else if (codeOk && !initOk){ m.className = 'meldung info'; m.textContent = T.initFalsch; }
+  else if (codeOk && initOk){ m.className = 'meldung ok'; m.textContent = '✔ ' + codeFormat(c) + ' · ' + i; }
+  else { m.className = 'meldung'; m.textContent = ''; }
+}
+function starten(){
+  if ($('startKnopf').disabled) return;
+  S.code = codeFormat($('codeFeld').value); S.init = initNorm($('initFeld').value);
+  S.lh = linkHash(); S.phase = 'laeuft'; S.start = Date.now(); S.gesperrt = false; S.karte = 'a0';
+  S.log.push({ t: S.start, art: 'Test gestartet' });
+  speichern(); ansicht();
+}
+
+/* ---------- Abgabe ---------- */
+function dateiname(){ return 'EXAM_' + EXAM.thema.replace(/[^A-Za-z0-9]+/g, '_') + '_' + S.code + '.pdf'; }
+function abgeben(){
+  S.phase = 'abgegeben'; S.ende = Date.now(); S.gesperrt = false;
+  S.log.push({ t: S.ende, art: 'abgegeben' });
+  speichern(); $('abgabeDialog').classList.remove('an');
+  ansicht(); zeigeKarte('ab');
+}
+
+/* ======================= PDF (ohne Bibliothek) =======================
+   A4, Helvetica/Helvetica-Bold (WinAnsi), Abbildungen als JPEG,
+   Antworten zusätzlich als eingebettete Datei abgabe.json. */
+var BREITE_N = [278,278,355,556,556,889,667,191,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,278,278,584,584,584,556,1015,667,667,722,722,667,611,778,722,278,500,667,556,833,722,778,667,778,722,667,611,722,667,944,667,667,611,278,278,278,469,556,333,556,556,500,556,556,278,556,556,222,222,500,222,833,556,556,556,556,333,500,278,556,500,722,500,500,500,334,260,334,584,350,556,350,222,556,333,1000,556,556,333,1000,667,333,1000,350,611,350,350,222,222,333,333,350,556,1000,333,1000,500,333,944,350,500,667,278,333,556,556,556,556,260,556,333,737,370,556,584,333,737,333,400,584,333,333,333,556,537,278,333,333,365,556,834,834,834,611,667,667,667,667,667,667,1000,722,667,667,667,667,278,278,278,278,722,722,778,778,778,778,778,584,778,722,722,722,722,667,667,611,556,556,556,556,556,556,889,500,556,556,556,556,278,278,278,278,556,556,556,556,556,556,556,584,611,556,556,556,556,500,556,500];
+var BREITE_F = [278,333,474,556,556,889,722,238,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,333,333,584,584,584,611,975,722,722,722,722,667,611,778,722,278,556,722,611,833,722,778,667,778,722,667,611,722,667,944,667,667,611,333,278,333,584,556,333,556,611,556,611,556,333,611,611,278,278,556,278,889,611,611,611,611,389,556,333,611,556,778,556,556,500,389,280,389,584,350,556,350,278,556,500,1000,556,556,333,1000,667,333,1000,350,611,350,350,278,278,500,500,350,556,1000,333,1000,556,333,944,350,500,667,278,333,556,556,556,556,280,556,333,737,370,556,584,333,737,333,400,584,333,333,333,611,556,278,333,333,365,556,834,834,834,611,722,722,722,722,722,722,1000,722,667,667,667,667,278,278,278,278,722,722,778,778,778,778,778,584,778,722,722,722,722,667,667,611,556,556,556,556,556,556,889,556,556,556,556,556,278,278,278,278,611,611,611,611,611,611,611,584,611,611,611,611,611,556,611,556];
+var WIN = {'€':128,'‚':130,'„':132,'…':133,'‘':145,'’':146,'“':147,'”':148,'•':149,'–':150,'—':151};
+var ERSATZ = {'⁺':'+','⁻':'-','→':'->','←':'<-','❓':'?','✔':'','✘':'','⚠':'','️':'','\t':' ','₂':'2','₃':'3','₁':'1','⇌':'<->'};
+function winCodes(s){
+  s = String(s); if (s.normalize) s = s.normalize('NFC');
+  var out = [];
+  for (var i = 0; i < s.length; i++){
+    var ch = s.charAt(i), c;
+    if (ERSATZ.hasOwnProperty(ch) && ERSATZ[ch] !== ch){ out = out.concat(winCodes(ERSATZ[ch])); continue; }
+    c = WIN.hasOwnProperty(ch) ? WIN[ch] : s.charCodeAt(i);
+    if (c >= 0xD800 && c <= 0xDBFF){ i++; out.push(63); continue; }
+    if (c < 32) continue;
+    if (c > 255 || (c >= 127 && c < 160 && !WIN.hasOwnProperty(ch))) { out.push(63); continue; }
+    out.push(c);
+  }
+  return out;
+}
+function pdfStr(codes){
+  var o = '';
+  codes.forEach(function(c){
+    if (c === 40 || c === 41 || c === 92) o += '\\' + String.fromCharCode(c);
+    else if (c > 126) o += '\\' + ('00' + c.toString(8)).slice(-3);
+    else o += String.fromCharCode(c);
+  });
+  return o;
+}
+function breite(codes, fett, gr){
+  var b = fett ? BREITE_F : BREITE_N, s = 0;
+  codes.forEach(function(c){ s += b[c - 32] || 556; });
+  return s * gr / 1000;
+}
+function umbruch(text, maxB, fett, gr){
+  var zeilen = [];
+  String(text).split(/\r?\n/).forEach(function(abs){
+    var woerter = abs.split(/\s+/).filter(Boolean), z = [];
+    if (!woerter.length){ zeilen.push([]); return; }
+    woerter.forEach(function(w){
+      var wc = winCodes(w);
+      while (breite(wc, fett, gr) > maxB){                       // überlange Wörter teilen
+        var k = wc.length; while (k > 1 && breite(wc.slice(0, k), fett, gr) > maxB) k--;
+        if (z.length){ zeilen.push(z); z = []; }
+        zeilen.push(wc.slice(0, k)); wc = wc.slice(k);
+      }
+      if (!wc.length) return;
+      var probe = z.length ? z.concat([32], wc) : wc;
+      if (breite(probe, fett, gr) <= maxB) z = probe; else { zeilen.push(z); z = wc; }
+    });
+    zeilen.push(z);
+  });
+  return zeilen;
+}
+var BILDER = {};          // Teil-ID -> {w,h,bytes}
+function svgZuJpeg(svg, breitePx){
+  return new Promise(function(ok, fehl){
+    var vb = /viewBox="([\d.\s-]+)"/.exec(svg), w = 900, h = 300;
+    if (vb){ var p = vb[1].trim().split(/\s+/); w = +p[2]; h = +p[3]; }
+    var skal = breitePx / w, cw = Math.round(w * skal), ch = Math.round(h * skal);
+    var s = svg.replace('<' + 'svg ', '<' + 'svg xmlns="http://www.w3.org/2000/svg" width="' + cw + '" height="' + ch + '" ');
+    var img = new Image();
+    img.onload = function(){
+      try {
+        var c = document.createElement('canvas'); c.width = cw; c.height = ch;
+        var g = c.getContext('2d'); g.fillStyle = '#ffffff'; g.fillRect(0, 0, cw, ch); g.drawImage(img, 0, 0, cw, ch);
+        var b64 = c.toDataURL('image/jpeg', 0.88).split(',')[1], bin = atob(b64);
+        ok({ w: cw, h: ch, bytes: bin });
+      } catch (e) { fehl(e); }
+    };
+    img.onerror = fehl;
+    img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(s);
+  });
+}
+function bilderVorbereiten(){
+  var auftraege = TEILE.filter(function(t){ return t.typ === 'beschriften'; }).map(function(t){
+    return svgZuJpeg(figurSvg(t), 1400).then(function(b){ BILDER[t.id] = b; }, function(){ BILDER[t.id] = null; });
+  });
+  return Promise.all(auftraege);
+}
+function antwortDaten(){
+  var d = { format: 'exam-abgabe-1', thema: EXAM.thema, titel: EXAM.titel, code: S.code, initialen: S.init,
+            flugmodus: FLUG, start: new Date(S.start).toISOString(), ende: new Date(S.ende).toISOString(),
+            protokoll: S.log.map(function(l){ return { zeit: new Date(l.t).toISOString(), art: l.art }; }),
+            teile: [] };
+  TEILE.forEach(function(t){
+    var a = S.a[t.id], e = { id: t.id, typ: t.typ, auftrag: t.auftrag };
+    if (t.typ === 'beschriften') e.antwort = t.nummern.map(function(p){ return { nr: p.nr, text: (a[p.nr] || '').trim() }; });
+    if (t.typ === 'sortieren') e.antwort = a.map(function(id, i){ var k = id ? karteVon(t, id) : null;
+      return { platz: i + 1, karte: id, text: k ? (k.fehlt ? '[FEHLENDER SCHRITT]' : k.t) : null }; });
+    if (t.typ === 'auswahl') e.antwort = t.optionen.map(function(o){ return { option: o.id, text: o.t, gewaehlt: a.indexOf(o.id) >= 0 }; });
+    if (t.typ === 'freitext') e.antwort = a;
+    d.teile.push(e);
+  });
+  return d;
+}
+function pdfBauen(){
+  var B = 595, H = 842, RAND = 50, BREIT = B - 2*RAND, OBEN = H - 50, UNTEN = 60;
+  var seiten = [], ops = null, y = 0, bildNr = 0, bildObjs = [];
+  function neueSeite(){ ops = []; seiten.push({ ops: ops, bilder: [] }); y = OBEN; }
+  function platz(h){ if (y - h < UNTEN) neueSeite(); }
+  function text(zeilen, gr, fett, x, farbe){
+    var lh = gr * 1.35;
+    zeilen.forEach(function(z){
+      platz(lh); y -= lh;
+      ops.push('BT ' + (farbe || '0.133 0.188 0.247') + ' rg /' + (fett ? 'F2' : 'F1') + ' ' + gr + ' Tf ' + x.toFixed(1) + ' ' + y.toFixed(1) + ' Td (' + pdfStr(z) + ') Tj ET');
+    });
+  }
+  function absatz(t, gr, fett, einzug){ text(umbruch(t, BREIT - (einzug || 0), fett, gr), gr, fett, RAND + (einzug || 0)); }
+  function luft(h){ y -= h; }
+  function antwortBox(t){
+    var gr = 11, lh = gr * 1.35, zeilen = umbruch(t || '(keine Angabe)', BREIT - 16, false, gr), i = 0;
+    while (i < zeilen.length){
+      platz(lh + 10);
+      var passt = Math.max(1, Math.floor((y - UNTEN - 10) / lh)), stueck = zeilen.slice(i, i + passt);
+      var h = stueck.length * lh + 10;
+      ops.push('q 0.933 0.941 0.953 rg ' + RAND + ' ' + (y - h).toFixed(1) + ' ' + BREIT + ' ' + h.toFixed(1) + ' re f Q');
+      y -= 5; text(stueck, gr, false, RAND + 8); y -= 5; i += passt;
+    }
+  }
+  function linie(){ platz(8); y -= 4; ops.push('q 0.6 0.65 0.7 RG 0.8 w ' + RAND + ' ' + y.toFixed(1) + ' m ' + (B - RAND) + ' ' + y.toFixed(1) + ' l S Q'); y -= 4; }
+  function bild(b){
+    var w = BREIT, h = b.h * w / b.w;
+    if (h > OBEN - UNTEN - 20){ h = OBEN - UNTEN - 20; w = b.w * h / b.h; }
+    platz(h + 6); y -= h;
+    var name = 'Im' + (++bildNr); bildObjs.push({ name: name, b: b }); seiten[seiten.length - 1].bilder.push(name);
+    ops.push('q ' + w.toFixed(1) + ' 0 0 ' + h.toFixed(1) + ' ' + RAND + ' ' + y.toFixed(1) + ' cm /' + name + ' Do Q');
+    y -= 6;
+  }
+  neueSeite();
+  // Kopf
+  absatz('EXAM ' + EXAM.titel.replace(/^[^A-Za-zÄÖÜäöü0-9]+/, '').replace(/^EXAM\s*·\s*/, '') + ' – Abgabe', 16, true);
+  luft(4);
+  absatz('Code: ' + S.code + '      Initialen: ' + S.init, 13, true);
+  absatz('Begonnen: ' + datum(S.start) + ', ' + zeit(S.start) + '      Abgegeben: ' + datum(S.ende) + ', ' + zeit(S.ende) +
+         '      Bearbeitungszeit: ' + Math.round((S.ende - S.start) / 60000) + ' min (Richtzeit ' + EXAM.zeit + ' min)', 10, false);
+  var sp = S.log.filter(function(l){ return /verlassen|verloren|geladen|Internet/.test(l.art); }).length;
+  absatz('Modus: ' + (FLUG ? 'Flugmodus (ohne Internet)' : 'ohne Netzprüfung'), 10, false);
+  var fa = S.log.filter(function(l){ return l.art === 'falscher Freischaltcode'; }).length;
+  absatz('Sperren während des Tests: ' + sp + (fa ? '   ·   falsche Freischaltcodes: ' + fa : ''), 10, true);
+  S.log.forEach(function(l){ if (l.art !== 'Test gestartet' && l.art !== 'abgegeben') absatz(zeit(l.t) + ' – ' + l.art, 9, false, 12); });
+  linie();
+  // Aufgaben
+  EXAM.aufgaben.forEach(function(a){
+    luft(6);
+    absatz(a.titel, 14, true);
+    var ein = (a.einleitung || '').replace(/<br\s*\/?>/gi, '\n').replace(/<\/p>\s*<p[^>]*>/gi, '\n').replace(/<[^>]+>/g, '')
+      .replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').trim();
+    if (ein) absatz(ein, 10.5, false);
+    a.teile.forEach(function(t){
+      luft(6); absatz(t.auftrag, 11, true);
+      var an = S.a[t.id];
+      if (t.typ === 'beschriften'){
+        if (BILDER[t.id]) bild(BILDER[t.id]); else absatz('(Abbildung siehe Testseite)', 9, false);
+        t.nummern.slice().sort(function(x, z){ return x.nr - z.nr; }).forEach(function(p){
+          absatz(p.nr + ':  ' + ((an[p.nr] || '').trim() || '(keine Angabe)'), 11, false, 10);
+        });
+      } else if (t.typ === 'sortieren'){
+        an.forEach(function(id, i){
+          var k = id ? karteVon(t, id) : null;
+          absatz((i + 1) + '.  ' + (k ? (k.fehlt ? '[FEHLENDER SCHRITT]' : k.t) : '(Platz leer)'), 11, false, 10);
+        });
+        var rest = t.karten.filter(function(k){ return an.indexOf(k.id) < 0; });
+        if (rest.length){
+          absatz('Nicht gelegte Karten:', 10, true, 10);
+          rest.forEach(function(k){ absatz('–  ' + (k.fehlt ? '[FEHLENDER SCHRITT]' : k.t), 10, false, 20); });
+        }
+      } else if (t.typ === 'auswahl'){
+        t.optionen.forEach(function(o){ absatz((an.indexOf(o.id) >= 0 ? '[X]  ' : '[  ]  ') + o.t, 11, an.indexOf(o.id) >= 0, 10); });
+      } else {
+        luft(2); antwortBox((an || '').trim());
+      }
+    });
+  });
+  // PDF zusammensetzen
+  var obj = [], i;
+  function neu(inhalt){ obj.push(inhalt); return obj.length; }        // Objektnummer
+  var json = unescape(encodeURIComponent(JSON.stringify(antwortDaten(), null, 1)));
+  var katalogNr = neu(null), seitenNr = neu(null);
+  var f1 = neu('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>');
+  var f2 = neu('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>');
+  var ef = neu('<< /Type /EmbeddedFile /Subtype /application#2Fjson /Length ' + json.length + ' >>\nstream\n' + json + '\nendstream');
+  var fs = neu('<< /Type /Filespec /F (abgabe.json) /UF (abgabe.json) /Desc (Antworten maschinenlesbar) /EF << /F ' + ef + ' 0 R >> >>');
+  var info = neu('<< /Title (' + pdfStr(winCodes('EXAM ' + EXAM.thema + ' ' + S.code)) + ') /Subject (EXAM-Abgabe) /Keywords (' +
+                 pdfStr(winCodes(S.code + ' ' + S.init)) + ') /Producer (Lernseiten EXAM v1) >>');
+  var bildNrMap = {};
+  bildObjs.forEach(function(x){
+    bildNrMap[x.name] = neu('<< /Type /XObject /Subtype /Image /Width ' + x.b.w + ' /Height ' + x.b.h +
+      ' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ' + x.b.bytes.length + ' >>\nstream\n' + x.b.bytes + '\nendstream');
+  });
+  var kids = [], n = seiten.length;
+  seiten.forEach(function(s, j){
+    var fuss = 'BT 0.42 0.46 0.53 rg /F1 9 Tf ' + RAND + ' 30 Td (' + pdfStr(winCodes('EXAM ' + EXAM.thema + '  ·  Code ' + S.code + '  ·  ' + S.init + '  ·  Seite ' + (j+1) + ' von ' + n)) + ') Tj ET';
+    var inhalt = s.ops.concat([fuss]).join('\n');
+    var cNr = neu('<< /Length ' + inhalt.length + ' >>\nstream\n' + inhalt + '\nendstream');
+    var xo = s.bilder.length ? ' /XObject << ' + s.bilder.map(function(nm){ return '/' + nm + ' ' + bildNrMap[nm] + ' 0 R'; }).join(' ') + ' >>' : '';
+    kids.push(neu('<< /Type /Page /Parent ' + seitenNr + ' 0 R /MediaBox [0 0 ' + B + ' ' + H + '] /Resources << /Font << /F1 ' + f1 + ' 0 R /F2 ' + f2 + ' 0 R >>' + xo + ' >> /Contents ' + cNr + ' 0 R >>'));
+  });
+  obj[katalogNr - 1] = '<< /Type /Catalog /Pages ' + seitenNr + ' 0 R /Names << /EmbeddedFiles << /Names [(abgabe.json) ' + fs + ' 0 R] >> >> /PageMode /UseAttachments >>';
+  obj[seitenNr - 1] = '<< /Type /Pages /Kids [' + kids.map(function(k){ return k + ' 0 R'; }).join(' ') + '] /Count ' + n + ' >>';
+  var pdf = '%PDF-1.7\n%âãÏÓ\n', lagen = [];
+  for (i = 0; i < obj.length; i++){ lagen.push(pdf.length); pdf += (i + 1) + ' 0 obj\n' + obj[i] + '\nendobj\n'; }
+  var xref = pdf.length;
+  pdf += 'xref\n0 ' + (obj.length + 1) + '\n0000000000 65535 f \n';
+  lagen.forEach(function(l){ pdf += ('000000000' + l).slice(-10) + ' 00000 n \n'; });
+  pdf += 'trailer\n<< /Size ' + (obj.length + 1) + ' /Root ' + katalogNr + ' 0 R /Info ' + info + ' 0 R >>\nstartxref\n' + xref + '\n%%EOF\n';
+  var bytes = new Uint8Array(pdf.length);
+  for (i = 0; i < pdf.length; i++) bytes[i] = pdf.charCodeAt(i) & 255;
+  return bytes;
+}
+function pdfLaden(){
+  var m = $('pdfMeldung');
+  try {
+    var blob = new Blob([pdfBauen()], { type: 'application/pdf' });
+    var url = URL.createObjectURL(blob), a = document.createElement('a');
+    a.href = url; a.download = dateiname(); a.rel = 'noopener';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 60000);
+    m.className = 'meldung ok'; m.textContent = '✔ PDF erstellt. Auf dem iPad liegt es in der Dateien-App im Ordner „Downloads“.';
+  } catch (e) { m.className = 'meldung falsch'; m.textContent = T.pdfFehler; }
+}
+
+/* ---------- Ansicht aus dem Zustand ---------- */
+function ansicht(){
+  var start = S.phase === 'start', fertig = S.phase === 'abgegeben';
+  $('startKarte').classList.toggle('aktiv', start);
+  $('testBereich').hidden = start;
+  $('kopfRechts').hidden = start;
+  $('werAnzeige').textContent = start ? '' : 'Code ' + S.code + ' · ' + S.init;
+  document.querySelectorAll('[data-teil]').forEach(function(el){
+    if (el.tagName !== 'INPUT' && el.tagName !== 'TEXTAREA') return;
+    var t = teil(el.getAttribute('data-teil'));
+    el.value = t.typ === 'beschriften' ? (S.a[t.id][el.getAttribute('data-nr')] || '') : (S.a[t.id] || '');
+    el.readOnly = !laeuft(); el.classList.toggle('zu', !laeuft());
+  });
+  TEILE.forEach(function(t){ if (t.typ === 'sortieren') zeichneSort(t); if (t.typ === 'auswahl') zeichneAuswahl(t); });
+  $('abVorher').hidden = fertig; $('abNachher').hidden = !fertig;
+  if (fertig){
+    $('dateiname').textContent = dateiname();
+    $('pdfKnopf').disabled = true;
+    $('pdfMeldung').className = 'meldung info'; $('pdfMeldung').textContent = 'PDF wird vorbereitet …';
+    bilderVorbereiten().then(function(){
+      $('pdfKnopf').disabled = false; $('pdfMeldung').className = 'meldung'; $('pdfMeldung').textContent = '';
+    });
+  }
+  marken(); uhr();
+  if (!start) zeigeKarte(fertig ? 'ab' : (S.karte || 'a0'));
+  zeigeSperre(laeuft() && S.gesperrt);
+}
+
+/* ---------- Aufbau & Bindungen ---------- */
+document.title = EXAM.titel.replace(/^[^A-Za-zÄÖÜäöü]+/, '');
+$('examTitel').textContent = EXAM.titel;
+$('examUntertitel').textContent = EXAM.untertitel;
+$('uhrHinweis').textContent = T.uhr;
+$('startTitel').textContent = T.startTitel;
+$('startRegeln').innerHTML = (FLUG ? [T.flugRegel] : []).concat(T.regeln).map(function(r){ return '<li>' + r + '</li>'; }).join('');
+$('startFelderTitel').textContent = T.felder;
+$('codeLabel').textContent = T.code; $('initLabel').textContent = T.init; $('startKnopf').textContent = T.start;
+$('linkFehlt').textContent = T.linkFehlt;
+$('sperreText1').textContent = T.sperre1; $('sperreText2').innerHTML = T.sperre2;
+$('abVorherText').textContent = T.abVorher; $('abWarnung').innerHTML = T.abWarn;
+$('abgabeTitel').textContent = T.frage; $('abgabeJa').textContent = T.ja; $('abgabeNein').textContent = T.nein;
+$('abFertig').textContent = T.fertig; $('abDateiText').textContent = T.datei;
+$('abSchritte').innerHTML = T.schritte.map(function(r){ return '<li>' + r + '</li>'; }).join('');
+baueAufgaben();
+if (!linkHash() && S.phase === 'start'){
+  $('linkFehlt').hidden = false;
+  ['codeFeld', 'initFeld'].forEach(function(id){ $(id).readOnly = true; $(id).classList.add('zu'); });
+}
+
+document.addEventListener('input', function(e){
+  if (!laeuft()) return;
+  var el = e.target, id = el.getAttribute && el.getAttribute('data-teil'); if (!id) return;
+  var t = teil(id);
+  if (t.typ === 'beschriften') S.a[id][el.getAttribute('data-nr')] = el.value; else S.a[id] = el.value;
+  speichern(); marken();
+});
+$('codeFeld').addEventListener('input', startPruefen);
+$('initFeld').addEventListener('input', startPruefen);
+$('initFeld').addEventListener('keydown', function(e){ if (e.key === 'Enter') starten(); });
+$('startKnopf').addEventListener('click', starten);
+$('tabs').addEventListener('click', function(e){ var t = e.target.closest('.tab'); if (t) zeigeKarte(t.getAttribute('data-ziel')); });
+$('aufgabenKarten').addEventListener('click', klick);
+$('abgebenKnopf').addEventListener('click', function(){
+  var offen = EXAM.aufgaben.map(function(a, i){ return a.teile.every(teilFertig) ? null : 'Aufgabe ' + (i + 1); }).filter(Boolean);
+  $('abgabeText').textContent = (offen.length ? 'Noch nicht vollständig: ' + offen.join(', ') + '. ' : '') + T.fragText;
+  $('abgabeDialog').classList.add('an');
+});
+$('abgabeNein').addEventListener('click', function(){ $('abgabeDialog').classList.remove('an'); });
+$('abgabeJa').addEventListener('click', abgeben);
+$('pdfKnopf').addEventListener('click', pdfLaden);
+$('entsperrKnopf').addEventListener('click', entsperren);
+$('freiFeld').addEventListener('keydown', function(e){ if (e.key === 'Enter') entsperren(); });
+
+ansicht();
+startPruefen();
+setInterval(function(){ uhr(); netzPruefen(); }, 1000);
+})();
+</script>
+<script>
+(function(){
+  var trex = document.getElementById('trex');
+  if (!trex) return;
+  trex.addEventListener('click', function(){
+    trex.classList.add('zeig');
+    setTimeout(function(){ trex.classList.remove('zeig'); }, 1800);
+  });
+})();
+</script>
+</body>
+</html>

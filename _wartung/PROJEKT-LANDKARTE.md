@@ -7,7 +7,7 @@ Diese Übersicht zeigt, welche Referenzdatei in welches reale Projekt gehört.
 von claude.ai ein (siehe `_wartung/LIESMICH.md`). Nach einer Änderung genügt im Projekt
 „Synchronisieren" – das Hochladen von Hand entfällt.
 
-## Die vier realen Projekte
+## Die realen Projekte
 
 | Reales Projekt | GitHub-Ordner | Lernseiten-Anweisung | Fehler-Checkliste | `pruefe.py` | MathJax-Notfall | Navigationsleiste | Dach-Anweisung (.md) | Geodreieck-Baustein |
 |---|---|---|---|---|---|---|---|---|
@@ -15,6 +15,7 @@ von claude.ai ein (siehe `_wartung/LIESMICH.md`). Nach einer Änderung genügt i
 | **HTML erzeugen** | `allgemein`, `geodreieck` | ja | ja | ja | ja | ja | — (nicht nötig) | ja |
 | **Debugging** | `allgemein`, `geodreieck` | ja | ja | ja | ja | ja | — (nicht nötig) | ja |
 | **GeoGebra** (Bedienungsseiten) | `allgemein`, `geogebra` | ja | ja | ja | — (steckt in `helfer.js`; liegt über `allgemein` trotzdem mit an, schadet nicht) | ja (`bauer.py` setzt sie; Datei muss mit nach `/tmp/gg/`) | — | — (nicht nötig) |
+| **EXAM** (bewertete Tests, ein Chat je Test) | `allgemein`, `exam` | nur Farbschema/Anrede (2.2, 3.7) | — | ja (Regel `EXAM`) | nur bei Formeln | **nein** (EXAM-Seiten haben keine Leiste) | `anweisung_exam.md` | — |
 | **Wartung Unterrichtsprojekte** | ganzer Ordner `_wartung` | alles | | | | | | |
 
 **Allgemeine Dateien** (`_wartung/allgemein/`: Lernseiten-Anweisung, Fehler-Checkliste,
@@ -48,6 +49,19 @@ werden deshalb hier im Wartungs-Projekt per PR eingetragen.
 
 **Nicht mehr gebraucht:** `ANHANG_B_neu.md` – der Text steht als ANHANG B in
 `anweisung_lernseiten.txt`.
+
+## Nur im Projekt „EXAM" (`_wartung/exam/`)
+
+| Datei | Zweck | Bei Änderungen mitprüfen |
+|---|---|---|
+| `anweisung_exam.md` | Regeln für EXAM-Seiten, Vorbereitung, Durchführung, Erwartungshorizont, Bewertung | bei Änderungen an Farbschema/Anrede der Lernseiten-Anweisung |
+| `baustein_exam.html` | EXAM-Engine (Sperre, Code + Initialen, Teil-Typen, PDF mit `abgabe.json`) + Beispiel-Inhalt | Versionsnummer **und** `EXAM_VERSION` in `pruefe.py`; Code-Muster gleich in `intern/EXAM/vorbereitung.html` |
+| `exam_bauen.py` | setzt den Block `var EXAM = {…};` und die Meta-Angaben in den Baustein | selten |
+| `projektanweisung_exam.md` | Text für das Feld „Anweisungen" des Projekts „EXAM" – **muss von Hand ins Feld** | bei neuer Datei oder neuem Ablaufschritt |
+
+Auf der Website (nicht in `_wartung`): `intern/EXAM/vorbereitung.html` (Codes, Freischaltcode,
+Link, QR-Code für jeden Test) und die Testseiten `intern/EXAM/*_exam.html`.
+**Erwartungshorizonte liegen nie im Repo** (öffentlich) – nur im Projekt „EXAM".
 
 ## Nur noch EINE Lernseiten-Anweisung
 Alle vier Projekte nutzen dieselbe Lernseiten-Anweisung (`anweisung_lernseiten.txt`).

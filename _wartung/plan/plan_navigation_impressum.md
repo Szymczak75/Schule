@@ -270,6 +270,22 @@ Ordner-Übersichten `_*.html` über `linking.txt`). Änderungen an der Startseit
   Lernseiten-Anweisung 3.6 und Checkliste ergänzt. Website-Seiten per Nachrüst-Skript v6→v7.
   **v7.1** (16.11.2026): QR-Code im Fenster 30 % kleiner (iPad zeigte Überschrift nicht), Fenster
   bei Bedarf scrollbar; ebenso im EXAM-Generator.
+- **EXAM – Schritt 1 von 3** (19.11.2026, Branch `exam-baustein`): neues Projekt „EXAM"
+  (Sync `allgemein`, `exam`), ein Chat je Test. `_wartung/exam/`: `anweisung_exam.md`,
+  `baustein_exam.html` (Engine v1: Code + Initialen, Sperre mit Freischaltcode aus `?l=`,
+  Teil-Typen beschriften/sortieren/auswahl/freitext, „Wirklich abgeben?", PDF mit Abbildungen
+  und eingebetteter `abgabe.json`), `exam_bauen.py`, `projektanweisung_exam.md`.
+  `intern/EXAM/vorbereitung.html` (sortierte Codes, automatischer Freischaltcode, Link, QR,
+  Druck); `codes_generieren.html` nur noch Weiterleitung; `neurobiologie_exam.html` aus dem
+  Baustein. `pruefe.py`: Suffix `_exam`, Regel `EXAM`, MathJax nur bei Formeln, Anrede nur im
+  EXAM-INHALT. Entscheidungen: keine Lösungen auf der Seite, Claude bewertet auch geschlossene
+  Teile; Initialen kommen ins PDF; Erwartungshorizont nie ins Repo.
+  Nachtrag 20.11.: **Flugmodus statt Classroom** (Standard `flugmodus: true`): Code-Eingabe erst
+  offline, Netz während des Tests sperrt, Entsperren nur offline.
+  **Offen – Schritt 2:** Bewertungsablauf (Auswertungs-Skript liest `abgabe.json`, Excel aus der
+  Vorlage „Punkteerfassung" – Achtung: openpyxl verliert deren Datenprüfung/bedingte
+  Formatierung, also XML direkt bearbeiten –, Gesamt-PDF mit Korrekturen), mit ausgedachten
+  Abgaben testen. **Schritt 3:** Neurobiologie als erster echter Durchlauf (Erwartungshorizont).
 
 **Noch offen:**
 1. **Neulade-Schutz Stufe 2** (voller Schutz inkl. Bewertungen, wie im Baukasten) nach und
