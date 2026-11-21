@@ -171,6 +171,12 @@ geprüft. Das Wichtigste im Überblick:
   `helfer.js` erledigt das automatisch; MC-Listen dafür mit Schlüssel mischen
   (`mische(OPT, 'mc1')`), Details in `LIESMICH.md`.
 - **Kennzeichnung ab EF** an jeder Aufgabe: Hilfsmittel und Lösungsart (`kennz(...)`).
+- **Operatoren nach der NRW-Liste** (Lernseiten-Anweisung 3.2a, seit 21.11.2026) – in allen
+  Jahrgängen. Jede Aufgabe beginnt mit dem Operator. *berechne* = Ansatz darstellen, danach
+  darf GeoGebra lösen; *bestimme/ermittle/untersuche* = Weg frei, **Vorgehen darstellen**
+  (Bedingung, Befehl, Wert) – „bestimme = kein Rechenweg" gilt nicht mehr; *gib an* = ohne
+  Begründung. Die Art-Chip in `kennz(...)` passt zum Operator („rechnerisch", „grafisch",
+  „Weg frei"). Lesart wie im Abitur: Schnittstellen umfassen Berührstellen.
 - **Anrede:** Sek I „du", Oberstufe (EF/Q1/Q2) „Sie" – in allen Texten der Seite, auch
   Tipps und Rückmeldungen. `helfer.js` schaltet seine eigenen Texte über den Meta-Tag
   `klasse` selbst um (Lernseiten-Anweisung 3.7).

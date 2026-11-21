@@ -50,7 +50,8 @@ bevorzugt zu einer Kernkompetenz? Braucht mindestens eine normale Aufgabe eine K
 als Rechenschritt? Haben `_rb`/`_kavb` die Karte „Wiederholung · Kernkompetenzen" (mindestens
 drei Kürzel) und `_rbka` die Karte „🧠 Fit bleiben" (`KA.kern`)? Hat jede
 Oberstufen-Aufgabenkarte unter dem Titel die `.op-tags`-Zeile mit Hilfsmittel- und
-Lösungsart-Kennzeichnung? Gibt es einen „Weiter"-Button – und wenn ja, mit echtem Ziel?
+Lösungsart-Kennzeichnung? Beginnt jede Aufgabe mit einem Operator der NRW-Liste, und passt
+er zum Badge (Anweisung 3.2a)? Gibt es einen „Weiter"-Button – und wenn ja, mit echtem Ziel?
 Beginnt jede Karte, die auf der vorigen aufbaut, mit „Wo wir gerade stehen"? Sind alle
 Aufgaben ausformuliert (keine Tabellen-Stichworte)? Steht die Navigationsleiste
 (`baustein_navigation.html`) unverändert vor dem T-Rex, außerhalb von `<main>`? Steht ein
@@ -326,6 +327,12 @@ Diese Punkte standen offen und sind inzwischen als Regel in
   Chat ohne Schreibzugriff gab Baustein und `pruefe.py` zum Hochladen ins Wartungs-Projekt
   heraus. Seitdem gilt TEIL 0 Nr. 26: Repo mit Schreibzugriff anhängen, Branch, Pull Request,
   dem Nutzer nur den Link geben.
+- **„bestimme" wurde als „kein Rechenweg nötig" erklärt** (bis 21.11.2026). Das war eine
+  Hausregel und widerspricht der NRW-Operatorenübersicht: Bei bestimmen/ermitteln/untersuchen
+  ist der Weg frei, das **Vorgehen aber darzustellen**; „berechnen" verlangt einen Ansatz,
+  danach darf der Rechner lösen. Seit 21.11.2026 gilt TEIL 3.2a der Anweisung. Betroffen sind
+  ältere GeoGebra-Seiten (EF-Reihe, `geogebra_wege_kl9_ls`), die die alte Regel noch erklären.
+  `pruefe.py` meldet die alte Formulierung als FEHLER `OPERATOR`.
 - **Pull Request ohne vorheriges Review** (10.11.2026): Zwei neue Seiten (`_sfs`, `_ue`) gingen
   direkt als Pull Request raus; der Nutzer hatte sie vorher nie gesehen und konnte sie nicht
   durchspielen. Seitdem regelt TEIL 0 Nr. 26 zwei Stufen: **erst die Dateien im Chat zeigen
@@ -333,4 +340,4 @@ Diese Punkte standen offen und sind inzwischen als Regel in
 
 ---
 
-*Stand: 19.11.2026 (Ablaufplan oben und aufklappbar; Sozialformen/Gruppen-Check; Kernkompetenzen; Seitenart Rückblick KA, Suffix _kavb; Schritt für Schritt; Navigationsleiste, keine Google Fonts) – gepflegt im Wartungs-Projekt „Wartung Unterrichtsprojekte".*
+*Stand: 21.11.2026 (Operatoren nach NRW-Liste; Ablaufplan oben und aufklappbar; Sozialformen/Gruppen-Check; Kernkompetenzen; Seitenart Rückblick KA, Suffix _kavb; Schritt für Schritt; Navigationsleiste, keine Google Fonts) – gepflegt im Wartungs-Projekt „Wartung Unterrichtsprojekte".*

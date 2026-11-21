@@ -23,7 +23,9 @@ Was dieser Linter NICHT kann (bleibt Handarbeit bzw. Browsertest):
   - ob der Stand ein Neuladen wirklich vollständig übersteht (Browsertest: Seite
     bearbeiten, neu laden, vergleichen)
 
-Stand: 19.11.2026 (Ablaufplan oben und aufklappbar, Prüfung ABLAUF, TEIL 3.8;
+Stand: 21.11.2026 (Operatoren nach NRW-Liste: Prüfung OPERATOR meldet die aufgehobene
+       Regel „bestimme = kein Rechenweg“, TEIL 3.2a;
+       19.11.2026: Ablaufplan oben und aufklappbar, Prüfung ABLAUF, TEIL 3.8;
        EXAM-Seiten _exam aus _wartung/exam/baustein_exam.html: typ Exam, ohne
        Navigationsleiste, MathJax nur bei Formeln, Anrede nur im EXAM-INHALT, Prüfung EXAM;
        Navigationsleiste v7 mit schwebendem QR-Knopf, Prüfung NAV;
@@ -454,6 +456,14 @@ def pruefe(pfad):
 
     if typ == 'Test' and 'TESTZEIT_MIN' not in js:
         fehler('TIMER', 'Wissenstest ohne Orientierungstimer-Konstante TESTZEIT_MIN')
+
+    # Operatoren (TEIL 3.2a): die aufgehobene Hausregel „bestimme = kein Rechenweg“ darf
+    # auf keiner Seite mehr erklärt werden – bestimmen/ermitteln verlangen das Vorgehen.
+    alt_op = re.search(r'(?:[Bb]estimm|[Ee]rmittl)\w*[^.!?<]{0,80}?(?:kein(?:en)?\s+Rechenweg|ohne\s+Rechenweg)',
+                       text)
+    if alt_op:
+        fehler('OPERATOR', '„%s" – aufgehobene Regel: bei bestimmen/ermitteln ist das Vorgehen '
+                           'darzustellen, nur der Weg ist frei (TEIL 3.2a)' % alt_op.group(0).strip()[:90])
 
     if meta.get('klasse') in ('EF', 'Q1', 'Q2'):
         aufgaben = len(re.findall(r'class="aufgabe"', h))

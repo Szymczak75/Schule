@@ -87,6 +87,10 @@ var EXAM = {
 - **`id`** des Teils: `'1'`, `'3a'`, `'3b'` … – eindeutig, sie verbindet Seite, PDF und
   Erwartungshorizont.
 - **`auftrag`** ist der Arbeitsauftrag mit Operator; bei mehreren Teilen mit „a)", „b)".
+  Operatoren nach der NRW-Liste (Lernseiten-Anweisung 3.2a): Erwartungshorizont und Bewertung
+  verlangen genau, was der Operator fordert – *angeben* ohne Begründung, *berechnen* mit
+  Ansatz, *bestimmen/untersuchen* mit dargestelltem Vorgehen (Weg frei), *begründen/zeigen*
+  mit Schlusskette. Schnittstellen umfassen Berührstellen.
 
 ### Teil-Typen
 

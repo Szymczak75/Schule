@@ -401,10 +401,13 @@ zugleich als Beleg für den Haken bei Weg B (\(f'''(0)=0\)).
 
 **Funktionen höheren Grades (Vorgabe erfüllt):** Testkarte S. 8 nutzt \(g(x)=x^4-8x^2+3\) mit drei Extrempunkten, Testkarte S. 9 nutzt \(h(x)=x^4-6x^2+5\) mit zwei Wendepunkten – beide zusätzlich mit dem Hinweis, dass ohne passendes Sichtfenster Punkte übersehen werden.
 
-**Operator-Regel (gilt ab EF für alle Seiten):** Die Unterscheidung explizit thematisieren und bei jeder Aufgabe kennzeichnen:
+**Operator-Regel (gilt ab EF für alle Seiten; seit 21.11.2026 nach NRW-Liste, Lernseiten-Anweisung 3.2a):** Die Unterscheidung explizit thematisieren und bei jeder Aufgabe kennzeichnen:
 - „lies ab" / „schätze ab" → Näherungswert vom Graphen genügt
-- „bestimme" → GeoGebra-Funktionen erlaubt (z. B. `f(2)`, `Nullstelle(f)`), Ergebnis exakt, kein Rechenweg nötig
-- „berechne" → nachvollziehbarer Rechenweg/Ansatz verlangt, GeoGebra höchstens zum Lösen
+- „bestimme" / „ermittle" / „untersuche" → Weg frei (auch GeoGebra-Befehl wie `Nullstelle(f)`), sofern kein Zusatz „rechnerisch"/„grafisch" – das **Vorgehen ist darzustellen** (Bedingung, Befehl, Ergebnis)
+- „berechne" → Berechnung ausgehend von einem Ansatz darstellen; nach dem Ansatz darf GeoGebra lösen
+- „gib an" / „nenne" → Ergebnis genügt, keine Begründung
+
+*(Bis 21.11.2026 stand hier „bestimme → kein Rechenweg nötig". Das entspricht nicht der NRW-Operatorenübersicht; die EF-Seiten, die das noch so erklären, müssen nachgezogen werden.)*
 
 Roter Faden der Reihe: In den Seiten 8 und 9 wird durchgehend betont, dass die **Gleichung von Hand aufgestellt** wird (rechnerischer Weg) und GeoGebra nur das **Lösen** übernimmt – im Gegensatz zum bloßen Ablesen eines Extrempunkts am Graphen. Genau diese Unterscheidung verlangt die Kennzeichnungspflicht ab EF.
 
@@ -506,9 +509,10 @@ Verlinkung: gemeinsame Übersichtsseite (Hub) für die GeoGebra-Grafikrechner-Re
   reinen Zahlen `{…}` – Letzteres ist weiterverwendbar (z. B. `g(Lösungen(f(x)=g(x)))`).
   Bei mehr als einem Buchstaben in der Gleichung ist die gesuchte Variable als zweites
   Argument Pflicht: `Löse(4*t-6=18, t)`.
-- **Operator-Regel (Seite 5):** *lies ab* → Näherung vom Graphen; *bestimme* → exaktes Ergebnis,
-  Befehl erlaubt, kein Rechenweg; *berechne* → Gleichung als Ansatz ins Heft, Auflösen darf der
-  Rechner. Diese Tabelle ist der rote Faden der Klasse-9-Serie und wird in Klasse 10 wieder
+- **Operator-Regel (Seite 5, seit 21.11.2026 nach NRW-Liste):** *lies ab* → Näherung vom Graphen;
+  *bestimme* → Weg frei, Befehl erlaubt, aber **Vorgehen aufschreiben** (welcher Befehl, welches
+  Ergebnis); *berechne* → Gleichung als Ansatz ins Heft, Auflösen darf der Rechner. *(Die Seite
+  `geogebra_wege_kl9_ls` erklärt noch die alte Fassung „bestimme = kein Rechenweg".)* Diese Tabelle ist der rote Faden der Klasse-9-Serie und wird in Klasse 10 wieder
   aufgegriffen.
 - **Seite 6 bewusst nur Kreis und Zylinder** (Vorgabe Andreas). Der Grafikrechner zeichnet keine
   Körper – er wird hier als **Formelrechner** benutzt: π exakt (`pi`, nie 3,14), Formeln als
