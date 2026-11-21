@@ -19,7 +19,7 @@ Die Projekte holen sich die Dateien über die GitHub-Synchronisation von claude.
 | `exam/` | `anweisung_exam.md`, `baustein_exam.html` (EXAM-Engine), `exam_bauen.py`, `projektanweisung_exam.md` |
 | `plan/` | laufende Planung (`plan_navigation_impressum.md`), `ideenliste.md` (zurückgestellte Ideen) und Entwürfe |
 | `PROJEKT-LANDKARTE.md` | welche Datei in welches Projekt gehört |
-| `anweisung_wartung_projekt.md` | Text für das Feld „Anweisungen" des Wartungs-Projekts |
+| `anweisung_wartung_projekt.md` | **die** Projektanweisung des Wartungs-Projekts (im Feld „Anweisungen" nur ein Verweis darauf) |
 | `projektanweisungen.md` | Texte für das Feld „Projektanweisungen" der übrigen Projekte (kurzer Verweis auf `_wartung/`) |
 
 ## Welches Projekt synchronisiert welche Ordner?
@@ -50,7 +50,7 @@ Pull Request mergen → in jedem betroffenen Projekt im Projektwissen auf
 Checkliste jeder Änderung.
 
 Die **Projektanweisungs-Texte** (das Feld „Projektanweisungen") synchronisieren sich nicht.
-Bei GeoGebra und WEB EXAM steht dort deshalb nur ein Verweis auf die Datei im Repo
-(`anweisung_geogebra_projekt.md`, `projektanweisung_exam.md`) – deren Änderungen wirken nach
+Bei GeoGebra, WEB EXAM und dem Wartungs-Projekt steht dort deshalb nur ein Verweis auf die Datei im Repo
+(`anweisung_geogebra_projekt.md`, `projektanweisung_exam.md`, `anweisung_wartung_projekt.md`) – deren Änderungen wirken nach
 „Synchronisieren". Von Hand eingesetzt werden muss nur noch ein geänderter Verweistext
 (`projektanweisungen.md`).
