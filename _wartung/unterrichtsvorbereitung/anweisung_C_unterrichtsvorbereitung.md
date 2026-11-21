@@ -297,6 +297,15 @@ Bei Oberstufen-Aufgaben (EF, Q1, Q2) muss jede Aufgabe eindeutig kennzeichnen, (
 
 Auf der Schüler-Website wird das als **`.op-tags`-Zeile direkt unter dem Titel jeder Aufgabenkarte** umgesetzt (zwei kurze Badges, z. B. „ohne Hilfsmittel" / „rechnerisch"), Schriftgröße ≥ 1rem.
 
+### Operatoren nach der NRW-Operatorenübersicht (Pflicht seit 21.11.2026)
+Alle drei Produkte – Lehrer-Website, Schüler-Website und Planungs-Docx – formulieren Aufgaben mit den Operatoren der amtlichen Übersicht (abitur.nrw, gültig ab Abitur 2023, angepasst 2026). Gilt in allen Jahrgängen, in der Oberstufe ohne Ausnahme. Tabelle, Zusätze und Beispiele stehen in der Lernseiten-Anweisung, **TEIL 3.2a**; das Wichtigste:
+- Jede Aufgabe beginnt mit dem Operator (Sek I „Berechne …", Oberstufe „Berechnen Sie …").
+- **berechnen** = Berechnung ausgehend von einem Ansatz darstellen; nach dem Ansatz darf der Rechner lösen. **bestimmen / ermitteln / untersuchen / zeigen** = Weg frei, sofern kein Zusatz („rechnerisch", „grafisch"), aber **Vorgehen darstellen** – die frühere Regel „bestimme = kein Rechenweg" gilt nicht mehr. **angeben / nennen / entscheiden** = ohne Begründung.
+- Der Operator bezieht sich auf das Objekt der Aufgabe (z. B. den Flächeninhalt), nicht auf Hilfseigenschaften (z. B. die Nullstellen als Grenzen).
+- **Erwartungshorizonte und Lösungen im Planungs-Docx** verlangen genau das, was der Operator fordert – nicht mehr und nicht weniger.
+- Lesart wie im Abitur: Schnittstellen umfassen Berührstellen; „parallel" umfasst „identisch".
+- Ab dem Abitur 2027 nur die ländergemeinsame Formelsammlung (bzw. das „Dokument mit mathematischen Formeln") nennen; deren Schreibweisen (\([a;b]\), \(]a;b[\), \(\mathbb{R}^+_0\), \(P^n_p(X=k)\) …) übernehmen.
+
 ### Brüche – immer div-basiert
 ```html
 ✅ <span class="frac"><span>3</span><span>4</span></span>
