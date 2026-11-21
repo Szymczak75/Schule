@@ -1,6 +1,9 @@
-# Projektanweisungen: GeoGebra-Bedienung
+# Projektanweisungen: GeoGebra-Bedienung (verbindlich)
 
-*Dieser Text gehört in das Feld „Projektanweisungen" des neuen Projekts.*
+> Diese Datei IST die Projektanweisung des Projekts „GeoGebra". Geändert wird sie nur hier im
+> Repo (Wartungs-Projekt, per Pull Request). Im Feld „Anweisungen" des Projekts steht nur ein
+> kurzer Verweis auf diese Datei (Wortlaut am Ende). Nach jeder Änderung im Projekt
+> „Synchronisieren" – von Hand kopieren entfällt (seit 21.11.2026).
 
 ---
 
@@ -205,3 +208,13 @@ geprüft. Das Wichtigste im Überblick:
 
 `typ` und Suffix müssen zusammenpassen, `klasse` muss zur Reihe passen. `pruefe.py`
 prüft beides.
+
+---
+
+## Text für das Feld „Anweisungen" (nur einmal einsetzen)
+
+```
+Lies zu Beginn jedes Chats vollständig die Datei `anweisung_geogebra_projekt.md` aus dem
+GitHub-Sync (`_wartung/geogebra/`) und befolge sie. Sie ist die verbindliche Projektanweisung.
+Findest du sie nicht im Projektwissen, sag das sofort und arbeite nicht aus dem Gedächtnis.
+```

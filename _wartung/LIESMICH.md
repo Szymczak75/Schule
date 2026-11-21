@@ -49,6 +49,8 @@ Pull Request mergen → in jedem betroffenen Projekt im Projektwissen auf
 **„Synchronisieren"** tippen. Welche Projekte betroffen sind, steht in der Abschluss-
 Checkliste jeder Änderung.
 
-Die **Projektanweisungs-Texte** (das Feld „Projektanweisungen") synchronisieren sich nicht –
-wenn sich `anweisung_geogebra_projekt.md` oder ein Textbaustein aus der Landkarte ändert,
-muss der Text weiterhin von Hand eingesetzt werden.
+Die **Projektanweisungs-Texte** (das Feld „Projektanweisungen") synchronisieren sich nicht.
+Bei GeoGebra und WEB EXAM steht dort deshalb nur ein Verweis auf die Datei im Repo
+(`anweisung_geogebra_projekt.md`, `projektanweisung_exam.md`) – deren Änderungen wirken nach
+„Synchronisieren". Von Hand eingesetzt werden muss nur noch ein geänderter Verweistext
+(`projektanweisungen.md`).
