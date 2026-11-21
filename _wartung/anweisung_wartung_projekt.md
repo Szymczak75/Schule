@@ -1,4 +1,8 @@
-# Projektanweisung: Standards-Pflege (Wartungs-Projekt)
+# Projektanweisung: Standards-Pflege (Wartungs-Projekt, verbindlich)
+
+> Diese Datei IST die Projektanweisung des Wartungs-Projekts. Geändert wird sie nur hier im
+> Repo (per Pull Request). Im Feld „Anweisungen" des Projekts steht nur ein kurzer Verweis
+> auf diese Datei (Wortlaut am Ende). Nach jeder Änderung „Synchronisieren" (seit 21.11.2026).
 
 ## Zweck
 Zentrale Pflegestelle für meine Unterrichts-Standards. Eine grundsätzliche Änderung an
@@ -61,9 +65,11 @@ einem Baustein oder einer Regel wird hier EINMAL umgesetzt und gilt dann in alle
 5. **Abschluss:** Branch + Pull Request, Link nennen. Danach immer die Checkliste:
    - **A) Reale Projekte:** welche Projekte nach dem Mergen „Synchronisieren" müssen; ob ein
      Projektanweisungs-Text (Feld „Anweisungen") von Hand ersetzt werden muss – dann den
-     fertigen Text mitliefern. Ausnahme **WEB EXAM**: Dort steht im Feld nur ein Verweis auf
-     `_wartung/exam/projektanweisung_exam.md` – Änderungen also nur in dieser Datei, danach
-     genügt „Synchronisieren".
+     fertigen Text mitliefern. Bei **WEB EXAM**, **GeoGebra** und diesem **Wartungs-Projekt**
+     steht im Feld nur ein Verweis auf die Datei (`exam/projektanweisung_exam.md`,
+     `geogebra/anweisung_geogebra_projekt.md`, `anweisung_wartung_projekt.md`) – Änderungen
+     also nur dort, danach genügt „Synchronisieren". Von Hand nur, wenn sich ein
+     Verweistext selbst ändert (`projektanweisungen.md`).
    - **B) Wartungs-Projekt:** ebenfalls „Synchronisieren".
    - **C) Zusammenfassung** in 1–3 Sätzen.
    Geänderte Dateien zusätzlich einzeln zum Download, wenn ich sie direkt brauche
@@ -79,3 +85,13 @@ einem Baustein oder einer Regel wird hier EINMAL umgesetzt und gilt dann in alle
 ## Stil
 Knapp, konkret, kein unnötiger Umbau funktionierender Teile. Bei mehreren möglichen
 Auslegungen kurz nachfragen, bevor alles umgebaut wird.
+
+---
+
+## Text für das Feld „Anweisungen" (nur einmal einsetzen)
+
+```
+Lies zu Beginn jedes Chats vollständig die Datei `anweisung_wartung_projekt.md` aus dem
+GitHub-Sync (`_wartung/`) und befolge sie. Sie ist die verbindliche Projektanweisung.
+Findest du sie nicht im Projektwissen, sag das sofort und arbeite nicht aus dem Gedächtnis.
+```

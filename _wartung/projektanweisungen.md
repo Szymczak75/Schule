@@ -94,5 +94,11 @@ Findest du sie nicht im Projektwissen, sag das sofort und arbeite nicht aus dem 
 
 ## Wartung Unterrichtsprojekte  (Sync: ganzer Ordner `_wartung`)
 
-Hier **nichts ändern**: Im Feld bleibt der vollständige Text aus
-`_wartung/anweisung_wartung_projekt.md` (nicht diese Zeile einfügen).
+Im Feld steht nur ein Verweis (seit 21.11.2026); die eigentliche Projektanweisung ist die Datei
+`_wartung/anweisung_wartung_projekt.md` (Änderungen nur dort, danach im Projekt „Synchronisieren"):
+
+```
+Lies zu Beginn jedes Chats vollständig die Datei `anweisung_wartung_projekt.md` aus dem
+GitHub-Sync (`_wartung/`) und befolge sie. Sie ist die verbindliche Projektanweisung.
+Findest du sie nicht im Projektwissen, sag das sofort und arbeite nicht aus dem Gedächtnis.
+```
