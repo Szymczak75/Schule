@@ -5,7 +5,7 @@ kurzer **Verweis** auf die Master-Dateien in `_wartung/` – die eigentlichen Re
 dann nur noch im Repo. Diese Texte werden einmal pro Projekt eingesetzt und müssen nur
 geändert werden, wenn sich der Verweis selbst ändert (neue Datei, neue Seitenart).
 
-Stand: 08.11.2026
+Stand: 21.11.2026
 
 ---
 
@@ -72,8 +72,14 @@ Maßgeblich sind ausschließlich die Dateien aus dem GitHub-Sync `_wartung/allge
 
 ## GeoGebra  (Sync: `allgemein`, `geogebra`)
 
-Hier **nichts ändern**: Im Feld bleibt der vollständige Text aus
-`_wartung/geogebra/anweisung_geogebra_projekt.md` (nicht diese Zeile einfügen).
+Im Feld steht nur ein Verweis (seit 21.11.2026); die eigentliche Projektanweisung ist die Datei
+`_wartung/geogebra/anweisung_geogebra_projekt.md` (Änderungen nur dort, danach im Projekt „Synchronisieren"):
+
+```
+Lies zu Beginn jedes Chats vollständig die Datei `anweisung_geogebra_projekt.md` aus dem
+GitHub-Sync (`_wartung/geogebra/`) und befolge sie. Sie ist die verbindliche Projektanweisung.
+Findest du sie nicht im Projektwissen, sag das sofort und arbeite nicht aus dem Gedächtnis.
+```
 
 ## WEB EXAM  (Sync: `allgemein`, `exam`)
 

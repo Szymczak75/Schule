@@ -15,10 +15,10 @@ Grafikrechner, CAS, Geometrie, 3D und Stochastik. Jahrgangsstufe 5 bis Q2.
 
 ## 2. Projektanweisung einfügen
 
-Den Inhalt von **`anweisung_geogebra_projekt.md`** in das Feld
-„Projektanweisungen" kopieren. Das ist der Text, der in jeder Unterhaltung
-mitgelesen wird – deshalb ist er bewusst kurz gehalten und verweist für Details auf
-die Dateien im Projektwissen.
+In das Feld „Projektanweisungen" kommt nur der kurze **Verweistext** vom Ende von
+`anweisung_geogebra_projekt.md`. Die Anweisung selbst ist die synchronisierte Datei
+und wird in jeder Unterhaltung zuerst gelesen; Änderungen wirken nach
+„Synchronisieren".
 
 ---
 

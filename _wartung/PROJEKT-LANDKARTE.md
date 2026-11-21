@@ -30,7 +30,7 @@ Die Master-Kopie liegt hier, damit eine Änderung an allgemeinen Regeln (z. B. F
 
 | Datei | Zweck | Muss bei allgemeinen Änderungen mitgeprüft werden? |
 |---|---|---|
-| `anweisung_geogebra_projekt.md` | Text für das Feld „Projektanweisungen" | ja, wenn sie eine allgemeine Regel zusammenfasst („Die harten Formatregeln") – **Text muss von Hand ins Feld** |
+| `anweisung_geogebra_projekt.md` | **die** Projektanweisung von „GeoGebra" – im Feld „Anweisungen" steht nur ein Verweis darauf (seit 21.11.2026); Änderungen wirken nach „Synchronisieren" | ja, wenn sie eine allgemeine Regel zusammenfasst („Die harten Formatregeln") |
 | `css.txt` | Stylesheet des Baukastens | **ja** – Farben, Schriftgrößen, `.frac`, `svg`-Selektoren |
 | `helfer.js` | JS-Helfer inkl. MathJax-Notfall-Anzeige | **ja** – Notfall-Anzeige muss mit `baustein_mathjax_notfall.js` übereinstimmen; Speicherregel |
 | `bauer.py` | Seiten-Bauer (Meta-Tags, Farbschemata, T-Rex, Navigationsleiste) | **ja** – Meta-Tags, Farbschemata; liest `baustein_navigation.html` aus `/tmp/gg/` |
@@ -110,8 +110,8 @@ kann nur der Nutzer selbst in den Projekteinstellungen auf claude.ai eintragen.
 > (Lernseiten-Anweisung TEIL 2.8). Vorbereitung auf eine Arbeit ist `_kavb`.
 
 ### GeoGebra
-Die Projektanweisung `anweisung_geogebra_projekt.md` nennt beide Dateien und `pruefe.py`
-bereits – dort ist kein zusätzlicher Textbaustein nötig.
+Die Projektanweisung `anweisung_geogebra_projekt.md` (synchronisierte Datei, im Feld nur ein
+Verweis) nennt beide Dateien und `pruefe.py` bereits – kein zusätzlicher Textbaustein nötig.
 
 ## Prüfwerkzeug `pruefe.py`
 Ein Programm, das die maschinell prüfbaren Punkte der Fehler-Checkliste über fertige Seiten
