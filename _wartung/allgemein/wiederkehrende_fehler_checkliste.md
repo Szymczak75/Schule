@@ -354,8 +354,8 @@ Diese Punkte standen offen und sind inzwischen als Regel in
   ausdrücklich abfragen, Vorgabe ist „ohne Sperre“.
 - **Brüche und Terme eingeben: getrennte Felder oder Formeltool** (22.11.2026). Vorher fragen;
   beides kommt aus `baustein_formeltool.html` (einfache Form: Bruch, gemischte Zahl, Hochzahl,
-  Index, Wurzel, n-te Wurzel – ohne Verschachtelung, keine externe Bibliothek). Bestehende
-  Seiten werden nur auf Nachfrage umgestellt. `pruefe.py` meldet `FT`/`FTALT`.
+  Index, Wurzel, n-te Wurzel – ohne Verschachtelung, keine externe Bibliothek), in allen
+  Seitentypen samt `_rbka`, `_sfs` und EXAM. Bestehende Seiten werden nur auf Nachfrage umgestellt. `pruefe.py` meldet `FT`/`FTALT`.
 - **Pull Request ohne vorheriges Review** (10.11.2026): Zwei neue Seiten (`_sfs`, `_ue`) gingen
   direkt als Pull Request raus; der Nutzer hatte sie vorher nie gesehen und konnte sie nicht
   durchspielen. Seitdem regelt TEIL 0 Nr. 26 zwei Stufen: **erst die Dateien im Chat zeigen

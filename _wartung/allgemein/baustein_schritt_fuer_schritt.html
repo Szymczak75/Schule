@@ -4,8 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <!-- =============================================================================
-     VORLAGE: Schritt-für-Schritt-Seite (_sfs)  ·  baustein_schritt_fuer_schritt.html (v2, 18.11.2026)
+     VORLAGE: Schritt-für-Schritt-Seite (_sfs)  ·  baustein_schritt_fuer_schritt.html (v3, 22.11.2026)
      Lernseiten-Anweisung TEIL 2.7. Gepflegt im Wartungs-Projekt.
+     v3: Formeltool (baustein_formeltool.html, TEIL 4.7) in der Wiederholung: statt input.in
+         ein <span class="ftfeld" data-ans="3/4" data-eingabe="getrennt|gemischt|formel"
+         [data-gekuerzt] aria-label="…"></span>; Terme: <span class="ftfeld" data-term="5x-8"
+         [data-ohne="("] aria-label="…"></span> (Zahlenprobe, immer Formeltool).
      v2: Zahlenfelder werden nach dem Prüfen per readOnly + Klasse .zu gesperrt statt per
          disabled – Safari (iPad) zeichnete gesperrte Felder nach dem Wieder-Einblenden blass.
 
@@ -28,7 +32,7 @@
         Alternative Wege: data-wahl="gleicher-name" an beide Schritte – gezählt wird
         der besser bewertete.
         Wiederholung: .task data-type="mc" (Optionen mit data-ok="1"/"0") oder
-        data-type="num" (input.in mit data-ans, optional data-tol); Hilfe als
+        data-type="num" (input.in mit data-ans, optional data-tol – oder .ftfeld, siehe v3); Hilfe als
         <div class="hilfe"><div class="tip">…</div>…<div class="muster">Lösungsweg</div></div>.
      5. BAUSTEIN-CSS, Engine, MathJax-Notfall und Navigationsleiste UNVERÄNDERT lassen.
         Seiteneigenes CSS (z. B. .kos > svg) nur unter „seiteneigenes CSS“.
@@ -51,7 +55,8 @@
 </script>
 <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
 <style>
-/* ===== BAUSTEIN-CSS: Schritt für Schritt (v2, 18.11.2026) – unverändert übernehmen =====
+/* ===== BAUSTEIN-CSS: Schritt für Schritt (v3, 22.11.2026) – unverändert übernehmen =====
+   v3: .ftfeld (Formeltool) mit Rahmenfarbe nach dem Prüfen
    Übungs-Farbschema (TEIL 2.2), Schrift ≥ 1rem, Tipp-Ziele ≥ 44px, nur Kind-Selektoren an SVGs. */
 :root{
   --ink:#22303f; --card:#ffffff; --green:#1e7d32; --red:#c1272d;
@@ -156,6 +161,9 @@ table.vorlage td.leer{height:2.6rem;background:#fff}
 .zeile{margin:10px 0}
 input.in{font:inherit;font-size:1.125rem;min-height:44px;padding:6px 10px;border:2px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);width:7.5rem}
 input.in:focus{outline:none;border-color:var(--blue)}
+.ftfeld{display:inline-block;vertical-align:middle}
+.ftfeld.ok .ft-zeile{border-color:var(--green)}
+.ftfeld.bad .ft-zeile{border-color:var(--red)}
 input.in:disabled,input.in.zu{-webkit-text-fill-color:#22303f;color:#22303f;-webkit-opacity:1;opacity:1;background:var(--bg)}
 .in.ok{border-color:var(--green);border-width:3px;box-shadow:0 0 0 2px var(--green)}
 .in.bad{border-color:var(--red);border-width:3px;box-shadow:0 0 0 2px var(--red)}
@@ -208,6 +216,551 @@ table.ausw th{background:var(--blue-light)}
 .dino-ecke>:not(.dino-huelle):not(.dino-ikon){position:absolute!important;right:calc(100% + 6px)!important;bottom:26px!important;left:auto!important;top:auto!important;white-space:nowrap}
 .dino-tipp-fest{right:96px!important;bottom:34px!important;left:auto!important;top:auto!important}
 </style>
+<!-- =============================================================================
+     BAUSTEIN: Formeltool  (v1, 22.11.2026)
+     Gepflegt im Wartungs-Projekt (_wartung/allgemein/baustein_formeltool.html).
+     Einfügen: UNVERÄNDERT in den <head> (vom Kommentar BAUSTEIN bis ENDE BAUSTEIN).
+     Einfache Form – keine Verschachtelung: In jedem Kästchen steht normaler Text.
+
+     Ein Feld anlegen:   var fd = FT.feld(element, { art: 'frei' });
+       art 'frei'   Eingabezeile + Tastenleiste (Formeltool)
+           'bruch'  nur Zähler und Nenner (getrennte Eingabe, keine Tastenleiste)
+           'gem'    Ganze, Zähler, Nenner (getrennte Eingabe als gemischte Zahl)
+       tasten   Auswahl/Reihenfolge der Tasten bei 'frei', Vorgabe:
+                ['bruch','gem','hoch','tief','wurzel','nwurzel','mal']
+       tastatur 'text' (Vorgabe) | 'zahl' (iPad-Zifferntastatur – hat KEIN Minus)
+       label    Bezeichnung für Screenreader, z. B. 'Antwort'
+       aendern  function(fd) – wird nach jeder Änderung aufgerufen (Zustand sichern!)
+     Am Feld:  fd.zustand() → Daten (JSON-fähig, für sessionStorage, TEIL 6)
+               fd.setze(daten)   fd.leeren()   fd.sperre(true|false)   fd.leer()
+               fd.zahl()   → { w:[Zähler,Nenner], gek, dez, vz } oder null (keine Zahl)
+               fd.linear() → Rechentext für FT.rechne/FT.gleichwertig
+               fd.tex()    → LaTeX zum Anzeigen der Eingabe (in \( … \) setzen)
+               fd.hat('bruch') → true, wenn der Baustein vorkommt (Formvorgaben)
+     Ohne Feld: FT.zahl(daten), FT.linear(daten), FT.tex(daten) – z. B. für die Auswertung
+               FT.leseZahl('2 3/4')  Dezimalzahl, a/b, g a/b, Periode 0,(3) – auch mit −
+               FT.rechne('2x^2', {x:3})  → 18      (NaN, wenn unlesbar)
+               FT.gleichwertig('2(x+1)', '2x+2')   → true (Zahlenprobe an 8 Stellen)
+     Einbau in eine eigene Aufgabe (Zustand nach TEIL 6):
+       var fd = FT.feld($('a1-feld'), { art: 'frei', label: 'Ergebnis',
+                 aendern: function(){ S.a1 = fd.zustand(); sichern(); } });
+       if (S.a1) fd.setze(S.a1);
+       Zahl prüfen:  var p = fd.zahl();  richtig = p && p.w[0] * 4 === 3 * p.w[1];  (gekürzt: p.gek)
+       Term prüfen:  FT.gleichwertig(fd.linear(), '2x+3')
+       Nach dem Prüfen sperren: fd.sperre(true); Leeren-Knopf: fd.leeren(); fd.sperre(false);
+     Tippen im Text: · oder *, : oder /, ^ für Hochzahlen im Kästchen (x^2), Klammern,
+     Variablen sind einzelne Buchstaben (ab = a·b), Index per Taste (x₁ → x_1).
+     Darstellung: Brüche div-basiert mit waagerechtem Strich (TEIL 7.2), Schrift ≥ 1rem,
+     Tasten ≥ 44×44 px, Farben nur aus dem Schema (TEIL 2.2).
+     ========================================================================== -->
+<style>
+/* ===== BAUSTEIN-CSS: Formeltool (v1) ===== */
+.ft{display:inline-block;max-width:100%;vertical-align:middle;color-scheme:light;}
+.ft-leiste{display:flex;flex-wrap:wrap;gap:.35rem;margin:0 0 .4rem;}
+.ft-taste{min-width:48px;min-height:48px;padding:.2rem .5rem;border:2px solid #2f5fa6;border-radius:.6rem;
+  background:#e6eefb;color:#1f4680;font:inherit;font-size:1.05rem;font-weight:700;cursor:pointer;
+  display:inline-flex;align-items:center;justify-content:center;line-height:1.1;}
+.ft-taste:active{transform:scale(.96);}
+.ft-taste:disabled{opacity:.45;cursor:default;}
+.ft-taste .ft-sym-hoch{font-size:1rem;position:relative;top:-.55em;margin-left:.05em;}
+.ft-taste .ft-sym-tief{font-size:1rem;position:relative;top:.45em;margin-left:.05em;}
+.ft-taste .ft-sym-wz{border-top:2px solid currentColor;padding:0 .15em;margin-left:.05em;}
+.ft-taste .ft-sym-nw{font-size:1rem;position:relative;top:-.6em;margin-right:-.15em;}
+.ft-sym-bruch{display:inline-flex;flex-direction:column;align-items:center;line-height:1.05;margin:0 .1em;}
+.ft-sym-bruch > span{display:block;padding:0 .2em;font-size:1rem;}
+.ft-sym-bruch > span:first-child{border-bottom:2px solid currentColor;}
+.ft-zeile{display:inline-flex;flex-wrap:wrap;align-items:center;min-height:52px;min-width:8rem;max-width:100%;
+  padding:.3rem .5rem;border:2px solid #2f5fa6;border-radius:.6rem;background:#ffffff;color:#22303f;
+  font-size:1.15rem;cursor:text;}
+.ft-zeile.ft-fokus{border-color:#2f5fa6;}
+.ft-zeile.ft-zu{background:#f6f8fb;cursor:default;}
+.ft input{font:inherit;font-size:1.15rem;color:#22303f;-webkit-text-fill-color:#22303f;background:transparent;border:0;outline:none;
+  margin:0;padding:.1rem 0;text-align:center;min-width:1ch;border-radius:.3rem;}
+.ft input.ft-x{padding:.1rem .05rem;}
+.ft input.ft-s{border:2px dashed #2f5fa6;min-width:1.6rem;padding:.05rem .15rem;}
+.ft input.ft-s:focus{border-style:solid;border-color:#2f5fa6;}
+.ft input.ft-s.ft-voll{border-color:transparent;}
+.ft input.ft-s.ft-voll:focus{border-color:#2f5fa6;}
+.ft input.zu,.ft input[readonly]{cursor:default;}
+.ft-bruch{display:inline-flex;flex-direction:column;align-items:center;margin:0 .15em;vertical-align:middle;}
+.ft-bruch > .ft-oben{display:block;border-bottom:2px solid currentColor;padding:0 .1em .1em;}
+.ft-bruch > .ft-unten{display:block;padding:.1em .1em 0;}
+.ft-gem{display:inline-flex;align-items:center;}
+.ft-hoch{display:inline-block;position:relative;top:-.55em;}
+.ft-hoch > input,.ft-tief > input,.ft-nw > input{font-size:1rem;}
+.ft-tief{display:inline-block;position:relative;top:.55em;}
+.ft-wurzel{display:inline-flex;align-items:stretch;margin:0 .1em;}
+.ft-wurzel > .ft-wz{font-size:1.3rem;line-height:1;align-self:center;}
+.ft-wurzel > .ft-rad{display:inline-flex;align-items:center;border-top:2px solid currentColor;padding:.1em .1em 0;}
+.ft-nw{display:inline-block;position:relative;top:-.75em;margin-right:-.25em;}
+.ft-fest .ft-zeile{padding:.3rem .7rem;}
+.ft-hilfe{font-size:1rem;color:#22303f;margin:.3rem 0 0;}
+/* ===== ENDE BAUSTEIN-CSS Formeltool ===== */
+</style>
+<script>
+/* ============================================================
+   BAUSTEIN: Formeltool-Engine (v1, 22.11.2026) – unverändert übernehmen
+   ============================================================ */
+var FT = (function(){
+"use strict";
+var VERSION = 'v1';
+var SLOTS = { x:['v'], bruch:['z','n'], gem:['g','z','n'], hoch:['v'], tief:['v'], wurzel:['v'], nwurzel:['n','v'] };
+var NAMEN = { z:'Zähler', n:'Nenner', g:'Ganze', v:'Eingabe' };
+var TASTEN = {
+  bruch:   { titel:'Bruch', html:'<span class="ft-sym-bruch"><span>a</span><span>b</span></span>' },
+  gem:     { titel:'gemischte Zahl', html:'1<span class="ft-sym-bruch"><span>a</span><span>b</span></span>' },
+  hoch:    { titel:'Hochzahl', html:'x<span class="ft-sym-hoch">n</span>' },
+  tief:    { titel:'Index (tiefgestellt)', html:'x<span class="ft-sym-tief">1</span>' },
+  wurzel:  { titel:'Quadratwurzel', html:'√<span class="ft-sym-wz">x</span>' },
+  nwurzel: { titel:'n-te Wurzel', html:'<span class="ft-sym-nw">n</span>√<span class="ft-sym-wz">x</span>' },
+  mal:     { titel:'Malpunkt', html:'·', zeichen:'·' },
+  klammer: { titel:'Klammer auf', html:'(', zeichen:'(' },
+  klammerzu: { titel:'Klammer zu', html:')', zeichen:')' },
+  minus:   { titel:'Minus', html:'−', zeichen:'-' },
+  loeschen:{ titel:'Baustein löschen', html:'⌫' }
+};
+var STANDARD = ['bruch','gem','hoch','tief','wurzel','nwurzel','mal','loeschen'];
+
+/* ---------- Modell ---------- */
+function ftLeeresTeil(t){ var o = { t:t }; SLOTS[t].forEach(function(s){ o[s] = ''; }); return o; }
+function ftKopie(teile){ return teile.map(function(p){ var o = { t:p.t }; SLOTS[p.t].forEach(function(s){ o[s] = String(p[s] == null ? '' : p[s]); }); return o; }); }
+function ftGueltig(daten){
+  return Array.isArray(daten) && daten.length > 0 && daten.every(function(p){ return p && SLOTS[p.t]; });
+}
+/* frei: beginnt und endet mit Text, zwischen zwei Bausteinen steht immer ein Textstück */
+function ftOrdne(teile){
+  var r = [];
+  teile.forEach(function(p){
+    var l = r[r.length - 1];
+    if (p.t === 'x' && l && l.t === 'x') { l.v += p.v; return; }
+    if (p.t !== 'x' && (!l || l.t !== 'x')) r.push({ t:'x', v:'' });
+    r.push(p);
+  });
+  if (!r.length || r[r.length - 1].t !== 'x') r.push({ t:'x', v:'' });
+  return r;
+}
+
+/* ---------- Zahlen lesen (wie Rückblick-KA-Engine) ---------- */
+function ftGgt(a, b){ a = Math.abs(a); b = Math.abs(b); while (b) { var t = a % b; a = b; b = t; } return a || 1; }
+function ftKurz(z, n){ if (n < 0) { z = -z; n = -n; } var t = ftGgt(z, n); return [z / t, n / t]; }
+function ftLeseZahl(roh){
+  var s = String(roh == null ? '' : roh).trim().replace(/[−–]/g, '-');
+  var kl = s.match(/^\((.*)\)$/); if (kl) s = kl[1].trim();
+  var vz = 1, r0 = s.match(/^([+-])\s*(.*)$/);
+  if (r0) { if (r0[1] === '-') vz = -1; s = r0[2]; }
+  var p = ftBetrag(s);
+  if (p && vz < 0) p.w = [-p.w[0], p.w[1]];
+  if (p) p.vz = !!r0;
+  return p;
+}
+function ftBetrag(s){
+  if (!s || s.length > 24) return null;
+  s = s.replace(/…|\.\.\.+/g, '~').replace(/\./g, ',').replace(/\s+/g, ' ').replace(/[÷:]/g, '/').replace(/⁄/g, '/');
+  s = s.replace(/((?:\d̅)+)/g, function(t){ return '(' + t.replace(/̅/g, '') + ')'; });
+  var r;
+  if ((r = s.match(/^(\d+) (\d+) ?\/ ?(\d+)$/))) {
+    if (!+r[3]) return null;
+    return { w: ftKurz(+r[1] * +r[3] + +r[2], +r[3]), gek: ftGgt(+r[2], +r[3]) === 1, dez: false };
+  }
+  var t = s.replace(/ /g, '');
+  if ((r = t.match(/^(\d+)\/(\d+)$/))) {
+    if (!+r[2]) return null;
+    return { w: ftKurz(+r[1], +r[2]), gek: ftGgt(+r[1], +r[2]) === 1, dez: false };
+  }
+  if ((r = t.match(/^(\d*),(\d*)\((\d+)\)$/)) || (r = t.match(/^(\d*),(\d*?)(\d)~$/))) {
+    var I = r[1] || '0', P = r[2], Q = r[3];
+    var N = parseInt(I + P + Q, 10), M = parseInt(I + P, 10);
+    return { w: ftKurz(N - M, (Math.pow(10, Q.length) - 1) * Math.pow(10, P.length)), gek: true, dez: true };
+  }
+  if ((r = t.match(/^(\d*),(\d+)$/)) || (r = t.match(/^(\d+),?()$/))) {
+    return { w: ftKurz(parseInt((r[1] || '0') + r[2], 10), Math.pow(10, r[2].length)), gek: true, dez: true };
+  }
+  return null;
+}
+/* Eingabe aus dem Formeltool als Zahl: Text allein, oder [Vorzeichen] Bruch / gemischte Zahl */
+function ftZahl(daten){
+  if (!ftGueltig(daten)) return null;
+  var t = daten.filter(function(p){ return !(p.t === 'x' && !String(p.v).trim()); });
+  if (t.length === 1 && t[0].t === 'x') return ftLeseZahl(t[0].v);
+  var vz = 1, mitVz = false;
+  if (t.length === 2 && t[0].t === 'x') {
+    var v0 = String(t[0].v).trim().replace(/[−–]/g, '-');
+    if (v0 !== '-' && v0 !== '+') return null;
+    vz = v0 === '-' ? -1 : 1; mitVz = true; t = [t[1]];
+  }
+  if (t.length !== 1) return null;
+  var s = t[0], z, n, w;
+  if (s.t === 'bruch') {
+    z = ftLeseZahl(s.z); n = ftLeseZahl(s.n);
+    if (!z || !n || !n.w[0]) return null;
+    w = ftKurz(vz * z.w[0] * n.w[1], z.w[1] * n.w[0]);
+    var ganz = z.w[1] === 1 && n.w[1] === 1;
+    return { w: w, gek: ganz && ftGgt(z.w[0], n.w[0]) === 1 && n.w[0] > 0, dez: false, vz: mitVz || z.vz || n.vz };
+  }
+  if (s.t === 'gem') {
+    var g = ftLeseZahl(s.g); z = ftLeseZahl(s.z); n = ftLeseZahl(s.n);
+    if (!g || !z || !n || g.vz || z.vz || n.vz) return null;
+    if (g.w[1] !== 1 || z.w[1] !== 1 || n.w[1] !== 1 || !n.w[0]) return null;
+    w = ftKurz(vz * (g.w[0] * n.w[0] + z.w[0]), n.w[0]);
+    return { w: w, gek: ftGgt(z.w[0], n.w[0]) === 1, dez: false, vz: mitVz };
+  }
+  return null;
+}
+
+/* ---------- Rechentext und Darstellung ---------- */
+function ftLinear(daten){
+  if (!ftGueltig(daten)) return '';
+  return daten.map(function(p){
+    switch (p.t) {
+      case 'x':       return p.v;
+      case 'bruch':   return '((' + p.z + ')/(' + p.n + '))';
+      case 'gem':     return '((' + p.g + ')+(' + p.z + ')/(' + p.n + '))';
+      case 'hoch':    return '^(' + p.v + ')';
+      case 'tief':    return '_' + String(p.v).replace(/\s+/g, '');
+      case 'wurzel':  return 'sqrt(' + p.v + ')';
+      case 'nwurzel': return 'root(' + p.n + ';' + p.v + ')';
+    }
+    return '';
+  }).join('');
+}
+function ftTexText(v){
+  var s = String(v == null ? '' : v).replace(/[\\{}$%#&~]/g, '').replace(/[−–]/g, '-');
+  if (!s.trim()) return '';
+  s = s.replace(/(\d),(\d)/g, '$1{,}$2').replace(/[·*×]/g, '\\cdot ').replace(/</g, '\\lt ').replace(/>/g, '\\gt ');
+  s = s.replace(/\^\s*\(([^()]*)\)/g, '^{($1)}').replace(/\^\s*(-?[A-Za-z0-9,{}]+)/g, '^{$1}');
+  s = s.replace(/_\s*([A-Za-z0-9]+)/g, '_{$1}');
+  return s;
+}
+function ftFeldTex(v){ var s = ftTexText(v); return s === '' ? '\\square' : s; }
+function ftTex(daten){
+  if (!ftGueltig(daten)) return '';
+  var out = [];
+  daten.forEach(function(p, i){
+    var s = '';
+    switch (p.t) {
+      case 'x':       s = ftTexText(p.v); break;
+      case 'bruch':   s = '\\frac{' + ftFeldTex(p.z) + '}{' + ftFeldTex(p.n) + '}'; break;
+      case 'gem':     s = ftFeldTex(p.g) + '\\frac{' + ftFeldTex(p.z) + '}{' + ftFeldTex(p.n) + '}'; break;
+      case 'hoch':    s = '^{' + ftFeldTex(p.v) + '}'; break;
+      case 'tief':    s = '_{' + ftFeldTex(p.v) + '}'; break;
+      case 'wurzel':  s = '\\sqrt{' + ftFeldTex(p.v) + '}'; break;
+      case 'nwurzel': s = '\\sqrt[' + ftFeldTex(p.n) + ']{' + ftFeldTex(p.v) + '}'; break;
+    }
+    /* Hochzahl direkt hinter einem Bruch/einer Wurzel: Klammer zeigen, wie gerechnet wird */
+    var nach = daten[i + 1];
+    if (p.t !== 'x' && p.t !== 'hoch' && p.t !== 'tief' && nach && nach.t === 'x' && !String(nach.v).trim()) nach = daten[i + 2];
+    if ((p.t === 'bruch' || p.t === 'gem') && nach && nach.t === 'hoch') s = '\\left(' + s + '\\right)';
+    if ((p.t === 'hoch' || p.t === 'tief') && !out.join('').trim()) s = '{}' + s;
+    out.push(s);
+  });
+  return out.join('');
+}
+
+/* ---------- Rechnen: Tokenizer und Parser ---------- */
+function ftTokens(s){
+  s = String(s).replace(/[−–]/g, '-').replace(/[·×*]/g, '*').replace(/[:÷]/g, '/')
+       .replace(/²/g, '^2').replace(/³/g, '^3').replace(/√/g, 'sqrt');
+  var out = [], i = 0, r;
+  while (i < s.length) {
+    var c = s.charAt(i), rest = s.slice(i);
+    if (/\s/.test(c)) { i++; continue; }
+    if ((r = rest.match(/^\d+(?:[.,]\d+)?/))) { out.push({ t:'n', v: parseFloat(r[0].replace(',', '.')) }); i += r[0].length; continue; }
+    if ((r = rest.match(/^(sqrt|root|wurzel)(?=\s*\()/i))) { out.push({ t:'f', v: r[1].toLowerCase() === 'root' ? 'root' : 'sqrt' }); i += r[0].length; continue; }
+    if (c === 'π') { out.push({ t:'n', v: Math.PI }); i++; continue; }
+    if ((r = rest.match(/^[A-Za-zÄÖÜäöüß](?:_\{?([A-Za-z0-9]+)\}?)?/))) {
+      out.push({ t:'v', v: r[0].charAt(0) + (r[1] ? '_' + r[1] : '') }); i += r[0].length; continue;
+    }
+    if ('+-*/^();'.indexOf(c) >= 0) { out.push({ t:c }); i++; continue; }
+    return null;
+  }
+  return out;
+}
+function ftBaum(s){
+  var tk = ftTokens(s); if (!tk || !tk.length) return null;
+  var i = 0;
+  function sieh(){ return tk[i]; }
+  function nimm(t){ if (tk[i] && tk[i].t === t) { i++; return true; } return false; }
+  function startFaktor(t){ return t && (t.t === 'n' || t.t === 'v' || t.t === 'f' || t.t === '('); }
+  function ausdruck(){
+    var a = term();
+    while (sieh() && (sieh().t === '+' || sieh().t === '-')) { var op = tk[i++].t; a = [op, a, term()]; }
+    return a;
+  }
+  function term(){
+    var a = vorz();
+    for (;;) {
+      var t = sieh();
+      if (t && (t.t === '*' || t.t === '/')) { i++; a = [t.t, a, vorz()]; }
+      else if (startFaktor(t)) a = ['*', a, potenz()];
+      else return a;
+    }
+  }
+  function vorz(){
+    if (nimm('-')) return ['neg', vorz()];
+    if (nimm('+')) return vorz();
+    return potenz();
+  }
+  function potenz(){
+    var b = atom();
+    if (nimm('^')) return ['^', b, vorz()];
+    return b;
+  }
+  function atom(){
+    var t = tk[i++];
+    if (!t) throw 0;
+    if (t.t === 'n') return ['n', t.v];
+    if (t.t === 'v') return ['v', t.v];
+    if (t.t === '(') { var a = ausdruck(); if (!nimm(')')) throw 0; return a; }
+    if (t.t === 'f') {
+      if (!nimm('(')) throw 0;
+      if (t.v === 'sqrt') { var x = ausdruck(); if (!nimm(')')) throw 0; return ['sqrt', x]; }
+      var n = ausdruck(); if (!nimm(';')) throw 0; var y = ausdruck(); if (!nimm(')')) throw 0; return ['root', n, y];
+    }
+    throw 0;
+  }
+  try { var e = ausdruck(); return i === tk.length ? e : null; } catch (x) { return null; }
+}
+function ftWerte(e, bel){
+  switch (e[0]) {
+    case 'n': return e[1];
+    case 'v': return Object.prototype.hasOwnProperty.call(bel, e[1]) ? +bel[e[1]] : NaN;
+    case 'neg': return -ftWerte(e[1], bel);
+    case '+': return ftWerte(e[1], bel) + ftWerte(e[2], bel);
+    case '-': return ftWerte(e[1], bel) - ftWerte(e[2], bel);
+    case '*': return ftWerte(e[1], bel) * ftWerte(e[2], bel);
+    case '/': return ftWerte(e[1], bel) / ftWerte(e[2], bel);
+    case '^': return Math.pow(ftWerte(e[1], bel), ftWerte(e[2], bel));
+    case 'sqrt': return Math.sqrt(ftWerte(e[1], bel));
+    case 'root':
+      var n = ftWerte(e[1], bel), x = ftWerte(e[2], bel);
+      if (x < 0 && Math.round(n) === n && Math.abs(n % 2) === 1) return -Math.pow(-x, 1 / n);
+      return Math.pow(x, 1 / n);
+  }
+  return NaN;
+}
+function ftRechne(s, bel){ var e = ftBaum(s); return e ? ftWerte(e, bel || {}) : NaN; }
+function ftVariablen(s){
+  var tk = ftTokens(s) || [], v = [];
+  tk.forEach(function(t){ if (t.t === 'v' && v.indexOf(t.v) < 0) v.push(t.v); });
+  return v;
+}
+var PROBE = [0.731, 1.913, -1.37, 2.57, 0.43, 3.11, -0.67, 1.29];
+function ftGleichwertig(a, b, vars){
+  var ea = ftBaum(a), eb = ftBaum(b);
+  if (!ea || !eb) return false;
+  vars = vars || ftVariablen(a).concat(ftVariablen(b));
+  var gueltige = 0;
+  for (var k = 0; k < PROBE.length; k++) {
+    var bel = {};
+    vars.forEach(function(v, j){ bel[v] = PROBE[(k + 3 * j) % PROBE.length] + 0.137 * j; });
+    var x = ftWerte(ea, bel), y = ftWerte(eb, bel);
+    if (!isFinite(x) || !isFinite(y)) continue;
+    gueltige++;
+    if (Math.abs(x - y) > 1e-7 * Math.max(1, Math.abs(x), Math.abs(y))) return false;
+  }
+  return gueltige >= 4;
+}
+
+/* ---------- Feld ---------- */
+function ftFeld(el, opt){
+  opt = opt || {};
+  var fd = this;
+  this.art = opt.art === 'bruch' || opt.art === 'gem' ? opt.art : 'frei';
+  this.opt = opt; this.zu = false; this.fokus = null;
+  this.teile = this.art === 'frei' ? [{ t:'x', v:'' }] : [ftLeeresTeil(this.art)];
+  this.box = document.createElement('div');
+  this.box.className = 'ft' + (this.art === 'frei' ? '' : ' ft-fest');
+  if (this.art === 'frei') {
+    this.leiste = document.createElement('div');
+    this.leiste.className = 'ft-leiste';
+    (opt.tasten || STANDARD).forEach(function(k){
+      var d = TASTEN[k]; if (!d) return;
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'ft-taste'; b.innerHTML = d.html;
+      b.title = d.titel; b.setAttribute('aria-label', d.titel);
+      /* Fokus im Kästchen lassen (iPad-Tastatur bleibt offen) */
+      b.addEventListener('pointerdown', function(e){ e.preventDefault(); });
+      b.addEventListener('mousedown', function(e){ e.preventDefault(); });
+      b.addEventListener('click', function(){
+        if (fd.zu) return;
+        if (k === 'loeschen') fd.loesche();
+        else if (d.zeichen) fd.tippe(d.zeichen);
+        else fd.fuegeEin(k);
+      });
+      fd.leiste.appendChild(b);
+    });
+    this.box.appendChild(this.leiste);
+  }
+  this.zeile = document.createElement('div');
+  this.zeile.className = 'ft-zeile';
+  this.zeile.setAttribute('role', 'group');
+  this.zeile.setAttribute('aria-label', opt.label || 'Eingabe');
+  this.box.appendChild(this.zeile);
+  el.appendChild(this.box);
+
+  this.zeile.addEventListener('input', function(e){
+    var inp = e.target; if (!inp.__ft) return;
+    fd.teile[inp.__ft.i][inp.__ft.s] = inp.value;
+    ftBreite(inp); fd.melde();
+  });
+  this.zeile.addEventListener('focusin', function(e){
+    if (e.target.__ft) { fd.fokus = e.target; fd.zeile.classList.add('ft-fokus'); }
+  });
+  this.zeile.addEventListener('focusout', function(){ fd.zeile.classList.remove('ft-fokus'); });
+  this.zeile.addEventListener('keydown', function(e){ fd.taste(e); });
+  this.zeile.addEventListener('click', function(e){
+    if (e.target === fd.zeile && !fd.zu) { var a = fd.eingaben(); var l = a[a.length - 1]; if (l) ftSetze(l, l.value.length); }
+  });
+  this.zeichne();
+}
+function ftBreite(inp){
+  var n = Math.max(inp.value.length, inp.classList.contains('ft-s') ? 1 : 0);
+  inp.style.width = (n + 1) + 'ch';
+  if (inp.classList.contains('ft-s')) inp.classList.toggle('ft-voll', inp.value.trim() !== '');
+}
+function ftSetze(inp, pos){
+  try { inp.focus(); inp.setSelectionRange(pos, pos); } catch (e) { try { inp.focus(); } catch (x) {} }
+}
+ftFeld.prototype.eingaben = function(){ return Array.prototype.slice.call(this.zeile.querySelectorAll('input')); };
+ftFeld.prototype.zeichne = function(ziel){
+  var fd = this, z = this.zeile, tm = this.opt.tastatur === 'zahl' ? 'decimal' : 'text';
+  z.innerHTML = ''; this.fokus = null;
+  function inp(i, s, cls, name){
+    var e = document.createElement('input');
+    e.type = 'text'; e.className = cls; e.value = fd.teile[i][s];
+    e.setAttribute('inputmode', tm); e.setAttribute('autocomplete', 'off');
+    e.setAttribute('autocapitalize', 'off'); e.setAttribute('autocorrect', 'off'); e.setAttribute('spellcheck', 'false');
+    e.setAttribute('aria-label', name);
+    e.__ft = { i:i, s:s };
+    if (fd.zu) { e.readOnly = true; e.classList.add('zu'); }
+    ftBreite(e);
+    return e;
+  }
+  function span(cls){ var s = document.createElement('span'); s.className = cls; return s; }
+  this.teile.forEach(function(p, i){
+    var w;
+    switch (p.t) {
+      case 'x':
+        z.appendChild(inp(i, 'v', 'ft-x', fd.opt.label || 'Eingabe')); break;
+      case 'bruch':
+        w = span('ft-bruch');
+        var o = span('ft-oben'); o.appendChild(inp(i, 'z', 'ft-s', 'Zähler'));
+        var u = span('ft-unten'); u.appendChild(inp(i, 'n', 'ft-s', 'Nenner'));
+        w.appendChild(o); w.appendChild(u); z.appendChild(w); break;
+      case 'gem':
+        w = span('ft-gem'); w.appendChild(inp(i, 'g', 'ft-s', 'Ganze'));
+        var b = span('ft-bruch');
+        var o2 = span('ft-oben'); o2.appendChild(inp(i, 'z', 'ft-s', 'Zähler'));
+        var u2 = span('ft-unten'); u2.appendChild(inp(i, 'n', 'ft-s', 'Nenner'));
+        b.appendChild(o2); b.appendChild(u2); w.appendChild(b); z.appendChild(w); break;
+      case 'hoch':
+        w = span('ft-hoch'); w.appendChild(inp(i, 'v', 'ft-s', 'Hochzahl')); z.appendChild(w); break;
+      case 'tief':
+        w = span('ft-tief'); w.appendChild(inp(i, 'v', 'ft-s', 'Index')); z.appendChild(w); break;
+      case 'wurzel':
+        w = span('ft-wurzel'); var wz = span('ft-wz'); wz.textContent = '√'; w.appendChild(wz);
+        var r = span('ft-rad'); r.appendChild(inp(i, 'v', 'ft-s', 'unter der Wurzel')); w.appendChild(r);
+        z.appendChild(w); break;
+      case 'nwurzel':
+        var nw = span('ft-nw'); nw.appendChild(inp(i, 'n', 'ft-s', 'Wurzelexponent')); z.appendChild(nw);
+        w = span('ft-wurzel'); var wz2 = span('ft-wz'); wz2.textContent = '√'; w.appendChild(wz2);
+        var r2 = span('ft-rad'); r2.appendChild(inp(i, 'v', 'ft-s', 'unter der Wurzel')); w.appendChild(r2);
+        z.appendChild(w); break;
+    }
+  });
+  this.zeile.classList.toggle('ft-zu', this.zu);
+  if (this.leiste) Array.prototype.forEach.call(this.leiste.children, function(b){ b.disabled = fd.zu; });
+  if (ziel) {
+    var ziel_el = this.eingaben().filter(function(e){ return e.__ft.i === ziel.i && e.__ft.s === ziel.s; })[0];
+    if (ziel_el) ftSetze(ziel_el, ziel.pos == null ? ziel_el.value.length : ziel.pos);
+  }
+};
+ftFeld.prototype.melde = function(){ if (typeof this.opt.aendern === 'function') this.opt.aendern(this); };
+/* Wo steht die Schreibmarke? → { i, s, pos } */
+ftFeld.prototype.marke = function(){
+  var f = this.fokus;
+  if (!f || !f.__ft) { var l = this.teile.length - 1; return { i:l, s:SLOTS[this.teile[l].t][0], pos:String(this.teile[l][SLOTS[this.teile[l].t][0]]).length }; }
+  var pos = f.value.length;
+  try { if (typeof f.selectionStart === 'number') pos = f.selectionStart; } catch (e) {}
+  return { i:f.__ft.i, s:f.__ft.s, pos:pos };
+};
+ftFeld.prototype.fuegeEin = function(typ){
+  if (this.art !== 'frei' || !SLOTS[typ] || typ === 'x') return;
+  var m = this.marke(), t = this.teile, neu = ftLeeresTeil(typ), stelle;
+  if (t[m.i].t === 'x') {
+    var v = t[m.i].v;
+    t.splice(m.i, 1, { t:'x', v:v.slice(0, m.pos) }, neu, { t:'x', v:v.slice(m.pos) });
+    stelle = m.i + 1;
+  } else {
+    t.splice(m.i + 1, 0, { t:'x', v:'' }, neu);
+    stelle = m.i + 2;
+  }
+  this.teile = ftOrdne(t);
+  stelle = this.teile.indexOf(neu);
+  this.zeichne({ i:stelle, s:SLOTS[typ][0], pos:0 });
+  this.melde();
+};
+ftFeld.prototype.tippe = function(zeichen){
+  var m = this.marke(), p = this.teile[m.i], alt = String(p[m.s]);
+  p[m.s] = alt.slice(0, m.pos) + zeichen + alt.slice(m.pos);
+  this.zeichne({ i:m.i, s:m.s, pos:m.pos + zeichen.length });
+  this.melde();
+};
+/* Baustein an der Schreibmarke (oder direkt davor) entfernen; Text links und rechts bleibt */
+ftFeld.prototype.loesche = function(){
+  if (this.art !== 'frei') return;
+  var m = this.marke(), t = this.teile, i = m.i;
+  if (t[i].t === 'x') { if (m.pos > 0 || i === 0) return; i = i - 1; }
+  var links = t[i - 1], rechts = t[i + 1], pos = links ? links.v.length : 0;
+  t.splice(i, 1);
+  this.teile = ftOrdne(t);
+  this.zeichne({ i:Math.max(0, i - 1), s:'v', pos:pos });
+  this.melde();
+};
+ftFeld.prototype.taste = function(e){
+  var inp = e.target; if (!inp.__ft || this.zu) return;
+  var a = this.eingaben(), k = a.indexOf(inp), pos = inp.selectionStart, bis = inp.selectionEnd;
+  var p = this.teile[inp.__ft.i];
+  if (e.key === 'ArrowLeft' && pos === 0 && bis === 0 && k > 0) { e.preventDefault(); ftSetze(a[k - 1], a[k - 1].value.length); }
+  else if (e.key === 'ArrowRight' && pos === inp.value.length && k < a.length - 1) { e.preventDefault(); ftSetze(a[k + 1], 0); }
+  else if (e.key === 'Backspace' && pos === 0 && bis === 0 && this.art === 'frei') {
+    var leer = function(q){ return SLOTS[q.t].every(function(s){ return !String(q[s]).trim(); }); };
+    if (p.t !== 'x' && leer(p)) { e.preventDefault(); this.loesche(); }
+    else if (p.t === 'x' && inp.__ft.i > 0) {
+      e.preventDefault();
+      if (leer(this.teile[inp.__ft.i - 1])) this.loesche();
+      else ftSetze(a[k - 1], a[k - 1].value.length);
+    }
+    else if (k > 0) { e.preventDefault(); ftSetze(a[k - 1], a[k - 1].value.length); }
+  }
+  else if (e.key === 'Enter' && typeof this.opt.enter === 'function') { e.preventDefault(); this.opt.enter(this); }
+};
+ftFeld.prototype.zustand = function(){ return ftKopie(this.teile); };
+ftFeld.prototype.setze = function(daten){
+  if (!ftGueltig(daten)) return;
+  var t = ftKopie(daten);
+  if (this.art === 'frei') t = ftOrdne(t);
+  else if (t.length !== 1 || t[0].t !== this.art) return;
+  this.teile = t; this.zeichne();
+};
+ftFeld.prototype.leeren = function(){ this.teile = this.art === 'frei' ? [{ t:'x', v:'' }] : [ftLeeresTeil(this.art)]; this.zeichne(); this.melde(); };
+ftFeld.prototype.sperre = function(an){ this.zu = !!an; this.zeichne(); };
+ftFeld.prototype.leer = function(){ return this.teile.every(function(p){ return SLOTS[p.t].every(function(s){ return !String(p[s]).trim(); }); }); };
+ftFeld.prototype.zahl = function(){ return ftZahl(this.teile); };
+ftFeld.prototype.linear = function(){ return ftLinear(this.teile); };
+ftFeld.prototype.tex = function(){ return ftTex(this.teile); };
+ftFeld.prototype.hat = function(typ){ return this.teile.some(function(p){ return p.t === typ; }); };
+
+return {
+  version: VERSION,
+  feld: function(el, opt){ return new ftFeld(el, opt); },
+  zahl: ftZahl, linear: ftLinear, tex: ftTex, leseZahl: ftLeseZahl,
+  rechne: ftRechne, gleichwertig: ftGleichwertig, variablen: ftVariablen, gueltig: ftGueltig
+};
+})();
+/* ============ ENDE BAUSTEIN Formeltool-Engine ============ */
+</script>
+<!-- ============ ENDE BAUSTEIN Formeltool ============ -->
 </head>
 <body data-anrede="sie" data-version="v1">
 
@@ -324,7 +877,7 @@ table.ausw th{background:var(--blue-light)}
 
 <script>
 /* =============================================================================
-   BAUSTEIN: Schritt-für-Schritt-Engine  (v2, 18.11.2026)
+   BAUSTEIN: Schritt-für-Schritt-Engine  (v3, 22.11.2026)
    Gepflegt im Wartungs-Projekt (_wartung/allgemein/baustein_schritt_fuer_schritt.html).
    UNVERÄNDERT übernehmen – Seiteninhalte stehen nur im HTML, nie hier.
    Erwartet im HTML:
@@ -333,6 +886,7 @@ table.ausw th{background:var(--blue-light)}
        (optional data-wahl="name": alternative Wege, gezählt wird der besser bewertete)
      - Wiederholung  .niveau > .nvbtn[data-stufe]  +  .stufe[data-stufe]
        .task[data-id][data-type="mc"|"num"][data-titel]  mit  .hilfe (.tip … , .muster)
+       num-Felder: input.in[data-ans] oder (v3) .ftfeld[data-ans|data-term] mit Formeltool
      - Auswertung  section.karte[data-auswertung]  mit  .ausw-inhalt
    Anrede über <body data-anrede="sie|du">, Version über <body data-version="v1">.
    Zustand: ein Status-Objekt, gespeichert in sessionStorage unter
@@ -550,17 +1104,42 @@ tasks.forEach(function(t){
   }
 
   if (typ === 'num') {
-    var ins = liste(t.querySelectorAll('input.in'));
+    /* v3: Zahlenfelder input.in UND Formeltool-Felder .ftfeld (TEIL 4.7) */
+    var ins = liste(t.querySelectorAll('input.in, .ftfeld'));
     z.v = z.v || [];
-    ins.forEach(function(el, i){
-      if (typeof z.v[i] === 'string') el.value = z.v[i];
-      el.addEventListener('input', function(){ z.v[i] = el.value; sichern(); });
+    var fds = ins.map(function(el, i){
+      if (el.tagName === 'INPUT') {
+        if (typeof z.v[i] === 'string') el.value = z.v[i];
+        el.addEventListener('input', function(){ z.v[i] = el.value; sichern(); });
+        return null;
+      }
+      var e = el.getAttribute('data-eingabe') || (el.hasAttribute('data-term') ? 'formel' : 'getrennt');
+      var f = FT.feld(el, { art: e === 'formel' ? 'frei' : e === 'gemischt' ? 'gem' : 'bruch',
+                            label: el.getAttribute('aria-label') || 'Antwort',
+                            aendern: function(x){ z.v[i] = x.zustand(); sichern(); } });
+      if (z.v[i] && typeof z.v[i] === 'object') f.setze(z.v[i]);
+      return f;
     });
+    var istLeer = function(i){ return fds[i] ? fds[i].leer() : ins[i].value.trim() === ''; };
+    var istGut = function(i){
+      var el = ins[i], f = fds[i], tol = parseFloat(el.getAttribute('data-tol'));
+      if (!f) { var v = zahlLesen(el.value); return !isNaN(v) && trifft(v, zahlLesen(el.getAttribute('data-ans')), tol); }
+      if (el.hasAttribute('data-term')) {
+        if (!FT.gleichwertig(f.linear(), el.getAttribute('data-term'))) return false;
+        var roh = f.zustand().map(function(q){ return Object.keys(q).filter(function(k){ return k !== 't'; }).map(function(k){ return q[k]; }).join(''); }).join('');
+        return (el.getAttribute('data-ohne') || '').split(' ').filter(Boolean).every(function(o){
+          return /^[a-z]+$/.test(o) ? !f.hat(o) : roh.indexOf(o) < 0;
+        });
+      }
+      var p = f.zahl();
+      if (!p || !trifft(p.w[0] / p.w[1], zahlLesen(el.getAttribute('data-ans')), tol)) return false;
+      return !el.hasAttribute('data-gekuerzt') || p.gek;
+    };
     var bewerteNum = function(){
       var falsch = 0, leer = 0;
-      z.g = ins.map(function(el){
-        if (el.value.trim() === '') { leer++; return 0; }
-        var v = zahlLesen(el.value), gut = !isNaN(v) && trifft(v, zahlLesen(el.getAttribute('data-ans')), parseFloat(el.getAttribute('data-tol')));
+      z.g = ins.map(function(el, i){
+        if (istLeer(i)) { leer++; return 0; }
+        var gut = istGut(i);
         if (!gut) falsch++;
         return gut ? 1 : 0;
       });
@@ -570,11 +1149,12 @@ tasks.forEach(function(t){
       ins.forEach(function(el, i){
         el.classList.toggle('ok', !!z.r && !!(z.g && z.g[i]));
         el.classList.toggle('bad', !!z.r && !(z.g && z.g[i]));
-        el.readOnly = !!z.r; el.classList.toggle('zu', !!z.r);
+        if (fds[i]) fds[i].sperre(!!z.r);
+        else { el.readOnly = !!z.r; el.classList.toggle('zu', !!z.r); }
       });
       zeichneStatus();
       if (z.r) {
-        var leer = ins.filter(function(el){ return el.value.trim() === ''; }).length;
+        var leer = ins.filter(function(el, i){ return istLeer(i); }).length;
         meldung(z.r === 'ok', z.r === 'ok' ? 'Richtig!' : (leer ? TX.leer + ' ' : '') + TX.feldFalsch);
       }
     };
@@ -585,7 +1165,11 @@ tasks.forEach(function(t){
       sichern(); zeichneNum();
     });
     bL.addEventListener('click', function(){
-      ins.forEach(function(el, i){ if (!(z.g && z.g[i])) { el.value = ''; z.v[i] = ''; } });
+      ins.forEach(function(el, i){
+        if (z.g && z.g[i]) return;
+        if (fds[i]) { fds[i].sperre(false); fds[i].leeren(); z.v[i] = null; }
+        else { el.value = ''; z.v[i] = ''; }
+      });
       z.r = null; z.g = null; sichern(); zeichneNum();
     });
     zeichneNum();
