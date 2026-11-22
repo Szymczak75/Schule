@@ -166,7 +166,8 @@ Engine-Fassung (`STORY_VERSION`). Bei einer Änderung: Versionsnummer im Kopfkom
 der Brüche oder Terme eingegeben werden (Lernseiten-Anweisung TEIL 4.7) – als getrennte
 Zähler/Nenner-Felder oder als Formeltool. Er steckt auch in `baustein_story.html`. Bei einer
 Änderung: Versionsnummer **und** `FT_VERSION` in `pruefe.py` erhöhen und den Block in der
-Story-Vorlage mitziehen. Die Engines `_rbka`, `_sfs` und EXAM nutzen ihn noch nicht.
+Vorlagen mitziehen, die ihn enthalten: `baustein_story.html`, `baustein_rueckblick_klassenarbeit.html`
+(ab v6), `baustein_schritt_fuer_schritt.html` (ab v3) und `exam/baustein_exam.html` (ab v1.3).
 
 ## Geodreieck
 Der Baustein ist für die drei Unterrichts-Projekte identisch. Er heißt jetzt überall

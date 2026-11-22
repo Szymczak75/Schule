@@ -157,6 +157,9 @@ def teil_html(t, kt, ewh):
         if kt:
             loes = '<ol>' + ''.join('<li>%s</li>' % e(karten[i]['t']) for i in kt['reihenfolge']) + '</ol>'
         return h.replace('@@LOES@@', ml(md_html(ewh) if ewh else loes) if (ewh or kt) else '')
+    elif t['typ'] == 'formel':
+        h += '<p><i>Eingabe: %s</i></p>' % {'getrennt': 'Zähler und Nenner getrennt', 'gemischt': 'gemischte Zahl'}.get(
+            t.get('eingabe'), 'Formeltool')
     elif t['typ'] == 'auswahl':
         richtig = set(kt.get('richtig', [])) if kt else set()
         h += '<ul class="karten">' + ''.join('<li class="%s">%s%s</li>' % (

@@ -47,8 +47,9 @@ einem Baustein oder einer Regel wird hier EINMAL umgesetzt und gilt dann in alle
    - Story-Engine → `baustein_story.html`; Versionsnummer im Kopfkommentar und `STORY_VERSION`
      in `pruefe.py` gemeinsam erhöhen.
    - Formeltool → `baustein_formeltool.html`; Versionsnummer und `FT_VERSION` in `pruefe.py`
-     gemeinsam erhöhen und den Block in `baustein_story.html` (und jedem weiteren Baustein,
-     der ihn enthält) mitziehen.
+     gemeinsam erhöhen und den Block in allen Vorlagen mitziehen, die ihn enthalten
+     (`baustein_story.html`, `baustein_rueckblick_klassenarbeit.html`,
+     `baustein_schritt_fuer_schritt.html`, `exam/baustein_exam.html`).
    - EXAM-Engine → `baustein_exam.html`; Versionsnummer im Kopfkommentar und `EXAM_VERSION`
      in `pruefe.py` gemeinsam erhöhen; Code-Muster (`CODE_ALPHABET`, `CODE_SALT`) immer
      gleichzeitig in `intern/EXAM/vorbereitung.html` ändern.

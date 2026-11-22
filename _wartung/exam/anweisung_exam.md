@@ -100,13 +100,15 @@ var EXAM = {
 | `sortieren` | `karten` `[{id, t}]`, optional **eine** Karte `{id, t:'❓ Fehlender Schritt', fehlt:true}` | legt die Karten per Antippen auf nummerierte Plätze | gelegte Reihenfolge, nicht gelegte Karten |
 | `auswahl` | `optionen` `[{id, t}]`, `mehrfach: true/false` | tippt eine (bzw. mehrere) Optionen an | alle Optionen mit [X] / [ ] |
 | `freitext` | – | schreibt einen Text | Text genau so, wie eingegeben |
+| `formel` | `eingabe`: `'formel'` (Formeltool) · `'getrennt'` (Zähler/Nenner) · `'gemischt'` (Ganze/Zähler/Nenner) | gibt einen Bruch oder Term ein (Lernseiten-Anweisung 4.7 – beim Erstellen fragen) | lesbarer Text, z. B. `3/4`, `x^2 + Wurzel(2)` |
 
 **Kennungen** (`id` der Karten und Optionen) sind neutral und ohne Muster (`'kq'`, `'kd'`,
 `'oa'` …) – nie `'schritt1'`, `'richtig'` oder alphabetisch in Lösungsreihenfolge.
 
 **Formeln:** möglichst als Unicode (Ca²⁺, Na⁺, ½). Braucht ein Test echte Formeln, kommt der
 MathJax-Block der Lernseiten-Anweisung (7.4) in den `<head>`; im PDF erscheinen sie dann als
-TeX-Quelltext.
+TeX-Quelltext. Im Aufgabentext (`auftrag`) das normale Minus `-` schreiben – das typografische
+`−` kann die PDF-Schrift nicht und druckt `?`.
 
 ---
 
@@ -228,6 +230,8 @@ Zusammen mit dem Erwartungshorizont entsteht der maschinenlesbare Schlüssel fü
 - `beschriften`: `nummern` = je Nummer die als richtig geltenden Begriffe; exakte Treffer schlägt
   das Skript als richtig vor, alles andere entscheidet Claude.
 - `freitext`: nur `max`.
+- `formel`: nur `max`; Claude bewertet vor wie bei `freitext` (Antwort als Text in `abgabe.json`,
+  die Eingabe zusätzlich als `eingabe`).
 
 ---
 
