@@ -348,6 +348,7 @@ Diese Punkte standen offen und sind inzwischen als Regel in
   optionaler Testcode `testcode` für SuS-Testgruppen hebt nur die Datumssperre auf; im
   Testmodus heißt jedes Codewort „Codewort + S“ (Wiedereinstieg mit Testmodus).
   Ablage: Story-Seiten immer in `<fach>/<klassenordner>/spiele/`, nie im Themenordner (TEIL 2.11).
+- **Antwortknöpfe mit langen Formeln überlappen** (22.11.2026, Escape Room Q1): Bei `wahl`-Optionen mit mehreren Bedingungen (z. B. \(f(1)=3;\ f''(1)=0;\ f'(1)=-2\)) ragte die Formel über den Knopf in den Nachbarknopf. Seitdem: mehrere Bedingungen **untereinander** (`m('…') + '<br>' + m('…')`), und das Baustein-CSS hält jede Formel im Knopf (`.optionen button > mjx-container`). Optionen immer mit geladenem MathJax ansehen.
 - **Zeitliche Sperre ungefragt angenommen** (22.11.2026): Beim ersten Adventskalender wurde nur
   gefragt, *wie* gesperrt wird, nicht *ob*. Seitdem gilt 2.11 Nr. 4: die Sperre immer
   ausdrücklich abfragen, Vorgabe ist „ohne Sperre“.
