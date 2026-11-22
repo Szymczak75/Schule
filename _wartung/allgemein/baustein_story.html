@@ -759,6 +759,8 @@ function m(t){
    STORY.testcode   optional, Testcode für SuS (z. B. eine Testgruppe vor dem 1.12.): gleiches Feld
                     (oder ?test=CODE) → Datumssperre in diesem Tab aus, die Karten bleiben aber
                     der Reihe nach zu lösen. Verschieden von vorschau und allen Codewörtern.
+                    Im Testmodus zeigt jede Karte ihr Codewort mit angehängtem S (z. B. TANNES);
+                    dieses Test-Codewort stellt den Stand wieder her UND schaltet den Testmodus ein.
    STORY.kern       { 'K6-1': 'Brüche kürzen', … } – nur zur Planung; den SuS wird nie
                     angezeigt, welche Kompetenz ein Rätsel übt
    STORY.karten[]   eine Karte:
@@ -939,7 +941,9 @@ var STORY = {
    Zeitraum: Karten öffnen nach Datum (Gerätedatum). Der Freischaltcode STORY.vorschau – im
    Codewort-Feld der Startkarte oder als ?vorschau=CODE – öffnet in diesem Tab alle Karten (ohne
    Datum, ohne Reihenfolge). Der Testcode STORY.testcode (oder ?test=CODE) hebt nur die
-   Datumssperre auf; die Reihenfolge bleibt – für Testgruppen von SuS.
+   Datumssperre auf; die Reihenfolge bleibt – für Testgruppen von SuS. Im Testmodus heißt jedes
+   Codewort „Codewort + S“; damit steigen Testende später wieder ein, ohne den Testcode erneut
+   einzugeben. Nach jedem Codewort springt die Seite direkt zur nächsten offenen Karte.
    Kernkompetenzen (kk) werden den SuS nicht angezeigt – sie sollen einfach ein Rätsel lösen. Codewort: Jede geschaffte Karte zeigt ein Codewort; auf der
    Startkarte eingegeben, gelten alle Karten bis dahin als geschafft (Stand im sessionStorage
    geht beim Schließen des Tabs verloren, TEIL 6 – das Codewort ersetzt dauerhaftes Speichern).
@@ -1158,13 +1162,20 @@ function zeigeStart(){
         : T('🧪 Testcode angenommen – die Datumssperre ist aus. Viel Spaß beim Testen!', '🧪 Testcode angenommen – die Datumssperre ist aus. Viel Spaß beim Testen!'); }
       return;
     }
+    var testWort = false;
     K.forEach(function(k, i){ if (w && norm(k.code) === w) treffer = i; });
+    if (treffer < 0 && STORY.testcode)                                  /* Test-Codewort: Codewort + S */
+      K.forEach(function(k, i){ if (w && norm(k.code) + 'S' === w) { treffer = i; testWort = true; } });
     if (treffer < 0) { fb.className = 'fb nok'; fb.textContent = '❌ Dieses Codewort kenne ich nicht.'; return; }
     for (var i = 0; i <= treffer; i++) if (!fertig(i)) { zk(i).st = 'code'; }
+    if (testWort) { S.test = true; banner(); }
     sichern(); reiterStand();
     zeigeStart(); zeigeAlleKarten();
+    var weiter = treffer + 1 < K.length ? 'k' + (treffer + 1) : 'ende';
+    if (!sperre(treffer + 1) || weiter === 'ende') { zeigeKarte(weiter, true); return; }   /* direkt zur nächsten Karte */
     var f2 = $('karte-start').querySelector('.block:last-child .fb');
-    if (f2) { f2.className = 'fb ok'; f2.textContent = '✅ Codewort angenommen – ' + R.karte + ' 1 bis ' + (treffer + 1) + ' gelten als geschafft.'; }
+    if (f2) { f2.className = 'fb ok'; f2.textContent = '✅ Codewort angenommen – ' + R.karte + ' 1 bis ' + (treffer + 1) + ' gelten als geschafft.'
+      + (testWort ? ' Testmodus ist wieder an.' : ''); }
   });
   inp.addEventListener('keydown', function(e){ if (e.key === 'Enter') { e.preventDefault(); ok.click(); } });
   z.appendChild(inp); z.appendChild(ok);
@@ -1215,8 +1226,12 @@ function zeigeKarteInhalt(i){
   }
 }
 function abschluss(b, i){
-  var cb = neu('div', 'codebox', '<span>🔑 Codewort:</span><span class="code">' + K[i].code + '</span>'
-    + '<span>' + T('– notiere es! Damit steigst du später wieder ein.', '– notieren Sie es! Damit steigen Sie später wieder ein.') + '</span>');
+  var testWort = S.test && !S.vorschau && STORY.testcode;   /* im Testmodus: Codewort + S, schaltet beim Wiedereinstieg den Testmodus mit ein */
+  var cb = neu('div', 'codebox', '<span>🔑 Codewort:</span><span class="code">' + K[i].code + (testWort ? 'S' : '') + '</span>'
+    + '<span>' + (testWort
+        ? T('– notiere es! Das S am Ende gehört zum Testmodus: Damit steigst du später wieder ein, auch vor dem Starttag.',
+            '– notieren Sie es! Das S am Ende gehört zum Testmodus: Damit steigen Sie später wieder ein, auch vor dem Starttag.')
+        : T('– notiere es! Damit steigst du später wieder ein.', '– notieren Sie es! Damit steigen Sie später wieder ein.')) + '</span>');
   b.appendChild(cb);
   var kn = neu('div', 'knoepfe');
   if (i + 1 < K.length) {

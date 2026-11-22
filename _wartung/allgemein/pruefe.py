@@ -544,6 +544,9 @@ def pruefe(pfad):
             if fc and re.sub(r'[^A-Z0-9ÄÖÜß]', '', fc.group(1).upper()) in codes:
                 fehler('STORY', 'Freischaltcode ist zugleich Codewort einer Karte')
             tc = re.search(r"\btestcode:\s*'([^']+)'", d)
+            if tc and any(c + 'S' in codes for c in codes):
+                fehler('STORY', 'Ein Codewort ist ein anderes Codewort + S – mit Testcode nicht eindeutig '
+                                '(Test-Codewörter enden auf S)')
             if tc:
                 tcn = re.sub(r'[^A-Z0-9ÄÖÜß]', '', tc.group(1).upper())
                 if tcn in codes:
