@@ -344,6 +344,8 @@ Diese Punkte standen offen und sind inzwischen als Regel in
   zurück, nach zwei Umwegen der Lösungsweg. Freischaltung nach Datum (Freischaltcode für die
   Lehrkraft im Codewort-Feld), Wiedereinstieg über Codewörter statt `localStorage`.
   Kernkompetenzen stecken in den Rätseln, werden den SuS aber nicht angezeigt. `pruefe.py` meldet `STORY`/`STORYALT`.
+  Seit Engine v2 (22.11.2026): Lehrercode `vorschau` öffnet alle Karten ohne Reihenfolge,
+  optionaler Testcode `testcode` für SuS-Testgruppen hebt nur die Datumssperre auf.
 - **Brüche und Terme eingeben: getrennte Felder oder Formeltool** (22.11.2026). Vorher fragen;
   beides kommt aus `baustein_formeltool.html` (einfache Form: Bruch, gemischte Zahl, Hochzahl,
   Index, Wurzel, n-te Wurzel – ohne Verschachtelung, keine externe Bibliothek). Bestehende

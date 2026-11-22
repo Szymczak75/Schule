@@ -19,6 +19,8 @@
      6. Alle soll-Werte nachrechnen (Python fractions / Termprobe), pruefe.py laufen lassen,
         mit dem Freischaltcode (Codewort-Feld der Startkarte) jede Karte einmal richtig und
         einmal falsch durchspielen.
+     v2: zweiter Code STORY.testcode für Testgruppen von SuS (Datumssperre aus, Reihenfolge
+        bleibt); der Lehrercode STORY.vorschau öffnet jetzt wirklich alle Karten.
      ===================================================================== -->
 <html lang="de">
 <head>
@@ -41,7 +43,7 @@
 </script>
 <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
 <style>
-/* ===== BAUSTEIN-CSS: Story (v1, 22.11.2026) – unverändert übernehmen ===== */
+/* ===== BAUSTEIN-CSS: Story (v2, 22.11.2026) – unverändert übernehmen ===== */
 :root{
   --ink:#22303f; --card:#ffffff; --green:#1e7d32; --red:#c1272d;
   --amber:#b8860b; --amber-light:#fdf3d9; --amber-dark:#96690a;
@@ -719,14 +721,14 @@ return {
   <p class="kopf-typ" id="st-typ"></p>
   <h1 id="st-titel"></h1>
   <p id="st-untertitel"></p>
-  <p class="vorschau" id="st-vorschau">🔓 Freigeschaltet für die Lehrkraft: Datumssperre ist aus (nur in diesem Tab).</p>
+  <p class="vorschau" id="st-vorschau"></p>
 </div></header>
 <nav class="reiter" aria-label="Karten"><div class="reiter-innen" id="reiter"></div></nav>
 <main id="main"></main>
 
 <script>
 /* ============================================================
-   BAUSTEIN: Story-Schreibhilfen (v1, 22.11.2026) – unverändert übernehmen
+   BAUSTEIN: Story-Schreibhilfen (v2, 22.11.2026) – unverändert übernehmen
    f(z,n)      Bruch als .frac-Konstrukt          f(3,4)  f('x + 1','2')
    g(ganz,z,n) gemischte Zahl                       g(1,5,9)
    m('…')      Formel mit Dezimalzahlen: Komma wird {,}, · wird \cdot
@@ -752,8 +754,11 @@ function m(t){
                     false → alle Karten ab „von“. Einzelne Karte abweichend: ab: '2026-12-07'.
                     nachEnde: 'sperren' (Vorgabe) | 'offen'. Ganz weglassen = immer spielbar.
    STORY.vorschau   Freischaltcode für die Lehrkraft: auf der Startkarte ins Codewort-Feld
-                    eingeben (oder seite_story.html?vorschau=CODE) → Datumssperre in diesem Tab
-                    aus, alle Karten offen – zum Testen. Kein echtes Passwort.
+                    eingeben (oder seite_story.html?vorschau=CODE) → in diesem Tab keine
+                    Datumssperre und keine Reihenfolge, alle Karten sofort offen. Kein echtes Passwort.
+   STORY.testcode   optional, Testcode für SuS (z. B. eine Testgruppe vor dem 1.12.): gleiches Feld
+                    (oder ?test=CODE) → Datumssperre in diesem Tab aus, die Karten bleiben aber
+                    der Reihe nach zu lösen. Verschieden von vorschau und allen Codewörtern.
    STORY.kern       { 'K6-1': 'Brüche kürzen', … } – nur zur Planung; den SuS wird nie
                     angezeigt, welche Kompetenz ein Rätsel übt
    STORY.karten[]   eine Karte:
@@ -924,7 +929,6 @@ var STORY = {
 <script>
 /* ============================================================
    BAUSTEIN: Story-Engine (v2, 22.11.2026) – unverändert übernehmen
-   v2: Freischaltcode öffnet alle Karten mit ihren Rätseln, nicht nur die Datumssperre
    Baut aus dem Objekt STORY: Startkarte (Einleitung, Anleitung, Zeitraum, Einstieg per
    Codewort) → je Karte Geschichte + Rätsel → Endkarte mit Auswertung.
    Ablauf einer Karte:  Haupträtsel richtig → geschafft (direkter Weg).
@@ -933,7 +937,9 @@ var STORY = {
      gleichwertige Terme in falscher Form kosten KEINEN Versuch (nur ein Hinweis).
    Hinweise (2 je Rätsel) gibt es vor dem Antworten; sie werden in der Auswertung gezählt.
    Zeitraum: Karten öffnen nach Datum (Gerätedatum). Der Freischaltcode STORY.vorschau – im
-   Codewort-Feld der Startkarte oder als ?vorschau=CODE – schaltet die Sperre für diesen Tab aus.
+   Codewort-Feld der Startkarte oder als ?vorschau=CODE – öffnet in diesem Tab alle Karten (ohne
+   Datum, ohne Reihenfolge). Der Testcode STORY.testcode (oder ?test=CODE) hebt nur die
+   Datumssperre auf; die Reihenfolge bleibt – für Testgruppen von SuS.
    Kernkompetenzen (kk) werden den SuS nicht angezeigt – sie sollen einfach ein Rätsel lösen. Codewort: Jede geschaffte Karte zeigt ein Codewort; auf der
    Startkarte eingegeben, gelten alle Karten bis dahin als geschafft (Stand im sessionStorage
    geht beim Schließen des Tabs verloren, TEIL 6 – das Codewort ersetzt dauerhaftes Speichern).
@@ -955,7 +961,7 @@ var K = STORY.karten || [];
 var Z = STORY.zeitraum || null;
 var DATEI = (location.pathname.split('/').pop() || 'seite').replace(/\.html?$/i, '');
 var KEY = 'aszym:' + DATEI + ':v' + (document.body.getAttribute('data-version') || '1');
-var S = { karte:'start', k:{}, vorschau:false };
+var S = { karte:'start', k:{}, vorschau:false, test:false };
 var FELD = {};   /* aktive Formeltool-Felder je Rätsel-ID */
 
 function lies(){ try { var r = sessionStorage.getItem(KEY); return r ? JSON.parse(r) : null; } catch (e) { return null; } }
@@ -981,12 +987,12 @@ function datumText(s){
 var HEUTE = iso(new Date());
 function ab(i){ if (K[i].ab) return K[i].ab; if (!Z || !Z.von) return ''; return Z.proTag ? plusTage(Z.von, i) : Z.von; }
 function phase(){
-  if (S.vorschau || !Z) return 'laeuft';
+  if (S.vorschau || S.test || !Z) return 'laeuft';
   if (Z.von && HEUTE < Z.von) return 'vor';
   if (Z.bis && HEUTE > Z.bis && Z.nachEnde !== 'offen') return 'nach';
   return 'laeuft';
 }
-function datumOffen(i){ return S.vorschau || !ab(i) || HEUTE >= ab(i); }
+function datumOffen(i){ return S.vorschau || S.test || !ab(i) || HEUTE >= ab(i); }
 
 /* ---------- Zustand je Karte ---------- */
 function zk(i){
@@ -1002,7 +1008,7 @@ function sperre(i){
   if (p === 'vor') return T('Die Geschichte beginnt am ', 'Die Geschichte beginnt am ') + datumText(Z.von) + '.';
   if (p === 'nach') return 'Der Spielzeitraum ist vorbei.';
   if (!datumOffen(i)) return R.karte + ' ' + (i + 1) + ' öffnet am ' + datumText(ab(i)) + '.';
-  if (i > 0 && !fertig(i - 1) && !S.vorschau) return T('Löse zuerst ', 'Lösen Sie zuerst ') + R.karte + ' ' + i + '.';
+  if (i > 0 && !S.vorschau && !fertig(i - 1)) return T('Löse zuerst ', 'Lösen Sie zuerst ') + R.karte + ' ' + i + '.';
   return '';
 }
 function raetsel(i, s){ return s === 0 ? K[i].raetsel : K[i].umwege[s - 1].raetsel; }
@@ -1064,7 +1070,7 @@ function baue(){
   $('st-typ').textContent = R.icon + ' ' + R.name;
   $('st-titel').innerHTML = STORY.titel || '';
   $('st-untertitel').innerHTML = STORY.untertitel || '';
-  $('st-vorschau').classList.toggle('an', !!S.vorschau);
+  banner();
   var reiter = $('reiter'), main = $('main');
   function tab(id, text, label){
     var b = neu('button', '', text); b.type = 'button'; b.id = 'tab-' + id;
@@ -1078,6 +1084,13 @@ function baue(){
   main.appendChild(neu('section', 'karte', '')).id = 'karte-start';
   K.forEach(function(k, i){ main.appendChild(neu('section', 'karte', '')).id = 'karte-k' + i; });
   main.appendChild(neu('section', 'karte', '')).id = 'karte-ende';
+}
+function banner(){
+  var e = $('st-vorschau');
+  e.textContent = S.vorschau ? '🔓 Freigeschaltet für die Lehrkraft: alle Karten sind offen – ohne Datum und ohne Reihenfolge (nur in diesem Tab).'
+    : S.test ? T('🧪 Testmodus: Die Datumssperre ist aus. Du löst die Karten der Reihe nach (nur in diesem Tab).',
+                 '🧪 Testmodus: Die Datumssperre ist aus. Sie lösen die Karten der Reihe nach (nur in diesem Tab).') : '';
+  e.classList.toggle('an', !!(S.vorschau || S.test));
 }
 function reiterStand(){
   K.forEach(function(k, i){
@@ -1133,12 +1146,16 @@ function zeigeStart(){
   var fb = neu('div', 'fb', '');
   var ok = knopf('btn-pruefen', 'Einsteigen', function(){
     var w = norm(inp.value), treffer = -1;
-    if (w && STORY.vorschau && norm(STORY.vorschau) === w) {          /* Freischaltcode der Lehrkraft */
-      S.vorschau = true; sichern();
-      $('st-vorschau').classList.add('an'); reiterStand();
+    var lehrer = w && STORY.vorschau && norm(STORY.vorschau) === w;   /* Freischaltcode der Lehrkraft */
+    var tester = w && STORY.testcode && norm(STORY.testcode) === w;   /* Testcode für SuS */
+    if (lehrer || tester) {
+      if (lehrer) S.vorschau = true; else S.test = true;
+      sichern(); banner(); reiterStand();
       zeigeStart(); zeigeAlleKarten();
       var f1 = $('karte-start').querySelector('.block:last-child .fb');
-      if (f1) { f1.className = 'fb ok'; f1.textContent = '🔓 Freischaltcode angenommen – alle Karten sind offen (nur in diesem Tab).'; }
+      if (f1) { f1.className = 'fb ok'; f1.textContent = lehrer
+        ? '🔓 Freischaltcode angenommen – alle Karten sind offen (nur in diesem Tab).'
+        : T('🧪 Testcode angenommen – die Datumssperre ist aus. Viel Spaß beim Testen!', '🧪 Testcode angenommen – die Datumssperre ist aus. Viel Spaß beim Testen!'); }
       return;
     }
     K.forEach(function(k, i){ if (w && norm(k.code) === w) treffer = i; });
@@ -1385,7 +1402,9 @@ var alt = lies();
 if (alt && alt.k) S = alt;
 try {
   var vp = new URLSearchParams(location.search).get('vorschau');
-  if (vp && STORY.vorschau && vp === String(STORY.vorschau)) S.vorschau = true;
+  if (vp && STORY.vorschau && norm(vp) === norm(STORY.vorschau)) S.vorschau = true;
+  var tp = new URLSearchParams(location.search).get('test');
+  if (tp && STORY.testcode && norm(tp) === norm(STORY.testcode)) S.test = true;
 } catch (e) {}
 baue();
 reiterStand();
