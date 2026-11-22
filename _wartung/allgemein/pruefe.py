@@ -23,7 +23,8 @@ Was dieser Linter NICHT kann (bleibt Handarbeit bzw. Browsertest):
   - ob der Stand ein Neuladen wirklich vollständig übersteht (Browsertest: Seite
     bearbeiten, neu laden, vergleichen)
 
-Stand: 22.11.2026 (Story-Seiten _story aus baustein_story.html, Prüfung STORY, TEIL 2.11;
+Stand: 22.11.2026 (Story-Engine v2: Freischaltcode öffnet alle Karten;
+       Story-Seiten _story aus baustein_story.html, Prüfung STORY, TEIL 2.11;
        Formeltool baustein_formeltool.html, Prüfung FT, TEIL 4.7;
        21.11.2026: Operatoren nach NRW-Liste: Prüfung OPERATOR meldet die aufgehobene
        Regel „bestimme = kein Rechenweg“, TEIL 3.2a;
@@ -78,7 +79,7 @@ RBKA_MARKE = 'BAUSTEIN: Rückblick-KA-Engine'
 
 # Story-Engine (baustein_story.html, TEIL 2.11)
 STORY_TYP = 'Story'
-STORY_VERSION = 'v1'
+STORY_VERSION = 'v2'
 STORY_MARKE = 'BAUSTEIN: Story-Engine'
 
 # Formeltool (baustein_formeltool.html, TEIL 4.7)
