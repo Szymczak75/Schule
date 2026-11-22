@@ -275,13 +275,13 @@ var TASTEN = {
 var STANDARD = ['bruch','gem','hoch','tief','wurzel','nwurzel','mal','loeschen'];
 
 /* ---------- Modell ---------- */
-function leeresTeil(t){ var o = { t:t }; SLOTS[t].forEach(function(s){ o[s] = ''; }); return o; }
-function kopie(teile){ return teile.map(function(p){ var o = { t:p.t }; SLOTS[p.t].forEach(function(s){ o[s] = String(p[s] == null ? '' : p[s]); }); return o; }); }
-function gueltig(daten){
+function ftLeeresTeil(t){ var o = { t:t }; SLOTS[t].forEach(function(s){ o[s] = ''; }); return o; }
+function ftKopie(teile){ return teile.map(function(p){ var o = { t:p.t }; SLOTS[p.t].forEach(function(s){ o[s] = String(p[s] == null ? '' : p[s]); }); return o; }); }
+function ftGueltig(daten){
   return Array.isArray(daten) && daten.length > 0 && daten.every(function(p){ return p && SLOTS[p.t]; });
 }
 /* frei: beginnt und endet mit Text, zwischen zwei Bausteinen steht immer ein Textstück */
-function ordne(teile){
+function ftOrdne(teile){
   var r = [];
   teile.forEach(function(p){
     var l = r[r.length - 1];
@@ -294,47 +294,47 @@ function ordne(teile){
 }
 
 /* ---------- Zahlen lesen (wie Rückblick-KA-Engine) ---------- */
-function ggt(a, b){ a = Math.abs(a); b = Math.abs(b); while (b) { var t = a % b; a = b; b = t; } return a || 1; }
-function kurz(z, n){ if (n < 0) { z = -z; n = -n; } var t = ggt(z, n); return [z / t, n / t]; }
-function leseZahl(roh){
+function ftGgt(a, b){ a = Math.abs(a); b = Math.abs(b); while (b) { var t = a % b; a = b; b = t; } return a || 1; }
+function ftKurz(z, n){ if (n < 0) { z = -z; n = -n; } var t = ftGgt(z, n); return [z / t, n / t]; }
+function ftLeseZahl(roh){
   var s = String(roh == null ? '' : roh).trim().replace(/[−–]/g, '-');
   var kl = s.match(/^\((.*)\)$/); if (kl) s = kl[1].trim();
   var vz = 1, r0 = s.match(/^([+-])\s*(.*)$/);
   if (r0) { if (r0[1] === '-') vz = -1; s = r0[2]; }
-  var p = betrag(s);
+  var p = ftBetrag(s);
   if (p && vz < 0) p.w = [-p.w[0], p.w[1]];
   if (p) p.vz = !!r0;
   return p;
 }
-function betrag(s){
+function ftBetrag(s){
   if (!s || s.length > 24) return null;
   s = s.replace(/…|\.\.\.+/g, '~').replace(/\./g, ',').replace(/\s+/g, ' ').replace(/[÷:]/g, '/').replace(/⁄/g, '/');
   s = s.replace(/((?:\d̅)+)/g, function(t){ return '(' + t.replace(/̅/g, '') + ')'; });
   var r;
   if ((r = s.match(/^(\d+) (\d+) ?\/ ?(\d+)$/))) {
     if (!+r[3]) return null;
-    return { w: kurz(+r[1] * +r[3] + +r[2], +r[3]), gek: ggt(+r[2], +r[3]) === 1, dez: false };
+    return { w: ftKurz(+r[1] * +r[3] + +r[2], +r[3]), gek: ftGgt(+r[2], +r[3]) === 1, dez: false };
   }
   var t = s.replace(/ /g, '');
   if ((r = t.match(/^(\d+)\/(\d+)$/))) {
     if (!+r[2]) return null;
-    return { w: kurz(+r[1], +r[2]), gek: ggt(+r[1], +r[2]) === 1, dez: false };
+    return { w: ftKurz(+r[1], +r[2]), gek: ftGgt(+r[1], +r[2]) === 1, dez: false };
   }
   if ((r = t.match(/^(\d*),(\d*)\((\d+)\)$/)) || (r = t.match(/^(\d*),(\d*?)(\d)~$/))) {
     var I = r[1] || '0', P = r[2], Q = r[3];
     var N = parseInt(I + P + Q, 10), M = parseInt(I + P, 10);
-    return { w: kurz(N - M, (Math.pow(10, Q.length) - 1) * Math.pow(10, P.length)), gek: true, dez: true };
+    return { w: ftKurz(N - M, (Math.pow(10, Q.length) - 1) * Math.pow(10, P.length)), gek: true, dez: true };
   }
   if ((r = t.match(/^(\d*),(\d+)$/)) || (r = t.match(/^(\d+),?()$/))) {
-    return { w: kurz(parseInt((r[1] || '0') + r[2], 10), Math.pow(10, r[2].length)), gek: true, dez: true };
+    return { w: ftKurz(parseInt((r[1] || '0') + r[2], 10), Math.pow(10, r[2].length)), gek: true, dez: true };
   }
   return null;
 }
 /* Eingabe aus dem Formeltool als Zahl: Text allein, oder [Vorzeichen] Bruch / gemischte Zahl */
-function zahl(daten){
-  if (!gueltig(daten)) return null;
+function ftZahl(daten){
+  if (!ftGueltig(daten)) return null;
   var t = daten.filter(function(p){ return !(p.t === 'x' && !String(p.v).trim()); });
-  if (t.length === 1 && t[0].t === 'x') return leseZahl(t[0].v);
+  if (t.length === 1 && t[0].t === 'x') return ftLeseZahl(t[0].v);
   var vz = 1, mitVz = false;
   if (t.length === 2 && t[0].t === 'x') {
     var v0 = String(t[0].v).trim().replace(/[−–]/g, '-');
@@ -344,25 +344,25 @@ function zahl(daten){
   if (t.length !== 1) return null;
   var s = t[0], z, n, w;
   if (s.t === 'bruch') {
-    z = leseZahl(s.z); n = leseZahl(s.n);
+    z = ftLeseZahl(s.z); n = ftLeseZahl(s.n);
     if (!z || !n || !n.w[0]) return null;
-    w = kurz(vz * z.w[0] * n.w[1], z.w[1] * n.w[0]);
+    w = ftKurz(vz * z.w[0] * n.w[1], z.w[1] * n.w[0]);
     var ganz = z.w[1] === 1 && n.w[1] === 1;
-    return { w: w, gek: ganz && ggt(z.w[0], n.w[0]) === 1 && n.w[0] > 0, dez: false, vz: mitVz || z.vz || n.vz };
+    return { w: w, gek: ganz && ftGgt(z.w[0], n.w[0]) === 1 && n.w[0] > 0, dez: false, vz: mitVz || z.vz || n.vz };
   }
   if (s.t === 'gem') {
-    var g = leseZahl(s.g); z = leseZahl(s.z); n = leseZahl(s.n);
+    var g = ftLeseZahl(s.g); z = ftLeseZahl(s.z); n = ftLeseZahl(s.n);
     if (!g || !z || !n || g.vz || z.vz || n.vz) return null;
     if (g.w[1] !== 1 || z.w[1] !== 1 || n.w[1] !== 1 || !n.w[0]) return null;
-    w = kurz(vz * (g.w[0] * n.w[0] + z.w[0]), n.w[0]);
-    return { w: w, gek: ggt(z.w[0], n.w[0]) === 1, dez: false, vz: mitVz };
+    w = ftKurz(vz * (g.w[0] * n.w[0] + z.w[0]), n.w[0]);
+    return { w: w, gek: ftGgt(z.w[0], n.w[0]) === 1, dez: false, vz: mitVz };
   }
   return null;
 }
 
 /* ---------- Rechentext und Darstellung ---------- */
-function linear(daten){
-  if (!gueltig(daten)) return '';
+function ftLinear(daten){
+  if (!ftGueltig(daten)) return '';
   return daten.map(function(p){
     switch (p.t) {
       case 'x':       return p.v;
@@ -376,7 +376,7 @@ function linear(daten){
     return '';
   }).join('');
 }
-function texText(v){
+function ftTexText(v){
   var s = String(v == null ? '' : v).replace(/[\\{}$%#&~]/g, '').replace(/[−–]/g, '-');
   if (!s.trim()) return '';
   s = s.replace(/(\d),(\d)/g, '$1{,}$2').replace(/[·*×]/g, '\\cdot ').replace(/</g, '\\lt ').replace(/>/g, '\\gt ');
@@ -384,20 +384,20 @@ function texText(v){
   s = s.replace(/_\s*([A-Za-z0-9]+)/g, '_{$1}');
   return s;
 }
-function feldTex(v){ var s = texText(v); return s === '' ? '\\square' : s; }
-function tex(daten){
-  if (!gueltig(daten)) return '';
+function ftFeldTex(v){ var s = ftTexText(v); return s === '' ? '\\square' : s; }
+function ftTex(daten){
+  if (!ftGueltig(daten)) return '';
   var out = [];
   daten.forEach(function(p, i){
     var s = '';
     switch (p.t) {
-      case 'x':       s = texText(p.v); break;
-      case 'bruch':   s = '\\frac{' + feldTex(p.z) + '}{' + feldTex(p.n) + '}'; break;
-      case 'gem':     s = feldTex(p.g) + '\\frac{' + feldTex(p.z) + '}{' + feldTex(p.n) + '}'; break;
-      case 'hoch':    s = '^{' + feldTex(p.v) + '}'; break;
-      case 'tief':    s = '_{' + feldTex(p.v) + '}'; break;
-      case 'wurzel':  s = '\\sqrt{' + feldTex(p.v) + '}'; break;
-      case 'nwurzel': s = '\\sqrt[' + feldTex(p.n) + ']{' + feldTex(p.v) + '}'; break;
+      case 'x':       s = ftTexText(p.v); break;
+      case 'bruch':   s = '\\frac{' + ftFeldTex(p.z) + '}{' + ftFeldTex(p.n) + '}'; break;
+      case 'gem':     s = ftFeldTex(p.g) + '\\frac{' + ftFeldTex(p.z) + '}{' + ftFeldTex(p.n) + '}'; break;
+      case 'hoch':    s = '^{' + ftFeldTex(p.v) + '}'; break;
+      case 'tief':    s = '_{' + ftFeldTex(p.v) + '}'; break;
+      case 'wurzel':  s = '\\sqrt{' + ftFeldTex(p.v) + '}'; break;
+      case 'nwurzel': s = '\\sqrt[' + ftFeldTex(p.n) + ']{' + ftFeldTex(p.v) + '}'; break;
     }
     /* Hochzahl direkt hinter einem Bruch/einer Wurzel: Klammer zeigen, wie gerechnet wird */
     var nach = daten[i + 1];
@@ -410,7 +410,7 @@ function tex(daten){
 }
 
 /* ---------- Rechnen: Tokenizer und Parser ---------- */
-function tokens(s){
+function ftTokens(s){
   s = String(s).replace(/[−–]/g, '-').replace(/[·×*]/g, '*').replace(/[:÷]/g, '/')
        .replace(/²/g, '^2').replace(/³/g, '^3').replace(/√/g, 'sqrt');
   var out = [], i = 0, r;
@@ -428,8 +428,8 @@ function tokens(s){
   }
   return out;
 }
-function baum(s){
-  var tk = tokens(s); if (!tk || !tk.length) return null;
+function ftBaum(s){
+  var tk = ftTokens(s); if (!tk || !tk.length) return null;
   var i = 0;
   function sieh(){ return tk[i]; }
   function nimm(t){ if (tk[i] && tk[i].t === t) { i++; return true; } return false; }
@@ -473,40 +473,40 @@ function baum(s){
   }
   try { var e = ausdruck(); return i === tk.length ? e : null; } catch (x) { return null; }
 }
-function werte(e, bel){
+function ftWerte(e, bel){
   switch (e[0]) {
     case 'n': return e[1];
     case 'v': return Object.prototype.hasOwnProperty.call(bel, e[1]) ? +bel[e[1]] : NaN;
-    case 'neg': return -werte(e[1], bel);
-    case '+': return werte(e[1], bel) + werte(e[2], bel);
-    case '-': return werte(e[1], bel) - werte(e[2], bel);
-    case '*': return werte(e[1], bel) * werte(e[2], bel);
-    case '/': return werte(e[1], bel) / werte(e[2], bel);
-    case '^': return Math.pow(werte(e[1], bel), werte(e[2], bel));
-    case 'sqrt': return Math.sqrt(werte(e[1], bel));
+    case 'neg': return -ftWerte(e[1], bel);
+    case '+': return ftWerte(e[1], bel) + ftWerte(e[2], bel);
+    case '-': return ftWerte(e[1], bel) - ftWerte(e[2], bel);
+    case '*': return ftWerte(e[1], bel) * ftWerte(e[2], bel);
+    case '/': return ftWerte(e[1], bel) / ftWerte(e[2], bel);
+    case '^': return Math.pow(ftWerte(e[1], bel), ftWerte(e[2], bel));
+    case 'sqrt': return Math.sqrt(ftWerte(e[1], bel));
     case 'root':
-      var n = werte(e[1], bel), x = werte(e[2], bel);
+      var n = ftWerte(e[1], bel), x = ftWerte(e[2], bel);
       if (x < 0 && Math.round(n) === n && Math.abs(n % 2) === 1) return -Math.pow(-x, 1 / n);
       return Math.pow(x, 1 / n);
   }
   return NaN;
 }
-function rechne(s, bel){ var e = baum(s); return e ? werte(e, bel || {}) : NaN; }
-function variablen(s){
-  var tk = tokens(s) || [], v = [];
+function ftRechne(s, bel){ var e = ftBaum(s); return e ? ftWerte(e, bel || {}) : NaN; }
+function ftVariablen(s){
+  var tk = ftTokens(s) || [], v = [];
   tk.forEach(function(t){ if (t.t === 'v' && v.indexOf(t.v) < 0) v.push(t.v); });
   return v;
 }
 var PROBE = [0.731, 1.913, -1.37, 2.57, 0.43, 3.11, -0.67, 1.29];
-function gleichwertig(a, b, vars){
-  var ea = baum(a), eb = baum(b);
+function ftGleichwertig(a, b, vars){
+  var ea = ftBaum(a), eb = ftBaum(b);
   if (!ea || !eb) return false;
-  vars = vars || variablen(a).concat(variablen(b));
+  vars = vars || ftVariablen(a).concat(ftVariablen(b));
   var gueltige = 0;
   for (var k = 0; k < PROBE.length; k++) {
     var bel = {};
     vars.forEach(function(v, j){ bel[v] = PROBE[(k + 3 * j) % PROBE.length] + 0.137 * j; });
-    var x = werte(ea, bel), y = werte(eb, bel);
+    var x = ftWerte(ea, bel), y = ftWerte(eb, bel);
     if (!isFinite(x) || !isFinite(y)) continue;
     gueltige++;
     if (Math.abs(x - y) > 1e-7 * Math.max(1, Math.abs(x), Math.abs(y))) return false;
@@ -515,12 +515,12 @@ function gleichwertig(a, b, vars){
 }
 
 /* ---------- Feld ---------- */
-function Feld(el, opt){
+function ftFeld(el, opt){
   opt = opt || {};
   var fd = this;
   this.art = opt.art === 'bruch' || opt.art === 'gem' ? opt.art : 'frei';
   this.opt = opt; this.zu = false; this.fokus = null;
-  this.teile = this.art === 'frei' ? [{ t:'x', v:'' }] : [leeresTeil(this.art)];
+  this.teile = this.art === 'frei' ? [{ t:'x', v:'' }] : [ftLeeresTeil(this.art)];
   this.box = document.createElement('div');
   this.box.className = 'ft' + (this.art === 'frei' ? '' : ' ft-fest');
   if (this.art === 'frei') {
@@ -554,7 +554,7 @@ function Feld(el, opt){
   this.zeile.addEventListener('input', function(e){
     var inp = e.target; if (!inp.__ft) return;
     fd.teile[inp.__ft.i][inp.__ft.s] = inp.value;
-    breite(inp); fd.melde();
+    ftBreite(inp); fd.melde();
   });
   this.zeile.addEventListener('focusin', function(e){
     if (e.target.__ft) { fd.fokus = e.target; fd.zeile.classList.add('ft-fokus'); }
@@ -562,20 +562,20 @@ function Feld(el, opt){
   this.zeile.addEventListener('focusout', function(){ fd.zeile.classList.remove('ft-fokus'); });
   this.zeile.addEventListener('keydown', function(e){ fd.taste(e); });
   this.zeile.addEventListener('click', function(e){
-    if (e.target === fd.zeile && !fd.zu) { var a = fd.eingaben(); var l = a[a.length - 1]; if (l) setze(l, l.value.length); }
+    if (e.target === fd.zeile && !fd.zu) { var a = fd.eingaben(); var l = a[a.length - 1]; if (l) ftSetze(l, l.value.length); }
   });
   this.zeichne();
 }
-function breite(inp){
+function ftBreite(inp){
   var n = Math.max(inp.value.length, inp.classList.contains('ft-s') ? 1 : 0);
   inp.style.width = (n + 1) + 'ch';
   if (inp.classList.contains('ft-s')) inp.classList.toggle('ft-voll', inp.value.trim() !== '');
 }
-function setze(inp, pos){
+function ftSetze(inp, pos){
   try { inp.focus(); inp.setSelectionRange(pos, pos); } catch (e) { try { inp.focus(); } catch (x) {} }
 }
-Feld.prototype.eingaben = function(){ return Array.prototype.slice.call(this.zeile.querySelectorAll('input')); };
-Feld.prototype.zeichne = function(ziel){
+ftFeld.prototype.eingaben = function(){ return Array.prototype.slice.call(this.zeile.querySelectorAll('input')); };
+ftFeld.prototype.zeichne = function(ziel){
   var fd = this, z = this.zeile, tm = this.opt.tastatur === 'zahl' ? 'decimal' : 'text';
   z.innerHTML = ''; this.fokus = null;
   function inp(i, s, cls, name){
@@ -586,7 +586,7 @@ Feld.prototype.zeichne = function(ziel){
     e.setAttribute('aria-label', name);
     e.__ft = { i:i, s:s };
     if (fd.zu) { e.readOnly = true; e.classList.add('zu'); }
-    breite(e);
+    ftBreite(e);
     return e;
   }
   function span(cls){ var s = document.createElement('span'); s.className = cls; return s; }
@@ -625,21 +625,21 @@ Feld.prototype.zeichne = function(ziel){
   if (this.leiste) Array.prototype.forEach.call(this.leiste.children, function(b){ b.disabled = fd.zu; });
   if (ziel) {
     var ziel_el = this.eingaben().filter(function(e){ return e.__ft.i === ziel.i && e.__ft.s === ziel.s; })[0];
-    if (ziel_el) setze(ziel_el, ziel.pos == null ? ziel_el.value.length : ziel.pos);
+    if (ziel_el) ftSetze(ziel_el, ziel.pos == null ? ziel_el.value.length : ziel.pos);
   }
 };
-Feld.prototype.melde = function(){ if (typeof this.opt.aendern === 'function') this.opt.aendern(this); };
+ftFeld.prototype.melde = function(){ if (typeof this.opt.aendern === 'function') this.opt.aendern(this); };
 /* Wo steht die Schreibmarke? → { i, s, pos } */
-Feld.prototype.marke = function(){
+ftFeld.prototype.marke = function(){
   var f = this.fokus;
   if (!f || !f.__ft) { var l = this.teile.length - 1; return { i:l, s:SLOTS[this.teile[l].t][0], pos:String(this.teile[l][SLOTS[this.teile[l].t][0]]).length }; }
   var pos = f.value.length;
   try { if (typeof f.selectionStart === 'number') pos = f.selectionStart; } catch (e) {}
   return { i:f.__ft.i, s:f.__ft.s, pos:pos };
 };
-Feld.prototype.fuegeEin = function(typ){
+ftFeld.prototype.fuegeEin = function(typ){
   if (this.art !== 'frei' || !SLOTS[typ] || typ === 'x') return;
-  var m = this.marke(), t = this.teile, neu = leeresTeil(typ), stelle;
+  var m = this.marke(), t = this.teile, neu = ftLeeresTeil(typ), stelle;
   if (t[m.i].t === 'x') {
     var v = t[m.i].v;
     t.splice(m.i, 1, { t:'x', v:v.slice(0, m.pos) }, neu, { t:'x', v:v.slice(m.pos) });
@@ -648,67 +648,67 @@ Feld.prototype.fuegeEin = function(typ){
     t.splice(m.i + 1, 0, { t:'x', v:'' }, neu);
     stelle = m.i + 2;
   }
-  this.teile = ordne(t);
+  this.teile = ftOrdne(t);
   stelle = this.teile.indexOf(neu);
   this.zeichne({ i:stelle, s:SLOTS[typ][0], pos:0 });
   this.melde();
 };
-Feld.prototype.tippe = function(zeichen){
+ftFeld.prototype.tippe = function(zeichen){
   var m = this.marke(), p = this.teile[m.i], alt = String(p[m.s]);
   p[m.s] = alt.slice(0, m.pos) + zeichen + alt.slice(m.pos);
   this.zeichne({ i:m.i, s:m.s, pos:m.pos + zeichen.length });
   this.melde();
 };
 /* Baustein an der Schreibmarke (oder direkt davor) entfernen; Text links und rechts bleibt */
-Feld.prototype.loesche = function(){
+ftFeld.prototype.loesche = function(){
   if (this.art !== 'frei') return;
   var m = this.marke(), t = this.teile, i = m.i;
   if (t[i].t === 'x') { if (m.pos > 0 || i === 0) return; i = i - 1; }
   var links = t[i - 1], rechts = t[i + 1], pos = links ? links.v.length : 0;
   t.splice(i, 1);
-  this.teile = ordne(t);
+  this.teile = ftOrdne(t);
   this.zeichne({ i:Math.max(0, i - 1), s:'v', pos:pos });
   this.melde();
 };
-Feld.prototype.taste = function(e){
+ftFeld.prototype.taste = function(e){
   var inp = e.target; if (!inp.__ft || this.zu) return;
   var a = this.eingaben(), k = a.indexOf(inp), pos = inp.selectionStart, bis = inp.selectionEnd;
   var p = this.teile[inp.__ft.i];
-  if (e.key === 'ArrowLeft' && pos === 0 && bis === 0 && k > 0) { e.preventDefault(); setze(a[k - 1], a[k - 1].value.length); }
-  else if (e.key === 'ArrowRight' && pos === inp.value.length && k < a.length - 1) { e.preventDefault(); setze(a[k + 1], 0); }
+  if (e.key === 'ArrowLeft' && pos === 0 && bis === 0 && k > 0) { e.preventDefault(); ftSetze(a[k - 1], a[k - 1].value.length); }
+  else if (e.key === 'ArrowRight' && pos === inp.value.length && k < a.length - 1) { e.preventDefault(); ftSetze(a[k + 1], 0); }
   else if (e.key === 'Backspace' && pos === 0 && bis === 0 && this.art === 'frei') {
     var leer = function(q){ return SLOTS[q.t].every(function(s){ return !String(q[s]).trim(); }); };
     if (p.t !== 'x' && leer(p)) { e.preventDefault(); this.loesche(); }
     else if (p.t === 'x' && inp.__ft.i > 0) {
       e.preventDefault();
       if (leer(this.teile[inp.__ft.i - 1])) this.loesche();
-      else setze(a[k - 1], a[k - 1].value.length);
+      else ftSetze(a[k - 1], a[k - 1].value.length);
     }
-    else if (k > 0) { e.preventDefault(); setze(a[k - 1], a[k - 1].value.length); }
+    else if (k > 0) { e.preventDefault(); ftSetze(a[k - 1], a[k - 1].value.length); }
   }
   else if (e.key === 'Enter' && typeof this.opt.enter === 'function') { e.preventDefault(); this.opt.enter(this); }
 };
-Feld.prototype.zustand = function(){ return kopie(this.teile); };
-Feld.prototype.setze = function(daten){
-  if (!gueltig(daten)) return;
-  var t = kopie(daten);
-  if (this.art === 'frei') t = ordne(t);
+ftFeld.prototype.zustand = function(){ return ftKopie(this.teile); };
+ftFeld.prototype.setze = function(daten){
+  if (!ftGueltig(daten)) return;
+  var t = ftKopie(daten);
+  if (this.art === 'frei') t = ftOrdne(t);
   else if (t.length !== 1 || t[0].t !== this.art) return;
   this.teile = t; this.zeichne();
 };
-Feld.prototype.leeren = function(){ this.teile = this.art === 'frei' ? [{ t:'x', v:'' }] : [leeresTeil(this.art)]; this.zeichne(); this.melde(); };
-Feld.prototype.sperre = function(an){ this.zu = !!an; this.zeichne(); };
-Feld.prototype.leer = function(){ return this.teile.every(function(p){ return SLOTS[p.t].every(function(s){ return !String(p[s]).trim(); }); }); };
-Feld.prototype.zahl = function(){ return zahl(this.teile); };
-Feld.prototype.linear = function(){ return linear(this.teile); };
-Feld.prototype.tex = function(){ return tex(this.teile); };
-Feld.prototype.hat = function(typ){ return this.teile.some(function(p){ return p.t === typ; }); };
+ftFeld.prototype.leeren = function(){ this.teile = this.art === 'frei' ? [{ t:'x', v:'' }] : [ftLeeresTeil(this.art)]; this.zeichne(); this.melde(); };
+ftFeld.prototype.sperre = function(an){ this.zu = !!an; this.zeichne(); };
+ftFeld.prototype.leer = function(){ return this.teile.every(function(p){ return SLOTS[p.t].every(function(s){ return !String(p[s]).trim(); }); }); };
+ftFeld.prototype.zahl = function(){ return ftZahl(this.teile); };
+ftFeld.prototype.linear = function(){ return ftLinear(this.teile); };
+ftFeld.prototype.tex = function(){ return ftTex(this.teile); };
+ftFeld.prototype.hat = function(typ){ return this.teile.some(function(p){ return p.t === typ; }); };
 
 return {
   version: VERSION,
-  feld: function(el, opt){ return new Feld(el, opt); },
-  zahl: zahl, linear: linear, tex: tex, leseZahl: leseZahl,
-  rechne: rechne, gleichwertig: gleichwertig, variablen: variablen, gueltig: gueltig
+  feld: function(el, opt){ return new ftFeld(el, opt); },
+  zahl: ftZahl, linear: ftLinear, tex: ftTex, leseZahl: ftLeseZahl,
+  rechne: ftRechne, gleichwertig: ftGleichwertig, variablen: ftVariablen, gueltig: ftGueltig
 };
 })();
 /* ============ ENDE BAUSTEIN Formeltool-Engine ============ */

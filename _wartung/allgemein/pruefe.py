@@ -23,7 +23,8 @@ Was dieser Linter NICHT kann (bleibt Handarbeit bzw. Browsertest):
   - ob der Stand ein Neuladen wirklich vollständig übersteht (Browsertest: Seite
     bearbeiten, neu laden, vergleichen)
 
-Stand: 22.11.2026 (Story-Engine v2: Testcode STORY.testcode für SuS-Testgruppen, Prüfung STORY;
+Stand: 22.11.2026 (Rückblick-KA-Engine v6 und SfS-Engine v3 mit Formeltool, art term;
+       Story-Engine v2: Testcode STORY.testcode für SuS-Testgruppen, Prüfung STORY;
        Story-Seiten _story aus baustein_story.html, Prüfung STORY, TEIL 2.11;
        Formeltool baustein_formeltool.html, Prüfung FT, TEIL 4.7;
        21.11.2026: Operatoren nach NRW-Liste: Prüfung OPERATOR meldet die aufgehobene
@@ -69,12 +70,12 @@ ERLAUBTE_HOSTS = ('cdn.jsdelivr.net/npm/mathjax',)   # Google Fonts seit 16.10.2
 
 # Schritt-für-Schritt-Engine (baustein_schritt_fuer_schritt.html, TEIL 2.7)
 SFS_TYP = 'Schritt für Schritt'
-SFS_VERSION = 'v2'
+SFS_VERSION = 'v3'
 SFS_MARKE = 'BAUSTEIN: Schritt-für-Schritt-Engine'
 
 # Rückblick-KA-Engine (baustein_rueckblick_klassenarbeit.html, TEIL 2.8)
 RBKA_TYP = 'Rückblick KA'
-RBKA_VERSION = 'v5'
+RBKA_VERSION = 'v6'
 RBKA_MARKE = 'BAUSTEIN: Rückblick-KA-Engine'
 
 # Story-Engine (baustein_story.html, TEIL 2.11)
@@ -435,7 +436,8 @@ def pruefe(pfad):
                         if n_ueb not in (1, 2):
                             fehler('KERN', 'KA.kern %s hat %d Aufgaben statt 1 oder 2' % (kid, n_ueb))
                         n_soll = len(re.findall(r'\bsoll:\s*\[\s*-?\d+\s*,\s*[1-9]\d*\s*\]', e)) + \
-                                 len(re.findall(r"\bart:\s*'zeichen'[^}]*?\bsoll:\s*'[<>=]'", e))
+                                 len(re.findall(r"\bart:\s*'zeichen'[^}]*?\bsoll:\s*'[<>=]'", e)) + \
+                         len(re.findall(r"\bsoll:\s*'(?![<>=]')[^']+'", e))   # art 'term' (v6)
                         if n_soll < n_ueb:
                             fehler('KERN', 'KA.kern %s: nicht jede Aufgabe hat einen gültigen soll-Wert' % kid)
                         if len(re.findall(r'\btipps:\s*\[', e)) < n_ueb:
@@ -454,7 +456,8 @@ def pruefe(pfad):
                     if n_ueb != 2:
                         fehler('RBKA', 'Teilaufgabe %s hat %d ähnliche Aufgaben statt genau 2' % (tid, n_ueb))
                     n_soll = len(re.findall(r'\bsoll:\s*\[\s*-?\d+\s*,\s*[1-9]\d*\s*\]', t)) + \
-                             len(re.findall(r"\bart:\s*'zeichen'[^}]*?\bsoll:\s*'[<>=]'", t))
+                             len(re.findall(r"\bart:\s*'zeichen'[^}]*?\bsoll:\s*'[<>=]'", t)) + \
+                         len(re.findall(r"\bsoll:\s*'(?![<>=]')[^']+'", t))   # art 'term' (v6)
                     if n_soll < n_ueb:
                         fehler('RBKA', 'Teilaufgabe %s: nicht jede Übung hat soll: [Zähler, Nenner] '
                                        'bzw. bei art \'zeichen\' soll: \'<\'|\'>\'|\'=\'' % tid)

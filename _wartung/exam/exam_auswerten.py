@@ -5,7 +5,7 @@ Ablauf im Test-Chat (anweisung_exam.md, Abschnitt 7):
 
   1) Vorbewerten – liest alle Abgabe-PDFs (eingebettete abgabe.json), prüft Codes und
      Doppelte, bewertet geschlossene Teile (auswahl, sortieren) nach dem Schlüssel und
-     schreibt die Bewertungsdatei. Offene Teile (freitext, beschriften) bleiben leer:
+     schreibt die Bewertungsdatei. Offene Teile (freitext, formel, beschriften) bleiben leer:
        python3 exam_auswerten.py vorbewerten PDF_ORDNER schluessel_<thema>.json bewertung_<thema>.json
 
   2) Claude füllt in bewertung_<thema>.json die offenen Teile aus (punkte, begruendung,
@@ -171,7 +171,7 @@ def vorbewerten(pdf_ordner, schluessel_pfad, ziel):
                 p, det = bewerte_geschlossen(t, ant)
                 eintrag = {'typ': t['typ'], 'max': t['max'], 'punkte': p, 'automatisch': p is not None,
                            'details': det, 'begruendung': '', 'kommentar': '', 'korrekturen': []}
-                if t['typ'] == 'freitext':
+                if t['typ'] in ('freitext', 'formel'):
                     eintrag['antwort'] = (ant or {}).get('antwort', '')
                 if t['typ'] == 'beschriften':
                     eintrag['nummern'] = {}            # {"1": {"ok": true/false, "richtig": "…"}}
