@@ -23,7 +23,8 @@ Was dieser Linter NICHT kann (bleibt Handarbeit bzw. Browsertest):
   - ob der Stand ein Neuladen wirklich vollständig übersteht (Browsertest: Seite
     bearbeiten, neu laden, vergleichen)
 
-Stand: 22.11.2026 (Story-Engine v2: Testcode STORY.testcode für SuS-Testgruppen, Prüfung STORY;
+Stand: 22.11.2026 (Story-Seiten im Ordner spiele/ der Jahrgangsstufe, Prüfung STORYORDNER;
+       Story-Engine v2: Testcode STORY.testcode für SuS-Testgruppen, Prüfung STORY;
        Story-Seiten _story aus baustein_story.html, Prüfung STORY, TEIL 2.11;
        Formeltool baustein_formeltool.html, Prüfung FT, TEIL 4.7;
        21.11.2026: Operatoren nach NRW-Liste: Prüfung OPERATOR meldet die aufgehobene
@@ -477,6 +478,10 @@ def pruefe(pfad):
         elif '%s (%s' % (STORY_MARKE, STORY_VERSION) not in h:
             hinweis('STORYALT', 'Story-Engine ist nicht die aktuelle Fassung %s – Baustein ersetzen'
                     % STORY_VERSION)
+        if (not name.startswith('baustein_')
+                and os.path.basename(os.path.dirname(os.path.abspath(pfad))) != 'spiele'):
+            hinweis('STORYORDNER', 'Story-Seite liegt nicht im Ordner spiele/ der Jahrgangsstufe '
+                    '(<fach>/<klassenordner>/spiele/, TEIL 2.11)')
         if not story_daten:
             fehler('STORY', 'Datenblock „ANPASSEN: Daten der Story" (var STORY = …) fehlt')
         else:

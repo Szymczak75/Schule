@@ -347,6 +347,7 @@ Diese Punkte standen offen und sind inzwischen als Regel in
   Seit Engine v2 (22.11.2026): Lehrercode `vorschau` öffnet alle Karten ohne Reihenfolge,
   optionaler Testcode `testcode` für SuS-Testgruppen hebt nur die Datumssperre auf; im
   Testmodus heißt jedes Codewort „Codewort + S“ (Wiedereinstieg mit Testmodus).
+  Ablage: Story-Seiten immer in `<fach>/<klassenordner>/spiele/`, nie im Themenordner (TEIL 2.11).
 - **Zeitliche Sperre ungefragt angenommen** (22.11.2026): Beim ersten Adventskalender wurde nur
   gefragt, *wie* gesperrt wird, nicht *ob*. Seitdem gilt 2.11 Nr. 4: die Sperre immer
   ausdrücklich abfragen, Vorgabe ist „ohne Sperre“.
