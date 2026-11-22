@@ -32,7 +32,7 @@ nach jedem Fund einzeln umgebaut.
 **1. Kopf & Meta**
 Alle sieben Pflicht-Meta-Tags gesetzt und gefüllt (`description`, `keywords`, `typ`,
 `klasse`, `fach`, `oberthema`, `thema`)? Passt `typ` zum Dateinamen-Suffix (`_sfs` ↔
-`Schritt für Schritt`, `_rbka` ↔ `Rückblick KA`, `_kavb` ↔ `KA-Vorbereitung`)? Passt `klasse`
+`Schritt für Schritt`, `_rbka` ↔ `Rückblick KA`, `_kavb` ↔ `KA-Vorbereitung`, `_story` ↔ `Story`)? Passt `klasse`
 zur restlichen Reihe? In Mathematik: Meta-Tag `kernkompetenzen` mit allen genutzten Kürzeln
 aus `kernkompetenzen.md`, keins aus einem späteren Jahrgang? MathJax-Block exakt wie vorgeschrieben eingebunden? Keine weitere
 externe Ressource außer MathJax – auch kein Google Fonts (Links `<a href>` zählen nicht)?
@@ -48,7 +48,10 @@ Sind die Aufgabentypen auf getrennten, umschaltbaren Karten? Hat die Übung/der 
 eine Auswertungskarte **und** eine Wiederholungskarte (vorletzte Karte) – in Mathematik
 bevorzugt zu einer Kernkompetenz? Braucht mindestens eine normale Aufgabe eine Kernkompetenz
 als Rechenschritt? Haben `_rb`/`_kavb` die Karte „Wiederholung · Kernkompetenzen" (mindestens
-drei Kürzel) und `_rbka` die Karte „🧠 Fit bleiben" (`KA.kern`)? Hat jede
+drei Kürzel) und `_rbka` die Karte „🧠 Fit bleiben" (`KA.kern`)? Hat eine `_story` je Karte
+Haupträtsel, genau zwei Umwege und ein eindeutiges Codewort, einen Freischaltcode für die
+Lehrkraft, und tragen mindestens ein Drittel der Haupträtsel eine Kernkompetenz (`kk`) – ohne
+dass sie den SuS angezeigt wird? Hat jede
 Oberstufen-Aufgabenkarte unter dem Titel die `.op-tags`-Zeile mit Hilfsmittel- und
 Lösungsart-Kennzeichnung? Beginnt jede Aufgabe mit einem Operator der NRW-Liste, und passt
 er zum Badge (Anweisung 3.2a)? Gibt es einen „Weiter"-Button – und wenn ja, mit echtem Ziel?
@@ -64,7 +67,9 @@ gemischt, und zwar **vor** den Klick-Bindungen? Sind `data-ok`/`data-c` wahrheit
 gesetzt (nie invertiert und im Prüf-Code kompensiert)? Hängt keine Auswertung an einem
 festen Index? Bleiben Zuordnungen nach dem Prüfen sichtbar und gesperrt? Werden Dezimalzahl
 und gleichwertiger Bruch akzeptiert, haben gerundete Werte eine Toleranz? Ist keine
-JS-Funktion doppelt definiert?
+JS-Funktion doppelt definiert? Werden Brüche oder Terme eingegeben – dann wie beim Erstellen
+abgefragt (getrennte Felder oder Formeltool) und aus `baustein_formeltool.html`, nicht
+nachgebaut (Anweisung 4.7)?
 
 **5. Feedback, Tipps, Musterlösung**
 Sattes Grün/Rot mit weißer Schrift statt Pastell? Verrät die Rückmeldung nicht sofort die
@@ -333,6 +338,16 @@ Diese Punkte standen offen und sind inzwischen als Regel in
   danach darf der Rechner lösen. Seit 21.11.2026 gilt TEIL 3.2a der Anweisung. Betroffen sind
   ältere GeoGebra-Seiten (EF-Reihe, `geogebra_wege_kl9_ls`), die die alte Regel noch erklären.
   `pruefe.py` meldet die alte Formulierung als FEHLER `OPERATOR`.
+- **Story ist eine eigene Seitenart** (22.11.2026). Escape Room, Adventskalender,
+  Detektivgeschichte = `thema_story.html` mit `typ="Story"` aus `baustein_story.html`: Karten
+  mit Geschichte und Rätsel, falsch gelöst → das Rätsel verschwindet und ein Umweg-Rätsel führt
+  zurück, nach zwei Umwegen der Lösungsweg. Freischaltung nach Datum (Freischaltcode für die
+  Lehrkraft im Codewort-Feld), Wiedereinstieg über Codewörter statt `localStorage`.
+  Kernkompetenzen stecken in den Rätseln, werden den SuS aber nicht angezeigt. `pruefe.py` meldet `STORY`/`STORYALT`.
+- **Brüche und Terme eingeben: getrennte Felder oder Formeltool** (22.11.2026). Vorher fragen;
+  beides kommt aus `baustein_formeltool.html` (einfache Form: Bruch, gemischte Zahl, Hochzahl,
+  Index, Wurzel, n-te Wurzel – ohne Verschachtelung, keine externe Bibliothek). Bestehende
+  Seiten werden nur auf Nachfrage umgestellt. `pruefe.py` meldet `FT`/`FTALT`.
 - **Pull Request ohne vorheriges Review** (10.11.2026): Zwei neue Seiten (`_sfs`, `_ue`) gingen
   direkt als Pull Request raus; der Nutzer hatte sie vorher nie gesehen und konnte sie nicht
   durchspielen. Seitdem regelt TEIL 0 Nr. 26 zwei Stufen: **erst die Dateien im Chat zeigen
@@ -340,4 +355,4 @@ Diese Punkte standen offen und sind inzwischen als Regel in
 
 ---
 
-*Stand: 21.11.2026 (Operatoren nach NRW-Liste; Ablaufplan oben und aufklappbar; Sozialformen/Gruppen-Check; Kernkompetenzen; Seitenart Rückblick KA, Suffix _kavb; Schritt für Schritt; Navigationsleiste, keine Google Fonts) – gepflegt im Wartungs-Projekt „Wartung Unterrichtsprojekte".*
+*Stand: 22.11.2026 (Story-Seiten _story; Formeltool und Rückfrage zur Bruch-/Term-Eingabe; Operatoren nach NRW-Liste; Ablaufplan oben und aufklappbar; Sozialformen/Gruppen-Check; Kernkompetenzen; Seitenart Rückblick KA, Suffix _kavb; Schritt für Schritt; Navigationsleiste, keine Google Fonts) – gepflegt im Wartungs-Projekt „Wartung Unterrichtsprojekte".*

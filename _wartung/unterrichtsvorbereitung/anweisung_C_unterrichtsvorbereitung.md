@@ -159,6 +159,8 @@ Wenn es inhaltlich sinnvoll ist (z. B. Think-Phase, Partnerarbeit, Testphasen), 
 ### Niveaustufen & Differenzierung
 - Bei Übungen: Niveaustufen **Grundlagen / Fortgeschritten / Profi** wählbar durch SuS (wie in den bestehenden Projektanweisungen)
 - **„Schritt für Schritt"** in der Anfrage (z. B. für die Übungsphase): Schüler-Website als `_sfs`-Seite aus `baustein_schritt_fuer_schritt.html` – im Heft rechnen, Lösung je Schritt aufdecken, 0–5 Sterne, Fragen für die Lehrkraft (Lernseiten-Anweisung TEIL 2.7).
+- **Escape Room, Adventskalender, Detektivgeschichte** (z. B. als Übungs- oder Vertretungsstunde): Schüler-Website als `_story`-Seite aus `baustein_story.html` – Rückfragen und Regeln in Lernseiten-Anweisung TEIL 2.11.
+- **Brüche oder Terme als Eingabe:** vorher fragen, ob Zähler/Nenner getrennt oder das Formeltool (Lernseiten-Anweisung TEIL 4.7).
 - Die Stufen werden als **dauerhaft sichtbare Buttons nebeneinander** angeboten (kein Dropdown, kein Aufklapp-Menü); der aktive Button ist hervorgehoben, jeder Button mindestens 44×44px
 - Niveauwechsel behält aktuelle Karte bei
 - Überschriften der Karten bleiben niveauunabhängig
@@ -247,7 +249,7 @@ einheit_thema_klasse/
 - Keine Umlaute (ä→ae, ö→oe, ü→ue, ß→ss)
 - Kleinbuchstaben
 - Beispiel: `lehrer_extremstellen_q1.html`, `planung_fotosynthese_kl9.docx`
-- Bei Schüler-Websites, die als reguläre Lernseiten im Hub landen, gelten zusätzlich die Suffix- und Meta-Regeln der Lernseiten-Projektanweisungen (`_ls`, `_ue`, `_sfs`, `_test`, `_rb`, `_rbka`, `_ka`, `_bonus`; `typ` und `klasse` müssen zu Dateiname und Reihe passen).
+- Bei Schüler-Websites, die als reguläre Lernseiten im Hub landen, gelten zusätzlich die Suffix- und Meta-Regeln der Lernseiten-Projektanweisungen (`_ls`, `_ue`, `_sfs`, `_test`, `_rb`, `_rbka`, `_kavb`, `_story`, `_ka`, `_bonus`; `typ` und `klasse` müssen zu Dateiname und Reihe passen).
 ---
  
 ## Technische Regeln (Websites)

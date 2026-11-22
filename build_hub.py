@@ -46,6 +46,7 @@ TYP_ICON = {
     "Schritt für Schritt": ("🪜", "sfs", "🪜"),
     "Test":      ("🔍", "test",  "🔍"),
     "Rückblick KA":    ("📋", "rbka", "📋"),
+    "Story":           ("🗝️", "story", "🗝️"),
     "KA-Vorbereitung": ("🎯", "kavb", "🎯"),
     "Rückblick":       ("🔁", "rb",   "🔁"),
     "Bonus":     ("⭐", "bonus", "⭐"),
@@ -62,8 +63,8 @@ KACHEL_SPALTEN = [
 # Vierte Spalte nur, wenn die Kachel Bonus-/Lehrer-/typlose Seiten enthält
 SPALTE_SONST = ("sonst", "📎 Sonstiges", "sonstig")
 # Schritt-für-Schritt-Seiten (_sfs) sind Übungsaufgaben → Spalte Übung, aber mit eigenem Icon
-TYP_SPALTE = {"Lernseite": "ls", "Übung": "ue", "Schritt für Schritt": "ue", "Test": "test"}
-TYP_MIT_ICON = {"Schritt für Schritt"}   # in ihrer Spalte trotzdem mit Icon kennzeichnen
+TYP_SPALTE = {"Lernseite": "ls", "Übung": "ue", "Schritt für Schritt": "ue", "Story": "ue", "Test": "test"}
+TYP_MIT_ICON = {"Schritt für Schritt", "Story"}   # in ihrer Spalte trotzdem mit Icon kennzeichnen
 
 # Emoji-Lookup für Themen (oberthema / Ordnername, lower, ohne Umlaute-Sonderfälle)
 # Hinweis: Der Lookup greift auch, wenn der Ordnername zusätzliche Wörter
@@ -334,7 +335,7 @@ def build_kachel_tabelle(files, metas):
     def sortkey(item):
         rel, fname = item
         typ = metas[rel].get("typ", "")
-        order = {"Lernseite": 0, "Übung": 1, "Schritt für Schritt": 2, "Test": 3, "Bonus": 4}.get(typ, 5)
+        order = {"Lernseite": 0, "Übung": 1, "Schritt für Schritt": 2, "Story": 2, "Test": 3, "Bonus": 4}.get(typ, 5)
         return (order, fname.lower())
 
     # Zeilen in der Reihenfolge ihres ersten Auftretens: Gruppen mit
@@ -731,6 +732,7 @@ def render_overview(dirpath, root, sub, heute):
   .kbadge.ls{{background:#dbeafe;color:#1d4ed8}}
   .kbadge.ue{{background:#ccfbf1;color:#0f766e}}
   .kbadge.sfs{{background:#e0e7ff;color:#3730a3}}
+  .kbadge.story{{background:#fce7f3;color:#9d174d}}
   .kbadge.test{{background:#fee2e2;color:#b91c1c}}
   .kbadge.bonus{{background:#ede9fe;color:#6d28d9}}
   .kbadge.lehrer{{background:#fef3c7;color:#92400e}}
@@ -1034,6 +1036,7 @@ TPL_HEAD = r"""<!DOCTYPE html>
   .kbadge.ls{background:#dbeafe;color:#1d4ed8}
   .kbadge.ue{background:#ccfbf1;color:#0f766e}
   .kbadge.sfs{background:#e0e7ff;color:#3730a3}
+  .kbadge.story{background:#fce7f3;color:#9d174d}
   .kbadge.test{background:#fee2e2;color:#b91c1c}
   .kbadge.bonus{background:#ede9fe;color:#6d28d9}
   .kbadge.rbka{background:#fef2f2;color:#9f1239}
@@ -1128,6 +1131,7 @@ TPL_HEAD = r"""<!DOCTYPE html>
   .tag-entwurf{background:#f1f5f9;color:#475569}
   .tag-bonus{background:#ede9fe;color:#6d28d9}
   .tag-sfs{background:#e0e7ff;color:#3730a3}
+  .tag-story{background:#fce7f3;color:#9d174d}
   .tag-test{background:#fee2e2;color:#b91c1c}
   .tag-orga{background:#fef9c3;color:#854d0e}
 
@@ -1199,6 +1203,7 @@ TPL_HEAD = r"""<!DOCTYPE html>
       <button class="filter-btn" data-val="Lernseite">Lernseite</button>
       <button class="filter-btn" data-val="Übung">Übung</button>
       <button class="filter-btn" data-val="Schritt für Schritt">🪜 Schritt für Schritt</button>
+      <button class="filter-btn" data-val="Story">🗝️ Story</button>
       <button class="filter-btn" data-val="Test">Test</button>
       <button class="filter-btn" data-val="Bonus">Bonus</button>
     </div>
@@ -1461,7 +1466,7 @@ function doSearch(){
   });
   if(!q&&!fF&&!fK&&!fT){res.innerHTML='';return;}
   if(!hits.length){res.innerHTML='<div class="no-results">🦖 Keine Ergebnisse gefunden</div>';return;}
-  const tagMap={'Lernseite':'tag-lernen','Übung':'tag-uebung','Schritt für Schritt':'tag-sfs','Test':'tag-test','Bonus':'tag-bonus'};
+  const tagMap={'Lernseite':'tag-lernen','Übung':'tag-uebung','Schritt für Schritt':'tag-sfs','Story':'tag-story','Test':'tag-test','Bonus':'tag-bonus'};
   const emoji={mathe:'📐',bio:'🧬',kompass:'🧭'};
   res.innerHTML=hits.map(([path,m])=>`<a class="sri" href="${path}" target="_blank" rel="noopener"><span class="sri-icon">${emoji[m.fach]||'📄'}</span><div class="sri-info"><div class="sri-title">${m.title}</div><div class="sri-desc">${m.desc}</div></div><div class="sri-tags"><span class="link-tag ${tagMap[m.typ]||''}">${m.typ}</span><span style="font-size:.6rem;padding:.13rem .42rem;border-radius:20px;font-weight:700;background:#f1f5f9;color:#475569">Kl. ${m.kl}</span></div></a>`).join('');
 }

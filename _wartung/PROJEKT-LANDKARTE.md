@@ -20,7 +20,7 @@ von claude.ai ein (siehe `_wartung/LIESMICH.md`). Nach einer Änderung genügt i
 
 **Allgemeine Dateien** (`_wartung/allgemein/`: Lernseiten-Anweisung, Fehler-Checkliste,
 Kernkompetenzen (`kernkompetenzen.md`, seit 12.11.2026), Gruppen-Check-Baustein (`baustein_gruppencheck.html`, seit 13.11.2026), `pruefe.py`, MathJax-Notfall, Navigationsleiste, Schritt-für-Schritt-Vorlage,
-Rückblick-KA-Vorlage) sind in allen Projekten **identisch** und werden nur hier
+Rückblick-KA-Vorlage, Story-Vorlage und Formeltool, seit 22.11.2026) sind in allen Projekten **identisch** und werden nur hier
 geändert.
 
 ## Nur im Projekt „GeoGebra" (`_wartung/geogebra/`)
@@ -151,6 +151,22 @@ darin enthalten; pro Klassenarbeit wird nur der Datenblock `ANPASSEN` geschriebe
 Versionsnummer in den Kopfkommentaren **und** `RBKA_VERSION` erhöhen, danach die
 `_rbka`-Seiten nachziehen (derzeit `bruch_dezimal_rbka` und `rueckblick_KA/rationale_zahlen_rbka`, beide v4; `rationale_zahlen_ka1_rbka` ist seit 13.11.2026 nur noch Weiterleitung). Oberstufen-Klausurnacharbeit mit eigenem Aufbau (`klausur1_q1_lk_rbka`, `klausur_fehler_rbka`) behält `typ="Rückblick"`. Der Hub (`build_hub.py`) zeigt
 `typ="Rückblick KA"` mit 📋 und `typ="KA-Vorbereitung"` (`_kavb`) mit 🎯.
+
+## Story-Vorlage
+`baustein_story.html` (Ordner `allgemein`) ist eine vollständige Vorlage für `_story`-Seiten
+(Escape Room, Adventskalender, Detektivgeschichte, Lernseiten-Anweisung TEIL 2.11): BAUSTEIN-CSS,
+Formeltool, Schreibhilfen, Story-Engine, MathJax-Notfall und Navigationsleiste sind darin
+enthalten; pro Story wird nur der Datenblock `ANPASSEN` geschrieben. `pruefe.py` kennt die
+Engine-Fassung (`STORY_VERSION`). Bei einer Änderung: Versionsnummer im Kopfkommentar **und**
+`STORY_VERSION` erhöhen, danach die `_story`-Seiten nachziehen (derzeit keine). Der Hub
+(`build_hub.py`) zeigt `typ="Story"` mit 🗝️ in der Spalte Übung.
+
+## Formeltool
+`baustein_formeltool.html` (Ordner `allgemein`) kommt unverändert in den `<head>` jeder Seite, auf
+der Brüche oder Terme eingegeben werden (Lernseiten-Anweisung TEIL 4.7) – als getrennte
+Zähler/Nenner-Felder oder als Formeltool. Er steckt auch in `baustein_story.html`. Bei einer
+Änderung: Versionsnummer **und** `FT_VERSION` in `pruefe.py` erhöhen und den Block in der
+Story-Vorlage mitziehen. Die Engines `_rbka`, `_sfs` und EXAM nutzen ihn noch nicht.
 
 ## Geodreieck
 Der Baustein ist für die drei Unterrichts-Projekte identisch. Er heißt jetzt überall
