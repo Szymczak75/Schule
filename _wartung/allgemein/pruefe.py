@@ -23,7 +23,8 @@ Was dieser Linter NICHT kann (bleibt Handarbeit bzw. Browsertest):
   - ob der Stand ein Neuladen wirklich vollständig übersteht (Browsertest: Seite
     bearbeiten, neu laden, vergleichen)
 
-Stand: 22.11.2026 (Story-Seiten _story aus baustein_story.html, Prüfung STORY, TEIL 2.11;
+Stand: 22.11.2026 (Story-Engine v2: Testcode STORY.testcode für SuS-Testgruppen, Prüfung STORY;
+       Story-Seiten _story aus baustein_story.html, Prüfung STORY, TEIL 2.11;
        Formeltool baustein_formeltool.html, Prüfung FT, TEIL 4.7;
        21.11.2026: Operatoren nach NRW-Liste: Prüfung OPERATOR meldet die aufgehobene
        Regel „bestimme = kein Rechenweg“, TEIL 3.2a;
@@ -78,7 +79,7 @@ RBKA_MARKE = 'BAUSTEIN: Rückblick-KA-Engine'
 
 # Story-Engine (baustein_story.html, TEIL 2.11)
 STORY_TYP = 'Story'
-STORY_VERSION = 'v1'
+STORY_VERSION = 'v2'
 STORY_MARKE = 'BAUSTEIN: Story-Engine'
 
 # Formeltool (baustein_formeltool.html, TEIL 4.7)
@@ -542,6 +543,13 @@ def pruefe(pfad):
             fc = re.search(r"\bvorschau:\s*'([^']+)'", d)
             if fc and re.sub(r'[^A-Z0-9ÄÖÜß]', '', fc.group(1).upper()) in codes:
                 fehler('STORY', 'Freischaltcode ist zugleich Codewort einer Karte')
+            tc = re.search(r"\btestcode:\s*'([^']+)'", d)
+            if tc:
+                tcn = re.sub(r'[^A-Z0-9ÄÖÜß]', '', tc.group(1).upper())
+                if tcn in codes:
+                    fehler('STORY', 'Testcode ist zugleich Codewort einer Karte')
+                if fc and tcn == re.sub(r'[^A-Z0-9ÄÖÜß]', '', fc.group(1).upper()):
+                    fehler('STORY', 'Testcode und Freischaltcode der Lehrkraft sind gleich')
             if re.search(r"\b(?:kktag|Kernkompetenz\s*·)", h):
                 fehler('STORY', 'Kernkompetenzen werden den SuS angezeigt – nur im Meta-Tag/Datenblock (TEIL 2.11)')
     elif story:
