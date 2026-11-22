@@ -345,7 +345,11 @@ Diese Punkte standen offen und sind inzwischen als Regel in
   Lehrkraft im Codewort-Feld), Wiedereinstieg über Codewörter statt `localStorage`.
   Kernkompetenzen stecken in den Rätseln, werden den SuS aber nicht angezeigt. `pruefe.py` meldet `STORY`/`STORYALT`.
   Seit Engine v2 (22.11.2026): Lehrercode `vorschau` öffnet alle Karten ohne Reihenfolge,
-  optionaler Testcode `testcode` für SuS-Testgruppen hebt nur die Datumssperre auf.
+  optionaler Testcode `testcode` für SuS-Testgruppen hebt nur die Datumssperre auf; im
+  Testmodus heißt jedes Codewort „Codewort + S“ (Wiedereinstieg mit Testmodus).
+- **Zeitliche Sperre ungefragt angenommen** (22.11.2026): Beim ersten Adventskalender wurde nur
+  gefragt, *wie* gesperrt wird, nicht *ob*. Seitdem gilt 2.11 Nr. 4: die Sperre immer
+  ausdrücklich abfragen, Vorgabe ist „ohne Sperre“.
 - **Brüche und Terme eingeben: getrennte Felder oder Formeltool** (22.11.2026). Vorher fragen;
   beides kommt aus `baustein_formeltool.html` (einfache Form: Bruch, gemischte Zahl, Hochzahl,
   Index, Wurzel, n-te Wurzel – ohne Verschachtelung, keine externe Bibliothek). Bestehende
