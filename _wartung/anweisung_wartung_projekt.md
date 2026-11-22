@@ -14,7 +14,8 @@ einem Baustein oder einer Regel wird hier EINMAL umgesetzt und gilt dann in alle
   im Repo – per Branch + Pull Request.
 - `_wartung/allgemein/` – `anweisung_lernseiten.txt`, `wiederkehrende_fehler_checkliste.md`,
   `pruefe.py`, `baustein_mathjax_notfall.js`, `baustein_navigation.html`,
-  `baustein_schritt_fuer_schritt.html`, `baustein_rueckblick_klassenarbeit.html`
+  `baustein_schritt_fuer_schritt.html`, `baustein_rueckblick_klassenarbeit.html`,
+  `baustein_story.html` (Story/Escape Room/Adventskalender), `baustein_formeltool.html`
 - `_wartung/geodreieck/` – `geodreieck_baustein.html`
 - `_wartung/unterrichtsvorbereitung/` – `anweisung_C_unterrichtsvorbereitung.md`
 - `_wartung/geogebra/` – Baukasten (`css.txt`, `helfer.js`, `bauer.py`, `koord.py`, `test.js`,
@@ -43,6 +44,11 @@ einem Baustein oder einer Regel wird hier EINMAL umgesetzt und gilt dann in alle
      Nachrüst-Skript aktualisieren (eigener PR).
    - Allgemeine Regel → Lernseiten-Anweisung; prüfen, ob Dach-Anweisung, Checkliste und
      `pruefe.py` mitziehen müssen.
+   - Story-Engine → `baustein_story.html`; Versionsnummer im Kopfkommentar und `STORY_VERSION`
+     in `pruefe.py` gemeinsam erhöhen.
+   - Formeltool → `baustein_formeltool.html`; Versionsnummer und `FT_VERSION` in `pruefe.py`
+     gemeinsam erhöhen und den Block in `baustein_story.html` (und jedem weiteren Baustein,
+     der ihn enthält) mitziehen.
    - EXAM-Engine → `baustein_exam.html`; Versionsnummer im Kopfkommentar und `EXAM_VERSION`
      in `pruefe.py` gemeinsam erhöhen; Code-Muster (`CODE_ALPHABET`, `CODE_SALT`) immer
      gleichzeitig in `intern/EXAM/vorbereitung.html` ändern.

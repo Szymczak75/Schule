@@ -8,7 +8,10 @@ Status: `zurückgestellt` · `als Nächstes` · `verworfen` · `erledigt`
 ---
 
 ## 1. Bruch-Eingabefeld (Klasse 6–10)
-- **Status:** zurückgestellt (18.11.2026 – „ein paar Tage")
+- **Status:** erledigt (22.11.2026) – umgesetzt als `allgemein/baustein_formeltool.html` (v1,
+  einfache Form: Bruch, gemischte Zahl, Hochzahl, Index, Quadratwurzel, n-te Wurzel) plus
+  getrennte Zähler/Nenner-Felder; Regel in `anweisung_lernseiten.txt` TEIL 4.7. Offen: Einbau in
+  die Engines `_rbka`, `_sfs`, EXAM (auf Wunsch); später evtl. Verschachtelung (Bruch im Bruch).
 - **Idee:** Kleiner eigener Baustein: Taste „Bruch" fügt ein Eingabefeld mit Zähler/Nenner ein,
   zusätzlich **gemischte Zahlen** (Ganzes + Zähler/Nenner). Evtl. später Potenz/Wurzel.
 - **Warum gut:** auswertbar (Zähler/Nenner liegen getrennt vor → Kürzen/Gleichwertigkeit prüfbar),

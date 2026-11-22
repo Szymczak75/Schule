@@ -23,7 +23,9 @@ Was dieser Linter NICHT kann (bleibt Handarbeit bzw. Browsertest):
   - ob der Stand ein Neuladen wirklich vollständig übersteht (Browsertest: Seite
     bearbeiten, neu laden, vergleichen)
 
-Stand: 21.11.2026 (Operatoren nach NRW-Liste: Prüfung OPERATOR meldet die aufgehobene
+Stand: 22.11.2026 (Story-Seiten _story aus baustein_story.html, Prüfung STORY, TEIL 2.11;
+       Formeltool baustein_formeltool.html, Prüfung FT, TEIL 4.7;
+       21.11.2026: Operatoren nach NRW-Liste: Prüfung OPERATOR meldet die aufgehobene
        Regel „bestimme = kein Rechenweg“, TEIL 3.2a;
        19.11.2026: Ablaufplan oben und aufklappbar, Prüfung ABLAUF, TEIL 3.8;
        EXAM-Seiten _exam aus _wartung/exam/baustein_exam.html: typ Exam, ohne
@@ -60,7 +62,8 @@ META_PFLICHT = ['description', 'keywords', 'typ', 'klasse', 'fach', 'oberthema',
 SUFFIX_TYP = {'_ls': 'Lernseite', '_ue': 'Übung', '_test': 'Test',
               '_rbka': 'Rückblick KA', '_kavb': 'KA-Vorbereitung',
               '_rb': 'Rückblick', '_ka': 'Klassenarbeit',
-              '_bonus': 'Bonus', '_sfs': 'Schritt für Schritt', '_exam': 'Exam'}
+              '_bonus': 'Bonus', '_sfs': 'Schritt für Schritt', '_exam': 'Exam',
+              '_story': 'Story'}
 ERLAUBTE_HOSTS = ('cdn.jsdelivr.net/npm/mathjax',)   # Google Fonts seit 16.10.2026 nicht mehr
 
 # Schritt-für-Schritt-Engine (baustein_schritt_fuer_schritt.html, TEIL 2.7)
@@ -72,6 +75,15 @@ SFS_MARKE = 'BAUSTEIN: Schritt-für-Schritt-Engine'
 RBKA_TYP = 'Rückblick KA'
 RBKA_VERSION = 'v5'
 RBKA_MARKE = 'BAUSTEIN: Rückblick-KA-Engine'
+
+# Story-Engine (baustein_story.html, TEIL 2.11)
+STORY_TYP = 'Story'
+STORY_VERSION = 'v1'
+STORY_MARKE = 'BAUSTEIN: Story-Engine'
+
+# Formeltool (baustein_formeltool.html, TEIL 4.7)
+FT_VERSION = 'v1'
+FT_MARKE = 'BAUSTEIN: Formeltool-Engine'
 
 # EXAM-Seiten (_wartung/exam/baustein_exam.html, anweisung_exam.md)
 EXAM_TYP = 'Exam'
@@ -86,7 +98,7 @@ GC_MARKE = 'BAUSTEIN: Gruppen-Check-Engine'
 # Kernkompetenzen (kernkompetenzen.md, TEIL 2.9): Anzahl Kürzel je Jahrgang.
 # Ändert sich kernkompetenzen.md, wird diese Tabelle mitgezogen. Klasse 9: noch keine Liste.
 KERN_ANZAHL = {5: 8, 6: 6, 7: 12, 8: 20, 9: 0, 10: 12}
-KERN_TYPEN = ('Übung', 'Test', 'Rückblick', 'KA-Vorbereitung', 'Rückblick KA', 'Schritt für Schritt')
+KERN_TYPEN = ('Übung', 'Test', 'Rückblick', 'KA-Vorbereitung', 'Rückblick KA', 'Schritt für Schritt', 'Story')
 KERN_KUERZEL = re.compile(r'^K(\d{1,2})-(\d{1,2})$')
 
 # Navigationsleiste (baustein_navigation.html, TEIL 3.6)
@@ -454,6 +466,95 @@ def pruefe(pfad):
         fehler('TYP', 'Seite nutzt die Rückblick-KA-Engine, trägt aber typ="%s" – '
                       'richtig ist typ="%s" und Suffix _rbka' % (typ, RBKA_TYP))
 
+    # Story (TEIL 2.11): Engine-Baustein, je Karte Haupträtsel + genau zwei Umwege, Codewörter
+    story = STORY_MARKE in h
+    story_daten = re.search(r'var STORY\s*=(.*?)ENDE ANPASSEN', h, re.S)
+    story_daten = story_daten.group(1) if story_daten else ''
+    if typ == STORY_TYP:
+        if not story:
+            fehler('STORY', 'typ="Story" ohne Engine aus baustein_story.html')
+        elif '%s (%s' % (STORY_MARKE, STORY_VERSION) not in h:
+            hinweis('STORYALT', 'Story-Engine ist nicht die aktuelle Fassung %s – Baustein ersetzen'
+                    % STORY_VERSION)
+        if not story_daten:
+            fehler('STORY', 'Datenblock „ANPASSEN: Daten der Story" (var STORY = …) fehlt')
+        else:
+            d = story_daten
+            kp = d.find('karten:')
+            karten = re.split(r"\{\s*id:\s*'", d[kp:] if kp >= 0 else '')[1:]
+            if len(karten) < 2:
+                hinweis('STORY', 'Story mit nur %d Karte(n)' % len(karten))
+            codes, n_kk = [], 0
+            for t in karten:
+                kid = t.split("'", 1)[0]
+                n_r = len(re.findall(r'\braetsel:\s*\{', t))
+                if n_r != 3:
+                    fehler('STORY', 'Karte %s hat %d Rätsel – vorgesehen sind Haupträtsel + genau zwei '
+                                    'Umwege' % (kid, n_r))
+                if len(re.findall(r'\bgeschichte:', t)) < 3:
+                    fehler('STORY', 'Karte %s: Karte und beide Umwege brauchen eine geschichte' % kid)
+                if not re.search(r'\bgeschafft:', t):
+                    fehler('STORY', 'Karte %s ohne geschafft-Text' % kid)
+                n_soll = len(re.findall(r'\bsoll:\s*(?:\[\s*-?\d+\s*,\s*[1-9]\d*\s*\]|\'[^\']+\'|\[\s*\')', t)) + \
+                         len(re.findall(r'\boptionen:\s*\[[^\]]*?\bok:\s*true', t, re.S))
+                if n_soll < n_r:
+                    fehler('STORY', 'Karte %s: nicht jedes Rätsel hat soll (bzw. eine Option mit ok: true)' % kid)
+                if len(re.findall(r'\btipps:\s*\[', t)) < n_r:
+                    fehler('STORY', 'Karte %s: nicht jedes Rätsel hat tipps' % kid)
+                if len(re.findall(r'\bweg:', t)) < n_r:
+                    fehler('STORY', 'Karte %s: nicht jedes Rätsel hat einen Lösungsweg (weg)' % kid)
+                for e in re.findall(r"\beingabe:\s*'([^']*)'", t):
+                    if e not in ('formel', 'getrennt', 'gemischt', 'linear'):
+                        fehler('STORY', "Karte %s: unbekannte eingabe '%s'" % (kid, e))
+                c = re.search(r"\bcode:\s*'([^']*)'", t)
+                if not c or not re.sub(r'[^A-Za-z0-9ÄÖÜäöüß]', '', c.group(1)):
+                    fehler('STORY', 'Karte %s ohne Codewort (code)' % kid)
+                else:
+                    codes.append(re.sub(r'[^A-Z0-9ÄÖÜß]', '', c.group(1).upper()))
+                haupt = t.split('umwege:', 1)[0]
+                if re.search(r"\bkk:\s*'K", haupt):
+                    n_kk += 1
+            for c in sorted(set(x for x in codes if codes.count(x) > 1)):
+                fehler('STORY', 'Codewort %s mehrfach vergeben' % c)
+            if meta.get('fach') == 'mathe' and karten:
+                soll_kk = max(2, -(-len(karten) // 3))
+                if n_kk < min(soll_kk, len(karten)):
+                    hinweis('KERN', 'Story: %d von %d Haupträtseln mit Kernkompetenz (kk) – vorgesehen ist '
+                                    'mindestens ein Drittel, mindestens zwei (TEIL 2.11)' % (n_kk, len(karten)))
+                for k in sorted(set(re.findall(r"\bkk:\s*'([^']+)'", d))):
+                    if k not in kern_meta:
+                        hinweis('KERN', 'Story-kk %s steht nicht im Meta-Tag kernkompetenzen' % k)
+            zr = re.search(r'zeitraum:\s*\{([^}]*)\}', d)
+            if zr:
+                von = re.search(r"von:\s*'([^']*)'", zr.group(1))
+                bis = re.search(r"bis:\s*'([^']*)'", zr.group(1))
+                for w in (von, bis):
+                    if w and not re.match(r'^\d{4}-\d{2}-\d{2}$', w.group(1)):
+                        fehler('STORY', "Datum '%s' nicht im Format JJJJ-MM-TT" % w.group(1))
+                if von and bis and von.group(1) > bis.group(1):
+                    fehler('STORY', 'Zeitraum: von liegt nach bis')
+                for w in re.findall(r"\bab:\s*'([^']*)'", d):
+                    if not re.match(r'^\d{4}-\d{2}-\d{2}$', w):
+                        fehler('STORY', "Freischalttag '%s' nicht im Format JJJJ-MM-TT" % w)
+                if not re.search(r"\bvorschau:\s*'[^']+'", d):
+                    fehler('STORY', 'Zeitraum ohne Freischaltcode (vorschau) – die Lehrkraft kann die Story '
+                                    'nicht jederzeit testen (TEIL 2.11)')
+            fc = re.search(r"\bvorschau:\s*'([^']+)'", d)
+            if fc and re.sub(r'[^A-Z0-9ÄÖÜß]', '', fc.group(1).upper()) in codes:
+                fehler('STORY', 'Freischaltcode ist zugleich Codewort einer Karte')
+            if re.search(r"\b(?:kktag|Kernkompetenz\s*·)", h):
+                fehler('STORY', 'Kernkompetenzen werden den SuS angezeigt – nur im Meta-Tag/Datenblock (TEIL 2.11)')
+    elif story:
+        fehler('TYP', 'Seite nutzt die Story-Engine, trägt aber typ="%s" – richtig ist typ="Story" '
+                      'und Suffix _story' % typ)
+
+    # Formeltool (TEIL 4.7): nur aus dem Baustein, aktuelle Fassung
+    if FT_MARKE in h:
+        if '%s (%s' % (FT_MARKE, FT_VERSION) not in h:
+            hinweis('FTALT', 'Formeltool ist nicht die aktuelle Fassung %s – Baustein ersetzen' % FT_VERSION)
+    elif re.search(r'\bFT\.feld\(', js) or 'class="ft-zeile"' in h:
+        fehler('FT', 'Formeltool genutzt, aber baustein_formeltool.html fehlt – unverändert in den <head> setzen')
+
     if typ == 'Test' and 'TESTZEIT_MIN' not in js:
         fehler('TIMER', 'Wissenstest ohne Orientierungstimer-Konstante TESTZEIT_MIN')
 
@@ -476,7 +577,12 @@ def pruefe(pfad):
         sfs = SFS_MARKE in h
         if sfs and 'data-anrede="sie"' not in h:
             fehler('ANREDE', 'Schritt-für-Schritt-Seite der Oberstufe ohne <body data-anrede="sie"> (TEIL 3.7)')
-        if exam:
+        if story and not re.search(r'<body\b[^>]*data-anrede="sie"', h):
+            fehler('ANREDE', 'Story der Oberstufe ohne <body data-anrede="sie"> (TEIL 3.7)')
+        if story:
+            # Engine-Texte schalten über data-anrede um; geprüft werden Seitentext und Datenblock
+            du = _du_formen(re.sub(r'<script>.*?</script>', ' ', eigen, flags=re.S), story_daten, True)
+        elif exam:
             du = _du_formen('', exam_inhalt, True)
             if not re.search(r"\banrede:\s*'sie'", exam_inhalt):
                 fehler('ANREDE', "EXAM der Oberstufe ohne anrede: 'sie' im EXAM-INHALT (TEIL 3.7)")
