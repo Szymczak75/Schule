@@ -1,0 +1,2302 @@
+<!DOCTYPE html>
+<!-- =====================================================================
+     BAUSTEIN: Story (_story)  v1, 22.11.2026
+     Escape Room, Adventskalender, Detektivgeschichte oder freie Story: eine Geschichte
+     in mehreren Karten, jede Karte endet mit einem Rätsel.
+     Richtig → weiter zur nächsten Karte (mit Codewort zum späteren Wiedereinstieg).
+     Falsch  → das Rätsel verschwindet, ein Umweg-Rätsel führt zurück in die Geschichte.
+               Nach zwei Umwegen zeigt die Seite den Lösungsweg – niemand bleibt hängen.
+     Gepflegt im Wartungs-Projekt. Anleitung (anweisung_lernseiten.txt, TEIL 2.11):
+     1. Datei kopieren, Name: thema_story.html (Suffix _story).
+     2. Meta-Tags ausfüllen: typ="Story", klasse, fach, oberthema, thema, description,
+        keywords, kernkompetenzen (alle kk-Kürzel aus dem Datenblock).
+     3. <body data-anrede="du"> (Sek I) bzw. "sie" (Oberstufe).
+     4. NUR den Block  ANPASSEN: Daten der Story  ersetzen – eine Karte = ein Eintrag in
+        karten[] mit Geschichte, Rätsel, genau zwei Umwegen und einem Codewort.
+     5. BAUSTEIN-CSS, Formeltool, Schreibhilfen, Story-Engine, MathJax-Notfall und
+        Navigationsleiste UNVERÄNDERT lassen. Bei geändertem Aufbau einer veröffentlichten
+        Seite data-version am <body> erhöhen.
+     6. Alle soll-Werte nachrechnen (Python fractions / Termprobe), pruefe.py laufen lassen,
+        mit dem Freischaltcode (Codewort-Feld der Startkarte) jede Karte einmal richtig und
+        einmal falsch durchspielen.
+     ===================================================================== -->
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Escape Room für die Q1 (GK und LK): Im Sturm ist die Kursfahrt-Gruppe auf dem Plattbodenschiff Groote Jager eingesperrt, der Lehrer wurde verschleppt. In acht Räumen und zwei Geheimtüren lösen die SuS hilfsmittelfrei Steckbriefaufgaben und Aufgaben zu Funktionenscharen und Ortskurven, um ihn mit dem Speedboot zu retten.">
+<meta name="keywords" content="Steckbriefaufgaben, Funktionenscharen, Ortskurve, ganzrationale Funktionen, Bedingungen, lineare Gleichungssysteme, Escape Room, hilfsmittelfrei">
+<meta name="typ" content="Story">
+<meta name="klasse" content="Q1">
+<meta name="fach" content="mathe">
+<meta name="oberthema" content="Steckbriefaufgaben">
+<meta name="thema" content="Escape Room Steckbriefaufgaben und Funktionenscharen">
+<meta name="kernkompetenzen" content="K6-3, K7-2, K7-8, K8-6, K8-11, K8-15, K8-16, K10-3">
+<title>Escape Room – Flucht von der Groote Jager</title>
+<script>
+  MathJax = {
+    tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+    svg: { fontCache: 'global' }
+  };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+/* ===== BAUSTEIN-CSS: Story (v1, 22.11.2026) – unverändert übernehmen ===== */
+:root{
+  --ink:#22303f; --card:#ffffff; --green:#1e7d32; --red:#c1272d;
+  --amber:#b8860b; --amber-light:#fdf3d9; --amber-dark:#96690a;
+  --blue:#2f5fa6; --blue-dark:#1f4680; --blue-light:#e6eefb; --bg:#f6f8fb; --line:#dbe3ee;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;}
+body{font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;font-size:1.0625rem;
+  line-height:1.55;color:var(--ink);background:var(--bg);}
+.kopf{background:var(--blue-light);border-bottom:4px solid var(--blue);padding:1.1rem 1rem 1rem;}
+.kopf-innen{max-width:860px;margin:0 auto;}
+.kopf-typ{font-size:1rem;font-weight:700;color:var(--blue);margin:0;}
+.kopf h1{font-size:1.5rem;margin:.2rem 0 .2rem;color:var(--blue-dark);line-height:1.25;}
+.kopf p{font-size:1rem;margin:0;}
+.vorschau{display:none;margin-top:.6rem;padding:.45rem .8rem;border:2px dashed var(--blue);border-radius:.6rem;
+  background:#fff;font-weight:700;}
+.vorschau.an{display:block;}
+.reiter{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--line);padding:.55rem .75rem;}
+.reiter-innen{position:relative;max-width:860px;margin:0 auto;display:flex;flex-wrap:nowrap;gap:.45rem;
+  overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;
+  scrollbar-width:thin;padding-bottom:.2rem;}
+.reiter-innen.mehr-rechts{-webkit-mask-image:linear-gradient(to right,#000 calc(100% - 3rem),transparent);
+  mask-image:linear-gradient(to right,#000 calc(100% - 3rem),transparent);}
+.reiter-innen.mehr-links{-webkit-mask-image:linear-gradient(to left,#000 calc(100% - 3rem),transparent);
+  mask-image:linear-gradient(to left,#000 calc(100% - 3rem),transparent);}
+.reiter-innen.mehr-links.mehr-rechts{
+  -webkit-mask-image:linear-gradient(to right,transparent,#000 3rem,#000 calc(100% - 3rem),transparent);
+  mask-image:linear-gradient(to right,transparent,#000 3rem,#000 calc(100% - 3rem),transparent);}
+.reiter button{flex:0 0 auto;white-space:nowrap;min-height:44px;min-width:44px;padding:.4rem .8rem;
+  border:2px solid var(--line);background:#fff;color:var(--blue-dark);border-radius:.6rem;font:inherit;
+  font-size:1rem;font-weight:700;cursor:pointer;}
+.reiter button.aktiv{background:var(--blue);border-color:var(--blue);color:#fff;}
+.reiter button.fertig::after{content:" ✓";}
+.reiter button.gesperrt{background:var(--bg);color:var(--ink);border-style:dashed;}
+main{max-width:860px;margin:0 auto;padding:1rem .75rem 2rem;}
+.karte{display:none;}
+.karte.aktiv{display:block;}
+.block{background:var(--card);border:1px solid var(--line);border-radius:1rem;padding:1.1rem;margin-bottom:1rem;}
+.block h2{font-size:1.35rem;margin:.1rem 0 .6rem;color:var(--blue-dark);line-height:1.3;}
+.block h3{font-size:1.15rem;margin:0 0 .5rem;color:var(--blue-dark);}
+.eyebrow{font-size:1rem;font-weight:700;color:var(--blue);margin:0;}
+.block p{margin:.4rem 0;}
+.geschichte{border-left:6px solid var(--blue);background:var(--blue-light);border-radius:.6rem;
+  padding:.8rem 1rem;margin:.8rem 0;}
+.geschichte p:first-child{margin-top:0;}
+.geschichte p:last-child{margin-bottom:0;}
+.raetsel{border:2px solid var(--blue);border-radius:.8rem;padding:.9rem 1rem;margin:.9rem 0;background:#fff;}
+.raetsel h3::before{content:"🧩 ";}
+.frage{font-size:1.1rem;}
+/* Oberstufe: Hilfsmittel und Lösungsart am Anfang von frage (TEIL 3.2) */
+.op-tags{display:block;margin:.2rem 0 .4rem;}
+.op-tag{display:inline-block;font-size:1rem;font-weight:700;color:var(--blue-dark);background:var(--blue-light);
+  border:1px solid var(--line);border-radius:1rem;padding:.05rem .65rem;margin:0 .35rem .25rem 0;}
+.versperrt{border-left:6px solid var(--red);background:#fff;border-radius:.6rem;padding:.6rem 1rem;margin:.8rem 0;
+  box-shadow:0 0 0 1px var(--line) inset;}
+.zeile{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin:.6rem 0;}
+.zeile > input{font:inherit;font-size:1.1rem;min-height:44px;padding:.35rem .6rem;border:2px solid var(--line);
+  border-radius:.6rem;background:#fff;color:var(--ink);width:12rem;text-align:center;}
+.zeile > input:focus{outline:none;border-color:var(--blue);}
+.zeile > input.zu{background:var(--bg);opacity:1;}
+/* Abbildungen im Datenblock (eigene SVG, nur Kind-Selektor, TEIL 7.7) */
+.bild{display:block;margin:.8rem 0;}
+.bild > svg{display:block;width:100%;max-width:460px;height:auto;margin:0 auto;}
+.zettel{display:inline-block;background:#fff;border:2px dashed var(--line);border-radius:.4rem;padding:.1rem .5rem;margin:0 .2rem;}
+.optionen{display:grid;grid-template-columns:repeat(auto-fill,minmax(12rem,1fr));gap:.5rem;margin:.6rem 0;}
+.optionen button{min-height:52px;padding:.45rem .7rem;border:2px solid var(--line);border-radius:.7rem;background:#fff;
+  color:var(--ink);font:inherit;font-size:1.05rem;cursor:pointer;text-align:left;}
+.optionen button.an{background:var(--blue);border-color:var(--blue);color:#fff;}
+.optionen button:disabled{cursor:default;}
+.knoepfe{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.5rem;}
+.btn{min-height:44px;min-width:44px;padding:.5rem 1.1rem;border-radius:.6rem;font:inherit;font-size:1rem;
+  font-weight:700;cursor:pointer;border:2px solid transparent;}
+.btn:active{transform:scale(.97);}
+.btn-pruefen{background:var(--blue);color:#fff;}
+.btn-leeren{background:#fff;color:var(--red);border-color:var(--red);}
+.btn-tipp{background:var(--amber-light);color:var(--amber-dark);border-color:var(--amber);}
+.btn-los{background:var(--blue);color:#fff;font-size:1.1rem;}
+.btn[hidden]{display:none;}
+.fb{display:none;margin-top:.6rem;padding:.6rem .9rem;border-radius:.6rem;font-weight:700;color:#fff;}
+.fb.ok{display:block;background:var(--green);}
+.fb.nok{display:block;background:var(--red);}
+.fb.info{display:block;background:var(--blue-light);color:var(--ink);}
+.tipps{display:none;margin-top:.6rem;}
+.tipps.an{display:block;}
+.tippstufe{background:var(--amber-light);border:2px solid var(--amber);border-radius:.6rem;padding:.6rem .9rem;margin-top:.5rem;}
+.tippstufe b.tl{color:var(--amber-dark);}
+.loesungsweg{background:var(--amber-light);border:2px solid var(--amber);border-radius:.6rem;padding:.7rem 1rem;margin:.7rem 0;}
+.loesungsweg b.tl{color:var(--amber-dark);}
+.geschafft{border-left:6px solid var(--green);background:#fff;border-radius:.6rem;padding:.7rem 1rem;margin:.8rem 0;
+  box-shadow:0 0 0 1px var(--line) inset;}
+.codebox{display:flex;flex-wrap:wrap;align-items:center;gap:.6rem;border:2px dashed var(--blue);border-radius:.7rem;
+  padding:.6rem 1rem;margin:.8rem 0;background:#fff;}
+.codebox .code{font-size:1.4rem;font-weight:800;letter-spacing:.12em;color:var(--blue-dark);}
+.gesperrt-box{border:2px dashed var(--line);border-radius:.8rem;padding:1rem;text-align:center;font-size:1.1rem;}
+.anleitung{margin:.4rem 0 0;padding-left:1.3rem;}
+.anleitung li{margin:.3rem 0;}
+.liste{list-style:none;padding:0;margin:.5rem 0;}
+.liste li{border:1px solid var(--line);border-radius:.6rem;padding:.55rem .8rem;margin:.4rem 0;}
+.liste .titel{font-weight:700;}
+.fazit{border-radius:.6rem;padding:.7rem 1rem;font-weight:700;margin-top:.8rem;}
+.fazit.ok{background:var(--green);color:#fff;}
+.fazit.offen{background:var(--blue-light);}
+.frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;margin:0 .2em;line-height:1.15;}
+.frac > span{display:block;padding:0 .35em;}
+.frac > span:first-child{border-bottom:1.8px solid currentColor;padding-bottom:.1em;}
+.frac > span:last-child{padding-top:.1em;}
+.gem{white-space:nowrap;}
+mjx-container{max-width:100%;overflow-x:auto;}
+.trex{position:fixed;right:.7rem;bottom:.7rem;z-index:50;width:44px;height:44px;border-radius:50%;
+  background:#fff;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;
+  font-size:1.4rem;cursor:pointer;user-select:none;}
+.trex-text{position:fixed;right:3.9rem;bottom:1rem;z-index:50;background:var(--ink);color:#fff;
+  padding:.3rem .7rem;border-radius:.5rem;font-size:1rem;display:none;}
+.trex:hover + .trex-text,.trex-text.an{display:block;}
+@media (max-width:600px){ .zeile > input{width:9rem;} }
+/* ===== ENDE BAUSTEIN-CSS Story ===== */
+</style>
+<style id="dino-stil">
+/* Markenzeichen: feiernder Dino (Lernseiten-Anweisung 8.3) */
+.dino-ecke{width:auto!important;height:auto!important;min-width:0!important;min-height:0!important;padding:0!important;background:none!important;border:0!important;border-radius:0!important;box-shadow:none!important;opacity:1!important;font-size:1rem!important;line-height:1.3!important;filter:none!important}
+.dino-huelle{all:unset;display:block;cursor:pointer}
+.dino-ikon{display:block;width:72px;height:72px;max-width:none;-webkit-user-drag:none;user-select:none}
+.dino-ecke>:not(.dino-huelle):not(.dino-ikon){position:absolute!important;right:calc(100% + 6px)!important;bottom:26px!important;left:auto!important;top:auto!important;white-space:nowrap}
+.dino-tipp-fest{right:96px!important;bottom:34px!important;left:auto!important;top:auto!important}
+</style>
+<!-- =============================================================================
+     BAUSTEIN: Formeltool  (v1, 22.11.2026)
+     Gepflegt im Wartungs-Projekt (_wartung/allgemein/baustein_formeltool.html).
+     Einfügen: UNVERÄNDERT in den <head> (vom Kommentar BAUSTEIN bis ENDE BAUSTEIN).
+     Einfache Form – keine Verschachtelung: In jedem Kästchen steht normaler Text.
+
+     Ein Feld anlegen:   var fd = FT.feld(element, { art: 'frei' });
+       art 'frei'   Eingabezeile + Tastenleiste (Formeltool)
+           'bruch'  nur Zähler und Nenner (getrennte Eingabe, keine Tastenleiste)
+           'gem'    Ganze, Zähler, Nenner (getrennte Eingabe als gemischte Zahl)
+       tasten   Auswahl/Reihenfolge der Tasten bei 'frei', Vorgabe:
+                ['bruch','gem','hoch','tief','wurzel','nwurzel','mal']
+       tastatur 'text' (Vorgabe) | 'zahl' (iPad-Zifferntastatur – hat KEIN Minus)
+       label    Bezeichnung für Screenreader, z. B. 'Antwort'
+       aendern  function(fd) – wird nach jeder Änderung aufgerufen (Zustand sichern!)
+     Am Feld:  fd.zustand() → Daten (JSON-fähig, für sessionStorage, TEIL 6)
+               fd.setze(daten)   fd.leeren()   fd.sperre(true|false)   fd.leer()
+               fd.zahl()   → { w:[Zähler,Nenner], gek, dez, vz } oder null (keine Zahl)
+               fd.linear() → Rechentext für FT.rechne/FT.gleichwertig
+               fd.tex()    → LaTeX zum Anzeigen der Eingabe (in \( … \) setzen)
+               fd.hat('bruch') → true, wenn der Baustein vorkommt (Formvorgaben)
+     Ohne Feld: FT.zahl(daten), FT.linear(daten), FT.tex(daten) – z. B. für die Auswertung
+               FT.leseZahl('2 3/4')  Dezimalzahl, a/b, g a/b, Periode 0,(3) – auch mit −
+               FT.rechne('2x^2', {x:3})  → 18      (NaN, wenn unlesbar)
+               FT.gleichwertig('2(x+1)', '2x+2')   → true (Zahlenprobe an 8 Stellen)
+     Einbau in eine eigene Aufgabe (Zustand nach TEIL 6):
+       var fd = FT.feld($('a1-feld'), { art: 'frei', label: 'Ergebnis',
+                 aendern: function(){ S.a1 = fd.zustand(); sichern(); } });
+       if (S.a1) fd.setze(S.a1);
+       Zahl prüfen:  var p = fd.zahl();  richtig = p && p.w[0] * 4 === 3 * p.w[1];  (gekürzt: p.gek)
+       Term prüfen:  FT.gleichwertig(fd.linear(), '2x+3')
+       Nach dem Prüfen sperren: fd.sperre(true); Leeren-Knopf: fd.leeren(); fd.sperre(false);
+     Tippen im Text: · oder *, : oder /, ^ für Hochzahlen im Kästchen (x^2), Klammern,
+     Variablen sind einzelne Buchstaben (ab = a·b), Index per Taste (x₁ → x_1).
+     Darstellung: Brüche div-basiert mit waagerechtem Strich (TEIL 7.2), Schrift ≥ 1rem,
+     Tasten ≥ 44×44 px, Farben nur aus dem Schema (TEIL 2.2).
+     ========================================================================== -->
+<style>
+/* ===== BAUSTEIN-CSS: Formeltool (v1) ===== */
+.ft{display:inline-block;max-width:100%;vertical-align:middle;color-scheme:light;}
+.ft-leiste{display:flex;flex-wrap:wrap;gap:.35rem;margin:0 0 .4rem;}
+.ft-taste{min-width:48px;min-height:48px;padding:.2rem .5rem;border:2px solid #2f5fa6;border-radius:.6rem;
+  background:#e6eefb;color:#1f4680;font:inherit;font-size:1.05rem;font-weight:700;cursor:pointer;
+  display:inline-flex;align-items:center;justify-content:center;line-height:1.1;}
+.ft-taste:active{transform:scale(.96);}
+.ft-taste:disabled{opacity:.45;cursor:default;}
+.ft-taste .ft-sym-hoch{font-size:1rem;position:relative;top:-.55em;margin-left:.05em;}
+.ft-taste .ft-sym-tief{font-size:1rem;position:relative;top:.45em;margin-left:.05em;}
+.ft-taste .ft-sym-wz{border-top:2px solid currentColor;padding:0 .15em;margin-left:.05em;}
+.ft-taste .ft-sym-nw{font-size:1rem;position:relative;top:-.6em;margin-right:-.15em;}
+.ft-sym-bruch{display:inline-flex;flex-direction:column;align-items:center;line-height:1.05;margin:0 .1em;}
+.ft-sym-bruch > span{display:block;padding:0 .2em;font-size:1rem;}
+.ft-sym-bruch > span:first-child{border-bottom:2px solid currentColor;}
+.ft-zeile{display:inline-flex;flex-wrap:wrap;align-items:center;min-height:52px;min-width:8rem;max-width:100%;
+  padding:.3rem .5rem;border:2px solid #2f5fa6;border-radius:.6rem;background:#ffffff;color:#22303f;
+  font-size:1.15rem;cursor:text;}
+.ft-zeile.ft-fokus{border-color:#2f5fa6;}
+.ft-zeile.ft-zu{background:#f6f8fb;cursor:default;}
+.ft input{font:inherit;font-size:1.15rem;color:#22303f;-webkit-text-fill-color:#22303f;background:transparent;border:0;outline:none;
+  margin:0;padding:.1rem 0;text-align:center;min-width:1ch;border-radius:.3rem;}
+.ft input.ft-x{padding:.1rem .05rem;}
+.ft input.ft-s{border:2px dashed #2f5fa6;min-width:1.6rem;padding:.05rem .15rem;}
+.ft input.ft-s:focus{border-style:solid;border-color:#2f5fa6;}
+.ft input.ft-s.ft-voll{border-color:transparent;}
+.ft input.ft-s.ft-voll:focus{border-color:#2f5fa6;}
+.ft input.zu,.ft input[readonly]{cursor:default;}
+.ft-bruch{display:inline-flex;flex-direction:column;align-items:center;margin:0 .15em;vertical-align:middle;}
+.ft-bruch > .ft-oben{display:block;border-bottom:2px solid currentColor;padding:0 .1em .1em;}
+.ft-bruch > .ft-unten{display:block;padding:.1em .1em 0;}
+.ft-gem{display:inline-flex;align-items:center;}
+.ft-hoch{display:inline-block;position:relative;top:-.55em;}
+.ft-hoch > input,.ft-tief > input,.ft-nw > input{font-size:1rem;}
+.ft-tief{display:inline-block;position:relative;top:.55em;}
+.ft-wurzel{display:inline-flex;align-items:stretch;margin:0 .1em;}
+.ft-wurzel > .ft-wz{font-size:1.3rem;line-height:1;align-self:center;}
+.ft-wurzel > .ft-rad{display:inline-flex;align-items:center;border-top:2px solid currentColor;padding:.1em .1em 0;}
+.ft-nw{display:inline-block;position:relative;top:-.75em;margin-right:-.25em;}
+.ft-fest .ft-zeile{padding:.3rem .7rem;}
+.ft-hilfe{font-size:1rem;color:#22303f;margin:.3rem 0 0;}
+/* ===== ENDE BAUSTEIN-CSS Formeltool ===== */
+</style>
+<script>
+/* ============================================================
+   BAUSTEIN: Formeltool-Engine (v1, 22.11.2026) – unverändert übernehmen
+   ============================================================ */
+var FT = (function(){
+"use strict";
+var VERSION = 'v1';
+var SLOTS = { x:['v'], bruch:['z','n'], gem:['g','z','n'], hoch:['v'], tief:['v'], wurzel:['v'], nwurzel:['n','v'] };
+var NAMEN = { z:'Zähler', n:'Nenner', g:'Ganze', v:'Eingabe' };
+var TASTEN = {
+  bruch:   { titel:'Bruch', html:'<span class="ft-sym-bruch"><span>a</span><span>b</span></span>' },
+  gem:     { titel:'gemischte Zahl', html:'1<span class="ft-sym-bruch"><span>a</span><span>b</span></span>' },
+  hoch:    { titel:'Hochzahl', html:'x<span class="ft-sym-hoch">n</span>' },
+  tief:    { titel:'Index (tiefgestellt)', html:'x<span class="ft-sym-tief">1</span>' },
+  wurzel:  { titel:'Quadratwurzel', html:'√<span class="ft-sym-wz">x</span>' },
+  nwurzel: { titel:'n-te Wurzel', html:'<span class="ft-sym-nw">n</span>√<span class="ft-sym-wz">x</span>' },
+  mal:     { titel:'Malpunkt', html:'·', zeichen:'·' },
+  klammer: { titel:'Klammer auf', html:'(', zeichen:'(' },
+  klammerzu: { titel:'Klammer zu', html:')', zeichen:')' },
+  minus:   { titel:'Minus', html:'−', zeichen:'-' },
+  loeschen:{ titel:'Baustein löschen', html:'⌫' }
+};
+var STANDARD = ['bruch','gem','hoch','tief','wurzel','nwurzel','mal','loeschen'];
+
+/* ---------- Modell ---------- */
+function leeresTeil(t){ var o = { t:t }; SLOTS[t].forEach(function(s){ o[s] = ''; }); return o; }
+function kopie(teile){ return teile.map(function(p){ var o = { t:p.t }; SLOTS[p.t].forEach(function(s){ o[s] = String(p[s] == null ? '' : p[s]); }); return o; }); }
+function gueltig(daten){
+  return Array.isArray(daten) && daten.length > 0 && daten.every(function(p){ return p && SLOTS[p.t]; });
+}
+/* frei: beginnt und endet mit Text, zwischen zwei Bausteinen steht immer ein Textstück */
+function ordne(teile){
+  var r = [];
+  teile.forEach(function(p){
+    var l = r[r.length - 1];
+    if (p.t === 'x' && l && l.t === 'x') { l.v += p.v; return; }
+    if (p.t !== 'x' && (!l || l.t !== 'x')) r.push({ t:'x', v:'' });
+    r.push(p);
+  });
+  if (!r.length || r[r.length - 1].t !== 'x') r.push({ t:'x', v:'' });
+  return r;
+}
+
+/* ---------- Zahlen lesen (wie Rückblick-KA-Engine) ---------- */
+function ggt(a, b){ a = Math.abs(a); b = Math.abs(b); while (b) { var t = a % b; a = b; b = t; } return a || 1; }
+function kurz(z, n){ if (n < 0) { z = -z; n = -n; } var t = ggt(z, n); return [z / t, n / t]; }
+function leseZahl(roh){
+  var s = String(roh == null ? '' : roh).trim().replace(/[−–]/g, '-');
+  var kl = s.match(/^\((.*)\)$/); if (kl) s = kl[1].trim();
+  var vz = 1, r0 = s.match(/^([+-])\s*(.*)$/);
+  if (r0) { if (r0[1] === '-') vz = -1; s = r0[2]; }
+  var p = betrag(s);
+  if (p && vz < 0) p.w = [-p.w[0], p.w[1]];
+  if (p) p.vz = !!r0;
+  return p;
+}
+function betrag(s){
+  if (!s || s.length > 24) return null;
+  s = s.replace(/…|\.\.\.+/g, '~').replace(/\./g, ',').replace(/\s+/g, ' ').replace(/[÷:]/g, '/').replace(/⁄/g, '/');
+  s = s.replace(/((?:\d̅)+)/g, function(t){ return '(' + t.replace(/̅/g, '') + ')'; });
+  var r;
+  if ((r = s.match(/^(\d+) (\d+) ?\/ ?(\d+)$/))) {
+    if (!+r[3]) return null;
+    return { w: kurz(+r[1] * +r[3] + +r[2], +r[3]), gek: ggt(+r[2], +r[3]) === 1, dez: false };
+  }
+  var t = s.replace(/ /g, '');
+  if ((r = t.match(/^(\d+)\/(\d+)$/))) {
+    if (!+r[2]) return null;
+    return { w: kurz(+r[1], +r[2]), gek: ggt(+r[1], +r[2]) === 1, dez: false };
+  }
+  if ((r = t.match(/^(\d*),(\d*)\((\d+)\)$/)) || (r = t.match(/^(\d*),(\d*?)(\d)~$/))) {
+    var I = r[1] || '0', P = r[2], Q = r[3];
+    var N = parseInt(I + P + Q, 10), M = parseInt(I + P, 10);
+    return { w: kurz(N - M, (Math.pow(10, Q.length) - 1) * Math.pow(10, P.length)), gek: true, dez: true };
+  }
+  if ((r = t.match(/^(\d*),(\d+)$/)) || (r = t.match(/^(\d+),?()$/))) {
+    return { w: kurz(parseInt((r[1] || '0') + r[2], 10), Math.pow(10, r[2].length)), gek: true, dez: true };
+  }
+  return null;
+}
+/* Eingabe aus dem Formeltool als Zahl: Text allein, oder [Vorzeichen] Bruch / gemischte Zahl */
+function zahl(daten){
+  if (!gueltig(daten)) return null;
+  var t = daten.filter(function(p){ return !(p.t === 'x' && !String(p.v).trim()); });
+  if (t.length === 1 && t[0].t === 'x') return leseZahl(t[0].v);
+  var vz = 1, mitVz = false;
+  if (t.length === 2 && t[0].t === 'x') {
+    var v0 = String(t[0].v).trim().replace(/[−–]/g, '-');
+    if (v0 !== '-' && v0 !== '+') return null;
+    vz = v0 === '-' ? -1 : 1; mitVz = true; t = [t[1]];
+  }
+  if (t.length !== 1) return null;
+  var s = t[0], z, n, w;
+  if (s.t === 'bruch') {
+    z = leseZahl(s.z); n = leseZahl(s.n);
+    if (!z || !n || !n.w[0]) return null;
+    w = kurz(vz * z.w[0] * n.w[1], z.w[1] * n.w[0]);
+    var ganz = z.w[1] === 1 && n.w[1] === 1;
+    return { w: w, gek: ganz && ggt(z.w[0], n.w[0]) === 1 && n.w[0] > 0, dez: false, vz: mitVz || z.vz || n.vz };
+  }
+  if (s.t === 'gem') {
+    var g = leseZahl(s.g); z = leseZahl(s.z); n = leseZahl(s.n);
+    if (!g || !z || !n || g.vz || z.vz || n.vz) return null;
+    if (g.w[1] !== 1 || z.w[1] !== 1 || n.w[1] !== 1 || !n.w[0]) return null;
+    w = kurz(vz * (g.w[0] * n.w[0] + z.w[0]), n.w[0]);
+    return { w: w, gek: ggt(z.w[0], n.w[0]) === 1, dez: false, vz: mitVz };
+  }
+  return null;
+}
+
+/* ---------- Rechentext und Darstellung ---------- */
+function linear(daten){
+  if (!gueltig(daten)) return '';
+  return daten.map(function(p){
+    switch (p.t) {
+      case 'x':       return p.v;
+      case 'bruch':   return '((' + p.z + ')/(' + p.n + '))';
+      case 'gem':     return '((' + p.g + ')+(' + p.z + ')/(' + p.n + '))';
+      case 'hoch':    return '^(' + p.v + ')';
+      case 'tief':    return '_' + String(p.v).replace(/\s+/g, '');
+      case 'wurzel':  return 'sqrt(' + p.v + ')';
+      case 'nwurzel': return 'root(' + p.n + ';' + p.v + ')';
+    }
+    return '';
+  }).join('');
+}
+function texText(v){
+  var s = String(v == null ? '' : v).replace(/[\\{}$%#&~]/g, '').replace(/[−–]/g, '-');
+  if (!s.trim()) return '';
+  s = s.replace(/(\d),(\d)/g, '$1{,}$2').replace(/[·*×]/g, '\\cdot ').replace(/</g, '\\lt ').replace(/>/g, '\\gt ');
+  s = s.replace(/\^\s*\(([^()]*)\)/g, '^{($1)}').replace(/\^\s*(-?[A-Za-z0-9,{}]+)/g, '^{$1}');
+  s = s.replace(/_\s*([A-Za-z0-9]+)/g, '_{$1}');
+  return s;
+}
+function feldTex(v){ var s = texText(v); return s === '' ? '\\square' : s; }
+function tex(daten){
+  if (!gueltig(daten)) return '';
+  var out = [];
+  daten.forEach(function(p, i){
+    var s = '';
+    switch (p.t) {
+      case 'x':       s = texText(p.v); break;
+      case 'bruch':   s = '\\frac{' + feldTex(p.z) + '}{' + feldTex(p.n) + '}'; break;
+      case 'gem':     s = feldTex(p.g) + '\\frac{' + feldTex(p.z) + '}{' + feldTex(p.n) + '}'; break;
+      case 'hoch':    s = '^{' + feldTex(p.v) + '}'; break;
+      case 'tief':    s = '_{' + feldTex(p.v) + '}'; break;
+      case 'wurzel':  s = '\\sqrt{' + feldTex(p.v) + '}'; break;
+      case 'nwurzel': s = '\\sqrt[' + feldTex(p.n) + ']{' + feldTex(p.v) + '}'; break;
+    }
+    /* Hochzahl direkt hinter einem Bruch/einer Wurzel: Klammer zeigen, wie gerechnet wird */
+    var nach = daten[i + 1];
+    if (p.t !== 'x' && p.t !== 'hoch' && p.t !== 'tief' && nach && nach.t === 'x' && !String(nach.v).trim()) nach = daten[i + 2];
+    if ((p.t === 'bruch' || p.t === 'gem') && nach && nach.t === 'hoch') s = '\\left(' + s + '\\right)';
+    if ((p.t === 'hoch' || p.t === 'tief') && !out.join('').trim()) s = '{}' + s;
+    out.push(s);
+  });
+  return out.join('');
+}
+
+/* ---------- Rechnen: Tokenizer und Parser ---------- */
+function tokens(s){
+  s = String(s).replace(/[−–]/g, '-').replace(/[·×*]/g, '*').replace(/[:÷]/g, '/')
+       .replace(/²/g, '^2').replace(/³/g, '^3').replace(/√/g, 'sqrt');
+  var out = [], i = 0, r;
+  while (i < s.length) {
+    var c = s.charAt(i), rest = s.slice(i);
+    if (/\s/.test(c)) { i++; continue; }
+    if ((r = rest.match(/^\d+(?:[.,]\d+)?/))) { out.push({ t:'n', v: parseFloat(r[0].replace(',', '.')) }); i += r[0].length; continue; }
+    if ((r = rest.match(/^(sqrt|root|wurzel)(?=\s*\()/i))) { out.push({ t:'f', v: r[1].toLowerCase() === 'root' ? 'root' : 'sqrt' }); i += r[0].length; continue; }
+    if (c === 'π') { out.push({ t:'n', v: Math.PI }); i++; continue; }
+    if ((r = rest.match(/^[A-Za-zÄÖÜäöüß](?:_\{?([A-Za-z0-9]+)\}?)?/))) {
+      out.push({ t:'v', v: r[0].charAt(0) + (r[1] ? '_' + r[1] : '') }); i += r[0].length; continue;
+    }
+    if ('+-*/^();'.indexOf(c) >= 0) { out.push({ t:c }); i++; continue; }
+    return null;
+  }
+  return out;
+}
+function baum(s){
+  var tk = tokens(s); if (!tk || !tk.length) return null;
+  var i = 0;
+  function sieh(){ return tk[i]; }
+  function nimm(t){ if (tk[i] && tk[i].t === t) { i++; return true; } return false; }
+  function startFaktor(t){ return t && (t.t === 'n' || t.t === 'v' || t.t === 'f' || t.t === '('); }
+  function ausdruck(){
+    var a = term();
+    while (sieh() && (sieh().t === '+' || sieh().t === '-')) { var op = tk[i++].t; a = [op, a, term()]; }
+    return a;
+  }
+  function term(){
+    var a = vorz();
+    for (;;) {
+      var t = sieh();
+      if (t && (t.t === '*' || t.t === '/')) { i++; a = [t.t, a, vorz()]; }
+      else if (startFaktor(t)) a = ['*', a, potenz()];
+      else return a;
+    }
+  }
+  function vorz(){
+    if (nimm('-')) return ['neg', vorz()];
+    if (nimm('+')) return vorz();
+    return potenz();
+  }
+  function potenz(){
+    var b = atom();
+    if (nimm('^')) return ['^', b, vorz()];
+    return b;
+  }
+  function atom(){
+    var t = tk[i++];
+    if (!t) throw 0;
+    if (t.t === 'n') return ['n', t.v];
+    if (t.t === 'v') return ['v', t.v];
+    if (t.t === '(') { var a = ausdruck(); if (!nimm(')')) throw 0; return a; }
+    if (t.t === 'f') {
+      if (!nimm('(')) throw 0;
+      if (t.v === 'sqrt') { var x = ausdruck(); if (!nimm(')')) throw 0; return ['sqrt', x]; }
+      var n = ausdruck(); if (!nimm(';')) throw 0; var y = ausdruck(); if (!nimm(')')) throw 0; return ['root', n, y];
+    }
+    throw 0;
+  }
+  try { var e = ausdruck(); return i === tk.length ? e : null; } catch (x) { return null; }
+}
+function werte(e, bel){
+  switch (e[0]) {
+    case 'n': return e[1];
+    case 'v': return Object.prototype.hasOwnProperty.call(bel, e[1]) ? +bel[e[1]] : NaN;
+    case 'neg': return -werte(e[1], bel);
+    case '+': return werte(e[1], bel) + werte(e[2], bel);
+    case '-': return werte(e[1], bel) - werte(e[2], bel);
+    case '*': return werte(e[1], bel) * werte(e[2], bel);
+    case '/': return werte(e[1], bel) / werte(e[2], bel);
+    case '^': return Math.pow(werte(e[1], bel), werte(e[2], bel));
+    case 'sqrt': return Math.sqrt(werte(e[1], bel));
+    case 'root':
+      var n = werte(e[1], bel), x = werte(e[2], bel);
+      if (x < 0 && Math.round(n) === n && Math.abs(n % 2) === 1) return -Math.pow(-x, 1 / n);
+      return Math.pow(x, 1 / n);
+  }
+  return NaN;
+}
+function rechne(s, bel){ var e = baum(s); return e ? werte(e, bel || {}) : NaN; }
+function variablen(s){
+  var tk = tokens(s) || [], v = [];
+  tk.forEach(function(t){ if (t.t === 'v' && v.indexOf(t.v) < 0) v.push(t.v); });
+  return v;
+}
+var PROBE = [0.731, 1.913, -1.37, 2.57, 0.43, 3.11, -0.67, 1.29];
+function gleichwertig(a, b, vars){
+  var ea = baum(a), eb = baum(b);
+  if (!ea || !eb) return false;
+  vars = vars || variablen(a).concat(variablen(b));
+  var gueltige = 0;
+  for (var k = 0; k < PROBE.length; k++) {
+    var bel = {};
+    vars.forEach(function(v, j){ bel[v] = PROBE[(k + 3 * j) % PROBE.length] + 0.137 * j; });
+    var x = werte(ea, bel), y = werte(eb, bel);
+    if (!isFinite(x) || !isFinite(y)) continue;
+    gueltige++;
+    if (Math.abs(x - y) > 1e-7 * Math.max(1, Math.abs(x), Math.abs(y))) return false;
+  }
+  return gueltige >= 4;
+}
+
+/* ---------- Feld ---------- */
+function Feld(el, opt){
+  opt = opt || {};
+  var fd = this;
+  this.art = opt.art === 'bruch' || opt.art === 'gem' ? opt.art : 'frei';
+  this.opt = opt; this.zu = false; this.fokus = null;
+  this.teile = this.art === 'frei' ? [{ t:'x', v:'' }] : [leeresTeil(this.art)];
+  this.box = document.createElement('div');
+  this.box.className = 'ft' + (this.art === 'frei' ? '' : ' ft-fest');
+  if (this.art === 'frei') {
+    this.leiste = document.createElement('div');
+    this.leiste.className = 'ft-leiste';
+    (opt.tasten || STANDARD).forEach(function(k){
+      var d = TASTEN[k]; if (!d) return;
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'ft-taste'; b.innerHTML = d.html;
+      b.title = d.titel; b.setAttribute('aria-label', d.titel);
+      /* Fokus im Kästchen lassen (iPad-Tastatur bleibt offen) */
+      b.addEventListener('pointerdown', function(e){ e.preventDefault(); });
+      b.addEventListener('mousedown', function(e){ e.preventDefault(); });
+      b.addEventListener('click', function(){
+        if (fd.zu) return;
+        if (k === 'loeschen') fd.loesche();
+        else if (d.zeichen) fd.tippe(d.zeichen);
+        else fd.fuegeEin(k);
+      });
+      fd.leiste.appendChild(b);
+    });
+    this.box.appendChild(this.leiste);
+  }
+  this.zeile = document.createElement('div');
+  this.zeile.className = 'ft-zeile';
+  this.zeile.setAttribute('role', 'group');
+  this.zeile.setAttribute('aria-label', opt.label || 'Eingabe');
+  this.box.appendChild(this.zeile);
+  el.appendChild(this.box);
+
+  this.zeile.addEventListener('input', function(e){
+    var inp = e.target; if (!inp.__ft) return;
+    fd.teile[inp.__ft.i][inp.__ft.s] = inp.value;
+    breite(inp); fd.melde();
+  });
+  this.zeile.addEventListener('focusin', function(e){
+    if (e.target.__ft) { fd.fokus = e.target; fd.zeile.classList.add('ft-fokus'); }
+  });
+  this.zeile.addEventListener('focusout', function(){ fd.zeile.classList.remove('ft-fokus'); });
+  this.zeile.addEventListener('keydown', function(e){ fd.taste(e); });
+  this.zeile.addEventListener('click', function(e){
+    if (e.target === fd.zeile && !fd.zu) { var a = fd.eingaben(); var l = a[a.length - 1]; if (l) setze(l, l.value.length); }
+  });
+  this.zeichne();
+}
+function breite(inp){
+  var n = Math.max(inp.value.length, inp.classList.contains('ft-s') ? 1 : 0);
+  inp.style.width = (n + 1) + 'ch';
+  if (inp.classList.contains('ft-s')) inp.classList.toggle('ft-voll', inp.value.trim() !== '');
+}
+function setze(inp, pos){
+  try { inp.focus(); inp.setSelectionRange(pos, pos); } catch (e) { try { inp.focus(); } catch (x) {} }
+}
+Feld.prototype.eingaben = function(){ return Array.prototype.slice.call(this.zeile.querySelectorAll('input')); };
+Feld.prototype.zeichne = function(ziel){
+  var fd = this, z = this.zeile, tm = this.opt.tastatur === 'zahl' ? 'decimal' : 'text';
+  z.innerHTML = ''; this.fokus = null;
+  function inp(i, s, cls, name){
+    var e = document.createElement('input');
+    e.type = 'text'; e.className = cls; e.value = fd.teile[i][s];
+    e.setAttribute('inputmode', tm); e.setAttribute('autocomplete', 'off');
+    e.setAttribute('autocapitalize', 'off'); e.setAttribute('autocorrect', 'off'); e.setAttribute('spellcheck', 'false');
+    e.setAttribute('aria-label', name);
+    e.__ft = { i:i, s:s };
+    if (fd.zu) { e.readOnly = true; e.classList.add('zu'); }
+    breite(e);
+    return e;
+  }
+  function span(cls){ var s = document.createElement('span'); s.className = cls; return s; }
+  this.teile.forEach(function(p, i){
+    var w;
+    switch (p.t) {
+      case 'x':
+        z.appendChild(inp(i, 'v', 'ft-x', fd.opt.label || 'Eingabe')); break;
+      case 'bruch':
+        w = span('ft-bruch');
+        var o = span('ft-oben'); o.appendChild(inp(i, 'z', 'ft-s', 'Zähler'));
+        var u = span('ft-unten'); u.appendChild(inp(i, 'n', 'ft-s', 'Nenner'));
+        w.appendChild(o); w.appendChild(u); z.appendChild(w); break;
+      case 'gem':
+        w = span('ft-gem'); w.appendChild(inp(i, 'g', 'ft-s', 'Ganze'));
+        var b = span('ft-bruch');
+        var o2 = span('ft-oben'); o2.appendChild(inp(i, 'z', 'ft-s', 'Zähler'));
+        var u2 = span('ft-unten'); u2.appendChild(inp(i, 'n', 'ft-s', 'Nenner'));
+        b.appendChild(o2); b.appendChild(u2); w.appendChild(b); z.appendChild(w); break;
+      case 'hoch':
+        w = span('ft-hoch'); w.appendChild(inp(i, 'v', 'ft-s', 'Hochzahl')); z.appendChild(w); break;
+      case 'tief':
+        w = span('ft-tief'); w.appendChild(inp(i, 'v', 'ft-s', 'Index')); z.appendChild(w); break;
+      case 'wurzel':
+        w = span('ft-wurzel'); var wz = span('ft-wz'); wz.textContent = '√'; w.appendChild(wz);
+        var r = span('ft-rad'); r.appendChild(inp(i, 'v', 'ft-s', 'unter der Wurzel')); w.appendChild(r);
+        z.appendChild(w); break;
+      case 'nwurzel':
+        var nw = span('ft-nw'); nw.appendChild(inp(i, 'n', 'ft-s', 'Wurzelexponent')); z.appendChild(nw);
+        w = span('ft-wurzel'); var wz2 = span('ft-wz'); wz2.textContent = '√'; w.appendChild(wz2);
+        var r2 = span('ft-rad'); r2.appendChild(inp(i, 'v', 'ft-s', 'unter der Wurzel')); w.appendChild(r2);
+        z.appendChild(w); break;
+    }
+  });
+  this.zeile.classList.toggle('ft-zu', this.zu);
+  if (this.leiste) Array.prototype.forEach.call(this.leiste.children, function(b){ b.disabled = fd.zu; });
+  if (ziel) {
+    var ziel_el = this.eingaben().filter(function(e){ return e.__ft.i === ziel.i && e.__ft.s === ziel.s; })[0];
+    if (ziel_el) setze(ziel_el, ziel.pos == null ? ziel_el.value.length : ziel.pos);
+  }
+};
+Feld.prototype.melde = function(){ if (typeof this.opt.aendern === 'function') this.opt.aendern(this); };
+/* Wo steht die Schreibmarke? → { i, s, pos } */
+Feld.prototype.marke = function(){
+  var f = this.fokus;
+  if (!f || !f.__ft) { var l = this.teile.length - 1; return { i:l, s:SLOTS[this.teile[l].t][0], pos:String(this.teile[l][SLOTS[this.teile[l].t][0]]).length }; }
+  var pos = f.value.length;
+  try { if (typeof f.selectionStart === 'number') pos = f.selectionStart; } catch (e) {}
+  return { i:f.__ft.i, s:f.__ft.s, pos:pos };
+};
+Feld.prototype.fuegeEin = function(typ){
+  if (this.art !== 'frei' || !SLOTS[typ] || typ === 'x') return;
+  var m = this.marke(), t = this.teile, neu = leeresTeil(typ), stelle;
+  if (t[m.i].t === 'x') {
+    var v = t[m.i].v;
+    t.splice(m.i, 1, { t:'x', v:v.slice(0, m.pos) }, neu, { t:'x', v:v.slice(m.pos) });
+    stelle = m.i + 1;
+  } else {
+    t.splice(m.i + 1, 0, { t:'x', v:'' }, neu);
+    stelle = m.i + 2;
+  }
+  this.teile = ordne(t);
+  stelle = this.teile.indexOf(neu);
+  this.zeichne({ i:stelle, s:SLOTS[typ][0], pos:0 });
+  this.melde();
+};
+Feld.prototype.tippe = function(zeichen){
+  var m = this.marke(), p = this.teile[m.i], alt = String(p[m.s]);
+  p[m.s] = alt.slice(0, m.pos) + zeichen + alt.slice(m.pos);
+  this.zeichne({ i:m.i, s:m.s, pos:m.pos + zeichen.length });
+  this.melde();
+};
+/* Baustein an der Schreibmarke (oder direkt davor) entfernen; Text links und rechts bleibt */
+Feld.prototype.loesche = function(){
+  if (this.art !== 'frei') return;
+  var m = this.marke(), t = this.teile, i = m.i;
+  if (t[i].t === 'x') { if (m.pos > 0 || i === 0) return; i = i - 1; }
+  var links = t[i - 1], rechts = t[i + 1], pos = links ? links.v.length : 0;
+  t.splice(i, 1);
+  this.teile = ordne(t);
+  this.zeichne({ i:Math.max(0, i - 1), s:'v', pos:pos });
+  this.melde();
+};
+Feld.prototype.taste = function(e){
+  var inp = e.target; if (!inp.__ft || this.zu) return;
+  var a = this.eingaben(), k = a.indexOf(inp), pos = inp.selectionStart, bis = inp.selectionEnd;
+  var p = this.teile[inp.__ft.i];
+  if (e.key === 'ArrowLeft' && pos === 0 && bis === 0 && k > 0) { e.preventDefault(); setze(a[k - 1], a[k - 1].value.length); }
+  else if (e.key === 'ArrowRight' && pos === inp.value.length && k < a.length - 1) { e.preventDefault(); setze(a[k + 1], 0); }
+  else if (e.key === 'Backspace' && pos === 0 && bis === 0 && this.art === 'frei') {
+    var leer = function(q){ return SLOTS[q.t].every(function(s){ return !String(q[s]).trim(); }); };
+    if (p.t !== 'x' && leer(p)) { e.preventDefault(); this.loesche(); }
+    else if (p.t === 'x' && inp.__ft.i > 0) {
+      e.preventDefault();
+      if (leer(this.teile[inp.__ft.i - 1])) this.loesche();
+      else setze(a[k - 1], a[k - 1].value.length);
+    }
+    else if (k > 0) { e.preventDefault(); setze(a[k - 1], a[k - 1].value.length); }
+  }
+  else if (e.key === 'Enter' && typeof this.opt.enter === 'function') { e.preventDefault(); this.opt.enter(this); }
+};
+Feld.prototype.zustand = function(){ return kopie(this.teile); };
+Feld.prototype.setze = function(daten){
+  if (!gueltig(daten)) return;
+  var t = kopie(daten);
+  if (this.art === 'frei') t = ordne(t);
+  else if (t.length !== 1 || t[0].t !== this.art) return;
+  this.teile = t; this.zeichne();
+};
+Feld.prototype.leeren = function(){ this.teile = this.art === 'frei' ? [{ t:'x', v:'' }] : [leeresTeil(this.art)]; this.zeichne(); this.melde(); };
+Feld.prototype.sperre = function(an){ this.zu = !!an; this.zeichne(); };
+Feld.prototype.leer = function(){ return this.teile.every(function(p){ return SLOTS[p.t].every(function(s){ return !String(p[s]).trim(); }); }); };
+Feld.prototype.zahl = function(){ return zahl(this.teile); };
+Feld.prototype.linear = function(){ return linear(this.teile); };
+Feld.prototype.tex = function(){ return tex(this.teile); };
+Feld.prototype.hat = function(typ){ return this.teile.some(function(p){ return p.t === typ; }); };
+
+return {
+  version: VERSION,
+  feld: function(el, opt){ return new Feld(el, opt); },
+  zahl: zahl, linear: linear, tex: tex, leseZahl: leseZahl,
+  rechne: rechne, gleichwertig: gleichwertig, variablen: variablen, gueltig: gueltig
+};
+})();
+/* ============ ENDE BAUSTEIN Formeltool-Engine ============ */
+</script>
+<!-- ============ ENDE BAUSTEIN Formeltool ============ -->
+</head>
+<body data-anrede="sie" data-version="1">
+
+<header class="kopf"><div class="kopf-innen">
+  <p class="kopf-typ" id="st-typ"></p>
+  <h1 id="st-titel"></h1>
+  <p id="st-untertitel"></p>
+  <p class="vorschau" id="st-vorschau">🔓 Freigeschaltet für die Lehrkraft: Datumssperre ist aus (nur in diesem Tab).</p>
+</div></header>
+<nav class="reiter" aria-label="Karten"><div class="reiter-innen" id="reiter"></div></nav>
+<main id="main"></main>
+
+<script>
+/* ============================================================
+   BAUSTEIN: Story-Schreibhilfen (v1, 22.11.2026) – unverändert übernehmen
+   f(z,n)      Bruch als .frac-Konstrukt          f(3,4)  f('x + 1','2')
+   g(ganz,z,n) gemischte Zahl                       g(1,5,9)
+   m('…')      Formel mit Dezimalzahlen: Komma wird {,}, · wird \cdot
+   ============================================================ */
+function f(z, n){ return '<span class="frac"><span>' + z + '</span><span>' + n + '</span></span>'; }
+function g(ganz, z, n){ return '<span class="gem">' + ganz + ' ' + f(z, n) + '</span>'; }
+function m(t){
+  return '\\(' + String(t).replace(/(\d),(\d)/g, '$1{,}$2').replace(/·/g, '\\cdot ')
+    .replace(/−/g, '-') + '\\)';
+}
+/* ============ ENDE BAUSTEIN Schreibhilfen ============ */
+</script>
+
+<script>
+/* ============================================================
+   ANPASSEN: Daten der Story  (nur diesen Block ersetzen)
+   ------------------------------------------------------------
+   Escape Room „Flucht von der Groote Jager“ – Q1 (GK und LK), Steckbriefaufgaben und
+   Funktionenscharen, hilfsmittelfrei, Terme per Formeltool.
+   8 Räume + 2 Geheimtüren (Karte 5: Funktionenschar, Karte 8: Ortskurve) = 10 Karten,
+   je Haupträtsel + zwei Umwege. Kernkompetenzen (Schwerpunkt): 9 von 10 Haupträtseln mit kk.
+   Feldbeschreibung siehe baustein_story.html.
+   ============================================================ */
+/* Kennzeichnung Oberstufe (TEIL 3.2): Hilfsmittel + Lösungsart */
+function op(art){
+  return '<span class="op-tags"><span class="op-tag">ohne Hilfsmittel</span><span class="op-tag">' + art + '</span></span>';
+}
+
+/* ---------- Namen der Crew und der Lehrkraft (nur diese Seite) ----------
+   Eingabe auf der Startkarte (im intro), gespeichert nur im sessionStorage (TEIL 6),
+   danach Neuladen – die Texte unten werden mit den Namen aufgebaut.
+   1 Name: Lena und Jonas bleiben Mitschüler, der Name fällt in der direkten Ansprache.
+   ab 2 Namen: Name 1 und Name 2 übernehmen die Sprechrollen von Lena und Jonas. */
+var NAMEN_KEY = 'aszym:steckbrief_escape_story:namen';
+var CREW = (function(){
+  var d = null;
+  try { d = JSON.parse(sessionStorage.getItem(NAMEN_KEY) || 'null'); } catch (e) { d = null; }
+  return d && typeof d === 'object' ? d : { namen: [], lk: '' };
+})();
+function nameSauber(s){ return String(s || '').replace(/[^A-Za-zÄÖÜäöüßÀ-ÿ\- ]/g, '').replace(/\s+/g, ' ').trim().slice(0, 20); }
+var NAMEN = (CREW.namen || []).map(nameSauber).filter(Boolean).slice(0, 6);
+var N1 = NAMEN.length >= 2 ? NAMEN[0] : 'Lena';
+var N2 = NAMEN.length >= 2 ? NAMEN[1] : 'Jonas';
+function liste(a){ return a.length < 2 ? (a[0] || '') : a.slice(0, -1).join(', ') + ' und ' + a[a.length - 1]; }
+var ANSPRACHE = NAMEN.length ? ', ' + liste(NAMEN) : '';          /* „Sie können das, Mia und Ben“ */
+var LK = (function(){
+  var t = nameSauber(CREW.lk), w = t.match(/^(Herr|Frau)\s+(.+)$/i), frau = w && /^frau$/i.test(w[1]);
+  if (!w) return { nom:'Ihr Lehrer', akk:'Ihren Lehrer', gen:'Ihres Lehrers', er:'er', Er:'Er', ihn:'ihn', ihm:'ihm', seine:'seine', text:'' };
+  var n = w[2];
+  return frau ? { nom:'Frau ' + n, akk:'Frau ' + n, gen:'von Frau ' + n, er:'sie', Er:'Sie', ihn:'sie', ihm:'ihr', seine:'ihre', text:'Frau ' + n }
+              : { nom:'Herr ' + n, akk:'Herrn ' + n, gen:'von Herrn ' + n, er:'er', Er:'Er', ihn:'ihn', ihm:'ihm', seine:'seine', text:'Herr ' + n };
+})();
+function namenUebernehmen(){
+  var nf = document.getElementById('crew-namen'), lf = document.getElementById('crew-lk'), fb = document.getElementById('crew-fb');
+  var namen = String(nf ? nf.value : '').split(/[,;]+/).map(nameSauber).filter(Boolean).slice(0, 6);
+  var lk = nameSauber(lf ? lf.value : '');
+  if (lk && !/^(Herr|Frau)\s+\S/i.test(lk)) {
+    if (fb) { fb.className = 'fb nok'; fb.textContent = 'Bitte die Lehrkraft mit „Herr“ oder „Frau“ und Nachnamen eingeben.'; }
+    return;
+  }
+  try { sessionStorage.setItem(NAMEN_KEY, JSON.stringify({ namen: namen, lk: lk })); } catch (e) {}
+  location.reload();
+}
+function crewBox(){
+  var stand = (NAMEN.length || LK.text)
+    ? '<p><b>An Bord:</b> ' + (NAMEN.length ? liste(NAMEN) : '–') + (LK.text ? ' · <b>Lehrkraft:</b> ' + LK.text : '') + '</p>' : '';
+  var feld = 'display:block;width:100%;max-width:30rem;min-height:44px;font:inherit;font-size:1rem;padding:.4rem .6rem;'
+           + 'border:2px solid var(--line);border-radius:.6rem;margin:.2rem 0 .6rem;color:var(--ink);background:#fff;box-sizing:border-box;';
+  return '<div style="border:2px dashed var(--blue);border-radius:.8rem;padding:.8rem 1rem;margin:1rem 0;background:var(--blue-light);">'
+    + '<p style="margin-top:0"><b>⚓ Wer ist an Bord?</b> Tragen Sie Ihre Namen ein – allein oder als Gruppe, mehrere Namen mit Komma getrennt. '
+    + 'Die Namen tauchen dann in der Geschichte auf. Sie können das Feld auch leer lassen.</p>' + stand
+    + '<label for="crew-namen">Ihre Namen</label><input id="crew-namen" type="text" autocomplete="off" style="' + feld + '" value="' + NAMEN.join(', ') + '">'
+    + '<label for="crew-lk">Ihre Lehrkraft (mit Herr oder Frau)</label><input id="crew-lk" type="text" autocomplete="off" style="' + feld + '" value="' + LK.text + '">'
+    + '<button type="button" class="btn btn-pruefen" onclick="namenUebernehmen()">Namen übernehmen</button>'
+    + '<div id="crew-fb" class="fb"></div></div>';
+}
+
+var NUR_TERM = ' Schreiben Sie nur den Term an die Tafel (ohne „f(x) =“).';
+
+var STORY = {
+  art: 'escape',
+  titel: 'Flucht von der Groote Jager',
+  untertitel: 'Ein Escape Room zu Steckbriefaufgaben und Funktionenscharen · Q1 (GK und LK)',
+  intro: '<p>Kursfahrt der Q1: eine Woche Segeln auf dem IJsselmeer, an Bord der <i>Groote Jager</i>, eines alten Plattbodenschiffs '
+       + 'mit dunklem Holz und knarrenden Planken. Die ersten beiden Tage sind eigentlich ganz herrlich – Sonne, Wind, Pommes im Hafen.</p>'
+       + '<p>Am dritten Tag kippt das Wetter. Schon am Nachmittag wird der Himmel bleigrau, und dann, mitten auf dem Wasser, bricht der Sturm los. '
+       + 'Das Schiff ächzt, die Wellen schlagen gegen den Rumpf, irgendwo klirrt Geschirr. Alle haben sich unter Deck in der Kajüte '
+       + 'zusammengekauert, ganz dicht beieinander. Die Lampe an der Decke pendelt hin und her und wirft unruhige Schatten.</p>'
+       + '<p>' + LK.nom + ' will kurz an Deck nachsehen. „Bleiben Sie hier, ich bin gleich zurück.“ Die Tür fällt hinter ' + LK.ihm + ' zu. '
+       + 'Minuten vergehen. Dann hören Sie über sich Schritte – schwere, fremde Schritte. Ein dumpfer Schlag. Und schließlich, ganz leise, '
+       + 'ein Klicken an der Kajütentür. Abgeschlossen. Von außen.</p>'
+       + '<p>Durch das Bullauge sehen Sie im Licht eines Blitzes, wie der Bootsmann – der Neue, dessen Namen nie jemand so richtig verstanden hat – '
+       + 'mit dem Beiboot ablegt. Neben ihm, zusammengesunken und an den Händen gefesselt: ' + LK.nom + '.</p>'
+       + '<p>Unter der Tür liegt ein feuchter, zerknitterter Zettel. Die Schrift ist hastig, aber Sie erkennen sie sofort: '
+       + '<i>„Er hat jede Tür mit einem Kurvenschloss gesichert. Eine Schiene, eine Tafel, ein Stück Kreide. Jedes Schloss verrät seinen Steckbrief. '
+       + 'Sie können das' + ANSPRACHE + ' – auch ohne Taschenrechner. Suchen Sie das Speedboot.“</i></p>'
+       + '<p>Acht Räume und zwei verborgene Türen liegen zwischen Ihnen und der Flucht. Draußen heult der Wind. '
+       + 'Stift und Papier sind erlaubt – Taschenrechner und GeoGebra nicht.</p>' + crewBox(),
+  vorschau: 'LOTSENPATENT',
+  kern: { 'K8-6': 'Funktionsterm einer linearen Funktion aufstellen',
+          'K10-3': 'Darstellungsformen quadratischer Funktionen kennen',
+          'K8-16': 'Lineare Gleichungssysteme lösen',
+          'K7-8': 'Gleichungen mit Äquivalenzumformungen lösen',
+          'K6-3': 'Mit Brüchen rechnen',
+          'K8-11': 'Terme mit mehreren Variablen aufstellen, umformen und vereinfachen',
+          'K7-2': 'Rationale Zahlen multiplizieren und dividieren',
+          'K8-15': 'Lineare Gleichungssysteme mit zwei Variablen aufstellen' },
+  karten: [
+
+  /* ---------------- Karte 1: Kajüte ---------------- */
+  { id: '1', titel: 'Die Kajüte',
+    geschichte: '<p>Sie rütteln an der Tür. Nichts. Das Holz ist schwer und feucht, und es riecht ein bisschen nach Moder. '
+              + 'Erst jetzt, im flackernden Licht, sehen Sie es: In Augenhöhe ist eine <b>rostige Metallschiene</b> an die Tür geschraubt, '
+              + 'schnurgerade und schief. Darunter hängt eine zerkratzte <b>Schiefertafel</b>. Oben auf der Tafel steht, in krakeliger Schrift: '
+              + '<i>f(x) = …</i> – und auf dem schmalen Holzbord darunter liegt ein <b>weißes Stück Kreide</b>.</p>'
+              + '<p>Auf der Schiene sind zwei Nieten eingeschlagen. Daneben, eingeritzt ins Metall: ' + m('P(2|1)') + ' und ' + m('Q(6|9)') + '.</p>'
+              + '<p>„Na ja“, flüstert ' + N1 + '. Die Stimme klingt nicht ganz so fest wie gewollt. „Eine Gerade. Das kriegen wir hin.“ '
+              + 'Über Ihnen poltert etwas über das Deck. Dann ist es wieder still – bis auf den Wind.</p>',
+    raetsel: { frage: op('Weg frei') + 'Bestimmen Sie den Funktionsterm der linearen Funktion f, deren Graph durch '
+                    + m('P(2|1)') + ' und ' + m('Q(6|9)') + ' verläuft.' + NUR_TERM,
+               kk: 'K8-6', art: 'term', eingabe: 'formel', soll: '2x-3',
+               tipps: [ 'Eine lineare Funktion hat die Form ' + m('f(x) = m · x + b') + '. Die Steigung m ergibt sich aus den beiden Punkten.',
+                        'Berechnen Sie m als Quotient aus der Differenz der y-Werte und der Differenz der x-Werte. Setzen Sie dann einen Punkt ein und lösen Sie nach b auf.' ],
+               weg: 'Ansatz ' + m('f(x) = m · x + b') + '.<br>Steigung: ' + m('m = \\frac{9 - 1}{6 - 2} = \\frac{8}{4} = 2') + '.<br>'
+                  + 'P einsetzen: ' + m('1 = 2 · 2 + b') + ', also ' + m('b = -3') + '.<br>Ergebnis: ' + m('f(x) = 2x - 3') + '.' },
+    umwege: [
+      { geschichte: '<p>Kaum ist die Kreide abgesetzt, kreischt die Schiene – ein hässliches, metallisches Geräusch – und klappt zur Seite. '
+                  + 'Die Schrift auf der Tafel verschwimmt, als hätte jemand mit nasser Hand darübergewischt. Dahinter kommt eine zweite, kleinere Schiene '
+                  + 'zum Vorschein. Neue Nieten: ' + m('P(-1|5)') + ' und ' + m('Q(3|-3)') + '.</p>',
+        raetsel: { frage: op('Weg frei') + 'Bestimmen Sie den Funktionsterm der linearen Funktion f, deren Graph durch '
+                        + m('P(-1|5)') + ' und ' + m('Q(3|-3)') + ' verläuft.' + NUR_TERM,
+                   kk: 'K8-6', art: 'term', eingabe: 'formel', soll: '-2x+3',
+                   tipps: [ 'Bestimmen Sie zuerst die Steigung aus den beiden Punkten – achten Sie auf die Vorzeichen.',
+                            'Setzen Sie danach einen der Punkte in ' + m('f(x) = m · x + b') + ' ein und lösen Sie nach b auf.' ],
+                   weg: m('m = \\frac{-3 - 5}{3 - (-1)} = \\frac{-8}{4} = -2') + '.<br>P einsetzen: ' + m('5 = -2 · (-1) + b') + ', also '
+                      + m('b = 3') + '.<br>Ergebnis: ' + m('f(x) = -2x + 3') + '.' } },
+      { geschichte: '<p>Wieder nichts. Plötzlich geht das Licht aus. Zwei, drei Sekunden lang ist es stockdunkel – nur der Sturm, der durch die Türritzen pfeift. '
+                  + 'Dann flackert die Lampe wieder auf. Auf der Tafel steht etwas, das eben noch nicht da war: '
+                  + '<i>„Letzte Chance.“</i> Darunter eine dritte Gerade durch ' + m('P(0|4)') + ' und ' + m('Q(2|1)') + '.</p>',
+        raetsel: { frage: op('Weg frei') + 'Bestimmen Sie den Funktionsterm der linearen Funktion f, deren Graph durch '
+                        + m('P(0|4)') + ' und ' + m('Q(2|1)') + ' verläuft.' + NUR_TERM,
+                   kk: 'K8-6', art: 'term', eingabe: 'formel', soll: '-1.5x+4',
+                   tipps: [ 'Einer der beiden Punkte liegt auf der y-Achse. Was verrät er über b?',
+                            'Berechnen Sie die Steigung aus beiden Punkten. Sie darf eine Dezimalzahl oder ein Bruch sein.' ],
+                   weg: 'P liegt auf der y-Achse, also ' + m('b = 4') + '.<br>' + m('m = \\frac{1 - 4}{2 - 0} = -\\frac{3}{2} = -1,5') + '.<br>'
+                      + 'Ergebnis: ' + m('f(x) = -1,5x + 4') + '.' } }
+    ],
+    geschafft: '<p>Klack. Der Riegel gleitet zurück, und die Tür schwingt quietschend auf. Kalte Luft schlägt Ihnen entgegen. '
+             + 'Auf der Innenseite der Tür steht mit Kreide ein einzelnes Wort, offenbar in der Handschrift ' + LK.gen + ': <b>BULLAUGE</b>. '
+             + '„Damit wir wissen, wo wir weitermachen, falls … na ja, falls etwas schiefgeht“, murmelt ' + N1 + '.</p>',
+    code: 'BULLAUGE' },
+
+  /* ---------------- Karte 2: Kombüse ---------------- */
+  { id: '2', titel: 'Die Kombüse',
+    geschichte: '<p>Der schmale Gang ist nass. Irgendwo tropft Wasser, gleichmäßig, wie eine Uhr. In der Kombüse riecht es nach kaltem Fett '
+              + 'und angebranntem Pfannkuchen. Töpfe schwingen an ihren Haken und schlagen leise gegeneinander.</p>'
+              + '<p>Die Tür zum Niedergang ist verriegelt – und diesmal ist die rostige Schiene gebogen, eine Parabel. Am tiefsten Punkt klebt ein '
+              + 'Schild: <i>„Scheitelpunkt ' + m('S(2|-1)') + '“</i>. Dort, wo die Schiene die Wand berührt, steht: ' + m('P(0|3)') + '. '
+              + 'Daneben wieder die Tafel. Wieder die Kreide.</p>'
+              + '<p>Hinter dem Vorratsschrank kratzt etwas. Wahrscheinlich nur eine Ratte. Wahrscheinlich.</p>',
+    raetsel: { frage: op('Weg frei') + 'Der Graph der quadratischen Funktion f hat den Scheitelpunkt ' + m('S(2|-1)')
+                    + ' und verläuft durch ' + m('P(0|3)') + '. Bestimmen Sie einen Funktionsterm von f.' + NUR_TERM,
+               kk: 'K10-3', art: 'term', eingabe: 'formel', soll: '(x-2)^2-1',
+               tipps: [ 'Wenn der Scheitelpunkt bekannt ist, hilft die Scheitelpunktform ' + m('f(x) = a · (x - d)^2 + e') + '.',
+                        'Setzen Sie den Scheitelpunkt ein. Den Streckfaktor a erhalten Sie, indem Sie den Punkt P einsetzen und nach a auflösen.' ],
+               weg: 'Scheitelpunktform mit ' + m('S(2|-1)') + ': ' + m('f(x) = a · (x - 2)^2 - 1') + '.<br>'
+                  + 'P einsetzen: ' + m('3 = a · (0 - 2)^2 - 1 = 4a - 1') + ', also ' + m('a = 1') + '.<br>'
+                  + 'Ergebnis: ' + m('f(x) = (x - 2)^2 - 1 = x^2 - 4x + 3') + '.' },
+    umwege: [
+      { geschichte: '<p>Ein Pfannenwender fällt scheppernd vom Haken, direkt neben Ihren Fuß. Alle zucken zusammen. Über dem Herd entdecken Sie '
+                  + 'eine zweite Parabelschiene, an der Luke zum Vorratsschrank: Scheitelpunkt ' + m('S(-1|2)') + ', Punkt ' + m('P(1|10)') + '. '
+                  + 'Das Kratzen hinter der Luke hat aufgehört.</p>',
+        raetsel: { frage: op('Weg frei') + 'Der Graph der quadratischen Funktion f hat den Scheitelpunkt ' + m('S(-1|2)')
+                        + ' und verläuft durch ' + m('P(1|10)') + '. Bestimmen Sie einen Funktionsterm von f.' + NUR_TERM,
+                   kk: 'K10-3', art: 'term', eingabe: 'formel', soll: '2(x+1)^2+2',
+                   tipps: [ 'Nutzen Sie wieder die Scheitelpunktform. Achten Sie auf das Vorzeichen in der Klammer.',
+                            'Setzen Sie P ein und lösen Sie die Gleichung nach a auf.' ],
+                   weg: m('f(x) = a · (x + 1)^2 + 2') + '.<br>P einsetzen: ' + m('10 = a · 2^2 + 2 = 4a + 2') + ', also ' + m('a = 2') + '.<br>'
+                      + 'Ergebnis: ' + m('f(x) = 2(x + 1)^2 + 2 = 2x^2 + 4x + 4') + '.' } },
+      { geschichte: '<p>Auch die Luke bleibt zu. An der Wand daneben hat jemand eine Parabel gemalt – mit Ketchup, hoffen Sie jedenfalls. '
+                  + 'Scheitelpunkt ' + m('S(1|4)') + ', durch ' + m('P(0|3)') + '. Darunter drei Zettel, festgeklebt mit Klebeband, '
+                  + 'und eine Kreidelinie, die auf einen davon zeigen soll.</p>',
+        raetsel: { frage: op('Weg frei') + 'Entscheiden Sie, welcher Term zu der Parabel mit Scheitelpunkt ' + m('S(1|4)')
+                        + ' durch ' + m('P(0|3)') + ' gehört.',
+                   kk: 'K10-3', art: 'wahl',
+                   optionen: [ { t: m('f(x) = -x^2 + 2x + 3'), ok: true }, { t: m('f(x) = x^2 - 2x + 3') },
+                               { t: m('f(x) = -x^2 - 2x + 3') }, { t: m('f(x) = -x^2 + 2x + 4') } ],
+                   tipps: [ 'Stellen Sie zuerst die Scheitelpunktform auf und bestimmen Sie a mit dem Punkt P.',
+                            'Multiplizieren Sie die Scheitelpunktform aus und vergleichen Sie mit den Zetteln.' ],
+                   weg: m('f(x) = a · (x - 1)^2 + 4') + '; P einsetzen: ' + m('3 = a + 4') + ', also ' + m('a = -1') + '.<br>'
+                      + m('f(x) = -(x - 1)^2 + 4 = -x^2 + 2x + 3') + '.' } }
+    ],
+    geschafft: '<p>Die Tür zum Niedergang gleitet auf. Auf dem Herd steht eine kleine Dose Pfefferminzbonbons, und darunter klemmt ein Zettel: '
+             + '<i>„Weiter so. Merken Sie sich <b>PFEFFERMINZ</b>.“</i> Sie nehmen sich jeder ein Bonbon – irgendwie beruhigt das ein bisschen – '
+             + 'und steigen die steile Treppe hinunter. Von unten dröhnt der Motor.</p>',
+    code: 'PFEFFERMINZ' },
+
+  /* ---------------- Karte 3: Maschinenraum ---------------- */
+  { id: '3', titel: 'Der Maschinenraum',
+    geschichte: '<p>Im Maschinenraum ist es heiß, laut und eng. Der Diesel stampft, Rohre zischen, und eine einzelne rote Notlampe taucht alles '
+              + 'in ein unheimliches Licht. Die Luke nach oben hat statt eines Riegels eine Schaltwand mit vier Hebeln.</p>'
+              + '<p>Über der Wand hängt eine Tafel. Jemand hat mit Kreide daraufgeschrieben: <i>„Die Schiene hat im Punkt ' + m('W(1|3)')
+              + ' einen Wendepunkt. Dort beträgt ihre Steigung ' + m('-2') + '.“</i> Unter jedem Hebel stehen drei Bedingungen. '
+              + 'Nur einer öffnet die Luke. Und was die anderen tun – daran möchten Sie lieber gar nicht denken.</p>',
+    raetsel: { frage: op('Weg frei') + 'Entscheiden Sie, welche Bedingungen den Steckbrief vollständig und richtig übersetzen: '
+                    + 'Der Graph von f hat den Wendepunkt ' + m('W(1|3)') + ' mit der Steigung ' + m('-2') + '.',
+               art: 'wahl',
+               optionen: [ { t: m("f(1) = 3;\\quad f''(1) = 0;\\quad f'(1) = -2"), ok: true },
+                           { t: m("f(1) = 3;\\quad f'(1) = 0;\\quad f''(1) = -2") },
+                           { t: m("f(3) = 1;\\quad f''(1) = 0;\\quad f'(1) = -2") },
+                           { t: m("f(1) = -2;\\quad f'(1) = 3;\\quad f''(1) = 0") } ],
+               tipps: [ 'Ein Punkt auf dem Graphen liefert eine Bedingung für f, eine Steigung eine Bedingung für ' + m("f'") + '.',
+                        'Überlegen Sie, welche Ableitung an einer Wendestelle null ist.' ],
+               weg: 'W liegt auf dem Graphen: ' + m('f(1) = 3') + '.<br>Wendestelle (notwendige Bedingung): ' + m("f''(1) = 0") + '.<br>'
+                  + 'Steigung im Wendepunkt: ' + m("f'(1) = -2") + '.' },
+    umwege: [
+      { geschichte: '<p>Ein Zischen – aus einem Ventil schießt heißer Dampf, nur knapp an Ihnen vorbei. Sie springen zur Seite. Neben dem Ventil '
+                  + 'hängt eine zweite Schaltwand. Auf der Tafel darüber: <i>„Die Schiene hat den Tiefpunkt ' + m('T(-1|0)') + '.“</i></p>',
+        raetsel: { frage: op('Weg frei') + 'Entscheiden Sie, welche Bedingungen den Steckbrief richtig übersetzen: '
+                        + 'Der Graph von f hat den Tiefpunkt ' + m('T(-1|0)') + '.',
+                   art: 'wahl',
+                   optionen: [ { t: m("f(-1) = 0;\\quad f'(-1) = 0"), ok: true }, { t: m("f(0) = -1;\\quad f'(0) = 0") },
+                               { t: m("f(-1) = 0;\\quad f''(-1) = 0") }, { t: m("f(-1) = 0;\\quad f'(0) = -1") } ],
+                   tipps: [ 'Achten Sie auf die Reihenfolge der Koordinaten: erst x, dann y.',
+                            'Ein Tiefpunkt liegt auf dem Graphen, und dort hat der Graph eine waagerechte Tangente.' ],
+                   weg: 'T liegt auf dem Graphen: ' + m('f(-1) = 0') + '. Waagerechte Tangente im Tiefpunkt: ' + m("f'(-1) = 0") + '.' } },
+      { geschichte: '<p>Wieder Dampf. Der Motor stottert, setzt kurz aus – und in der plötzlichen Stille hören Sie hinter der Stahltür zum Tank '
+                  + 'ein langsames, schabendes Geräusch. Dann springt der Diesel wieder an. Am Treibstofftank klebt der letzte Steckbrief: '
+                  + '<i>„Die Schiene schneidet die y-Achse bei 4 und hat dort die Steigung 1.“</i></p>',
+        raetsel: { frage: op('Weg frei') + 'Entscheiden Sie, welche Bedingungen den Steckbrief richtig übersetzen: '
+                        + 'Der Graph von f schneidet die y-Achse bei 4 und hat dort die Steigung 1.',
+                   art: 'wahl',
+                   optionen: [ { t: m("f(0) = 4;\\quad f'(0) = 1"), ok: true }, { t: m("f(4) = 0;\\quad f'(4) = 1") },
+                               { t: m("f(0) = 4;\\quad f''(0) = 1") }, { t: m("f(0) = 1;\\quad f'(0) = 4") } ],
+                   tipps: [ 'Überlegen Sie, welchen x-Wert alle Punkte auf der y-Achse haben.',
+                            'Die Steigung des Graphen gehört zur ersten Ableitung.' ],
+                   weg: 'Auf der y-Achse ist ' + m('x = 0') + ': ' + m('f(0) = 4') + '. Steigung dort: ' + m("f'(0) = 1") + '.' } }
+    ],
+    geschafft: '<p>Der richtige Hebel rastet mit einem satten Klonk ein, und die Luke zum Laderaum springt auf. An ihrer Unterseite steht, '
+             + 'in öliger Kreide: <b>DIESELDUFT</b>. ' + LK.nom + ' war also auch hier – oder jemand, der ' + LK.seine + ' Schrift sehr gut nachmachen kann. '
+             + 'Sie schieben den Gedanken beiseite und klettern weiter.</p>',
+    code: 'DIESELDUFT' },
+
+  /* ---------------- Karte 4: Laderaum ---------------- */
+  { id: '4', titel: 'Der Laderaum',
+    geschichte: '<p>Im Laderaum ist es fast dunkel. Nur durch die Ritzen der Ladeluke fällt fahles Licht, und mit jedem Blitz zucken die Schatten '
+              + 'über die Wände. Kisten über Kisten, mit Tauen festgezurrt. Jemand hat sie entlang einer Kurve aufgestapelt, die den Weg zur Luke '
+              + 'versperrt. Das Schiff rollt, und die Stapel schwanken bedrohlich.</p>'
+              + '<p>Auf einer Kiste steht mit Kreide: <i>„Die Kurve ist der Graph von ' + m('f(x) = a x^3 + b x') + ' – punktsymmetrisch zum Ursprung. '
+              + 'Ihr Tiefpunkt ist ' + m('T(2|-16)') + '.“</i></p>'
+              + '<p>Ganz hinten, zwischen zwei Regalen, entdecken Sie außerdem eine schmale Eisentür, die gar nicht auf dem Plan des Schiffs '
+              + 'eingezeichnet war. Sie ist verschlossen. Sehr verschlossen.</p>',
+    raetsel: { frage: op('Weg frei') + 'Bestimmen Sie a und b so, dass der Graph von ' + m('f(x) = a x^3 + b x')
+                    + ' den Tiefpunkt ' + m('T(2|-16)') + ' hat, und geben Sie den Funktionsterm an.' + NUR_TERM,
+               kk: 'K8-16', art: 'term', eingabe: 'formel', soll: 'x^3-12x',
+               tipps: [ 'Der Tiefpunkt liefert zwei Bedingungen: eine für f und eine für ' + m("f'") + '. Daraus entsteht ein lineares Gleichungssystem für a und b.',
+                        'Lösen Sie eine der beiden Gleichungen nach b auf und setzen Sie in die andere ein (Einsetzungsverfahren).' ],
+               weg: m("f'(x) = 3a x^2 + b") + '.<br>'
+                  + 'I: ' + m('f(2) = -16') + ' ⇒ ' + m('8a + 2b = -16') + '<br>'
+                  + 'II: ' + m("f'(2) = 0") + ' ⇒ ' + m('12a + b = 0') + ', also ' + m('b = -12a') + '.<br>'
+                  + 'In I: ' + m('8a - 24a = -16') + ' ⇒ ' + m('a = 1') + ', ' + m('b = -12') + '.<br>'
+                  + 'Ergebnis: ' + m('f(x) = x^3 - 12x') + '.' },
+    umwege: [
+      { geschichte: '<p>Polter! Ein Kistenstapel kippt und kracht auf die Planken. Zum Glück steht niemand darunter. Zwischen den Trümmern liegt ein Zettel: '
+                  + '<i>„Kleinere Kurve, gleiche Bauart: ' + m('f(x) = a x^3 + b x') + ' durch ' + m('P(1|-1)') + ' und ' + m('Q(2|4)') + '.“</i></p>',
+        raetsel: { frage: op('Weg frei') + 'Bestimmen Sie a und b so, dass der Graph von ' + m('f(x) = a x^3 + b x') + ' durch '
+                        + m('P(1|-1)') + ' und ' + m('Q(2|4)') + ' verläuft, und geben Sie den Funktionsterm an.' + NUR_TERM,
+                   kk: 'K8-16', art: 'term', eingabe: 'formel', soll: 'x^3-2x',
+                   tipps: [ 'Jeder Punkt liefert eine Gleichung für a und b.',
+                            'Teilen Sie die zweite Gleichung durch 2 und ziehen Sie dann die erste ab (Additionsverfahren).' ],
+                   weg: 'I: ' + m('a + b = -1') + '<br>II: ' + m('8a + 2b = 4') + ' ⇒ ' + m('4a + b = 2') + '<br>'
+                      + 'II − I: ' + m('3a = 3') + ' ⇒ ' + m('a = 1') + ', ' + m('b = -2') + '.<br>Ergebnis: ' + m('f(x) = x^3 - 2x') + '.' } },
+      { geschichte: '<p>Wieder rutscht ein Stapel. Sie entdecken einen schmalen Durchgang – aber auch der ist mit Kisten gesperrt, diesmal '
+                  + 'achsensymmetrisch zur y-Achse gestapelt. Mit Kreide: <i>„' + m('f(x) = a x^2 + c') + ' durch ' + m('P(1|1)') + ' und ' + m('Q(3|-7)') + '.“</i></p>',
+        raetsel: { frage: op('Weg frei') + 'Bestimmen Sie a und c so, dass der Graph von ' + m('f(x) = a x^2 + c') + ' durch '
+                        + m('P(1|1)') + ' und ' + m('Q(3|-7)') + ' verläuft, und geben Sie den Funktionsterm an.' + NUR_TERM,
+                   kk: 'K8-16', art: 'term', eingabe: 'formel', soll: '-x^2+2',
+                   tipps: [ 'Setzen Sie beide Punkte ein – Sie erhalten zwei Gleichungen für a und c.',
+                            'Ziehen Sie die eine Gleichung von der anderen ab, dann fällt c weg.' ],
+                   weg: 'I: ' + m('a + c = 1') + '<br>II: ' + m('9a + c = -7') + '<br>II − I: ' + m('8a = -8') + ' ⇒ ' + m('a = -1') + ', '
+                      + m('c = 2') + '.<br>Ergebnis: ' + m('f(x) = -x^2 + 2') + '.' } }
+    ],
+    geschafft: '<p>Sie schieben genau die richtigen Kisten zur Seite. Der Weg zur Ladeluke ist frei – und der zur schmalen Eisentür auch. '
+             + 'Neben ihr steht ein altes Heringsfass. In den Deckel ist ein Wort geritzt: <b>HERINGSFASS</b>. '
+             + '„Er hätte auch was Schöneres nehmen können“, sagt ' + N2 + '. Keiner lacht. Alle starren auf die Eisentür. '
+             + 'Von dahinter kommt ein leises, regelmäßiges Ticken.</p>',
+    code: 'HERINGSFASS' },
+
+  /* ---------------- Karte 5: Geheimtür I – Funktionenschar ---------------- */
+  { id: '5', titel: 'Geheimtür: Die Kapitänskammer',
+    geschichte: '<p>Die Eisentür ist mit Nieten übersät, und in Augenhöhe prangt ein verblasstes Messingschild: <i>KAPITÄN – PRIVAT</i>. '
+              + 'Das Ticken dahinter klingt jetzt ganz deutlich. Eine Uhr? Oder etwas anderes?</p>'
+              + '<p>Das Schloss ist anders als die bisherigen. Statt einer Schiene sind es viele dünne Schienen, fächerförmig übereinander, '
+              + 'alle ähnlich gebogen und doch verschieden. Auf der Tafel daneben steht:</p>'
+              + '<p><i>„Meine Schienen gehören zur Schar ' + m('f_k(x) = x^3 - k x^2') + ' mit ' + m('k > 0') + '. '
+              + 'Nur eine von ihnen hat an der Stelle ' + m('x = 3') + ' eine Extremstelle. Schreiben Sie mir ihr k auf – dann öffne ich.“</i></p>',
+    raetsel: { frage: op('Weg frei') + 'Gegeben ist die Funktionenschar ' + m('f_k') + ' mit ' + m('f_k(x) = x^3 - k x^2') + ' und ' + m('k > 0')
+                    + '. Bestimmen Sie k so, dass ' + m('f_k') + ' an der Stelle ' + m('x = 3') + ' eine Extremstelle hat. '
+                    + 'Schreiben Sie k als Bruch oder Dezimalzahl an die Tafel.',
+               kk: 'K7-8', art: 'zahl', eingabe: 'formel', soll: [9, 2],
+               tipps: [ 'Leiten Sie ' + m('f_k') + ' nach x ab – k wird dabei wie eine feste Zahl behandelt.',
+                        'Setzen Sie die notwendige Bedingung für eine Extremstelle an der Stelle 3 an und lösen Sie die entstehende Gleichung nach k auf. Prüfen Sie zum Schluss mit der zweiten Ableitung.' ],
+               weg: m("f_k'(x) = 3x^2 - 2k x") + ', ' + m("f_k''(x) = 6x - 2k") + '.<br>'
+                  + 'Notwendige Bedingung: ' + m("f_k'(3) = 27 - 6k = 0") + ' ⇒ ' + m('k = \\frac{27}{6} = \\frac{9}{2} = 4,5') + '.<br>'
+                  + 'Prüfung: ' + m("f_{4,5}''(3) = 18 - 9 = 9 > 0") + ' – an der Stelle 3 liegt ein Tiefpunkt.' },
+    umwege: [
+      { geschichte: '<p>Die Schienen beginnen zu zittern, eine nach der anderen, wie Saiten. Das Ticken wird schneller. Dann – Stille. '
+                  + 'Auf der Tafel ist die Aufgabe verschwunden, und eine neue steht da, in derselben krakeligen Schrift: '
+                  + '<i>„Noch einmal. Gleiche Schar, andere Stelle: ' + m('x = 2') + '.“</i></p>',
+        raetsel: { frage: op('Weg frei') + 'Gegeben ist die Funktionenschar ' + m('f_k(x) = x^3 - k x^2') + ' mit ' + m('k > 0')
+                        + '. Bestimmen Sie k so, dass ' + m('f_k') + ' an der Stelle ' + m('x = 2') + ' eine Extremstelle hat.',
+                   kk: 'K7-8', art: 'zahl', eingabe: 'formel', soll: [3, 1],
+                   tipps: [ 'Bilden Sie die Ableitung von ' + m('f_k') + ' und setzen Sie x = 2 ein.',
+                            'Die Ableitung muss an einer Extremstelle null sein. Lösen Sie nach k auf.' ],
+                   weg: m("f_k'(2) = 12 - 4k = 0") + ' ⇒ ' + m('k = 3') + '. Prüfung: ' + m("f_3''(2) = 12 - 6 = 6 > 0") + ' (Tiefpunkt).' } },
+      { geschichte: '<p>Ein Ruck geht durchs Schiff, und von der Decke rieselt Staub. Das Messingschild hängt jetzt schief. '
+                  + 'Darunter ist eine zweite, kleinere Schienenschar zum Vorschein gekommen: <i>„' + m('f_k(x) = x^3 - k x') + ', ' + m('k > 0')
+                  + '. Extremstelle bei ' + m('x = 2') + '.“</i></p>',
+        raetsel: { frage: op('Weg frei') + 'Gegeben ist die Funktionenschar ' + m('f_k(x) = x^3 - k x') + ' mit ' + m('k > 0')
+                        + '. Bestimmen Sie k so, dass ' + m('f_k') + ' an der Stelle ' + m('x = 2') + ' eine Extremstelle hat.',
+                   kk: 'K7-8', art: 'zahl', eingabe: 'formel', soll: [12, 1],
+                   tipps: [ 'Leiten Sie ab – der Summand mit k wird dabei zu einer Konstanten.',
+                            'Setzen Sie die Ableitung an der Stelle 2 gleich null und lösen Sie nach k auf.' ],
+                   weg: m("f_k'(x) = 3x^2 - k") + '; ' + m("f_k'(2) = 12 - k = 0") + ' ⇒ ' + m('k = 12') + '. Prüfung: '
+                      + m("f_{12}''(2) = 12 > 0") + ' (Tiefpunkt).' } }
+    ],
+    geschafft: '<p>Mit einem tiefen Seufzen schwingt die Eisentür auf. Die Kapitänskammer ist winzig: eine Koje, ein Schrank, eine alte Wanduhr – '
+             + 'daher also das Ticken. Auf dem Tisch liegt ein schwerer Schlüsselbund mit einem roten Schwimmer daran. Auf dem Schwimmer steht: '
+             + '<i>SPEEDBOOT</i>.</p><p>„Das ist es“, flüstert ' + N1 + '. „Damit holen wir ' + LK.ihn + ' zurück.“ An der Schiffsglocke über der Koje '
+             + 'hängt ein Zettel: <b>SCHIFFSGLOCKE</b>.</p>',
+    code: 'SCHIFFSGLOCKE' },
+
+  /* ---------------- Karte 6: Navigationsraum ---------------- */
+  { id: '6', titel: 'Der Navigationsraum',
+    geschichte: '<p>Durch die Ladeluke gelangen Sie in den Navigationsraum hinter dem Steuerhaus. Regen peitscht gegen die Scheiben, und draußen ist '
+              + 'nichts zu sehen als Schwärze und Gischt. Auf dem Kartentisch liegt eine Seekarte, mit Kaffeeflecken und Bleistiftstrichen.</p>'
+              + '<p>Jemand hat den Kurs des Beiboots eingezeichnet: ein Parabelbogen vom Anleger im Ursprung aus. Der nördlichste Punkt ist markiert: '
+              + m('H(4|6)') + '. Der Autopilot daneben blinkt. Auf seiner kleinen Tafel steht: <i>„Faktor a des Kurses ' + m('f(x) = a x^2 + b x') + '?“</i></p>',
+    raetsel: { frage: op('rechnerisch') + 'Der Graph von ' + m('f(x) = a x^2 + b x') + ' hat den Hochpunkt ' + m('H(4|6)')
+                    + '. Berechnen Sie a. Geben Sie a als Bruch oder Dezimalzahl an.',
+               kk: 'K6-3', art: 'zahl', eingabe: 'formel', soll: [-3, 8],
+               tipps: [ 'Der Hochpunkt liefert zwei Bedingungen. Eine davon ergibt einen einfachen Zusammenhang zwischen a und b.',
+                        'Drücken Sie b durch a aus und setzen Sie in die andere Gleichung ein. Rechnen Sie mit Brüchen weiter.' ],
+               weg: m("f'(x) = 2a x + b") + '.<br>'
+                  + 'I: ' + m("f'(4) = 0") + ' ⇒ ' + m('8a + b = 0') + ' ⇒ ' + m('b = -8a') + '.<br>'
+                  + 'II: ' + m('f(4) = 6') + ' ⇒ ' + m('16a + 4b = 6') + ' ⇒ ' + m('16a - 32a = 6') + ' ⇒ ' + m('-16a = 6') + '.<br>'
+                  + m('a = -\\frac{6}{16} = -\\frac{3}{8} = -0,375') + ' (und ' + m('b = 3') + ').' },
+    umwege: [
+      { geschichte: '<p>Der Autopilot piept schrill: <i>KURS UNGÜLTIG</i>. Unter der Karte liegt eine ältere Skizze, feucht und verwischt. '
+                  + 'Ein kürzerer Bogen, ebenfalls vom Ursprung aus, mit dem nördlichsten Punkt ' + m('H(2|3)') + '.</p>',
+        raetsel: { frage: op('rechnerisch') + 'Der Graph von ' + m('f(x) = a x^2 + b x') + ' hat den Hochpunkt ' + m('H(2|3)')
+                        + '. Berechnen Sie a. Geben Sie a als Bruch oder Dezimalzahl an.',
+                   kk: 'K6-3', art: 'zahl', eingabe: 'formel', soll: [-3, 4],
+                   tipps: [ 'Nutzen Sie ' + m("f'(2) = 0") + ', um b durch a auszudrücken.',
+                            'Setzen Sie das Ergebnis in die Gleichung aus ' + m('f(2) = 3') + ' ein.' ],
+                   weg: m("f'(2) = 4a + b = 0") + ' ⇒ ' + m('b = -4a') + '.<br>' + m('f(2) = 4a + 2b = 4a - 8a = -4a = 3') + '.<br>'
+                      + m('a = -\\frac{3}{4} = -0,75') + '.' } },
+      { geschichte: '<p>Wieder rot. Ein Windstoß drückt die Tür zum Steuerhaus auf, Regen weht herein, und die Karten flattern vom Tisch. '
+                  + 'Auf der Rückseite einer Karte steht eine dritte Variante, Ziel: die Sandbank mit dem nördlichsten Punkt ' + m('H(3|6)') + '.</p>',
+        raetsel: { frage: op('rechnerisch') + 'Der Graph von ' + m('f(x) = a x^2 + b x') + ' hat den Hochpunkt ' + m('H(3|6)')
+                        + '. Berechnen Sie a. Geben Sie a als Bruch an.',
+                   kk: 'K6-3', art: 'zahl', eingabe: 'formel', soll: [-2, 3],
+                   tipps: [ 'Aus der waagerechten Tangente im Hochpunkt folgt ein Zusammenhang zwischen a und b.',
+                            'Setzen Sie ihn in die Gleichung für den Punkt H ein und lösen Sie nach a auf. Kürzen Sie am Ende.' ],
+                   weg: m("f'(3) = 6a + b = 0") + ' ⇒ ' + m('b = -6a') + '.<br>' + m('f(3) = 9a + 3b = 9a - 18a = -9a = 6') + '.<br>'
+                      + m('a = -\\frac{6}{9} = -\\frac{2}{3}') + '.' } }
+    ],
+    geschafft: '<p>Der Autopilot zeigt den Kurs – er führt hinaus zu einer kleinen Insel mit einem alten Leuchtturm. Dort also. '
+             + 'Neben dem Kartentisch liegt ein Sextant, und auf einem Klebezettel steht: <b>SEXTANT</b>. '
+             + 'Allein schaffen Sie das nicht. Sie brauchen Hilfe – und der Funkraum ist gleich nebenan.</p>',
+    code: 'SEXTANT' },
+
+  /* ---------------- Karte 7: Funkraum ---------------- */
+  { id: '7', titel: 'Der Funkraum',
+    geschichte: '<p>Der Funkraum ist kaum größer als ein Schrank. Das Funkgerät ist an, aber gesperrt. Aus dem Lautsprecher kommt nur ein '
+              + 'leises Rauschen – und manchmal, ganz kurz, etwas, das wie eine Stimme klingt. Dann wieder nichts.</p>'
+              + '<p>Auf dem Display flackert eine Kurve: die Signalstärke, eine ganzrationale Funktion dritten Grades. Darunter, auf einer kleinen Tafel:</p>'
+              + '<p><i>„Hochpunkt ' + m('H(0|2)') + ', Wendestelle bei ' + m('x = 1') + ', und die Kurve geht durch ' + m('P(2|-2)') + '. '
+              + 'Wer den Term kennt, darf funken.“</i></p>',
+    raetsel: { frage: op('Weg frei') + 'Der Graph einer ganzrationalen Funktion f dritten Grades hat den Hochpunkt ' + m('H(0|2)')
+                    + ', bei ' + m('x = 1') + ' eine Wendestelle und verläuft durch ' + m('P(2|-2)') + '. Bestimmen Sie den Funktionsterm von f.' + NUR_TERM,
+               kk: 'K7-8', art: 'term', eingabe: 'formel', soll: 'x^3-3x^2+2',
+               tipps: [ 'Ansatz ' + m('f(x) = a x^3 + b x^2 + c x + d') + '. Zwei Bedingungen liefern sofort d und c.',
+                        'Aus der Wendestelle folgt ein Zusammenhang zwischen a und b. Setzen Sie ihn in die Gleichung zu P ein – dann bleibt eine einfache Gleichung für a.' ],
+               weg: m("f'(x) = 3a x^2 + 2b x + c") + ', ' + m("f''(x) = 6a x + 2b") + '.<br>'
+                  + m('f(0) = 2') + ' ⇒ ' + m('d = 2') + '; ' + m("f'(0) = 0") + ' ⇒ ' + m('c = 0') + '.<br>'
+                  + m("f''(1) = 0") + ' ⇒ ' + m('6a + 2b = 0') + ' ⇒ ' + m('b = -3a') + '.<br>'
+                  + m('f(2) = -2') + ' ⇒ ' + m('8a + 4b + 2 = -2') + ' ⇒ ' + m('8a - 12a = -4') + ' ⇒ ' + m('a = 1') + ', ' + m('b = -3') + '.<br>'
+                  + 'Ergebnis: ' + m('f(x) = x^3 - 3x^2 + 2') + '.' },
+    umwege: [
+      { geschichte: '<p>Nur Rauschen. Und dann, für eine halbe Sekunde, ein Lachen aus dem Lautsprecher. Ein ziemlich unangenehmes Lachen. '
+                  + 'Das Display springt auf eine andere Frequenz mit einer neuen Kurve: Hochpunkt ' + m('H(0|1)') + ', Wendepunkt ' + m('W(1|-1)') + '.</p>',
+        raetsel: { frage: op('Weg frei') + 'Der Graph einer ganzrationalen Funktion f dritten Grades hat den Hochpunkt ' + m('H(0|1)')
+                        + ' und den Wendepunkt ' + m('W(1|-1)') + '. Bestimmen Sie den Funktionsterm von f.' + NUR_TERM,
+                   kk: 'K7-8', art: 'term', eingabe: 'formel', soll: 'x^3-3x^2+1',
+                   tipps: [ 'Der Hochpunkt auf der y-Achse liefert d und c ohne Rechnung.',
+                            'Der Wendepunkt liefert zwei Bedingungen: eine für ' + m("f''") + ' und eine für f.' ],
+                   weg: m('d = 1') + ', ' + m('c = 0') + '. ' + m("f''(1) = 0") + ' ⇒ ' + m('b = -3a') + '.<br>'
+                      + m('f(1) = a + b + 1 = -1') + ' ⇒ ' + m('a - 3a = -2') + ' ⇒ ' + m('a = 1') + ', ' + m('b = -3') + '.<br>'
+                      + 'Ergebnis: ' + m('f(x) = x^3 - 3x^2 + 1') + '.' } },
+      { geschichte: '<p>Wieder nichts. Draußen schlägt eine Welle über das Deck, und Wasser läuft unter der Tür hindurch. Letzte Frequenz: '
+                  + 'Die Kurve hat jetzt einen Tiefpunkt im Ursprung, eine Wendestelle bei ' + m('x = -1') + ' und läuft durch ' + m('P(1|4)') + '.</p>',
+        raetsel: { frage: op('Weg frei') + 'Der Graph einer ganzrationalen Funktion f dritten Grades hat den Tiefpunkt ' + m('T(0|0)')
+                        + ', bei ' + m('x = -1') + ' eine Wendestelle und verläuft durch ' + m('P(1|4)') + '. Bestimmen Sie den Funktionsterm von f.' + NUR_TERM,
+                   kk: 'K7-8', art: 'term', eingabe: 'formel', soll: 'x^3+3x^2',
+                   tipps: [ 'Der Tiefpunkt im Ursprung liefert d und c sofort.',
+                            'Drücken Sie mit der Wendestelle b durch a aus und setzen Sie in die Gleichung zu P ein.' ],
+                   weg: m('d = 0') + ', ' + m('c = 0') + '. ' + m("f''(-1) = -6a + 2b = 0") + ' ⇒ ' + m('b = 3a') + '.<br>'
+                      + m('f(1) = a + b = 4') + ' ⇒ ' + m('4a = 4') + ' ⇒ ' + m('a = 1') + ', ' + m('b = 3') + '.<br>'
+                      + 'Ergebnis: ' + m('f(x) = x^3 + 3x^2') + '.' } }
+    ],
+    geschafft: '<p>Das Funkgerät knackt: „Wasserschutzpolizei Lelystad, wir hören Sie.“ Sie berichten, so schnell Sie können. '
+             + 'Die Antwort ist ernüchternd: Bei diesem Sturm brauchen die Kollegen mindestens eine Stunde. Bis dahin sind Sie auf sich gestellt. '
+             + 'Auf das Funkgerät hat jemand mit Kreide geschrieben: <b>KURZWELLE</b>.</p>'
+             + '<p>Als Sie sich umdrehen, fällt Ihr Blick auf die Holzvertäfelung hinter dem Funkgerät. Eine der Platten sitzt nicht ganz bündig. '
+             + 'Und durch den Spalt zieht es – kalt, als läge dahinter ein ganzer Raum.</p>',
+    code: 'KURZWELLE' },
+
+  /* ---------------- Karte 8: Geheimtür II – Ortskurve ---------------- */
+  { id: '8', titel: 'Geheimtür: Die Kartenkammer',
+    geschichte: '<p>Sie drücken gegen die Platte, und sie gibt nach. Dahinter liegt ein schmaler, staubiger Verschlag – eine geheime Kartenkammer. '
+              + 'An den Wänden hängen alte Seekarten, und in der Mitte steht eine Truhe mit einem eigenartigen Schloss.</p>'
+              + '<p>Auf dem Deckel sind lauter Parabelschienen eingelassen, alle gleich geformt, aber jede ein Stück verschoben. '
+              + 'Ihre tiefsten Punkte sind mit kleinen Perlen markiert – und die Perlen liegen auffällig ordentlich auf einer gemeinsamen Linie. '
+              + 'Auf der Tafel an der Truhe steht:</p>'
+              + '<p><i>„Meine Schienen sind die Schar ' + m('f_t(x) = x^2 - 2t x + 2t') + ', ' + m('t \\in \\mathbb{R}') + '. '
+              + 'Auf welcher Kurve liegen ihre Tiefpunkte? Wer sie kennt, findet das Versteck.“</i></p>',
+    raetsel: { frage: op('Weg frei') + 'Gegeben ist die Funktionenschar ' + m('f_t(x) = x^2 - 2t x + 2t') + ' mit ' + m('t \\in \\mathbb{R}')
+                    + '. Bestimmen Sie eine Gleichung der Ortskurve, auf der die Tiefpunkte aller Graphen der Schar liegen. '
+                    + 'Schreiben Sie nur den Term der Ortskurve an die Tafel (ohne „y =“).',
+               kk: 'K8-11', art: 'term', eingabe: 'formel', soll: '-x^2+2x',
+               tipps: [ 'Bestimmen Sie zuerst den Tiefpunkt von ' + m('f_t') + ' in Abhängigkeit von t.',
+                        'Lösen Sie die x-Koordinate des Tiefpunkts nach t auf und setzen Sie das in die y-Koordinate ein. Vereinfachen Sie den Term.' ],
+               weg: m("f_t'(x) = 2x - 2t = 0") + ' ⇒ ' + m('x = t') + '; ' + m("f_t''(x) = 2 > 0") + ' (Tiefpunkt).<br>'
+                  + m('f_t(t) = t^2 - 2t^2 + 2t = -t^2 + 2t') + ', also ' + m('T_t(t|-t^2 + 2t)') + '.<br>'
+                  + 'Aus ' + m('x = t') + ' folgt ' + m('t = x') + '. Einsetzen: ' + m('y = -x^2 + 2x') + '.' },
+    umwege: [
+      { geschichte: '<p>Die Perlen rollen klackernd in eine Rinne, und der Deckel bleibt zu. In der Ecke der Kammer raschelt etwas. '
+                  + 'Sie leuchten mit dem Handy hin – nur ein loses Stück Segeltuch. Darunter liegt eine kleinere Truhe: '
+                  + '<i>„' + m('f_t(x) = x^2 - 2t x + 3t') + ', ' + m('t \\in \\mathbb{R}') + '. Ortskurve der Tiefpunkte?“</i></p>',
+        raetsel: { frage: op('Weg frei') + 'Gegeben ist die Funktionenschar ' + m('f_t(x) = x^2 - 2t x + 3t') + ' mit ' + m('t \\in \\mathbb{R}')
+                        + '. Bestimmen Sie eine Gleichung der Ortskurve der Tiefpunkte. Schreiben Sie nur den Term an die Tafel (ohne „y =“).',
+                   kk: 'K8-11', art: 'term', eingabe: 'formel', soll: '-x^2+3x',
+                   tipps: [ 'Berechnen Sie die Stelle, an der die Ableitung null ist. Sie hängt von t ab.',
+                            'Setzen Sie diese Stelle in ' + m('f_t') + ' ein und ersetzen Sie danach t durch einen Ausdruck in x.' ],
+                   weg: m("f_t'(x) = 2x - 2t = 0") + ' ⇒ ' + m('x = t') + '. ' + m('f_t(t) = t^2 - 2t^2 + 3t = -t^2 + 3t') + '.<br>'
+                      + 'Mit ' + m('t = x') + ': ' + m('y = -x^2 + 3x') + '.' } },
+      { geschichte: '<p>Wieder nichts. Die Wanduhr aus der Kapitänskammer schlägt – einmal, zweimal, dreimal –, obwohl sie doch zwei Räume weit weg ist. '
+                  + 'Auf dem Boden der Kartenkammer entdecken Sie eine eingelassene Bodenklappe mit einer letzten Schar: '
+                  + '<i>„' + m('f_t(x) = -x^2 + 2t x') + ', ' + m('t \\in \\mathbb{R}') + '. Ortskurve der Hochpunkte?“</i></p>',
+        raetsel: { frage: op('Weg frei') + 'Gegeben ist die Funktionenschar ' + m('f_t(x) = -x^2 + 2t x') + ' mit ' + m('t \\in \\mathbb{R}')
+                        + '. Bestimmen Sie eine Gleichung der Ortskurve der Hochpunkte. Schreiben Sie nur den Term an die Tafel (ohne „y =“).',
+                   kk: 'K8-11', art: 'term', eingabe: 'formel', soll: 'x^2',
+                   tipps: [ 'Bestimmen Sie den Hochpunkt in Abhängigkeit von t.',
+                            'Drücken Sie t durch x aus und setzen Sie in die y-Koordinate ein.' ],
+                   weg: m("f_t'(x) = -2x + 2t = 0") + ' ⇒ ' + m('x = t') + '; ' + m("f_t''(x) = -2 < 0") + ' (Hochpunkt).<br>'
+                      + m('f_t(t) = -t^2 + 2t^2 = t^2') + '. Mit ' + m('t = x') + ': ' + m('y = x^2') + '.' } }
+    ],
+    geschafft: '<p>Mit einem Knarren hebt sich der Deckel. In der Truhe liegt eine einzelne, sorgfältig gefaltete Seekarte – und eine alte Flaschenpost. '
+             + 'Auf der Karte ist die Leuchtturminsel eingekreist, daneben mit rotem Stift: <i>„Fahrrinne nur über die drei Bojen. '
+             + 'Sonst Sandbank.“</i> Der Zettel in der Flaschenpost trägt nur ein Wort: <b>FLASCHENPOST</b>.</p>'
+             + '<p>Jetzt haben Sie den Schlüssel, die Karte und das Ziel. Fehlt nur noch das Boot.</p>',
+    code: 'FLASCHENPOST' },
+
+  /* ---------------- Karte 9: Bootsdeck ---------------- */
+  { id: '9', titel: 'Das Bootsdeck',
+    geschichte: '<p>Die Tür zum Deck reißt Ihnen der Wind fast aus der Hand. Regen schlägt Ihnen ins Gesicht, eiskalt, und das Deck hebt und senkt sich '
+              + 'unter Ihren Füßen. Am Heck hängt es: das Speedboot, schwarz und schmal, in einer Halterung aus Stahl.</p>'
+              + '<p>Die Halterung ist mit einer Kette gesichert, an der vier Vorhängeschlösser baumeln. Jedes trägt einen Funktionsterm. '
+              + 'Auf einer Tafel an der Reling, halb verwaschen vom Regen:</p>'
+              + '<p><i>„Mein Graph ist dritten Grades. Er hat den Hochpunkt ' + m('H(-1|2)') + ' und den Wendepunkt ' + m('W(0|0)') + '.“</i></p>'
+              + '<p>Ein falsches Schloss löst eine Sirene aus – und wer weiß, wer die dann hört. Rechnen Sie lieber nach, bevor Sie zugreifen.</p>',
+    raetsel: { frage: op('Weg frei') + 'Entscheiden Sie, welcher Funktionsterm den Steckbrief erfüllt: Der Graph hat den Hochpunkt '
+                    + m('H(-1|2)') + ' und den Wendepunkt ' + m('W(0|0)') + '.',
+               kk: 'K7-2', art: 'wahl',
+               optionen: [ { t: m('f(x) = x^3 - 3x'), ok: true }, { t: m('f(x) = x^3 - 3x^2') },
+                           { t: m('f(x) = -x^3 + 3x') }, { t: m('f(x) = 2x^3 - 6x') } ],
+               tipps: [ 'Machen Sie für jeden Term eine Probe: Setzen Sie die Koordinaten der Punkte in f, ' + m("f'") + ' und ' + m("f''") + ' ein.',
+                        'Achten Sie beim Einsetzen von ' + m('-1') + ' besonders auf die Vorzeichen bei ungeraden Hochzahlen.' ],
+               weg: 'Probe mit ' + m('f(x) = x^3 - 3x') + ': ' + m("f'(x) = 3x^2 - 3") + ', ' + m("f''(x) = 6x") + '.<br>'
+                  + m('f(-1) = -1 + 3 = 2') + ', ' + m("f'(-1) = 3 - 3 = 0") + ', ' + m("f''(-1) = -6 < 0") + ' (Hochpunkt).<br>'
+                  + m('f(0) = 0') + ', ' + m("f''(0) = 0") + ' mit Vorzeichenwechsel von ' + m("f''") + ' (Wendepunkt).<br>'
+                  + 'Die anderen Terme scheitern schon an ' + m('f(-1) = 2') + ': Sie liefern ' + m('-4') + ', ' + m('-2') + ' bzw. ' + m('4') + '.' },
+    umwege: [
+      { geschichte: '<p>Die Sirene heult los, schrill und durchdringend, und mischt sich mit dem Heulen des Sturms. Schnell, weiter! '
+                  + 'An der Steuerbordseite hängt eine zweite Kette. Tafel: <i>„Tiefpunkt ' + m('T(2|-4)') + ', Wendepunkt im Ursprung.“</i></p>',
+        raetsel: { frage: op('Weg frei') + 'Entscheiden Sie, welcher Funktionsterm den Steckbrief erfüllt: Der Graph hat den Tiefpunkt '
+                        + m('T(2|-4)') + ' und den Wendepunkt ' + m('W(0|0)') + '.',
+                   kk: 'K7-2', art: 'wahl',
+                   optionen: [ { t: m('f(x) = \\frac{1}{4}x^3 - 3x'), ok: true }, { t: m('f(x) = x^3 - 12x') },
+                               { t: m('f(x) = \\frac{1}{2}x^3 - 6x') }, { t: m('f(x) = -\\frac{1}{4}x^3 + 3x') } ],
+                   tipps: [ 'Prüfen Sie zuerst bei jedem Term, ob ' + m('f(2) = -4') + ' gilt.',
+                            'Für den passenden Term prüfen Sie dann noch die Steigung bei ' + m('x = 2') + '.' ],
+                   weg: m('f(x) = \\frac{1}{4}x^3 - 3x') + ': ' + m('f(2) = 2 - 6 = -4') + ', ' + m("f'(x) = \\frac{3}{4}x^2 - 3") + ', '
+                      + m("f'(2) = 3 - 3 = 0") + ', ' + m("f''(2) = 3 > 0") + '. ' + m('f(0) = 0') + ', ' + m("f''(0) = 0") + '.<br>'
+                      + 'Die anderen liefern ' + m('f(2) = -16') + ', ' + m('-8') + ' bzw. ' + m('4') + '.' } },
+      { geschichte: '<p>Die zweite Kette hält. Irgendwo auf dem Vorschiff geht ein Licht an. Und dann wieder aus. Sie halten den Atem an. '
+                  + 'Am letzten Schloss, direkt an der Bugleine, hängt ein Schild: <i>„Hochpunkt ' + m('H(0|4)') + ', Tiefpunkt ' + m('T(2|0)') + '.“</i></p>',
+        raetsel: { frage: op('Weg frei') + 'Entscheiden Sie, welcher Funktionsterm den Steckbrief erfüllt: Der Graph hat den Hochpunkt '
+                        + m('H(0|4)') + ' und den Tiefpunkt ' + m('T(2|0)') + '.',
+                   kk: 'K7-2', art: 'wahl',
+                   optionen: [ { t: m('f(x) = x^3 - 3x^2 + 4'), ok: true }, { t: m('f(x) = x^3 - 3x^2 + 2') },
+                               { t: m('f(x) = -x^3 + 3x^2 + 4') }, { t: m('f(x) = x^3 - 3x + 4') } ],
+                   tipps: [ 'Prüfen Sie zuerst bei jedem Term, ob ' + m('f(0) = 4') + ' und ' + m('f(2) = 0') + ' gelten.',
+                            'Kontrollieren Sie beim passenden Term, ob ' + m("f'") + ' an beiden Stellen null ist und welche Art von Extremum vorliegt.' ],
+                   weg: m('f(x) = x^3 - 3x^2 + 4') + ': ' + m('f(0) = 4') + ', ' + m('f(2) = 8 - 12 + 4 = 0') + '.<br>'
+                      + m("f'(x) = 3x^2 - 6x") + ': ' + m("f'(0) = 0") + ', ' + m("f'(2) = 0") + '; ' + m("f''(x) = 6x - 6") + ': '
+                      + m("f''(0) = -6 < 0") + ' (Hochpunkt), ' + m("f''(2) = 6 > 0") + ' (Tiefpunkt).' } }
+    ],
+    geschafft: '<p>Das Schloss schnappt auf, die Kette rasselt über das Deck, und das Speedboot gleitet ins aufgewühlte Wasser. '
+             + 'Einer nach dem anderen klettern Sie hinein, klatschnass und zitternd. Unter der Sitzbank liegen Schwimmwesten. '
+             + 'Auf einer steht mit Edding: <b>SCHWIMMWESTE</b>. Sie ziehen sie an. Dann stecken Sie den Schlüssel mit dem roten Schwimmer ins Zündschloss.</p>',
+    code: 'SCHWIMMWESTE' },
+
+  /* ---------------- Karte 10: Speedboot ---------------- */
+  { id: '10', titel: 'Das Speedboot',
+    geschichte: '<p>Der Motor heult auf. Das Speedboot springt über die Wellen, Gischt spritzt über den Bug, und vor Ihnen blinkt, '
+              + 'mal sichtbar, mal verschluckt vom Regen, das Licht des Leuchtturms.</p>'
+              + '<p>Doch kurz vor der Insel nimmt ' + N2 + ' am Steuer abrupt das Gas weg und ruft gegen den Wind: „Sandbank!“ '
+              + '„Die Karte sagt: nur über die drei Bojen!“ Im Scheinwerfer tauchen sie auf, rot und tanzend auf den Wellen. Auf dem Bordcomputer '
+              + 'stehen ihre Koordinaten: ' + m('A(-1|0)') + ', ' + m('B(0|1)') + ' und ' + m('C(1|4)') + '. Die Fahrrinne ist eine Parabel. '
+              + 'Und auf dem Armaturenbrett – natürlich – eine kleine Tafel und ein Stück Kreide.</p>',
+    raetsel: { frage: op('Weg frei') + 'Der Graph der quadratischen Funktion ' + m('f(x) = a x^2 + b x + c') + ' verläuft durch '
+                    + m('A(-1|0)') + ', ' + m('B(0|1)') + ' und ' + m('C(1|4)') + '. Bestimmen Sie den Funktionsterm von f.' + NUR_TERM,
+               kk: 'K8-15', art: 'term', eingabe: 'formel', soll: 'x^2+2x+1',
+               tipps: [ 'Jeder Punkt liefert eine Gleichung. Einer der Punkte verrät c sofort.',
+                        'Stellen Sie mit den beiden anderen Punkten ein Gleichungssystem für a und b auf. Addieren Sie die beiden Gleichungen.' ],
+               weg: 'B: ' + m('f(0) = 1') + ' ⇒ ' + m('c = 1') + '.<br>'
+                  + 'C: ' + m('a + b + 1 = 4') + ' ⇒ ' + m('a + b = 3') + '<br>'
+                  + 'A: ' + m('a - b + 1 = 0') + ' ⇒ ' + m('a - b = -1') + '<br>'
+                  + 'Addieren: ' + m('2a = 2') + ' ⇒ ' + m('a = 1') + ', ' + m('b = 2') + '.<br>'
+                  + 'Ergebnis: ' + m('f(x) = x^2 + 2x + 1 = (x + 1)^2') + '.' },
+    umwege: [
+      { geschichte: '<p>Ein harter Stoß – der Rumpf schrammt über Sand. Alle werden nach vorn geworfen. Zurück, rückwärts, raus aus der Untiefe! '
+                  + 'Ein Stück weiter östlich tauchen drei andere Bojen auf: ' + m('A(0|2)') + ', ' + m('B(1|1)') + ' und ' + m('C(2|2)') + '.</p>',
+        raetsel: { frage: op('Weg frei') + 'Der Graph der quadratischen Funktion ' + m('f(x) = a x^2 + b x + c') + ' verläuft durch '
+                        + m('A(0|2)') + ', ' + m('B(1|1)') + ' und ' + m('C(2|2)') + '. Bestimmen Sie den Funktionsterm von f.' + NUR_TERM,
+                   kk: 'K8-15', art: 'term', eingabe: 'formel', soll: 'x^2-2x+2',
+                   tipps: [ 'Bestimmen Sie c mit dem Punkt auf der y-Achse.',
+                            'Stellen Sie mit B und C zwei Gleichungen für a und b auf und lösen Sie das System.' ],
+                   weg: m('c = 2') + '. B: ' + m('a + b = -1') + '; C: ' + m('4a + 2b = 0') + ' ⇒ ' + m('b = -2a') + '.<br>'
+                      + m('a - 2a = -1') + ' ⇒ ' + m('a = 1') + ', ' + m('b = -2') + '.<br>Ergebnis: ' + m('f(x) = x^2 - 2x + 2') + '.' } },
+      { geschichte: '<p>Wieder Grund unter dem Kiel, wieder zurück. Der Leuchtturm ist jetzt ganz nah – so nah, dass Sie oben im Fenster eine Gestalt sehen, '
+                  + 'die sich nicht bewegt. Drei letzte Bojen, im Bogen gelegt: ' + m('A(0|0)') + ', ' + m('B(2|0)') + ' und dazwischen, am weitesten draußen, '
+                  + m('C(1|2)') + '.</p>',
+        raetsel: { frage: op('Weg frei') + 'Der Graph der quadratischen Funktion ' + m('f(x) = a x^2 + b x + c') + ' verläuft durch '
+                        + m('A(0|0)') + ', ' + m('B(2|0)') + ' und ' + m('C(1|2)') + '. Bestimmen Sie den Funktionsterm von f.' + NUR_TERM,
+                   kk: 'K8-15', art: 'term', eingabe: 'formel', soll: '-2x^2+4x',
+                   tipps: [ 'A liegt im Ursprung – was folgt daraus für c?',
+                            'Stellen Sie mit B und C zwei Gleichungen für a und b auf und lösen Sie das System.' ],
+                   weg: m('c = 0') + '. B: ' + m('4a + 2b = 0') + ' ⇒ ' + m('b = -2a') + '; C: ' + m('a + b = 2') + ' ⇒ ' + m('-a = 2') + '.<br>'
+                      + m('a = -2') + ', ' + m('b = 4') + '.<br>Ergebnis: ' + m('f(x) = -2x^2 + 4x') + '.' } }
+    ],
+    geschafft: '<p>Bogen für Bogen gleitet das Speedboot durch die Fahrrinne und läuft knirschend am kleinen Steg der Insel auf. '
+             + 'Sie rennen den Pfad hinauf, die Wendeltreppe hoch, immer im Kreis, außer Atem – und oben, im Licht des Leuchtfeuers, '
+             + 'sitzt ' + LK.nom + ' auf einem Stuhl. Gefesselt, durchnässt, aber unverletzt.</p>'
+             + '<p>Sie lösen die Knoten. ' + LK.nom + ' reibt sich die Handgelenke und schaut ' + (NAMEN.length === 1 ? 'Sie lange' : 'Sie der Reihe nach') + ' an. „Kein Taschenrechner' + ANSPRACHE + '“, sagt ' + LK.er + ' leise, '
+             + '„und trotzdem alles richtig.“ Auf die Tafel neben dem Leuchtfeuer hat ' + LK.er + ' schon das letzte Wort geschrieben: <b>LEUCHTFEUER</b>.</p>',
+    code: 'LEUCHTFEUER' }
+  ],
+  ende: '<p>Unten auf dem Wasser blitzt Blaulicht durch den Regen: Die Wasserschutzpolizei ist da – und sie hat den Bootsmann erwischt, '
+      + 'der mit dem Beiboot gerade zur Sandbank verschwinden wollte. Langsam lässt der Sturm nach. Im Osten wird der Himmel schon grau.</p>'
+      + '<p>' + LK.nom + ' steht am Fenster und schaut über das IJsselmeer. „Morgen“, sagt ' + LK.er + ' schließlich, „machen wir frei. '
+      + 'Das haben Sie sich verdient.“</p>'
+      + '<p>Acht Räume, zwei Geheimtüren, zehn Kurvenschlösser – Sie sind von der Groote Jager entkommen und haben ' + LK.akk + ' gerettet.</p>'
+};
+/* ============ ENDE ANPASSEN: Daten der Story ============ */
+</script>
+
+<script>
+/* ============================================================
+   BAUSTEIN: Story-Engine (v1, 22.11.2026) – unverändert übernehmen
+   Baut aus dem Objekt STORY: Startkarte (Einleitung, Anleitung, Zeitraum, Einstieg per
+   Codewort) → je Karte Geschichte + Rätsel → Endkarte mit Auswertung.
+   Ablauf einer Karte:  Haupträtsel richtig → geschafft (direkter Weg).
+     falsch → Rätsel verschwindet, Umweg 1 erscheint; falsch → Umweg 2; falsch → Lösungsweg,
+     die Karte gilt trotzdem als geschafft. Unlesbare Eingaben, nicht gekürzte Brüche und
+     gleichwertige Terme in falscher Form kosten KEINEN Versuch (nur ein Hinweis).
+   Hinweise (2 je Rätsel) gibt es vor dem Antworten; sie werden in der Auswertung gezählt.
+   Zeitraum: Karten öffnen nach Datum (Gerätedatum). Der Freischaltcode STORY.vorschau – im
+   Codewort-Feld der Startkarte oder als ?vorschau=CODE – schaltet die Sperre für diesen Tab aus.
+   Kernkompetenzen (kk) werden den SuS nicht angezeigt – sie sollen einfach ein Rätsel lösen. Codewort: Jede geschaffte Karte zeigt ein Codewort; auf der
+   Startkarte eingegeben, gelten alle Karten bis dahin als geschafft (Stand im sessionStorage
+   geht beim Schließen des Tabs verloren, TEIL 6 – das Codewort ersetzt dauerhaftes Speichern).
+   Eingaben: Formeltool (FT, baustein_formeltool.html) bei eingabe 'formel'/'getrennt'/'gemischt'.
+   Anrede: <body data-anrede="sie"> → alle Texte gesiezt (Oberstufe), sonst „du".
+   ============================================================ */
+(function(){
+"use strict";
+var SIE = document.body.getAttribute('data-anrede') === 'sie';
+function T(du, sie){ return SIE ? sie : du; }
+var RAHMEN = {
+  advent:   { icon:'🎄', name:'Adventskalender',    karte:'Türchen' },
+  escape:   { icon:'🔐', name:'Escape Room',        karte:'Raum' },
+  detektiv: { icon:'🕵️', name:'Detektivgeschichte', karte:'Spur' },
+  story:    { icon:'📖', name:'Story',              karte:'Kapitel' }
+};
+var R = RAHMEN[STORY.art] || RAHMEN.story;
+var K = STORY.karten || [];
+var Z = STORY.zeitraum || null;
+var DATEI = (location.pathname.split('/').pop() || 'seite').replace(/\.html?$/i, '');
+var KEY = 'aszym:' + DATEI + ':v' + (document.body.getAttribute('data-version') || '1');
+var S = { karte:'start', k:{}, vorschau:false };
+var FELD = {};   /* aktive Formeltool-Felder je Rätsel-ID */
+
+function lies(){ try { var r = sessionStorage.getItem(KEY); return r ? JSON.parse(r) : null; } catch (e) { return null; } }
+function sichern(){ try { sessionStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
+function setzeFormel(el){
+  if (window.MathJax && MathJax.typesetPromise) { try { MathJax.typesetPromise([el]); } catch (e) {} }
+  /* MathJax blockiert (Schul-WLAN): Notfall-Anzeige für neu aufgebaute Karten erneut anstoßen –
+     sie hört nur auf 'load' und tut nichts, sobald MathJax da ist. */
+  else if (document.readyState === 'complete') { try { window.dispatchEvent(new Event('load')); } catch (e) {} }
+}
+function $(id){ return document.getElementById(id); }
+function neu(tag, cls, html){ var e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; }
+function knopf(cls, html, fn){ var b = neu('button', 'btn ' + cls, html); b.type = 'button'; b.addEventListener('click', fn); return b; }
+
+/* ---------- Datum ---------- */
+function iso(d){ return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
+function ausIso(s){ var t = String(s).split('-'); return new Date(+t[0], +t[1] - 1, +t[2]); }
+function plusTage(s, n){ var d = ausIso(s); d.setDate(d.getDate() + n); return iso(d); }
+function datumText(s){
+  try { return ausIso(s).toLocaleDateString('de-DE', { weekday:'long', day:'numeric', month:'long' }); }
+  catch (e) { return s; }
+}
+var HEUTE = iso(new Date());
+function ab(i){ if (K[i].ab) return K[i].ab; if (!Z || !Z.von) return ''; return Z.proTag ? plusTage(Z.von, i) : Z.von; }
+function phase(){
+  if (S.vorschau || !Z) return 'laeuft';
+  if (Z.von && HEUTE < Z.von) return 'vor';
+  if (Z.bis && HEUTE > Z.bis && Z.nachEnde !== 'offen') return 'nach';
+  return 'laeuft';
+}
+function datumOffen(i){ return S.vorschau || !ab(i) || HEUTE >= ab(i); }
+
+/* ---------- Zustand je Karte ---------- */
+function zk(i){
+  var id = K[i].id;
+  if (!S.k[id]) S.k[id] = { st:'offen', stufe:0, tipps:[0,0,0], e:[null,null,null], mix:[null,null,null], antw:null };
+  return S.k[id];
+}
+function fertig(i){ var s = zk(i).st; return s === 'ok' || s === 'durch' || s === 'code'; }
+function alleFertig(){ for (var i = 0; i < K.length; i++) if (!fertig(i)) return false; return K.length > 0; }
+/* Warum ist Karte i (noch) zu? '' = offen */
+function sperre(i){
+  var p = phase();
+  if (p === 'vor') return T('Die Geschichte beginnt am ', 'Die Geschichte beginnt am ') + datumText(Z.von) + '.';
+  if (p === 'nach') return 'Der Spielzeitraum ist vorbei.';
+  if (!datumOffen(i)) return R.karte + ' ' + (i + 1) + ' öffnet am ' + datumText(ab(i)) + '.';
+  if (i > 0 && !fertig(i - 1)) return T('Löse zuerst ', 'Lösen Sie zuerst ') + R.karte + ' ' + i + '.';
+  return '';
+}
+function raetsel(i, s){ return s === 0 ? K[i].raetsel : K[i].umwege[s - 1].raetsel; }
+function rid(i, s){ return K[i].id + '-' + s; }
+
+/* ---------- Mischen (TEIL 4.3: einmal beim ersten Anzeigen, Reihenfolge gehört zum Zustand) ---------- */
+function mische(n){
+  var a = []; for (var k = 0; k < n; k++) a.push(k);
+  for (var j = a.length - 1; j > 0; j--) { var r = Math.floor(Math.random() * (j + 1)); var t = a[j]; a[j] = a[r]; a[r] = t; }
+  return a;
+}
+
+/* ---------- Bewerten ---------- */
+function gleich(a, b){ return a[0] * b[1] === b[0] * a[1]; }
+function norm(t){
+  return String(t == null ? '' : t).toUpperCase().replace(/Ä/g, 'AE').replace(/Ö/g, 'OE').replace(/Ü/g, 'UE')
+    .replace(/ß/g, 'SS').replace(/[^A-Z0-9]/g, '');
+}
+function textAus(daten){ return (daten || []).map(function(p){ return Object.keys(p).filter(function(k){ return k !== 't'; }).map(function(k){ return p[k]; }).join(''); }).join(''); }
+/* antwort: { ft: Formeltool-Daten } | { txt: '…' } | { wahl: Index in r.optionen } */
+function bewerte(r, a){
+  if (!a) return 'leer';
+  if (r.art === 'wahl') { if (a.wahl == null) return 'leerWahl'; return r.optionen[a.wahl] && r.optionen[a.wahl].ok ? 'ok' : 'falsch'; }
+  if (r.art === 'text') {
+    if (!norm(a.txt)) return 'leer';
+    return (r.soll || []).some(function(s){ return norm(s) === norm(a.txt); }) ? 'ok' : 'falsch';
+  }
+  var leer = a.ft ? !textAus(a.ft).trim() : !String(a.txt || '').trim();
+  if (leer) return 'leer';
+  if (r.art === 'term') {
+    var lin = a.ft ? FT.linear(a.ft) : String(a.txt);
+    if (!FT.gleichwertig(lin, lin)) return 'unlesbarTerm';
+    if (!FT.gleichwertig(lin, String(r.soll))) return 'falsch';
+    var roh = a.ft ? textAus(a.ft) : String(a.txt);
+    var form = (r.ohne || []).some(function(o){
+      return (/^[a-z]+$/.test(o) && a.ft) ? a.ft.some(function(p){ return p.t === o; }) : roh.indexOf(o) >= 0;
+    });
+    return form ? 'form' : 'ok';
+  }
+  var p = a.ft ? FT.zahl(a.ft) : FT.leseZahl(a.txt);
+  if (!p) return 'unlesbar';
+  if (!gleich(p.w, r.soll)) return 'falsch';
+  return (r.art === 'bruch' && !p.gek) ? 'kuerzen' : 'ok';
+}
+var HINWEIS = {
+  leer: T('Gib zuerst eine Antwort ein.', 'Geben Sie zuerst eine Antwort ein.'),
+  leerWahl: T('Tippe zuerst eine Antwort an.', 'Tippen Sie zuerst eine Antwort an.'),
+  unlesbar: T('Das kann ich nicht als Zahl lesen. Erlaubt sind Dezimalzahlen, Brüche und gemischte Zahlen – auch mit Minuszeichen. Das kostet keinen Versuch.',
+              'Das kann ich nicht als Zahl lesen. Erlaubt sind Dezimalzahlen, Brüche und gemischte Zahlen – auch mit Minuszeichen. Das kostet keinen Versuch.'),
+  unlesbarTerm: T('Das kann ich nicht als Term lesen. Prüfe Klammern und Rechenzeichen. Das kostet keinen Versuch.',
+                  'Das kann ich nicht als Term lesen. Prüfen Sie Klammern und Rechenzeichen. Das kostet keinen Versuch.'),
+  kuerzen: T('Fast! Der Wert stimmt, aber der Bruch ist noch nicht vollständig gekürzt. Das kostet keinen Versuch.',
+             'Fast! Der Wert stimmt, aber der Bruch ist noch nicht vollständig gekürzt. Das kostet keinen Versuch.'),
+  form: 'Gleichwertig, aber noch nicht in der verlangten Form. Das kostet keinen Versuch.'
+};
+
+/* ---------- Aufbau ---------- */
+function baue(){
+  $('st-typ').textContent = R.icon + ' ' + R.name;
+  $('st-titel').innerHTML = STORY.titel || '';
+  $('st-untertitel').innerHTML = STORY.untertitel || '';
+  $('st-vorschau').classList.toggle('an', !!S.vorschau);
+  var reiter = $('reiter'), main = $('main');
+  function tab(id, text, label){
+    var b = neu('button', '', text); b.type = 'button'; b.id = 'tab-' + id;
+    if (label) b.setAttribute('aria-label', label);
+    b.addEventListener('click', function(){ zeigeKarte(id, true); });
+    reiter.appendChild(b);
+  }
+  tab('start', 'Start');
+  K.forEach(function(k, i){ tab('k' + i, String(i + 1), R.karte + ' ' + (i + 1) + ': ' + k.titel.replace(/<[^>]+>/g, '')); });
+  tab('ende', '🏁 Ende');
+  main.appendChild(neu('section', 'karte', '')).id = 'karte-start';
+  K.forEach(function(k, i){ main.appendChild(neu('section', 'karte', '')).id = 'karte-k' + i; });
+  main.appendChild(neu('section', 'karte', '')).id = 'karte-ende';
+}
+function reiterStand(){
+  K.forEach(function(k, i){
+    var b = $('tab-k' + i), zu = !!sperre(i);
+    b.classList.toggle('fertig', fertig(i));
+    b.classList.toggle('gesperrt', zu && !fertig(i));
+    b.textContent = (zu && !fertig(i) ? '🔒 ' : '') + (i + 1);
+  });
+  $('tab-ende').classList.toggle('gesperrt', !alleFertig());
+}
+
+/* ---------- Startkarte ---------- */
+function zeigeStart(){
+  var c = $('karte-start'); c.innerHTML = '';
+  var b = neu('div', 'block');
+  b.appendChild(neu('p', 'eyebrow', R.icon + ' ' + R.name));
+  b.appendChild(neu('h2', '', STORY.titel || ''));
+  b.appendChild(neu('div', 'geschichte', STORY.intro || ''));
+  var anl = neu('div', '');
+  anl.appendChild(neu('h3', '', 'So funktioniert’s'));
+  anl.appendChild(neu('ol', 'anleitung',
+    '<li>' + T('Lies die Geschichte und löse das Rätsel am Ende jeder Karte.', 'Lesen Sie die Geschichte und lösen Sie das Rätsel am Ende jeder Karte.') + '</li>'
+    + '<li>' + T('Richtig gelöst? Dann geht es weiter zur nächsten Karte.', 'Richtig gelöst? Dann geht es weiter zur nächsten Karte.') + '</li>'
+    + '<li>' + T('Falsch gelöst? Dann verschwindet das Rätsel und du nimmst einen Umweg mit einem neuen Rätsel. Langsam, aber sicher kommst du ans Ziel.',
+                 'Falsch gelöst? Dann verschwindet das Rätsel und Sie nehmen einen Umweg mit einem neuen Rätsel. Langsam, aber sicher kommen Sie ans Ziel.') + '</li>'
+    + '<li>' + T('Du steckst fest? Hol dir einen 💡 Hinweis – bevor du antwortest.', 'Sie stecken fest? Holen Sie sich einen 💡 Hinweis – bevor Sie antworten.') + '</li>'
+    + '<li>' + T('Notiere nach jeder Karte das 🔑 Codewort. Damit steigst du später wieder ein – auch an einem anderen Tag.',
+                 'Notieren Sie nach jeder Karte das 🔑 Codewort. Damit steigen Sie später wieder ein – auch an einem anderen Tag.') + '</li>'));
+  b.appendChild(anl);
+  if (Z && Z.von) {
+    var zt = '📅 Spielbar ' + (Z.bis ? 'vom ' + datumText(Z.von) + ' bis ' + datumText(Z.bis) : 'ab ' + datumText(Z.von)) + '.';
+    if (Z.proTag) zt += ' Jeden Tag öffnet sich ' + (R.karte === 'Türchen' ? 'ein neues Türchen' : 'eine neue Karte') + '.';
+    b.appendChild(neu('p', '', zt));
+  }
+  var p = phase();
+  if (p !== 'laeuft') b.appendChild(neu('div', 'gesperrt-box', '🔒 ' + sperre(0)));
+  else {
+    var ziel = naechste();
+    var text = ziel === 'ende' ? 'Zum Ende 🏁'
+      : (anyFertig() ? 'Weiter mit ' : 'Los geht’s: ') + R.karte + ' ' + (+ziel.slice(1) + 1) + ' →';
+    var los = knopf('btn-los', text, function(){ zeigeKarte(ziel, true); });
+    b.appendChild(neu('div', 'knoepfe')).appendChild(los);
+  }
+  c.appendChild(b);
+  /* Einstieg per Codewort */
+  var cb = neu('div', 'block');
+  cb.appendChild(neu('h3', '', '🔑 Mit Codewort weiterspielen'));
+  cb.appendChild(neu('p', '', T('Du hast schon gespielt? Gib das Codewort deiner letzten geschafften Karte ein.',
+                                'Sie haben schon gespielt? Geben Sie das Codewort Ihrer letzten geschafften Karte ein.')));
+  var z = neu('div', 'zeile');
+  var inp = neu('input', ''); inp.type = 'text'; inp.setAttribute('aria-label', 'Codewort');
+  inp.setAttribute('autocomplete', 'off'); inp.setAttribute('autocapitalize', 'characters'); inp.setAttribute('spellcheck', 'false');
+  var fb = neu('div', 'fb', '');
+  var ok = knopf('btn-pruefen', 'Einsteigen', function(){
+    var w = norm(inp.value), treffer = -1;
+    if (w && STORY.vorschau && norm(STORY.vorschau) === w) {          /* Freischaltcode der Lehrkraft */
+      S.vorschau = true; sichern();
+      $('st-vorschau').classList.add('an'); reiterStand();
+      zeigeStart(); zeigeAlleKarten();
+      var f1 = $('karte-start').querySelector('.block:last-child .fb');
+      if (f1) { f1.className = 'fb ok'; f1.textContent = '🔓 Freischaltcode angenommen – alle Karten sind offen (nur in diesem Tab).'; }
+      return;
+    }
+    K.forEach(function(k, i){ if (w && norm(k.code) === w) treffer = i; });
+    if (treffer < 0) { fb.className = 'fb nok'; fb.textContent = '❌ Dieses Codewort kenne ich nicht.'; return; }
+    for (var i = 0; i <= treffer; i++) if (!fertig(i)) { zk(i).st = 'code'; }
+    sichern(); reiterStand();
+    zeigeStart(); zeigeAlleKarten();
+    var f2 = $('karte-start').querySelector('.block:last-child .fb');
+    if (f2) { f2.className = 'fb ok'; f2.textContent = '✅ Codewort angenommen – ' + R.karte + ' 1 bis ' + (treffer + 1) + ' gelten als geschafft.'; }
+  });
+  inp.addEventListener('keydown', function(e){ if (e.key === 'Enter') { e.preventDefault(); ok.click(); } });
+  z.appendChild(inp); z.appendChild(ok);
+  cb.appendChild(z); cb.appendChild(fb);
+  c.appendChild(cb);
+}
+function anyFertig(){ for (var i = 0; i < K.length; i++) if (fertig(i)) return true; return false; }
+function naechste(){ for (var i = 0; i < K.length; i++) if (!fertig(i)) return 'k' + i; return 'ende'; }
+
+/* ---------- Eine Story-Karte ---------- */
+function zeigeKarteInhalt(i){
+  var k = K[i], c = $('karte-k' + i); c.innerHTML = '';
+  Object.keys(FELD).forEach(function(id){ if (id.indexOf(k.id + '-') === 0) delete FELD[id]; });
+  var b = neu('div', 'block');
+  var kopf = R.icon + ' ' + R.karte + ' ' + (i + 1) + (ab(i) ? ' · ' + datumText(ab(i)) : '');
+  b.appendChild(neu('p', 'eyebrow', kopf));
+  b.appendChild(neu('h2', '', k.titel));
+  c.appendChild(b);
+  var grund = sperre(i);
+  if (grund && !fertig(i)) { b.appendChild(neu('div', 'gesperrt-box', '🔒 ' + grund)); return; }
+  var z = zk(i);
+  b.appendChild(neu('div', 'geschichte', k.geschichte));
+  if (z.st === 'code') {
+    b.appendChild(neu('div', 'geschafft', '<p>✅ Per Codewort freigeschaltet.</p>' + k.geschafft));
+    abschluss(b, i); return;
+  }
+  var letzte = z.st === 'offen' ? z.stufe : (z.st === 'ok' ? z.stufe : 2);
+  for (var s = 0; s <= letzte; s++) {
+    if (s > 0) b.appendChild(neu('div', 'geschichte', k.umwege[s - 1].geschichte));
+    if (s < letzte) {
+      b.appendChild(neu('div', 'versperrt', '❌ ' + T('Deine Antwort war nicht richtig. Dieses Rätsel ist verschwunden – der Weg ist versperrt.',
+        'Ihre Antwort war nicht richtig. Dieses Rätsel ist verschwunden – der Weg ist versperrt.')
+        + (s === 0 ? ' ' + T('Aber es gibt einen Umweg …', 'Aber es gibt einen Umweg …') : ' ' + T('Noch ein Umweg …', 'Noch ein Umweg …'))));
+      continue;
+    }
+    b.appendChild(raetselBlock(i, s));
+  }
+  if (z.st === 'durch') {
+    var r2 = raetsel(i, 2);
+    b.appendChild(neu('div', 'loesungsweg', '<b class="tl">Lösungsweg:</b> ' + r2.weg));
+    b.appendChild(neu('p', '', T('Mit dem Lösungsweg kommst du trotzdem weiter. Lies ihn genau – beim nächsten Mal klappt es!',
+                                 'Mit dem Lösungsweg kommen Sie trotzdem weiter. Lesen Sie ihn genau – beim nächsten Mal klappt es!')));
+  }
+  if (z.st !== 'offen') {
+    var g = neu('div', 'geschafft', (z.st === 'ok' && z.stufe > 0 ? '<p>🧭 ' + T('Über den Umweg hast du zurück auf den Weg gefunden.', 'Über den Umweg haben Sie zurück auf den Weg gefunden.') + '</p>' : '') + k.geschafft);
+    b.appendChild(g);
+    abschluss(b, i);
+  }
+}
+function abschluss(b, i){
+  var cb = neu('div', 'codebox', '<span>🔑 Codewort:</span><span class="code">' + K[i].code + '</span>'
+    + '<span>' + T('– notiere es! Damit steigst du später wieder ein.', '– notieren Sie es! Damit steigen Sie später wieder ein.') + '</span>');
+  b.appendChild(cb);
+  var kn = neu('div', 'knoepfe');
+  if (i + 1 < K.length) {
+    var grund = sperre(i + 1);
+    if (grund) b.appendChild(neu('div', 'gesperrt-box', '🔒 ' + grund));
+    else kn.appendChild(knopf('btn-los', 'Weiter zu ' + R.karte + ' ' + (i + 2) + ' →', function(){ zeigeKarte('k' + (i + 1), true); }));
+  } else kn.appendChild(knopf('btn-los', 'Zum Ende 🏁', function(){ zeigeKarte('ende', true); }));
+  if (kn.children.length) b.appendChild(kn);
+}
+
+/* ---------- Ein Rätsel (aktiv oder schon beantwortet) ---------- */
+function raetselBlock(i, s){
+  var r = raetsel(i, s), z = zk(i), id = rid(i, s);
+  var aktiv = z.st === 'offen' && z.stufe === s;
+  var box = neu('div', 'raetsel');
+  box.appendChild(neu('h3', '', s === 0 ? 'Rätsel' : 'Umweg-Rätsel ' + s));
+  box.appendChild(neu('p', 'frage', r.frage));
+  var fb = neu('div', 'fb', '');
+  var hol, leere;                            /* aktuelle Antwort holen / Eingabe leeren */
+  if (r.art === 'wahl') {
+    if (!z.mix[s]) { z.mix[s] = mische(r.optionen.length); sichern(); }
+    var opt = neu('div', 'optionen'), gew = z.e[s] && z.e[s].wahl != null ? z.e[s].wahl : null;
+    z.mix[s].forEach(function(o){
+      var bt = neu('button', '', r.optionen[o].t); bt.type = 'button';
+      if (r.optionen[o].ok) bt.setAttribute('data-ok', '1');
+      if (gew === o) bt.classList.add('an');
+      bt.disabled = !aktiv;
+      bt.addEventListener('click', function(){
+        z.e[s] = { wahl:o }; sichern();
+        Array.prototype.forEach.call(opt.children, function(x){ x.classList.remove('an'); });
+        bt.classList.add('an');
+      });
+      opt.appendChild(bt);
+    });
+    box.appendChild(opt);
+    hol = function(){ return z.e[s]; };
+    leere = function(){ Array.prototype.forEach.call(opt.children, function(x){ x.classList.remove('an'); }); };
+  } else if (r.art === 'text' || (r.eingabe || 'linear') === 'linear') {
+    var zl = neu('div', 'zeile'), inp = neu('input', '');
+    inp.type = 'text'; inp.setAttribute('aria-label', 'Antwort'); inp.setAttribute('autocomplete', 'off');
+    inp.setAttribute('autocorrect', 'off'); inp.setAttribute('spellcheck', 'false');
+    inp.value = z.e[s] && z.e[s].txt != null ? z.e[s].txt : '';
+    if (!aktiv) { inp.readOnly = true; inp.classList.add('zu'); }
+    inp.addEventListener('input', function(){ z.e[s] = { txt: inp.value }; sichern(); });
+    inp.addEventListener('keydown', function(e){ if (e.key === 'Enter') { e.preventDefault(); pruefen(); } });
+    zl.appendChild(inp); box.appendChild(zl);
+    hol = function(){ return { txt: inp.value }; };
+    leere = function(){ inp.value = ''; };
+  } else {
+    var art = r.eingabe === 'getrennt' ? 'bruch' : r.eingabe === 'gemischt' ? 'gem' : 'frei';
+    var zf = neu('div', 'zeile');
+    var fd = FT.feld(zf, { art: art, label: 'Antwort', enter: function(){ pruefen(); },
+                           aendern: function(x){ z.e[s] = { ft: x.zustand() }; sichern(); } });
+    if (z.e[s] && z.e[s].ft) fd.setze(z.e[s].ft);
+    if (!aktiv) fd.sperre(true);
+    FELD[id] = fd;
+    box.appendChild(zf);
+    if (art === 'frei' && r.art === 'term')
+      box.appendChild(neu('p', 'ft-hilfe', T('Tipp zur Eingabe: Malpunkt · oder *, Hochzahl im Kästchen mit ^ (x^2).',
+                                             'Tipp zur Eingabe: Malpunkt · oder *, Hochzahl im Kästchen mit ^ (x^2).')));
+    hol = function(){ return { ft: fd.zustand() }; };
+    leere = function(){ fd.leeren(); };
+  }
+  /* Hinweise – gestuft, vor dem Antworten */
+  var tp = neu('div', 'tipps' + (z.tipps[s] ? ' an' : ''));
+  function zeigeTipps(){
+    tp.innerHTML = '';
+    for (var t = 0; t < z.tipps[s]; t++) tp.appendChild(neu('div', 'tippstufe', '<b class="tl">💡 Hinweis ' + (t + 1) + ':</b> ' + r.tipps[t]));
+    tp.classList.toggle('an', z.tipps[s] > 0);
+    setzeFormel(tp);
+  }
+  zeigeTipps();
+  if (aktiv) {
+    var kn = neu('div', 'knoepfe');
+    var bp = knopf('btn-pruefen', 'Prüfen', pruefen);
+    var bl = knopf('btn-leeren', 'Leeren', function(){
+      leere(); z.e[s] = null; sichern(); fb.className = 'fb'; fb.textContent = '';
+    });
+    var bt2 = knopf('btn-tipp', '', function(){
+      if (z.tipps[s] < (r.tipps || []).length) { z.tipps[s]++; sichern(); zeigeTipps(); tippText(); }
+    });
+    function tippText(){
+      var n = (r.tipps || []).length;
+      bt2.textContent = '💡 Hinweis (' + z.tipps[s] + '/' + n + ')';
+      bt2.hidden = z.tipps[s] >= n;
+    }
+    tippText();
+    kn.appendChild(bp); kn.appendChild(bl); kn.appendChild(bt2);
+    box.appendChild(kn);
+  } else if (z.st === 'ok' && z.stufe === s) {
+    fb.className = 'fb ok'; fb.textContent = '✅ Richtig – das Rätsel ist gelöst!';
+  } else if (z.st === 'durch' && s === 2) {
+    fb.className = 'fb nok'; fb.textContent = '❌ ' + T('Auch das war nicht richtig.', 'Auch das war nicht richtig.');
+  }
+  box.appendChild(tp);
+  box.appendChild(fb);
+
+  function pruefen(){
+    if (!(z.st === 'offen' && z.stufe === s)) return;
+    var a = hol(), erg = bewerte(r, a);
+    if (HINWEIS[erg]) {
+      fb.className = 'fb info';
+      fb.textContent = erg === 'form' && r.formHinweis ? r.formHinweis + ' Das kostet keinen Versuch.' : HINWEIS[erg];
+      return;
+    }
+    z.e[s] = a;
+    if (erg === 'ok') { z.st = 'ok'; }
+    else if (s < 2) { z.stufe = s + 1; }
+    else { z.st = 'durch'; }
+    sichern(); reiterStand();
+    zeigeKarteInhalt(i);
+    var karte = $('karte-k' + i);
+    setzeFormel(karte);
+    var ziel = karte.querySelector(z.st === 'offen' ? '.versperrt:last-of-type' : '.geschafft');
+    if (ziel && ziel.scrollIntoView) { try { ziel.scrollIntoView({ behavior:'smooth', block:'center' }); } catch (e) { ziel.scrollIntoView(); } }
+  }
+  return box;
+}
+
+/* ---------- Endkarte mit Auswertung (TEIL 2.5) ---------- */
+function zeigeEnde(){
+  var c = $('karte-ende'); c.innerHTML = '';
+  var b = neu('div', 'block');
+  b.appendChild(neu('p', 'eyebrow', '🏁 Ende'));
+  b.appendChild(neu('h2', '', 'Auswertung'));
+  var direkt = 0, umweg = 0, durch = 0, code = 0, tipps = 0, fertigN = 0;
+  var ul = neu('ul', 'liste');
+  K.forEach(function(k, i){
+    var z = zk(i), t = z.tipps[0] + z.tipps[1] + z.tipps[2], text;
+    tipps += t;
+    if (fertig(i)) fertigN++;
+    if (z.st === 'ok' && z.stufe === 0) { direkt++; text = '⭐ direkt gelöst'; }
+    else if (z.st === 'ok') { umweg++; text = '🧭 über ' + z.stufe + (z.stufe === 1 ? ' Umweg' : ' Umwege'); }
+    else if (z.st === 'durch') { durch++; text = '📖 mit Lösungsweg'; }
+    else if (z.st === 'code') { code++; text = '🔑 per Codewort (nicht ausgewertet)'; }
+    else text = '⏳ noch offen';
+    ul.appendChild(neu('li', '', '<span class="titel">' + (i + 1) + ' · ' + k.titel + '</span><br>' + text
+      + (t ? ' · 💡 ' + t + (t === 1 ? ' Hinweis' : ' Hinweise') : '')));
+  });
+  if (alleFertig()) b.appendChild(neu('div', 'geschichte', STORY.ende || ''));
+  b.appendChild(ul);
+  var gewertet = K.length - code;
+  var fz = alleFertig()
+    ? neu('div', 'fazit ok', '🎉 Geschafft! ' + direkt + ' von ' + gewertet + ' gewerteten Rätseln auf dem direkten Weg, '
+        + umweg + ' über Umwege, ' + durch + ' mit Lösungsweg. Hinweise genutzt: ' + tipps + '.')
+    : neu('div', 'fazit offen', fertigN + ' von ' + K.length + ' ' + (R.karte === 'Türchen' ? 'Türchen' : 'Karten') + ' geschafft.');
+  b.appendChild(fz);
+  c.appendChild(b);
+}
+
+function zeigeAlleKarten(){
+  K.forEach(function(k, i){ zeigeKarteInhalt(i); });
+  zeigeEnde();
+  setzeFormel($('main'));
+}
+function zeigeKarte(id, scrollen){
+  if (!$('karte-' + id)) id = 'start';
+  if (id === 'start') zeigeStart();
+  if (id === 'ende') zeigeEnde();
+  if (/^k\d+$/.test(id)) zeigeKarteInhalt(+id.slice(1));   /* Stand kann sich geändert haben (Datum, Codewort, Vorkarte) */
+  var alle = document.querySelectorAll('.karte');
+  for (var i = 0; i < alle.length; i++) alle[i].classList.remove('aktiv');
+  var tabs = document.querySelectorAll('.reiter button');
+  for (var j = 0; j < tabs.length; j++) tabs[j].classList.remove('aktiv');
+  $('karte-' + id).classList.add('aktiv'); $('tab-' + id).classList.add('aktiv');
+  S.karte = id; sichern();
+  reiterZu($('tab-' + id));
+  setzeFormel($('karte-' + id));
+  if (scrollen) window.scrollTo(0, 0);
+}
+function reiterRand(){
+  var r = $('reiter'), l = r.scrollLeft > 2, re = r.scrollLeft + r.clientWidth < r.scrollWidth - 2;
+  r.classList.toggle('mehr-links', l); r.classList.toggle('mehr-rechts', re);
+}
+function reiterZu(b){
+  var r = $('reiter'); if (!b) return;
+  r.scrollLeft = b.offsetLeft - (r.clientWidth - b.offsetWidth) / 2;
+  reiterRand();
+}
+
+/* ---------- Start ---------- */
+var alt = lies();
+if (alt && alt.k) S = alt;
+try {
+  var vp = new URLSearchParams(location.search).get('vorschau');
+  if (vp && STORY.vorschau && vp === String(STORY.vorschau)) S.vorschau = true;
+} catch (e) {}
+baue();
+reiterStand();
+zeigeStart();
+zeigeAlleKarten();
+zeigeKarte(S.karte || 'start', false);
+(function(){
+  var r = $('reiter');
+  r.addEventListener('scroll', reiterRand);
+  window.addEventListener('resize', function(){ reiterZu($('tab-' + S.karte)); });
+  r.addEventListener('wheel', function(e){
+    if (r.scrollWidth > r.clientWidth && Math.abs(e.deltaY) > Math.abs(e.deltaX)) { r.scrollLeft += e.deltaY; e.preventDefault(); }
+  }, { passive: false });
+})();
+
+/* T-Rex */
+var rex = $('trex'), rexText = $('trex-text');
+if (rex) rex.addEventListener('click', function(){
+  rexText.classList.toggle('an'); setTimeout(function(){ rexText.classList.remove('an'); }, 2000);
+});
+})();
+/* ============ ENDE BAUSTEIN Story-Engine ============ */
+/* =============================================================================
+   BAUSTEIN: MathJax-Notfall-Anzeige  (MATHJAX-FALLBACK)
+   Gepflegt im Wartungs-Projekt. Unverändert ans ENDE des Seiten-Skripts kopieren
+   (in die Seite hinein – nie per <script src> verlinken, TEIL 8.1).
+   Voraussetzung auf der Seite: das .frac-CSS mit Kind-Selektoren (TEIL 7.2):
+     .frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;
+           margin:0 .2em;line-height:1.15;}
+     .frac > span{display:block;padding:0 .35em;}
+     .frac > span:first-child{border-bottom:1.8px solid currentColor;padding-bottom:.1em;}
+     .frac > span:last-child{padding-top:.1em;}
+   ========================================================================== */
+/* =============================================================================
+   Notfall-Anzeige für Formeln (MATHJAX-FALLBACK)
+   Lädt MathJax nicht (Schul-WLAN, Vorschau, Offline-Kopie), blieben sonst
+   \( ... \) als Rohtext mit Backslashes stehen. Dann werden die TeX-Ausdrücke
+   hier in lesbares HTML gewandelt: √ mit Klammer, Brüche als .frac-Konstrukt
+   (kein Schrägstrich!), Hoch-/Tiefstellungen als sup/sub, Sonderzeichen direkt.
+   Ist MathJax da, passiert nichts.
+   ========================================================================== */
+(function(){
+  var AUF = '\u0001', ZU = '\u0002';   /* Platzhalter fuer { } aus \left\{ */
+
+  function leseGruppe(t, i){
+    if (t.charAt(i) !== '{') return null;
+    var tiefe = 0;
+    for (var j = i; j < t.length; j++){
+      if (t.charAt(j) === '{') tiefe++;
+      else if (t.charAt(j) === '}'){ tiefe--; if (tiefe === 0) return [t.slice(i+1, j), j+1]; }
+    }
+    return null;
+  }
+
+  function strukturen(t){
+    var aus = '', i = 0;
+    while (i < t.length){
+      var m = /^\\(dfrac|tfrac|frac|sqrt)/.exec(t.slice(i));
+      if (m){
+        var a = leseGruppe(t, i + m[0].length);
+        if (a){
+          if (m[1] === 'sqrt'){
+            var inn = strukturen(a[0]);
+            aus += /^[0-9A-Za-z]+$/.test(a[0]) ? '√' + inn : '√(' + inn + ')';
+            i = a[1]; continue;
+          }
+          var b = leseGruppe(t, a[1]);
+          if (b){
+            aus += '<span class="frac"><span>' + strukturen(a[0]) + '</span><span>'
+                 + strukturen(b[0]) + '</span></span>';
+            i = b[1]; continue;
+          }
+        }
+      }
+      aus += t.charAt(i); i++;
+    }
+    return aus;
+  }
+
+  function texHtml(t){
+    t = t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    t = t.replace(/\\rightarrow/g, '→').replace(/\\leftarrow/g, '←')
+         .replace(/\\Rightarrow/g, '⇒').replace(/\\Leftarrow/g, '⇐')
+         .replace(/\\left\\\{/g, AUF).replace(/\\right\\\}/g, ZU)
+         .replace(/\\left(?![a-zA-Z])/g, '').replace(/\\right(?![a-zA-Z])/g, '')
+         .replace(/\\\{/g, AUF).replace(/\\\}/g, ZU);
+    t = t.replace(/\\cdot/g, '·').replace(/\\times/g, '·')
+         .replace(/\\approx/g, '≈').replace(/\\neq/g, '≠')
+         .replace(/\\leq/g, '≤').replace(/\\le\b/g, '≤')
+         .replace(/\\geq/g, '≥').replace(/\\ge\b/g, '≥')
+         .replace(/\\pm/g, '±').replace(/\\mp/g, '∓')
+         .replace(/\\ldots/g, '…').replace(/\\dots/g, '…')
+         .replace(/\\to\b/g, '→')
+         .replace(/\\infty/g, '∞')
+         .replace(/\\pi/g, 'π').replace(/\\alpha/g, 'α')
+         .replace(/\\beta/g, 'β').replace(/\\gamma/g, 'γ')
+         .replace(/\\Delta/g, 'Δ').replace(/\\delta/g, 'δ')
+         .replace(/\\min/g, 'min').replace(/\\max/g, 'max')
+         .replace(/\\text\{([^{}]*)\}/g, '$1')
+         .replace(/\\mathrm\{([^{}]*)\}/g, '$1');
+    t = strukturen(t);
+    t = t.replace(/\^\{([^{}]*)\}/g, '<sup>$1</sup>')
+         .replace(/\^(-?[0-9A-Za-z])/g, '<sup>$1</sup>')
+         .replace(/_\{([^{}]*)\}/g, '<sub>$1</sub>')
+         .replace(/_(-?[0-9A-Za-z])/g, '<sub>$1</sub>');
+    t = t.replace(/\{,\}/g, ',').replace(/\\,/g, ' ').replace(/\\;/g, ' ')
+         .replace(/\\ /g, ' ').replace(/[{}]/g, '')
+         .replace(new RegExp(AUF, 'g'), '{').replace(new RegExp(ZU, 'g'), '}');
+    return t;
+  }
+
+  function mathNotfall(){
+    if (window.MathJax && window.MathJax.typesetPromise) return;  /* MathJax ist da */
+    var lauf = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
+      acceptNode: function(n){
+        var tag = n.parentNode && n.parentNode.nodeName;
+        if (tag === 'SCRIPT' || tag === 'STYLE') return NodeFilter.FILTER_REJECT;
+        return n.nodeValue.indexOf('\\(') > -1 ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP;
+      }
+    });
+    var treffer = [], n;
+    while ((n = lauf.nextNode())) treffer.push(n);
+    treffer.forEach(function(k){
+      var teile = k.nodeValue.split(/\\\(([\s\S]+?)\\\)/);
+      if (teile.length < 2) return;
+      var html = '';
+      for (var i = 0; i < teile.length; i++){
+        html += (i % 2)
+          ? '<span class="tex-ersatz">' + texHtml(teile[i]) + '</span>'
+          : teile[i].replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      }
+      var huelle = document.createElement('span');
+      huelle.innerHTML = html;
+      var frag = document.createDocumentFragment();
+      while (huelle.firstChild) frag.appendChild(huelle.firstChild);
+      k.parentNode.replaceChild(frag, k);
+    });
+  }
+  window.addEventListener('load', function(){ setTimeout(mathNotfall, 3500); });
+})();
+
+</script>
+
+<!-- ============================================================
+     BAUSTEIN: Navigationsleiste  (v7.1, 16.11.2026)
+     Pflicht auf jeder Lernseite (anweisung_lernseiten.txt, TEIL 3.6).
+     Einfügen: UNVERÄNDERT direkt vor dem T-Rex bzw. vor </body> – nicht in <main>.
+     - 🏠 schwebender Knopf unten links (immer sichtbar, T-Rex bleibt rechts) + Leiste am Seitenende.
+     - Seit v7: schwebender QR-Knopf rechts neben 🏠. Antippen zeigt einen großen
+       QR-Code mit der Adresse dieser Seite (ohne #…), dazu Titel und Adresse;
+       Antippen schließt ihn. Eigener Encoder (dinoQr), keine Bibliothek, kein Dienst.
+     - v7.1: QR-Code 30 % kleiner, damit Überschrift und Adresse auf dem iPad ganz sichtbar sind.
+     - 🏠 Startseite: feste Adresse, funktioniert aus jedem Unterordner.
+     - 📚 Alles für …: liest <meta name="klasse"> und hängt ?klasse=… an.
+       Fehlt das Meta-Tag, bleibt der Knopf unsichtbar.
+     - Seit v6: Texte im Feedback-Fenster ohne Anrede (passt zu Sek I „du"
+       und Oberstufe „Sie", anweisung_lernseiten.txt 3.7).
+     - Seit v5: Alle drei Links (🏠, Startseite, Alles für …) hängen zusätzlich
+       start=<fach> an (aus <meta name="fach">, sonst aus dem Ordner bio/mathe/…).
+       Die Startseite öffnet dann zuerst den Reiter dieses Fachs; die anderen
+       Fächer bleiben als Reiter erreichbar.
+     - ✉️ Feedback: Fenster mit Art (Fehler/Idee/Lob) und Textfeld.
+       "Mail öffnen" startet das eigene Mailprogramm; Seitentitel und
+       Seitenadresse stehen automatisch drin. Kein fremder Dienst.
+       Empfänger: NUR in FB_NAME/FB_DOMAIN unten ändern.
+     - Impressum & Datenschutz: feste Adresse, seit v4 freigeschaltet
+       (impressum.html im Repo-Root existiert).
+     - Eigene Klassen mit Präfix "dino-", Systemschrift,
+       kein Speicher, Schrift ≥ 1rem, Tipp-Ziele ≥ 44 px.
+     - Die Kommentarzeilen BAUSTEIN/ENDE BAUSTEIN bleiben stehen –
+       pruefe.py und das Nachrüst-Skript erkennen den Block daran.
+     ============================================================ -->
+<style>
+.dino-nav{max-width:1024px;margin:2.5rem auto 5rem;padding:0 1rem;
+  font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;}
+.dino-nav-innen{display:flex;flex-wrap:wrap;gap:.6rem;justify-content:center;
+  border-top:2px solid #e4dcd0;padding-top:1.1rem;}
+.dino-nav a,.dino-nav button{display:inline-flex;align-items:center;gap:.4rem;
+  min-height:44px;padding:.5rem 1.1rem;border:2px solid #22303f;border-radius:.6rem;
+  background:#fff;color:#22303f;text-decoration:none;cursor:pointer;
+  font-family:inherit;font-size:1rem;font-weight:700;line-height:1.2;
+  width:auto;margin:0;box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;}
+.dino-nav a:active,.dino-nav button:active{transform:scale(.97);}
+.dino-nav a.dino-nav-start{background:#22303f;color:#fff;}
+.dino-nav a[hidden]{display:none;}
+.dino-fb{width:min(32rem,calc(100vw - 2rem));border:2px solid #22303f;border-radius:.9rem;
+  padding:1.2rem;color:#22303f;background:#fff;
+  font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;font-size:1rem;}
+.dino-fb::backdrop{background:rgba(34,48,63,.45);}
+.dino-fb h2{margin:0 0 .3rem;font-size:1.2rem;}
+.dino-fb p{margin:.4rem 0;font-size:1rem;line-height:1.45;}
+.dino-fb-seite{font-weight:700;}
+.dino-fb-arten{display:flex;flex-wrap:wrap;gap:.5rem;margin:.7rem 0;border:0;padding:0;}
+.dino-fb-arten legend{font-weight:700;margin-bottom:.4rem;font-size:1rem;}
+.dino-fb-arten label{display:inline-flex;align-items:center;gap:.35rem;min-height:44px;
+  padding:.4rem .9rem;border:2px solid #e4dcd0;border-radius:.6rem;cursor:pointer;font-size:1rem;}
+.dino-fb-arten input{width:1.1rem;height:1.1rem;margin:0;}
+.dino-fb-arten label:has(input:checked){border-color:#22303f;background:#eef0f3;}
+.dino-fb textarea{width:100%;box-sizing:border-box;min-height:7rem;padding:.6rem;
+  border:2px solid #e4dcd0;border-radius:.6rem;font-family:inherit;font-size:1rem;color:#22303f;}
+.dino-fb textarea:focus{outline:none;border-color:#22303f;}
+.dino-fb-knoepfe{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.8rem;}
+.dino-fb-knoepfe button{min-height:44px;padding:.5rem 1rem;border-radius:.6rem;
+  border:2px solid #22303f;background:#fff;color:#22303f;font-family:inherit;
+  font-size:1rem;font-weight:700;cursor:pointer;width:auto;margin:0;}
+.dino-fb-knoepfe .dino-fb-senden{background:#22303f;color:#fff;}
+.dino-fb-meldung{min-height:1.4rem;font-weight:700;}
+.dino-fb-meldung.ok{color:#1e7d32;}
+.dino-fb-meldung.nok{color:#c1272d;}
+.dino-home{position:fixed;left:.7rem;bottom:.7rem;z-index:49;width:44px;height:44px;
+  display:flex;align-items:center;justify-content:center;border-radius:50%;
+  background:#fff;border:2px solid #22303f;text-decoration:none;font-size:1.3rem;
+  box-shadow:0 2px 6px rgba(34,48,63,.25);-webkit-tap-highlight-color:transparent;}
+.dino-home:active{transform:scale(.93);}
+.dino-qr{position:fixed;left:calc(.7rem + 52px);bottom:.7rem;z-index:49;width:44px;height:44px;
+  display:flex;align-items:center;justify-content:center;border-radius:50%;margin:0;padding:0;
+  background:#fff;border:2px solid #22303f;color:#22303f;cursor:pointer;
+  font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;font-size:1rem;font-weight:800;
+  box-shadow:0 2px 6px rgba(34,48,63,.25);-webkit-tap-highlight-color:transparent;}
+.dino-qr:active{transform:scale(.93);}
+.dino-qrfenster{position:fixed;inset:0;margin:auto;height:fit-content;
+  width:min(40rem,calc(100vw - 1.5rem));max-height:calc(100vh - 1.5rem);overflow:auto;border:3px solid #22303f;
+  border-radius:1rem;padding:1rem;background:#fff;color:#22303f;text-align:center;cursor:pointer;
+  font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;font-size:1rem;}
+.dino-qrfenster::backdrop{background:rgba(34,48,63,.6);}
+.dino-qrfenster h2{margin:0 0 .3rem;font-size:1.3rem;line-height:1.3;}
+.dino-qrfenster p{margin:.3rem 0;font-size:1rem;line-height:1.4;}
+.dino-qr-adresse{word-break:break-all;color:#6b7686;}
+.dino-qr-bild{margin:.5rem auto;width:min(70%,calc(70vh - 9rem));width:min(70%,calc(70dvh - 9rem));}
+.dino-qr-bild > svg{display:block;width:100%;height:auto;}
+@media print{.dino-nav,.dino-fb,.dino-home,.dino-qr,.dino-qrfenster{display:none;}}
+</style>
+<a class="dino-home" href="https://szymczak75.github.io/Schule/dino_hub.html" title="Zur Startseite" aria-label="Zur Startseite">🏠</a>
+<button type="button" class="dino-qr" id="dino-qr" title="QR-Code dieser Seite" aria-label="QR-Code dieser Seite groß anzeigen">QR</button>
+<dialog class="dino-qrfenster" id="dino-qrfenster" aria-labelledby="dino-qr-titel">
+  <h2 id="dino-qr-titel"></h2>
+  <div class="dino-qr-bild" id="dino-qr-bild"></div>
+  <p class="dino-qr-adresse" id="dino-qr-adresse"></p>
+  <p>Zum Schließen antippen.</p>
+</dialog>
+<nav class="dino-nav" aria-label="Seitennavigation">
+  <div class="dino-nav-innen">
+    <a class="dino-nav-start" href="https://szymczak75.github.io/Schule/dino_hub.html">🏠 Startseite</a>
+    <a id="dino-nav-klasse" href="https://szymczak75.github.io/Schule/dino_hub.html" hidden>📚 Alles für …</a>
+    <button type="button" id="dino-nav-fb">✉️ Feedback zu dieser Seite</button>
+    <a class="dino-nav-impressum" href="https://szymczak75.github.io/Schule/impressum.html">Impressum &amp; Datenschutz</a>
+  </div>
+</nav>
+<dialog class="dino-fb" id="dino-fb" aria-labelledby="dino-fb-titel">
+  <h2 id="dino-fb-titel">✉️ Feedback zu dieser Seite</h2>
+  <p>Seite: <span class="dino-fb-seite" id="dino-fb-seite"></span></p>
+  <fieldset class="dino-fb-arten">
+    <legend>Worum geht es?</legend>
+    <label><input type="radio" name="dino-fb-art" value="Fehler" checked> 🐞 Fehler</label>
+    <label><input type="radio" name="dino-fb-art" value="Idee"> 💡 Idee</label>
+    <label><input type="radio" name="dino-fb-art" value="Lob"> 👍 Lob</label>
+  </fieldset>
+  <textarea id="dino-fb-text" aria-label="Nachricht"
+    placeholder="Was ist aufgefallen? Bei Fehlern: Welche Karte, welche Aufgabe?"></textarea>
+  <p>Bitte schreib keine persönlichen Daten hinein.</p>
+  <div class="dino-fb-knoepfe">
+    <button type="button" class="dino-fb-senden" id="dino-fb-senden">✉️ Mail öffnen</button>
+    <button type="button" id="dino-fb-kopieren">📋 Text kopieren</button>
+    <button type="button" id="dino-fb-zu">Schließen</button>
+  </div>
+  <p class="dino-fb-meldung" id="dino-fb-meldung" aria-live="polite"></p>
+  <p>Kein Mailprogramm? Text kopieren und an <b id="dino-fb-adresse"></b> schicken.</p>
+</dialog>
+<script>
+(function(){
+  /* Empfänger – nur hier ändern */
+  var FB_NAME = 'aszymczak', FB_DOMAIN = 'my-mcg.de';
+  var START = 'https://szymczak75.github.io/Schule/dino_hub.html';
+
+  /* Fach der Seite → Startseite öffnet zuerst diesen Reiter */
+  var FAECHER = ['mathe', 'bio', 'kompass'];
+  var mf = document.querySelector('meta[name="fach"]');
+  var fach = mf ? (mf.getAttribute('content') || '').trim().toLowerCase() : '';
+  if (FAECHER.indexOf(fach) < 0) {
+    var teile = location.pathname.split('/');
+    fach = '';
+    for (var i = 0; i < teile.length; i++) {
+      var t = teile[i].toLowerCase();
+      if (FAECHER.indexOf(t) >= 0) { fach = t; break; }
+    }
+  }
+  var startUrl = fach ? START + '?start=' + fach : START;
+  var heim = document.querySelectorAll('.dino-home, .dino-nav-start');
+  for (var j = 0; j < heim.length; j++) heim[j].href = startUrl;
+
+  /* 📚 Alles für … */
+  var m = document.querySelector('meta[name="klasse"]');
+  var k = m ? (m.getAttribute('content') || '').trim() : '';
+  var a = document.getElementById('dino-nav-klasse');
+  if (k && a) {
+    a.href = START + '?klasse=' + encodeURIComponent(k) + (fach ? '&start=' + fach : '');
+    var name = /^\d+$/.test(k) ? 'Klasse ' + parseInt(k, 10) : 'die ' + k.replace('_', '/');
+    a.textContent = '📚 Alles für ' + name;
+    a.hidden = false;
+  }
+
+  /* 📱 QR-Code dieser Seite – eigener Encoder (Byte-Modus, Fehlerkorrektur M),
+     keine Bibliothek, kein fremder Dienst. Aufbau nach ISO/IEC 18004. */
+  function dinoQr(text){
+    var ECC = [0,10,16,26,18,24,16,18,22,22,26,30,22,22,24,24,28,28,26,26,26,26,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28,28];
+    var BLK = [0,1,1,1,2,2,4,4,4,5,5,5,8,9,9,10,10,11,13,14,16,17,17,18,20,21,23,25,26,28,29,31,33,35,37,38,40,43,45,47,49];
+    var daten = [], i, j, v;
+    var u = unescape(encodeURIComponent(text));                     // UTF-8-Bytes
+    for (i = 0; i < u.length; i++) daten.push(u.charCodeAt(i));
+    function roh(v){ var r = (16*v + 128)*v + 64;
+      if (v >= 2){ var n = Math.floor(v/7) + 2; r -= (25*n - 10)*n - 55; if (v >= 7) r -= 36; } return r; }
+    function nutz(v){ return Math.floor(roh(v)/8) - ECC[v]*BLK[v]; }
+    for (v = 1; v <= 40; v++) if (4 + (v < 10 ? 8 : 16) + 8*daten.length <= nutz(v)*8) break;
+    if (v > 40) return null;
+    // Bitstrom
+    var bits = [];
+    function put(w, n){ for (var k = n - 1; k >= 0; k--) bits.push((w >>> k) & 1); }
+    put(4, 4); put(daten.length, v < 10 ? 8 : 16);
+    daten.forEach(function(b){ put(b, 8); });
+    var kap = nutz(v)*8;
+    put(0, Math.min(4, kap - bits.length));
+    put(0, (8 - bits.length % 8) % 8);
+    for (var pad = 0xEC; bits.length < kap; pad ^= 0xEC ^ 0x11) put(pad, 8);
+    var cw = [];
+    for (i = 0; i < bits.length; i += 8){ var b = 0; for (j = 0; j < 8; j++) b = (b << 1) | bits[i+j]; cw.push(b); }
+    // Reed-Solomon
+    function mul(x, y){ var z = 0; for (var k = 7; k >= 0; k--){ z = (z << 1) ^ ((z >>> 7)*0x11D); z ^= ((y >>> k) & 1)*x; } return z; }
+    var grad = ECC[v], div = [], wurzel = 1;
+    for (i = 0; i < grad - 1; i++) div.push(0); div.push(1);
+    for (i = 0; i < grad; i++){
+      for (j = 0; j < grad; j++){ div[j] = mul(div[j], wurzel); if (j + 1 < grad) div[j] ^= div[j+1]; }
+      wurzel = mul(wurzel, 2);
+    }
+    function rest(d){ var r = div.map(function(){ return 0; });
+      d.forEach(function(b){ var f = b ^ r.shift(); r.push(0); div.forEach(function(c, k){ r[k] ^= mul(c, f); }); });
+      return r; }
+    var nb = BLK[v], rohCw = Math.floor(roh(v)/8), kurz = nb - rohCw % nb, kl = Math.floor(rohCw/nb), bloecke = [], pos = 0;
+    for (i = 0; i < nb; i++){
+      var d = cw.slice(pos, pos + kl - grad + (i < kurz ? 0 : 1)); pos += d.length;
+      var e = rest(d); if (i < kurz) d.push(0); bloecke.push(d.concat(e));
+    }
+    var folge = [];
+    for (i = 0; i < bloecke[0].length; i++)
+      for (j = 0; j < nb; j++) if (i !== kl - grad || j >= kurz) folge.push(bloecke[j][i]);
+    // Matrix
+    var n = 4*v + 17, M = [], F = [];
+    for (i = 0; i < n; i++){ M.push([]); F.push([]); for (j = 0; j < n; j++){ M[i].push(false); F[i].push(false); } }
+    function setz(x, y, d){ M[y][x] = d; F[y][x] = true; }
+    for (i = 0; i < n; i++){ setz(6, i, i % 2 === 0); setz(i, 6, i % 2 === 0); }
+    [[3,3],[n-4,3],[3,n-4]].forEach(function(p){
+      for (var dy = -4; dy <= 4; dy++) for (var dx = -4; dx <= 4; dx++){
+        var x = p[0]+dx, y = p[1]+dy, dist = Math.max(Math.abs(dx), Math.abs(dy));
+        if (x >= 0 && x < n && y >= 0 && y < n) setz(x, y, dist !== 2 && dist !== 4);
+      }
+    });
+    var ap = [];
+    if (v > 1){
+      var na = Math.floor(v/7) + 2, schritt = v === 32 ? 26 : Math.ceil((4*v + 4)/(2*na - 2))*2;
+      ap = [6]; for (var p2 = n - 7; ap.length < na; p2 -= schritt) ap.splice(1, 0, p2);
+    }
+    ap.forEach(function(ax, ia){ ap.forEach(function(ay, ib){
+      var letzt = ap.length - 1;
+      if ((ia === 0 && ib === 0) || (ia === 0 && ib === letzt) || (ia === letzt && ib === 0)) return;
+      for (var dy = -2; dy <= 2; dy++) for (var dx = -2; dx <= 2; dx++)
+        setz(ax+dx, ay+dy, Math.max(Math.abs(dx), Math.abs(dy)) !== 1);
+    }); });
+    function format(maske){
+      var dat = maske, r = dat;                                    // Stufe M = 00
+      for (var k = 0; k < 10; k++) r = (r << 1) ^ ((r >>> 9)*0x537);
+      var fb = ((dat << 10) | r) ^ 0x5412;
+      function bit(k){ return ((fb >>> k) & 1) !== 0; }
+      for (k = 0; k <= 5; k++) setz(8, k, bit(k));
+      setz(8, 7, bit(6)); setz(8, 8, bit(7)); setz(7, 8, bit(8));
+      for (k = 9; k < 15; k++) setz(14 - k, 8, bit(k));
+      for (k = 0; k < 8; k++) setz(n - 1 - k, 8, bit(k));
+      for (k = 8; k < 15; k++) setz(8, n - 15 + k, bit(k));
+      setz(8, n - 8, true);
+    }
+    format(0);
+    if (v >= 7){
+      var r = v;
+      for (i = 0; i < 12; i++) r = (r << 1) ^ ((r >>> 11)*0x1F25);
+      var vb = (v << 12) | r;
+      for (i = 0; i < 18; i++){
+        var bt = ((vb >>> i) & 1) !== 0, a = n - 11 + i % 3, bb = Math.floor(i/3);
+        setz(a, bb, bt); setz(bb, a, bt);
+      }
+    }
+    var z = 0;
+    for (var rechts = n - 1; rechts >= 1; rechts -= 2){
+      if (rechts === 6) rechts = 5;
+      for (var vert = 0; vert < n; vert++) for (j = 0; j < 2; j++){
+        var x = rechts - j, hoch = ((rechts + 1) & 2) === 0, y = hoch ? n - 1 - vert : vert;
+        if (!F[y][x] && z < folge.length*8){ M[y][x] = ((folge[z >>> 3] >>> (7 - (z & 7))) & 1) !== 0; z++; }
+      }
+    }
+    function maskiere(m){
+      for (var y = 0; y < n; y++) for (var x = 0; x < n; x++){
+        if (F[y][x]) continue;
+        var t;
+        switch (m){
+          case 0: t = (x + y) % 2 === 0; break;
+          case 1: t = y % 2 === 0; break;
+          case 2: t = x % 3 === 0; break;
+          case 3: t = (x + y) % 3 === 0; break;
+          case 4: t = (Math.floor(x/3) + Math.floor(y/2)) % 2 === 0; break;
+          case 5: t = x*y % 2 + x*y % 3 === 0; break;
+          case 6: t = (x*y % 2 + x*y % 3) % 2 === 0; break;
+          default: t = ((x + y) % 2 + x*y % 3) % 2 === 0;
+        }
+        if (t) M[y][x] = !M[y][x];
+      }
+    }
+    function strafe(){
+      var s = 0, dunkel = 0, x, y, k;
+      function zeile(get){
+        var lauf = 1;
+        for (k = 1; k <= n; k++){
+          if (k < n && get(k) === get(k-1)) lauf++;
+          else { if (lauf >= 5) s += lauf - 2; lauf = 1; }
+        }
+        for (k = 0; k + 7 <= n; k++){
+          if (get(k) && !get(k+1) && get(k+2) && get(k+3) && get(k+4) && !get(k+5) && get(k+6)){
+            var vor = true, nach = true;
+            for (var q = 1; q <= 4; q++){ if (k - q >= 0 && get(k - q)) vor = false; if (k + 6 + q < n && get(k + 6 + q)) nach = false; }
+            if (vor || nach) s += 40;
+          }
+        }
+      }
+      for (y = 0; y < n; y++) zeile(function(k){ return M[y][k]; });
+      for (x = 0; x < n; x++) zeile(function(k){ return M[k][x]; });
+      for (y = 0; y < n - 1; y++) for (x = 0; x < n - 1; x++)
+        if (M[y][x] === M[y][x+1] && M[y][x] === M[y+1][x] && M[y][x] === M[y+1][x+1]) s += 3;
+      for (y = 0; y < n; y++) for (x = 0; x < n; x++) if (M[y][x]) dunkel++;
+      s += Math.floor(Math.abs(dunkel*20 - n*n*10) / (n*n)) * 10;
+      return s;
+    }
+    var beste = 0, min = Infinity;
+    for (var m = 0; m < 8; m++){
+      maskiere(m); format(m); var st = strafe();
+      if (st < min){ min = st; beste = m; }
+      maskiere(m);
+    }
+    maskiere(beste); format(beste);
+    var pfad = '';
+    for (var yy = 0; yy < n; yy++) for (var xx = 0; xx < n; xx++)
+      if (M[yy][xx]) pfad += 'M' + (xx + 4) + ' ' + (yy + 4) + 'h1v1h-1z';
+    return '<svg viewBox="0 0 ' + (n + 8) + ' ' + (n + 8) + '" role="img" aria-label="QR-Code mit der Adresse dieser Seite" shape-rendering="crispEdges">' +
+           '<rect width="100%" height="100%" fill="#fff"/><path d="' + pfad + '" fill="#22303f"/></svg>';
+  }
+
+  var qrKnopf = document.getElementById('dino-qr');
+  var qrFenster = document.getElementById('dino-qrfenster');
+  if (qrKnopf && qrFenster) {
+    var qrFertig = false;
+    qrKnopf.addEventListener('click', function(){
+      if (!qrFertig) {
+        var ziel = location.href.split('#')[0];
+        var svg = null;
+        try { svg = dinoQr(ziel); } catch (e) {}
+        document.getElementById('dino-qr-bild').innerHTML = svg || '<p>Adresse zu lang für einen QR-Code.</p>';
+        document.getElementById('dino-qr-titel').textContent =
+          (document.title || '').trim() || location.pathname.split('/').pop();
+        document.getElementById('dino-qr-adresse').textContent = ziel;
+        qrFertig = true;
+      }
+      if (typeof qrFenster.showModal === 'function') qrFenster.showModal(); else qrFenster.setAttribute('open', '');
+    });
+    qrFenster.addEventListener('click', function(){
+      if (typeof qrFenster.close === 'function') qrFenster.close(); else qrFenster.removeAttribute('open');
+    });
+  }
+
+  /* ✉️ Feedback */
+  var dlg = document.getElementById('dino-fb');
+  var fbBtn = document.getElementById('dino-nav-fb');
+  if (!dlg || !fbBtn) return;
+  var adresse = FB_NAME + '@' + FB_DOMAIN;
+  var titel = (document.title || '').trim() || location.pathname.split('/').pop();
+  var url = location.href.split('#')[0];
+  var text = document.getElementById('dino-fb-text');
+  var meldung = document.getElementById('dino-fb-meldung');
+  document.getElementById('dino-fb-seite').textContent = titel;
+  document.getElementById('dino-fb-adresse').textContent = adresse;
+
+  function art(){
+    var r = dlg.querySelector('input[name="dino-fb-art"]:checked');
+    return r ? r.value : 'Feedback';
+  }
+  function betreff(){ return '[Dino-Feedback] ' + art() + ': ' + titel; }
+  function inhalt(){
+    return 'Seite: ' + titel + '\nAdresse: ' + url + '\nArt: ' + art() +
+           '\n\n' + text.value.trim() + '\n';
+  }
+  function melde(t, ok){ meldung.textContent = t; meldung.className = 'dino-fb-meldung ' + (ok ? 'ok' : 'nok'); }
+  function leer(){
+    if (text.value.trim()) return false;
+    melde('Bitte schreib zuerst etwas in das Feld.', false);
+    text.focus();
+    return true;
+  }
+
+  fbBtn.addEventListener('click', function(){
+    melde('', true);
+    if (typeof dlg.showModal === 'function') dlg.showModal(); else dlg.setAttribute('open', '');
+    text.focus();
+  });
+  document.getElementById('dino-fb-zu').addEventListener('click', function(){
+    if (typeof dlg.close === 'function') dlg.close(); else dlg.removeAttribute('open');
+  });
+  document.getElementById('dino-fb-senden').addEventListener('click', function(){
+    if (leer()) return;
+    location.href = 'mailto:' + adresse + '?subject=' + encodeURIComponent(betreff()) +
+                    '&body=' + encodeURIComponent(inhalt());
+    melde('Das Mailprogramm öffnet sich. Danke! 🦖', true);
+  });
+  document.getElementById('dino-fb-kopieren').addEventListener('click', function(){
+    if (leer()) return;
+    var ganz = 'Betreff: ' + betreff() + '\n' + inhalt();
+    function ersatz(){
+      var t = document.createElement('textarea');
+      t.value = ganz; document.body.appendChild(t); t.select();
+      var ok = false; try { ok = document.execCommand('copy'); } catch (e) {}
+      document.body.removeChild(t);
+      melde(ok ? 'Kopiert! Jetzt in eine Mail einfügen.' : 'Kopieren ging nicht – bitte Text markieren und kopieren.', ok);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(ganz).then(function(){
+        melde('Kopiert! Jetzt in eine Mail einfügen.', true);
+      }, ersatz);
+    } else ersatz();
+  });
+})();
+</script>
+<!-- ============ ENDE BAUSTEIN Navigationsleiste ============ -->
+<div class="trex dino-ecke" id="trex" title="Made by ASzym" aria-label="Made by ASzym"><img class="dino-ikon" src="data:image/webp;base64,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" alt="Dino" width="72" height="72" draggable="false"></div>
+<div class="trex-text dino-tipp-fest" id="trex-text">Made by ASzym</div>
+</body>
+</html>
