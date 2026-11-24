@@ -13,7 +13,7 @@
 <meta name="oberthema" content="Beispiel">
 <meta name="thema" content="Beispiel-EXAM">
 <!-- =============================================================================
-     BAUSTEIN: EXAM-Seite  (v1.3, 22.11.2026 – Teil-Typ formel) – _wartung/exam/baustein_exam.html
+     BAUSTEIN: EXAM-Seite  (v1.4, 24.11.2026 – Tastatur zuklappen sperrt nicht mehr) – _wartung/exam/baustein_exam.html
      Anleitung: _wartung/exam/anweisung_exam.md
      Neue EXAM-Seite = Kopie dieser Datei. Geändert werden NUR
        - die Meta-Tags und <title> oben,
@@ -25,7 +25,8 @@
          erscheinen die Aufgaben; die Orientierungsuhr startet.
        - Flugmodus (Standard, EXAM.flugmodus !== false): Code-Eingabe erst offline;
          Netz während des Tests = Sperre; Entsperren nur offline.
-       - Sperre beim Verlassen (Tab/App, Fokus, Neuladen); Entsperren mit dem
+       - Sperre beim Verlassen (Tab/App, Neuladen sofort; Fokusverlust erst nach
+         1,5 s, v1.4 – iPad-Tastatur); Entsperren mit dem
          Freischaltcode; jede Sperre steht im PDF.
        - Aufgabentypen: beschriften, sortieren (Antippen), auswahl, freitext,
          formel (v1.3: Bruch/Term mit Formeltool oder getrennten Feldern, TEIL 4.7;
@@ -1186,7 +1187,22 @@ function sperren(anlass){
   speichern(); zeigeSperre(true);
 }
 document.addEventListener('visibilitychange', function(){ if (document.visibilityState === 'hidden') sperren('Seite verlassen (Tab oder App gewechselt)'); });
-window.addEventListener('blur', function(){ sperren('Fokus verloren (anderes Fenster oder App)'); });
+/* v1.4: Fokusverlust erst nach kurzer Wartezeit sperren. Auf dem iPad nimmt das Zuklappen der
+   Bildschirmtastatur dem Fenster kurz den Fokus – das darf nicht sperren. Echtes Verlassen
+   (Tab/App, Neuladen) sperrt weiterhin sofort über visibilitychange und pagehide. */
+var FOKUS_WARTEN = 1500, fokusTimer = null;
+function fokusZurueck(){ if (fokusTimer){ clearTimeout(fokusTimer); fokusTimer = null; } }
+window.addEventListener('blur', function(){
+  if (!laeuft() || S.gesperrt || fokusTimer) return;
+  fokusTimer = setTimeout(function(){
+    fokusTimer = null;
+    var weg = true; try { weg = !document.hasFocus(); } catch (e) {}
+    if (weg) sperren('Fokus verloren (anderes Fenster oder App)');
+  }, FOKUS_WARTEN);
+});
+window.addEventListener('focus', fokusZurueck);
+document.addEventListener('focusin', fokusZurueck);
+document.addEventListener('pointerdown', fokusZurueck, true);
 window.addEventListener('pagehide', function(){ sperren('Seite neu geladen oder geschlossen'); });
 function netzPruefen(){
   if (laeuft() && online()) sperren('Internetverbindung während des Tests (Flugmodus aus)');
