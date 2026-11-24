@@ -1,6 +1,6 @@
 # Anweisung EXAM – bewertete Tests auf dem iPad
 
-Stand: 20.11.2026 · Engine `baustein_exam.html` v1.2 · Auswertung `exam_auswerten.py` v1.1 · gilt für das Projekt **„WEB EXAM"**
+Stand: 24.11.2026 · Engine `baustein_exam.html` v1.4 · Auswertung `exam_auswerten.py` v1.1 · gilt für das Projekt **„WEB EXAM"**
 (Sync: `_wartung/exam`, `_wartung/allgemein`).
 
 Ein EXAM ist ein **bewerteter Test**, den die Klasse auf dem iPad schreibt. Die Seite gibt
@@ -146,6 +146,9 @@ ist). Ohne `?l=` im Link startet die Testseite nicht.
 - Zwischen den Aufgaben frei wechseln. Rechtschreibhilfen sind aus (`spellcheck`,
   `autocorrect`); Text kann außerhalb der Felder nicht markiert/nachgeschlagen werden.
 - Verlassen (Tab, App, Neuladen) **sperrt** den Test; Entsperren mit dem Freischaltcode.
+  Ein kurzer Fokusverlust (z. B. iPad-Bildschirmtastatur zuklappen) sperrt nicht: Erst wenn
+  der Fokus länger als 1,5 s weg ist, greift die Sperre (seit v1.4, 24.11.2026). Tab- und
+  App-Wechsel sperren weiterhin sofort.
   Jede Sperre und jeder falsche Freischaltcode steht mit Uhrzeit im PDF.
 - **Abgeben** → „Wirklich abgeben?" → Felder werden gesperrt → **PDF herunterladen**
   (`EXAM_<thema>_<Code>.pdf`) → Flugmodus aus → in Teams in der **Aufgabe** hochladen (nicht im
