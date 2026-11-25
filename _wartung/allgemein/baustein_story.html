@@ -1414,7 +1414,9 @@ function bewerteGeraet(r, a){
 
 /* v5: Wert eines Reglers (Stufe → Zahl) und Funktionswert des Sternbild-Graphen */
 function reglerWert(r, p, k){
-  var q = r.regler[p], max = Math.round((q[1] - q[0]) / q[2]);
+  var q = r.regler[p];
+  if (typeof q === 'number') return q;
+  var max = Math.round((q[1] - q[0]) / q[2]);
   if (k == null) k = Math.round((0 - q[0]) / q[2]);
   k = Math.max(0, Math.min(max, k));
   return Math.round((q[0] + k * q[2]) * 1e6) / 1e6;
@@ -2209,10 +2211,10 @@ var GERAET = {
   },
 
   /* Sternbild-Regler (v5): typ 'gerade' (Regler m, b) | 'parabel' (Regler a, d, e: y = a(x − d)² + e).
-     regler: { a:[-3, 3, 0.5], d:[-5, 5, 1], e:[-5, 5, 1] } (von, bis, Schritt); sterne: [[x, y], …];
+     regler: { a:[-3, 3, 0.5], d:[-5, 5, 1], e:[-5, 5, 1] } (von, bis, Schritt; eine Zahl statt Liste = fest, ohne Regler); sterne: [[x, y], …];
      gitter wie bei 'gitter'. Richtig, wenn der Graph durch alle Sterne geht – getroffene Sterne leuchten. */
   regler: function(r, alt, merke, aktiv){
-    var par = r.typ === 'gerade' ? ['m', 'b'] : ['a', 'd', 'e'];
+    var par = (r.typ === 'gerade' ? ['m', 'b'] : ['a', 'd', 'e']).filter(function(p){ return Array.isArray(r.regler[p]); });
     var rg = r.regler, g = r.gitter || { x:[-5, 5], y:[-5, 5] }, X0 = g.x[0], X1 = g.x[1], Y0 = g.y[0], Y1 = g.y[1];
     var stufe = {}; par.forEach(function(p){ stufe[p] = alt && alt.regler ? alt.regler[p] : null; });
     function wertVonRegler(p){ return reglerWert(r, p, stufe[p]); }
@@ -2264,9 +2266,10 @@ var GERAET = {
           filter:svg.leucht, stroke:hit ? '#1e7d32' : '#ffd34d', 'stroke-width':1.5 }));
       });
       par.forEach(function(p){ werte[p].textContent = zahlRegler(wertVonRegler(p)); });
-      var w = {}; par.forEach(function(p){ w[p] = wertVonRegler(p); });
+      var w = {}; (r.typ === 'gerade' ? ['m', 'b'] : ['a', 'd', 'e']).forEach(function(p){ w[p] = wertVonRegler(p); });
+      var faktor = w.a === 1 ? '' : w.a === -1 ? '−' : zahlRegler(w.a);
       var term = r.typ === 'gerade' ? 'y = ' + zahlRegler(w.m) + 'x ' + (w.b < 0 ? '− ' + zahlRegler(-w.b) : '+ ' + zahlRegler(w.b))
-        : 'y = ' + zahlRegler(w.a) + '(x ' + (w.d < 0 ? '+ ' + zahlRegler(-w.d) : '− ' + zahlRegler(w.d)) + ')² ' + (w.e < 0 ? '− ' + zahlRegler(-w.e) : '+ ' + zahlRegler(w.e));
+        : 'y = ' + faktor + '(x ' + (w.d < 0 ? '+ ' + zahlRegler(-w.d) : '− ' + zahlRegler(w.d)) + ')² ' + (w.e < 0 ? '− ' + zahlRegler(-w.e) : '+ ' + zahlRegler(w.e));
       anz.innerHTML = term + ' · getroffene Sterne: <b>' + treffer + ' von ' + r.sterne.length + '</b>';
     }
     function sternRegler(cx, cy, ro, n){ var p = []; for (var i = 0; i < 2 * n; i++) { var rr = i % 2 ? ro * 0.45 : ro, a = i * Math.PI / n - Math.PI / 2;
