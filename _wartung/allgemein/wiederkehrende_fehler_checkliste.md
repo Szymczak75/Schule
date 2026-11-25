@@ -362,6 +362,10 @@ Diese Punkte standen offen und sind inzwischen als Regel in
   durchspielen. Seitdem regelt TEIL 0 Nr. 26 zwei Stufen: **erst die Dateien im Chat zeigen
   und auf das OK warten, dann** Branch und Pull Request. Kein Push vor dem OK.
 
+- **Story-Engine v5 – Spielzeug-Paket** (25.11.2026): acht neue Rätselgeräte (`wuerfel`, `karten`,
+  `abakus`, `thermo`, `zeit`, `gitter`, `kompass`, `regler`). In Storys möglichst Geräte statt
+  Zahleneingabe; `pruefe.py` kennt die neuen Arten und zählt `blatt`/`sterne` als Lösung.
+
 ---
 
 *Stand: 22.11.2026 (Story-Seiten _story; Formeltool und Rückfrage zur Bruch-/Term-Eingabe; Operatoren nach NRW-Liste; Ablaufplan oben und aufklappbar; Sozialformen/Gruppen-Check; Kernkompetenzen; Seitenart Rückblick KA, Suffix _kavb; Schritt für Schritt; Navigationsleiste, keine Google Fonts) – gepflegt im Wartungs-Projekt „Wartung Unterrichtsprojekte".*
