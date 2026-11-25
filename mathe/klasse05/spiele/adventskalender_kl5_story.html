@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- =====================================================================
-     BAUSTEIN: Story (_story)  v4, 25.11.2026
+     BAUSTEIN: Story (_story)  v5, 25.11.2026
      Escape Room, Adventskalender, Detektivgeschichte oder freie Story: eine Geschichte
      in mehreren Karten, jede Karte endet mit einem Rätsel.
      Richtig → weiter zur nächsten Karte (mit Codewort zum späteren Wiedereinstieg).
@@ -33,6 +33,12 @@
         welcher Zeiger Zähler und welcher Nenner ist. Gezeichnete Hebel statt Kippschalter.
         Diamanten und Hebel: nach dem ersten falschen Prüfen einmal korrigieren (Diamanten:
         richtige leuchten grün und bleiben stecken; Hebel: nur die Anzahl richtiger wird genannt).
+     v5 (Spielzeug-Paket): acht weitere Rätselgeräte – 'wuerfel' (Würfel drehen), 'karten'
+        (verdeckter Kartenfächer), 'abakus' (Perlen auf Stellenwert-Stangen), 'thermo' (Skala /
+        Thermometer, auch negativ und mit Dezimalschritten), 'zeit' (echte Uhr mit ☀️/🌙),
+        'gitter' (Schatzkarte: Gitterpunkt setzen, optional mit Graphen), 'kompass'
+        (Himmelsrichtung oder Winkel einstellen), 'regler' (Sternbild: Gerade/Parabel per
+        Schieberegler durch Sterne legen). Abwärtskompatibel.
      ===================================================================== -->
 <html lang="de">
 <head>
@@ -55,7 +61,7 @@
 </script>
 <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
 <style>
-/* ===== BAUSTEIN-CSS: Story (v4, 25.11.2026) – unverändert übernehmen ===== */
+/* ===== BAUSTEIN-CSS: Story (v5, 25.11.2026) – unverändert übernehmen ===== */
 :root{
   --ink:#22303f; --card:#ffffff; --green:#1e7d32; --red:#c1272d;
   --amber:#b8860b; --amber-light:#fdf3d9; --amber-dark:#96690a;
@@ -223,7 +229,32 @@ mjx-container{max-width:100%;overflow-x:auto;}
 .ablage button > svg{display:block;width:30px;height:30px;}
 .ablage button.fest{border-color:var(--green);}
 .fb.korr{display:block;background:var(--blue-light);color:var(--ink);border:2px solid var(--green);}
-@media (prefers-reduced-motion:reduce){ .funkeln,.rolle > .ziffer.klick{animation:none;} }
+/* v5: Spielzeug-Paket */
+.wuerfelreihe{display:flex;flex-wrap:wrap;gap:1rem;justify-content:center;margin:.6rem 0;}
+.wuerfel{width:96px;height:96px;padding:0;border:0;background:transparent;cursor:pointer;}
+.wuerfel > svg{display:block;width:100%;height:100%;}
+.wuerfel.rollt{animation:rollen .35s ease-out;}
+@keyframes rollen{0%{transform:rotate(-25deg) scale(.85);}60%{transform:rotate(12deg) scale(1.06);}100%{transform:none;}}
+.faecher{display:flex;flex-wrap:wrap;gap:.6rem;justify-content:center;margin:.8rem 0 .4rem;}
+.spielkarte{width:7.4rem;min-height:9.6rem;padding:.5rem;border:3px solid var(--blue-dark);border-radius:.8rem;cursor:pointer;
+  background:repeating-linear-gradient(45deg,var(--blue) 0 8px,var(--blue-dark) 8px 16px);color:#fff;font:inherit;
+  transform:rotate(var(--dreh,0deg));transition:transform .2s;display:flex;align-items:center;justify-content:center;}
+.spielkarte.offen{background:#fff;color:var(--ink);border-color:var(--amber);transform:rotate(0deg);}
+.spielkarte.an{box-shadow:0 0 0 4px var(--blue),0 0 18px var(--blue);transform:translateY(-8px);}
+.karten-ruecken{font-size:2.4rem;color:#fdf3d9;}
+.karten-text{font-size:1.05rem;font-weight:700;line-height:1.35;}
+.abakus > svg{display:block;width:100%;height:auto;margin:0 auto;}
+.abakus-fein{display:grid;gap:.15rem;margin:.3rem auto;}
+.abakus-fein > span{display:flex;justify-content:center;gap:.2rem;}
+.abakus-fein button{min-width:0;flex:1;max-width:44px;padding:0;min-height:44px;border:2px solid var(--line);border-radius:.5rem;background:#fff;color:var(--blue-dark);font:inherit;font-weight:700;cursor:pointer;}
+.thermo > svg{display:block;width:100%;max-width:230px;height:auto;margin:0 auto;touch-action:none;cursor:pointer;}
+.gitter > svg{display:block;width:100%;max-width:480px;height:auto;margin:0 auto;}
+.regler-feld{display:grid;gap:.5rem;max-width:480px;margin:.6rem auto;}
+.regler-zeile{display:grid;grid-template-columns:9.5rem 1fr 3.2rem;align-items:center;gap:.5rem;font-weight:700;}
+.regler-zeile input{width:100%;min-height:44px;accent-color:var(--blue);}
+.regler-wert{text-align:right;font-variant-numeric:tabular-nums;}
+@media (max-width:520px){ .regler-zeile{grid-template-columns:1fr 3.2rem;} .regler-name{grid-column:1/-1;} }
+@media (prefers-reduced-motion:reduce){ .funkeln,.rolle > .ziffer.klick,.wuerfel.rollt{animation:none;} .spielkarte{transition:none;} }
 .erwischt{border-left-color:var(--ink);}
 /* v4: Szenenbilder in Geschichte, Umweg, erwischt und Ende (als data-URI im Datenblock, TEIL 8.1) */
 .szene{margin:.2rem 0 .8rem;}
@@ -868,12 +899,61 @@ function m(t){
                          formHinweis: 'Multipliziere die Klammer aus.'
                  'text'  Wort/Zahlenfolge, Groß/klein egal                    soll: ['NORDEN']
                  'wahl'  Antippen, optionen: [{ t:'…', ok:true }, { t:'…' }, …]  (wird gemischt)
+     ---- Rätselgeräte (seit v3) – Antwort per Gerät statt Eingabefeld: ----
+                 'uhr'      Bruch-Uhr (v4): kurzer Zeiger auf Stunden 1–12, langer auf Minuten 1–60;
+                            das Kind wählt, welcher Zeiger Zähler ist (⇄)            soll: [Z, N]
+                            einer der beiden Werte ≤ 12, der andere ≤ 60 (in der verlangten Form)
+                            form: 'gekuerzt' (Vorgabe, Wert + vollständig gekürzt) | 'genau' (genau
+                            Z und N, z. B. beim Erweitern) | 'wert' (jeder gleichwertige Bruch)
+                 'schloss'  Zahlenschloss mit Rädern (▲/▼)                           soll: [Z, N]
+                            schloss: 'bruch' (Vorgabe: Zähler | Nenner) | 'gemischt' (Ganze |
+                            Zähler | Nenner) | 'zahl' (eine Zahl, soll: [Wert, 1])
+                            stellen: Räder je Gruppe, z. B. [2, 2] oder [1, 2, 2] oder [3]
+                            vorne: 'nenner' (nur 'bruch') – Nenner-Räder vorne, Zähler hinten
+                            einheit: '%', 'cm' … steht hinter dem Schloss;  form wie bei 'uhr'
+                 'steck'    Diamanten an den Zahlenstrahl stecken (antippen, dann Stelle antippen)
+                            strahl: { bis: 1, teile: 12 }  – von 0 bis „bis“, „teile“ Steckplätze
+                            steine: [{ t: f(3,4), w: [3,4] }, …]  – w muss auf einem Steckplatz
+                            liegen (w · teile / bis ganzzahlig); kein eigenes soll nötig
+                 'felder'   Teile einer Figur einfärben (antippen)                     soll: [Z, N]
+                            figur: { form: 'steine', zeilen: 3, spalten: 4 } (Leuchtsteine, v4) |
+                                   { form: 'kreis', teile: 8 } | { form: 'rechteck', zeilen: 3, spalten: 4 }
+                            richtig, wenn eingefärbt : alle Felder = soll (jede Anordnung zählt)
+                 'schalter' Hebel: alle passenden umlegen  schalter: [{ t:'…', ok:true }, { t:'…' }]
+                            (wird gemischt, 4.3; richtig nur, wenn genau die ok-Hebel auf I stehen)
+                 steck und schalter (v4): nach dem ersten falschen Prüfen einmal korrigieren, erst
+                            danach geht es in den Umweg
+     ---- Spielzeug-Paket (seit v5): ----
+                 'wuerfel'  wuerfel: 1–3; antippen dreht weiter, 🎲 würfelt alle
+                            ziel: 'summe' (soll: [Summe, 1]) | 'augen' (soll: ['6','6'], Reihenfolge egal)
+                            | 'zahl' (Augen von links nach rechts als Ziffern, soll: [Wert, 1])
+                 'karten'   verdeckter Fächer: blatt: [{ t:'…', ok:true }, { t:'…' }] (gemischt, 4.3);
+                            antippen deckt auf, nochmal antippen wählt; mehr: true → genau alle ok-Karten
+                 'abakus'   stellen: ['HT','ZT','T','H','Z','E'] (je 0–9 Perlen)     soll: [Wert, 1]
+                 'thermo'   skala: { von:-20, bis:10, schritt:[1,1], marke:5 }, einheit: '°C'
+                            (von/bis ganzzahlig, soll auf einem Schritt)                soll: [Z, N]
+                 'zeit'     echte Uhr; minuten: 5 (Schritt), tag: false schaltet ☀️/🌙 ab  soll: '16:25'
+                 'gitter'   gitter: { x:[-2,8], y:[-2,8] }; graphen: [{ m, b } | { a, d, e }]
+                            (a(x−d)²+e); punkte: [{ x, y, t:'🌲' }]                     soll: '4|3'
+                 'kompass'  modus: 'richtung' (soll: 'NO' – N, NO, O, SO, S, SW, W, NW)
+                            | 'winkel' (Schenkel drehen, grad: Schritt, soll: [108, 1])
+                 'regler'   typ: 'gerade' (Regler m, b) | 'parabel' (a, d, e: y = a(x−d)²+e)
+                            regler: { m:[-4,4,0.5], b:[-6,6,1] } (von, bis, Schritt);
+                            sterne: [[x, y], …]; gitter wie oben – richtig, wenn der Graph durch
+                            alle Sterne geht (kein soll nötig; Sterne müssen erreichbar sein)
      eingabe     bei 'zahl'/'bruch'/'term' – beim Erstellen abgefragt (TEIL 1.2):
                  'formel'   Formeltool (Bruch, gem. Zahl, Hochzahl, Index, Wurzel)
                  'getrennt' Zähler und Nenner in zwei Feldern   ('gemischt': Ganze + Zähler + Nenner)
                  'linear'   ein einfaches Textfeld (nur, wenn keine Brüche/Terme einzugeben sind)
      tipps       zwei Hinweise: Idee, dann Vorgehen – ohne Zwischenergebnisse (TEIL 5.2)
      weg         Lösungsweg (erscheint nur nach dem zweiten Umweg, darf das Ergebnis nennen)
+   Szenenbilder (v4): Bilder als data-URI (WebP, ca. 960 px breit, je ≤ 80 KB) im Datenblock ablegen –
+                    nie als Datei daneben (TEIL 8.1) – und mit szene(BILD.r1, 'Alt-Text') in geschichte,
+                    umwege[].geschichte, erwischt oder ende einsetzen (CSS-Klasse .szene im Baustein)
+   STORY.wegTitel   optional (v3): Überschrift des Lösungswegs, z. B. 'Herr Gräulich erklärt:'
+   STORY.erwischt / karte.erwischt  optional (v3): Erzähltext, der vor dem Lösungsweg erscheint
+                    (z. B. eine Figur holt die Kinder ein und erklärt) – die Karte zählt danach
+                    als geschafft wie bisher
    Schreibhilfen: f(3,4) Bruch · g(1,5,9) gemischte Zahl · m('0,4 · 0,9') Dezimal-Formel
    Eigene Abbildungen: Hilfsfunktion IM Datenblock, die ein SVG mit role="img" und
    aria-label erzeugt, Farben aus 2.2, Brüche mit waagerechtem Strich (Beispiel: wegweiser).
@@ -986,21 +1066,18 @@ var STORY = {
               + strichliste([ ['Norden', 13], ['Osten', 17], ['Süden', 9], ['Westen', 16] ])
               + '<p>„Die meisten Glöckchen sind dorthin geflogen, wohin der Wind am häufigsten geweht hat“, meint Ottilie. '
               + '„Wir müssen nur wissen, woher er am häufigsten kam – dann suchen wir auf der anderen Seite.“</p>',
-    raetsel: { frage: 'Gib an, aus welcher Richtung der Wind am häufigsten geweht hat.', art: 'wahl',
-               optionen: [ { t: '🧭 Osten', ok: true }, { t: '🧭 Norden' }, { t: '🧭 Süden' }, { t: '🧭 Westen' } ],
+    raetsel: { frage: 'Stelle die Kompassnadel auf die Richtung, aus der der Wind laut der Strichliste am häufigsten geweht hat.', art: 'kompass', modus: 'richtung', soll: 'O',
                tipps: [ 'Ein durchgestrichenes Bündel steht für fünf Striche.', 'Zähle bei jeder Richtung zuerst die Fünferbündel, dann die einzelnen Striche, und vergleiche.' ],
                weg: 'Norden: 5 + 5 + 3 = 13, Osten: 5 + 5 + 5 + 2 = 17, Süden: 5 + 4 = 9, Westen: 5 + 5 + 5 + 1 = 16. Am häufigsten kam der Wind aus dem Osten (17-mal).' },
     umwege: [
       { geschichte: '<p>Ottilie runzelt die Stirn. „Moment, das war die Liste von vorgestern!“ Sie kramt eine zweite Liste aus ihrem Gefieder:</p>'
                   + strichliste([ ['Norden', 8], ['Osten', 11], ['Süden', 14], ['Westen', 12] ]),
-        raetsel: { frage: 'Gib an, aus welcher Richtung der Wind laut dieser Liste am häufigsten geweht hat.', art: 'wahl',
-                   optionen: [ { t: '🧭 Süden', ok: true }, { t: '🧭 Norden' }, { t: '🧭 Osten' }, { t: '🧭 Westen' } ],
+        raetsel: { frage: 'Stelle die Kompassnadel auf die Richtung, aus der der Wind laut dieser Liste am häufigsten geweht hat.', art: 'kompass', modus: 'richtung', soll: 'S',
                    tipps: [ 'Jedes Bündel zählt fünf.', 'Zähle für jede Richtung Bündel und Einzelstriche zusammen.' ],
                    weg: 'Norden 8, Osten 11, Süden 14, Westen 12. Am häufigsten: Süden.' } },
       { geschichte: '<p>„Hm, auch nicht die richtige“, murmelt Ottilie verlegen. Auf der Rückseite steht noch eine Liste – diesmal ganz sicher von heute Nacht:</p>'
                   + strichliste([ ['Norden', 15], ['Osten', 9], ['Süden', 7], ['Westen', 10] ]),
-        raetsel: { frage: 'Gib an, aus welcher Richtung der Wind laut dieser Liste am häufigsten geweht hat.', art: 'wahl',
-                   optionen: [ { t: '🧭 Norden', ok: true }, { t: '🧭 Osten' }, { t: '🧭 Süden' }, { t: '🧭 Westen' } ],
+        raetsel: { frage: 'Stelle die Kompassnadel auf die Richtung, aus der der Wind laut dieser Liste am häufigsten geweht hat.', art: 'kompass', modus: 'richtung', soll: 'N',
                    tipps: [ 'Ein Bündel bedeutet fünf Windstöße.', 'Zähle jede Zeile einzeln aus und vergleiche die Ergebnisse.' ],
                    weg: 'Norden 15, Osten 9, Süden 7, Westen 10. Am häufigsten: Norden.' } }
     ],
@@ -1013,18 +1090,18 @@ var STORY = {
     geschichte: '<p>Eichhörnchen Nuss hat das zweite Glöckchen gesehen: Es hängt hinter dem Gartentor von Zwerg Knurrbart. '
               + 'Doch das Tor hat ein Zahlenschloss. Auf einem Schild steht:</p>'
               + '<p>' + zettel('7 Hunderter, 5 Einer, 3 Hunderttausender, 2 Zehner und 4 Zehntausender') + '</p>',
-    raetsel: { frage: 'Gib die Zahl an, die auf dem Schild beschrieben ist.', art: 'zahl', eingabe: 'linear', soll: [340725, 1],
+    raetsel: { frage: 'Stelle die Zahl, die auf dem Schild beschrieben ist, am Abakus ein.', art: 'abakus', stellen: ['HT', 'ZT', 'T', 'H', 'Z', 'E'], soll: [340725,1],
                tipps: [ 'Eine Stellenwerttafel hilft: HT, ZT, T, H, Z, E.', 'Trage jede Ziffer in ihre Spalte ein. Wo nichts angegeben ist, steht eine 0.' ],
                weg: 'HT = 3, ZT = 4, T = 0, H = 7, Z = 2, E = 5. Die Zahl ist 340 725.' },
     umwege: [
       { geschichte: '<p>Das Schloss knackt – und klemmt. Knurrbart brummt: „Dann nehmt die Hintertür. Da steht auch ein Schild.“</p>'
                   + '<p>' + zettel('9 Zehner, 2 Zehntausender, 1 Einer und 6 Tausender') + '</p>',
-        raetsel: { frage: 'Gib die Zahl an, die auf diesem Schild beschrieben ist.', art: 'zahl', eingabe: 'linear', soll: [26091, 1],
+        raetsel: { frage: 'Stelle die Zahl, die auf diesem Schild beschrieben ist, am Abakus ein.', art: 'abakus', stellen: ['HT', 'ZT', 'T', 'H', 'Z', 'E'], soll: [26091,1],
                    tipps: [ 'Sortiere die Angaben in eine Stellenwerttafel: ZT, T, H, Z, E.', 'Eine Stelle wird gar nicht genannt – dort steht eine 0.' ],
                    weg: 'ZT = 2, T = 6, H = 0, Z = 9, E = 1. Die Zahl ist 26 091.' } },
       { geschichte: '<p>Auch die Hintertür bleibt zu. Bleibt nur noch das kleine Kellerfenster mit einem dritten Schild:</p>'
                   + '<p>' + zettel('4 Einer, 8 Hunderter, 5 Hunderttausender und 3 Tausender') + '</p>',
-        raetsel: { frage: 'Gib die Zahl an, die auf diesem Schild beschrieben ist.', art: 'zahl', eingabe: 'linear', soll: [503804, 1],
+        raetsel: { frage: 'Stelle die Zahl, die auf diesem Schild beschrieben ist, am Abakus ein.', art: 'abakus', stellen: ['HT', 'ZT', 'T', 'H', 'Z', 'E'], soll: [503804,1],
                    tipps: [ 'Hier fehlen gleich zwei Stellen – dort steht jeweils eine 0.', 'Zeichne die Stellenwerttafel von HT bis E und fülle sie aus.' ],
                    weg: 'HT = 5, ZT = 0, T = 3, H = 8, Z = 0, E = 4. Die Zahl ist 503 804.' } }
     ],
@@ -1035,16 +1112,16 @@ var STORY = {
     geschichte: '<p>Am zugefrorenen Fluss wohnt Biber Balduin. Er hat das dritte Glöckchen in seinen Damm eingebaut – aus Versehen! '
               + '„Ich gebe es euch“, sagt er, „aber erst sagt ihr mir, wie viele Steine mein Damm ungefähr hat. Ich habe 48 763 gezählt, '
               + 'aber so genau will das niemand wissen.“</p>',
-    raetsel: { frage: 'Runde die Zahl 48 763 auf Tausender.', art: 'zahl', eingabe: 'linear', soll: [49000, 1],
+    raetsel: { frage: 'Runde die Zahl 48 763 auf Tausender. Stelle das Ergebnis am Abakus ein.', art: 'abakus', stellen: ['ZT', 'T', 'H', 'Z', 'E'], soll: [49000,1],
                tipps: [ 'Beim Runden auf Tausender entscheidet die Ziffer an der Hunderterstelle.', 'Ist diese Ziffer 5 oder größer, wird aufgerundet, sonst abgerundet.' ],
                weg: 'Die Hunderterziffer ist 7, also wird aufgerundet: 48 763 ≈ 49 000.' },
     umwege: [
       { geschichte: '<p>Balduin schüttelt den Kopf. „Nein, nein. Dann zählt lieber die Äste in meiner Burg: 23 451 Stück.“</p>',
-        raetsel: { frage: 'Runde die Zahl 23 451 auf Hunderter.', art: 'zahl', eingabe: 'linear', soll: [23500, 1],
+        raetsel: { frage: 'Runde die Zahl 23 451 auf Hunderter. Stelle das Ergebnis am Abakus ein.', art: 'abakus', stellen: ['ZT', 'T', 'H', 'Z', 'E'], soll: [23500,1],
                    tipps: [ 'Beim Runden auf Hunderter entscheidet die Zehnerziffer.', 'Schau, ob die Zehnerziffer kleiner als 5 ist oder nicht.' ],
                    weg: 'Die Zehnerziffer ist 5, also wird aufgerundet: 23 451 ≈ 23 500.' } },
       { geschichte: '<p>„Letzter Versuch“, brummt der Biber. „In meiner Vorratskammer liegen 6 849 Zweige.“</p>',
-        raetsel: { frage: 'Runde die Zahl 6 849 auf Zehner.', art: 'zahl', eingabe: 'linear', soll: [6850, 1],
+        raetsel: { frage: 'Runde die Zahl 6 849 auf Zehner. Stelle das Ergebnis am Abakus ein.', art: 'abakus', stellen: ['ZT', 'T', 'H', 'Z', 'E'], soll: [6850,1],
                    tipps: [ 'Beim Runden auf Zehner entscheidet die Einerziffer.', 'Ist die Einerziffer 5 oder größer, rundest du auf.' ],
                    weg: 'Die Einerziffer ist 9, also wird aufgerundet: 6 849 ≈ 6 850.' } }
     ],
@@ -1054,16 +1131,16 @@ var STORY = {
   { id: '4', titel: 'Die Ästebrücke',
     geschichte: '<p>Das vierte Glöckchen liegt auf einer kleinen Insel im Bach. Pippo baut eine Brücke: Er legt drei Äste '
               + 'hintereinander – einen mit 1 m 2 dm, einen mit 8 dm 5 cm und einen mit 2 m 5 cm.</p>',
-    raetsel: { frage: 'Berechne, wie lang die Brücke insgesamt ist. Gib das Ergebnis in Zentimetern an.', kk: 'K5-1', art: 'zahl', eingabe: 'linear', soll: [410, 1],
+    raetsel: { frage: 'Berechne, wie lang die Brücke insgesamt ist, und stelle die Länge in Zentimetern am Zahlenschloss ein.', kk: 'K5-1', art: 'schloss', schloss: 'zahl', stellen: [3], soll: [410,1], einheit: 'cm',
                tipps: [ 'Rechne zuerst alle Längen in dieselbe Einheit um.', 'Schreibe jede Länge in Zentimetern (1 m = 10 dm = 100 cm, 1 dm = 10 cm) und addiere dann.' ],
                weg: '1 m 2 dm = 120 cm, 8 dm 5 cm = 85 cm, 2 m 5 cm = 205 cm. 120 cm + 85 cm + 205 cm = 410 cm.' },
     umwege: [
       { geschichte: '<p>Platsch! Ein Ast bricht. Pippo versucht es mit zwei anderen: 7 dm 5 cm und 1 m 4 dm.</p>',
-        raetsel: { frage: 'Berechne, wie lang die neue Brücke ist. Gib das Ergebnis in Zentimetern an.', kk: 'K5-1', art: 'zahl', eingabe: 'linear', soll: [215, 1],
+        raetsel: { frage: 'Berechne, wie lang die neue Brücke ist, und stelle die Länge in Zentimetern am Zahlenschloss ein.', kk: 'K5-1', art: 'schloss', schloss: 'zahl', stellen: [3], soll: [215,1], einheit: 'cm',
                    tipps: [ 'Wandle beide Längen zuerst in Zentimeter um (1 dm = 10 cm).', 'Addiere danach die beiden Längen in Zentimetern.' ],
                    weg: '7 dm 5 cm = 75 cm, 1 m 4 dm = 140 cm. 75 cm + 140 cm = 215 cm.' } },
       { geschichte: '<p>Zu kurz! Nuss bringt einen langen Ast von 2 m. „Der ist zu lang, wir sägen 6 dm 5 cm ab“, sagt Pippo.</p>',
-        raetsel: { frage: 'Berechne, wie lang der Ast nach dem Absägen ist. Gib das Ergebnis in Zentimetern an.', kk: 'K5-1', art: 'zahl', eingabe: 'linear', soll: [135, 1],
+        raetsel: { frage: 'Berechne, wie lang der Ast nach dem Absägen ist, und stelle die Länge in Zentimetern am Zahlenschloss ein.', kk: 'K5-1', art: 'schloss', schloss: 'zahl', stellen: [3], soll: [135,1], einheit: 'cm',
                    tipps: [ 'Schreibe beide Längen in Zentimetern.', 'Ziehe dann das abgesägte Stück ab.' ],
                    weg: '2 m = 200 cm, 6 dm 5 cm = 65 cm. 200 cm − 65 cm = 135 cm.' } }
     ],
@@ -1092,16 +1169,16 @@ var STORY = {
   { id: '6', titel: 'Die Lagerliste der Werkstatt',
     geschichte: '<p>In der Glöckchen-Werkstatt von Moosgrund wird alles genau gezählt. Das sechste Glöckchen ist in eine der Kisten gefallen. '
               + 'Um es zu finden, muss Pippo die Lagerliste prüfen: In Kiste A liegen 4 786 Schrauben, in Kiste B 3 958 und in Kiste C 1 207.</p>',
-    raetsel: { frage: 'Berechne schriftlich, wie viele Schrauben in allen drei Kisten zusammen liegen.', kk: 'K5-6', art: 'zahl', eingabe: 'linear', soll: [9951, 1],
+    raetsel: { frage: 'Berechne schriftlich, wie viele Schrauben in allen drei Kisten zusammen liegen. Stelle das Ergebnis am Abakus ein.', kk: 'K5-6', art: 'abakus', stellen: ['T', 'H', 'Z', 'E'], soll: [9951,1],
                tipps: [ 'Schreibe die Zahlen stellengerecht untereinander: Einer unter Einer, Zehner unter Zehner …', 'Addiere von rechts nach links und denke an die Überträge.' ],
                weg: '4 786 + 3 958 + 1 207 = 9 951 (Einer: 21, schreibe 1, Übertrag 2; Zehner: 15, schreibe 5, Übertrag 1; Hunderter: 19, schreibe 9, Übertrag 1; Tausender: 9).' },
     umwege: [
       { geschichte: '<p>Kiste C ist leer – die Liste ist falsch! Pippo zählt nur Kiste D und E: 2 645 und 3 879 Nägel.</p>',
-        raetsel: { frage: 'Berechne schriftlich, wie viele Nägel in den Kisten D und E zusammen liegen.', kk: 'K5-6', art: 'zahl', eingabe: 'linear', soll: [6524, 1],
+        raetsel: { frage: 'Berechne schriftlich, wie viele Nägel in den Kisten D und E zusammen liegen. Stelle das Ergebnis am Abakus ein.', kk: 'K5-6', art: 'abakus', stellen: ['T', 'H', 'Z', 'E'], soll: [6524,1],
                    tipps: [ 'Schreibe die Zahlen stellengerecht untereinander.', 'Beginne bei den Einern und vergiss die Überträge nicht.' ],
                    weg: '2 645 + 3 879 = 6 524.' } },
       { geschichte: '<p>Auch da ist kein Glöckchen. Bleiben die Kisten F und G mit 5 308 und 1 794 Federn.</p>',
-        raetsel: { frage: 'Berechne schriftlich, wie viele Federn in den Kisten F und G zusammen liegen.', kk: 'K5-6', art: 'zahl', eingabe: 'linear', soll: [7102, 1],
+        raetsel: { frage: 'Berechne schriftlich, wie viele Federn in den Kisten F und G zusammen liegen. Stelle das Ergebnis am Abakus ein.', kk: 'K5-6', art: 'abakus', stellen: ['T', 'H', 'Z', 'E'], soll: [7102,1],
                    tipps: [ 'Stellengerecht untereinander schreiben.', 'Von rechts nach links addieren, Überträge klein notieren.' ],
                    weg: '5 308 + 1 794 = 7 102.' } }
     ],
@@ -1111,16 +1188,16 @@ var STORY = {
   { id: '7', titel: 'Knurrbarts Mühle',
     geschichte: '<p>Zwerg Knurrbart backt Weihnachtsplätzchen. Auf seiner Waage liegt – das siebte Glöckchen! „Das kriegst du“, brummt er, '
               + '„wenn du mir hilfst. Ich brauche 2 kg 350 g Weizenmehl und 1 kg 800 g Roggenmehl.“</p>',
-    raetsel: { frage: 'Berechne, wie viel Gramm Mehl Knurrbart insgesamt braucht.', art: 'zahl', eingabe: 'linear', soll: [4150, 1],
+    raetsel: { frage: 'Berechne, wie viel Gramm Mehl Knurrbart insgesamt braucht, und stelle es an der Mehlwaage ein.', art: 'schloss', schloss: 'zahl', stellen: [4], soll: [4150,1], einheit: 'g',
                tipps: [ 'Wandle beide Angaben in Gramm um. 1 kg = 1 000 g.', 'Addiere dann die beiden Grammzahlen.' ],
                weg: '2 kg 350 g = 2 350 g, 1 kg 800 g = 1 800 g. 2 350 g + 1 800 g = 4 150 g.' },
     umwege: [
       { geschichte: '<p>„Zu viel!“, ruft Knurrbart. „Ich habe nur 3 kg 500 g Mehl im Sack und nehme 1 kg 750 g heraus.“</p>',
-        raetsel: { frage: 'Berechne, wie viel Gramm Mehl noch im Sack bleiben.', art: 'zahl', eingabe: 'linear', soll: [1750, 1],
+        raetsel: { frage: 'Berechne, wie viel Gramm Mehl noch im Sack bleiben, und stelle es an der Mehlwaage ein.', art: 'schloss', schloss: 'zahl', stellen: [4], soll: [1750,1], einheit: 'g',
                    tipps: [ 'Rechne beide Angaben in Gramm um.', 'Ziehe die herausgenommene Menge ab.' ],
                    weg: '3 500 g − 1 750 g = 1 750 g.' } },
       { geschichte: '<p>Knurrbart kratzt sich am Bart. „Dann nehmen wir Butter. Ich habe 4 Päckchen zu je 250 g.“</p>',
-        raetsel: { frage: 'Berechne, wie viel Gramm Butter Knurrbart hat.', art: 'zahl', eingabe: 'linear', soll: [1000, 1],
+        raetsel: { frage: 'Berechne, wie viel Gramm Butter Knurrbart hat, und stelle es an der Waage ein.', art: 'schloss', schloss: 'zahl', stellen: [4], soll: [1000,1], einheit: 'g',
                    tipps: [ 'Alle Päckchen wiegen gleich viel.', 'Multipliziere die Anzahl der Päckchen mit dem Gewicht eines Päckchens.' ],
                    weg: '4 · 250 g = 1 000 g = 1 kg.' } }
     ],
@@ -1129,16 +1206,16 @@ var STORY = {
 
   { id: '8', titel: 'Der Weg zum Uhrenhaus',
     geschichte: '<p>Das achte Glöckchen hängt am Uhrenhaus auf dem Hügel. Pippo bricht um 14:35 Uhr auf. Der Weg dauert 1 Stunde und 50 Minuten.</p>',
-    raetsel: { frage: 'Gib an, um wie viel Uhr Pippo am Uhrenhaus ankommt. Schreibe die Uhrzeit so: 12:00', art: 'text', soll: ['16:25'],
+    raetsel: { frage: 'Stelle an der Uhr ein, um wie viel Uhr Pippo am Uhrenhaus ankommt.', art: 'zeit', minuten: 5, soll: '16:25',
                tipps: [ 'Rechne zuerst die volle Stunde dazu, dann die Minuten.', 'Wenn du über eine volle Stunde kommst, zähle bis zur vollen Stunde und dann weiter.' ],
                weg: '14:35 Uhr + 1 h = 15:35 Uhr. 15:35 Uhr + 25 min = 16:00 Uhr, + 25 min = 16:25 Uhr.' },
     umwege: [
       { geschichte: '<p>Pippo verläuft sich im Nebel und landet wieder zu Hause. Am nächsten Morgen nimmt er den Rentierbus. Der fährt um 9:40 Uhr ab und braucht 55 Minuten.</p>',
-        raetsel: { frage: 'Gib an, um wie viel Uhr der Bus am Uhrenhaus ankommt. Schreibe die Uhrzeit so: 12:00', art: 'text', soll: ['10:35'],
+        raetsel: { frage: 'Stelle an der Uhr ein, um wie viel Uhr der Bus am Uhrenhaus ankommt.', art: 'zeit', minuten: 5, soll: '10:35',
                    tipps: [ 'Zähle zuerst bis zur vollen Stunde.', 'Wie viele Minuten bleiben danach noch übrig?' ],
                    weg: '9:40 Uhr + 20 min = 10:00 Uhr, + 35 min = 10:35 Uhr.' } },
       { geschichte: '<p>Der Bus hat Verspätung! Die Uhrmacherin sagt: „Ich warte von 15:50 Uhr bis 17:15 Uhr auf dich.“</p>',
-        raetsel: { frage: 'Berechne, wie viele Minuten die Uhrmacherin wartet.', art: 'zahl', eingabe: 'linear', soll: [85, 1],
+        raetsel: { frage: 'Berechne, wie viele Minuten die Uhrmacherin wartet, und stelle es am Zahlenschloss ein.', art: 'schloss', schloss: 'zahl', stellen: [2], soll: [85,1], einheit: 'min',
                    tipps: [ 'Zähle in Etappen: erst bis zur nächsten vollen Stunde.', 'Addiere dann die Etappen zusammen.' ],
                    weg: '15:50 → 16:00: 10 min, 16:00 → 17:00: 60 min, 17:00 → 17:15: 15 min. Zusammen 85 min.' } }
     ],
@@ -1148,16 +1225,16 @@ var STORY = {
   { id: '9', titel: 'Die alte Kapellentür',
     geschichte: '<p>Mitten im Wald steht eine alte Kapelle. Über der Tür ist eine Jahreszahl in römischen Zahlzeichen eingemeißelt: <b>MDCCXLVIII</b>. '
               + 'Nuss flüstert: „Wer das Baujahr kennt, darf hinein – und da drinnen klingelt etwas!“</p>',
-    raetsel: { frage: 'Gib die Zahl MDCCXLVIII in unserer Schreibweise an.', art: 'zahl', eingabe: 'linear', soll: [1748, 1],
+    raetsel: { frage: 'Übersetze die Zahl MDCCXLVIII in unsere Schreibweise. Stelle das Ergebnis am Abakus ein.', art: 'abakus', stellen: ['T', 'H', 'Z', 'E'], soll: [1748,1],
                tipps: [ 'M = 1000, D = 500, C = 100, L = 50, X = 10, V = 5, I = 1.', 'Steht ein kleineres Zeichen vor einem größeren, wird es abgezogen (zum Beispiel XL).' ],
                weg: 'M = 1000, D = 500, CC = 200, XL = 40, VIII = 8. Zusammen 1748.' },
     umwege: [
       { geschichte: '<p>Die Tür bleibt zu. An der Seitenwand steht noch eine Zahl: <b>CCCLXIV</b>.</p>',
-        raetsel: { frage: 'Gib die Zahl CCCLXIV in unserer Schreibweise an.', art: 'zahl', eingabe: 'linear', soll: [364, 1],
+        raetsel: { frage: 'Übersetze die Zahl CCCLXIV in unsere Schreibweise. Stelle das Ergebnis am Abakus ein.', art: 'abakus', stellen: ['H', 'Z', 'E'], soll: [364,1],
                    tipps: [ 'Zerlege die Zahl in Gruppen: CCC, L, X, IV.', 'Bei IV steht das kleinere Zeichen vor dem größeren.' ],
                    weg: 'CCC = 300, L = 50, X = 10, IV = 4. Zusammen 364.' } },
       { geschichte: '<p>Ein Fensterladen klappert. Darauf steht klein: <b>XCIX</b>.</p>',
-        raetsel: { frage: 'Gib die Zahl XCIX in unserer Schreibweise an.', art: 'zahl', eingabe: 'linear', soll: [99, 1],
+        raetsel: { frage: 'Übersetze die Zahl XCIX in unsere Schreibweise. Stelle das Ergebnis am Abakus ein.', art: 'abakus', stellen: ['H', 'Z', 'E'], soll: [99,1],
                    tipps: [ 'Hier stehen zweimal kleinere Zeichen vor größeren.', 'Lies XC und IX jeweils als Paar.' ],
                    weg: 'XC = 100 − 10 = 90, IX = 10 − 1 = 9. Zusammen 99.' } }
     ],
@@ -1169,16 +1246,16 @@ var STORY = {
               + 'wenn jemand das Diagramm richtig liest.</p>'
               + saeulen([ ['Moosgrund', 35], ['Tannheim', 15], ['Pilzhausen', 25], ['Eichenau', 10] ],
                         'Säulendiagramm: Moosgrund 35, Tannheim 15, Pilzhausen 25, Eichenau 10 Schneemänner'),
-    raetsel: { frage: 'Bestimme, wie viele Schneemänner in Moosgrund mehr gebaut wurden als in Tannheim.', art: 'zahl', eingabe: 'linear', soll: [20, 1],
+    raetsel: { frage: 'Bestimme, wie viele Schneemänner in Moosgrund mehr gebaut wurden als in Tannheim, und stelle die Zahl an der Schneemann-Messlatte ein.', art: 'thermo', skala: { von: 0, bis: 100, schritt: [5,1], marke: 10 }, soll: [20,1], einheit: '⛄',
                tipps: [ 'Lies die Höhe beider Säulen an der Achse ab.', 'Bilde dann den Unterschied der beiden Werte.' ],
                weg: 'Moosgrund: 35, Tannheim: 15. 35 − 15 = 20 Schneemänner mehr.' },
     umwege: [
       { geschichte: '<p>Der Schiedsrichter-Uhu schüttelt den Kopf. „Dann vergleichen wir Pilzhausen und Eichenau.“</p>',
-        raetsel: { frage: 'Bestimme, wie viele Schneemänner in Pilzhausen mehr gebaut wurden als in Eichenau.', art: 'zahl', eingabe: 'linear', soll: [15, 1],
+        raetsel: { frage: 'Bestimme, wie viele Schneemänner in Pilzhausen mehr gebaut wurden als in Eichenau, und stelle die Zahl an der Messlatte ein.', art: 'thermo', skala: { von: 0, bis: 100, schritt: [5,1], marke: 10 }, soll: [15,1], einheit: '⛄',
                    tipps: [ 'Lies beide Säulen genau ab – jede Linie steht für 5.', 'Ziehe den kleineren vom größeren Wert ab.' ],
                    weg: 'Pilzhausen: 25, Eichenau: 10. 25 − 10 = 15.' } },
       { geschichte: '<p>„Und jetzt alle zusammen!“, ruft der Uhu.</p>',
-        raetsel: { frage: 'Bestimme, wie viele Schneemänner in allen vier Dörfern zusammen gebaut wurden.', art: 'zahl', eingabe: 'linear', soll: [85, 1],
+        raetsel: { frage: 'Bestimme, wie viele Schneemänner in allen vier Dörfern zusammen gebaut wurden, und stelle die Zahl an der Messlatte ein.', art: 'thermo', skala: { von: 0, bis: 100, schritt: [5,1], marke: 10 }, soll: [85,1], einheit: '⛄',
                    tipps: [ 'Lies alle vier Säulen ab.', 'Addiere die vier Werte.' ],
                    weg: '35 + 15 + 25 + 10 = 85 Schneemänner.' } }
     ],
@@ -1188,19 +1265,19 @@ var STORY = {
   { id: '11', titel: 'Die Waldwege',
     geschichte: '<p>Ottilie fliegt über den Wald und ruft herunter: „Die Wege a und b laufen parallel. Weg c steht senkrecht auf Weg a. '
               + 'Das elfte Glöckchen liegt dort, wo Weg c auf Weg b trifft!“ Pippo überlegt, wie c und b zueinander liegen.</p>',
-    raetsel: { frage: 'Entscheide, wie die Wege c und b zueinander liegen.', art: 'wahl',
-               optionen: [ { t: 'c ist senkrecht zu b', ok: true }, { t: 'c ist parallel zu b' }, { t: 'c und b treffen sich nie' } ],
+    raetsel: { frage: 'Entscheide, wie die Wege c und b zueinander liegen.', art: 'karten',
+               blatt: [ { t: 'c ist senkrecht zu b', ok: true }, { t: 'c ist parallel zu b' }, { t: 'c und b treffen sich nie' } ],
                tipps: [ 'Zeichne zwei parallele Linien a und b auf ein Blatt.', 'Zeichne c senkrecht zu a ein und verlängere c bis zu b. Prüfe mit dem Geodreieck.' ],
                weg: 'Eine Gerade, die senkrecht auf a steht, steht auch senkrecht auf jeder Parallelen zu a. Also ist c senkrecht zu b.' },
     umwege: [
       { geschichte: '<p>Pippo läuft in die falsche Richtung. Ottilie ruft: „Neue Spur! Weg a ist senkrecht zu Weg b, und Weg b ist senkrecht zu Weg c.“</p>',
-        raetsel: { frage: 'Entscheide, wie die Wege a und c zueinander liegen.', art: 'wahl',
-                   optionen: [ { t: 'a ist parallel zu c', ok: true }, { t: 'a ist senkrecht zu c' }, { t: 'a und c schneiden sich schräg' } ],
+        raetsel: { frage: 'Entscheide, wie die Wege a und c zueinander liegen.', art: 'karten',
+                   blatt: [ { t: 'a ist parallel zu c', ok: true }, { t: 'a ist senkrecht zu c' }, { t: 'a und c schneiden sich schräg' } ],
                    tipps: [ 'Zeichne b als waagerechte Linie.', 'Zeichne a und c jeweils senkrecht zu b ein und vergleiche.' ],
                    weg: 'a und c stehen beide senkrecht auf b. Zwei Senkrechte zur selben Geraden sind parallel.' } },
       { geschichte: '<p>Am Wegrand stehen Holzbuchstaben. „Das Glöckchen liegt beim Buchstaben mit zwei parallelen Strecken“, liest Pippo.</p>',
-        raetsel: { frage: 'Entscheide, welcher Buchstabe zwei zueinander parallele Strecken hat.', art: 'wahl',
-                   optionen: [ { t: 'H', ok: true }, { t: 'T' }, { t: 'L' }, { t: 'V' } ],
+        raetsel: { frage: 'Entscheide, welcher Buchstabe zwei zueinander parallele Strecken hat.', art: 'karten',
+                   blatt: [ { t: 'H', ok: true }, { t: 'T' }, { t: 'L' }, { t: 'V' } ],
                    tipps: [ 'Parallele Strecken haben überall den gleichen Abstand und treffen sich nie.', 'Schau dir die Striche jedes Buchstabens einzeln an.' ],
                    weg: 'Beim H sind die beiden senkrechten Striche parallel. T und L haben senkrechte Striche, V hat zwei schräge, die sich treffen.' } }
     ],
@@ -1212,19 +1289,19 @@ var STORY = {
               + '„Aber man muss die Koordinaten kennen, sonst öffnet sich die Schatztruhe nicht.“</p>'
               + koord([ { x:4, y:3, t:'🔔' }, { x:1, y:5, t:'🌲' }, { x:5, y:1, t:'🍄' } ],
                       'Koordinatensystem mit Glocke, Tanne und Pilz'),
-    raetsel: { frage: 'Gib die Koordinaten der Glocke 🔔 an. Tippe erst x, dann y, getrennt durch ein Semikolon – zum Beispiel 1;6.', art: 'text', soll: ['4;3'],
+    raetsel: { frage: 'Lies die Koordinaten der Glocke 🔔 ab und setze den Edelstein auf denselben Punkt der Schatzkarte.', art: 'gitter', gitter: { x: [0, 7], y: [0, 6] }, soll: '4|3',
                tipps: [ 'Zuerst gehst du nach rechts (x-Wert), dann nach oben (y-Wert).', 'Lies an der x-Achse und an der y-Achse ab und schreibe beide Werte in die Klammer.' ],
                weg: 'Die Glocke liegt 4 nach rechts und 3 nach oben: (4|3).' },
     umwege: [
       { geschichte: '<p>Die Truhe bleibt zu. Auf der Rückseite der Karte ist eine zweite Glocke eingezeichnet.</p>'
                   + koord([ { x:2, y:5, t:'🔔' }, { x:5, y:2, t:'⭐' } ], 'Koordinatensystem mit Glocke und Stern'),
-        raetsel: { frage: 'Gib die Koordinaten der Glocke 🔔 an. Tippe erst x, dann y, getrennt durch ein Semikolon – zum Beispiel 1;6.', art: 'text', soll: ['2;5'],
+        raetsel: { frage: 'Lies die Koordinaten der Glocke 🔔 ab und setze den Edelstein auf denselben Punkt der Schatzkarte.', art: 'gitter', gitter: { x: [0, 7], y: [0, 6] }, soll: '2|5',
                    tipps: [ 'Der erste Wert gehört zur waagerechten Achse.', 'Achte darauf, die Werte nicht zu vertauschen.' ],
                    weg: 'Die Glocke liegt 2 nach rechts und 5 nach oben: (2|5).' } },
       { geschichte: '<p>Pippo hat x und y vertauscht. Jetzt hilft nur noch die Schatzliste: „Das Glöckchen liegt bei (5|1).“</p>'
                   + koord([ { x:1, y:5, t:'A' }, { x:5, y:1, t:'B' }, { x:5, y:5, t:'C' } ], 'Koordinatensystem mit den Punkten A, B und C'),
-        raetsel: { frage: 'Entscheide, welcher Punkt die Koordinaten (5|1) hat.', art: 'wahl',
-                   optionen: [ { t: 'B', ok: true }, { t: 'A' }, { t: 'C' } ],
+        raetsel: { frage: 'Entscheide, welcher Punkt die Koordinaten (5|1) hat.', art: 'karten',
+                   blatt: [ { t: 'B', ok: true }, { t: 'A' }, { t: 'C' } ],
                    tipps: [ 'Gehe vom Ursprung aus zuerst nach rechts.', 'Gehe 5 nach rechts und dann 1 nach oben.' ],
                    weg: '5 nach rechts und 1 nach oben führt zum Punkt B.' } }
     ],
@@ -1234,16 +1311,16 @@ var STORY = {
   { id: '13', titel: 'Die Schneeflocke am Fenster',
     geschichte: '<p>An Pippos Fenster klebt eine riesige Schneeflocke in Form eines regelmäßigen Sechsecks. '
               + 'Darin eingefroren: das dreizehnte Glöckchen. Die Flocke schmilzt nur, wenn man ihre Symmetrieachsen kennt.</p>',
-    raetsel: { frage: 'Gib an, wie viele Symmetrieachsen ein regelmäßiges Sechseck hat.', art: 'zahl', eingabe: 'linear', soll: [6, 1],
+    raetsel: { frage: 'Bestimme, wie viele Symmetrieachsen ein regelmäßiges Sechseck hat, und drehe den Würfel auf diese Zahl.', art: 'wuerfel', wuerfel: 1, ziel: 'summe', soll: [6,1],
                tipps: [ 'Eine Symmetrieachse teilt die Figur in zwei spiegelgleiche Hälften.', 'Denke an Achsen durch gegenüberliegende Ecken und an Achsen durch die Mitten gegenüberliegender Seiten.' ],
                weg: '3 Achsen durch gegenüberliegende Ecken und 3 Achsen durch gegenüberliegende Seitenmitten: zusammen 6.' },
     umwege: [
       { geschichte: '<p>Die Flocke knistert, bleibt aber hart. Daneben klebt eine rechteckige Eisscheibe (kein Quadrat).</p>',
-        raetsel: { frage: 'Gib an, wie viele Symmetrieachsen ein Rechteck hat, das kein Quadrat ist.', art: 'zahl', eingabe: 'linear', soll: [2, 1],
+        raetsel: { frage: 'Bestimme, wie viele Symmetrieachsen ein Rechteck hat, das kein Quadrat ist, und drehe den Würfel auf diese Zahl.', art: 'wuerfel', wuerfel: 1, ziel: 'summe', soll: [2,1],
                    tipps: [ 'Falte in Gedanken ein Rechteck aus Papier.', 'Prüfe auch, ob die Diagonale eine Symmetrieachse ist.' ],
                    weg: 'Ein Rechteck hat 2 Symmetrieachsen (waagerecht und senkrecht durch die Mitte). Die Diagonalen sind keine.' } },
       { geschichte: '<p>Ganz oben am Fenster hängt noch ein Eiskristall – ein gleichseitiges Dreieck.</p>',
-        raetsel: { frage: 'Gib an, wie viele Symmetrieachsen ein gleichseitiges Dreieck hat.', art: 'zahl', eingabe: 'linear', soll: [3, 1],
+        raetsel: { frage: 'Bestimme, wie viele Symmetrieachsen ein gleichseitiges Dreieck hat, und drehe den Würfel auf diese Zahl.', art: 'wuerfel', wuerfel: 1, ziel: 'summe', soll: [3,1],
                    tipps: [ 'Alle Seiten und Winkel sind gleich.', 'Jede Achse geht durch eine Ecke und die Mitte der gegenüberliegenden Seite.' ],
                    weg: 'Durch jede der 3 Ecken geht eine Achse: 3 Symmetrieachsen.' } }
     ],
@@ -1253,17 +1330,17 @@ var STORY = {
   { id: '14', titel: 'Der Zauberspiegel',
     geschichte: '<p>Im Haus der Eule hängt ein Zauberspiegel. Er spiegelt Dinge an einem Punkt Z(3|3). '
               + 'Das vierzehnte Glöckchen liegt bei P(1|2) – aber nur sein Spiegelbild P’ kann man anfassen.</p>',
-    raetsel: { frage: 'Gib die Koordinaten des Bildpunktes P’ an, wenn P(1|2) am Punkt Z(3|3) gespiegelt wird. Tippe erst x, dann y, getrennt durch ein Semikolon – zum Beispiel 1;6.', art: 'text', soll: ['5;4'],
+    raetsel: { frage: 'Spiegle den Punkt P(1|2) 📍 am Punkt Z(3|3) ⭐ und setze den Edelstein auf den Bildpunkt P’.', art: 'gitter', gitter: { x: [0, 7], y: [0, 6] }, soll: '5|4', punkte: [ { x: 1, y: 2, t: '📍' }, { x: 3, y: 3, t: '⭐' } ],
                tipps: [ 'Bestimme, wie weit du von P nach Z nach rechts und nach oben gehst.', 'Gehe von Z aus noch einmal genau denselben Weg weiter.' ],
                weg: 'Von P nach Z: 2 nach rechts, 1 nach oben. Von Z aus noch einmal 2 nach rechts und 1 nach oben: P’(5|4).' },
     umwege: [
       { geschichte: '<p>Der Spiegel flackert und zeigt einen anderen Punkt: Jetzt spiegelt er an Z(4|4), und das Glöckchen liegt bei P(2|5).</p>',
-        raetsel: { frage: 'Gib die Koordinaten von P’ an, wenn P(2|5) am Punkt Z(4|4) gespiegelt wird. Tippe erst x, dann y, getrennt durch ein Semikolon – zum Beispiel 1;6.', art: 'text', soll: ['6;3'],
+        raetsel: { frage: 'Spiegle den Punkt P(2|5) 📍 am Punkt Z(4|4) ⭐ und setze den Edelstein auf den Bildpunkt P’.', art: 'gitter', gitter: { x: [0, 7], y: [0, 6] }, soll: '6|3', punkte: [ { x: 2, y: 5, t: '📍' }, { x: 4, y: 4, t: '⭐' } ],
                    tipps: [ 'Wie gehst du von P nach Z? Schau auf die Richtung nach rechts und nach oben oder unten.', 'Wiederhole diesen Weg ab Z.' ],
                    weg: 'Von P nach Z: 2 nach rechts, 1 nach unten. Weiter ab Z: P’(6|3).' } },
       { geschichte: '<p>Der Spiegel wird blind. Auf ihm erscheinen Buchstaben: „Nur ein punktsymmetrischer Buchstabe öffnet mich.“</p>',
-        raetsel: { frage: 'Entscheide, welcher Buchstabe punktsymmetrisch ist.', art: 'wahl',
-                   optionen: [ { t: 'S', ok: true }, { t: 'E' }, { t: 'A' }, { t: 'K' } ],
+        raetsel: { frage: 'Entscheide, welcher Buchstabe punktsymmetrisch ist.', art: 'karten',
+                   blatt: [ { t: 'S', ok: true }, { t: 'E' }, { t: 'A' }, { t: 'K' } ],
                    tipps: [ 'Eine punktsymmetrische Figur sieht nach einer halben Drehung gleich aus.', 'Drehe dein Blatt in Gedanken auf den Kopf.' ],
                    weg: 'Dreht man S um 180°, sieht es wieder aus wie S. E, A und K sehen dann anders aus.' } }
     ],
@@ -1273,19 +1350,19 @@ var STORY = {
   { id: '15', titel: 'Die Laternenwerkstatt',
     geschichte: '<p>Für den Weihnachtsmarkt baut Knurrbart Laternen mit viereckigen Fenstern. Das fünfzehnte Glöckchen hängt an einer Laterne, '
               + 'deren Fenster vier gleich lange Seiten, aber keine rechten Winkel hat.</p>',
-    raetsel: { frage: 'Gib an, welches Viereck das Fenster dieser Laterne hat.', art: 'wahl',
-               optionen: [ { t: 'Raute', ok: true }, { t: 'Quadrat' }, { t: 'Rechteck' }, { t: 'Trapez' } ],
+    raetsel: { frage: 'Gib an, welches Viereck das Fenster dieser Laterne hat.', art: 'karten',
+               blatt: [ { t: 'Raute', ok: true }, { t: 'Quadrat' }, { t: 'Rechteck' }, { t: 'Trapez' } ],
                tipps: [ 'Zwei Vierecke haben vier gleich lange Seiten.', 'Eines davon hat vier rechte Winkel – das ist es also nicht.' ],
                weg: 'Vier gleich lange Seiten haben Quadrat und Raute. Ohne rechte Winkel bleibt nur die Raute.' },
     umwege: [
       { geschichte: '<p>„Falsch, die hängt da hinten!“, brummt Knurrbart. „Das Glöckchen hängt an der Laterne mit genau einem Paar paralleler Seiten.“</p>',
-        raetsel: { frage: 'Gib an, welches Viereck genau ein Paar paralleler Seiten hat.', art: 'wahl',
-                   optionen: [ { t: 'Trapez', ok: true }, { t: 'Parallelogramm' }, { t: 'Quadrat' }, { t: 'Raute' } ],
+        raetsel: { frage: 'Gib an, welches Viereck genau ein Paar paralleler Seiten hat.', art: 'karten',
+                   blatt: [ { t: 'Trapez', ok: true }, { t: 'Parallelogramm' }, { t: 'Quadrat' }, { t: 'Raute' } ],
                    tipps: [ 'Bei Parallelogramm, Raute und Quadrat sind beide Paare gegenüberliegender Seiten parallel.', 'Welches Viereck hat nur ein Paar?' ],
                    weg: 'Das Trapez hat genau ein Paar paralleler Seiten.' } },
       { geschichte: '<p>„Ach, ich hab es umgehängt“, murmelt Knurrbart. „Jetzt hängt es an der Laterne mit vier rechten Winkeln, deren Seiten aber nicht alle gleich lang sind.“</p>',
-        raetsel: { frage: 'Gib an, welches Viereck das ist.', art: 'wahl',
-                   optionen: [ { t: 'Rechteck', ok: true }, { t: 'Quadrat' }, { t: 'Raute' }, { t: 'Drachenviereck' } ],
+        raetsel: { frage: 'Gib an, welches Viereck das ist.', art: 'karten',
+                   blatt: [ { t: 'Rechteck', ok: true }, { t: 'Quadrat' }, { t: 'Raute' }, { t: 'Drachenviereck' } ],
                    tipps: [ 'Vier rechte Winkel haben zwei Vierecke.', 'Bei einem davon sind alle Seiten gleich lang.' ],
                    weg: 'Vier rechte Winkel haben Rechteck und Quadrat. Weil nicht alle Seiten gleich lang sind, ist es ein Rechteck.' } }
     ],
@@ -1295,16 +1372,16 @@ var STORY = {
   { id: '16', titel: 'Das Nusslager',
     geschichte: '<p>Eichhörnchen Nuss hat für den Winter 8 004 Nüsse gesammelt. 2 739 davon hat er schon an die Gnome verschenkt. '
               + 'Unter den übrigen Nüssen liegt das sechzehnte Glöckchen – aber Nuss will wissen, wie viele noch übrig sind.</p>',
-    raetsel: { frage: 'Berechne schriftlich, wie viele Nüsse noch übrig sind.', kk: 'K5-6', art: 'zahl', eingabe: 'linear', soll: [5265, 1],
+    raetsel: { frage: 'Berechne schriftlich, wie viele Nüsse noch übrig sind, und stelle die Zahl am Vorratsschloss ein.', kk: 'K5-6', art: 'schloss', schloss: 'zahl', stellen: [4], soll: [5265,1],
                tipps: [ 'Schreibe die Zahlen stellengerecht untereinander, die größere oben.', 'Subtrahiere von rechts nach links. Wo oben eine 0 steht, musst du entbündeln bzw. mit Übertrag rechnen.' ],
                weg: '8 004 − 2 739 = 5 265. Probe: 5 265 + 2 739 = 8 004.' },
     umwege: [
       { geschichte: '<p>Nuss zählt nach: „Oh, das war das alte Lager. Im neuen sind 6 512 Nüsse, und 3 845 habe ich schon gegessen.“</p>',
-        raetsel: { frage: 'Berechne schriftlich, wie viele Nüsse im neuen Lager übrig sind.', kk: 'K5-6', art: 'zahl', eingabe: 'linear', soll: [2667, 1],
+        raetsel: { frage: 'Berechne schriftlich, wie viele Nüsse im neuen Lager übrig sind, und stelle die Zahl am Vorratsschloss ein.', kk: 'K5-6', art: 'schloss', schloss: 'zahl', stellen: [4], soll: [2667,1],
                    tipps: [ 'Stellengerecht untereinander schreiben.', 'Von rechts nach links rechnen, Überträge beachten.' ],
                    weg: '6 512 − 3 845 = 2 667.' } },
       { geschichte: '<p>„Oder doch das Lager im Baumstumpf?“ Dort waren 9 000 Bucheckern, 4 386 sind schon weg.</p>',
-        raetsel: { frage: 'Berechne schriftlich, wie viele Bucheckern noch im Baumstumpf liegen.', kk: 'K5-6', art: 'zahl', eingabe: 'linear', soll: [4614, 1],
+        raetsel: { frage: 'Berechne schriftlich, wie viele Bucheckern noch im Baumstumpf liegen, und stelle die Zahl am Vorratsschloss ein.', kk: 'K5-6', art: 'schloss', schloss: 'zahl', stellen: [4], soll: [4614,1],
                    tipps: [ 'Bei den vielen Nullen helfen Überträge.', 'Mache zum Schluss die Probe mit einer Addition.' ],
                    weg: '9 000 − 4 386 = 4 614. Probe: 4 614 + 4 386 = 9 000.' } }
     ],
@@ -1323,7 +1400,7 @@ var STORY = {
                    tipps: [ 'Schreibe 1 m 15 cm in Zentimetern.', 'Multipliziere mit 4 und wandle das Ergebnis in Meter um.' ],
                    weg: '1 m 15 cm = 115 cm. 4 · 115 cm = 460 cm = 4,60 m.' } },
       { geschichte: '<p>Jetzt ist die Kette zu lang! Sie misst 3 m 10 cm, aber nur 1 m 85 cm passen an den Ast.</p>',
-        raetsel: { frage: 'Berechne, wie viele Zentimeter übrig bleiben.', kk: 'K5-1', art: 'zahl', eingabe: 'linear', soll: [125, 1],
+        raetsel: { frage: 'Berechne, wie viele Zentimeter übrig bleiben, und stelle es am Zahlenschloss ein.', kk: 'K5-1', art: 'schloss', schloss: 'zahl', stellen: [3], soll: [125,1], einheit: 'cm',
                    tipps: [ 'Rechne beide Längen in Zentimeter um.', 'Bilde den Unterschied.' ],
                    weg: '310 cm − 185 cm = 125 cm.' } }
     ],
@@ -1333,16 +1410,16 @@ var STORY = {
   { id: '18', titel: 'Die Glöckchen-Kisten',
     geschichte: '<p>In der Werkstatt werden neue Glöckchen für alle Gnomenhäuser gegossen. In jede Kiste passen 36 Glöckchen, '
               + 'und es gibt 48 Kisten. Das achtzehnte Sternenglöckchen ist irgendwo dazwischen geraten.</p>',
-    raetsel: { frage: 'Berechne schriftlich, wie viele Glöckchen in allen 48 Kisten zusammen sind.', kk: 'K5-6', art: 'zahl', eingabe: 'linear', soll: [1728, 1],
+    raetsel: { frage: 'Berechne schriftlich, wie viele Glöckchen in allen 48 Kisten zusammen sind. Stelle das Ergebnis am Abakus ein.', kk: 'K5-6', art: 'abakus', stellen: ['T', 'H', 'Z', 'E'], soll: [1728,1],
                tipps: [ 'Multipliziere 48 zuerst mit den Zehnern von 36, dann mit den Einern.', 'Schreibe die Teilergebnisse stellengerecht untereinander und addiere sie.' ],
                weg: '48 · 30 = 1 440 und 48 · 6 = 288. 1 440 + 288 = 1 728.' },
     umwege: [
       { geschichte: '<p>Die Liste ist verrutscht. Neu gezählt: 24 Kisten mit je 53 Glöckchen.</p>',
-        raetsel: { frage: 'Berechne schriftlich, wie viele Glöckchen in den 24 Kisten sind.', kk: 'K5-6', art: 'zahl', eingabe: 'linear', soll: [1272, 1],
+        raetsel: { frage: 'Berechne schriftlich, wie viele Glöckchen in den 24 Kisten sind. Stelle das Ergebnis am Abakus ein.', kk: 'K5-6', art: 'abakus', stellen: ['T', 'H', 'Z', 'E'], soll: [1272,1],
                    tipps: [ 'Zerlege einen Faktor in Zehner und Einer.', 'Multipliziere schrittweise und addiere die Teilergebnisse.' ],
                    weg: '24 · 50 = 1 200 und 24 · 3 = 72. 1 200 + 72 = 1 272.' } },
       { geschichte: '<p>Ein kleineres Regal: 19 Fächer mit je 41 Glöckchen.</p>',
-        raetsel: { frage: 'Berechne schriftlich, wie viele Glöckchen im Regal sind.', kk: 'K5-6', art: 'zahl', eingabe: 'linear', soll: [779, 1],
+        raetsel: { frage: 'Berechne schriftlich, wie viele Glöckchen im Regal sind. Stelle das Ergebnis am Abakus ein.', kk: 'K5-6', art: 'abakus', stellen: ['T', 'H', 'Z', 'E'], soll: [779,1],
                    tipps: [ 'Schreibe 19 · 41 als schriftliche Multiplikation.', 'Multipliziere 19 mit 40 und mit 1 und addiere.' ],
                    weg: '19 · 40 = 760, 19 · 1 = 19. 760 + 19 = 779.' } }
     ],
@@ -1352,16 +1429,16 @@ var STORY = {
   { id: '19', titel: 'Der Rentier-Fahrplan',
     geschichte: '<p>Die jungen Rentiere üben für Heiligabend. Sie starten um 18:20 Uhr und fliegen 3 Runden zu je 45 Minuten. '
               + 'Zwischen den Runden machen sie 2 Pausen von je 10 Minuten. Das neunzehnte Glöckchen hängt am Geschirr des letzten Rentiers.</p>',
-    raetsel: { frage: 'Gib an, um wie viel Uhr die Rentiere landen. Schreibe die Uhrzeit so: 12:00', art: 'text', soll: ['20:55'],
+    raetsel: { frage: 'Stelle an der Uhr ein, um wie viel Uhr die Rentiere landen.', art: 'zeit', minuten: 5, soll: '20:55',
                tipps: [ 'Berechne zuerst die gesamte Dauer aus Flugzeit und Pausen.', 'Wandle die Dauer in Stunden und Minuten um und rechne ab 18:20 Uhr weiter.' ],
                weg: '3 · 45 min + 2 · 10 min = 135 min + 20 min = 155 min = 2 h 35 min. 18:20 Uhr + 2 h 35 min = 20:55 Uhr.' },
     umwege: [
       { geschichte: '<p>Die Rentiere sind heute müde: Nur 2 Runden zu je 40 Minuten und 1 Pause von 15 Minuten. Start ist um 17:30 Uhr.</p>',
-        raetsel: { frage: 'Gib an, um wie viel Uhr die Rentiere jetzt landen. Schreibe die Uhrzeit so: 12:00', art: 'text', soll: ['19:05'],
+        raetsel: { frage: 'Stelle an der Uhr ein, um wie viel Uhr die Rentiere jetzt landen.', art: 'zeit', minuten: 5, soll: '19:05',
                    tipps: [ 'Addiere Flugzeiten und Pause.', 'Rechne die Dauer in Stunden und Minuten um und addiere sie zur Startzeit.' ],
                    weg: '2 · 40 min + 15 min = 95 min = 1 h 35 min. 17:30 Uhr + 1 h 35 min = 19:05 Uhr.' } },
       { geschichte: '<p>Das Leitrentier sagt: „Meine längste Runde dauerte 3 h 10 min. Wie viele Minuten sind das?“</p>',
-        raetsel: { frage: 'Gib an, wie viele Minuten 3 h 10 min sind.', art: 'zahl', eingabe: 'linear', soll: [190, 1],
+        raetsel: { frage: 'Rechne 3 h 10 min in Minuten um und stelle das Ergebnis am Zahlenschloss ein.', art: 'schloss', schloss: 'zahl', stellen: [3], soll: [190,1], einheit: 'min',
                    tipps: [ 'Eine Stunde hat 60 Minuten.', 'Rechne die Stunden in Minuten um und addiere die restlichen Minuten.' ],
                    weg: '3 h = 180 min. 180 min + 10 min = 190 min.' } }
     ],
@@ -1371,16 +1448,16 @@ var STORY = {
   { id: '20', titel: 'Der Wegweiser zum Nordtal',
     geschichte: '<p>Das zwanzigste Glöckchen ist bis ins Nordtal geweht. Auf dem Wegweiser steht: <b>3 km 40 m</b>. '
               + '„Wie viele Meter sind das?“, fragt Nuss. „Ich kann nur in Metern hüpfen.“</p>',
-    raetsel: { frage: 'Gib an, wie viele Meter 3 km 40 m sind.', kk: 'K5-1', art: 'zahl', eingabe: 'linear', soll: [3040, 1],
+    raetsel: { frage: 'Rechne 3 km 40 m in Meter um und stelle das Ergebnis am Zahlenschloss ein.', kk: 'K5-1', art: 'schloss', schloss: 'zahl', stellen: [4], soll: [3040,1], einheit: 'm',
                tipps: [ '1 km = 1 000 m.', 'Wandle die Kilometer in Meter um und addiere die restlichen Meter. Achte auf die Stellen.' ],
                weg: '3 km = 3 000 m. 3 000 m + 40 m = 3 040 m.' },
     umwege: [
       { geschichte: '<p>Nuss hüpft zu weit. Ein anderer Wegweiser zeigt: <b>2 km 500 m</b>.</p>',
-        raetsel: { frage: 'Gib an, wie viele Meter 2 km 500 m sind.', kk: 'K5-1', art: 'zahl', eingabe: 'linear', soll: [2500, 1],
+        raetsel: { frage: 'Rechne 2 km 500 m in Meter um und stelle das Ergebnis am Zahlenschloss ein.', kk: 'K5-1', art: 'schloss', schloss: 'zahl', stellen: [4], soll: [2500,1], einheit: 'm',
                    tipps: [ 'Ein Kilometer hat 1 000 Meter.', 'Rechne um und addiere.' ],
                    weg: '2 km = 2 000 m. 2 000 m + 500 m = 2 500 m.' } },
       { geschichte: '<p>Am Ende des Pfads misst Pippo ein Brett: <b>4 m 7 cm</b>.</p>',
-        raetsel: { frage: 'Gib an, wie viele Zentimeter 4 m 7 cm sind.', kk: 'K5-1', art: 'zahl', eingabe: 'linear', soll: [407, 1],
+        raetsel: { frage: 'Rechne 4 m 7 cm in Zentimeter um und stelle das Ergebnis am Zahlenschloss ein.', kk: 'K5-1', art: 'schloss', schloss: 'zahl', stellen: [3], soll: [407,1], einheit: 'cm',
                    tipps: [ '1 m = 100 cm.', 'Achte darauf, dass 7 cm in die Einerstelle gehören.' ],
                    weg: '4 m = 400 cm. 400 cm + 7 cm = 407 cm.' } }
     ],
@@ -1390,16 +1467,16 @@ var STORY = {
   { id: '21', titel: 'Das Sternenbuch',
     geschichte: '<p>Ottilie besitzt ein dickes Sternenbuch. Darin steht, auf welcher Seite das einundzwanzigste Glöckchen eingeklemmt ist: '
               + '„Auf der Seite direkt nach Seite 2 099 999.“ Ein sehr dickes Buch!</p>',
-    raetsel: { frage: 'Gib den Nachfolger der Zahl 2 099 999 an.', art: 'zahl', eingabe: 'linear', soll: [2100000, 1],
+    raetsel: { frage: 'Bestimme den Nachfolger der Zahl 2 099 999. Stelle das Ergebnis am Abakus ein.', art: 'abakus', stellen: ['M', 'HT', 'ZT', 'T', 'H', 'Z', 'E'], soll: [2100000,1],
                tipps: [ 'Der Nachfolger ist die Zahl, die um 1 größer ist.', 'Achte auf die vielen Neunen – sie werden alle zu Nullen.' ],
                weg: '2 099 999 + 1 = 2 100 000.' },
     umwege: [
       { geschichte: '<p>Ottilie blättert zurück. „Oder doch die Seite direkt vor Seite 500 000?“</p>',
-        raetsel: { frage: 'Gib den Vorgänger der Zahl 500 000 an.', art: 'zahl', eingabe: 'linear', soll: [499999, 1],
+        raetsel: { frage: 'Bestimme den Vorgänger der Zahl 500 000. Stelle das Ergebnis am Abakus ein.', art: 'abakus', stellen: ['HT', 'ZT', 'T', 'H', 'Z', 'E'], soll: [499999,1],
                    tipps: [ 'Der Vorgänger ist um 1 kleiner.', 'Aus den Nullen werden Neunen.' ],
                    weg: '500 000 − 1 = 499 999.' } },
       { geschichte: '<p>„Ach, ich weiß es wieder“, sagt Ottilie. „Es ist genau in der Mitte zwischen Seite 40 000 und Seite 60 000.“</p>',
-        raetsel: { frage: 'Gib die Zahl an, die genau in der Mitte zwischen 40 000 und 60 000 liegt.', art: 'zahl', eingabe: 'linear', soll: [50000, 1],
+        raetsel: { frage: 'Bestimme die Zahl, die genau in der Mitte zwischen 40 000 und 60 000 liegt. Stelle das Ergebnis am Abakus ein.', art: 'abakus', stellen: ['ZT', 'T', 'H', 'Z', 'E'], soll: [50000,1],
                    tipps: [ 'Berechne den Abstand der beiden Zahlen.', 'Gehe von der kleineren Zahl die Hälfte dieses Abstands weiter.' ],
                    weg: 'Abstand: 60 000 − 40 000 = 20 000. Die Hälfte ist 10 000. 40 000 + 10 000 = 50 000.' } }
     ],
@@ -1409,16 +1486,16 @@ var STORY = {
   { id: '22', titel: 'Der schwere Schlitten',
     geschichte: '<p>Der Weihnachtsmann schickt einen Brief: Sein Schlitten trägt höchstens 1 000 kg. Schon geladen sind Geschenke mit '
               + '385 kg, 248 kg und 197 kg. Das zweiundzwanzigste Glöckchen soll als letztes mit – wenn noch Platz ist.</p>',
-    raetsel: { frage: 'Berechne schriftlich, wie viele Kilogramm noch auf den Schlitten passen.', kk: 'K5-6', art: 'zahl', eingabe: 'linear', soll: [170, 1],
+    raetsel: { frage: 'Berechne schriftlich, wie viele Kilogramm noch auf den Schlitten passen, und stelle es an der Schlittenwaage ein.', kk: 'K5-6', art: 'schloss', schloss: 'zahl', stellen: [3], soll: [170,1], einheit: 'kg',
                tipps: [ 'Addiere zuerst alles, was schon geladen ist.', 'Ziehe diese Summe von 1 000 kg ab.' ],
                weg: '385 kg + 248 kg + 197 kg = 830 kg. 1 000 kg − 830 kg = 170 kg.' },
     umwege: [
       { geschichte: '<p>Ein Paket war doppelt gezählt! Geladen sind nur 456 kg und 278 kg.</p>',
-        raetsel: { frage: 'Berechne schriftlich, wie viele Kilogramm noch auf den Schlitten passen.', kk: 'K5-6', art: 'zahl', eingabe: 'linear', soll: [266, 1],
+        raetsel: { frage: 'Berechne schriftlich, wie viele Kilogramm noch auf den Schlitten passen, und stelle es an der Schlittenwaage ein.', kk: 'K5-6', art: 'schloss', schloss: 'zahl', stellen: [3], soll: [266,1], einheit: 'kg',
                    tipps: [ 'Bilde zuerst die Summe der Ladung.', 'Subtrahiere sie von 1 000 kg.' ],
                    weg: '456 kg + 278 kg = 734 kg. 1 000 kg − 734 kg = 266 kg.' } },
       { geschichte: '<p>Neue Nachricht: „Die Geschenke wiegen zusammen 612 kg.“</p>',
-        raetsel: { frage: 'Berechne schriftlich, wie viele Kilogramm noch auf den Schlitten passen.', kk: 'K5-6', art: 'zahl', eingabe: 'linear', soll: [388, 1],
+        raetsel: { frage: 'Berechne schriftlich, wie viele Kilogramm noch auf den Schlitten passen, und stelle es an der Schlittenwaage ein.', kk: 'K5-6', art: 'schloss', schloss: 'zahl', stellen: [3], soll: [388,1], einheit: 'kg',
                    tipps: [ 'Der Schlitten trägt 1 000 kg.', 'Ziehe die Ladung ab.' ],
                    weg: '1 000 kg − 612 kg = 388 kg.' } }
     ],
@@ -1428,16 +1505,16 @@ var STORY = {
   { id: '23', titel: 'Der Sternenpfad',
     geschichte: '<p>Am Abend vor Heiligabend führt der Sternenpfad zum vorletzten Glöckchen. Pippo läuft zuerst 1 km 250 m bis zur Quelle, '
               + 'dann 875 m bis zum Felsen und schließlich 2 km 75 m bis zur Lichtung.</p>',
-    raetsel: { frage: 'Berechne, wie viele Meter Pippo insgesamt läuft.', kk: 'K5-1', art: 'zahl', eingabe: 'linear', soll: [4200, 1],
+    raetsel: { frage: 'Berechne, wie viele Meter Pippo insgesamt läuft, und stelle es am Schrittzähler ein.', kk: 'K5-1', art: 'schloss', schloss: 'zahl', stellen: [4], soll: [4200,1], einheit: 'm',
                tipps: [ 'Wandle alle Angaben in Meter um.', 'Achte bei 2 km 75 m auf die Stellen und addiere dann alles.' ],
                weg: '1 km 250 m = 1 250 m, 2 km 75 m = 2 075 m. 1 250 m + 875 m + 2 075 m = 4 200 m.' },
     umwege: [
       { geschichte: '<p>Der Weg ist verschneit. Pippo nimmt die Abkürzung: 650 m und dann 1 km 350 m.</p>',
-        raetsel: { frage: 'Berechne, wie viele Meter die Abkürzung lang ist.', kk: 'K5-1', art: 'zahl', eingabe: 'linear', soll: [2000, 1],
+        raetsel: { frage: 'Berechne, wie viele Meter die Abkürzung lang ist, und stelle es am Schrittzähler ein.', kk: 'K5-1', art: 'schloss', schloss: 'zahl', stellen: [4], soll: [2000,1], einheit: 'm',
                    tipps: [ 'Schreibe 1 km 350 m in Metern.', 'Addiere die beiden Strecken.' ],
                    weg: '650 m + 1 350 m = 2 000 m.' } },
       { geschichte: '<p>Auch die Abkürzung ist blockiert. Bis zur Lichtung sind es 3 km, und 1 km 450 m ist Pippo schon gelaufen.</p>',
-        raetsel: { frage: 'Berechne, wie viele Meter Pippo noch laufen muss.', kk: 'K5-1', art: 'zahl', eingabe: 'linear', soll: [1550, 1],
+        raetsel: { frage: 'Berechne, wie viele Meter Pippo noch laufen muss, und stelle es am Schrittzähler ein.', kk: 'K5-1', art: 'schloss', schloss: 'zahl', stellen: [4], soll: [1550,1], einheit: 'm',
                    tipps: [ 'Rechne beide Angaben in Meter um.', 'Ziehe die schon gelaufene Strecke ab.' ],
                    weg: '3 000 m − 1 450 m = 1 550 m.' } }
     ],
@@ -1448,16 +1525,16 @@ var STORY = {
     geschichte: '<p>Heiligabend! 23 Glöckchen hängen schon an der Tanne. Das letzte hat Nordwind Wusch selbst zurückgebracht – '
               + 'er möchte sich entschuldigen. Doch erst soll Pippo ihm ein Rätsel lösen: „Wenn jedes der 24 Glöckchen heute Nacht '
               + '365-mal klingt – wie oft klingt es dann insgesamt?“</p>',
-    raetsel: { frage: 'Berechne schriftlich, wie oft die 24 Glöckchen zusammen klingen.', kk: 'K5-6', art: 'zahl', eingabe: 'linear', soll: [8760, 1],
+    raetsel: { frage: 'Berechne schriftlich, wie oft die 24 Glöckchen zusammen klingen. Stelle das Ergebnis am Abakus ein.', kk: 'K5-6', art: 'abakus', stellen: ['T', 'H', 'Z', 'E'], soll: [8760,1],
                tipps: [ 'Es ist eine Multiplikation: 24 · 365.', 'Multipliziere 365 erst mit 20, dann mit 4, und addiere die Teilergebnisse.' ],
                weg: '365 · 20 = 7 300, 365 · 4 = 1 460. 7 300 + 1 460 = 8 760.' },
     umwege: [
       { geschichte: '<p>Wusch lacht und pustet Pippo die Mütze vom Kopf. „Dann eben leichter: 12 Glöckchen klingen je 365-mal.“</p>',
-        raetsel: { frage: 'Berechne schriftlich, wie oft die 12 Glöckchen zusammen klingen.', kk: 'K5-6', art: 'zahl', eingabe: 'linear', soll: [4380, 1],
+        raetsel: { frage: 'Berechne schriftlich, wie oft die 12 Glöckchen zusammen klingen. Stelle das Ergebnis am Abakus ein.', kk: 'K5-6', art: 'abakus', stellen: ['T', 'H', 'Z', 'E'], soll: [4380,1],
                    tipps: [ 'Rechne 12 · 365.', 'Zerlege 12 in 10 und 2.' ],
                    weg: '365 · 10 = 3 650, 365 · 2 = 730. 3 650 + 730 = 4 380.' } },
       { geschichte: '<p>„Letzte Chance“, braust Wusch. „24 Glöckchen klingen je 125-mal.“</p>',
-        raetsel: { frage: 'Berechne schriftlich, wie oft die 24 Glöckchen zusammen klingen.', kk: 'K5-6', art: 'zahl', eingabe: 'linear', soll: [3000, 1],
+        raetsel: { frage: 'Berechne schriftlich, wie oft die 24 Glöckchen zusammen klingen. Stelle das Ergebnis am Abakus ein.', kk: 'K5-6', art: 'abakus', stellen: ['T', 'H', 'Z', 'E'], soll: [3000,1],
                    tipps: [ 'Rechne 24 · 125.', 'Tipp für Schlaue: 8 · 125 ist eine besonders runde Zahl.' ],
                    weg: '24 · 125 = 3 · 8 · 125 = 3 · 1 000 = 3 000.' } }
     ],
@@ -1479,7 +1556,7 @@ STORY.karten.forEach(function(k){ k.geschichte = bild(k.id, 'Bild zu Türchen ' 
 
 <script>
 /* ============================================================
-   BAUSTEIN: Story-Engine (v4, 25.11.2026) – unverändert übernehmen
+   BAUSTEIN: Story-Engine (v5, 25.11.2026) – unverändert übernehmen
    Baut aus dem Objekt STORY: Startkarte (Einleitung, Anleitung, Zeitraum, Einstieg per
    Codewort) → je Karte Geschichte + Rätsel → Endkarte mit Auswertung.
    Ablauf einer Karte:  Haupträtsel richtig → geschafft (direkter Weg).
@@ -1635,7 +1712,17 @@ var HINWEIS = {
   halbSteck: T('Es liegen noch Diamanten in der Ablage. Stecke alle an den Zahlenstrahl. Das kostet keinen Versuch.',
                'Es liegen noch Diamanten in der Ablage. Stecken Sie alle an den Zahlenstrahl. Das kostet keinen Versuch.'),
   leerFelder: T('Tippe zuerst Felder an, um sie einzufärben.', 'Tippen Sie zuerst Felder an, um sie einzufärben.'),
-  leerSchalter: T('Lege zuerst mindestens einen Schalter um.', 'Legen Sie zuerst mindestens einen Schalter um.')
+  leerSchalter: T('Lege zuerst mindestens einen Schalter um.', 'Legen Sie zuerst mindestens einen Schalter um.'),
+  /* v5 */
+  leerWuerfel: T('Tippe zuerst die Würfel an, um sie zu drehen.', 'Tippen Sie zuerst die Würfel an, um sie zu drehen.'),
+  halbWuerfel: T('Es zeigt noch nicht jeder Würfel eine Zahl. Das kostet keinen Versuch.', 'Es zeigt noch nicht jeder Würfel eine Zahl. Das kostet keinen Versuch.'),
+  leerKarten: T('Decke Karten auf und wähle durch nochmaliges Antippen.', 'Decken Sie Karten auf und wählen Sie durch nochmaliges Antippen.'),
+  leerAbakus: T('Schiebe zuerst Perlen auf die Stangen.', 'Schieben Sie zuerst Perlen auf die Stangen.'),
+  leerThermo: T('Stelle zuerst einen Wert auf der Skala ein.', 'Stellen Sie zuerst einen Wert auf der Skala ein.'),
+  leerZeit: T('Stelle zuerst beide Zeiger der Uhr ein.', 'Stellen Sie zuerst beide Zeiger der Uhr ein.'),
+  leerGitter: T('Tippe zuerst einen Gitterpunkt an.', 'Tippen Sie zuerst einen Gitterpunkt an.'),
+  leerKompass: T('Drehe zuerst den Zeiger.', 'Drehen Sie zuerst den Zeiger.'),
+  leerRegler: T('Schiebe zuerst an den Reglern.', 'Schieben Sie zuerst an den Reglern.')
 };
 
 /* ---------- Rätselgeräte (v3, Fantasie-Paket v4) ----------
@@ -1737,12 +1824,68 @@ function bewerteGeraet(r, a){
     if (!an) return 'leerFelder';
     return gleich([an, fe.length], r.soll) ? 'ok' : 'falsch';
   }
+  if (art === 'wuerfel') {
+    var wu = a && a.wuerfel ? a.wuerfel : [];
+    if (!wu.some(function(x){ return x != null; })) return 'leerWuerfel';
+    if (wu.some(function(x){ return x == null; })) return 'halbWuerfel';
+    var ziel = r.ziel || 'summe';
+    if (ziel === 'summe') return gleich([wu.reduce(function(x, y){ return x + y; }, 0), 1], r.soll) ? 'ok' : 'falsch';
+    if (ziel === 'zahl') return gleich([Number(wu.join('')), 1], r.soll) ? 'ok' : 'falsch';
+    return wu.slice().sort().join(',') === r.soll.map(Number).sort().join(',') ? 'ok' : 'falsch';
+  }
+  if (art === 'karten') {
+    var ka = a && a.karten ? a.karten : [];
+    if (!ka.some(Boolean)) return 'leerKarten';
+    return r.blatt.every(function(o, k){ return !!ka[k] === !!o.ok; }) ? 'ok' : 'falsch';
+  }
+  if (art === 'abakus') {
+    if (!a || !a.abakus) return 'leerAbakus';
+    return gleich([Number(a.abakus.join('')), 1], r.soll) ? 'ok' : 'falsch';
+  }
+  if (art === 'thermo') {
+    if (!a || a.thermo == null) return 'leerThermo';
+    var sz = r.skala.schritt || [1, 1];
+    return gleich([r.skala.von * sz[1] + a.thermo * sz[0], sz[1]], r.soll) ? 'ok' : 'falsch';
+  }
+  if (art === 'zeit') {
+    if (!a || !a.zeit || a.zeit[0] == null || a.zeit[1] == null) return 'leerZeit';
+    var hm = String(r.soll).split(':').map(Number), hs = hm[0] % 12, ps = hm[0] >= 12;
+    if (a.zeit[0] !== hs || a.zeit[1] !== hm[1]) return 'falsch';
+    return (r.tag === false || !!a.pm === ps) ? 'ok' : 'falsch';
+  }
+  if (art === 'gitter') {
+    if (!a || !a.gitter) return 'leerGitter';
+    var sg = String(r.soll).split('|').map(Number);
+    return a.gitter[0] === sg[0] && a.gitter[1] === sg[1] ? 'ok' : 'falsch';
+  }
+  if (art === 'kompass') {
+    if (!a || a.kompass == null) return 'leerKompass';
+    if (r.modus === 'winkel') return gleich([a.kompass, 1], r.soll) ? 'ok' : 'falsch';
+    return ['N', 'NO', 'O', 'SO', 'S', 'SW', 'W', 'NW'][a.kompass] === String(r.soll).toUpperCase() ? 'ok' : 'falsch';
+  }
+  if (art === 'regler') {
+    if (!a || !a.regler) return 'leerRegler';
+    return r.sterne.every(function(s){ return Math.abs(reglerY(r, a.regler, s[0]) - s[1]) < 1e-9; }) ? 'ok' : 'falsch';
+  }
   if (art === 'schalter') {
     var sc = a && a.schalter ? a.schalter : [];
     if (!sc.some(Boolean)) return 'leerSchalter';
     return r.schalter.every(function(o, k){ return !!sc[k] === !!o.ok; }) ? 'ok' : 'falsch';
   }
   return 'leer';
+}
+
+/* v5: Wert eines Reglers (Stufe → Zahl) und Funktionswert des Sternbild-Graphen */
+function reglerWert(r, p, k){
+  var q = r.regler[p], max = Math.round((q[1] - q[0]) / q[2]);
+  if (k == null) k = Math.round((0 - q[0]) / q[2]);
+  k = Math.max(0, Math.min(max, k));
+  return Math.round((q[0] + k * q[2]) * 1e6) / 1e6;
+}
+function reglerY(r, st, x){
+  if (r.typ === 'gerade') return reglerWert(r, 'm', st.m) * x + reglerWert(r, 'b', st.b);
+  var d = x - reglerWert(r, 'd', st.d);
+  return reglerWert(r, 'a', st.a) * d * d + reglerWert(r, 'e', st.e);
 }
 
 var GERAET = {
@@ -2097,6 +2240,504 @@ var GERAET = {
         return '✨ ' + n + ' von ' + r.schalter.length + T(' Hebeln stehen richtig. Du darfst die Hebel jetzt einmal umstellen. Dann prüfe noch einmal.',
                                                            ' Hebeln stehen richtig. Sie dürfen die Hebel jetzt einmal umstellen. Dann prüfen Sie noch einmal.');
       } };
+  },
+
+  /* ===== v5: weitere Rätselgeräte =====================================================
+     Gemeinsam: Antwort in z.e[s] (TEIL 6), Edelstein-Leuchten (v4), gelöst → grün.        */
+
+  /* Würfel (v5): wuerfel: 1–3 Würfel; antippen dreht einen Würfel weiter, 🎲 würfelt alle.
+     ziel 'summe' (soll: [Summe, 1]) | 'augen' (soll: ['6','6'] – Reihenfolge egal)
+     | 'zahl' (Augen von links nach rechts als Ziffern gelesen, soll: [Wert, 1]) */
+  wuerfel: function(r, alt, merke, aktiv){
+    var n = r.wuerfel || 1, w = alt && alt.wuerfel ? alt.wuerfel.slice() : [];
+    for (var k = w.length; k < n; k++) w.push(null);
+    var el = neu('div', 'geraet'), reihe = neu('div', 'wuerfelreihe'), kn = [];
+    var PIPS = { 1:[[50,50]], 2:[[28,28],[72,72]], 3:[[26,26],[50,50],[74,74]], 4:[[28,28],[72,28],[28,72],[72,72]],
+                 5:[[26,26],[74,26],[50,50],[26,74],[74,74]], 6:[[28,24],[72,24],[28,50],[72,50],[28,76],[72,76]] };
+    w.forEach(function(x, i){
+      var b = neu('button', 'wuerfel', ''); b.type = 'button'; b.disabled = !aktiv;
+      b.setAttribute('aria-label', 'Würfel ' + (i + 1) + ' weiterdrehen');
+      b.addEventListener('click', function(){ w[i] = w[i] == null ? 1 : w[i] % 6 + 1; zeichneWuerfel(i); sichereWuerfel(); });
+      reihe.appendChild(b); kn.push(b);
+    });
+    var knoepfe = neu('div', 'geraet-knoepfe'), alle = neu('button', '', '🎲 alle würfeln');
+    alle.type = 'button'; alle.disabled = !aktiv;
+    alle.addEventListener('click', function(){
+      w = w.map(function(){ return 1 + Math.floor(Math.random() * 6); }); w.forEach(function(x, i){ zeichneWuerfel(i); }); sichereWuerfel();
+    });
+    knoepfe.appendChild(alle);
+    var anz = neu('p', 'anzeige', '');
+    el.appendChild(reihe); el.appendChild(knoepfe); el.appendChild(anz);
+    function sichereWuerfel(){ merke({ wuerfel: w.slice() }); textWuerfel(); }
+    function zeichneWuerfel(i, still){
+      var svg = svgLeucht({ viewBox:'0 0 100 100', 'aria-hidden':'true' });
+      svg.appendChild(svgEl('rect', { x:4, y:4, width:92, height:92, rx:18, fill:'#ffffff', stroke:'#22303f', 'stroke-width':5 }));
+      if (w[i] == null) svg.appendChild(svgEl('text', { x:50, y:64, 'text-anchor':'middle', 'font-size':44, 'font-weight':'800', fill:'#dbe3ee' }, '?'));
+      else PIPS[w[i]].forEach(function(p){
+        var c = svgEl('circle', { cx:p[0], cy:p[1], r:9, fill:'#2f5fa6' }); c.setAttribute('filter', svg.leucht); svg.appendChild(c);
+      });
+      kn[i].innerHTML = ''; kn[i].appendChild(svg);
+      if (!still) { kn[i].classList.remove('rollt'); void kn[i].offsetWidth; kn[i].classList.add('rollt'); }
+    }
+    function textWuerfel(){
+      anz.textContent = w.every(function(x){ return x == null; })
+        ? T('Tippe einen Würfel an, um ihn weiterzudrehen.', 'Tippen Sie einen Würfel an, um ihn weiterzudrehen.')
+        : 'Gewürfelt: ' + w.map(function(x){ return x == null ? '?' : x; }).join(' · ');
+    }
+    w.forEach(function(x, i){ zeichneWuerfel(i, true); }); textWuerfel();
+    return { el:el,
+      hol: function(){ return w.some(function(x){ return x != null; }) ? { wuerfel: w.slice() } : null; },
+      leere: function(){ w = w.map(function(){ return null; }); w.forEach(function(x, i){ zeichneWuerfel(i, true); }); textWuerfel(); } };
+  },
+
+  /* Kartenfächer (v5): blatt [{ t:'…', ok:true }, { t:'…' }, …] – verdeckte Karten; antippen deckt auf,
+     nochmal antippen wählt aus. mehr: true → mehrere Karten wählen (genau die ok-Karten). Gemischt (4.3). */
+  karten: function(r, alt, merke, aktiv, z, s){
+    if (!z.mix[s]) { z.mix[s] = mische(r.blatt.length); sichern(); }
+    var offen = alt && alt.offen ? alt.offen.slice() : r.blatt.map(function(){ return false; });
+    var gew = alt && alt.karten ? alt.karten.slice() : r.blatt.map(function(){ return false; });
+    var el = neu('div', 'geraet'), faecher = neu('div', 'faecher'), kn = [];
+    var mitte = (z.mix[s].length - 1) / 2;
+    z.mix[s].forEach(function(o, pos){
+      var b = neu('button', 'spielkarte', ''); b.type = 'button'; b.disabled = !aktiv;
+      if (r.blatt[o].ok) b.setAttribute('data-ok', '1');
+      b.style.setProperty('--dreh', ((pos - mitte) * 5) + 'deg');
+      b.addEventListener('click', function(){
+        if (!offen[o]) offen[o] = true;
+        else {
+          if (!r.mehr) gew = gew.map(function(x, k){ return k === o ? !x : false; });
+          else gew[o] = !gew[o];
+        }
+        zeichneKarten(); merke({ karten: gew.slice(), offen: offen.slice() });
+      });
+      faecher.appendChild(b); kn[o] = b;
+    });
+    var anz = neu('p', 'anzeige', '');
+    el.appendChild(faecher); el.appendChild(anz);
+    function zeichneKarten(){
+      kn.forEach(function(b, o){
+        b.classList.toggle('offen', !!offen[o]); b.classList.toggle('an', !!gew[o]);
+        b.innerHTML = offen[o] ? '<span class="karten-text">' + r.blatt[o].t + '</span>' : '<span class="karten-ruecken">✦</span>';
+        b.setAttribute('aria-label', offen[o] ? (gew[o] ? 'ausgewählt' : 'aufgedeckt') : 'verdeckte Karte – antippen zum Aufdecken');
+      });
+      var nw = gew.filter(Boolean).length, no = offen.filter(Boolean).length;
+      anz.textContent = no < kn.length && nw === 0
+        ? T('Tippe eine Karte an, um sie aufzudecken. Tippe sie noch einmal an, um sie zu wählen.',
+            'Tippen Sie eine Karte an, um sie aufzudecken. Tippen Sie sie noch einmal an, um sie zu wählen.')
+        : 'Ausgewählt: ' + nw + (nw === 1 ? ' Karte' : ' Karten') + (r.mehr ? T(' – wähle alle passenden.', ' – wählen Sie alle passenden.') : '.');
+      if (window.MathJax && MathJax.typesetPromise) { try { MathJax.typesetPromise([faecher]); } catch (e) {} }
+    }
+    zeichneKarten();
+    return { el:el,
+      hol: function(){ return { karten: gew.slice(), offen: offen.slice() }; },
+      leere: function(){ gew = gew.map(function(){ return false; }); zeichneKarten(); } };
+  },
+
+  /* Abakus (v5): stellen ['HT','ZT','T','H','Z','E'] – Perlen je Stange 0–9; Stange oben antippen
+     schiebt eine Perle hoch, ▲/▼ darunter fein. soll: [Wert, 1] */
+  abakus: function(r, alt, merke, aktiv){
+    var st = r.stellen || ['H', 'Z', 'E'], n = st.length;
+    var p = alt && alt.abakus ? alt.abakus.slice() : st.map(function(){ return 0; });
+    var bewegt = !!(alt && alt.abakus);
+    var B = 70, H = 300, el = neu('div', 'geraet'), huelle = neu('div', 'abakus');
+    huelle.style.maxWidth = Math.min(440, n * B + 20) + 'px'; huelle.style.margin = '0 auto';
+    var svg = svgLeucht({ viewBox:'0 0 ' + (n * B + 20) + ' ' + H, role:'img',
+      'aria-label':'Abakus mit den Stangen ' + st.join(', ') + '. Jede Stange zeigt 0 bis 9 Perlen.' });
+    var schicht = svgEl('g', {}), ziele = [];
+    svg.appendChild(svgEl('rect', { x:2, y:2, width:n * B + 16, height:H - 4, rx:14, fill:'#fdf3d9', stroke:'#96690a', 'stroke-width':4 }));
+    svg.appendChild(svgEl('rect', { x:2, y:52, width:n * B + 16, height:8, fill:'#96690a' }));
+    st.forEach(function(name, i){
+      var x = 10 + i * B + B / 2;
+      svg.appendChild(svgEl('line', { x1:x, y1:60, x2:x, y2:H - 40, stroke:'#96690a', 'stroke-width':5 }));
+      svg.appendChild(svgEl('text', { x:x, y:38, 'text-anchor':'middle', 'font-size':20, 'font-weight':'800', fill:'#22303f' }, name));
+      var oben = svgEl('rect', { x:x - B / 2, y:0, width:B, height:(H - 40) / 2, fill:'#ffffff', 'fill-opacity':'0', style:'cursor:pointer' });
+      var unten = svgEl('rect', { x:x - B / 2, y:(H - 40) / 2, width:B, height:(H - 40) / 2 + 40, fill:'#ffffff', 'fill-opacity':'0', style:'cursor:pointer' });
+      oben.setAttribute('aria-label', name + ': eine Perle mehr'); unten.setAttribute('aria-label', name + ': eine Perle weniger');
+      svg.appendChild(svgEl('text', { x:x + 22, y:78, 'text-anchor':'middle', 'font-size':15, fill:'#96690a' }, '▲'));
+      svg.appendChild(svgEl('text', { x:x + 22, y:H - 50, 'text-anchor':'middle', 'font-size':15, fill:'#96690a' }, '▼'));
+      if (aktiv) {
+        oben.addEventListener('click', function(){ setzeAbakus(i, Math.min(9, p[i] + 1)); });
+        unten.addEventListener('click', function(){ setzeAbakus(i, Math.max(0, p[i] - 1)); });
+      }
+      ziele.push(oben, unten);
+    });
+    svg.appendChild(schicht);
+    ziele.forEach(function(t){ svg.appendChild(t); });
+    huelle.appendChild(svg);
+    var anz = neu('p', 'anzeige', '');
+    el.appendChild(huelle); el.appendChild(anz);
+    var zuletzt = null;
+    function setzeAbakus(i, v){ p[i] = v; bewegt = true; zuletzt = i; zeichneAbakus(); merke({ abakus: p.slice() }); }
+    function zeichneAbakus(){
+      while (schicht.firstChild) schicht.removeChild(schicht.firstChild);
+      p.forEach(function(anzahl, i){
+        var x = 10 + i * B + B / 2;
+        for (var k = 0; k < anzahl; k++) {
+          var g = edelstein(svg, x, 82 + k * 21, 11, 'an'); schicht.appendChild(g);
+          if (i === zuletzt && k === anzahl - 1) funkeln(g);
+        }
+        schicht.appendChild(svgEl('text', { x:x, y:H - 12, 'text-anchor':'middle', 'font-size':22, 'font-weight':'800', fill:'#1f4680' }, anzahl));
+      });
+      zuletzt = null;
+      anz.textContent = bewegt ? 'Eingestellt: ' + Number(p.join('')).toLocaleString('de-DE')
+        : T('Tippe oben auf eine Stange (▲) für eine Perle mehr, unten (▼) für eine weniger.',
+            'Tippen Sie oben auf eine Stange (▲) für eine Perle mehr, unten (▼) für eine weniger.');
+    }
+    zeichneAbakus();
+    return { el:el,
+      hol: function(){ return bewegt ? { abakus: p.slice() } : null; },
+      leere: function(){ p = p.map(function(){ return 0; }); bewegt = false; zeichneAbakus(); } };
+  },
+
+  /* Thermometer (v5): skala { von:-20, bis:10, schritt:[1,1], marke:5 } – Säule ziehen oder ▲/▼;
+     einheit: '°C' | 'm' …  soll: [Z, N] (muss auf einem Schritt liegen) */
+  thermo: function(r, alt, merke, aktiv){
+    var sk = r.skala, sz = sk.schritt || [1, 1], anzahl = Math.round((sk.bis - sk.von) * sz[1] / sz[0]);
+    var k = alt && alt.thermo != null ? alt.thermo : null;
+    var el = neu('div', 'geraet'), huelle = neu('div', 'thermo');
+    var Y0 = 30, Y1 = 330, svg = svgLeucht({ viewBox:'0 0 220 380', role:'img',
+      'aria-label':'Senkrechte Skala von ' + sk.von + ' bis ' + sk.bis + (r.einheit ? ' ' + r.einheit : '') + ' zum Einstellen' });
+    function ykThermo(i){ return Y1 - (Y1 - Y0) * i / anzahl; }
+    function wertThermo(i){ return [sk.von * sz[1] + i * sz[0], sz[1]]; }
+    function txtThermo(w){ var v = w[0] / w[1]; return String(Math.round(v * 1000) / 1000).replace('.', ',').replace('-', '−'); }
+    svg.appendChild(svgEl('rect', { x:84, y:Y0 - 14, width:32, height:Y1 - Y0 + 28, rx:16, fill:'#ffffff', stroke:'#22303f', 'stroke-width':4 }));
+    svg.appendChild(svgEl('circle', { cx:100, cy:Y1 + 26, r:24, fill:'#c1272d', stroke:'#22303f', 'stroke-width':4 }));
+    var marke = sk.marke || 1;
+    for (var i = 0; i <= anzahl; i++) {
+      var w = wertThermo(i), v = w[0] / w[1], gross = Math.abs(v / marke - Math.round(v / marke)) < 1e-9;
+      svg.appendChild(svgEl('line', { x1:118, y1:ykThermo(i), x2:gross ? 140 : 130, y2:ykThermo(i), stroke:'#22303f', 'stroke-width':gross ? 3 : 1.5 }));
+      if (gross) svg.appendChild(svgEl('text', { x:146, y:ykThermo(i) + 6, 'font-size':17, 'font-weight':'700', fill:v === 0 ? '#c1272d' : '#22303f' }, txtThermo(w)));
+    }
+    if (sk.von < 0 && sk.bis > 0) {
+      var i0 = Math.round(-sk.von * sz[1] / sz[0]);
+      svg.appendChild(svgEl('line', { x1:60, y1:ykThermo(i0), x2:118, y2:ykThermo(i0), stroke:'#c1272d', 'stroke-width':2, 'stroke-dasharray':'4 3' }));
+    }
+    var saeule = svgEl('rect', { x:92, width:16, rx:8, fill:'#c1272d' }); svg.appendChild(saeule);
+    var zeiger = svgEl('g', {}); svg.appendChild(zeiger);
+    huelle.appendChild(svg);
+    var fein = neu('div', 'geraet-knoepfe'), ab = neu('button', '', '▼'), auf = neu('button', '', '▲');
+    ab.type = auf.type = 'button'; ab.disabled = auf.disabled = !aktiv;
+    ab.setAttribute('aria-label', 'tiefer'); auf.setAttribute('aria-label', 'höher');
+    ab.addEventListener('click', function(){ setzeThermo(k == null ? 0 : Math.max(0, k - 1)); });
+    auf.addEventListener('click', function(){ setzeThermo(k == null ? anzahl : Math.min(anzahl, k + 1)); });
+    fein.appendChild(ab); fein.appendChild(auf);
+    var anz = neu('p', 'anzeige', '');
+    el.appendChild(huelle); el.appendChild(fein); el.appendChild(anz);
+    function setzeThermo(i){ if (i === k) return; k = i; zeichneThermo(true); merke({ thermo: k }); }
+    function zeichneThermo(funk){
+      var y = k == null ? Y1 : ykThermo(k);
+      saeule.setAttribute('y', y); saeule.setAttribute('height', Y1 + 10 - y);
+      while (zeiger.firstChild) zeiger.removeChild(zeiger.firstChild);
+      if (k != null) {
+        var g = edelstein(svg, 66, y - 4, 10, 'an'); zeiger.appendChild(g); if (funk) funkeln(g);
+      }
+      anz.textContent = k == null ? T('Ziehe an der Skala oder tippe auf ▲ und ▼.', 'Ziehen Sie an der Skala oder tippen Sie auf ▲ und ▼.')
+        : 'Eingestellt: ' + txtThermo(wertThermo(k)) + (r.einheit ? ' ' + r.einheit : '');
+    }
+    var zieht = false;
+    function stelleThermo(e){
+      var b = svg.getBoundingClientRect(); if (!b.height) return;
+      var y = (e.clientY - b.top) / b.height * 380;
+      setzeThermo(Math.max(0, Math.min(anzahl, Math.round((Y1 - y) / (Y1 - Y0) * anzahl))));
+    }
+    if (aktiv) {
+      svg.addEventListener('pointerdown', function(e){ zieht = true; try { svg.setPointerCapture(e.pointerId); } catch (x) {} stelleThermo(e); e.preventDefault(); });
+      svg.addEventListener('pointermove', function(e){ if (zieht && e.buttons) stelleThermo(e); });
+      svg.addEventListener('pointerup', function(){ zieht = false; }); svg.addEventListener('pointercancel', function(){ zieht = false; });
+    }
+    zeichneThermo(false);
+    return { el:el,
+      hol: function(){ return k == null ? null : { thermo: k }; },
+      leere: function(){ k = null; zeichneThermo(false); } };
+  },
+
+  /* Uhrzeit (v5): echte Uhr mit Stunden- und Minutenzeiger; innen tippen/ziehen stellt die Stunde,
+     außen die Minuten (Schritt: minuten, Vorgabe 5); ☀️/🌙 für vormittags/nachmittags (tag: false schaltet ab).
+     soll: '16:25' */
+  zeit: function(r, alt, merke, aktiv){
+    var schritt = r.minuten || 5, mitTag = r.tag !== false;
+    var h = alt && alt.zeit ? alt.zeit[0] : null, mi = alt && alt.zeit ? alt.zeit[1] : null, pm = !!(alt && alt.pm);
+    var M = 170, RI = 100, el = neu('div', 'geraet'), huelle = neu('div', 'uhr');
+    var svg = svgLeucht({ viewBox:'0 0 340 340', role:'img', 'aria-label':'Uhr mit Stunden- und Minutenzeiger zum Einstellen' });
+    svg.appendChild(svgEl('circle', { cx:M, cy:M, r:164, fill:'#fdf3d9', stroke:'#96690a', 'stroke-width':8 }));
+    function polZeit(rad, a){ return [M + rad * Math.sin(a), M - rad * Math.cos(a)]; }
+    for (var t = 0; t < 60; t++) {
+      var a = t / 60 * 2 * Math.PI, gross = t % 5 === 0, p1 = polZeit(gross ? 140 : 148, a), p2 = polZeit(156, a);
+      svg.appendChild(svgEl('line', { x1:p1[0], y1:p1[1], x2:p2[0], y2:p2[1], stroke:'#22303f', 'stroke-width':gross ? 4 : 1.5 }));
+    }
+    for (var s2 = 1; s2 <= 12; s2++) {
+      var ps = polZeit(118, s2 / 12 * 2 * Math.PI);
+      svg.appendChild(svgEl('text', { x:ps[0], y:ps[1] + 9, 'text-anchor':'middle', 'font-size':26, 'font-weight':'700', fill:'#22303f' }, s2));
+    }
+    var kurz = svgEl('g', {}), lang = svgEl('g', {});
+    kurz.appendChild(svgEl('line', { x1:M, y1:M, x2:M, y2:M - 70, stroke:'#22303f', 'stroke-width':12, 'stroke-linecap':'round' }));
+    lang.appendChild(svgEl('line', { x1:M, y1:M, x2:M, y2:M - 132, stroke:'#2f5fa6', 'stroke-width':6, 'stroke-linecap':'round' }));
+    var gk = edelstein(svg, M, M - 78, 9, 'aus'), gl = edelstein(svg, M, M - 138, 8, 'aus');
+    kurz.appendChild(gk); lang.appendChild(gl); svg.appendChild(kurz); svg.appendChild(lang);
+    svg.appendChild(svgEl('circle', { cx:M, cy:M, r:11, fill:'#22303f' }));
+    huelle.appendChild(svg);
+    var fein = neu('div', 'geraet-knoepfe'), werte = [];
+    [['Stunden', function(u){ h = h == null ? (u > 0 ? 1 : 11) : (h + u + 12) % 12; }],
+     ['Minuten', function(u){ mi = mi == null ? (u > 0 ? schritt : 60 - schritt) : (mi + u * schritt + 60) % 60; }]].forEach(function(z0, j){
+      var grp = neu('span', 'uhr-fein'), zur = neu('button', '', '◀'), vor = neu('button', '', '▶'), wt = neu('span', 'uhr-wert', '');
+      zur.type = vor.type = 'button'; zur.disabled = vor.disabled = !aktiv;
+      zur.setAttribute('aria-label', z0[0] + ' zurück'); vor.setAttribute('aria-label', z0[0] + ' vor');
+      zur.addEventListener('click', function(){ z0[1](-1); zeichneZeit(j); sichereZeit(); });
+      vor.addEventListener('click', function(){ z0[1](1); zeichneZeit(j); sichereZeit(); });
+      grp.appendChild(neu('span', 'uhr-name', z0[0] + ':')); grp.appendChild(zur); grp.appendChild(wt); grp.appendChild(vor);
+      fein.appendChild(grp); werte.push(wt);
+    });
+    var tagzeile = neu('div', 'geraet-knoepfe'), bt = neu('button', '', '');
+    bt.type = 'button'; bt.disabled = !aktiv;
+    bt.addEventListener('click', function(){ pm = !pm; zeichneZeit(); sichereZeit(); });
+    if (mitTag) tagzeile.appendChild(bt);
+    var anz = neu('p', 'anzeige', '');
+    el.appendChild(huelle); el.appendChild(fein); el.appendChild(tagzeile); el.appendChild(anz);
+    function sichereZeit(){ if (h != null || mi != null) merke({ zeit:[h, mi], pm: pm }); }
+    function zweiZeit(x){ return x < 10 ? '0' + x : '' + x; }
+    function zeichneZeit(j){
+      var hh = h == null ? 0 : h, mm = mi == null ? 0 : mi;
+      kurz.setAttribute('transform', 'rotate(' + ((hh + mm / 60) * 30) + ' ' + M + ' ' + M + ')');
+      lang.setAttribute('transform', 'rotate(' + (mm * 6) + ' ' + M + ' ' + M + ')');
+      kurz.setAttribute('opacity', h == null ? '0.3' : '1'); lang.setAttribute('opacity', mi == null ? '0.3' : '1');
+      [[gk, h], [gl, mi]].forEach(function(q){
+        q[0].firstChild.setAttribute('fill', q[1] == null ? '#ffffff' : '#2f5fa6');
+        if (q[1] != null) q[0].setAttribute('filter', svg.leucht); else q[0].removeAttribute('filter');
+      });
+      if (j === 0) funkeln(gk); if (j === 1) funkeln(gl);
+      werte[0].textContent = h == null ? '–' : (h === 0 ? 12 : h); werte[1].textContent = mi == null ? '–' : zweiZeit(mi);
+      bt.textContent = pm ? '🌙 nachmittags / abends' : '☀️ vormittags';
+      var std = h == null ? null : (h + (pm ? 12 : 0));
+      anz.textContent = (h != null && mi != null) ? 'Eingestellt: ' + (mitTag ? zweiZeit(std) : (h === 0 ? 12 : h)) + ':' + zweiZeit(mi) + ' Uhr'
+        : T('Tippe innen für den Stundenzeiger, außen für den Minutenzeiger.', 'Tippen Sie innen für den Stundenzeiger, außen für den Minutenzeiger.');
+    }
+    var welcher = null;
+    function stelleZeit(e, start){
+      var b = svg.getBoundingClientRect(); if (!b.width) return;
+      var x = (e.clientX - b.left) / b.width * 340 - M, y = (e.clientY - b.top) / b.height * 340 - M, d = Math.sqrt(x * x + y * y);
+      if (start) { if (d < 20) { welcher = null; return; } welcher = d < RI ? 0 : 1; }
+      if (welcher == null) return;
+      var wi = Math.atan2(x, -y); if (wi < 0) wi += 2 * Math.PI;
+      if (welcher === 0) { var nh = Math.round(wi / (2 * Math.PI) * 12) % 12; if (nh !== h) { h = nh; zeichneZeit(0); sichereZeit(); } }
+      else { var nm = (Math.round(wi / (2 * Math.PI) * 60 / schritt) * schritt) % 60; if (nm !== mi) { mi = nm; zeichneZeit(1); sichereZeit(); } }
+    }
+    if (aktiv) {
+      svg.addEventListener('pointerdown', function(e){ try { svg.setPointerCapture(e.pointerId); } catch (x) {} stelleZeit(e, true); e.preventDefault(); });
+      svg.addEventListener('pointermove', function(e){ if (welcher != null && e.buttons) stelleZeit(e, false); });
+      svg.addEventListener('pointerup', function(){ welcher = null; }); svg.addEventListener('pointercancel', function(){ welcher = null; });
+    }
+    zeichneZeit();
+    return { el:el,
+      hol: function(){ return (h == null && mi == null) ? null : { zeit:[h, mi], pm: pm }; },
+      leere: function(){ h = mi = null; pm = false; zeichneZeit(); } };
+  },
+
+  /* Schatzkarte (v5): gitter { x:[-2, 8], y:[-2, 8] } – Gitterpunkt antippen setzt den Edelstein.
+     graphen: [{ m:2, b:1 } | { a:1, d:2, e:-1 }] (Gerade / Parabel in Scheitelpunktform),
+     punkte: [{ x, y, t:'🌲' }] als Landmarken. soll: '4|3' */
+  gitter: function(r, alt, merke, aktiv){
+    var g = r.gitter || { x:[0, 6], y:[0, 6] }, X0 = g.x[0], X1 = g.x[1], Y0 = g.y[0], Y1 = g.y[1];
+    var E = Math.min(44, Math.floor(400 / Math.max(X1 - X0, Y1 - Y0))), R = 34;
+    var W = (X1 - X0) * E + 2 * R, H = (Y1 - Y0) * E + 2 * R;
+    var pt = alt && alt.gitter ? alt.gitter.slice() : null;
+    var el = neu('div', 'geraet'), huelle = neu('div', 'gitter');
+    var svg = svgLeucht({ viewBox:'0 0 ' + W + ' ' + H, role:'img', 'aria-label':'Koordinatensystem; Gitterpunkt antippen, um den Edelstein zu setzen' });
+    if (H > W * 1.2) svg.style.maxWidth = Math.max(280, Math.round(540 * W / H)) + 'px';
+    function sxGitter(x){ return R + (x - X0) * E; } function syGitter(y){ return H - R - (y - Y0) * E; }
+    svg.appendChild(svgEl('rect', { x:0, y:0, width:W, height:H, rx:14, fill:'#fdf3d9' }));
+    for (var x = X0; x <= X1; x++) svg.appendChild(svgEl('line', { x1:sxGitter(x), y1:syGitter(Y0), x2:sxGitter(x), y2:syGitter(Y1), stroke:'#e2cf9f', 'stroke-width':1.5 }));
+    for (var y = Y0; y <= Y1; y++) svg.appendChild(svgEl('line', { x1:sxGitter(X0), y1:syGitter(y), x2:sxGitter(X1), y2:syGitter(y), stroke:'#e2cf9f', 'stroke-width':1.5 }));
+    var ax = Math.max(X0, Math.min(X1, 0)), ay = Math.max(Y0, Math.min(Y1, 0));
+    svg.appendChild(svgEl('line', { x1:sxGitter(X0) - 8, y1:syGitter(ay), x2:sxGitter(X1) + 18, y2:syGitter(ay), stroke:'#22303f', 'stroke-width':2.5 }));
+    svg.appendChild(svgEl('polygon', { points:(sxGitter(X1) + 26) + ',' + syGitter(ay) + ' ' + (sxGitter(X1) + 14) + ',' + (syGitter(ay) - 6) + ' ' + (sxGitter(X1) + 14) + ',' + (syGitter(ay) + 6), fill:'#22303f' }));
+    svg.appendChild(svgEl('line', { x1:sxGitter(ax), y1:syGitter(Y0) + 8, x2:sxGitter(ax), y2:syGitter(Y1) - 18, stroke:'#22303f', 'stroke-width':2.5 }));
+    svg.appendChild(svgEl('polygon', { points:sxGitter(ax) + ',' + (syGitter(Y1) - 26) + ' ' + (sxGitter(ax) - 6) + ',' + (syGitter(Y1) - 14) + ' ' + (sxGitter(ax) + 6) + ',' + (syGitter(Y1) - 14), fill:'#22303f' }));
+    svg.appendChild(svgEl('text', { x:sxGitter(X1) + 14, y:syGitter(ay) + 24, 'font-size':16, 'font-style':'italic', fill:'#22303f' }, 'x'));
+    svg.appendChild(svgEl('text', { x:sxGitter(ax) + 10, y:syGitter(Y1) - 14, 'font-size':16, 'font-style':'italic', fill:'#22303f' }, 'y'));
+    var ecke = ax === 0 && ay === 0 && X0 < 0 && Y0 < 0;
+    for (x = X0; x <= X1; x++) if (x !== ax && !(ecke && x === -1)) svg.appendChild(svgEl('text', { x:sxGitter(x), y:syGitter(ay) + 19, 'text-anchor':'middle', 'font-size':14, fill:'#22303f' }, String(x).replace('-', '−')));
+    for (y = Y0; y <= Y1; y++) if (y !== ay) svg.appendChild(svgEl('text', { x:sxGitter(ax) - 8, y:syGitter(y) + 5, 'text-anchor':'end', 'font-size':(E < 30 ? 12 : 14), fill:'#22303f' }, String(y).replace('-', '−')));
+    (r.graphen || []).forEach(function(gr, i){
+      var d = '', farbe = ['#2f5fa6', '#96690a', '#1e7d32'][i % 3];
+      for (var k = 0; k <= 200; k++) {
+        var xx = X0 + (X1 - X0) * k / 200, yy = gr.m != null ? gr.m * xx + gr.b : gr.a * (xx - gr.d) * (xx - gr.d) + gr.e;
+        if (yy < Y0 - 1 || yy > Y1 + 1) { d += ' '; continue; }
+        d += (d === '' || d.slice(-1) === ' ' ? 'M' : 'L') + sxGitter(xx).toFixed(1) + ',' + syGitter(yy).toFixed(1);
+      }
+      svg.appendChild(svgEl('path', { d:d.replace(/ +/g, ' ').trim(), fill:'none', stroke:farbe, 'stroke-width':3.5 }));
+    });
+    (r.punkte || []).forEach(function(p){
+      svg.appendChild(svgEl('text', { x:sxGitter(p.x), y:syGitter(p.y) + 8, 'text-anchor':'middle', 'font-size':22 }, p.t));
+    });
+    var schicht = svgEl('g', {}); svg.appendChild(schicht);
+    for (x = X0; x <= X1; x++) for (y = Y0; y <= Y1; y++) (function(x, y){
+      var hit = svgEl('circle', { cx:sxGitter(x), cy:syGitter(y), r:E / 2, fill:'#ffffff', 'fill-opacity':'0', style:'cursor:pointer' });
+      if (aktiv) hit.addEventListener('click', function(){ pt = [x, y]; zeichneGitter(true); merke({ gitter: pt.slice() }); });
+      svg.appendChild(hit);
+    })(x, y);
+    huelle.appendChild(svg);
+    var anz = neu('p', 'anzeige', '');
+    el.appendChild(huelle); el.appendChild(anz);
+    function zeichneGitter(funk){
+      while (schicht.firstChild) schicht.removeChild(schicht.firstChild);
+      if (pt) { var s = edelstein(svg, sxGitter(pt[0]), syGitter(pt[1]) - 6, 11, 'an'); schicht.appendChild(s); if (funk) funkeln(s); }
+      anz.textContent = pt ? 'Gesetzt: (' + String(pt[0]).replace('-', '−') + ' | ' + String(pt[1]).replace('-', '−') + ')'
+        : T('Tippe den Gitterpunkt an, an dem der Edelstein liegen soll.', 'Tippen Sie den Gitterpunkt an, an dem der Edelstein liegen soll.');
+    }
+    zeichneGitter(false);
+    return { el:el,
+      hol: function(){ return pt ? { gitter: pt.slice() } : null; },
+      leere: function(){ pt = null; zeichneGitter(false); } };
+  },
+
+  /* Kompass / Winkelzeiger (v5): modus 'richtung' (8 Himmelsrichtungen, soll: 'NO')
+     | 'winkel' (Zeiger gegen den festen Schenkel, 0–360°, Schritt grad (Vorgabe 1), soll: [108, 1]) */
+  kompass: function(r, alt, merke, aktiv){
+    var rich = r.modus !== 'winkel', schritt = r.grad || 1;
+    var RICHT = ['N', 'NO', 'O', 'SO', 'S', 'SW', 'W', 'NW'];
+    var v = alt && alt.kompass != null ? alt.kompass : null;           /* richtung: Index 0–7, winkel: Grad */
+    var M = 170, el = neu('div', 'geraet'), huelle = neu('div', 'uhr');
+    var svg = svgLeucht({ viewBox:'0 0 340 340', role:'img',
+      'aria-label':rich ? 'Kompassrose mit acht Himmelsrichtungen; Nadel drehen' : 'Winkelscheibe von 0 bis 360 Grad; beweglichen Schenkel drehen' });
+    function polKompass(rad, gradW){ var a = gradW * Math.PI / 180; return [M + rad * Math.sin(a), M - rad * Math.cos(a)]; }
+    svg.appendChild(svgEl('circle', { cx:M, cy:M, r:164, fill:'#ffffff', stroke:'#22303f', 'stroke-width':6 }));
+    if (rich) {
+      RICHT.forEach(function(n0, i){
+        var pt = polKompass(i % 2 ? 128 : 136, i * 45);
+        svg.appendChild(svgEl('text', { x:pt[0], y:pt[1] + 9, 'text-anchor':'middle', 'font-size':i % 2 ? 20 : 28, 'font-weight':'800', fill:i === 0 ? '#c1272d' : '#22303f' }, n0));
+      });
+      svg.appendChild(svgEl('polygon', { points:M + ',' + (M - 100) + ' ' + (M + 14) + ',' + M + ' ' + M + ',' + (M + 100) + ' ' + (M - 14) + ',' + M, fill:'#e6eefb', stroke:'#dbe3ee' }));
+      svg.appendChild(svgEl('polygon', { points:(M - 100) + ',' + M + ' ' + M + ',' + (M - 14) + ' ' + (M + 100) + ',' + M + ' ' + M + ',' + (M + 14), fill:'#e6eefb', stroke:'#dbe3ee' }));
+    } else {
+      for (var gr = 0; gr < 360; gr += 5) {
+        var zehn = gr % 10 === 0;          /* Winkel gegen den Uhrzeigersinn vom festen Schenkel nach rechts */
+        svg.appendChild(svgEl('line', { x1:M + 152 * Math.cos(gr * Math.PI / 180) * (zehn ? 0.96 : 1), y1:M - 152 * Math.sin(gr * Math.PI / 180) * (zehn ? 0.96 : 1),
+          x2:M + 160 * Math.cos(gr * Math.PI / 180), y2:M - 160 * Math.sin(gr * Math.PI / 180), stroke:'#22303f', 'stroke-width':zehn ? 2.5 : 1 }));
+        if (gr % 30 === 0) svg.appendChild(svgEl('text', { x:M + 128 * Math.cos(gr * Math.PI / 180), y:M - 128 * Math.sin(gr * Math.PI / 180) + (gr === 0 ? -10 : 5),
+          'text-anchor':'middle', 'font-size':14, 'font-weight':'700', fill:'#1f4680' }, gr + '°'));
+      }
+      svg.appendChild(svgEl('line', { x1:M, y1:M, x2:M + 150, y2:M, stroke:'#22303f', 'stroke-width':6, 'stroke-linecap':'round' }));
+    }
+    var bogen = svgEl('path', { fill:'#fdf3d9', stroke:'#b8860b', 'stroke-width':2 }); if (!rich) svg.appendChild(bogen);
+    var nadel = svgEl('g', {});
+    if (rich) {
+      nadel.appendChild(svgEl('polygon', { points:M + ',' + (M - 96) + ' ' + (M + 11) + ',' + M + ' ' + (M - 11) + ',' + M, fill:'#c1272d' }));
+      nadel.appendChild(svgEl('polygon', { points:M + ',' + (M + 96) + ' ' + (M + 11) + ',' + M + ' ' + (M - 11) + ',' + M, fill:'#22303f' }));
+    } else nadel.appendChild(svgEl('line', { x1:M, y1:M, x2:M, y2:M - 150, stroke:'#2f5fa6', 'stroke-width':6, 'stroke-linecap':'round' }));
+    var spitze = edelstein(svg, M, M - (rich ? 104 : 152), 9, 'aus'); nadel.appendChild(spitze);
+    svg.appendChild(nadel); svg.appendChild(svgEl('circle', { cx:M, cy:M, r:10, fill:'#22303f' }));
+    huelle.appendChild(svg);
+    var fein = neu('div', 'geraet-knoepfe'), zur = neu('button', '', '◀'), vor = neu('button', '', '▶');
+    zur.type = vor.type = 'button'; zur.disabled = vor.disabled = !aktiv;
+    zur.setAttribute('aria-label', rich ? 'gegen den Uhrzeigersinn' : 'kleiner'); vor.setAttribute('aria-label', rich ? 'im Uhrzeigersinn' : 'größer');
+    zur.addEventListener('click', function(){ setzeKompass(rich ? ((v == null ? 0 : v) + 7) % 8 : Math.max(0, (v == null ? 0 : v) - schritt)); });
+    vor.addEventListener('click', function(){ setzeKompass(rich ? ((v == null ? -1 : v) + 1) % 8 : Math.min(360, (v == null ? 0 : v) + schritt)); });
+    fein.appendChild(zur); fein.appendChild(vor);
+    var anz = neu('p', 'anzeige', '');
+    el.appendChild(huelle); el.appendChild(fein); el.appendChild(anz);
+    function setzeKompass(x){ if (x === v) return; v = x; zeichneKompass(true); merke({ kompass: v }); }
+    function zeichneKompass(funk){
+      var w = v == null ? 0 : v;
+      if (rich) nadel.setAttribute('transform', 'rotate(' + (w * 45) + ' ' + M + ' ' + M + ')');
+      else {
+        nadel.setAttribute('transform', 'rotate(' + (90 - w) + ' ' + M + ' ' + M + ')');
+        var a = w * Math.PI / 180, ex = M + 60 * Math.cos(a), ey = M - 60 * Math.sin(a);
+        bogen.setAttribute('d', w <= 0 ? '' : 'M' + M + ',' + M + ' L' + (M + 60) + ',' + M + ' A60,60 0 ' + (w > 180 ? 1 : 0) + ' 0 ' + ex + ',' + ey + ' Z');
+      }
+      nadel.setAttribute('opacity', v == null ? '0.35' : '1');
+      spitze.firstChild.setAttribute('fill', v == null ? '#ffffff' : '#2f5fa6');
+      if (v != null) spitze.setAttribute('filter', svg.leucht); else spitze.removeAttribute('filter');
+      if (funk) funkeln(spitze);
+      anz.textContent = v == null ? (rich ? T('Drehe die Nadel: ziehen oder ◀ ▶ antippen.', 'Drehen Sie die Nadel: ziehen oder ◀ ▶ antippen.')
+                                          : T('Drehe den blauen Schenkel: ziehen oder ◀ ▶ antippen.', 'Drehen Sie den blauen Schenkel: ziehen oder ◀ ▶ antippen.'))
+        : 'Eingestellt: ' + (rich ? RICHT[v] : v + '°');
+    }
+    var zieht = false;
+    function stelleKompass(e){
+      var b = svg.getBoundingClientRect(); if (!b.width) return;
+      var x = (e.clientX - b.left) / b.width * 340 - M, y = (e.clientY - b.top) / b.height * 340 - M;
+      if (x * x + y * y < 400) return;
+      if (rich) { var a = Math.atan2(x, -y) * 180 / Math.PI; if (a < 0) a += 360; setzeKompass(Math.round(a / 45) % 8); }
+      else { var g2 = Math.atan2(-y, x) * 180 / Math.PI; if (g2 < 0) g2 += 360; setzeKompass(Math.round(g2 / schritt) * schritt % 360); }
+    }
+    if (aktiv) {
+      svg.addEventListener('pointerdown', function(e){ zieht = true; try { svg.setPointerCapture(e.pointerId); } catch (x) {} stelleKompass(e); e.preventDefault(); });
+      svg.addEventListener('pointermove', function(e){ if (zieht && e.buttons) stelleKompass(e); });
+      svg.addEventListener('pointerup', function(){ zieht = false; }); svg.addEventListener('pointercancel', function(){ zieht = false; });
+    }
+    zeichneKompass(false);
+    return { el:el,
+      hol: function(){ return v == null ? null : { kompass: v }; },
+      leere: function(){ v = null; zeichneKompass(false); } };
+  },
+
+  /* Sternbild-Regler (v5): typ 'gerade' (Regler m, b) | 'parabel' (Regler a, d, e: y = a(x − d)² + e).
+     regler: { a:[-3, 3, 0.5], d:[-5, 5, 1], e:[-5, 5, 1] } (von, bis, Schritt); sterne: [[x, y], …];
+     gitter wie bei 'gitter'. Richtig, wenn der Graph durch alle Sterne geht – getroffene Sterne leuchten. */
+  regler: function(r, alt, merke, aktiv){
+    var par = r.typ === 'gerade' ? ['m', 'b'] : ['a', 'd', 'e'];
+    var rg = r.regler, g = r.gitter || { x:[-5, 5], y:[-5, 5] }, X0 = g.x[0], X1 = g.x[1], Y0 = g.y[0], Y1 = g.y[1];
+    var stufe = {}; par.forEach(function(p){ stufe[p] = alt && alt.regler ? alt.regler[p] : null; });
+    function wertVonRegler(p){ return reglerWert(r, p, stufe[p]); }
+    function fxRegler(x){ return reglerY(r, stufe, x); }
+    var E = Math.min(40, Math.floor(400 / Math.max(X1 - X0, Y1 - Y0))), R = 30, W = (X1 - X0) * E + 2 * R, H = (Y1 - Y0) * E + 2 * R;
+    function sxRegler(x){ return R + (x - X0) * E; } function syRegler(y){ return H - R - (y - Y0) * E; }
+    var el = neu('div', 'geraet'), huelle = neu('div', 'gitter');
+    var svg = svgLeucht({ viewBox:'0 0 ' + W + ' ' + H, role:'img', 'aria-label':'Sternenhimmel mit Koordinatensystem; der Graph soll durch alle Sterne gehen' });
+    if (H > W * 1.2) svg.style.maxWidth = Math.max(280, Math.round(540 * W / H)) + 'px';
+    svg.appendChild(svgEl('rect', { x:0, y:0, width:W, height:H, rx:14, fill:'#1f2a44' }));
+    for (var x = X0; x <= X1; x++) svg.appendChild(svgEl('line', { x1:sxRegler(x), y1:syRegler(Y0), x2:sxRegler(x), y2:syRegler(Y1), stroke:'#33415f', 'stroke-width':1 }));
+    for (var y = Y0; y <= Y1; y++) svg.appendChild(svgEl('line', { x1:sxRegler(X0), y1:syRegler(y), x2:sxRegler(X1), y2:syRegler(y), stroke:'#33415f', 'stroke-width':1 }));
+    var ax = Math.max(X0, Math.min(X1, 0)), ay = Math.max(Y0, Math.min(Y1, 0));
+    svg.appendChild(svgEl('line', { x1:sxRegler(X0), y1:syRegler(ay), x2:sxRegler(X1) + 10, y2:syRegler(ay), stroke:'#dbe3ee', 'stroke-width':2 }));
+    svg.appendChild(svgEl('line', { x1:sxRegler(ax), y1:syRegler(Y0), x2:sxRegler(ax), y2:syRegler(Y1) - 10, stroke:'#dbe3ee', 'stroke-width':2 }));
+    for (x = X0; x <= X1; x++) if (x !== ax && (X1 - X0 <= 12 || x % 2 === 0)) svg.appendChild(svgEl('text', { x:sxRegler(x), y:syRegler(ay) + 17, 'text-anchor':'middle', 'font-size':13, fill:'#dbe3ee' }, String(x).replace('-', '−')));
+    for (y = Y0; y <= Y1; y++) if (y !== ay && (Y1 - Y0 <= 12 || y % 2 === 0)) svg.appendChild(svgEl('text', { x:sxRegler(ax) - 6, y:syRegler(y) + 4, 'text-anchor':'end', 'font-size':13, fill:'#dbe3ee' }, String(y).replace('-', '−')));
+    var kurve = svgEl('path', { fill:'none', stroke:'#ffd34d', 'stroke-width':3.5 }); svg.appendChild(kurve);
+    var schicht = svgEl('g', {}); svg.appendChild(schicht);
+    huelle.appendChild(svg);
+    var feld = neu('div', 'regler-feld'), bars = {}, werte = {};
+    var NAMEN = { m:'m (Steigung)', b:'b (y-Abschnitt)', a:'a (Streckung)', d:'d (nach rechts)', e:'e (nach oben)' };
+    par.forEach(function(p){
+      var q = rg[p], zeile = neu('label', 'regler-zeile', ''), inp = document.createElement('input');
+      inp.type = 'range'; inp.min = 0; inp.max = Math.round((q[1] - q[0]) / q[2]); inp.step = 1; inp.disabled = !aktiv;
+      inp.value = stufe[p] == null ? Math.round((0 - q[0]) / q[2]) : stufe[p];
+      inp.addEventListener('input', function(){ stufe[p] = +inp.value; zeichneRegler(); merke({ regler: kopieRegler() }); });
+      var wt = neu('span', 'regler-wert', '');
+      zeile.appendChild(neu('span', 'regler-name', NAMEN[p])); zeile.appendChild(inp); zeile.appendChild(wt);
+      feld.appendChild(zeile); bars[p] = inp; werte[p] = wt;
+    });
+    var anz = neu('p', 'anzeige', '');
+    el.appendChild(huelle); el.appendChild(feld); el.appendChild(anz);
+    function kopieRegler(){ var o = {}; par.forEach(function(p){ o[p] = stufe[p]; }); return o; }
+    function zahlRegler(v){ return String(v).replace('.', ',').replace('-', '−'); }
+    function zeichneRegler(){
+      var d = '';
+      for (var k = 0; k <= 240; k++) {
+        var xx = X0 + (X1 - X0) * k / 240, yy = fxRegler(xx);
+        if (yy < Y0 - 0.5 || yy > Y1 + 0.5) { d += ' '; continue; }
+        d += (d === '' || d.slice(-1) === ' ' ? 'M' : 'L') + sxRegler(xx).toFixed(1) + ',' + syRegler(yy).toFixed(1);
+      }
+      kurve.setAttribute('d', d.replace(/ +/g, ' ').trim());
+      while (schicht.firstChild) schicht.removeChild(schicht.firstChild);
+      var treffer = 0;
+      r.sterne.forEach(function(s){
+        var hit = Math.abs(fxRegler(s[0]) - s[1]) < 1e-9; if (hit) treffer++;
+        schicht.appendChild(svgEl('polygon', { points:sternRegler(sxRegler(s[0]), syRegler(s[1]), 11, 5), fill:hit ? '#7ee08a' : '#ffffff',
+          filter:svg.leucht, stroke:hit ? '#1e7d32' : '#ffd34d', 'stroke-width':1.5 }));
+      });
+      par.forEach(function(p){ werte[p].textContent = zahlRegler(wertVonRegler(p)); });
+      var w = {}; par.forEach(function(p){ w[p] = wertVonRegler(p); });
+      var term = r.typ === 'gerade' ? 'y = ' + zahlRegler(w.m) + 'x ' + (w.b < 0 ? '− ' + zahlRegler(-w.b) : '+ ' + zahlRegler(w.b))
+        : 'y = ' + zahlRegler(w.a) + '(x ' + (w.d < 0 ? '+ ' + zahlRegler(-w.d) : '− ' + zahlRegler(w.d)) + ')² ' + (w.e < 0 ? '− ' + zahlRegler(-w.e) : '+ ' + zahlRegler(w.e));
+      anz.innerHTML = term + ' · getroffene Sterne: <b>' + treffer + ' von ' + r.sterne.length + '</b>';
+    }
+    function sternRegler(cx, cy, ro, n){ var p = []; for (var i = 0; i < 2 * n; i++) { var rr = i % 2 ? ro * 0.45 : ro, a = i * Math.PI / n - Math.PI / 2;
+      p.push((cx + rr * Math.cos(a)).toFixed(1) + ',' + (cy + rr * Math.sin(a)).toFixed(1)); } return p.join(' '); }
+    zeichneRegler();
+    return { el:el,
+      hol: function(){ return par.some(function(p){ return stufe[p] != null; }) ? { regler: kopieRegler() } : null; },
+      leere: function(){ par.forEach(function(p){ stufe[p] = null; bars[p].value = Math.round((0 - rg[p][0]) / rg[p][2]); }); zeichneRegler(); } };
   }
 };
 
@@ -2283,7 +2924,7 @@ function raetselBlock(i, s){
   box.appendChild(neu('p', 'frage', r.frage));
   var fb = neu('div', 'fb', '');
   var hol, leere, gt = null;                 /* aktuelle Antwort holen / Eingabe leeren; gt: Rätselgerät */
-  if (GERAET[r.art]) {                       /* v3: Uhr, Zahlenschloss, Diamanten, Felder, Schalter */
+  if (GERAET[r.art]) {                       /* v3–v5: Rätselgeräte */
     gt = GERAET[r.art](r, z.e[s] || null, function(a){
       z.e[s] = a; sichern();
       if (fb.className === 'fb info') { fb.className = 'fb'; fb.textContent = ''; }   /* alter Hinweis passt nicht mehr */
