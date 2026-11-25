@@ -26,7 +26,9 @@ einem Baustein oder einer Regel wird hier EINMAL umgesetzt und gilt dann in alle
 - `_wartung/plan/` – laufende Planung (`plan_navigation_impressum.md`) und Entwürfe
 - `_wartung/PROJEKT-LANDKARTE.md` – welches Projekt welche Ordner synchronisiert
 - Die Website selbst (Lernseiten, `build_hub.py`) liegt im selben Repo.
-  `dino_hub.html` wird von der GitHub-Action erzeugt – nie von Hand ändern.
+  `dino_hub.html` und `404.html` (Seite nicht gefunden, mit Vorschlägen) werden von der
+  GitHub-Action aus `build_hub.py` erzeugt – nie von Hand ändern. Das Bild der 404-Seite ist
+  `dino_404.png` im Hauptordner (fehlt es, erscheint ein 🦖).
 
 ## Die fünf realen Projekte (GitHub-Ordner)
 - **Unterrichtsvorbereitung** – `allgemein`, `geodreieck`, `unterrichtsvorbereitung`
