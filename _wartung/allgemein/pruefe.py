@@ -23,7 +23,11 @@ Was dieser Linter NICHT kann (bleibt Handarbeit bzw. Browsertest):
   - ob der Stand ein Neuladen wirklich vollständig übersteht (Browsertest: Seite
     bearbeiten, neu laden, vergleichen)
 
-Stand: 25.11.2026 (Formeltool v2: Tastenleiste dezent unter dem Feld, nur bei aktivem Feld,
+Stand: 25.11.2026 (Story-Engine v4: Fantasie-Paket – Edelsteine, Uhr mit Minutenring, Hebel,
+       Korrekturrunde; Prüfung STORY: Uhr-Bruch muss auf Stunden (≤ 12) und Minuten (≤ 60) passen;
+       Story-Engine v3: Rätselgeräte uhr/schloss/steck/felder/schalter,
+       Prüfung STORY kennt die neuen Antwortarten und prüft Diamanten-Steckplätze;
+       Formeltool v2: Tastenleiste dezent unter dem Feld, nur bei aktivem Feld,
        Prüfung FT/FTALT; Dino-CSS mit Kommentarrest aus dem Baustein, Prüfung TREX;
        22.11.2026: Story-Seiten im Ordner spiele/ der Jahrgangsstufe, Prüfung STORYORDNER;
        Rückblick-KA-Engine v6 und SfS-Engine v3 mit Formeltool, art term;
@@ -83,8 +87,10 @@ RBKA_MARKE = 'BAUSTEIN: Rückblick-KA-Engine'
 
 # Story-Engine (baustein_story.html, TEIL 2.11)
 STORY_TYP = 'Story'
-STORY_VERSION = 'v2'
+STORY_VERSION = 'v4'
 STORY_MARKE = 'BAUSTEIN: Story-Engine'
+STORY_ARTEN = ('zahl', 'bruch', 'term', 'text', 'wahl',                 # v1/v2
+               'uhr', 'schloss', 'steck', 'felder', 'schalter')      # v3: Rätselgeräte
 
 # Formeltool (baustein_formeltool.html, TEIL 4.7)
 FT_VERSION = 'v2'
@@ -507,7 +513,26 @@ def pruefe(pfad):
                 if not re.search(r'\bgeschafft:', t):
                     fehler('STORY', 'Karte %s ohne geschafft-Text' % kid)
                 n_soll = len(re.findall(r'\bsoll:\s*(?:\[\s*-?\d+\s*,\s*[1-9]\d*\s*\]|\'[^\']+\'|\[\s*\')', t)) + \
-                         len(re.findall(r'\boptionen:\s*\[[^\]]*?\bok:\s*true', t, re.S))
+                         len(re.findall(r'\boptionen:\s*\[[^\]]*?\bok:\s*true', t, re.S)) + \
+                         len(re.findall(r'\bschalter:\s*\[[^\]]*?\bok:\s*true', t, re.S)) + \
+                         len(re.findall(r'\bsteine:\s*\[\s*\{', t))
+                # v3: Antwortarten und Rätselgeräte
+                for a in re.findall(r"\bart:\s*'([^']*)'", t):
+                    if a not in STORY_ARTEN:
+                        fehler('STORY', "Karte %s: unbekannte Antwortart '%s'" % (kid, a))
+                for um in re.finditer(r"art:\s*'uhr'[^}]*?\bsoll:\s*\[\s*(\d+)\s*,\s*(\d+)\s*\]", t):
+                    kl, gr = sorted((int(um.group(1)), int(um.group(2))))
+                    if kl < 1 or kl > 12 or gr > 60:
+                        fehler('STORY', 'Karte %s: Bruch-Uhr kann %s/%s nicht zeigen – ein Wert höchstens 12 '
+                                        '(Stunden), der andere höchstens 60 (Minuten)' % (kid, um.group(1), um.group(2)))
+                for sm in re.finditer(r"\bstrahl:\s*\{\s*bis:\s*(\d+)\s*,\s*teile:\s*(\d+)\s*\}", t):
+                    bis, teile = int(sm.group(1)), int(sm.group(2))
+                    rest = t[sm.end():]
+                    rest = rest[:rest.find('tipps:')] if 'tipps:' in rest else rest
+                    for wz, wn in re.findall(r'\bw:\s*\[\s*(\d+)\s*,\s*(\d+)\s*\]', rest):
+                        if (int(wz) * teile) % (int(wn) * bis) or int(wz) > int(wn) * bis:
+                            fehler('STORY', 'Karte %s: Diamant %s/%s liegt auf keinem Steckplatz des Zahlenstrahls '
+                                            '(0 bis %d, %d Teile)' % (kid, wz, wn, bis, teile))
                 if n_soll < n_r:
                     fehler('STORY', 'Karte %s: nicht jedes Rätsel hat soll (bzw. eine Option mit ok: true)' % kid)
                 if len(re.findall(r'\btipps:\s*\[', t)) < n_r:

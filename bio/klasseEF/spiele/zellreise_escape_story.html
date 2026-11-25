@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- =====================================================================
-     BAUSTEIN: Story (_story)  v2, 22.11.2026
+     BAUSTEIN: Story (_story)  v4, 25.11.2026
      Escape Room, Adventskalender, Detektivgeschichte oder freie Story: eine Geschichte
      in mehreren Karten, jede Karte endet mit einem Rätsel.
      Richtig → weiter zur nächsten Karte (mit Codewort zum späteren Wiedereinstieg).
@@ -21,6 +21,18 @@
         einmal falsch durchspielen.
      v2: zweiter Code STORY.testcode für Testgruppen von SuS (Datumssperre aus, Reihenfolge
         bleibt); der Lehrercode STORY.vorschau öffnet jetzt wirklich alle Karten.
+     v3: Rätselgeräte als neue Antwortarten – 'uhr' (Bruch-Uhr: langer Zeiger Zähler, kurzer
+        Zeiger Nenner), 'schloss' (Zahlenschloss mit Rädern: Bruch, gemischte Zahl oder Zahl),
+        'steck' (Diamanten an den Zahlenstrahl stecken), 'felder' (Teile einer Figur einfärben),
+        'schalter' (Kippschalter: alle passenden umlegen). Dazu STORY.erwischt / karte.erwischt
+        (Erzähltext vor dem Lösungsweg) und STORY.wegTitel (Überschrift des Lösungswegs).
+        Abwärtskompatibel: v2-Datenblöcke laufen unverändert.
+     v4 (Fantasie-Paket): Edelsteine, die beim Antippen aufleuchten (Felder-Form 'steine', Diamanten,
+        Hebel-Knauf, Zeigerspitzen, Schlossbügel); gelöste Geräte leuchten grün. Bruch-Uhr mit
+        Stunden (1–12, kurzer Zeiger) und Minuten (1–60, langer Zeiger) – das Kind legt selbst fest,
+        welcher Zeiger Zähler und welcher Nenner ist. Gezeichnete Hebel statt Kippschalter.
+        Diamanten und Hebel: nach dem ersten falschen Prüfen einmal korrigieren (Diamanten:
+        richtige leuchten grün und bleiben stecken; Hebel: nur die Anzahl richtiger wird genannt).
      ===================================================================== -->
 <html lang="de">
 <head>
@@ -43,7 +55,7 @@
 </script>
 <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
 <style>
-/* ===== BAUSTEIN-CSS: Story (v2, 22.11.2026) – unverändert übernehmen ===== */
+/* ===== BAUSTEIN-CSS: Story (v4, 25.11.2026) – unverändert übernehmen ===== */
 :root{
   --ink:#22303f; --card:#ffffff; --green:#1e7d32; --red:#c1272d;
   --amber:#b8860b; --amber-light:#fdf3d9; --amber-dark:#96690a;
@@ -162,6 +174,60 @@ mjx-container{max-width:100%;overflow-x:auto;}
   padding:.3rem .7rem;border-radius:.5rem;font-size:1rem;display:none;}
 .trex:hover + .trex-text,.trex-text.an{display:block;}
 @media (max-width:600px){ .zeile > input{width:9rem;} }
+/* v3: Rätselgeräte – Bruch-Uhr, Zahlenschloss, Diamanten am Zahlenstrahl, Felder, Schalter */
+.geraet{margin:.8rem 0;}
+.anzeige{font-size:1.05rem;text-align:center;margin:.5rem 0 0;}
+.geraet-knoepfe{display:flex;flex-wrap:wrap;gap:.5rem;justify-content:center;margin:.5rem 0;}
+.geraet-knoepfe button,.ablage button{min-height:48px;min-width:48px;padding:.35rem .8rem;border:2px solid var(--line);
+  border-radius:.7rem;background:#fff;color:var(--ink);font:inherit;font-size:1.05rem;cursor:pointer;
+  display:inline-flex;align-items:center;gap:.4rem;}
+.geraet-knoepfe button.an,.ablage button.an{background:var(--blue);border-color:var(--blue);color:#fff;}
+.geraet-knoepfe button:disabled,.ablage button:disabled,.rolle button:disabled,.schalter:disabled{cursor:default;}
+.uhr > svg{display:block;width:100%;max-width:330px;height:auto;margin:0 auto;touch-action:none;cursor:pointer;}
+.strahl > svg{display:block;width:100%;max-width:620px;height:auto;margin:0 auto;}
+.felder > svg{display:block;width:100%;max-width:360px;height:auto;margin:0 auto;}
+.schloss{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:.7rem;background:var(--ink);
+  border-radius:1rem;padding:.8rem 1rem;margin:0 auto;width:fit-content;max-width:100%;}
+.schloss-gruppe{display:flex;flex-direction:column;align-items:center;gap:.3rem;}
+.schloss-name{color:#fff;font-weight:700;font-size:1rem;}
+.schloss-rollen{display:flex;gap:.3rem;}
+.schloss-trenn{color:#fff;font-size:1.6rem;font-weight:700;}
+.schloss-einheit{color:#fff;font-size:1.5rem;font-weight:700;}
+.rolle{display:flex;flex-direction:column;align-items:center;background:#fff;border-radius:.6rem;}
+.rolle button{min-width:48px;min-height:44px;border:0;background:transparent;color:var(--blue-dark);font:inherit;
+  font-size:1.1rem;cursor:pointer;}
+.rolle > .ziffer{display:block;font-size:1.9rem;font-weight:800;min-width:2.6rem;text-align:center;line-height:1.35;
+  border-top:1px solid var(--line);border-bottom:1px solid var(--line);color:var(--ink);}
+.ablage{display:flex;flex-wrap:wrap;gap:.5rem;justify-content:center;margin:.6rem 0;}
+.ablage button.gesteckt{border-style:dashed;}
+.nr{display:inline-flex;align-items:center;justify-content:center;width:1.7rem;height:1.7rem;border-radius:50%;
+  background:var(--blue-dark);color:#fff;font-weight:700;font-size:1rem;}
+.schalterfeld{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,8.5rem),1fr));gap:.5rem;margin:.6rem 0;}
+.schalter{display:flex;flex-direction:column;align-items:center;gap:.2rem;min-height:56px;padding:.4rem .5rem .6rem;
+  border:2px solid var(--line);border-radius:.8rem;background:#fff;color:var(--ink);font:inherit;font-size:1.05rem;cursor:pointer;}
+.schalter.an{border-color:var(--blue);background:var(--blue-light);}
+.hebel-bild > svg{display:block;width:80px;height:auto;}
+.hebel-text{font-size:1.1rem;}
+/* v4 Fantasie-Paket: Funkeln, Leuchten, Uhr-Feinstellung, Schlossbügel */
+.funkeln{animation:funkeln .45s ease-out;transform-box:fill-box;transform-origin:center;}
+@keyframes funkeln{0%{transform:scale(.7);}60%{transform:scale(1.18);}100%{transform:scale(1);}}
+.rolle > .ziffer.klick{animation:klick .25s ease-out;}
+@keyframes klick{0%{transform:translateY(-.3em);opacity:.4;}100%{transform:none;opacity:1;}}
+.geraet.geloest{border-radius:1rem;box-shadow:0 0 0 3px var(--green),0 0 22px var(--green);padding:.5rem;}
+.uhr-fein{display:inline-flex;align-items:center;gap:.3rem;}
+.uhr-name{font-weight:700;}
+.uhr-wert{display:inline-block;min-width:2.2rem;text-align:center;font-size:1.2rem;font-weight:800;}
+.uhr-rolle{align-self:center;}
+.schloss-buegel{display:block;width:fit-content;margin:0 auto -4px;}
+.schloss-buegel > svg{display:block;width:110px;height:auto;}
+.ablage button > svg{display:block;width:30px;height:30px;}
+.ablage button.fest{border-color:var(--green);}
+.fb.korr{display:block;background:var(--blue-light);color:var(--ink);border:2px solid var(--green);}
+@media (prefers-reduced-motion:reduce){ .funkeln,.rolle > .ziffer.klick{animation:none;} }
+.erwischt{border-left-color:var(--ink);}
+/* v4: Szenenbilder in Geschichte, Umweg, erwischt und Ende (als data-URI im Datenblock, TEIL 8.1) */
+.szene{margin:.2rem 0 .8rem;}
+.szene > img{display:block;width:100%;height:auto;border-radius:.8rem;box-shadow:0 2px 10px rgba(34,48,63,.25);}
 /* ===== ENDE BAUSTEIN-CSS Story ===== */
 </style>
 <style id="dino-stil">
@@ -1282,7 +1348,7 @@ var STORY = {
 
 <script>
 /* ============================================================
-   BAUSTEIN: Story-Engine (v2, 22.11.2026) – unverändert übernehmen
+   BAUSTEIN: Story-Engine (v4, 25.11.2026) – unverändert übernehmen
    Baut aus dem Objekt STORY: Startkarte (Einleitung, Anleitung, Zeitraum, Einstieg per
    Codewort) → je Karte Geschichte + Rätsel → Endkarte mit Auswertung.
    Ablauf einer Karte:  Haupträtsel richtig → geschafft (direkter Weg).
@@ -1300,6 +1366,11 @@ var STORY = {
    Startkarte eingegeben, gelten alle Karten bis dahin als geschafft (Stand im sessionStorage
    geht beim Schließen des Tabs verloren, TEIL 6 – das Codewort ersetzt dauerhaftes Speichern).
    Eingaben: Formeltool (FT, baustein_formeltool.html) bei eingabe 'formel'/'getrennt'/'gemischt'.
+   v3 – Rätselgeräte (GERAET): 'uhr', 'schloss', 'steck', 'felder', 'schalter'. Jedes Gerät
+   speichert seine Einstellung in z.e[s] (TEIL 6), wird nach dem Lösen gesperrt angezeigt und vom
+   Leeren-Knopf zurückgesetzt. Unvollständige Einstellungen und nicht gekürzte Brüche kosten
+   keinen Versuch. STORY.erwischt/karte.erwischt erscheint vor dem Lösungsweg, STORY.wegTitel
+   ersetzt dessen Überschrift.
    Anrede: <body data-anrede="sie"> → alle Texte gesiezt (Oberstufe), sonst „du".
    ============================================================ */
 (function(){
@@ -1354,6 +1425,7 @@ function datumOffen(i){ return S.vorschau || S.test || !ab(i) || HEUTE >= ab(i);
 function zk(i){
   var id = K[i].id;
   if (!S.k[id]) S.k[id] = { st:'offen', stufe:0, tipps:[0,0,0], e:[null,null,null], mix:[null,null,null], antw:null };
+  if (!S.k[id].korr) S.k[id].korr = [0,0,0];   /* v4: einmal korrigiert je Rätsel */
   return S.k[id];
 }
 function fertig(i){ var s = zk(i).st; return s === 'ok' || s === 'durch' || s === 'code'; }
@@ -1386,6 +1458,7 @@ function norm(t){
 function textAus(daten){ return (daten || []).map(function(p){ return Object.keys(p).filter(function(k){ return k !== 't'; }).map(function(k){ return p[k]; }).join(''); }).join(''); }
 /* antwort: { ft: Formeltool-Daten } | { txt: '…' } | { wahl: Index in r.optionen } */
 function bewerte(r, a){
+  if (GERAET[r.art]) return bewerteGeraet(r, a);
   if (!a) return 'leer';
   if (r.art === 'wahl') { if (a.wahl == null) return 'leerWahl'; return r.optionen[a.wahl] && r.optionen[a.wahl].ok ? 'ok' : 'falsch'; }
   if (r.art === 'text') {
@@ -1418,7 +1491,482 @@ var HINWEIS = {
                   'Das kann ich nicht als Term lesen. Prüfen Sie Klammern und Rechenzeichen. Das kostet keinen Versuch.'),
   kuerzen: T('Fast! Der Wert stimmt, aber der Bruch ist noch nicht vollständig gekürzt. Das kostet keinen Versuch.',
              'Fast! Der Wert stimmt, aber der Bruch ist noch nicht vollständig gekürzt. Das kostet keinen Versuch.'),
-  form: 'Gleichwertig, aber noch nicht in der verlangten Form. Das kostet keinen Versuch.'
+  form: 'Gleichwertig, aber noch nicht in der verlangten Form. Das kostet keinen Versuch.',
+  /* v3: Rätselgeräte */
+  leerUhr: T('Stelle zuerst beide Zeiger ein: den langen für den Zähler und den kurzen für den Nenner.',
+             'Stellen Sie zuerst beide Zeiger ein: den langen für den Zähler und den kurzen für den Nenner.'),
+  leerSchloss: T('Drehe zuerst an den Rädern des Schlosses.', 'Drehen Sie zuerst an den Rädern des Schlosses.'),
+  nenner0: 'Der Nenner darf nicht 0 sein. Das kostet keinen Versuch.',
+  genau: 'Der Wert stimmt, aber gesucht ist genau die Darstellung aus der Aufgabe. Das kostet keinen Versuch.',
+  gemischtForm: 'Der Wert stimmt, aber bei einer gemischten Zahl ist der Bruchteil kleiner als 1. Das kostet keinen Versuch.',
+  leerSteck: T('Stecke zuerst einen Diamanten an den Zahlenstrahl: Diamant antippen, dann die Stelle antippen.',
+               'Stecken Sie zuerst einen Diamanten an den Zahlenstrahl: Diamant antippen, dann die Stelle antippen.'),
+  halbSteck: T('Es liegen noch Diamanten in der Ablage. Stecke alle an den Zahlenstrahl. Das kostet keinen Versuch.',
+               'Es liegen noch Diamanten in der Ablage. Stecken Sie alle an den Zahlenstrahl. Das kostet keinen Versuch.'),
+  leerFelder: T('Tippe zuerst Felder an, um sie einzufärben.', 'Tippen Sie zuerst Felder an, um sie einzufärben.'),
+  leerSchalter: T('Lege zuerst mindestens einen Schalter um.', 'Legen Sie zuerst mindestens einen Schalter um.')
+};
+
+/* ---------- Rätselgeräte (v3, Fantasie-Paket v4) ----------
+   Jedes Gerät: GERAET[art](r, alt, merke, aktiv, z, s) → { el, hol, leere [, korrektur] }
+   alt = gespeicherte Antwort (z.e[s]) oder null; merke(a) sichert die Antwort (TEIL 6).
+   korrektur(a) (v4, nur steck/schalter): nach dem ersten falschen Prüfen einmal korrigieren –
+   gibt den Hinweistext zurück; richtig gesteckte Diamanten leuchten grün und sind fest,
+   bei Hebeln wird nur die Anzahl der richtigen genannt (sonst wäre die Lösung verraten).
+   Antworten: { uhr:[kurz, lang], tausch } · { schloss:[[Ziffern], …] } · { steck:[Stelle|null je Stein] }
+              { felder:[true|false je Feld] } · { schalter:[true|false je Schalter] }        */
+var SVGNS = 'http://www.w3.org/2000/svg';
+var SVGNR = 0;
+function svgEl(tag, at, text){
+  var e = document.createElementNS(SVGNS, tag);
+  for (var k in at) if (at.hasOwnProperty(k)) e.setAttribute(k, at[k]);
+  if (text != null) e.textContent = text;
+  return e;
+}
+function ggtZ(a, b){ a = Math.abs(a); b = Math.abs(b); while (b) { var t = a % b; a = b; b = t; } return a || 1; }
+/* SVG mit Leucht-Filter (v4): leuchtende Teile bekommen filter="url(#…)" – der Schein hat ihre eigene Farbe */
+function svgLeucht(at){
+  var svg = svgEl('svg', at), id = 'leucht' + (++SVGNR);
+  var defs = svgEl('defs', {}), fl = svgEl('filter', { id:id, x:'-60%', y:'-60%', width:'220%', height:'220%' });
+  fl.appendChild(svgEl('feGaussianBlur', { 'in':'SourceGraphic', stdDeviation:'4', result:'schein' }));
+  var mg = svgEl('feMerge', {});
+  mg.appendChild(svgEl('feMergeNode', { 'in':'schein' })); mg.appendChild(svgEl('feMergeNode', { 'in':'SourceGraphic' }));
+  fl.appendChild(mg); defs.appendChild(fl); svg.appendChild(defs);
+  svg.leucht = 'url(#' + id + ')';
+  return svg;
+}
+/* Edelstein (v4) – Mitte x, y, Größe s; zustand 'aus' | 'an' | 'ok' | 'nok' */
+var STEIN_FARBE = { aus:['#ffffff', '#1f4680', '#dbe3ee'], an:['#2f5fa6', '#1f4680', '#e6eefb'],
+                    ok:['#1e7d32', '#1e7d32', '#ffffff'], nok:['#ffffff', '#c1272d', '#dbe3ee'] };
+function edelstein(svg, x, y, s, zustand){
+  var c = STEIN_FARBE[zustand] || STEIN_FARBE.aus, g = svgEl('g', { 'class':'stein' });
+  var ob = y - 0.55 * s, gu = y - 0.15 * s, sp = y + s;           /* Tafel, Gürtel, Spitze */
+  g.appendChild(svgEl('polygon', { points:(x - 0.5 * s) + ',' + ob + ' ' + (x + 0.5 * s) + ',' + ob + ' ' + (x + s) + ',' + gu
+    + ' ' + x + ',' + sp + ' ' + (x - s) + ',' + gu, fill:c[0], stroke:c[1], 'stroke-width':2, 'stroke-linejoin':'round' }));
+  var fa = { stroke:c[2], 'stroke-width':1.5, fill:'none' };
+  g.appendChild(svgEl('polyline', Object.assign({ points:(x - s) + ',' + gu + ' ' + (x + s) + ',' + gu }, fa)));
+  g.appendChild(svgEl('polyline', Object.assign({ points:(x - 0.5 * s) + ',' + ob + ' ' + (x - 0.3 * s) + ',' + gu + ' ' + x + ',' + sp
+    + ' ' + (x + 0.3 * s) + ',' + gu + ' ' + (x + 0.5 * s) + ',' + ob }, fa)));
+  g.appendChild(svgEl('polyline', Object.assign({ points:(x - 0.3 * s) + ',' + gu + ' ' + x + ',' + ob + ' ' + (x + 0.3 * s) + ',' + gu }, fa)));
+  if ((zustand === 'an' || zustand === 'ok') && svg.leucht) g.setAttribute('filter', svg.leucht);
+  svg.appendChild(g);
+  return g;
+}
+function steinBild(zustand){                     /* kleiner Edelstein für Knöpfe (Ablage) */
+  var svg = svgLeucht({ viewBox:'0 0 40 40', 'aria-hidden':'true' });
+  edelstein(svg, 20, 18, 13, zustand);
+  return svg;
+}
+function funkeln(g){ if (g) { g.classList.add('funkeln'); } }
+/* Wert und Form eines eingestellten Bruchs prüfen – form: 'gekuerzt' (Vorgabe) | 'genau' | 'wert' */
+function pruefeBruch(r, w){
+  if (w[1] === 0) return 'nenner0';
+  if (!gleich(w, r.soll)) return 'falsch';
+  var form = r.form || 'gekuerzt';
+  if (form === 'genau') return (w[0] === r.soll[0] && w[1] === r.soll[1]) ? 'ok' : 'genau';
+  if (form === 'gekuerzt' && ggtZ(w[0], w[1]) !== 1) return 'kuerzen';
+  return 'ok';
+}
+function uhrBruch(a){ return a.tausch ? [a.uhr[1], a.uhr[0]] : [a.uhr[0], a.uhr[1]]; }
+function schlossZahlen(r, d){                    /* Ziffern je Rad-Gruppe → Zahlen */
+  return d.map(function(gr){ return gr.reduce(function(x, y){ return x * 10 + y; }, 0); });
+}
+function steckRichtig(r, st){
+  var bis = r.strahl.bis || 1, teile = r.strahl.teile;
+  return r.steine.map(function(stein, k){ return st[k] != null && st[k] * bis * stein.w[1] === stein.w[0] * teile; });
+}
+function bewerteGeraet(r, a){
+  var art = r.art;
+  if (art === 'uhr') {
+    if (!a || !a.uhr || a.uhr[0] == null || a.uhr[1] == null) return 'leerUhr';
+    return pruefeBruch(r, uhrBruch(a));
+  }
+  if (art === 'schloss') {
+    if (!a || !a.schloss) return 'leerSchloss';
+    var zl = schlossZahlen(r, a.schloss), typ = r.schloss || 'bruch';
+    if (typ === 'zahl') return gleich([zl[0], 1], r.soll) ? 'ok' : 'falsch';
+    if (typ === 'gemischt') {
+      if (zl[2] === 0) return 'nenner0';
+      if (!gleich([zl[0] * zl[2] + zl[1], zl[2]], r.soll)) return 'falsch';
+      if (zl[1] >= zl[2]) return 'gemischtForm';
+      if (zl[1] > 0 && ggtZ(zl[1], zl[2]) !== 1) return 'kuerzen';
+      return 'ok';
+    }
+    return pruefeBruch(r, [zl[0], zl[1]]);
+  }
+  if (art === 'steck') {
+    var st = a && a.steck ? a.steck : [];
+    var gesteckt = st.filter(function(x){ return x != null; }).length;
+    if (!gesteckt) return 'leerSteck';
+    if (gesteckt < r.steine.length) return 'halbSteck';
+    return steckRichtig(r, st).every(Boolean) ? 'ok' : 'falsch';
+  }
+  if (art === 'felder') {
+    var fe = a && a.felder ? a.felder : [], an = fe.filter(Boolean).length;
+    if (!an) return 'leerFelder';
+    return gleich([an, fe.length], r.soll) ? 'ok' : 'falsch';
+  }
+  if (art === 'schalter') {
+    var sc = a && a.schalter ? a.schalter : [];
+    if (!sc.some(Boolean)) return 'leerSchalter';
+    return r.schalter.every(function(o, k){ return !!sc[k] === !!o.ok; }) ? 'ok' : 'falsch';
+  }
+  return 'leer';
+}
+
+var GERAET = {
+  /* Bruch-Uhr (v4): kurzer Zeiger auf den Stunden 1–12, langer Zeiger auf den Minuten 1–60.
+     Das Kind entscheidet selbst (Knopf ⇄), welcher Zeiger Zähler und welcher Nenner ist –
+     jede Einstellung mit dem richtigen Bruch zählt. */
+  uhr: function(r, alt, merke, aktiv){
+    var w = alt && alt.uhr ? alt.uhr.slice() : [null, null];      /* [kurz (1–12), lang (1–60)] */
+    var tausch = !!(alt && alt.tausch);
+    var M = 170, RI = 112;                                          /* Mitte, Grenze innen/außen */
+    var el = neu('div', 'geraet'), huelle = neu('div', 'uhr');
+    var svg = svgLeucht({ viewBox:'0 0 340 340', role:'img',
+      'aria-label':'Bruch-Uhr: innen die Stunden 1 bis 12 für den kurzen Zeiger, außen der Minutenring 1 bis 60 für den langen Zeiger.' });
+    svg.appendChild(svgEl('circle', { cx:M, cy:M, r:166, fill:'#ffffff', stroke:'#22303f', 'stroke-width':6 }));
+    svg.appendChild(svgEl('circle', { cx:M, cy:M, r:RI, fill:'#e6eefb', stroke:'#2f5fa6', 'stroke-width':2 }));
+    function pol(rad, a){ return [M + rad * Math.sin(a), M - rad * Math.cos(a)]; }
+    for (var mi = 1; mi <= 60; mi++) {
+      var a = mi / 60 * 2 * Math.PI, fuenf = mi % 5 === 0, p1 = pol(fuenf ? 120 : 126, a), p2 = pol(134, a);
+      svg.appendChild(svgEl('line', { x1:p1[0], y1:p1[1], x2:p2[0], y2:p2[1], stroke:'#22303f', 'stroke-width':fuenf ? 3 : 1.5 }));
+      if (fuenf) { var pt = pol(150, a); svg.appendChild(svgEl('text', { x:pt[0], y:pt[1] + 6, 'text-anchor':'middle',
+        'font-size':17, 'font-weight':'700', fill:'#1f4680' }, mi)); }
+    }
+    for (var h = 1; h <= 12; h++) {
+      var ph = pol(88, h / 12 * 2 * Math.PI);
+      svg.appendChild(svgEl('text', { x:ph[0], y:ph[1] + 8, 'text-anchor':'middle', 'font-size':24, 'font-weight':'700', fill:'#22303f' }, h));
+    }
+    var kurz = svgEl('g', {}), lang = svgEl('g', {});
+    kurz.appendChild(svgEl('line', { x1:M, y1:M, x2:M, y2:M - 62, stroke:'#22303f', 'stroke-width':11, 'stroke-linecap':'round' }));
+    lang.appendChild(svgEl('line', { x1:M, y1:M, x2:M, y2:M - 118, stroke:'#2f5fa6', 'stroke-width':5, 'stroke-linecap':'round' }));
+    svg.appendChild(kurz); svg.appendChild(lang);
+    var spitzeK = edelstein(svg, M, M - 70, 9, 'aus'), spitzeL = edelstein(svg, M, M - 122, 8, 'aus');
+    kurz.appendChild(spitzeK); lang.appendChild(spitzeL);
+    svg.appendChild(svgEl('circle', { cx:M, cy:M, r:11, fill:'#22303f' }));
+    huelle.appendChild(svg);
+    /* Feinstellung und Rollen */
+    var fein = neu('div', 'geraet-knoepfe'), werte = [];
+    [['Kurzer Zeiger', 0, 12], ['Langer Zeiger', 1, 60]].forEach(function(z0){
+      var grp = neu('span', 'uhr-fein');
+      var mi2 = neu('button', '', '◀'), pl = neu('button', '', '▶'), wt = neu('span', 'uhr-wert', '');
+      mi2.type = pl.type = 'button'; mi2.disabled = pl.disabled = !aktiv;
+      mi2.setAttribute('aria-label', z0[0] + ' zurück'); pl.setAttribute('aria-label', z0[0] + ' weiter');
+      mi2.addEventListener('click', function(){ schiebe(z0[1], -1, z0[2]); });
+      pl.addEventListener('click', function(){ schiebe(z0[1], 1, z0[2]); });
+      grp.appendChild(neu('span', 'uhr-name', z0[0] + ':')); grp.appendChild(mi2); grp.appendChild(wt); grp.appendChild(pl);
+      fein.appendChild(grp); werte.push(wt);
+    });
+    var rolle = neu('div', 'geraet-knoepfe'), rt = neu('span', 'uhr-rolle', ''), tb = neu('button', '', '⇄ tauschen');
+    tb.type = 'button'; tb.disabled = !aktiv;
+    tb.addEventListener('click', function(){ tausch = !tausch; zeichneUhr(); sichere(); });
+    rolle.appendChild(rt); rolle.appendChild(tb);
+    var anz = neu('p', 'anzeige', '');
+    el.appendChild(huelle); el.appendChild(fein); el.appendChild(rolle); el.appendChild(anz);
+    function sichere(){ if (w[0] != null || w[1] != null) merke({ uhr: w.slice(), tausch: tausch }); }
+    function schiebe(k, um, max){
+      var g = k, alt0 = w[g] == null ? (um > 0 ? 0 : 1) : w[g];
+      w[g] = ((alt0 - 1 + um) % max + max) % max + 1;
+      zeichneUhr(); funkeln(g === 0 ? spitzeK : spitzeL); sichere();
+    }
+    function zeichneUhr(){
+      [[kurz, w[0], 12, spitzeK], [lang, w[1], 60, spitzeL]].forEach(function(p){
+        p[0].setAttribute('transform', 'rotate(' + ((p[1] || p[2]) / p[2] * 360) + ' ' + M + ' ' + M + ')');
+        p[0].setAttribute('opacity', p[1] == null ? '0.3' : '1');
+        var leuchtet = p[1] != null;
+        var poly = p[3].firstChild; poly.setAttribute('fill', leuchtet ? '#2f5fa6' : '#ffffff');
+        if (leuchtet) p[3].setAttribute('filter', svg.leucht); else p[3].removeAttribute('filter');
+      });
+      werte[0].textContent = w[0] == null ? '–' : w[0]; werte[1].textContent = w[1] == null ? '–' : w[1];
+      rt.innerHTML = 'Zähler = <b>' + (tausch ? 'langer' : 'kurzer') + '</b> Zeiger · Nenner = <b>' + (tausch ? 'kurzer' : 'langer') + '</b> Zeiger';
+      anz.innerHTML = (w[0] != null && w[1] != null) ? 'Eingestellt: ' + f.apply(null, uhrBruch({ uhr:w, tausch:tausch }))
+        : T('Tippe innen für den kurzen Zeiger, außen auf den Minutenring für den langen.',
+            'Tippen Sie innen für den kurzen Zeiger, außen auf den Minutenring für den langen.');
+    }
+    var zeiger = null;
+    function stelle(e, start){
+      var b = svg.getBoundingClientRect(); if (!b.width) return;
+      var x = (e.clientX - b.left) / b.width * 340 - M, y = (e.clientY - b.top) / b.height * 340 - M, d = Math.sqrt(x * x + y * y);
+      if (start) { if (d < 22) { zeiger = null; return; } zeiger = d < RI ? 0 : 1; }
+      if (zeiger == null) return;
+      var winkel = Math.atan2(x, -y); if (winkel < 0) winkel += 2 * Math.PI;
+      var max = zeiger === 0 ? 12 : 60, zahl = Math.round(winkel / (2 * Math.PI) * max) % max || max;
+      if (w[zeiger] !== zahl) { w[zeiger] = zahl; zeichneUhr(); funkeln(zeiger === 0 ? spitzeK : spitzeL); sichere(); }
+    }
+    if (aktiv) {
+      svg.addEventListener('pointerdown', function(e){
+        try { svg.setPointerCapture(e.pointerId); } catch (x) {}
+        stelle(e, true); e.preventDefault();
+      });
+      svg.addEventListener('pointermove', function(e){ if (zeiger != null && e.buttons) stelle(e, false); });
+      var los = function(){ zeiger = null; };
+      svg.addEventListener('pointerup', los); svg.addEventListener('pointercancel', los);
+    }
+    zeichneUhr();
+    return { el:el,
+      hol: function(){ return (w[0] == null && w[1] == null) ? null : { uhr: w.slice(), tausch: tausch }; },
+      leere: function(){ w = [null, null]; tausch = false; zeichneUhr(); } };
+  },
+
+  /* Zahlenschloss: schloss 'bruch' (Vorgabe) | 'gemischt' | 'zahl'; stellen je Rad-Gruppe, z. B. [2, 2];
+     vorne: 'nenner' dreht die Reihenfolge der Gruppen um; einheit: '%', 'cm' … hinter dem Schloss.
+     v4: Edelstein im Bügel leuchtet, sobald gedreht wurde. */
+  schloss: function(r, alt, merke, aktiv){
+    var typ = r.schloss || 'bruch';
+    var namen = r.namen || (typ === 'gemischt' ? ['Ganze', 'Zähler', 'Nenner'] : typ === 'zahl' ? ['Zahl'] : ['Zähler', 'Nenner']);
+    var stellen = r.stellen || namen.map(function(){ return 1; });
+    var d = alt && alt.schloss ? alt.schloss.map(function(g){ return g.slice(); })
+                               : stellen.map(function(n){ var g = []; for (var k = 0; k < n; k++) g.push(0); return g; });
+    var bewegt = !!(alt && alt.schloss);
+    var el = neu('div', 'geraet');
+    var buegel = neu('div', 'schloss-buegel'), bsvg = svgLeucht({ viewBox:'0 0 120 60', 'aria-hidden':'true' });
+    bsvg.appendChild(svgEl('path', { d:'M22,60 L22,34 A38,30 0 0 1 98,34 L98,60', fill:'none', stroke:'#22303f', 'stroke-width':10 }));
+    var bstein = null;
+    buegel.appendChild(bsvg);
+    var body = neu('div', 'schloss');
+    body.setAttribute('role', 'group'); body.setAttribute('aria-label', 'Zahlenschloss');
+    var reihe = namen.map(function(x, k){ return k; });
+    if (r.vorne === 'nenner' && typ === 'bruch') reihe = [1, 0];
+    var ziffern = [];
+    reihe.forEach(function(gi, pos){
+      if (pos > 0) body.appendChild(neu('span', 'schloss-trenn', '│'));
+      var gr = neu('div', 'schloss-gruppe'), rollen = neu('div', 'schloss-rollen');
+      gr.appendChild(neu('span', 'schloss-name', namen[gi]));
+      ziffern[gi] = [];
+      d[gi].forEach(function(x, si){
+        var rolle = neu('div', 'rolle');
+        var hoch = neu('button', '', '▲'), runter = neu('button', '', '▼'), zf = neu('span', 'ziffer', '');
+        hoch.type = runter.type = 'button'; hoch.disabled = runter.disabled = !aktiv;
+        hoch.setAttribute('aria-label', namen[gi] + ', Rad ' + (si + 1) + ' höher');
+        runter.setAttribute('aria-label', namen[gi] + ', Rad ' + (si + 1) + ' tiefer');
+        hoch.addEventListener('click', function(){ dreh(gi, si, 1); });
+        runter.addEventListener('click', function(){ dreh(gi, si, -1); });
+        rolle.appendChild(hoch); rolle.appendChild(zf); rolle.appendChild(runter);
+        rollen.appendChild(rolle); ziffern[gi][si] = zf;
+      });
+      gr.appendChild(rollen); body.appendChild(gr);
+    });
+    if (r.einheit) body.appendChild(neu('span', 'schloss-einheit', r.einheit));
+    var anz = neu('p', 'anzeige', '');
+    el.appendChild(buegel); el.appendChild(body); el.appendChild(anz);
+    function dreh(gi, si, um){
+      d[gi][si] = (d[gi][si] + um + 10) % 10; bewegt = true; zeichneSchloss();
+      ziffern[gi][si].classList.remove('klick'); void ziffern[gi][si].offsetWidth; ziffern[gi][si].classList.add('klick');
+      merke({ schloss: d.map(function(g){ return g.slice(); }) });
+    }
+    function zeichneSchloss(){
+      d.forEach(function(g, gi){ g.forEach(function(x, si){ ziffern[gi][si].textContent = x; }); });
+      if (bstein) bsvg.removeChild(bstein);
+      bstein = edelstein(bsvg, 60, 22, 11, bewegt ? 'an' : 'aus');
+      var zl = schlossZahlen(r, d);
+      anz.innerHTML = !bewegt ? T('Tippe auf ▲ und ▼, um die Räder zu drehen.', 'Tippen Sie auf ▲ und ▼, um die Räder zu drehen.')
+        : 'Eingestellt: ' + (typ === 'zahl' ? zl[0] + (r.einheit ? ' ' + r.einheit : '')
+          : typ === 'gemischt' ? (zl[0] ? zl[0] + ' ' : '') + f(zl[1], zl[2]) : f(zl[0], zl[1]));
+    }
+    zeichneSchloss();
+    return { el:el,
+      hol: function(){ return bewegt ? { schloss: d.map(function(g){ return g.slice(); }) } : null; },
+      leere: function(){ d.forEach(function(g){ for (var k = 0; k < g.length; k++) g[k] = 0; }); bewegt = false; zeichneSchloss(); } };
+  },
+
+  /* Diamanten an den Zahlenstrahl stecken: strahl { bis: 1, teile: 12 }, steine [{ t: f(3,4), w: [3,4] }, …]
+     v4: Edelsteine leuchten; nach dem ersten falschen Prüfen leuchten die richtig gesteckten grün und
+     sind fest – die anderen dürfen einmal umgesteckt werden. */
+  steck: function(r, alt, merke, aktiv){
+    var bis = r.strahl.bis || 1, teile = r.strahl.teile, L = 440, x0 = 30;
+    var st = alt && alt.steck ? alt.steck.slice() : r.steine.map(function(){ return null; }), sel = null;
+    var fest = r.steine.map(function(){ return false; });
+    var el = neu('div', 'geraet'), huelle = neu('div', 'strahl');
+    var svg = svgLeucht({ viewBox:'0 0 510 150', role:'img',
+      'aria-label':'Zahlenstrahl von 0 bis ' + bis + ', jede Einheit in ' + (teile / bis) + ' gleiche Teile geteilt. Hier werden die Diamanten eingesteckt.' });
+    function xk(k){ return x0 + L * k / teile; }
+    svg.appendChild(svgEl('line', { x1:x0 - 10, y1:100, x2:x0 + L + 30, y2:100, stroke:'#22303f', 'stroke-width':3 }));
+    svg.appendChild(svgEl('polygon', { points:(x0 + L + 38) + ',100 ' + (x0 + L + 24) + ',92 ' + (x0 + L + 24) + ',108', fill:'#22303f' }));
+    for (var k = 0; k <= teile; k++) {
+      var ganz = (k * bis) % teile === 0;
+      svg.appendChild(svgEl('line', { x1:xk(k), y1:ganz ? 86 : 91, x2:xk(k), y2:ganz ? 114 : 109, stroke:'#22303f', 'stroke-width':ganz ? 3 : 2 }));
+      if (ganz) svg.appendChild(svgEl('text', { x:xk(k), y:138, 'text-anchor':'middle', 'font-size':20, 'font-weight':'700', fill:'#22303f' }, k * bis / teile));
+    }
+    var schicht = svgEl('g', {});
+    svg.appendChild(schicht);
+    for (var j = 0; j <= teile; j++) (function(j){
+      var p = svgEl('rect', { x:xk(j) - L / teile / 2, y:12, width:L / teile, height:106, fill:'#ffffff', 'fill-opacity':'0', style:'cursor:pointer' });
+      p.setAttribute('aria-label', 'Steckplatz ' + (j + 1));
+      if (aktiv) p.addEventListener('click', function(){ tippe(j); });
+      svg.appendChild(p);
+    })(j);
+    huelle.appendChild(svg);
+    var ablage = neu('div', 'ablage'), kn = [];
+    r.steine.forEach(function(stein, i){
+      var b = neu('button', '', '');
+      b.type = 'button'; b.disabled = !aktiv;
+      b.setAttribute('aria-label', 'Diamant ' + (i + 1));
+      b.addEventListener('click', function(){ if (fest[i]) return; sel = sel === i ? null : i; zeichneSteck(); });
+      ablage.appendChild(b); kn.push(b);
+    });
+    var anz = neu('p', 'anzeige', '');
+    el.appendChild(ablage); el.appendChild(huelle); el.appendChild(anz);
+    var neuG = null;
+    function tippe(j){
+      var da = st.indexOf(j);
+      if (da >= 0 && fest[da]) return;                          /* grün leuchtende bleiben stecken */
+      if (sel == null) { if (da >= 0) { st[da] = null; sel = da; } }
+      else { if (da >= 0 && da !== sel) st[da] = null; st[sel] = j; neuG = sel; sel = null; }
+      zeichneSteck(); merke({ steck: st.slice() });
+    }
+    function zeichneSteck(){
+      while (schicht.firstChild) schicht.removeChild(schicht.firstChild);
+      st.forEach(function(j, i){
+        if (j == null) return;
+        var x = xk(j), g = edelstein(svg, x, 62, 15, fest[i] ? 'ok' : 'an');
+        schicht.appendChild(g);
+        if (i === neuG) funkeln(g);
+        schicht.appendChild(svgEl('circle', { cx:x, cy:24, r:12, fill:fest[i] ? '#1e7d32' : '#1f4680' }));
+        schicht.appendChild(svgEl('text', { x:x, y:30, 'text-anchor':'middle', 'font-size':17, 'font-weight':'700', fill:'#ffffff' }, i + 1));
+      });
+      neuG = null;
+      kn.forEach(function(b, i){
+        b.innerHTML = '<span class="nr">' + (i + 1) + '</span>';
+        b.appendChild(steinBild(fest[i] ? 'ok' : (sel === i || st[i] != null) ? 'an' : 'aus'));
+        b.insertAdjacentHTML('beforeend', r.steine[i].t);
+        b.classList.toggle('an', sel === i); b.classList.toggle('gesteckt', st[i] != null);
+        b.classList.toggle('fest', fest[i]);
+        if (fest[i]) b.disabled = true;
+      });
+      var n = st.filter(function(x){ return x != null; }).length;
+      anz.textContent = sel != null ? T('Diamant ' + (sel + 1) + ' ist ausgewählt – tippe die Stelle am Zahlenstrahl an.',
+                                        'Diamant ' + (sel + 1) + ' ist ausgewählt – tippen Sie die Stelle am Zahlenstrahl an.')
+        : 'Gesteckt: ' + n + ' von ' + st.length + ' Diamanten.';
+    }
+    zeichneSteck();
+    return { el:el,
+      hol: function(){ return { steck: st.slice() }; },
+      leere: function(){ st = st.map(function(x, i){ return fest[i] ? x : null; }); sel = null; zeichneSteck(); },
+      korrektur: function(a){
+        var ri = steckRichtig(r, a.steck), n = ri.filter(Boolean).length;
+        fest = ri; zeichneSteck();
+        return '✨ ' + n + ' von ' + ri.length + T(' Diamanten leuchten grün – sie sitzen richtig. Die anderen darfst du jetzt einmal umstecken. Dann prüfe noch einmal.',
+                                                   ' Diamanten leuchten grün – sie sitzen richtig. Die anderen dürfen Sie jetzt einmal umstecken. Dann prüfen Sie noch einmal.');
+      } };
+  },
+
+  /* Felder einfärben: figur { form: 'steine', zeilen: 3, spalten: 4 } (Leuchtsteine, v4)
+     | { form: 'kreis', teile: 8 } | { form: 'rechteck', zeilen: 3, spalten: 4 } – angetippt leuchtet ein Teil */
+  felder: function(r, alt, merke, aktiv){
+    var fg = r.figur || { form:'rechteck', zeilen:1, spalten:4 };
+    var n = fg.form === 'kreis' ? fg.teile : fg.zeilen * fg.spalten;
+    var an = alt && alt.felder ? alt.felder.slice() : []; for (var k = an.length; k < n; k++) an.push(false);
+    var el = neu('div', 'geraet'), huelle = neu('div', 'felder'), teile = [], svg, zuletzt = null;
+    function klick(i){ an[i] = !an[i]; zuletzt = i; zeichneFelder(); merke({ felder: an.slice() }); }
+    if (fg.form === 'steine') {
+      var abst = 70;
+      svg = svgLeucht({ viewBox:'0 0 ' + (fg.spalten * abst + 10) + ' ' + (fg.zeilen * abst + 10), role:'img',
+        'aria-label':n + ' Leuchtsteine zum Antippen' });
+    } else if (fg.form === 'kreis') {
+      svg = svgLeucht({ viewBox:'0 0 260 260', role:'img', 'aria-label':'Kreis aus ' + n + ' gleich großen Teilen zum Einfärben' });
+    } else {
+      var gr = Math.min(70, Math.floor(340 / fg.spalten));
+      svg = svgLeucht({ viewBox:'0 0 ' + (fg.spalten * gr + 20) + ' ' + (fg.zeilen * gr + 20), role:'img',
+        'aria-label':'Rechteck aus ' + n + ' gleich großen Feldern zum Einfärben' });
+    }
+    var schicht = svgEl('g', {}); svg.appendChild(schicht);
+    function zeichneFelder(){
+      while (schicht.firstChild) schicht.removeChild(schicht.firstChild);
+      teile = [];
+      for (var i = 0; i < n; i++) (function(i){
+        var t;
+        if (fg.form === 'steine') {
+          var zi = Math.floor(i / fg.spalten), sp = i % fg.spalten;
+          var cx = 5 + abst * sp + abst / 2, cy = 5 + abst * zi + abst / 2 - 4;
+          t = edelstein(svg, cx, cy, 24, an[i] ? 'an' : 'aus'); schicht.appendChild(t);
+          var hit = svgEl('rect', { x:cx - abst / 2, y:cy - abst / 2 + 4, width:abst, height:abst, fill:'#ffffff', 'fill-opacity':'0', style:'cursor:pointer' });
+          schicht.appendChild(hit); t = [t, hit];
+        } else {
+          var form;
+          if (fg.form === 'kreis') {
+            var a1 = i / n * 2 * Math.PI, a2 = (i + 1) / n * 2 * Math.PI;
+            form = svgEl('path', { d:'M130,130 L' + (130 + 120 * Math.sin(a1)) + ',' + (130 - 120 * Math.cos(a1))
+              + ' A120,120 0 ' + (a2 - a1 > Math.PI ? 1 : 0) + ' 1 ' + (130 + 120 * Math.sin(a2)) + ',' + (130 - 120 * Math.cos(a2)) + ' Z' });
+          } else {
+            var zr = Math.floor(i / fg.spalten), sr = i % fg.spalten;
+            form = svgEl('rect', { x:10 + sr * gr, y:10 + zr * gr, width:gr, height:gr });
+          }
+          form.setAttribute('fill', an[i] ? '#2f5fa6' : '#ffffff'); form.setAttribute('stroke', '#22303f');
+          form.setAttribute('stroke-width', '3'); form.setAttribute('style', 'cursor:pointer');
+          if (an[i]) form.setAttribute('filter', svg.leucht);
+          schicht.appendChild(form); t = [form, form];
+        }
+        if (i === zuletzt && an[i]) funkeln(t[0]);
+        if (aktiv) t[1].addEventListener('click', function(){ klick(i); });
+        teile.push(t);
+      })(i);
+      /* leuchtende Kreisteile zuletzt zeichnen, damit der Schein nicht verdeckt wird */
+      if (fg.form !== 'steine') teile.forEach(function(t, i){ if (an[i]) schicht.appendChild(t[0]); });
+      zuletzt = null;
+      anz.textContent = (fg.form === 'steine' ? 'Leuchtend: ' : 'Eingefärbt: ') + an.filter(Boolean).length + ' von ' + n
+        + (fg.form === 'steine' ? ' Steinen.' : ' Feldern.');
+    }
+    huelle.appendChild(svg);
+    var anz = neu('p', 'anzeige', '');
+    el.appendChild(huelle); el.appendChild(anz);
+    zeichneFelder();
+    return { el:el,
+      hol: function(){ return { felder: an.slice() }; },
+      leere: function(){ for (var k = 0; k < n; k++) an[k] = false; zeichneFelder(); } };
+  },
+
+  /* Hebel (v4: gezeichnete Hebel mit Edelstein-Knauf): schalter [{ t:'…', ok:true }, { t:'…' }, …] –
+     alle mit ok umlegen; Reihenfolge gemischt (4.3). Nach dem ersten falschen Prüfen wird nur die Anzahl
+     richtig gestellter Hebel genannt, dann darf einmal umgestellt werden. */
+  schalter: function(r, alt, merke, aktiv, z, s){
+    if (!z.mix[s]) { z.mix[s] = mische(r.schalter.length); sichern(); }
+    var an = alt && alt.schalter ? alt.schalter.slice() : r.schalter.map(function(){ return false; });
+    var el = neu('div', 'geraet'), feld = neu('div', 'schalterfeld'), kn = [], bilder = [], zuletzt = null;
+    z.mix[s].forEach(function(o){
+      var b = neu('button', 'schalter', '');
+      b.type = 'button'; b.disabled = !aktiv; b.setAttribute('role', 'switch');
+      if (r.schalter[o].ok) b.setAttribute('data-ok', '1');
+      var bild = neu('span', 'hebel-bild', '');
+      b.appendChild(bild); b.appendChild(neu('span', 'hebel-text', r.schalter[o].t));
+      b.addEventListener('click', function(){ an[o] = !an[o]; zuletzt = o; zeichneSchalter(); merke({ schalter: an.slice() }); });
+      feld.appendChild(b); kn[o] = b; bilder[o] = bild;
+    });
+    el.appendChild(feld);
+    function hebel(o){
+      var svg = svgLeucht({ viewBox:'0 0 80 104', 'aria-hidden':'true' }), w = an[o] ? 32 : -32;
+      svg.appendChild(svgEl('rect', { x:4, y:62, width:72, height:40, rx:9, fill:'#22303f' }));
+      svg.appendChild(svgEl('rect', { x:16, y:70, width:48, height:9, rx:4.5, fill:'#dbe3ee' }));
+      svg.appendChild(svgEl('text', { x:18, y:98, 'text-anchor':'middle', 'font-size':16, 'font-weight':'700', fill:'#ffffff' }, '0'));
+      svg.appendChild(svgEl('text', { x:62, y:98, 'text-anchor':'middle', 'font-size':16, 'font-weight':'700', fill:'#ffffff' }, 'I'));
+      var arm = svgEl('g', { transform:'rotate(' + w + ' 40 74)' });
+      arm.appendChild(svgEl('line', { x1:40, y1:74, x2:40, y2:26, stroke:'#96690a', 'stroke-width':9, 'stroke-linecap':'round' }));
+      svg.appendChild(arm);
+      var kx = 40 + 50 * Math.sin(w * Math.PI / 180), ky = 74 - 50 * Math.cos(w * Math.PI / 180);
+      var halter = svgEl('g', { transform:'translate(' + kx + ' ' + (ky - 2) + ')' });
+      var knauf = edelstein(svg, 0, 0, 13, an[o] ? 'an' : 'aus');
+      halter.appendChild(knauf); svg.appendChild(halter);
+      svg.appendChild(svgEl('circle', { cx:40, cy:74, r:6, fill:'#dbe3ee', stroke:'#22303f', 'stroke-width':2 }));
+      if (o === zuletzt) funkeln(knauf);
+      return svg;
+    }
+    function zeichneSchalter(){
+      kn.forEach(function(b, o){
+        b.classList.toggle('an', !!an[o]); b.setAttribute('aria-checked', an[o] ? 'true' : 'false');
+        bilder[o].innerHTML = ''; bilder[o].appendChild(hebel(o));
+      });
+      zuletzt = null;
+    }
+    zeichneSchalter();
+    return { el:el,
+      hol: function(){ return { schalter: an.slice() }; },
+      leere: function(){ for (var k = 0; k < an.length; k++) an[k] = false; zeichneSchalter(); },
+      korrektur: function(a){
+        var n = r.schalter.filter(function(o, k){ return !!a.schalter[k] === !!o.ok; }).length;
+        return '✨ ' + n + ' von ' + r.schalter.length + T(' Hebeln stehen richtig. Du darfst die Hebel jetzt einmal umstellen. Dann prüfe noch einmal.',
+                                                           ' Hebeln stehen richtig. Sie dürfen die Hebel jetzt einmal umstellen. Dann prüfen Sie noch einmal.');
+      } };
+  }
 };
 
 /* ---------- Aufbau ---------- */
@@ -1567,7 +2115,8 @@ function zeigeKarteInhalt(i){
   }
   if (z.st === 'durch') {
     var r2 = raetsel(i, 2);
-    b.appendChild(neu('div', 'loesungsweg', '<b class="tl">Lösungsweg:</b> ' + r2.weg));
+    if (k.erwischt || STORY.erwischt) b.appendChild(neu('div', 'geschichte erwischt', k.erwischt || STORY.erwischt));   /* v3 */
+    b.appendChild(neu('div', 'loesungsweg', '<b class="tl">' + (STORY.wegTitel || 'Lösungsweg:') + '</b> ' + r2.weg));
     b.appendChild(neu('p', '', T('Mit dem Lösungsweg kommst du trotzdem weiter. Lies ihn genau – beim nächsten Mal klappt es!',
                                  'Mit dem Lösungsweg kommen Sie trotzdem weiter. Lesen Sie ihn genau – beim nächsten Mal klappt es!')));
   }
@@ -1602,8 +2151,19 @@ function raetselBlock(i, s){
   box.appendChild(neu('h3', '', s === 0 ? 'Rätsel' : 'Umweg-Rätsel ' + s));
   box.appendChild(neu('p', 'frage', r.frage));
   var fb = neu('div', 'fb', '');
-  var hol, leere;                            /* aktuelle Antwort holen / Eingabe leeren */
-  if (r.art === 'wahl') {
+  var hol, leere, gt = null;                 /* aktuelle Antwort holen / Eingabe leeren; gt: Rätselgerät */
+  if (GERAET[r.art]) {                       /* v3: Uhr, Zahlenschloss, Diamanten, Felder, Schalter */
+    gt = GERAET[r.art](r, z.e[s] || null, function(a){
+      z.e[s] = a; sichern();
+      if (fb.className === 'fb info') { fb.className = 'fb'; fb.textContent = ''; }   /* alter Hinweis passt nicht mehr */
+    }, aktiv, z, s);
+    box.appendChild(gt.el);
+    if (aktiv && z.korr[s] && gt.korrektur && z.e[s]) {          /* v4: Korrekturrunde läuft (nach Neuladen) */
+      fb.className = 'fb korr'; fb.textContent = gt.korrektur(z.e[s]);
+    }
+    if (z.st === 'ok' && z.stufe === s) gt.el.classList.add('geloest');   /* v4: gelöstes Gerät leuchtet grün */
+    hol = gt.hol; leere = gt.leere;
+  } else if (r.art === 'wahl') {
     if (!z.mix[s]) { z.mix[s] = mische(r.optionen.length); sichern(); }
     var opt = neu('div', 'optionen'), gew = z.e[s] && z.e[s].wahl != null ? z.e[s].wahl : null;
     z.mix[s].forEach(function(o){
@@ -1686,10 +2246,15 @@ function raetselBlock(i, s){
     var a = hol(), erg = bewerte(r, a);
     if (HINWEIS[erg]) {
       fb.className = 'fb info';
-      fb.textContent = erg === 'form' && r.formHinweis ? r.formHinweis + ' Das kostet keinen Versuch.' : HINWEIS[erg];
+      fb.textContent = (erg === 'form' || erg === 'genau') && r.formHinweis ? r.formHinweis + ' Das kostet keinen Versuch.' : HINWEIS[erg];
       return;
     }
     z.e[s] = a;
+    if (erg === 'falsch' && gt && gt.korrektur && !z.korr[s]) {   /* v4: einmal korrigieren (Diamanten, Hebel) */
+      z.korr[s] = 1; sichern();
+      fb.className = 'fb korr'; fb.textContent = gt.korrektur(a);
+      return;
+    }
     if (erg === 'ok') { z.st = 'ok'; }
     else if (s < 2) { z.stufe = s + 1; }
     else { z.st = 'durch'; }
@@ -1715,7 +2280,7 @@ function zeigeEnde(){
     var z = zk(i), t = z.tipps[0] + z.tipps[1] + z.tipps[2], text;
     tipps += t;
     if (fertig(i)) fertigN++;
-    if (z.st === 'ok' && z.stufe === 0) { direkt++; text = '⭐ direkt gelöst'; }
+    if (z.st === 'ok' && z.stufe === 0) { direkt++; text = z.korr && z.korr[0] ? '✨ direkt gelöst (nach einer Korrektur)' : '⭐ direkt gelöst'; }
     else if (z.st === 'ok') { umweg++; text = '🧭 über ' + z.stufe + (z.stufe === 1 ? ' Umweg' : ' Umwege'); }
     else if (z.st === 'durch') { durch++; text = '📖 mit Lösungsweg'; }
     else if (z.st === 'code') { code++; text = '🔑 per Codewort (nicht ausgewertet)'; }
