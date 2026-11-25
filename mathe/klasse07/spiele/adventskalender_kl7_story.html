@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- =====================================================================
-     BAUSTEIN: Story (_story)  v4, 25.11.2026
+     BAUSTEIN: Story (_story)  v5, 25.11.2026
      Escape Room, Adventskalender, Detektivgeschichte oder freie Story: eine Geschichte
      in mehreren Karten, jede Karte endet mit einem Rätsel.
      Richtig → weiter zur nächsten Karte (mit Codewort zum späteren Wiedereinstieg).
@@ -33,6 +33,12 @@
         welcher Zeiger Zähler und welcher Nenner ist. Gezeichnete Hebel statt Kippschalter.
         Diamanten und Hebel: nach dem ersten falschen Prüfen einmal korrigieren (Diamanten:
         richtige leuchten grün und bleiben stecken; Hebel: nur die Anzahl richtiger wird genannt).
+     v5 (Spielzeug-Paket): acht weitere Rätselgeräte – 'wuerfel' (Würfel drehen), 'karten'
+        (verdeckter Kartenfächer), 'abakus' (Perlen auf Stellenwert-Stangen), 'thermo' (Skala /
+        Thermometer, auch negativ und mit Dezimalschritten), 'zeit' (echte Uhr mit ☀️/🌙),
+        'gitter' (Schatzkarte: Gitterpunkt setzen, optional mit Graphen), 'kompass'
+        (Himmelsrichtung oder Winkel einstellen), 'regler' (Sternbild: Gerade/Parabel per
+        Schieberegler durch Sterne legen). Abwärtskompatibel.
      ===================================================================== -->
 <html lang="de">
 <head>
@@ -55,7 +61,7 @@
 </script>
 <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
 <style>
-/* ===== BAUSTEIN-CSS: Story (v4, 25.11.2026) – unverändert übernehmen ===== */
+/* ===== BAUSTEIN-CSS: Story (v5, 25.11.2026) – unverändert übernehmen ===== */
 :root{
   --ink:#22303f; --card:#ffffff; --green:#1e7d32; --red:#c1272d;
   --amber:#b8860b; --amber-light:#fdf3d9; --amber-dark:#96690a;
@@ -223,7 +229,32 @@ mjx-container{max-width:100%;overflow-x:auto;}
 .ablage button > svg{display:block;width:30px;height:30px;}
 .ablage button.fest{border-color:var(--green);}
 .fb.korr{display:block;background:var(--blue-light);color:var(--ink);border:2px solid var(--green);}
-@media (prefers-reduced-motion:reduce){ .funkeln,.rolle > .ziffer.klick{animation:none;} }
+/* v5: Spielzeug-Paket */
+.wuerfelreihe{display:flex;flex-wrap:wrap;gap:1rem;justify-content:center;margin:.6rem 0;}
+.wuerfel{width:96px;height:96px;padding:0;border:0;background:transparent;cursor:pointer;}
+.wuerfel > svg{display:block;width:100%;height:100%;}
+.wuerfel.rollt{animation:rollen .35s ease-out;}
+@keyframes rollen{0%{transform:rotate(-25deg) scale(.85);}60%{transform:rotate(12deg) scale(1.06);}100%{transform:none;}}
+.faecher{display:flex;flex-wrap:wrap;gap:.6rem;justify-content:center;margin:.8rem 0 .4rem;}
+.spielkarte{width:7.4rem;min-height:9.6rem;padding:.5rem;border:3px solid var(--blue-dark);border-radius:.8rem;cursor:pointer;
+  background:repeating-linear-gradient(45deg,var(--blue) 0 8px,var(--blue-dark) 8px 16px);color:#fff;font:inherit;
+  transform:rotate(var(--dreh,0deg));transition:transform .2s;display:flex;align-items:center;justify-content:center;}
+.spielkarte.offen{background:#fff;color:var(--ink);border-color:var(--amber);transform:rotate(0deg);}
+.spielkarte.an{box-shadow:0 0 0 4px var(--blue),0 0 18px var(--blue);transform:translateY(-8px);}
+.karten-ruecken{font-size:2.4rem;color:#fdf3d9;}
+.karten-text{font-size:1.05rem;font-weight:700;line-height:1.35;}
+.abakus > svg{display:block;width:100%;height:auto;margin:0 auto;}
+.abakus-fein{display:grid;gap:.15rem;margin:.3rem auto;}
+.abakus-fein > span{display:flex;justify-content:center;gap:.2rem;}
+.abakus-fein button{min-width:0;flex:1;max-width:44px;padding:0;min-height:44px;border:2px solid var(--line);border-radius:.5rem;background:#fff;color:var(--blue-dark);font:inherit;font-weight:700;cursor:pointer;}
+.thermo > svg{display:block;width:100%;max-width:230px;height:auto;margin:0 auto;touch-action:none;cursor:pointer;}
+.gitter > svg{display:block;width:100%;max-width:480px;height:auto;margin:0 auto;}
+.regler-feld{display:grid;gap:.5rem;max-width:480px;margin:.6rem auto;}
+.regler-zeile{display:grid;grid-template-columns:9.5rem 1fr 3.2rem;align-items:center;gap:.5rem;font-weight:700;}
+.regler-zeile input{width:100%;min-height:44px;accent-color:var(--blue);}
+.regler-wert{text-align:right;font-variant-numeric:tabular-nums;}
+@media (max-width:520px){ .regler-zeile{grid-template-columns:1fr 3.2rem;} .regler-name{grid-column:1/-1;} }
+@media (prefers-reduced-motion:reduce){ .funkeln,.rolle > .ziffer.klick,.wuerfel.rollt{animation:none;} .spielkarte{transition:none;} }
 .erwischt{border-left-color:var(--ink);}
 /* v4: Szenenbilder in Geschichte, Umweg, erwischt und Ende (als data-URI im Datenblock, TEIL 8.1) */
 .szene{margin:.2rem 0 .8rem;}
@@ -868,12 +899,61 @@ function m(t){
                          formHinweis: 'Multipliziere die Klammer aus.'
                  'text'  Wort/Zahlenfolge, Groß/klein egal                    soll: ['NORDEN']
                  'wahl'  Antippen, optionen: [{ t:'…', ok:true }, { t:'…' }, …]  (wird gemischt)
+     ---- Rätselgeräte (seit v3) – Antwort per Gerät statt Eingabefeld: ----
+                 'uhr'      Bruch-Uhr (v4): kurzer Zeiger auf Stunden 1–12, langer auf Minuten 1–60;
+                            das Kind wählt, welcher Zeiger Zähler ist (⇄)            soll: [Z, N]
+                            einer der beiden Werte ≤ 12, der andere ≤ 60 (in der verlangten Form)
+                            form: 'gekuerzt' (Vorgabe, Wert + vollständig gekürzt) | 'genau' (genau
+                            Z und N, z. B. beim Erweitern) | 'wert' (jeder gleichwertige Bruch)
+                 'schloss'  Zahlenschloss mit Rädern (▲/▼)                           soll: [Z, N]
+                            schloss: 'bruch' (Vorgabe: Zähler | Nenner) | 'gemischt' (Ganze |
+                            Zähler | Nenner) | 'zahl' (eine Zahl, soll: [Wert, 1])
+                            stellen: Räder je Gruppe, z. B. [2, 2] oder [1, 2, 2] oder [3]
+                            vorne: 'nenner' (nur 'bruch') – Nenner-Räder vorne, Zähler hinten
+                            einheit: '%', 'cm' … steht hinter dem Schloss;  form wie bei 'uhr'
+                 'steck'    Diamanten an den Zahlenstrahl stecken (antippen, dann Stelle antippen)
+                            strahl: { bis: 1, teile: 12 }  – von 0 bis „bis“, „teile“ Steckplätze
+                            steine: [{ t: f(3,4), w: [3,4] }, …]  – w muss auf einem Steckplatz
+                            liegen (w · teile / bis ganzzahlig); kein eigenes soll nötig
+                 'felder'   Teile einer Figur einfärben (antippen)                     soll: [Z, N]
+                            figur: { form: 'steine', zeilen: 3, spalten: 4 } (Leuchtsteine, v4) |
+                                   { form: 'kreis', teile: 8 } | { form: 'rechteck', zeilen: 3, spalten: 4 }
+                            richtig, wenn eingefärbt : alle Felder = soll (jede Anordnung zählt)
+                 'schalter' Hebel: alle passenden umlegen  schalter: [{ t:'…', ok:true }, { t:'…' }]
+                            (wird gemischt, 4.3; richtig nur, wenn genau die ok-Hebel auf I stehen)
+                 steck und schalter (v4): nach dem ersten falschen Prüfen einmal korrigieren, erst
+                            danach geht es in den Umweg
+     ---- Spielzeug-Paket (seit v5): ----
+                 'wuerfel'  wuerfel: 1–3; antippen dreht weiter, 🎲 würfelt alle
+                            ziel: 'summe' (soll: [Summe, 1]) | 'augen' (soll: ['6','6'], Reihenfolge egal)
+                            | 'zahl' (Augen von links nach rechts als Ziffern, soll: [Wert, 1])
+                 'karten'   verdeckter Fächer: blatt: [{ t:'…', ok:true }, { t:'…' }] (gemischt, 4.3);
+                            antippen deckt auf, nochmal antippen wählt; mehr: true → genau alle ok-Karten
+                 'abakus'   stellen: ['HT','ZT','T','H','Z','E'] (je 0–9 Perlen)     soll: [Wert, 1]
+                 'thermo'   skala: { von:-20, bis:10, schritt:[1,1], marke:5 }, einheit: '°C'
+                            (von/bis ganzzahlig, soll auf einem Schritt)                soll: [Z, N]
+                 'zeit'     echte Uhr; minuten: 5 (Schritt), tag: false schaltet ☀️/🌙 ab  soll: '16:25'
+                 'gitter'   gitter: { x:[-2,8], y:[-2,8] }; graphen: [{ m, b } | { a, d, e }]
+                            (a(x−d)²+e); punkte: [{ x, y, t:'🌲' }]                     soll: '4|3'
+                 'kompass'  modus: 'richtung' (soll: 'NO' – N, NO, O, SO, S, SW, W, NW)
+                            | 'winkel' (Schenkel drehen, grad: Schritt, soll: [108, 1])
+                 'regler'   typ: 'gerade' (Regler m, b) | 'parabel' (a, d, e: y = a(x−d)²+e)
+                            regler: { m:[-4,4,0.5], b:[-6,6,1] } (von, bis, Schritt);
+                            sterne: [[x, y], …]; gitter wie oben – richtig, wenn der Graph durch
+                            alle Sterne geht (kein soll nötig; Sterne müssen erreichbar sein)
      eingabe     bei 'zahl'/'bruch'/'term' – beim Erstellen abgefragt (TEIL 1.2):
                  'formel'   Formeltool (Bruch, gem. Zahl, Hochzahl, Index, Wurzel)
                  'getrennt' Zähler und Nenner in zwei Feldern   ('gemischt': Ganze + Zähler + Nenner)
                  'linear'   ein einfaches Textfeld (nur, wenn keine Brüche/Terme einzugeben sind)
      tipps       zwei Hinweise: Idee, dann Vorgehen – ohne Zwischenergebnisse (TEIL 5.2)
      weg         Lösungsweg (erscheint nur nach dem zweiten Umweg, darf das Ergebnis nennen)
+   Szenenbilder (v4): Bilder als data-URI (WebP, ca. 960 px breit, je ≤ 80 KB) im Datenblock ablegen –
+                    nie als Datei daneben (TEIL 8.1) – und mit szene(BILD.r1, 'Alt-Text') in geschichte,
+                    umwege[].geschichte, erwischt oder ende einsetzen (CSS-Klasse .szene im Baustein)
+   STORY.wegTitel   optional (v3): Überschrift des Lösungswegs, z. B. 'Herr Gräulich erklärt:'
+   STORY.erwischt / karte.erwischt  optional (v3): Erzähltext, der vor dem Lösungsweg erscheint
+                    (z. B. eine Figur holt die Kinder ein und erklärt) – die Karte zählt danach
+                    als geschafft wie bisher
    Schreibhilfen: f(3,4) Bruch · g(1,5,9) gemischte Zahl · m('0,4 · 0,9') Dezimal-Formel
    Eigene Abbildungen: Hilfsfunktion IM Datenblock, die ein SVG mit role="img" und
    aria-label erzeugt, Farben aus 2.2, Brüche mit waagerechtem Strich (Beispiel: wegweiser).
@@ -935,16 +1015,16 @@ var STORY = {
   { id: '1', titel: 'Das Thermometer am Eingang',
     geschichte: '<p>Hilde steht vor dem vereisten Tor. Am Eingang hängt Großvater Bolles altes Thermometer. Im wärmsten Stollen misst er 3 °C, '
               + 'im kältesten −12 °C. „Die erste Tür öffnet sich nur, wenn du den Unterschied kennst“, brummt Bolle.</p>',
-    raetsel: { frage: 'Berechne den Temperaturunterschied zwischen 3 °C und −12 °C in Grad.', kk: 'K7-1', art: 'zahl', eingabe: 'linear', soll: [15,1],
+    raetsel: { frage: 'Berechne den Temperaturunterschied zwischen 3 °C und −12 °C. Stelle das Ergebnis am Zahlenschloss ein.', kk: 'K7-1', art: 'schloss', schloss: 'zahl', stellen: [2], soll: [15,1], einheit: '°C',
                tipps: [ 'Denke an ein Thermometer: Wie viele Grad liegen zwischen den beiden Temperaturen?', 'Rechne „wärmere minus kältere Temperatur“ und beachte das Minus vor der negativen Zahl.' ],
                weg: '3 − (−12) = 3 + 12 = 15. Der Unterschied beträgt 15 Grad.' },
     umwege: [
       { geschichte: '<p>Das Tor knirscht, bleibt aber zu. Glut kriecht in einen Seitengang: Dort sind es 5 °C, im Gang daneben −4 °C.</p>',
-        raetsel: { frage: 'Berechne den Temperaturunterschied zwischen 5 °C und −4 °C in Grad.', kk: 'K7-1', art: 'zahl', eingabe: 'linear', soll: [9,1],
+        raetsel: { frage: 'Berechne den Temperaturunterschied zwischen 5 °C und −4 °C. Stelle das Ergebnis am Zahlenschloss ein.', kk: 'K7-1', art: 'schloss', schloss: 'zahl', stellen: [2], soll: [9,1], einheit: '°C',
                    tipps: [ 'Zähle am Thermometer von −4 bis 0 und dann bis 5.', 'Oder rechne 5 − (−4).' ],
                    weg: '5 − (−4) = 9 Grad.' } },
       { geschichte: '<p>Auch der Seitengang ist versperrt. In zwei Eiskammern misst Hilde −3 °C und −8 °C.</p>',
-        raetsel: { frage: 'Berechne den Temperaturunterschied zwischen −3 °C und −8 °C in Grad.', kk: 'K7-1', art: 'zahl', eingabe: 'linear', soll: [5,1],
+        raetsel: { frage: 'Berechne den Temperaturunterschied zwischen −3 °C und −8 °C. Stelle das Ergebnis am Zahlenschloss ein.', kk: 'K7-1', art: 'schloss', schloss: 'zahl', stellen: [2], soll: [5,1], einheit: '°C',
                    tipps: [ 'Beide Temperaturen sind negativ.', 'Rechne −3 − (−8).' ],
                    weg: '−3 − (−8) = −3 + 8 = 5 Grad.' } }
     ],
@@ -954,16 +1034,16 @@ var STORY = {
   { id: '2', titel: 'Die Zwergenbank',
     geschichte: '<p>Um Kohle für das Herzfeuer zu kaufen, braucht Hilde Geld. Auf ihrem Konto bei der Zwergenbank stehen −35 Taler – sie hat sich '
               + 'für ihren neuen Hammer Geld geliehen. Heute zahlt sie 80 Taler ein.</p>',
-    raetsel: { frage: 'Berechne Hildes neuen Kontostand in Talern.', kk: 'K7-1', art: 'zahl', eingabe: 'linear', soll: [45,1],
+    raetsel: { frage: 'Berechne Hildes neuen Kontostand. Stelle das Ergebnis am Kontobuch-Zeiger ein.', kk: 'K7-1', art: 'thermo', skala: { von: -50, bis: 50, schritt: [5,1], marke: 10 }, soll: [45,1], einheit: 'Taler',
                tipps: [ 'Eine Einzahlung erhöht den Kontostand.', 'Rechne −35 + 80. Denke an den Zahlenstrahl.' ],
                weg: '−35 + 80 = 45. Der Kontostand ist 45 Taler.' },
     umwege: [
       { geschichte: '<p>Der Bankzwerg schüttelt den Kopf: „Falsches Konto!“ Auf Bolles Konto sind 20 Taler. Er hebt 45 Taler ab.</p>',
-        raetsel: { frage: 'Berechne Bolles neuen Kontostand in Talern.', kk: 'K7-1', art: 'zahl', eingabe: 'linear', soll: [-25,1],
+        raetsel: { frage: 'Berechne Bolles neuen Kontostand. Stelle das Ergebnis am Kontobuch-Zeiger ein.', kk: 'K7-1', art: 'thermo', skala: { von: -50, bis: 50, schritt: [5,1], marke: 10 }, soll: [-25,1], einheit: 'Taler',
                    tipps: [ 'Abheben verringert den Kontostand.', 'Rechne 20 − 45. Das Ergebnis kann negativ sein.' ],
                    weg: '20 − 45 = −25 Taler.' } },
       { geschichte: '<p>Glut hat auch ein Konto: −15 Taler. Er bestellt Funkenpulver für 30 Taler.</p>',
-        raetsel: { frage: 'Berechne Gluts neuen Kontostand in Talern.', kk: 'K7-1', art: 'zahl', eingabe: 'linear', soll: [-45,1],
+        raetsel: { frage: 'Berechne Gluts neuen Kontostand. Stelle das Ergebnis am Kontobuch-Zeiger ein.', kk: 'K7-1', art: 'thermo', skala: { von: -50, bis: 50, schritt: [5,1], marke: 10 }, soll: [-45,1], einheit: 'Taler',
                    tipps: [ 'Der Kontostand sinkt noch weiter.', 'Rechne −15 − 30.' ],
                    weg: '−15 − 30 = −45 Taler.' } }
     ],
@@ -972,16 +1052,16 @@ var STORY = {
 
   { id: '3', titel: 'Der Förderkorb',
     geschichte: '<p>Der Förderkorb hängt in 120 m Tiefe, also bei −120 m. Hilde zieht am Hebel, und der Korb fährt 85 m nach oben.</p>',
-    raetsel: { frage: 'Berechne, in welcher Höhe (in m) der Korb jetzt ist.', kk: 'K7-1', art: 'zahl', eingabe: 'linear', soll: [-35,1],
+    raetsel: { frage: 'Berechne, in welcher Höhe der Korb jetzt ist. Stelle das Ergebnis am Höhenmesser ein.', kk: 'K7-1', art: 'thermo', skala: { von: -50, bis: 50, schritt: [5,1], marke: 10 }, soll: [-35,1], einheit: 'm',
                tipps: [ 'Nach oben fahren heißt: Die Höhenangabe wird größer.', 'Rechne −120 + 85.' ],
                weg: '−120 + 85 = −35. Der Korb ist bei −35 m.' },
     umwege: [
       { geschichte: '<p>Ein Seil reißt, der Korb saust zurück! Hilde nimmt die Treppe: Sie startet bei 30 m über dem Eingang und steigt 70 m hinab.</p>',
-        raetsel: { frage: 'Berechne, in welcher Höhe (in m) Hilde ankommt.', kk: 'K7-1', art: 'zahl', eingabe: 'linear', soll: [-40,1],
+        raetsel: { frage: 'Berechne, in welcher Höhe Hilde ankommt. Stelle das Ergebnis am Höhenmesser ein.', kk: 'K7-1', art: 'thermo', skala: { von: -50, bis: 50, schritt: [5,1], marke: 10 }, soll: [-40,1], einheit: 'm',
                    tipps: [ 'Hinabsteigen verringert die Höhe.', 'Rechne 30 − 70.' ],
                    weg: '30 − 70 = −40 m.' } },
       { geschichte: '<p>Die Treppe ist vereist. Hilde klettert von −50 m aus 20 m nach oben.</p>',
-        raetsel: { frage: 'Berechne, in welcher Höhe (in m) Hilde ankommt.', kk: 'K7-1', art: 'zahl', eingabe: 'linear', soll: [-30,1],
+        raetsel: { frage: 'Berechne, in welcher Höhe Hilde ankommt. Stelle das Ergebnis am Höhenmesser ein.', kk: 'K7-1', art: 'thermo', skala: { von: -50, bis: 50, schritt: [5,1], marke: 10 }, soll: [-30,1], einheit: 'm',
                    tipps: [ 'Nach oben: addieren.', 'Rechne −50 + 20.' ],
                    weg: '−50 + 20 = −30 m.' } }
     ],
@@ -990,16 +1070,16 @@ var STORY = {
 
   { id: '4', titel: 'Die frierende Halle',
     geschichte: '<p>In der großen Halle ist es 4 °C warm. Doch Frostbart bläst: 6 Stunden lang sinkt die Temperatur um jeweils 2,5 °C pro Stunde.</p>',
-    raetsel: { frage: 'Berechne die Temperatur in °C nach 6 Stunden.', kk: 'K7-2', art: 'zahl', eingabe: 'linear', soll: [-11,1],
+    raetsel: { frage: 'Berechne die Temperatur nach 6 Stunden. Stelle das Ergebnis am Thermometer ein.', kk: 'K7-2', art: 'thermo', skala: { von: -20, bis: 10, schritt: [1,1], marke: 5 }, soll: [-11,1], einheit: '°C',
                tipps: [ 'Berechne zuerst die gesamte Änderung als Produkt mit Vorzeichen.', 'Addiere die Änderung zur Anfangstemperatur.' ],
                weg: 'Änderung: 6 · (−2,5) = −15. 4 + (−15) = −11. Nach 6 Stunden sind es −11 °C.' },
     umwege: [
       { geschichte: '<p>Glut heizt dagegen, aber in der Nebenhalle (0 °C) sinkt die Temperatur 4 Stunden lang um je 5 °C.</p>',
-        raetsel: { frage: 'Berechne die Temperatur in °C nach 4 Stunden.', kk: 'K7-2', art: 'zahl', eingabe: 'linear', soll: [-20,1],
+        raetsel: { frage: 'Berechne die Temperatur nach 4 Stunden. Stelle das Ergebnis am Thermometer ein.', kk: 'K7-2', art: 'thermo', skala: { von: -20, bis: 10, schritt: [1,1], marke: 5 }, soll: [-20,1], einheit: '°C',
                    tipps: [ 'Die Änderung ist 4 · (−5).', 'Addiere sie zu 0 °C.' ],
                    weg: '4 · (−5) = −20. 0 + (−20) = −20 °C.' } },
       { geschichte: '<p>In der kleinen Kammer sind es 2 °C, und es wird 3 Stunden lang um je 3 °C kälter.</p>',
-        raetsel: { frage: 'Berechne die Temperatur in °C nach 3 Stunden.', kk: 'K7-2', art: 'zahl', eingabe: 'linear', soll: [-7,1],
+        raetsel: { frage: 'Berechne die Temperatur nach 3 Stunden. Stelle das Ergebnis am Thermometer ein.', kk: 'K7-2', art: 'thermo', skala: { von: -20, bis: 10, schritt: [1,1], marke: 5 }, soll: [-7,1], einheit: '°C',
                    tipps: [ 'Gesamtänderung: 3 · (−3).', 'Addiere zur Anfangstemperatur.' ],
                    weg: '3 · (−3) = −9. 2 + (−9) = −7 °C.' } }
     ],
@@ -1008,16 +1088,16 @@ var STORY = {
 
   { id: '5', titel: 'Frostbarts Schulden',
     geschichte: '<p>Frostbart hat bei acht Zwergen Werkzeug zerbrochen. Der Schaden beträgt −96 Taler und wird gleichmäßig auf alle acht Zwerge verteilt.</p>',
-    raetsel: { frage: 'Berechne, welcher Betrag (in Talern) auf jeden Zwerg entfällt.', kk: 'K7-2', art: 'zahl', eingabe: 'linear', soll: [-12,1],
+    raetsel: { frage: 'Berechne, welcher Betrag auf jeden Zwerg entfällt. Stelle das Ergebnis am Kontobuch-Zeiger ein.', kk: 'K7-2', art: 'thermo', skala: { von: -15, bis: 10, schritt: [1,1], marke: 5 }, soll: [-12,1], einheit: 'Taler',
                tipps: [ 'Gleichmäßig verteilen heißt dividieren.', 'Minus geteilt durch Plus ergibt Minus.' ],
                weg: '(−96) : 8 = −12. Auf jeden Zwerg entfallen −12 Taler.' },
     umwege: [
       { geschichte: '<p>Bolle rechnet nach: Nur fünf Zwerge sind betroffen, der Schaden beträgt −45 Taler.</p>',
-        raetsel: { frage: 'Berechne den Betrag (in Talern) pro Zwerg.', kk: 'K7-2', art: 'zahl', eingabe: 'linear', soll: [-9,1],
+        raetsel: { frage: 'Berechne den Betrag pro Zwerg. Stelle das Ergebnis am Kontobuch-Zeiger ein.', kk: 'K7-2', art: 'thermo', skala: { von: -15, bis: 10, schritt: [1,1], marke: 5 }, soll: [-9,1], einheit: 'Taler',
                    tipps: [ 'Dividiere −45 durch 5.', 'Achte auf das Vorzeichen.' ],
                    weg: '(−45) : 5 = −9 Taler.' } },
       { geschichte: '<p>„Rätsel aus meiner Schulzeit“, lacht Bolle: (−56) : (−7).</p>',
-        raetsel: { frage: 'Berechne (−56) : (−7).', kk: 'K7-2', art: 'zahl', eingabe: 'linear', soll: [8,1],
+        raetsel: { frage: 'Berechne (−56) : (−7). Stelle das Ergebnis an der Vorzeichen-Skala ein.', kk: 'K7-2', art: 'thermo', skala: { von: -15, bis: 10, schritt: [1,1], marke: 5 }, soll: [8,1],
                    tipps: [ 'Zwei gleiche Vorzeichen ergeben beim Dividieren ein positives Ergebnis.', 'Rechne dann mit den Beträgen.' ],
                    weg: '(−56) : (−7) = 8.' } }
     ],
@@ -1044,16 +1124,16 @@ var STORY = {
 
   { id: '7', titel: 'Das Runenschloss',
     geschichte: '<p>Am Schloss der siebten Tür sind vier Runensteine mit Zahlen eingesetzt: −2, −3, −1 und 4. Das Schloss öffnet sich mit dem Produkt aller vier Zahlen.</p>',
-    raetsel: { frage: 'Berechne ' + m('(−2) · (−3) · (−1) · 4') + '.', kk: 'K7-2', art: 'zahl', eingabe: 'linear', soll: [-24,1],
+    raetsel: { frage: 'Berechne ' + m('(−2) · (−3) · (−1) · 4') + ' und stelle das Ergebnis an der Vorzeichen-Skala ein.', kk: 'K7-2', art: 'thermo', skala: { von: -25, bis: 25, schritt: [1,1], marke: 5 }, soll: [-24,1],
                tipps: [ 'Zähle zuerst die negativen Faktoren: Bei einer ungeraden Anzahl ist das Produkt negativ.', 'Multipliziere dann die Beträge.' ],
                weg: 'Drei negative Faktoren → Ergebnis negativ. 2 · 3 · 1 · 4 = 24. Also −24.' },
     umwege: [
       { geschichte: '<p>Ein Runenstein fällt heraus. Übrig sind −1, −5 und 3.</p>',
-        raetsel: { frage: 'Berechne ' + m('(−1) · (−5) · 3') + '.', kk: 'K7-2', art: 'zahl', eingabe: 'linear', soll: [15,1],
+        raetsel: { frage: 'Berechne ' + m('(−1) · (−5) · 3') + ' und stelle das Ergebnis an der Vorzeichen-Skala ein.', kk: 'K7-2', art: 'thermo', skala: { von: -25, bis: 25, schritt: [1,1], marke: 5 }, soll: [15,1],
                    tipps: [ 'Wie viele negative Faktoren gibt es?', 'Gerade Anzahl → positiv.' ],
                    weg: 'Zwei negative Faktoren → positiv. 1 · 5 · 3 = 15.' } },
       { geschichte: '<p>Jetzt liegen nur noch drei gleiche Steine da: −2, −2 und −2.</p>',
-        raetsel: { frage: 'Berechne ' + m('(−2) · (−2) · (−2)') + '.', kk: 'K7-2', art: 'zahl', eingabe: 'linear', soll: [-8,1],
+        raetsel: { frage: 'Berechne ' + m('(−2) · (−2) · (−2)') + ' und stelle das Ergebnis an der Vorzeichen-Skala ein.', kk: 'K7-2', art: 'thermo', skala: { von: -25, bis: 25, schritt: [1,1], marke: 5 }, soll: [-8,1],
                    tipps: [ 'Drei negative Faktoren.', 'Ungerade Anzahl → negativ.' ],
                    weg: '(−2) · (−2) = 4, 4 · (−2) = −8.' } }
     ],
@@ -1062,16 +1142,16 @@ var STORY = {
 
   { id: '8', titel: 'Der unterirdische See',
     geschichte: '<p>Hinter Tür acht liegt ein See. Bolles Pegelstab zeigt morgens −2,4 m an (unter der Markierung). Im Laufe des Tages steigt das Wasser um 3,9 m.</p>',
-    raetsel: { frage: 'Berechne den neuen Pegelstand in m.', kk: 'K7-1', art: 'zahl', eingabe: 'linear', soll: [3,2],
+    raetsel: { frage: 'Berechne den neuen Pegelstand. Stelle das Ergebnis am Pegel ein.', kk: 'K7-1', art: 'thermo', skala: { von: -3, bis: 3, schritt: [1,10], marke: 1 }, soll: [3,2], einheit: 'm',
                tipps: [ 'Steigen heißt addieren.', 'Rechne −2,4 + 3,9 wie mit ganzen Zahlen, nur mit Komma.' ],
                weg: '−2,4 + 3,9 = 1,5. Der Pegel steht bei 1,5 m.' },
     umwege: [
       { geschichte: '<p>Das Boot kippt fast! Am nächsten Tag steht der Pegel bei −1,2 m und sinkt um 0,8 m.</p>',
-        raetsel: { frage: 'Berechne den neuen Pegelstand in m.', kk: 'K7-1', art: 'zahl', eingabe: 'linear', soll: [-2,1],
+        raetsel: { frage: 'Berechne den neuen Pegelstand. Stelle das Ergebnis am Pegel ein.', kk: 'K7-1', art: 'thermo', skala: { von: -3, bis: 3, schritt: [1,10], marke: 1 }, soll: [-2,1], einheit: 'm',
                    tipps: [ 'Sinken heißt subtrahieren.', 'Rechne −1,2 − 0,8.' ],
                    weg: '−1,2 − 0,8 = −2,0 m.' } },
       { geschichte: '<p>Glut misst selbst: Der Pegel steht bei 0,5 m und sinkt um 1,7 m.</p>',
-        raetsel: { frage: 'Berechne den neuen Pegelstand in m.', kk: 'K7-1', art: 'zahl', eingabe: 'linear', soll: [-6,5],
+        raetsel: { frage: 'Berechne den neuen Pegelstand. Stelle das Ergebnis am Pegel ein.', kk: 'K7-1', art: 'thermo', skala: { von: -3, bis: 3, schritt: [1,10], marke: 1 }, soll: [-6,5], einheit: 'm',
                    tipps: [ 'Rechne 0,5 − 1,7.', 'Das Ergebnis liegt unter 0.' ],
                    weg: '0,5 − 1,7 = −1,2 m.' } }
     ],
@@ -1081,16 +1161,16 @@ var STORY = {
   { id: '9', titel: 'Die Erzwaage',
     geschichte: '<p>In der Schmiede wird Silbererz gewogen. Der Preis ist proportional zur Masse. Die Waage zeigt eine Tabelle, ein Wert ist verwischt:</p>'
               + tabelle(['Masse (kg)', 'Preis (Taler)'], [2, 6], [7, '?']),
-    raetsel: { frage: 'Berechne den fehlenden Preis in Talern.', kk: 'K7-4', art: 'zahl', eingabe: 'linear', soll: [21,1],
+    raetsel: { frage: 'Berechne den fehlenden Preis. Stelle das Ergebnis am Zahlenschloss ein.', kk: 'K7-4', art: 'schloss', schloss: 'zahl', stellen: [2], soll: [21,1], einheit: 'Taler',
                tipps: [ 'Bei einer proportionalen Zuordnung gilt: Das Doppelte, Dreifache … der Masse kostet das Doppelte, Dreifache …', 'Mit welcher Zahl wird 2 kg zu 6 kg? Rechne mit dem Preis genauso.' ],
                weg: '2 kg · 3 = 6 kg, also 7 Taler · 3 = 21 Taler.' },
     umwege: [
       { geschichte: '<p>Die Waage zeigt eine zweite Tabelle:</p>' + tabelle(['Masse (kg)', 'Preis (Taler)'], [3, 5], [12, '?']),
-        raetsel: { frage: 'Berechne den fehlenden Preis in Talern.', kk: 'K7-4', art: 'zahl', eingabe: 'linear', soll: [20,1],
+        raetsel: { frage: 'Berechne den fehlenden Preis. Stelle das Ergebnis am Zahlenschloss ein.', kk: 'K7-4', art: 'schloss', schloss: 'zahl', stellen: [2], soll: [20,1], einheit: 'Taler',
                    tipps: [ 'Berechne zuerst den Preis für 1 kg.', 'Multipliziere dann mit 5.' ],
                    weg: '12 : 3 = 4 Taler pro kg. 4 · 5 = 20 Taler.' } },
       { geschichte: '<p>Letzte Tabelle, diesmal für Kupfererz:</p>' + tabelle(['Masse (kg)', 'Preis (Taler)'], [4, 10], [10, '?']),
-        raetsel: { frage: 'Berechne den fehlenden Preis in Talern.', kk: 'K7-4', art: 'zahl', eingabe: 'linear', soll: [25,1],
+        raetsel: { frage: 'Berechne den fehlenden Preis. Stelle das Ergebnis am Zahlenschloss ein.', kk: 'K7-4', art: 'schloss', schloss: 'zahl', stellen: [2], soll: [25,1], einheit: 'Taler',
                    tipps: [ 'Preis für 1 kg berechnen.', 'Dann mit 10 multiplizieren.' ],
                    weg: '10 : 4 = 2,5 Taler pro kg. 2,5 · 10 = 25 Taler.' } }
     ],
@@ -1099,16 +1179,16 @@ var STORY = {
 
   { id: '10', titel: 'Das Schmiederezept',
     geschichte: '<p>Für die Schlittenkufen gilt Bolles Zuordnungsvorschrift: Für x Kufen braucht man y = 3,5 · x Kilogramm Silber.</p>',
-    raetsel: { frage: 'Berechne, wie viel Kilogramm Silber man für x = 8 Kufen braucht.', kk: 'K7-4', art: 'zahl', eingabe: 'linear', soll: [28,1],
+    raetsel: { frage: 'Berechne, wie viel Kilogramm Silber man für x = 8 Kufen braucht. Stelle das Ergebnis am Zahlenschloss ein.', kk: 'K7-4', art: 'schloss', schloss: 'zahl', stellen: [2], soll: [28,1], einheit: 'kg',
                tipps: [ 'Setze die Zahl für x in die Vorschrift ein.', 'Rechne 3,5 · 8.' ],
                weg: 'y = 3,5 · 8 = 28. Man braucht 28 kg Silber.' },
     umwege: [
       { geschichte: '<p>Zu viel Silber! Für Glöckchen gilt eine andere Vorschrift: y = 2,5 · x.</p>',
-        raetsel: { frage: 'Berechne y für x = 6.', kk: 'K7-4', art: 'zahl', eingabe: 'linear', soll: [15,1],
+        raetsel: { frage: 'Berechne y für x = 6. Stelle das Ergebnis am Zahlenschloss ein.', kk: 'K7-4', art: 'schloss', schloss: 'zahl', stellen: [2], soll: [15,1],
                    tipps: [ 'Einsetzen.', '2,5 · 6.' ],
                    weg: 'y = 2,5 · 6 = 15.' } },
       { geschichte: '<p>Für Sterne gilt: y = 4 · x.</p>',
-        raetsel: { frage: 'Berechne y für x = 9.', kk: 'K7-4', art: 'zahl', eingabe: 'linear', soll: [36,1],
+        raetsel: { frage: 'Berechne y für x = 9. Stelle das Ergebnis am Zahlenschloss ein.', kk: 'K7-4', art: 'schloss', schloss: 'zahl', stellen: [2], soll: [36,1],
                    tipps: [ 'Einsetzen.', '4 · 9.' ],
                    weg: 'y = 4 · 9 = 36.' } }
     ],
@@ -1117,19 +1197,19 @@ var STORY = {
 
   { id: '11', titel: 'Drei Schriftrollen',
     geschichte: '<p>Im Archiv liegen drei Schriftrollen mit Wertetabellen. Nur die Rolle mit einer proportionalen Zuordnung zeigt den Weg zur nächsten Tür.</p>',
-    raetsel: { frage: 'Entscheide, welche Zuordnung proportional ist.', kk: 'K7-4', art: 'wahl',
-               optionen: [ { t: '1 → 4; 2 → 8; 5 → 20', ok: true }, { t: '1 → 12; 2 → 6; 4 → 3' }, { t: '1 → 3; 2 → 5; 3 → 7' } ],
+    raetsel: { frage: 'Entscheide, welche Zuordnung proportional ist.', kk: 'K7-4', art: 'karten',
+               blatt: [ { t: '1 → 4; 2 → 8; 5 → 20', ok: true }, { t: '1 → 12; 2 → 6; 4 → 3' }, { t: '1 → 3; 2 → 5; 3 → 7' } ],
                tipps: [ 'Proportional heißt quotientengleich: y : x ist immer gleich.', 'Berechne für jedes Paar y : x und vergleiche.' ],
                weg: '4 : 1 = 8 : 2 = 20 : 5 = 4 → proportional. Die zweite Rolle ist produktgleich (antiproportional), die dritte weder noch.' },
     umwege: [
       { geschichte: '<p>Die Rolle zerfällt zu Staub. Bolle kramt neue hervor: „Diesmal suchen wir die antiproportionale!“</p>',
-        raetsel: { frage: 'Entscheide, welche Zuordnung antiproportional ist.', kk: 'K7-4', art: 'wahl',
-                   optionen: [ { t: '2 → 15; 3 → 10; 6 → 5', ok: true }, { t: '2 → 6; 3 → 9; 6 → 18' }, { t: '2 → 10; 3 → 9; 6 → 6' } ],
+        raetsel: { frage: 'Entscheide, welche Zuordnung antiproportional ist.', kk: 'K7-4', art: 'karten',
+                   blatt: [ { t: '2 → 15; 3 → 10; 6 → 5', ok: true }, { t: '2 → 6; 3 → 9; 6 → 18' }, { t: '2 → 10; 3 → 9; 6 → 6' } ],
                    tipps: [ 'Antiproportional heißt produktgleich: x · y ist immer gleich.', 'Berechne für jedes Paar x · y.' ],
                    weg: '2 · 15 = 3 · 10 = 6 · 5 = 30 → antiproportional.' } },
       { geschichte: '<p>„Und jetzt die, die weder proportional noch antiproportional ist“, sagt Hilde.</p>',
-        raetsel: { frage: 'Entscheide, welche Zuordnung weder proportional noch antiproportional ist.', kk: 'K7-4', art: 'wahl',
-                   optionen: [ { t: '1 → 5; 2 → 7; 4 → 11', ok: true }, { t: '1 → 6; 2 → 12; 4 → 24' }, { t: '1 → 8; 2 → 4; 4 → 2' } ],
+        raetsel: { frage: 'Entscheide, welche Zuordnung weder proportional noch antiproportional ist.', kk: 'K7-4', art: 'karten',
+                   blatt: [ { t: '1 → 5; 2 → 7; 4 → 11', ok: true }, { t: '1 → 6; 2 → 12; 4 → 24' }, { t: '1 → 8; 2 → 4; 4 → 2' } ],
                    tipps: [ 'Prüfe Quotienten und Produkte.', 'Bei welcher Rolle ist weder y : x noch x · y konstant?' ],
                    weg: 'Rolle 1: 5 : 1 ≠ 7 : 2 und 1 · 5 ≠ 2 · 7 → weder noch. Rolle 2 ist proportional, Rolle 3 antiproportional.' } }
     ],
@@ -1156,16 +1236,16 @@ var STORY = {
 
   { id: '13', titel: 'Der Eiswall',
     geschichte: '<p>Ein dicker Eiswall versperrt den Weg. Bolle rechnet: „6 Zwerge brauchen 12 Tage, um ihn wegzuhacken.“ Hilde holt Verstärkung – jetzt hacken 8 Zwerge.</p>',
-    raetsel: { frage: 'Berechne, wie viele Tage 8 Zwerge brauchen (bei gleichem Arbeitstempo).', kk: 'K7-4', art: 'zahl', eingabe: 'linear', soll: [9,1],
+    raetsel: { frage: 'Berechne, wie viele Tage 8 Zwerge bei gleichem Arbeitstempo brauchen. Stelle das Ergebnis am Zahlenschloss ein.', kk: 'K7-4', art: 'schloss', schloss: 'zahl', stellen: [2], soll: [9,1], einheit: 'Tage',
                tipps: [ 'Mehr Zwerge brauchen weniger Zeit – die Zuordnung ist antiproportional.', 'Berechne zuerst, wie lange 1 Zwerg allein bräuchte.' ],
                weg: '1 Zwerg: 12 · 6 = 72 Tage. 8 Zwerge: 72 : 8 = 9 Tage.' },
     umwege: [
       { geschichte: '<p>Zwei Zwerge haben Schnupfen. Ein kleinerer Wall: 4 Zwerge brauchen 15 Stunden. Es helfen 5 Zwerge.</p>',
-        raetsel: { frage: 'Berechne, wie viele Stunden 5 Zwerge brauchen.', kk: 'K7-4', art: 'zahl', eingabe: 'linear', soll: [12,1],
+        raetsel: { frage: 'Berechne, wie viele Stunden 5 Zwerge brauchen. Stelle das Ergebnis am Zahlenschloss ein.', kk: 'K7-4', art: 'schloss', schloss: 'zahl', stellen: [2], soll: [12,1], einheit: 'h',
                    tipps: [ 'Antiproportional: Produkt bleibt gleich.', 'Erst für 1 Zwerg, dann für 5.' ],
                    weg: '4 · 15 = 60 Stunden für 1 Zwerg. 60 : 5 = 12 Stunden.' } },
       { geschichte: '<p>Glut holt Bergziegen: 3 Ziegen brauchen 20 Tage, um das Geröll wegzutragen. Es kommen 6 Ziegen.</p>',
-        raetsel: { frage: 'Berechne, wie viele Tage 6 Ziegen brauchen.', kk: 'K7-4', art: 'zahl', eingabe: 'linear', soll: [10,1],
+        raetsel: { frage: 'Berechne, wie viele Tage 6 Ziegen brauchen. Stelle das Ergebnis am Zahlenschloss ein.', kk: 'K7-4', art: 'schloss', schloss: 'zahl', stellen: [2], soll: [10,1], einheit: 'Tage',
                    tipps: [ 'Doppelt so viele Ziegen …', '… brauchen halb so lange.' ],
                    weg: '3 · 20 = 60. 60 : 6 = 10 Tage.' } }
     ],
@@ -1174,16 +1254,16 @@ var STORY = {
 
   { id: '14', titel: 'Der Vorratskeller',
     geschichte: '<p>Im Vorratskeller lagert Zwergenbrot. Es reicht für 24 Zwerge 30 Tage lang. Weil einige Zwerge zu ihren Familien gereist sind, bleiben nur 20.</p>',
-    raetsel: { frage: 'Berechne, wie viele Tage der Vorrat für 20 Zwerge reicht.', kk: 'K7-4', art: 'zahl', eingabe: 'linear', soll: [36,1],
+    raetsel: { frage: 'Berechne, wie viele Tage der Vorrat für 20 Zwerge reicht. Stelle das Ergebnis am Zahlenschloss ein.', kk: 'K7-4', art: 'schloss', schloss: 'zahl', stellen: [2], soll: [36,1], einheit: 'Tage',
                tipps: [ 'Weniger Esser – der Vorrat reicht länger. Die Zuordnung ist antiproportional.', 'Berechne, wie lange der Vorrat für einen einzigen Zwerg reichen würde.' ],
                weg: '24 · 30 = 720 Tage für 1 Zwerg. 720 : 20 = 36 Tage.' },
     umwege: [
       { geschichte: '<p>Ein Teil des Brots ist verschimmelt. Für die Rentiere: Das Heu reicht für 10 Rentiere 18 Tage. Es sind aber 12 Rentiere.</p>',
-        raetsel: { frage: 'Berechne, wie viele Tage das Heu für 12 Rentiere reicht.', kk: 'K7-4', art: 'zahl', eingabe: 'linear', soll: [15,1],
+        raetsel: { frage: 'Berechne, wie viele Tage das Heu für 12 Rentiere reicht. Stelle das Ergebnis am Zahlenschloss ein.', kk: 'K7-4', art: 'schloss', schloss: 'zahl', stellen: [2], soll: [15,1], einheit: 'Tage',
                    tipps: [ 'Mehr Rentiere, kürzere Zeit.', 'Erst für 1 Rentier rechnen.' ],
                    weg: '10 · 18 = 180. 180 : 12 = 15 Tage.' } },
       { geschichte: '<p>Glut hat einen Vorrat Holzkohle: reicht 5 Öfen 8 Tage. Es brennen nur 4 Öfen.</p>',
-        raetsel: { frage: 'Berechne, wie viele Tage die Kohle für 4 Öfen reicht.', kk: 'K7-4', art: 'zahl', eingabe: 'linear', soll: [10,1],
+        raetsel: { frage: 'Berechne, wie viele Tage die Kohle für 4 Öfen reicht. Stelle das Ergebnis am Zahlenschloss ein.', kk: 'K7-4', art: 'schloss', schloss: 'zahl', stellen: [2], soll: [10,1], einheit: 'Tage',
                    tipps: [ 'Produktgleichheit.', '5 · 8 durch 4.' ],
                    weg: '5 · 8 = 40. 40 : 4 = 10 Tage.' } }
     ],
@@ -1192,16 +1272,16 @@ var STORY = {
 
   { id: '15', titel: 'Das Silberblech',
     geschichte: '<p>Für die Glocke am Schlitten schneidet Hilde aus einem Silberblech ein Stück aus. Das Blech ist ' + f(3,4) + ' m² groß, sie braucht ' + f(2,9) + ' davon.</p>',
-    raetsel: { frage: 'Berechne ' + f(2,9) + ' von ' + f(3,4) + ' m². Gib das Ergebnis in m² vollständig gekürzt an.', kk: 'K6-3', art: 'bruch', eingabe: 'getrennt', soll: [1,6],
+    raetsel: { frage: 'Berechne ' + f(2,9) + ' von ' + f(3,4) + ' m². Stelle das Ergebnis vollständig gekürzt am Zahlenschloss ein.', kk: 'K6-3', art: 'schloss', schloss: 'bruch', stellen: [1, 2], soll: [1,6],
                tipps: [ '„Von“ bedeutet hier „mal“.', 'Multipliziere Zähler mit Zähler und Nenner mit Nenner. Kürze am besten vor dem Ausmultiplizieren.' ],
                weg: f(2,9) + ' · ' + f(3,4) + ' = ' + f('2 · 3','9 · 4') + ' = ' + f(6,36) + ' = ' + f(1,6) + ' m².' },
     umwege: [
       { geschichte: '<p>Das Stück ist verbogen. Ein neues Blech: ' + f(5,6) + ' m², sie braucht ' + f(3,10) + ' davon.</p>',
-        raetsel: { frage: 'Berechne ' + f(3,10) + ' von ' + f(5,6) + ' m². Gib das Ergebnis vollständig gekürzt an.', kk: 'K6-3', art: 'bruch', eingabe: 'getrennt', soll: [1,4],
+        raetsel: { frage: 'Berechne ' + f(3,10) + ' von ' + f(5,6) + ' m². Stelle das Ergebnis vollständig gekürzt am Zahlenschloss ein.', kk: 'K6-3', art: 'schloss', schloss: 'bruch', stellen: [1, 2], soll: [1,4],
                    tipps: [ 'Multipliziere die Brüche.', 'Kürze über Kreuz.' ],
                    weg: f(3,10) + ' · ' + f(5,6) + ' = ' + f(15,60) + ' = ' + f(1,4) + ' m².' } },
       { geschichte: '<p>Letztes Blech: ' + f(5,12) + ' m², sie braucht ' + f(4,5) + ' davon.</p>',
-        raetsel: { frage: 'Berechne ' + f(4,5) + ' von ' + f(5,12) + ' m². Gib das Ergebnis vollständig gekürzt an.', kk: 'K6-3', art: 'bruch', eingabe: 'getrennt', soll: [1,3],
+        raetsel: { frage: 'Berechne ' + f(4,5) + ' von ' + f(5,12) + ' m². Stelle das Ergebnis vollständig gekürzt am Zahlenschloss ein.', kk: 'K6-3', art: 'schloss', schloss: 'bruch', stellen: [1, 2], soll: [1,3],
                    tipps: [ 'Zähler mal Zähler, Nenner mal Nenner.', 'Kürze das Ergebnis vollständig.' ],
                    weg: f(4,5) + ' · ' + f(5,12) + ' = ' + f(20,60) + ' = ' + f(1,3) + ' m².' } }
     ],
@@ -1210,16 +1290,16 @@ var STORY = {
 
   { id: '16', titel: 'Die Kristallflaschen',
     geschichte: '<p>Glut braucht Feuerwasser. Die Kristallflasche öffnet sich aber nur für den, der das Rätsel auf ihrem Etikett löst: ' + f(2,3) + ' : ' + f(4,5) + '.</p>',
-    raetsel: { frage: 'Berechne ' + f(2,3) + ' : ' + f(4,5) + '. Gib das Ergebnis vollständig gekürzt an.', kk: 'K6-3', art: 'bruch', eingabe: 'getrennt', soll: [5,6],
+    raetsel: { frage: 'Berechne ' + f(2,3) + ' : ' + f(4,5) + '. Stelle das Ergebnis vollständig gekürzt am Zahlenschloss ein.', kk: 'K6-3', art: 'schloss', schloss: 'bruch', stellen: [1, 2], soll: [5,6],
                tipps: [ 'Durch einen Bruch teilst du, indem du mit seinem Kehrwert multiplizierst.', 'Bilde den Kehrwert von ' + f(4,5) + ' und multipliziere.' ],
                weg: f(2,3) + ' : ' + f(4,5) + ' = ' + f(2,3) + ' · ' + f(5,4) + ' = ' + f(10,12) + ' = ' + f(5,6) + '.' },
     umwege: [
       { geschichte: '<p>Die Flasche zerspringt. Im kleinen Kessel sind ' + f(3,5) + ' Liter, die gleichmäßig auf 2 Becher verteilt werden.</p>',
-        raetsel: { frage: 'Berechne ' + f(3,5) + ' : 2. Gib das Ergebnis vollständig gekürzt an.', kk: 'K6-3', art: 'bruch', eingabe: 'getrennt', soll: [3,10],
+        raetsel: { frage: 'Berechne ' + f(3,5) + ' : 2. Stelle das Ergebnis vollständig gekürzt am Zahlenschloss ein.', kk: 'K6-3', art: 'schloss', schloss: 'bruch', stellen: [1, 2], soll: [3,10],
                    tipps: [ 'Durch 2 teilen heißt: den Nenner verdoppeln (oder mit ' + f(1,2) + ' multiplizieren).', 'Rechne und kürze, falls möglich.' ],
                    weg: f(3,5) + ' : 2 = ' + f(3,10) + ' Liter.' } },
       { geschichte: '<p>Ein Becher kippt um. Auf dem letzten Fläschchen steht: ' + f(1,2) + ' : ' + f(3,4) + '.</p>',
-        raetsel: { frage: 'Berechne ' + f(1,2) + ' : ' + f(3,4) + '. Gib das Ergebnis vollständig gekürzt an.', kk: 'K6-3', art: 'bruch', eingabe: 'getrennt', soll: [2,3],
+        raetsel: { frage: 'Berechne ' + f(1,2) + ' : ' + f(3,4) + '. Stelle das Ergebnis vollständig gekürzt am Zahlenschloss ein.', kk: 'K6-3', art: 'schloss', schloss: 'bruch', stellen: [1, 2], soll: [2,3],
                    tipps: [ 'Mit dem Kehrwert multiplizieren.', 'Kehrwert von ' + f(3,4) + ' bilden.' ],
                    weg: f(1,2) + ' · ' + f(4,3) + ' = ' + f(4,6) + ' = ' + f(2,3) + '.' } }
     ],
@@ -1246,16 +1326,16 @@ var STORY = {
 
   { id: '18', titel: 'Die Kettenglieder',
     geschichte: '<p>Eine 7,2 m lange Kette hält die nächste Tür. Jedes Kettenglied ist 0,8 m lang.</p>',
-    raetsel: { frage: 'Berechne, aus wie vielen Gliedern die Kette besteht.', kk: 'K6-4', art: 'zahl', eingabe: 'linear', soll: [9,1],
+    raetsel: { frage: 'Berechne, aus wie vielen Gliedern die Kette besteht. Stelle das Ergebnis am Zahlenschloss ein.', kk: 'K6-4', art: 'schloss', schloss: 'zahl', stellen: [2], soll: [9,1], einheit: 'Glieder',
                tipps: [ 'Dividiere die Gesamtlänge durch die Länge eines Glieds.', 'Verschiebe bei beiden Zahlen das Komma um gleich viele Stellen, bis der Divisor keine Nachkommastellen mehr hat.' ],
                weg: '7,2 : 0,8 = 72 : 8 = 9 Glieder.' },
     umwege: [
       { geschichte: '<p>Die Kette rasselt herunter. Eine kürzere: 4,5 m mit Gliedern von 1,5 m.</p>',
-        raetsel: { frage: 'Berechne, aus wie vielen Gliedern diese Kette besteht.', kk: 'K6-4', art: 'zahl', eingabe: 'linear', soll: [3,1],
+        raetsel: { frage: 'Berechne, aus wie vielen Gliedern diese Kette besteht. Stelle das Ergebnis am Zahlenschloss ein.', kk: 'K6-4', art: 'schloss', schloss: 'zahl', stellen: [2], soll: [3,1], einheit: 'Glieder',
                    tipps: [ 'Gesamtlänge durch Gliedlänge.', 'Komma bei beiden verschieben.' ],
                    weg: '4,5 : 1,5 = 45 : 15 = 3.' } },
       { geschichte: '<p>Die letzte Kette: 6,3 m, Glieder zu 0,9 m.</p>',
-        raetsel: { frage: 'Berechne, aus wie vielen Gliedern diese Kette besteht.', kk: 'K6-4', art: 'zahl', eingabe: 'linear', soll: [7,1],
+        raetsel: { frage: 'Berechne, aus wie vielen Gliedern diese Kette besteht. Stelle das Ergebnis am Zahlenschloss ein.', kk: 'K6-4', art: 'schloss', schloss: 'zahl', stellen: [2], soll: [7,1], einheit: 'Glieder',
                    tipps: [ 'Dividiere.', '63 : 9.' ],
                    weg: '6,3 : 0,9 = 63 : 9 = 7.' } }
     ],
@@ -1283,19 +1363,19 @@ var STORY = {
   { id: '20', titel: 'Der Spitzhacken-Winkel',
     geschichte: '<p>Frostbart hat eine Spitzhacke im Eis eingefroren. Der Stiel und das Eis bilden einen Winkel von 135°. Hilde muss die Winkelart nennen, '
               + 'damit Glut die Hacke an der richtigen Stelle auftaut.</p>',
-    raetsel: { frage: 'Gib an, zu welcher Winkelart ein Winkel von 135° gehört.', kk: 'K6-5', art: 'wahl',
-               optionen: [ { t: 'stumpfer Winkel', ok: true }, { t: 'spitzer Winkel' }, { t: 'rechter Winkel' }, { t: 'überstumpfer Winkel' } ],
+    raetsel: { frage: 'Gib an, zu welcher Winkelart ein Winkel von 135° gehört.', kk: 'K6-5', art: 'karten',
+               blatt: [ { t: 'stumpfer Winkel', ok: true }, { t: 'spitzer Winkel' }, { t: 'rechter Winkel' }, { t: 'überstumpfer Winkel' } ],
                tipps: [ 'Wichtige Grenzen sind 90°, 180° und 360°.', 'Zwischen welchen dieser Grenzen liegt 135°?' ],
                weg: '135° liegt zwischen 90° und 180°: stumpfer Winkel.' },
     umwege: [
       { geschichte: '<p>Die Hacke rutscht und steht nun genau senkrecht auf dem Eis: 90°.</p>',
-        raetsel: { frage: 'Gib an, zu welcher Winkelart ein Winkel von 90° gehört.', kk: 'K6-5', art: 'wahl',
-                   optionen: [ { t: 'rechter Winkel', ok: true }, { t: 'stumpfer Winkel' }, { t: 'spitzer Winkel' }, { t: 'gestreckter Winkel' } ],
+        raetsel: { frage: 'Gib an, zu welcher Winkelart ein Winkel von 90° gehört.', kk: 'K6-5', art: 'karten',
+                   blatt: [ { t: 'rechter Winkel', ok: true }, { t: 'stumpfer Winkel' }, { t: 'spitzer Winkel' }, { t: 'gestreckter Winkel' } ],
                    tipps: [ 'Dieser Winkel hat einen eigenen Namen.', 'Man zeichnet ihn mit einem Punkt im Bogen.' ],
                    weg: '90° ist ein rechter Winkel.' } },
       { geschichte: '<p>Frostbart dreht die Hacke weiter: Jetzt sind es 200°.</p>',
-        raetsel: { frage: 'Gib an, zu welcher Winkelart ein Winkel von 200° gehört.', kk: 'K6-5', art: 'wahl',
-                   optionen: [ { t: 'überstumpfer Winkel', ok: true }, { t: 'stumpfer Winkel' }, { t: 'gestreckter Winkel' }, { t: 'Vollwinkel' } ],
+        raetsel: { frage: 'Gib an, zu welcher Winkelart ein Winkel von 200° gehört.', kk: 'K6-5', art: 'karten',
+                   blatt: [ { t: 'überstumpfer Winkel', ok: true }, { t: 'stumpfer Winkel' }, { t: 'gestreckter Winkel' }, { t: 'Vollwinkel' } ],
                    tipps: [ 'Der Winkel ist größer als 180°.', 'Aber kleiner als 360°.' ],
                    weg: 'Zwischen 180° und 360°: überstumpfer Winkel.' } }
     ],
@@ -1305,16 +1385,16 @@ var STORY = {
   { id: '21', titel: 'Die Brücke über die Kluft',
     geschichte: '<p>Eine Hängebrücke führt über eine Kluft. Der linke Pfeiler steht bei −3,5 m, der rechte bei 1,5 m (gemessen vom Mittelpunkt der Schmiede). '
               + 'Genau in der Mitte der Brücke hängt das Schloss der nächsten Tür.</p>',
-    raetsel: { frage: 'Gib die Zahl an, die genau in der Mitte zwischen −3,5 und 1,5 liegt.', kk: 'K7-1', art: 'zahl', eingabe: 'linear', soll: [-1,1],
+    raetsel: { frage: 'Bestimme die Zahl genau in der Mitte zwischen −3,5 und 1,5. Stelle das Ergebnis am Zahlenstrahl ein.', kk: 'K7-1', art: 'thermo', skala: { von: -10, bis: 10, schritt: [1,2], marke: 1 }, soll: [-1,1],
                tipps: [ 'Berechne zuerst den Abstand der beiden Zahlen.', 'Gehe von der kleineren Zahl aus die Hälfte dieses Abstands nach rechts.' ],
                weg: 'Abstand: 1,5 − (−3,5) = 5. Hälfte: 2,5. −3,5 + 2,5 = −1.' },
     umwege: [
       { geschichte: '<p>Die Brücke schwankt! Eine andere führt von −8 bis 2.</p>',
-        raetsel: { frage: 'Gib die Zahl an, die genau in der Mitte zwischen −8 und 2 liegt.', kk: 'K7-1', art: 'zahl', eingabe: 'linear', soll: [-3,1],
+        raetsel: { frage: 'Bestimme die Zahl genau in der Mitte zwischen −8 und 2. Stelle das Ergebnis am Zahlenstrahl ein.', kk: 'K7-1', art: 'thermo', skala: { von: -10, bis: 10, schritt: [1,2], marke: 1 }, soll: [-3,1],
                    tipps: [ 'Abstand berechnen.', 'Die Hälfte zur kleineren Zahl addieren.' ],
                    weg: 'Abstand 10, Hälfte 5. −8 + 5 = −3.' } },
       { geschichte: '<p>Die letzte Brücke reicht von −1 bis 5.</p>',
-        raetsel: { frage: 'Gib die Zahl an, die genau in der Mitte zwischen −1 und 5 liegt.', kk: 'K7-1', art: 'zahl', eingabe: 'linear', soll: [2,1],
+        raetsel: { frage: 'Bestimme die Zahl genau in der Mitte zwischen −1 und 5. Stelle das Ergebnis am Zahlenstrahl ein.', kk: 'K7-1', art: 'thermo', skala: { von: -10, bis: 10, schritt: [1,2], marke: 1 }, soll: [2,1],
                    tipps: [ 'Abstand der beiden Zahlen.', 'Halbieren und von −1 aus weitergehen.' ],
                    weg: 'Abstand 6, Hälfte 3. −1 + 3 = 2.' } }
     ],
@@ -1324,16 +1404,16 @@ var STORY = {
   { id: '22', titel: 'Der Blasebalg',
     geschichte: '<p>Der große Blasebalg liefert Luft proportional zur Zahl der Pumpstöße. Bei 4 Stößen sind es 6 Fässer Luft – '
               + 'der Graph der Zuordnung geht also durch den Punkt (4|6). Hilde braucht die Luftmenge für 6 Stöße.</p>',
-    raetsel: { frage: 'Berechne, wie viele Fässer Luft 6 Stöße liefern.', kk: 'K7-4', art: 'zahl', eingabe: 'linear', soll: [9,1],
+    raetsel: { frage: 'Berechne, wie viele Fässer Luft 6 Stöße liefern. Stelle das Ergebnis am Zahlenschloss ein.', kk: 'K7-4', art: 'schloss', schloss: 'zahl', stellen: [2], soll: [9,1], einheit: 'Fässer',
                tipps: [ 'Der Graph einer proportionalen Zuordnung ist eine Ursprungsgerade.', 'Berechne zuerst, wie viel Luft ein einziger Stoß liefert.' ],
                weg: '1 Stoß: 6 : 4 = 1,5 Fässer. 6 Stöße: 1,5 · 6 = 9 Fässer.' },
     umwege: [
       { geschichte: '<p>Der Blasebalg pfeift. Ein kleinerer liefert bei 2 Stößen 5 Fässer, der Graph geht durch (2|5).</p>',
-        raetsel: { frage: 'Berechne, wie viele Fässer 6 Stöße liefern.', kk: 'K7-4', art: 'zahl', eingabe: 'linear', soll: [15,1],
+        raetsel: { frage: 'Berechne, wie viele Fässer 6 Stöße liefern. Stelle das Ergebnis am Zahlenschloss ein.', kk: 'K7-4', art: 'schloss', schloss: 'zahl', stellen: [2], soll: [15,1], einheit: 'Fässer',
                    tipps: [ 'Pro Stoß berechnen.', 'Mal 6.' ],
                    weg: '5 : 2 = 2,5. 2,5 · 6 = 15 Fässer.' } },
       { geschichte: '<p>Glut pumpt selbst: Graph durch (3|12).</p>',
-        raetsel: { frage: 'Berechne, wie viele Fässer 5 Stöße liefern.', kk: 'K7-4', art: 'zahl', eingabe: 'linear', soll: [20,1],
+        raetsel: { frage: 'Berechne, wie viele Fässer 5 Stöße liefern. Stelle das Ergebnis am Zahlenschloss ein.', kk: 'K7-4', art: 'schloss', schloss: 'zahl', stellen: [2], soll: [20,1], einheit: 'Fässer',
                    tipps: [ 'Proportionalitätsfaktor: y : x.', 'Mal 5.' ],
                    weg: '12 : 3 = 4. 4 · 5 = 20 Fässer.' } }
     ],
@@ -1362,16 +1442,16 @@ var STORY = {
   { id: '24', titel: 'Das Herzfeuer',
     geschichte: '<p>Heiligabend! Vor euch liegt die Esse des Herzfeuers. Glut darf es nur entzünden, wenn die Durchschnittstemperatur der vier Kammern stimmt: '
               + '−3 °C, 5 °C, −8 °C und 2 °C.</p>',
-    raetsel: { frage: 'Berechne den Mittelwert (das arithmetische Mittel) der Temperaturen −3 °C, 5 °C, −8 °C und 2 °C.', kk: 'K7-1', art: 'zahl', eingabe: 'linear', soll: [-1,1],
+    raetsel: { frage: 'Berechne den Mittelwert der Temperaturen −3 °C, 5 °C, −8 °C und 2 °C. Stelle das Ergebnis am Thermometer ein.', kk: 'K7-1', art: 'thermo', skala: { von: -10, bis: 10, schritt: [1,1], marke: 5 }, soll: [-1,1], einheit: '°C',
                tipps: [ 'Addiere alle Werte mit Vorzeichen.', 'Teile die Summe durch die Anzahl der Werte.' ],
                weg: '(−3) + 5 + (−8) + 2 = −4. (−4) : 4 = −1. Der Mittelwert ist −1 °C.' },
     umwege: [
       { geschichte: '<p>Die Esse zischt. Glut misst nur drei Kammern: −4 °C, 6 °C und 1 °C.</p>',
-        raetsel: { frage: 'Berechne den Mittelwert der Temperaturen −4 °C, 6 °C und 1 °C.', kk: 'K7-1', art: 'zahl', eingabe: 'linear', soll: [1,1],
+        raetsel: { frage: 'Berechne den Mittelwert der Temperaturen −4 °C, 6 °C und 1 °C. Stelle das Ergebnis am Thermometer ein.', kk: 'K7-1', art: 'thermo', skala: { von: -10, bis: 10, schritt: [1,1], marke: 5 }, soll: [1,1], einheit: '°C',
                    tipps: [ 'Summe bilden.', 'Durch 3 teilen.' ],
                    weg: '(−4 + 6 + 1) : 3 = 3 : 3 = 1 °C.' } },
       { geschichte: '<p>Zwei Kammern bleiben: −2 °C und −6 °C.</p>',
-        raetsel: { frage: 'Berechne den Mittelwert der Temperaturen −2 °C und −6 °C.', kk: 'K7-1', art: 'zahl', eingabe: 'linear', soll: [-4,1],
+        raetsel: { frage: 'Berechne den Mittelwert der Temperaturen −2 °C und −6 °C. Stelle das Ergebnis am Thermometer ein.', kk: 'K7-1', art: 'thermo', skala: { von: -10, bis: 10, schritt: [1,1], marke: 5 }, soll: [-4,1], einheit: '°C',
                    tipps: [ 'Addieren.', 'Durch 2 teilen.' ],
                    weg: '(−2 + (−6)) : 2 = −8 : 2 = −4 °C.' } }
     ],
@@ -1393,7 +1473,7 @@ STORY.karten.forEach(function(k){ k.geschichte = bild(k.id, 'Bild zu Türchen ' 
 
 <script>
 /* ============================================================
-   BAUSTEIN: Story-Engine (v4, 25.11.2026) – unverändert übernehmen
+   BAUSTEIN: Story-Engine (v5, 25.11.2026) – unverändert übernehmen
    Baut aus dem Objekt STORY: Startkarte (Einleitung, Anleitung, Zeitraum, Einstieg per
    Codewort) → je Karte Geschichte + Rätsel → Endkarte mit Auswertung.
    Ablauf einer Karte:  Haupträtsel richtig → geschafft (direkter Weg).
@@ -1549,7 +1629,17 @@ var HINWEIS = {
   halbSteck: T('Es liegen noch Diamanten in der Ablage. Stecke alle an den Zahlenstrahl. Das kostet keinen Versuch.',
                'Es liegen noch Diamanten in der Ablage. Stecken Sie alle an den Zahlenstrahl. Das kostet keinen Versuch.'),
   leerFelder: T('Tippe zuerst Felder an, um sie einzufärben.', 'Tippen Sie zuerst Felder an, um sie einzufärben.'),
-  leerSchalter: T('Lege zuerst mindestens einen Schalter um.', 'Legen Sie zuerst mindestens einen Schalter um.')
+  leerSchalter: T('Lege zuerst mindestens einen Schalter um.', 'Legen Sie zuerst mindestens einen Schalter um.'),
+  /* v5 */
+  leerWuerfel: T('Tippe zuerst die Würfel an, um sie zu drehen.', 'Tippen Sie zuerst die Würfel an, um sie zu drehen.'),
+  halbWuerfel: T('Es zeigt noch nicht jeder Würfel eine Zahl. Das kostet keinen Versuch.', 'Es zeigt noch nicht jeder Würfel eine Zahl. Das kostet keinen Versuch.'),
+  leerKarten: T('Decke Karten auf und wähle durch nochmaliges Antippen.', 'Decken Sie Karten auf und wählen Sie durch nochmaliges Antippen.'),
+  leerAbakus: T('Schiebe zuerst Perlen auf die Stangen.', 'Schieben Sie zuerst Perlen auf die Stangen.'),
+  leerThermo: T('Stelle zuerst einen Wert auf der Skala ein.', 'Stellen Sie zuerst einen Wert auf der Skala ein.'),
+  leerZeit: T('Stelle zuerst beide Zeiger der Uhr ein.', 'Stellen Sie zuerst beide Zeiger der Uhr ein.'),
+  leerGitter: T('Tippe zuerst einen Gitterpunkt an.', 'Tippen Sie zuerst einen Gitterpunkt an.'),
+  leerKompass: T('Drehe zuerst den Zeiger.', 'Drehen Sie zuerst den Zeiger.'),
+  leerRegler: T('Schiebe zuerst an den Reglern.', 'Schieben Sie zuerst an den Reglern.')
 };
 
 /* ---------- Rätselgeräte (v3, Fantasie-Paket v4) ----------
@@ -1651,12 +1741,68 @@ function bewerteGeraet(r, a){
     if (!an) return 'leerFelder';
     return gleich([an, fe.length], r.soll) ? 'ok' : 'falsch';
   }
+  if (art === 'wuerfel') {
+    var wu = a && a.wuerfel ? a.wuerfel : [];
+    if (!wu.some(function(x){ return x != null; })) return 'leerWuerfel';
+    if (wu.some(function(x){ return x == null; })) return 'halbWuerfel';
+    var ziel = r.ziel || 'summe';
+    if (ziel === 'summe') return gleich([wu.reduce(function(x, y){ return x + y; }, 0), 1], r.soll) ? 'ok' : 'falsch';
+    if (ziel === 'zahl') return gleich([Number(wu.join('')), 1], r.soll) ? 'ok' : 'falsch';
+    return wu.slice().sort().join(',') === r.soll.map(Number).sort().join(',') ? 'ok' : 'falsch';
+  }
+  if (art === 'karten') {
+    var ka = a && a.karten ? a.karten : [];
+    if (!ka.some(Boolean)) return 'leerKarten';
+    return r.blatt.every(function(o, k){ return !!ka[k] === !!o.ok; }) ? 'ok' : 'falsch';
+  }
+  if (art === 'abakus') {
+    if (!a || !a.abakus) return 'leerAbakus';
+    return gleich([Number(a.abakus.join('')), 1], r.soll) ? 'ok' : 'falsch';
+  }
+  if (art === 'thermo') {
+    if (!a || a.thermo == null) return 'leerThermo';
+    var sz = r.skala.schritt || [1, 1];
+    return gleich([r.skala.von * sz[1] + a.thermo * sz[0], sz[1]], r.soll) ? 'ok' : 'falsch';
+  }
+  if (art === 'zeit') {
+    if (!a || !a.zeit || a.zeit[0] == null || a.zeit[1] == null) return 'leerZeit';
+    var hm = String(r.soll).split(':').map(Number), hs = hm[0] % 12, ps = hm[0] >= 12;
+    if (a.zeit[0] !== hs || a.zeit[1] !== hm[1]) return 'falsch';
+    return (r.tag === false || !!a.pm === ps) ? 'ok' : 'falsch';
+  }
+  if (art === 'gitter') {
+    if (!a || !a.gitter) return 'leerGitter';
+    var sg = String(r.soll).split('|').map(Number);
+    return a.gitter[0] === sg[0] && a.gitter[1] === sg[1] ? 'ok' : 'falsch';
+  }
+  if (art === 'kompass') {
+    if (!a || a.kompass == null) return 'leerKompass';
+    if (r.modus === 'winkel') return gleich([a.kompass, 1], r.soll) ? 'ok' : 'falsch';
+    return ['N', 'NO', 'O', 'SO', 'S', 'SW', 'W', 'NW'][a.kompass] === String(r.soll).toUpperCase() ? 'ok' : 'falsch';
+  }
+  if (art === 'regler') {
+    if (!a || !a.regler) return 'leerRegler';
+    return r.sterne.every(function(s){ return Math.abs(reglerY(r, a.regler, s[0]) - s[1]) < 1e-9; }) ? 'ok' : 'falsch';
+  }
   if (art === 'schalter') {
     var sc = a && a.schalter ? a.schalter : [];
     if (!sc.some(Boolean)) return 'leerSchalter';
     return r.schalter.every(function(o, k){ return !!sc[k] === !!o.ok; }) ? 'ok' : 'falsch';
   }
   return 'leer';
+}
+
+/* v5: Wert eines Reglers (Stufe → Zahl) und Funktionswert des Sternbild-Graphen */
+function reglerWert(r, p, k){
+  var q = r.regler[p], max = Math.round((q[1] - q[0]) / q[2]);
+  if (k == null) k = Math.round((0 - q[0]) / q[2]);
+  k = Math.max(0, Math.min(max, k));
+  return Math.round((q[0] + k * q[2]) * 1e6) / 1e6;
+}
+function reglerY(r, st, x){
+  if (r.typ === 'gerade') return reglerWert(r, 'm', st.m) * x + reglerWert(r, 'b', st.b);
+  var d = x - reglerWert(r, 'd', st.d);
+  return reglerWert(r, 'a', st.a) * d * d + reglerWert(r, 'e', st.e);
 }
 
 var GERAET = {
@@ -2011,6 +2157,504 @@ var GERAET = {
         return '✨ ' + n + ' von ' + r.schalter.length + T(' Hebeln stehen richtig. Du darfst die Hebel jetzt einmal umstellen. Dann prüfe noch einmal.',
                                                            ' Hebeln stehen richtig. Sie dürfen die Hebel jetzt einmal umstellen. Dann prüfen Sie noch einmal.');
       } };
+  },
+
+  /* ===== v5: weitere Rätselgeräte =====================================================
+     Gemeinsam: Antwort in z.e[s] (TEIL 6), Edelstein-Leuchten (v4), gelöst → grün.        */
+
+  /* Würfel (v5): wuerfel: 1–3 Würfel; antippen dreht einen Würfel weiter, 🎲 würfelt alle.
+     ziel 'summe' (soll: [Summe, 1]) | 'augen' (soll: ['6','6'] – Reihenfolge egal)
+     | 'zahl' (Augen von links nach rechts als Ziffern gelesen, soll: [Wert, 1]) */
+  wuerfel: function(r, alt, merke, aktiv){
+    var n = r.wuerfel || 1, w = alt && alt.wuerfel ? alt.wuerfel.slice() : [];
+    for (var k = w.length; k < n; k++) w.push(null);
+    var el = neu('div', 'geraet'), reihe = neu('div', 'wuerfelreihe'), kn = [];
+    var PIPS = { 1:[[50,50]], 2:[[28,28],[72,72]], 3:[[26,26],[50,50],[74,74]], 4:[[28,28],[72,28],[28,72],[72,72]],
+                 5:[[26,26],[74,26],[50,50],[26,74],[74,74]], 6:[[28,24],[72,24],[28,50],[72,50],[28,76],[72,76]] };
+    w.forEach(function(x, i){
+      var b = neu('button', 'wuerfel', ''); b.type = 'button'; b.disabled = !aktiv;
+      b.setAttribute('aria-label', 'Würfel ' + (i + 1) + ' weiterdrehen');
+      b.addEventListener('click', function(){ w[i] = w[i] == null ? 1 : w[i] % 6 + 1; zeichneWuerfel(i); sichereWuerfel(); });
+      reihe.appendChild(b); kn.push(b);
+    });
+    var knoepfe = neu('div', 'geraet-knoepfe'), alle = neu('button', '', '🎲 alle würfeln');
+    alle.type = 'button'; alle.disabled = !aktiv;
+    alle.addEventListener('click', function(){
+      w = w.map(function(){ return 1 + Math.floor(Math.random() * 6); }); w.forEach(function(x, i){ zeichneWuerfel(i); }); sichereWuerfel();
+    });
+    knoepfe.appendChild(alle);
+    var anz = neu('p', 'anzeige', '');
+    el.appendChild(reihe); el.appendChild(knoepfe); el.appendChild(anz);
+    function sichereWuerfel(){ merke({ wuerfel: w.slice() }); textWuerfel(); }
+    function zeichneWuerfel(i, still){
+      var svg = svgLeucht({ viewBox:'0 0 100 100', 'aria-hidden':'true' });
+      svg.appendChild(svgEl('rect', { x:4, y:4, width:92, height:92, rx:18, fill:'#ffffff', stroke:'#22303f', 'stroke-width':5 }));
+      if (w[i] == null) svg.appendChild(svgEl('text', { x:50, y:64, 'text-anchor':'middle', 'font-size':44, 'font-weight':'800', fill:'#dbe3ee' }, '?'));
+      else PIPS[w[i]].forEach(function(p){
+        var c = svgEl('circle', { cx:p[0], cy:p[1], r:9, fill:'#2f5fa6' }); c.setAttribute('filter', svg.leucht); svg.appendChild(c);
+      });
+      kn[i].innerHTML = ''; kn[i].appendChild(svg);
+      if (!still) { kn[i].classList.remove('rollt'); void kn[i].offsetWidth; kn[i].classList.add('rollt'); }
+    }
+    function textWuerfel(){
+      anz.textContent = w.every(function(x){ return x == null; })
+        ? T('Tippe einen Würfel an, um ihn weiterzudrehen.', 'Tippen Sie einen Würfel an, um ihn weiterzudrehen.')
+        : 'Gewürfelt: ' + w.map(function(x){ return x == null ? '?' : x; }).join(' · ');
+    }
+    w.forEach(function(x, i){ zeichneWuerfel(i, true); }); textWuerfel();
+    return { el:el,
+      hol: function(){ return w.some(function(x){ return x != null; }) ? { wuerfel: w.slice() } : null; },
+      leere: function(){ w = w.map(function(){ return null; }); w.forEach(function(x, i){ zeichneWuerfel(i, true); }); textWuerfel(); } };
+  },
+
+  /* Kartenfächer (v5): blatt [{ t:'…', ok:true }, { t:'…' }, …] – verdeckte Karten; antippen deckt auf,
+     nochmal antippen wählt aus. mehr: true → mehrere Karten wählen (genau die ok-Karten). Gemischt (4.3). */
+  karten: function(r, alt, merke, aktiv, z, s){
+    if (!z.mix[s]) { z.mix[s] = mische(r.blatt.length); sichern(); }
+    var offen = alt && alt.offen ? alt.offen.slice() : r.blatt.map(function(){ return false; });
+    var gew = alt && alt.karten ? alt.karten.slice() : r.blatt.map(function(){ return false; });
+    var el = neu('div', 'geraet'), faecher = neu('div', 'faecher'), kn = [];
+    var mitte = (z.mix[s].length - 1) / 2;
+    z.mix[s].forEach(function(o, pos){
+      var b = neu('button', 'spielkarte', ''); b.type = 'button'; b.disabled = !aktiv;
+      if (r.blatt[o].ok) b.setAttribute('data-ok', '1');
+      b.style.setProperty('--dreh', ((pos - mitte) * 5) + 'deg');
+      b.addEventListener('click', function(){
+        if (!offen[o]) offen[o] = true;
+        else {
+          if (!r.mehr) gew = gew.map(function(x, k){ return k === o ? !x : false; });
+          else gew[o] = !gew[o];
+        }
+        zeichneKarten(); merke({ karten: gew.slice(), offen: offen.slice() });
+      });
+      faecher.appendChild(b); kn[o] = b;
+    });
+    var anz = neu('p', 'anzeige', '');
+    el.appendChild(faecher); el.appendChild(anz);
+    function zeichneKarten(){
+      kn.forEach(function(b, o){
+        b.classList.toggle('offen', !!offen[o]); b.classList.toggle('an', !!gew[o]);
+        b.innerHTML = offen[o] ? '<span class="karten-text">' + r.blatt[o].t + '</span>' : '<span class="karten-ruecken">✦</span>';
+        b.setAttribute('aria-label', offen[o] ? (gew[o] ? 'ausgewählt' : 'aufgedeckt') : 'verdeckte Karte – antippen zum Aufdecken');
+      });
+      var nw = gew.filter(Boolean).length, no = offen.filter(Boolean).length;
+      anz.textContent = no < kn.length && nw === 0
+        ? T('Tippe eine Karte an, um sie aufzudecken. Tippe sie noch einmal an, um sie zu wählen.',
+            'Tippen Sie eine Karte an, um sie aufzudecken. Tippen Sie sie noch einmal an, um sie zu wählen.')
+        : 'Ausgewählt: ' + nw + (nw === 1 ? ' Karte' : ' Karten') + (r.mehr ? T(' – wähle alle passenden.', ' – wählen Sie alle passenden.') : '.');
+      if (window.MathJax && MathJax.typesetPromise) { try { MathJax.typesetPromise([faecher]); } catch (e) {} }
+    }
+    zeichneKarten();
+    return { el:el,
+      hol: function(){ return { karten: gew.slice(), offen: offen.slice() }; },
+      leere: function(){ gew = gew.map(function(){ return false; }); zeichneKarten(); } };
+  },
+
+  /* Abakus (v5): stellen ['HT','ZT','T','H','Z','E'] – Perlen je Stange 0–9; Stange oben antippen
+     schiebt eine Perle hoch, ▲/▼ darunter fein. soll: [Wert, 1] */
+  abakus: function(r, alt, merke, aktiv){
+    var st = r.stellen || ['H', 'Z', 'E'], n = st.length;
+    var p = alt && alt.abakus ? alt.abakus.slice() : st.map(function(){ return 0; });
+    var bewegt = !!(alt && alt.abakus);
+    var B = 70, H = 300, el = neu('div', 'geraet'), huelle = neu('div', 'abakus');
+    huelle.style.maxWidth = Math.min(440, n * B + 20) + 'px'; huelle.style.margin = '0 auto';
+    var svg = svgLeucht({ viewBox:'0 0 ' + (n * B + 20) + ' ' + H, role:'img',
+      'aria-label':'Abakus mit den Stangen ' + st.join(', ') + '. Jede Stange zeigt 0 bis 9 Perlen.' });
+    var schicht = svgEl('g', {}), ziele = [];
+    svg.appendChild(svgEl('rect', { x:2, y:2, width:n * B + 16, height:H - 4, rx:14, fill:'#fdf3d9', stroke:'#96690a', 'stroke-width':4 }));
+    svg.appendChild(svgEl('rect', { x:2, y:52, width:n * B + 16, height:8, fill:'#96690a' }));
+    st.forEach(function(name, i){
+      var x = 10 + i * B + B / 2;
+      svg.appendChild(svgEl('line', { x1:x, y1:60, x2:x, y2:H - 40, stroke:'#96690a', 'stroke-width':5 }));
+      svg.appendChild(svgEl('text', { x:x, y:38, 'text-anchor':'middle', 'font-size':20, 'font-weight':'800', fill:'#22303f' }, name));
+      var oben = svgEl('rect', { x:x - B / 2, y:0, width:B, height:(H - 40) / 2, fill:'#ffffff', 'fill-opacity':'0', style:'cursor:pointer' });
+      var unten = svgEl('rect', { x:x - B / 2, y:(H - 40) / 2, width:B, height:(H - 40) / 2 + 40, fill:'#ffffff', 'fill-opacity':'0', style:'cursor:pointer' });
+      oben.setAttribute('aria-label', name + ': eine Perle mehr'); unten.setAttribute('aria-label', name + ': eine Perle weniger');
+      svg.appendChild(svgEl('text', { x:x + 22, y:78, 'text-anchor':'middle', 'font-size':15, fill:'#96690a' }, '▲'));
+      svg.appendChild(svgEl('text', { x:x + 22, y:H - 50, 'text-anchor':'middle', 'font-size':15, fill:'#96690a' }, '▼'));
+      if (aktiv) {
+        oben.addEventListener('click', function(){ setzeAbakus(i, Math.min(9, p[i] + 1)); });
+        unten.addEventListener('click', function(){ setzeAbakus(i, Math.max(0, p[i] - 1)); });
+      }
+      ziele.push(oben, unten);
+    });
+    svg.appendChild(schicht);
+    ziele.forEach(function(t){ svg.appendChild(t); });
+    huelle.appendChild(svg);
+    var anz = neu('p', 'anzeige', '');
+    el.appendChild(huelle); el.appendChild(anz);
+    var zuletzt = null;
+    function setzeAbakus(i, v){ p[i] = v; bewegt = true; zuletzt = i; zeichneAbakus(); merke({ abakus: p.slice() }); }
+    function zeichneAbakus(){
+      while (schicht.firstChild) schicht.removeChild(schicht.firstChild);
+      p.forEach(function(anzahl, i){
+        var x = 10 + i * B + B / 2;
+        for (var k = 0; k < anzahl; k++) {
+          var g = edelstein(svg, x, 82 + k * 21, 11, 'an'); schicht.appendChild(g);
+          if (i === zuletzt && k === anzahl - 1) funkeln(g);
+        }
+        schicht.appendChild(svgEl('text', { x:x, y:H - 12, 'text-anchor':'middle', 'font-size':22, 'font-weight':'800', fill:'#1f4680' }, anzahl));
+      });
+      zuletzt = null;
+      anz.textContent = bewegt ? 'Eingestellt: ' + Number(p.join('')).toLocaleString('de-DE')
+        : T('Tippe oben auf eine Stange (▲) für eine Perle mehr, unten (▼) für eine weniger.',
+            'Tippen Sie oben auf eine Stange (▲) für eine Perle mehr, unten (▼) für eine weniger.');
+    }
+    zeichneAbakus();
+    return { el:el,
+      hol: function(){ return bewegt ? { abakus: p.slice() } : null; },
+      leere: function(){ p = p.map(function(){ return 0; }); bewegt = false; zeichneAbakus(); } };
+  },
+
+  /* Thermometer (v5): skala { von:-20, bis:10, schritt:[1,1], marke:5 } – Säule ziehen oder ▲/▼;
+     einheit: '°C' | 'm' …  soll: [Z, N] (muss auf einem Schritt liegen) */
+  thermo: function(r, alt, merke, aktiv){
+    var sk = r.skala, sz = sk.schritt || [1, 1], anzahl = Math.round((sk.bis - sk.von) * sz[1] / sz[0]);
+    var k = alt && alt.thermo != null ? alt.thermo : null;
+    var el = neu('div', 'geraet'), huelle = neu('div', 'thermo');
+    var Y0 = 30, Y1 = 330, svg = svgLeucht({ viewBox:'0 0 220 380', role:'img',
+      'aria-label':'Senkrechte Skala von ' + sk.von + ' bis ' + sk.bis + (r.einheit ? ' ' + r.einheit : '') + ' zum Einstellen' });
+    function ykThermo(i){ return Y1 - (Y1 - Y0) * i / anzahl; }
+    function wertThermo(i){ return [sk.von * sz[1] + i * sz[0], sz[1]]; }
+    function txtThermo(w){ var v = w[0] / w[1]; return String(Math.round(v * 1000) / 1000).replace('.', ',').replace('-', '−'); }
+    svg.appendChild(svgEl('rect', { x:84, y:Y0 - 14, width:32, height:Y1 - Y0 + 28, rx:16, fill:'#ffffff', stroke:'#22303f', 'stroke-width':4 }));
+    svg.appendChild(svgEl('circle', { cx:100, cy:Y1 + 26, r:24, fill:'#c1272d', stroke:'#22303f', 'stroke-width':4 }));
+    var marke = sk.marke || 1;
+    for (var i = 0; i <= anzahl; i++) {
+      var w = wertThermo(i), v = w[0] / w[1], gross = Math.abs(v / marke - Math.round(v / marke)) < 1e-9;
+      svg.appendChild(svgEl('line', { x1:118, y1:ykThermo(i), x2:gross ? 140 : 130, y2:ykThermo(i), stroke:'#22303f', 'stroke-width':gross ? 3 : 1.5 }));
+      if (gross) svg.appendChild(svgEl('text', { x:146, y:ykThermo(i) + 6, 'font-size':17, 'font-weight':'700', fill:v === 0 ? '#c1272d' : '#22303f' }, txtThermo(w)));
+    }
+    if (sk.von < 0 && sk.bis > 0) {
+      var i0 = Math.round(-sk.von * sz[1] / sz[0]);
+      svg.appendChild(svgEl('line', { x1:60, y1:ykThermo(i0), x2:118, y2:ykThermo(i0), stroke:'#c1272d', 'stroke-width':2, 'stroke-dasharray':'4 3' }));
+    }
+    var saeule = svgEl('rect', { x:92, width:16, rx:8, fill:'#c1272d' }); svg.appendChild(saeule);
+    var zeiger = svgEl('g', {}); svg.appendChild(zeiger);
+    huelle.appendChild(svg);
+    var fein = neu('div', 'geraet-knoepfe'), ab = neu('button', '', '▼'), auf = neu('button', '', '▲');
+    ab.type = auf.type = 'button'; ab.disabled = auf.disabled = !aktiv;
+    ab.setAttribute('aria-label', 'tiefer'); auf.setAttribute('aria-label', 'höher');
+    ab.addEventListener('click', function(){ setzeThermo(k == null ? 0 : Math.max(0, k - 1)); });
+    auf.addEventListener('click', function(){ setzeThermo(k == null ? anzahl : Math.min(anzahl, k + 1)); });
+    fein.appendChild(ab); fein.appendChild(auf);
+    var anz = neu('p', 'anzeige', '');
+    el.appendChild(huelle); el.appendChild(fein); el.appendChild(anz);
+    function setzeThermo(i){ if (i === k) return; k = i; zeichneThermo(true); merke({ thermo: k }); }
+    function zeichneThermo(funk){
+      var y = k == null ? Y1 : ykThermo(k);
+      saeule.setAttribute('y', y); saeule.setAttribute('height', Y1 + 10 - y);
+      while (zeiger.firstChild) zeiger.removeChild(zeiger.firstChild);
+      if (k != null) {
+        var g = edelstein(svg, 66, y - 4, 10, 'an'); zeiger.appendChild(g); if (funk) funkeln(g);
+      }
+      anz.textContent = k == null ? T('Ziehe an der Skala oder tippe auf ▲ und ▼.', 'Ziehen Sie an der Skala oder tippen Sie auf ▲ und ▼.')
+        : 'Eingestellt: ' + txtThermo(wertThermo(k)) + (r.einheit ? ' ' + r.einheit : '');
+    }
+    var zieht = false;
+    function stelleThermo(e){
+      var b = svg.getBoundingClientRect(); if (!b.height) return;
+      var y = (e.clientY - b.top) / b.height * 380;
+      setzeThermo(Math.max(0, Math.min(anzahl, Math.round((Y1 - y) / (Y1 - Y0) * anzahl))));
+    }
+    if (aktiv) {
+      svg.addEventListener('pointerdown', function(e){ zieht = true; try { svg.setPointerCapture(e.pointerId); } catch (x) {} stelleThermo(e); e.preventDefault(); });
+      svg.addEventListener('pointermove', function(e){ if (zieht && e.buttons) stelleThermo(e); });
+      svg.addEventListener('pointerup', function(){ zieht = false; }); svg.addEventListener('pointercancel', function(){ zieht = false; });
+    }
+    zeichneThermo(false);
+    return { el:el,
+      hol: function(){ return k == null ? null : { thermo: k }; },
+      leere: function(){ k = null; zeichneThermo(false); } };
+  },
+
+  /* Uhrzeit (v5): echte Uhr mit Stunden- und Minutenzeiger; innen tippen/ziehen stellt die Stunde,
+     außen die Minuten (Schritt: minuten, Vorgabe 5); ☀️/🌙 für vormittags/nachmittags (tag: false schaltet ab).
+     soll: '16:25' */
+  zeit: function(r, alt, merke, aktiv){
+    var schritt = r.minuten || 5, mitTag = r.tag !== false;
+    var h = alt && alt.zeit ? alt.zeit[0] : null, mi = alt && alt.zeit ? alt.zeit[1] : null, pm = !!(alt && alt.pm);
+    var M = 170, RI = 100, el = neu('div', 'geraet'), huelle = neu('div', 'uhr');
+    var svg = svgLeucht({ viewBox:'0 0 340 340', role:'img', 'aria-label':'Uhr mit Stunden- und Minutenzeiger zum Einstellen' });
+    svg.appendChild(svgEl('circle', { cx:M, cy:M, r:164, fill:'#fdf3d9', stroke:'#96690a', 'stroke-width':8 }));
+    function polZeit(rad, a){ return [M + rad * Math.sin(a), M - rad * Math.cos(a)]; }
+    for (var t = 0; t < 60; t++) {
+      var a = t / 60 * 2 * Math.PI, gross = t % 5 === 0, p1 = polZeit(gross ? 140 : 148, a), p2 = polZeit(156, a);
+      svg.appendChild(svgEl('line', { x1:p1[0], y1:p1[1], x2:p2[0], y2:p2[1], stroke:'#22303f', 'stroke-width':gross ? 4 : 1.5 }));
+    }
+    for (var s2 = 1; s2 <= 12; s2++) {
+      var ps = polZeit(118, s2 / 12 * 2 * Math.PI);
+      svg.appendChild(svgEl('text', { x:ps[0], y:ps[1] + 9, 'text-anchor':'middle', 'font-size':26, 'font-weight':'700', fill:'#22303f' }, s2));
+    }
+    var kurz = svgEl('g', {}), lang = svgEl('g', {});
+    kurz.appendChild(svgEl('line', { x1:M, y1:M, x2:M, y2:M - 70, stroke:'#22303f', 'stroke-width':12, 'stroke-linecap':'round' }));
+    lang.appendChild(svgEl('line', { x1:M, y1:M, x2:M, y2:M - 132, stroke:'#2f5fa6', 'stroke-width':6, 'stroke-linecap':'round' }));
+    var gk = edelstein(svg, M, M - 78, 9, 'aus'), gl = edelstein(svg, M, M - 138, 8, 'aus');
+    kurz.appendChild(gk); lang.appendChild(gl); svg.appendChild(kurz); svg.appendChild(lang);
+    svg.appendChild(svgEl('circle', { cx:M, cy:M, r:11, fill:'#22303f' }));
+    huelle.appendChild(svg);
+    var fein = neu('div', 'geraet-knoepfe'), werte = [];
+    [['Stunden', function(u){ h = h == null ? (u > 0 ? 1 : 11) : (h + u + 12) % 12; }],
+     ['Minuten', function(u){ mi = mi == null ? (u > 0 ? schritt : 60 - schritt) : (mi + u * schritt + 60) % 60; }]].forEach(function(z0, j){
+      var grp = neu('span', 'uhr-fein'), zur = neu('button', '', '◀'), vor = neu('button', '', '▶'), wt = neu('span', 'uhr-wert', '');
+      zur.type = vor.type = 'button'; zur.disabled = vor.disabled = !aktiv;
+      zur.setAttribute('aria-label', z0[0] + ' zurück'); vor.setAttribute('aria-label', z0[0] + ' vor');
+      zur.addEventListener('click', function(){ z0[1](-1); zeichneZeit(j); sichereZeit(); });
+      vor.addEventListener('click', function(){ z0[1](1); zeichneZeit(j); sichereZeit(); });
+      grp.appendChild(neu('span', 'uhr-name', z0[0] + ':')); grp.appendChild(zur); grp.appendChild(wt); grp.appendChild(vor);
+      fein.appendChild(grp); werte.push(wt);
+    });
+    var tagzeile = neu('div', 'geraet-knoepfe'), bt = neu('button', '', '');
+    bt.type = 'button'; bt.disabled = !aktiv;
+    bt.addEventListener('click', function(){ pm = !pm; zeichneZeit(); sichereZeit(); });
+    if (mitTag) tagzeile.appendChild(bt);
+    var anz = neu('p', 'anzeige', '');
+    el.appendChild(huelle); el.appendChild(fein); el.appendChild(tagzeile); el.appendChild(anz);
+    function sichereZeit(){ if (h != null || mi != null) merke({ zeit:[h, mi], pm: pm }); }
+    function zweiZeit(x){ return x < 10 ? '0' + x : '' + x; }
+    function zeichneZeit(j){
+      var hh = h == null ? 0 : h, mm = mi == null ? 0 : mi;
+      kurz.setAttribute('transform', 'rotate(' + ((hh + mm / 60) * 30) + ' ' + M + ' ' + M + ')');
+      lang.setAttribute('transform', 'rotate(' + (mm * 6) + ' ' + M + ' ' + M + ')');
+      kurz.setAttribute('opacity', h == null ? '0.3' : '1'); lang.setAttribute('opacity', mi == null ? '0.3' : '1');
+      [[gk, h], [gl, mi]].forEach(function(q){
+        q[0].firstChild.setAttribute('fill', q[1] == null ? '#ffffff' : '#2f5fa6');
+        if (q[1] != null) q[0].setAttribute('filter', svg.leucht); else q[0].removeAttribute('filter');
+      });
+      if (j === 0) funkeln(gk); if (j === 1) funkeln(gl);
+      werte[0].textContent = h == null ? '–' : (h === 0 ? 12 : h); werte[1].textContent = mi == null ? '–' : zweiZeit(mi);
+      bt.textContent = pm ? '🌙 nachmittags / abends' : '☀️ vormittags';
+      var std = h == null ? null : (h + (pm ? 12 : 0));
+      anz.textContent = (h != null && mi != null) ? 'Eingestellt: ' + (mitTag ? zweiZeit(std) : (h === 0 ? 12 : h)) + ':' + zweiZeit(mi) + ' Uhr'
+        : T('Tippe innen für den Stundenzeiger, außen für den Minutenzeiger.', 'Tippen Sie innen für den Stundenzeiger, außen für den Minutenzeiger.');
+    }
+    var welcher = null;
+    function stelleZeit(e, start){
+      var b = svg.getBoundingClientRect(); if (!b.width) return;
+      var x = (e.clientX - b.left) / b.width * 340 - M, y = (e.clientY - b.top) / b.height * 340 - M, d = Math.sqrt(x * x + y * y);
+      if (start) { if (d < 20) { welcher = null; return; } welcher = d < RI ? 0 : 1; }
+      if (welcher == null) return;
+      var wi = Math.atan2(x, -y); if (wi < 0) wi += 2 * Math.PI;
+      if (welcher === 0) { var nh = Math.round(wi / (2 * Math.PI) * 12) % 12; if (nh !== h) { h = nh; zeichneZeit(0); sichereZeit(); } }
+      else { var nm = (Math.round(wi / (2 * Math.PI) * 60 / schritt) * schritt) % 60; if (nm !== mi) { mi = nm; zeichneZeit(1); sichereZeit(); } }
+    }
+    if (aktiv) {
+      svg.addEventListener('pointerdown', function(e){ try { svg.setPointerCapture(e.pointerId); } catch (x) {} stelleZeit(e, true); e.preventDefault(); });
+      svg.addEventListener('pointermove', function(e){ if (welcher != null && e.buttons) stelleZeit(e, false); });
+      svg.addEventListener('pointerup', function(){ welcher = null; }); svg.addEventListener('pointercancel', function(){ welcher = null; });
+    }
+    zeichneZeit();
+    return { el:el,
+      hol: function(){ return (h == null && mi == null) ? null : { zeit:[h, mi], pm: pm }; },
+      leere: function(){ h = mi = null; pm = false; zeichneZeit(); } };
+  },
+
+  /* Schatzkarte (v5): gitter { x:[-2, 8], y:[-2, 8] } – Gitterpunkt antippen setzt den Edelstein.
+     graphen: [{ m:2, b:1 } | { a:1, d:2, e:-1 }] (Gerade / Parabel in Scheitelpunktform),
+     punkte: [{ x, y, t:'🌲' }] als Landmarken. soll: '4|3' */
+  gitter: function(r, alt, merke, aktiv){
+    var g = r.gitter || { x:[0, 6], y:[0, 6] }, X0 = g.x[0], X1 = g.x[1], Y0 = g.y[0], Y1 = g.y[1];
+    var E = Math.min(44, Math.floor(400 / Math.max(X1 - X0, Y1 - Y0))), R = 34;
+    var W = (X1 - X0) * E + 2 * R, H = (Y1 - Y0) * E + 2 * R;
+    var pt = alt && alt.gitter ? alt.gitter.slice() : null;
+    var el = neu('div', 'geraet'), huelle = neu('div', 'gitter');
+    var svg = svgLeucht({ viewBox:'0 0 ' + W + ' ' + H, role:'img', 'aria-label':'Koordinatensystem; Gitterpunkt antippen, um den Edelstein zu setzen' });
+    if (H > W * 1.2) svg.style.maxWidth = Math.max(280, Math.round(540 * W / H)) + 'px';
+    function sxGitter(x){ return R + (x - X0) * E; } function syGitter(y){ return H - R - (y - Y0) * E; }
+    svg.appendChild(svgEl('rect', { x:0, y:0, width:W, height:H, rx:14, fill:'#fdf3d9' }));
+    for (var x = X0; x <= X1; x++) svg.appendChild(svgEl('line', { x1:sxGitter(x), y1:syGitter(Y0), x2:sxGitter(x), y2:syGitter(Y1), stroke:'#e2cf9f', 'stroke-width':1.5 }));
+    for (var y = Y0; y <= Y1; y++) svg.appendChild(svgEl('line', { x1:sxGitter(X0), y1:syGitter(y), x2:sxGitter(X1), y2:syGitter(y), stroke:'#e2cf9f', 'stroke-width':1.5 }));
+    var ax = Math.max(X0, Math.min(X1, 0)), ay = Math.max(Y0, Math.min(Y1, 0));
+    svg.appendChild(svgEl('line', { x1:sxGitter(X0) - 8, y1:syGitter(ay), x2:sxGitter(X1) + 18, y2:syGitter(ay), stroke:'#22303f', 'stroke-width':2.5 }));
+    svg.appendChild(svgEl('polygon', { points:(sxGitter(X1) + 26) + ',' + syGitter(ay) + ' ' + (sxGitter(X1) + 14) + ',' + (syGitter(ay) - 6) + ' ' + (sxGitter(X1) + 14) + ',' + (syGitter(ay) + 6), fill:'#22303f' }));
+    svg.appendChild(svgEl('line', { x1:sxGitter(ax), y1:syGitter(Y0) + 8, x2:sxGitter(ax), y2:syGitter(Y1) - 18, stroke:'#22303f', 'stroke-width':2.5 }));
+    svg.appendChild(svgEl('polygon', { points:sxGitter(ax) + ',' + (syGitter(Y1) - 26) + ' ' + (sxGitter(ax) - 6) + ',' + (syGitter(Y1) - 14) + ' ' + (sxGitter(ax) + 6) + ',' + (syGitter(Y1) - 14), fill:'#22303f' }));
+    svg.appendChild(svgEl('text', { x:sxGitter(X1) + 14, y:syGitter(ay) + 24, 'font-size':16, 'font-style':'italic', fill:'#22303f' }, 'x'));
+    svg.appendChild(svgEl('text', { x:sxGitter(ax) + 10, y:syGitter(Y1) - 14, 'font-size':16, 'font-style':'italic', fill:'#22303f' }, 'y'));
+    var ecke = ax === 0 && ay === 0 && X0 < 0 && Y0 < 0;
+    for (x = X0; x <= X1; x++) if (x !== ax && !(ecke && x === -1)) svg.appendChild(svgEl('text', { x:sxGitter(x), y:syGitter(ay) + 19, 'text-anchor':'middle', 'font-size':14, fill:'#22303f' }, String(x).replace('-', '−')));
+    for (y = Y0; y <= Y1; y++) if (y !== ay) svg.appendChild(svgEl('text', { x:sxGitter(ax) - 8, y:syGitter(y) + 5, 'text-anchor':'end', 'font-size':(E < 30 ? 12 : 14), fill:'#22303f' }, String(y).replace('-', '−')));
+    (r.graphen || []).forEach(function(gr, i){
+      var d = '', farbe = ['#2f5fa6', '#96690a', '#1e7d32'][i % 3];
+      for (var k = 0; k <= 200; k++) {
+        var xx = X0 + (X1 - X0) * k / 200, yy = gr.m != null ? gr.m * xx + gr.b : gr.a * (xx - gr.d) * (xx - gr.d) + gr.e;
+        if (yy < Y0 - 1 || yy > Y1 + 1) { d += ' '; continue; }
+        d += (d === '' || d.slice(-1) === ' ' ? 'M' : 'L') + sxGitter(xx).toFixed(1) + ',' + syGitter(yy).toFixed(1);
+      }
+      svg.appendChild(svgEl('path', { d:d.replace(/ +/g, ' ').trim(), fill:'none', stroke:farbe, 'stroke-width':3.5 }));
+    });
+    (r.punkte || []).forEach(function(p){
+      svg.appendChild(svgEl('text', { x:sxGitter(p.x), y:syGitter(p.y) + 8, 'text-anchor':'middle', 'font-size':22 }, p.t));
+    });
+    var schicht = svgEl('g', {}); svg.appendChild(schicht);
+    for (x = X0; x <= X1; x++) for (y = Y0; y <= Y1; y++) (function(x, y){
+      var hit = svgEl('circle', { cx:sxGitter(x), cy:syGitter(y), r:E / 2, fill:'#ffffff', 'fill-opacity':'0', style:'cursor:pointer' });
+      if (aktiv) hit.addEventListener('click', function(){ pt = [x, y]; zeichneGitter(true); merke({ gitter: pt.slice() }); });
+      svg.appendChild(hit);
+    })(x, y);
+    huelle.appendChild(svg);
+    var anz = neu('p', 'anzeige', '');
+    el.appendChild(huelle); el.appendChild(anz);
+    function zeichneGitter(funk){
+      while (schicht.firstChild) schicht.removeChild(schicht.firstChild);
+      if (pt) { var s = edelstein(svg, sxGitter(pt[0]), syGitter(pt[1]) - 6, 11, 'an'); schicht.appendChild(s); if (funk) funkeln(s); }
+      anz.textContent = pt ? 'Gesetzt: (' + String(pt[0]).replace('-', '−') + ' | ' + String(pt[1]).replace('-', '−') + ')'
+        : T('Tippe den Gitterpunkt an, an dem der Edelstein liegen soll.', 'Tippen Sie den Gitterpunkt an, an dem der Edelstein liegen soll.');
+    }
+    zeichneGitter(false);
+    return { el:el,
+      hol: function(){ return pt ? { gitter: pt.slice() } : null; },
+      leere: function(){ pt = null; zeichneGitter(false); } };
+  },
+
+  /* Kompass / Winkelzeiger (v5): modus 'richtung' (8 Himmelsrichtungen, soll: 'NO')
+     | 'winkel' (Zeiger gegen den festen Schenkel, 0–360°, Schritt grad (Vorgabe 1), soll: [108, 1]) */
+  kompass: function(r, alt, merke, aktiv){
+    var rich = r.modus !== 'winkel', schritt = r.grad || 1;
+    var RICHT = ['N', 'NO', 'O', 'SO', 'S', 'SW', 'W', 'NW'];
+    var v = alt && alt.kompass != null ? alt.kompass : null;           /* richtung: Index 0–7, winkel: Grad */
+    var M = 170, el = neu('div', 'geraet'), huelle = neu('div', 'uhr');
+    var svg = svgLeucht({ viewBox:'0 0 340 340', role:'img',
+      'aria-label':rich ? 'Kompassrose mit acht Himmelsrichtungen; Nadel drehen' : 'Winkelscheibe von 0 bis 360 Grad; beweglichen Schenkel drehen' });
+    function polKompass(rad, gradW){ var a = gradW * Math.PI / 180; return [M + rad * Math.sin(a), M - rad * Math.cos(a)]; }
+    svg.appendChild(svgEl('circle', { cx:M, cy:M, r:164, fill:'#ffffff', stroke:'#22303f', 'stroke-width':6 }));
+    if (rich) {
+      RICHT.forEach(function(n0, i){
+        var pt = polKompass(i % 2 ? 128 : 136, i * 45);
+        svg.appendChild(svgEl('text', { x:pt[0], y:pt[1] + 9, 'text-anchor':'middle', 'font-size':i % 2 ? 20 : 28, 'font-weight':'800', fill:i === 0 ? '#c1272d' : '#22303f' }, n0));
+      });
+      svg.appendChild(svgEl('polygon', { points:M + ',' + (M - 100) + ' ' + (M + 14) + ',' + M + ' ' + M + ',' + (M + 100) + ' ' + (M - 14) + ',' + M, fill:'#e6eefb', stroke:'#dbe3ee' }));
+      svg.appendChild(svgEl('polygon', { points:(M - 100) + ',' + M + ' ' + M + ',' + (M - 14) + ' ' + (M + 100) + ',' + M + ' ' + M + ',' + (M + 14), fill:'#e6eefb', stroke:'#dbe3ee' }));
+    } else {
+      for (var gr = 0; gr < 360; gr += 5) {
+        var zehn = gr % 10 === 0;          /* Winkel gegen den Uhrzeigersinn vom festen Schenkel nach rechts */
+        svg.appendChild(svgEl('line', { x1:M + 152 * Math.cos(gr * Math.PI / 180) * (zehn ? 0.96 : 1), y1:M - 152 * Math.sin(gr * Math.PI / 180) * (zehn ? 0.96 : 1),
+          x2:M + 160 * Math.cos(gr * Math.PI / 180), y2:M - 160 * Math.sin(gr * Math.PI / 180), stroke:'#22303f', 'stroke-width':zehn ? 2.5 : 1 }));
+        if (gr % 30 === 0) svg.appendChild(svgEl('text', { x:M + 128 * Math.cos(gr * Math.PI / 180), y:M - 128 * Math.sin(gr * Math.PI / 180) + (gr === 0 ? -10 : 5),
+          'text-anchor':'middle', 'font-size':14, 'font-weight':'700', fill:'#1f4680' }, gr + '°'));
+      }
+      svg.appendChild(svgEl('line', { x1:M, y1:M, x2:M + 150, y2:M, stroke:'#22303f', 'stroke-width':6, 'stroke-linecap':'round' }));
+    }
+    var bogen = svgEl('path', { fill:'#fdf3d9', stroke:'#b8860b', 'stroke-width':2 }); if (!rich) svg.appendChild(bogen);
+    var nadel = svgEl('g', {});
+    if (rich) {
+      nadel.appendChild(svgEl('polygon', { points:M + ',' + (M - 96) + ' ' + (M + 11) + ',' + M + ' ' + (M - 11) + ',' + M, fill:'#c1272d' }));
+      nadel.appendChild(svgEl('polygon', { points:M + ',' + (M + 96) + ' ' + (M + 11) + ',' + M + ' ' + (M - 11) + ',' + M, fill:'#22303f' }));
+    } else nadel.appendChild(svgEl('line', { x1:M, y1:M, x2:M, y2:M - 150, stroke:'#2f5fa6', 'stroke-width':6, 'stroke-linecap':'round' }));
+    var spitze = edelstein(svg, M, M - (rich ? 104 : 152), 9, 'aus'); nadel.appendChild(spitze);
+    svg.appendChild(nadel); svg.appendChild(svgEl('circle', { cx:M, cy:M, r:10, fill:'#22303f' }));
+    huelle.appendChild(svg);
+    var fein = neu('div', 'geraet-knoepfe'), zur = neu('button', '', '◀'), vor = neu('button', '', '▶');
+    zur.type = vor.type = 'button'; zur.disabled = vor.disabled = !aktiv;
+    zur.setAttribute('aria-label', rich ? 'gegen den Uhrzeigersinn' : 'kleiner'); vor.setAttribute('aria-label', rich ? 'im Uhrzeigersinn' : 'größer');
+    zur.addEventListener('click', function(){ setzeKompass(rich ? ((v == null ? 0 : v) + 7) % 8 : Math.max(0, (v == null ? 0 : v) - schritt)); });
+    vor.addEventListener('click', function(){ setzeKompass(rich ? ((v == null ? -1 : v) + 1) % 8 : Math.min(360, (v == null ? 0 : v) + schritt)); });
+    fein.appendChild(zur); fein.appendChild(vor);
+    var anz = neu('p', 'anzeige', '');
+    el.appendChild(huelle); el.appendChild(fein); el.appendChild(anz);
+    function setzeKompass(x){ if (x === v) return; v = x; zeichneKompass(true); merke({ kompass: v }); }
+    function zeichneKompass(funk){
+      var w = v == null ? 0 : v;
+      if (rich) nadel.setAttribute('transform', 'rotate(' + (w * 45) + ' ' + M + ' ' + M + ')');
+      else {
+        nadel.setAttribute('transform', 'rotate(' + (90 - w) + ' ' + M + ' ' + M + ')');
+        var a = w * Math.PI / 180, ex = M + 60 * Math.cos(a), ey = M - 60 * Math.sin(a);
+        bogen.setAttribute('d', w <= 0 ? '' : 'M' + M + ',' + M + ' L' + (M + 60) + ',' + M + ' A60,60 0 ' + (w > 180 ? 1 : 0) + ' 0 ' + ex + ',' + ey + ' Z');
+      }
+      nadel.setAttribute('opacity', v == null ? '0.35' : '1');
+      spitze.firstChild.setAttribute('fill', v == null ? '#ffffff' : '#2f5fa6');
+      if (v != null) spitze.setAttribute('filter', svg.leucht); else spitze.removeAttribute('filter');
+      if (funk) funkeln(spitze);
+      anz.textContent = v == null ? (rich ? T('Drehe die Nadel: ziehen oder ◀ ▶ antippen.', 'Drehen Sie die Nadel: ziehen oder ◀ ▶ antippen.')
+                                          : T('Drehe den blauen Schenkel: ziehen oder ◀ ▶ antippen.', 'Drehen Sie den blauen Schenkel: ziehen oder ◀ ▶ antippen.'))
+        : 'Eingestellt: ' + (rich ? RICHT[v] : v + '°');
+    }
+    var zieht = false;
+    function stelleKompass(e){
+      var b = svg.getBoundingClientRect(); if (!b.width) return;
+      var x = (e.clientX - b.left) / b.width * 340 - M, y = (e.clientY - b.top) / b.height * 340 - M;
+      if (x * x + y * y < 400) return;
+      if (rich) { var a = Math.atan2(x, -y) * 180 / Math.PI; if (a < 0) a += 360; setzeKompass(Math.round(a / 45) % 8); }
+      else { var g2 = Math.atan2(-y, x) * 180 / Math.PI; if (g2 < 0) g2 += 360; setzeKompass(Math.round(g2 / schritt) * schritt % 360); }
+    }
+    if (aktiv) {
+      svg.addEventListener('pointerdown', function(e){ zieht = true; try { svg.setPointerCapture(e.pointerId); } catch (x) {} stelleKompass(e); e.preventDefault(); });
+      svg.addEventListener('pointermove', function(e){ if (zieht && e.buttons) stelleKompass(e); });
+      svg.addEventListener('pointerup', function(){ zieht = false; }); svg.addEventListener('pointercancel', function(){ zieht = false; });
+    }
+    zeichneKompass(false);
+    return { el:el,
+      hol: function(){ return v == null ? null : { kompass: v }; },
+      leere: function(){ v = null; zeichneKompass(false); } };
+  },
+
+  /* Sternbild-Regler (v5): typ 'gerade' (Regler m, b) | 'parabel' (Regler a, d, e: y = a(x − d)² + e).
+     regler: { a:[-3, 3, 0.5], d:[-5, 5, 1], e:[-5, 5, 1] } (von, bis, Schritt); sterne: [[x, y], …];
+     gitter wie bei 'gitter'. Richtig, wenn der Graph durch alle Sterne geht – getroffene Sterne leuchten. */
+  regler: function(r, alt, merke, aktiv){
+    var par = r.typ === 'gerade' ? ['m', 'b'] : ['a', 'd', 'e'];
+    var rg = r.regler, g = r.gitter || { x:[-5, 5], y:[-5, 5] }, X0 = g.x[0], X1 = g.x[1], Y0 = g.y[0], Y1 = g.y[1];
+    var stufe = {}; par.forEach(function(p){ stufe[p] = alt && alt.regler ? alt.regler[p] : null; });
+    function wertVonRegler(p){ return reglerWert(r, p, stufe[p]); }
+    function fxRegler(x){ return reglerY(r, stufe, x); }
+    var E = Math.min(40, Math.floor(400 / Math.max(X1 - X0, Y1 - Y0))), R = 30, W = (X1 - X0) * E + 2 * R, H = (Y1 - Y0) * E + 2 * R;
+    function sxRegler(x){ return R + (x - X0) * E; } function syRegler(y){ return H - R - (y - Y0) * E; }
+    var el = neu('div', 'geraet'), huelle = neu('div', 'gitter');
+    var svg = svgLeucht({ viewBox:'0 0 ' + W + ' ' + H, role:'img', 'aria-label':'Sternenhimmel mit Koordinatensystem; der Graph soll durch alle Sterne gehen' });
+    if (H > W * 1.2) svg.style.maxWidth = Math.max(280, Math.round(540 * W / H)) + 'px';
+    svg.appendChild(svgEl('rect', { x:0, y:0, width:W, height:H, rx:14, fill:'#1f2a44' }));
+    for (var x = X0; x <= X1; x++) svg.appendChild(svgEl('line', { x1:sxRegler(x), y1:syRegler(Y0), x2:sxRegler(x), y2:syRegler(Y1), stroke:'#33415f', 'stroke-width':1 }));
+    for (var y = Y0; y <= Y1; y++) svg.appendChild(svgEl('line', { x1:sxRegler(X0), y1:syRegler(y), x2:sxRegler(X1), y2:syRegler(y), stroke:'#33415f', 'stroke-width':1 }));
+    var ax = Math.max(X0, Math.min(X1, 0)), ay = Math.max(Y0, Math.min(Y1, 0));
+    svg.appendChild(svgEl('line', { x1:sxRegler(X0), y1:syRegler(ay), x2:sxRegler(X1) + 10, y2:syRegler(ay), stroke:'#dbe3ee', 'stroke-width':2 }));
+    svg.appendChild(svgEl('line', { x1:sxRegler(ax), y1:syRegler(Y0), x2:sxRegler(ax), y2:syRegler(Y1) - 10, stroke:'#dbe3ee', 'stroke-width':2 }));
+    for (x = X0; x <= X1; x++) if (x !== ax && (X1 - X0 <= 12 || x % 2 === 0)) svg.appendChild(svgEl('text', { x:sxRegler(x), y:syRegler(ay) + 17, 'text-anchor':'middle', 'font-size':13, fill:'#dbe3ee' }, String(x).replace('-', '−')));
+    for (y = Y0; y <= Y1; y++) if (y !== ay && (Y1 - Y0 <= 12 || y % 2 === 0)) svg.appendChild(svgEl('text', { x:sxRegler(ax) - 6, y:syRegler(y) + 4, 'text-anchor':'end', 'font-size':13, fill:'#dbe3ee' }, String(y).replace('-', '−')));
+    var kurve = svgEl('path', { fill:'none', stroke:'#ffd34d', 'stroke-width':3.5 }); svg.appendChild(kurve);
+    var schicht = svgEl('g', {}); svg.appendChild(schicht);
+    huelle.appendChild(svg);
+    var feld = neu('div', 'regler-feld'), bars = {}, werte = {};
+    var NAMEN = { m:'m (Steigung)', b:'b (y-Abschnitt)', a:'a (Streckung)', d:'d (nach rechts)', e:'e (nach oben)' };
+    par.forEach(function(p){
+      var q = rg[p], zeile = neu('label', 'regler-zeile', ''), inp = document.createElement('input');
+      inp.type = 'range'; inp.min = 0; inp.max = Math.round((q[1] - q[0]) / q[2]); inp.step = 1; inp.disabled = !aktiv;
+      inp.value = stufe[p] == null ? Math.round((0 - q[0]) / q[2]) : stufe[p];
+      inp.addEventListener('input', function(){ stufe[p] = +inp.value; zeichneRegler(); merke({ regler: kopieRegler() }); });
+      var wt = neu('span', 'regler-wert', '');
+      zeile.appendChild(neu('span', 'regler-name', NAMEN[p])); zeile.appendChild(inp); zeile.appendChild(wt);
+      feld.appendChild(zeile); bars[p] = inp; werte[p] = wt;
+    });
+    var anz = neu('p', 'anzeige', '');
+    el.appendChild(huelle); el.appendChild(feld); el.appendChild(anz);
+    function kopieRegler(){ var o = {}; par.forEach(function(p){ o[p] = stufe[p]; }); return o; }
+    function zahlRegler(v){ return String(v).replace('.', ',').replace('-', '−'); }
+    function zeichneRegler(){
+      var d = '';
+      for (var k = 0; k <= 240; k++) {
+        var xx = X0 + (X1 - X0) * k / 240, yy = fxRegler(xx);
+        if (yy < Y0 - 0.5 || yy > Y1 + 0.5) { d += ' '; continue; }
+        d += (d === '' || d.slice(-1) === ' ' ? 'M' : 'L') + sxRegler(xx).toFixed(1) + ',' + syRegler(yy).toFixed(1);
+      }
+      kurve.setAttribute('d', d.replace(/ +/g, ' ').trim());
+      while (schicht.firstChild) schicht.removeChild(schicht.firstChild);
+      var treffer = 0;
+      r.sterne.forEach(function(s){
+        var hit = Math.abs(fxRegler(s[0]) - s[1]) < 1e-9; if (hit) treffer++;
+        schicht.appendChild(svgEl('polygon', { points:sternRegler(sxRegler(s[0]), syRegler(s[1]), 11, 5), fill:hit ? '#7ee08a' : '#ffffff',
+          filter:svg.leucht, stroke:hit ? '#1e7d32' : '#ffd34d', 'stroke-width':1.5 }));
+      });
+      par.forEach(function(p){ werte[p].textContent = zahlRegler(wertVonRegler(p)); });
+      var w = {}; par.forEach(function(p){ w[p] = wertVonRegler(p); });
+      var term = r.typ === 'gerade' ? 'y = ' + zahlRegler(w.m) + 'x ' + (w.b < 0 ? '− ' + zahlRegler(-w.b) : '+ ' + zahlRegler(w.b))
+        : 'y = ' + zahlRegler(w.a) + '(x ' + (w.d < 0 ? '+ ' + zahlRegler(-w.d) : '− ' + zahlRegler(w.d)) + ')² ' + (w.e < 0 ? '− ' + zahlRegler(-w.e) : '+ ' + zahlRegler(w.e));
+      anz.innerHTML = term + ' · getroffene Sterne: <b>' + treffer + ' von ' + r.sterne.length + '</b>';
+    }
+    function sternRegler(cx, cy, ro, n){ var p = []; for (var i = 0; i < 2 * n; i++) { var rr = i % 2 ? ro * 0.45 : ro, a = i * Math.PI / n - Math.PI / 2;
+      p.push((cx + rr * Math.cos(a)).toFixed(1) + ',' + (cy + rr * Math.sin(a)).toFixed(1)); } return p.join(' '); }
+    zeichneRegler();
+    return { el:el,
+      hol: function(){ return par.some(function(p){ return stufe[p] != null; }) ? { regler: kopieRegler() } : null; },
+      leere: function(){ par.forEach(function(p){ stufe[p] = null; bars[p].value = Math.round((0 - rg[p][0]) / rg[p][2]); }); zeichneRegler(); } };
   }
 };
 
@@ -2197,7 +2841,7 @@ function raetselBlock(i, s){
   box.appendChild(neu('p', 'frage', r.frage));
   var fb = neu('div', 'fb', '');
   var hol, leere, gt = null;                 /* aktuelle Antwort holen / Eingabe leeren; gt: Rätselgerät */
-  if (GERAET[r.art]) {                       /* v3: Uhr, Zahlenschloss, Diamanten, Felder, Schalter */
+  if (GERAET[r.art]) {                       /* v3–v5: Rätselgeräte */
     gt = GERAET[r.art](r, z.e[s] || null, function(a){
       z.e[s] = a; sichern();
       if (fb.className === 'fb info') { fb.className = 'fb'; fb.textContent = ''; }   /* alter Hinweis passt nicht mehr */
