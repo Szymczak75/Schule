@@ -15,7 +15,8 @@ Konventionen (Pfad 3 – Politur lebt in den Metatags):
 - Icon kommt aus <meta name="typ">, sonst neutral 📄.
 - Link-Titel kommt aus <title> der Seite (Fallback: Dateiname).
 - Tooltip-Text: <meta name="description">, Fallback <title>.
-- Suche: title + description + keywords.
+- Suche: title + description + keywords. ?suche=… öffnet die Suche mit Begriff.
+- 404.html: wird mit erzeugt (Vorschläge bei falscher Adresse), siehe build_404().
 - Kachel = letzter Ordner. Kachelname aus Ordnername (übersteuerbar per
   <meta name="kachel">). Emoji aus Lookup, Fallback 📂.
 - Reihenfolge: Blöcke und Kacheln werden immer sortiert – jahrgangsartige
@@ -565,6 +566,9 @@ def build(root, out):
 
     with open(out, "w", encoding="utf-8") as f:
         f.write(full_html)
+
+    # ── 404-Seite (Vorschläge bei falscher Adresse) ──
+    build_404(root, search_index)
 
     # ── Teilbaum-Übersichten aus linking.txt ──
     uebersichten = build_linking_overviews(root, heute)
@@ -1477,6 +1481,16 @@ function showMetaHinweis(){
   document.getElementById('metaHinweis').classList.add('visible');
 }
 
+// ?suche=… (z. B. von der 404-Seite): Suche öffnen und Begriff eintragen
+const suchParam = params.get('suche');
+if (suchParam !== null) {
+  showCard('suche', sb);
+  const si = document.getElementById('searchInput');
+  si.value = suchParam.trim();
+  doSearch();
+  si.focus();
+}
+
 // Swipe
 let tx=0;
 document.addEventListener('touchstart',e=>{tx=e.touches[0].clientX;},{passive:true});
@@ -1493,6 +1507,231 @@ document.addEventListener('touchend',e=>{
 </body>
 </html>
 """
+
+# ──────────────────────────────────────────────────────────────────────────────
+#  404-Seite („Seite nicht gefunden")
+#  GitHub Pages zeigt /404.html automatisch bei jeder falschen Adresse. Die Seite
+#  zerlegt die falsche Adresse in Suchwörter, vergleicht sie tippfehlertolerant
+#  mit allen gelisteten Seiten (ohne intern/ und ohne Lehrer-Seiten) und schlägt
+#  die besten Treffer vor. Der Knopf führt zur Suche der Startseite (?suche=…).
+#  Wird bei jedem Lauf neu erzeugt – nie von Hand ändern.
+# ──────────────────────────────────────────────────────────────────────────────
+
+def build_404(root, search_index):
+    seiten = OrderedDict()
+    for rel, v in search_index.items():
+        if v["typ"] == "Lehrer":
+            continue
+        seiten[rel] = {"t": v["title"], "d": v["desc"], "k": v["kw"],
+                       "y": v["typ"], "kl": v["kl"], "f": v["fach"]}
+    daten = json.dumps(seiten, ensure_ascii=False, separators=(",", ":"))
+    daten = daten.replace("</", "<\\/")
+    out = os.path.join(root, "404.html")
+    with open(out, "w", encoding="utf-8") as f:
+        f.write(TPL_404.replace("__SEITEN__", daten))
+    return out
+
+
+TPL_404 = r"""<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="hubignore" content="404-Seite, erzeugt von build_hub.py">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>🦖 Seite nicht gefunden</title>
+<style>
+  :root{--bg:#f0f2f8;--surface:#fff;--border:#d4daf0;--text:#0f172a;--muted:#64748b;
+    --akzent:#7c3aed;--shadow:0 4px 12px rgba(15,23,42,.10),0 12px 40px rgba(15,23,42,.08)}
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+    font-size:1.05rem;line-height:1.5;min-height:100vh;display:flex;flex-direction:column}
+  main{flex:1;max-width:720px;width:100%;margin:0 auto;padding:2rem 1.25rem 3rem}
+  .kopf{display:flex;flex-direction:column;align-items:center;text-align:center;gap:.6rem}
+  .dino-bild{width:220px;height:220px;object-fit:contain}
+  .dino-ersatz{font-size:7rem;line-height:1}
+  h1{font-size:1.7rem;font-weight:800}
+  .adresse{color:var(--muted);font-size:.95rem;word-break:break-all}
+  .adresse code{background:#e8ecf8;padding:.1rem .4rem;border-radius:6px;color:var(--text)}
+  .box{background:var(--surface);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow);
+    margin-top:1.6rem;padding:1.1rem 1.2rem}
+  .box h2{font-size:1.1rem;margin-bottom:.7rem}
+  .vorschlag{display:flex;align-items:center;gap:.8rem;min-height:56px;padding:.7rem .8rem;border-radius:12px;
+    text-decoration:none;color:var(--text);border:1px solid transparent}
+  .vorschlag:hover,.vorschlag:focus{background:#f5f3ff;border-color:#ddd6fe}
+  .vorschlag + .vorschlag{margin-top:.3rem}
+  .v-icon{font-size:1.5rem;flex:0 0 auto}
+  .v-titel{font-weight:700}
+  .v-info{font-size:.88rem;color:var(--muted)}
+  .leer{color:var(--muted)}
+  .knoepfe{display:flex;flex-wrap:wrap;gap:.7rem;margin-top:1.4rem;justify-content:center}
+  .knopf{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:.6rem 1.2rem;
+    border-radius:12px;font-weight:700;text-decoration:none;font-size:1rem}
+  .knopf.haupt{background:var(--akzent);color:#fff}
+  .knopf.neben{background:var(--surface);color:var(--akzent);border:2px solid var(--akzent)}
+  footer{text-align:center;padding:1rem;font-size:.85rem}
+  footer a{color:var(--muted)}
+</style>
+</head>
+<body>
+<main>
+  <div class="kopf">
+    <img class="dino-bild" id="dinoBild" src="" alt="Dino mit schwerem Rucksack schaut fragend">
+    <div class="dino-ersatz" id="dinoErsatz" hidden>🦖</div>
+    <h1>Seite nicht gefunden</h1>
+    <p class="adresse">Die Adresse <code id="falsch"></code> gibt es leider nicht.</p>
+  </div>
+
+  <section class="box">
+    <h2>🔍 Vielleicht ist eine dieser Seiten gemeint:</h2>
+    <div id="vorschlaege"></div>
+  </section>
+
+  <div class="knoepfe">
+    <a class="knopf haupt" id="suchKnopf" href="#">🔍 Auf der Startseite weitersuchen</a>
+    <a class="knopf neben" id="startKnopf" href="#">🏠 Zur Startseite</a>
+  </div>
+</main>
+<footer><a id="impressum" href="#">Impressum &amp; Datenschutz</a></footer>
+
+<script>
+const SEITEN = __SEITEN__;
+
+// Basis der Website: auf GitHub Pages /Schule/, lokal beim Testen der Ordner.
+const BASIS = (function(){
+  const p = location.pathname;
+  const i = p.toLowerCase().indexOf('/schule/');
+  return location.origin + (i >= 0 ? p.slice(0, i + 8) : '/');
+})();
+const url = rel => BASIS + rel.split('/').map(encodeURIComponent).join('/');
+
+// Dino-Bild: dino_404.png im Hauptordner; fehlt es, steht ein großer 🦖 da.
+const bild = document.getElementById('dinoBild');
+bild.onerror = () => { bild.hidden = true; document.getElementById('dinoErsatz').hidden = false; };
+bild.src = BASIS + 'dino_404.png';
+
+document.getElementById('startKnopf').href = BASIS + 'dino_hub.html';
+document.getElementById('impressum').href = BASIS + 'impressum.html';
+
+// ── Falsche Adresse zerlegen ────────────────────────────────────────────────
+let pfad = location.pathname;
+try { pfad = decodeURIComponent(pfad); } catch (e) {}
+const ab = pfad.toLowerCase().indexOf('/schule/');
+if (ab >= 0) pfad = pfad.slice(ab + 8);
+pfad = pfad.replace(/^\/+/, '');
+document.getElementById('falsch').textContent = '/' + pfad;
+
+const norm = s => (s || '').toLowerCase()
+  .replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss')
+  .normalize('NFD').replace(/[̀-ͯ]/g, '');
+const FUELL = new Set(['html','htm','index','schule','www','http','https','seite','seiten',
+  'ls','ue','sfs','rbka','kavb','lehrer','und','der','die','das','mit','von','fuer','zum','zur','im','in']);
+const FAECHER = {mathe:'mathe', mathematik:'mathe', bio:'bio', biologie:'bio', kompass:'kompass'};
+
+// Klasse erkennen: „klasse7", „7_klasse", „kl7", „ef", „q1" …
+let klasse = '';
+const roh = norm(pfad);
+let m = roh.match(/(?:klasse|kl|jg|jahrgang)[\s_\-]*(\d{1,2})\b/) || roh.match(/\b(\d{1,2})[\s_\-]*(?:klasse|kl)\b/);
+if (m) klasse = m[1];
+else if ((m = roh.match(/\b(ef|q1|q2)\b/))) klasse = m[1].toUpperCase();
+
+let fach = '';
+const woerter = [];
+norm(pfad).split(/[^a-z0-9]+/).forEach(w => {
+  if (!w) return;
+  if (FAECHER[w]) { fach = FAECHER[w]; return; }
+  if (/^\d+$/.test(w) || /^(klasse|kl|jg|jahrgang|ef|q1|q2)\d*$/.test(w)) return;
+  if (w.length < 3 || FUELL.has(w)) return;
+  if (!woerter.includes(w)) woerter.push(w);
+});
+
+// ── Tippfehlertoleranter Vergleich ──────────────────────────────────────────
+function abstand(a, b) {
+  if (Math.abs(a.length - b.length) > 3) return 99;
+  let vor = Array.from({length: b.length + 1}, (_, j) => j);
+  for (let i = 1; i <= a.length; i++) {
+    const neu = [i];
+    for (let j = 1; j <= b.length; j++)
+      neu[j] = Math.min(vor[j] + 1, neu[j - 1] + 1, vor[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+    vor = neu;
+  }
+  return vor[b.length];
+}
+// Wie gut passt Suchwort w zu Seitenwort t? 0 … 1
+function aehnlich(w, t) {
+  if (w === t) return 1;
+  if (t.length >= 4 && w.length >= 4 && (t.startsWith(w) || w.startsWith(t)))
+    return .6 + .35 * Math.min(w.length, t.length) / Math.max(w.length, t.length);
+  if (w.length >= 5 && t.includes(w)) return .85;
+  if (t.length >= 6 && w.includes(t)) return .8;
+  if (w.length < 4 || t.length < 4) return 0;
+  const r = 1 - abstand(w, t) / Math.max(w.length, t.length);
+  return r >= .75 ? r * .95 : 0;
+}
+
+const eintraege = Object.entries(SEITEN).map(([rel, s]) => {
+  const teile = norm(rel + ' ' + s.t + ' ' + s.k + ' ' + s.d).split(/[^a-z0-9]+/).filter(w => w.length >= 3);
+  return {rel, s, woerter: [...new Set(teile)], titel: new Set(norm(s.t + ' ' + s.k).split(/[^a-z0-9]+/))};
+});
+
+// Jedes Suchwort auf das passendste vorhandene Wort korrigieren (für die Startseiten-Suche).
+// Nur Wörter aus Titel, Schlagwörtern und Beschreibung – genau die durchsucht die Startseite.
+// Schlüssel: normalisiert (ae statt ä), Wert: Originalschreibweise für die Suche.
+const wortschatz = new Map();
+Object.values(SEITEN).forEach(s => (s.t + ' ' + s.k + ' ' + s.d).toLowerCase()
+  .split(/[^a-z0-9äöüß]+/).forEach(o => { if (o.length >= 3) wortschatz.set(norm(o), o); }));
+function korrigiere(w) {
+  if (wortschatz.has(w)) return w;
+  let best = '', bw = 0;
+  wortschatz.forEach((_, t) => { const a = aehnlich(w, t); if (a > bw) { bw = a; best = t; } });
+  return bw >= .7 ? best : '';
+}
+const original = w => wortschatz.get(w) || w;
+
+const treffer = eintraege.map(e => {
+  let punkte = 0, passend = 0;
+  woerter.forEach(w => {
+    let best = 0;
+    e.woerter.forEach(t => { const a = aehnlich(w, t); if (a > best) best = a; });
+    if (best > 0) { passend++; punkte += best * (e.titel.has(korrigiere(w)) ? 1.3 : 1); }
+  });
+  if (!passend) return {e, punkte: 0};
+  if (fach && e.s.f === fach) punkte += .4;
+  if (klasse && String(e.s.kl).toUpperCase() === klasse) punkte += .6;
+  // Gleicher Dateiname in einem anderen Ordner (Seite umgezogen)?
+  const dn = norm(pfad.split('/').pop()), en = norm(e.rel.split('/').pop());
+  if (dn && dn === en) punkte += 3;
+  return {e, punkte};
+}).filter(t => t.punkte >= .7).sort((a, b) => b.punkte - a.punkte).slice(0, 5);
+
+// ── Anzeigen ────────────────────────────────────────────────────────────────
+const ICON = {mathe:'📐', bio:'🧬', kompass:'🧭'};
+const box = document.getElementById('vorschlaege');
+if (treffer.length) {
+  treffer.forEach(({e}) => {
+    const a = document.createElement('a');
+    a.className = 'vorschlag';
+    a.href = url(e.rel);
+    const info = [e.s.y, e.s.kl ? 'Klasse ' + e.s.kl : ''].filter(Boolean).join(' · ');
+    a.innerHTML = '<span class="v-icon"></span><span><span class="v-titel"></span><br><span class="v-info"></span></span>';
+    a.querySelector('.v-icon').textContent = ICON[e.s.f] || '📄';
+    a.querySelector('.v-titel').textContent = e.s.t;
+    a.querySelector('.v-info').textContent = info;
+    box.appendChild(a);
+  });
+} else {
+  box.innerHTML = '<p class="leer">Leider kein passender Vorschlag. Die Suche auf der Startseite hilft weiter.</p>';
+}
+
+const suchbegriffe = [...new Set(woerter.map(korrigiere).filter(Boolean))].slice(0, 3).map(original);
+const params = new URLSearchParams();
+if (suchbegriffe.length) params.set('suche', suchbegriffe.join(' '));
+document.getElementById('suchKnopf').href = BASIS + 'dino_hub.html' + (suchbegriffe.length ? '?' + params : '?suche=');
+</script>
+</body>
+</html>
+"""
+
 
 HEAD_FALLBACK = "<!DOCTYPE html><html><head><meta charset='utf-8'></head><body>"
 
