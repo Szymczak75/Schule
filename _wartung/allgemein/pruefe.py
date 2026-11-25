@@ -23,7 +23,9 @@ Was dieser Linter NICHT kann (bleibt Handarbeit bzw. Browsertest):
   - ob der Stand ein Neuladen wirklich vollständig übersteht (Browsertest: Seite
     bearbeiten, neu laden, vergleichen)
 
-Stand: 22.11.2026 (Story-Seiten im Ordner spiele/ der Jahrgangsstufe, Prüfung STORYORDNER;
+Stand: 25.11.2026 (Formeltool v2: Tastenleiste dezent unter dem Feld, nur bei aktivem Feld,
+       Prüfung FT/FTALT; Dino-CSS mit Kommentarrest aus dem Baustein, Prüfung TREX;
+       22.11.2026: Story-Seiten im Ordner spiele/ der Jahrgangsstufe, Prüfung STORYORDNER;
        Rückblick-KA-Engine v6 und SfS-Engine v3 mit Formeltool, art term;
        Story-Engine v2: Testcode STORY.testcode für SuS-Testgruppen, Prüfung STORY;
        Story-Seiten _story aus baustein_story.html, Prüfung STORY, TEIL 2.11;
@@ -85,7 +87,7 @@ STORY_VERSION = 'v2'
 STORY_MARKE = 'BAUSTEIN: Story-Engine'
 
 # Formeltool (baustein_formeltool.html, TEIL 4.7)
-FT_VERSION = 'v1'
+FT_VERSION = 'v2'
 FT_MARKE = 'BAUSTEIN: Formeltool-Engine'
 
 # EXAM-Seiten (_wartung/exam/baustein_exam.html, anweisung_exam.md)
@@ -703,6 +705,9 @@ def pruefe(pfad):
             fehler('TREX', 'Dino fehlt – baustein_dino.html einsetzen (8.3)')
     elif 'Made by ASzym' not in h:
         fehler('TREX', 'T-Rex ohne Hinweis „Made by ASzym"')
+    if '<style>-Block im <head>' in h:
+        fehler('TREX', 'Dino-CSS samt Kommentarzeile aus baustein_dino.html übernommen – die Regel '
+                       '.trex{position:fixed…} wird ungültig, der Dino rutscht ans Seitenende (8.3)')
     if 'backface-visibility' in css and 'min-height' not in css:
         fehler('FLIP', 'Flip-Card ohne min-height')
     # iPad: disabled-Textfelder werden nach dem Wieder-Einblenden blass gezeichnet (18.11.2026)

@@ -173,10 +173,14 @@ mjx-container{max-width:100%;overflow-x:auto;}
 .dino-tipp-fest{right:96px!important;bottom:34px!important;left:auto!important;top:auto!important}
 </style>
 <!-- =============================================================================
-     BAUSTEIN: Formeltool  (v1, 22.11.2026)
+     BAUSTEIN: Formeltool  (v2, 25.11.2026)
      Gepflegt im Wartungs-Projekt (_wartung/allgemein/baustein_formeltool.html).
      Einfügen: UNVERÄNDERT in den <head> (vom Kommentar BAUSTEIN bis ENDE BAUSTEIN).
      Einfache Form – keine Verschachtelung: In jedem Kästchen steht normaler Text.
+     v2: Tastenleiste dezent UNTER der Eingabezeile, nur sichtbar, solange das Feld aktiv ist
+         (Option leiste:'immer' zeigt sie dauerhaft). Die Grundlinie des Feldes ist die der
+         Eingabezeile – eine Bezeichnung davor (b =) steht auf gleicher Höhe
+         (im umgebenden Flex-Container align-items:baseline).
 
      Ein Feld anlegen:   var fd = FT.feld(element, { art: 'frei' });
        art 'frei'   Eingabezeile + Tastenleiste (Formeltool)
@@ -186,6 +190,7 @@ mjx-container{max-width:100%;overflow-x:auto;}
                 ['bruch','gem','hoch','tief','wurzel','nwurzel','mal']
        tastatur 'text' (Vorgabe) | 'zahl' (iPad-Zifferntastatur – hat KEIN Minus)
        label    Bezeichnung für Screenreader, z. B. 'Antwort'
+       leiste   'fokus' (Vorgabe, v2): Tasten erscheinen beim Antippen des Feldes | 'immer'
        aendern  function(fd) – wird nach jeder Änderung aufgerufen (Zustand sichern!)
      Am Feld:  fd.zustand() → Daten (JSON-fähig, für sessionStorage, TEIL 6)
                fd.setze(daten)   fd.leeren()   fd.sperre(true|false)   fd.leer()
@@ -210,13 +215,15 @@ mjx-container{max-width:100%;overflow-x:auto;}
      Tasten ≥ 44×44 px, Farben nur aus dem Schema (TEIL 2.2).
      ========================================================================== -->
 <style>
-/* ===== BAUSTEIN-CSS: Formeltool (v1) ===== */
-.ft{display:inline-block;max-width:100%;vertical-align:middle;color-scheme:light;}
-.ft-leiste{display:flex;flex-wrap:wrap;gap:.35rem;margin:0 0 .4rem;}
-.ft-taste{min-width:48px;min-height:48px;padding:.2rem .5rem;border:2px solid #2f5fa6;border-radius:.6rem;
-  background:#e6eefb;color:#1f4680;font:inherit;font-size:1.05rem;font-weight:700;cursor:pointer;
+/* ===== BAUSTEIN-CSS: Formeltool (v2) ===== */
+.ft{display:inline-flex;flex-direction:column;align-items:flex-start;max-width:100%;vertical-align:baseline;color-scheme:light;}
+.ft-leiste{display:none;flex-wrap:wrap;gap:.3rem;margin:.35rem 0 0;}
+.ft.ft-aktiv > .ft-leiste,.ft.ft-immer > .ft-leiste{display:flex;}
+.ft.ft-gesperrt > .ft-leiste{display:none;}
+.ft-taste{min-width:44px;min-height:44px;padding:.15rem .45rem;border:1px solid #dbe3ee;border-radius:.5rem;
+  background:#ffffff;color:#1f4680;font:inherit;font-size:1rem;font-weight:600;cursor:pointer;
   display:inline-flex;align-items:center;justify-content:center;line-height:1.1;}
-.ft-taste:active{transform:scale(.96);}
+.ft-taste:active{transform:scale(.96);background:#e6eefb;}
 .ft-taste:disabled{opacity:.45;cursor:default;}
 .ft-taste .ft-sym-hoch{font-size:1rem;position:relative;top:-.55em;margin-left:.05em;}
 .ft-taste .ft-sym-tief{font-size:1rem;position:relative;top:.45em;margin-left:.05em;}
@@ -255,11 +262,11 @@ mjx-container{max-width:100%;overflow-x:auto;}
 </style>
 <script>
 /* ============================================================
-   BAUSTEIN: Formeltool-Engine (v1, 22.11.2026) – unverändert übernehmen
+   BAUSTEIN: Formeltool-Engine (v2, 25.11.2026) – unverändert übernehmen
    ============================================================ */
 var FT = (function(){
 "use strict";
-var VERSION = 'v1';
+var VERSION = 'v2';
 var SLOTS = { x:['v'], bruch:['z','n'], gem:['g','z','n'], hoch:['v'], tief:['v'], wurzel:['v'], nwurzel:['n','v'] };
 var NAMEN = { z:'Zähler', n:'Nenner', g:'Ganze', v:'Eingabe' };
 var TASTEN = {
@@ -525,7 +532,7 @@ function ftFeld(el, opt){
   this.opt = opt; this.zu = false; this.fokus = null;
   this.teile = this.art === 'frei' ? [{ t:'x', v:'' }] : [ftLeeresTeil(this.art)];
   this.box = document.createElement('div');
-  this.box.className = 'ft' + (this.art === 'frei' ? '' : ' ft-fest');
+  this.box.className = 'ft' + (this.art === 'frei' ? '' : ' ft-fest') + (opt.leiste === 'immer' ? ' ft-immer' : '');
   if (this.art === 'frei') {
     this.leiste = document.createElement('div');
     this.leiste.className = 'ft-leiste';
@@ -545,14 +552,19 @@ function ftFeld(el, opt){
       });
       fd.leiste.appendChild(b);
     });
-    this.box.appendChild(this.leiste);
   }
   this.zeile = document.createElement('div');
   this.zeile.className = 'ft-zeile';
   this.zeile.setAttribute('role', 'group');
   this.zeile.setAttribute('aria-label', opt.label || 'Eingabe');
   this.box.appendChild(this.zeile);
+  if (this.leiste) this.box.appendChild(this.leiste);
   el.appendChild(this.box);
+  /* v2: Tastenleiste nur, solange das Feld aktiv ist */
+  this.box.addEventListener('focusin', function(){ if (!fd.zu) fd.box.classList.add('ft-aktiv'); });
+  this.box.addEventListener('focusout', function(){
+    setTimeout(function(){ if (!fd.box.contains(document.activeElement)) fd.box.classList.remove('ft-aktiv'); }, 0);
+  });
 
   this.zeile.addEventListener('input', function(e){
     var inp = e.target; if (!inp.__ft) return;
@@ -625,6 +637,8 @@ ftFeld.prototype.zeichne = function(ziel){
     }
   });
   this.zeile.classList.toggle('ft-zu', this.zu);
+  this.box.classList.toggle('ft-gesperrt', this.zu);
+  if (this.zu) this.box.classList.remove('ft-aktiv');
   if (this.leiste) Array.prototype.forEach.call(this.leiste.children, function(b){ b.disabled = fd.zu; });
   if (ziel) {
     var ziel_el = this.eingaben().filter(function(e){ return e.__ft.i === ziel.i && e.__ft.s === ziel.s; })[0];
