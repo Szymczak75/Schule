@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- =====================================================================
-     BAUSTEIN: Story (_story)  v6, 26.11.2026
+     BAUSTEIN: Story (_story)  v7, 26.11.2026
      Escape Room, Adventskalender, Detektivgeschichte oder freie Story: eine Geschichte
      in mehreren Karten, jede Karte endet mit einem Rätsel.
      Richtig → weiter zur nächsten Karte (mit Codewort zum späteren Wiedereinstieg).
@@ -39,6 +39,10 @@
         'gitter' (Schatzkarte: Gitterpunkt setzen, optional mit Graphen), 'kompass'
         (Himmelsrichtung oder Winkel einstellen), 'regler' (Sternbild: Gerade/Parabel per
         Schieberegler durch Sterne legen). Abwärtskompatibel.
+     v6 (Fantasy-Stil): alle Rätselgeräte aus Messing, Holz, Pergament und geschliffenen Edelsteinen.
+     v7 (Wegwahl): 'kurs' für Rätsel mit genau einer richtigen Antwort – Fahrzeug mit nummerierten
+        Kurslinien und Steuerrad (optional steigt die Gruppe ein), Personen der Gruppe oder Wesen, die
+        verschiedene Wege vorschlagen. Abwärtskompatibel.
      ===================================================================== -->
 <html lang="de">
 <head>
@@ -61,7 +65,7 @@
 </script>
 <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
 <style>
-/* ===== BAUSTEIN-CSS: Story (v6, 26.11.2026) – unverändert übernehmen ===== */
+/* ===== BAUSTEIN-CSS: Story (v7, 26.11.2026) – unverändert übernehmen ===== */
 :root{
   --ink:#22303f; --card:#ffffff; --green:#1e7d32; --red:#c1272d;
   --amber:#b8860b; --amber-light:#fdf3d9; --amber-dark:#96690a;
@@ -300,7 +304,32 @@ mjx-container{max-width:100%;overflow-x:auto;}
   border:4px solid #c9a04a;background:radial-gradient(circle at 35% 30%,#ffd0d8,#e0294f 45%,#5e0619);box-shadow:0 2px 4px rgba(0,0,0,.5);}
 .regler-zeile input::-moz-range-thumb{width:24px;height:24px;border-radius:50%;border:4px solid #c9a04a;
   background:radial-gradient(circle at 35% 30%,#ffd0d8,#e0294f 45%,#5e0619);}
-@media (prefers-reduced-motion:reduce){ .funkeln,.rolle > .ziffer.klick,.wuerfel.rollt{animation:none;} .spielkarte{transition:none;} }
+/* v7: Wegwahl (kurs) – Steuerrad, Kurslinien, Personen und Wesen im Fantasy-Stil */
+.kurs-szene > svg{display:block;width:100%;max-width:620px;height:auto;margin:0 auto;}
+.kurs-steuer{display:flex;align-items:center;justify-content:center;gap:1rem;margin:.6rem 0;}
+.kurs-steuer > svg{display:block;width:170px;height:170px;touch-action:none;cursor:grab;border-radius:50%;}
+.kurs-steuer > svg:focus-visible{outline:4px solid #5cc8ef;outline-offset:4px;}
+.kurs-rad{transition:transform .25s ease-out;}
+.kurs-pfeil{min-width:56px;min-height:56px;border-radius:50%;border:3px solid #b8860b;font:inherit;font-size:1.4rem;cursor:pointer;
+  background:radial-gradient(circle at 35% 30%,#fff0b0,#d4a63a 60%,#6e4c0d);color:#2a1a05;box-shadow:0 3px 6px rgba(0,0,0,.35);}
+.kurs-pfeil:disabled{opacity:.5;cursor:default;}
+.kurs-fahrzeug{transition:transform .35s ease-out;}
+.kurs-figur{transition:transform 1.1s ease-in-out;}
+.kurs-tafel{display:grid;gap:.45rem;margin:.6rem 0;}
+.kurs-opt,.vorschlag{display:flex;align-items:center;gap:.6rem;min-height:48px;padding:.45rem .8rem;text-align:left;font:inherit;font-size:1.05rem;
+  color:#3b2a17;cursor:pointer;border:2px solid #b8860b;border-radius:.7rem;background:linear-gradient(135deg,#f6e7c1,#e2c78c);
+  box-shadow:0 2px 4px rgba(0,0,0,.25);}
+.kurs-opt.an,.vorschlag.an{border-color:#1f7fb8;box-shadow:0 0 0 3px #5cc8ef,0 0 14px rgba(92,200,239,.7);}
+.kurs-opt:disabled,.vorschlag:disabled{cursor:default;}
+.geraet.geloest .kurs-opt.an,.geraet.geloest .vorschlag.an{border-color:#16934d;box-shadow:0 0 0 3px #3fd27f,0 0 14px rgba(63,210,127,.7);}
+.kurs-opt .nr,.vorschlag .nr{flex:none;}
+.vorschlaege{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,8.8rem),1fr));gap:.6rem;margin:.6rem 0;}
+.vorschlag{flex-direction:column;align-items:center;text-align:center;padding:.5rem;}
+.vorschlag-bild > svg{display:block;width:96px;height:auto;}
+.vorschlag-name{font-family:Georgia,'Palatino Linotype',serif;font-weight:700;}
+.blase{position:relative;display:block;width:100%;hyphens:auto;-webkit-hyphens:auto;hyphenate-limit-chars:12 5 5;overflow-wrap:break-word;background:#fffdf6;border:2px solid #8a6a32;border-radius:.8rem;padding:.4rem .6rem;}
+.blase::before{content:'';position:absolute;top:-10px;left:50%;margin-left:-9px;border:9px solid transparent;border-top:0;border-bottom-color:#8a6a32;}
+@media (prefers-reduced-motion:reduce){ .funkeln,.rolle > .ziffer.klick,.wuerfel.rollt{animation:none;} .spielkarte,.kurs-rad,.kurs-fahrzeug,.kurs-figur{transition:none;} }
 .erwischt{border-left-color:var(--ink);}
 /* v4: Szenenbilder in Geschichte, Umweg, erwischt und Ende (als data-URI im Datenblock, TEIL 8.1) */
 .szene{margin:.2rem 0 .8rem;}
@@ -990,6 +1019,19 @@ function m(t){
                             regler: { m:[-4,4,0.5], b:[-6,6,1] } (von, bis, Schritt);
                             sterne: [[x, y], …]; gitter wie oben – richtig, wenn der Graph durch
                             alle Sterne geht (kein soll nötig; Sterne müssen erreichbar sein)
+     ---- Wegwahl (seit v7) – für Rätsel mit GENAU EINER richtigen Antwort, statt 'wahl': ----
+                 'kurs'     optionen: [{ t:'…', ok:true }, { t:'…' }, …] (2–5, gemischt, dann nummeriert)
+                            modus: 'fahrzeug' (Vorgabe) – Fahrzeug von oben, nummerierte Kurslinien, Steuerrad
+                                   fahrzeug: 'boot' | 'uboot' | 'floss' | 'schlitten' | 'kutsche' | 'lore' |
+                                             'ballon' | 'rakete'
+                                   gelaende: optional 'wasser' | 'tiefsee' | 'zelle' | 'schnee' | 'land' |
+                                             'himmel' | 'weltall' (sonst passend zum Fahrzeug)
+                                   einsteigen: true – die Gruppe steigt beim ersten Anzeigen ein (personen: 1–4)
+                                 | 'gruppe' – Personen an der Weggabelung schlagen Wege vor
+                                   (Namen aus STORY.gruppe bzw. r.gruppe: [{ name:'Ayla', haar: 1 }, …];
+                                   haar 0 kurz · 1 lang · 2 Dutt · 3 kurz/Scheitel · 4 Zopf)
+                                 | 'wesen'  – Wesen schlagen Wege vor: wesen: ['eule', 'fuchs', …]
+                                   (eule, fuchs, drache, roboter, geist, zwerg, golem, fee, troll, organell)
      eingabe     bei 'zahl'/'bruch'/'term' – beim Erstellen abgefragt (TEIL 1.2):
                  'formel'   Formeltool (Bruch, gem. Zahl, Hochzahl, Index, Wurzel)
                  'getrennt' Zähler und Nenner in zwei Feldern   ('gemischt': Ganze + Zähler + Nenner)
@@ -1522,7 +1564,7 @@ STORY.karten.forEach(function(k){ k.geschichte = bild(k.id, 'Bild zu Türchen ' 
 
 <script>
 /* ============================================================
-   BAUSTEIN: Story-Engine (v6, 26.11.2026) – unverändert übernehmen
+   BAUSTEIN: Story-Engine (v7, 26.11.2026) – unverändert übernehmen
    Baut aus dem Objekt STORY: Startkarte (Einleitung, Anleitung, Zeitraum, Einstieg per
    Codewort) → je Karte Geschichte + Rätsel → Endkarte mit Auswertung.
    Ablauf einer Karte:  Haupträtsel richtig → geschafft (direkter Weg).
@@ -1545,6 +1587,8 @@ STORY.karten.forEach(function(k){ k.geschichte = bild(k.id, 'Bild zu Türchen ' 
    Leeren-Knopf zurückgesetzt. Unvollständige Einstellungen und nicht gekürzte Brüche kosten
    keinen Versuch. STORY.erwischt/karte.erwischt erscheint vor dem Lösungsweg, STORY.wegTitel
    ersetzt dessen Überschrift.
+   v7 – Wegwahl 'kurs' (Steuerrad, Personen, Wesen): genau eine richtige Option, Antwort { kurs: Index };
+   Einsteigen und Fahrt laufen je Rätsel nur einmal (z.anim), bei prefers-reduced-motion gar nicht.
    Anrede: <body data-anrede="sie"> → alle Texte gesiezt (Oberstufe), sonst „du".
    ============================================================ */
 (function(){
@@ -1688,7 +1732,10 @@ var HINWEIS = {
   leerZeit: T('Stelle zuerst beide Zeiger der Uhr ein.', 'Stellen Sie zuerst beide Zeiger der Uhr ein.'),
   leerGitter: T('Tippe zuerst einen Gitterpunkt an.', 'Tippen Sie zuerst einen Gitterpunkt an.'),
   leerKompass: T('Drehe zuerst den Zeiger.', 'Drehen Sie zuerst den Zeiger.'),
-  leerRegler: T('Schiebe zuerst an den Reglern.', 'Schieben Sie zuerst an den Reglern.')
+  leerRegler: T('Schiebe zuerst an den Reglern.', 'Schieben Sie zuerst an den Reglern.'),
+  /* v7 */
+  leerKurs: T('Wähle zuerst einen Weg – am Steuerrad oder durch Antippen eines Vorschlags.',
+              'Wählen Sie zuerst einen Weg – am Steuerrad oder durch Antippen eines Vorschlags.')
 };
 
 /* ---------- Rätselgeräte (v3, Fantasie-Paket v4) ----------
@@ -1881,6 +1928,10 @@ function bewerteGeraet(r, a){
     if (r.modus === 'winkel') return gleich([a.kompass, 1], r.soll) ? 'ok' : 'falsch';
     return ['N', 'NO', 'O', 'SO', 'S', 'SW', 'W', 'NW'][a.kompass] === String(r.soll).toUpperCase() ? 'ok' : 'falsch';
   }
+  if (art === 'kurs') {                                         /* v7: Wegwahl */
+    if (!a || a.kurs == null) return 'leerKurs';
+    return r.optionen[a.kurs] && r.optionen[a.kurs].ok ? 'ok' : 'falsch';
+  }
   if (art === 'regler') {
     if (!a || !a.regler) return 'leerRegler';
     return r.sterne.every(function(s){ return Math.abs(reglerY(r, a.regler, s[0]) - s[1]) < 1e-9; }) ? 'ok' : 'falsch';
@@ -1908,6 +1959,173 @@ function reglerY(r, st, x){
   return reglerWert(r, 'a', st.a) * d * d + reglerWert(r, 'e', st.e);
 }
 
+/* v7: Zeichnungen für die Wegwahl (art 'kurs') – Gelände, Fahrzeuge von oben, Personen, Wesen.
+   Alle Fahrzeuge zeigen mit dem Bug nach oben (−y), Mitte im Ursprung. */
+function kursGelaende(g, W, H){
+  var s = '<rect x="0" y="0" width="' + W + '" height="' + H + '" rx="16" fill="url(#fx-messing)"/>', k;
+  var innen = function(f){ return '<rect x="7" y="7" width="' + (W - 14) + '" height="' + (H - 14) + '" rx="11" fill="' + f + '" stroke="#6e4c0d" stroke-width="1.5"/>'; };
+  if (g === 'wasser' || g === 'tiefsee') {
+    s += innen(g === 'wasser' ? '#2c6f96' : '#123a57');
+    s += '<rect x="7" y="7" width="' + (W - 14) + '" height="' + (H - 14) + '" rx="11" fill="url(#fx-trank)" opacity="' + (g === 'wasser' ? '.35' : '.12') + '"/>';
+    for (k = 0; k < 26; k++) {
+      var x = 30 + (k * 97) % (W - 60), y = 30 + (k * 61) % (H - 60);
+      s += g === 'wasser'
+        ? '<path d="M' + x + ',' + y + ' q8,-6 16,0 t16,0" fill="none" stroke="#e6f4ff" stroke-opacity=".45" stroke-width="2" stroke-linecap="round"/>'
+        : '<circle cx="' + x + '" cy="' + y + '" r="' + (2 + k % 4) + '" fill="none" stroke="#cfe8ff" stroke-opacity=".45" stroke-width="1.5"/>';
+    }
+  } else if (g === 'zelle') {
+    s += innen('#eef3e2');
+    for (k = 0; k < 30; k++) s += '<circle cx="' + (24 + (k * 89) % (W - 48)) + '" cy="' + (24 + (k * 53) % (H - 48)) + '" r="' + (2 + k % 3) + '" fill="#9fb27a" opacity=".45"/>';
+    s += '<ellipse cx="90" cy="70" rx="46" ry="22" fill="#fbeee0" stroke="#c97a2e" stroke-width="2" opacity=".55"/>'
+       + '<ellipse cx="' + (W - 90) + '" cy="' + (H - 90) + '" rx="38" ry="24" fill="#e2ecd0" stroke="#1e7d32" stroke-width="2" opacity=".5"/>';
+  } else if (g === 'schnee') {
+    s += innen('#f3f7fb');
+    for (k = 0; k < 14; k++) {
+      var tx = 30 + (k * 113) % (W - 60), ty = 30 + (k * 71) % (H - 90);
+      s += '<path d="M' + tx + ',' + (ty - 14) + ' l10,20 h-20 z" fill="#1e7d32" opacity=".75"/><rect x="' + (tx - 2) + '" y="' + (ty + 6) + '" width="4" height="6" fill="#5b3519"/>';
+    }
+  } else if (g === 'himmel') {
+    s += innen('#bfe0f7');
+    for (k = 0; k < 6; k++) {
+      var wx = 60 + (k * 131) % (W - 120), wy = 40 + (k * 83) % (H - 100);
+      s += '<g fill="#ffffff" opacity=".9"><ellipse cx="' + wx + '" cy="' + wy + '" rx="34" ry="13"/><ellipse cx="' + (wx + 18) + '" cy="' + (wy - 9) + '" rx="20" ry="12"/></g>';
+    }
+  } else if (g === 'weltall') {
+    s += innen('#1a1540') + '<rect x="7" y="7" width="' + (W - 14) + '" height="' + (H - 14) + '" rx="11" fill="url(#fx-nacht)"/>';
+    for (k = 0; k < 60; k++) s += '<circle cx="' + (12 + (k * 73.7) % (W - 24)).toFixed(1) + '" cy="' + (12 + (k * 47.3) % (H - 24)).toFixed(1) + '" r="' + (k % 5 ? .9 : 1.6) + '" fill="#ffffff" opacity=".8"/>';
+  } else {
+    s += innen('#ead29b') + '<rect x="7" y="7" width="' + (W - 14) + '" height="' + (H - 14) + '" rx="11" fill="url(#fx-pergament)"/>';
+    for (k = 0; k < 18; k++) s += '<path d="M' + (24 + (k * 97) % (W - 48)) + ',' + (24 + (k * 59) % (H - 48)) + ' l4,-8 l4,8" fill="none" stroke="#1e7d32" stroke-width="2" opacity=".55"/>';
+  }
+  return s;
+}
+function kursFahrzeug(f){
+  var ST = ' stroke="#2e1a0b" stroke-width="2.5" stroke-linejoin="round"';
+  switch (f) {
+    case 'uboot':
+      return '<rect x="-21" y="-50" width="42" height="100" rx="21" fill="url(#fx-messing)"' + ST + '/>'
+        + '<ellipse cx="0" cy="-2" rx="11" ry="17" fill="url(#fx-messingR)"' + ST + '/>'
+        + '<circle cx="0" cy="-32" r="6" fill="#5cc8ef" stroke="#2e1a0b" stroke-width="2"/><circle cx="0" cy="24" r="6" fill="#5cc8ef" stroke="#2e1a0b" stroke-width="2"/>'
+        + '<path d="M-14,50 l-8,10 h44 l-8,-10" fill="#6b7686"' + ST + '/>';
+    case 'floss':
+      var s = '';
+      for (var i = -2; i <= 2; i++) s += '<rect x="' + (i * 10 - 5) + '" y="-44" width="10" height="88" rx="5" fill="url(#fx-holz)"' + ST + '/>';
+      return s + '<path d="M-26,-30 h52 M-26,30 h52" stroke="#d9c08c" stroke-width="4"/><circle r="5" fill="#5b3519"/>'
+        + '<path d="M0,0 L22,-6 L0,-12 z" fill="#f6e7c1" stroke="#8a6a32" stroke-width="1.5"/>';
+    case 'schlitten':
+      return '<path d="M-18,48 V-30 Q-18,-50 -4,-46 M18,48 V-30 Q18,-50 4,-46" fill="none" stroke="#4a3208" stroke-width="6" stroke-linecap="round"/>'
+        + '<path d="M-18,48 V-30 Q-18,-50 -4,-46 M18,48 V-30 Q18,-50 4,-46" fill="none" stroke="url(#fx-messingQ)" stroke-width="3" stroke-linecap="round"/>'
+        + '<rect x="-17" y="-24" width="34" height="62" rx="6" fill="url(#fx-holz)"' + ST + '/>'
+        + '<path d="M-17,-8 h34 M-17,8 h34 M-17,24 h34" stroke="#2e1a0b" stroke-width="1.5" opacity=".6"/>';
+    case 'kutsche':
+      return '<rect x="-30" y="-30" width="10" height="22" rx="3" fill="#2e1a0b"/><rect x="20" y="-30" width="10" height="22" rx="3" fill="#2e1a0b"/>'
+        + '<rect x="-30" y="18" width="10" height="22" rx="3" fill="#2e1a0b"/><rect x="20" y="18" width="10" height="22" rx="3" fill="#2e1a0b"/>'
+        + '<rect x="-22" y="-42" width="44" height="88" rx="10" fill="#c1272d"' + ST + '/>'
+        + '<rect x="-16" y="-34" width="32" height="72" rx="7" fill="url(#fx-messing)" opacity=".55"/>'
+        + '<path d="M-6,-42 V-62 M6,-42 V-62" stroke="#5b3519" stroke-width="4"/>';
+    case 'lore':
+      return '<path d="M-14,-70 V70 M14,-70 V70" stroke="#6b7686" stroke-width="4"/>'
+        + '<rect x="-24" y="-36" width="48" height="72" rx="6" fill="url(#fx-eisen)"' + ST + '/>'
+        + '<rect x="-17" y="-29" width="34" height="58" rx="4" fill="#2a1608"/>'
+        + '<circle cx="-6" cy="-8" r="7" fill="#d9ae3e"/><circle cx="7" cy="6" r="6" fill="#b8860b"/>';
+    case 'ballon':
+      var b = '<circle r="46" fill="#c1272d"' + ST + '/>';
+      for (var k = 0; k < 8; k += 2) b += '<path d="M0,0 L' + (46 * Math.sin(k * Math.PI / 4)).toFixed(1) + ',' + (-46 * Math.cos(k * Math.PI / 4)).toFixed(1)
+        + ' A46,46 0 0 1 ' + (46 * Math.sin((k + 1) * Math.PI / 4)).toFixed(1) + ',' + (-46 * Math.cos((k + 1) * Math.PI / 4)).toFixed(1) + ' z" fill="#d9ae3e"/>';
+      return b + '<circle r="46" fill="none"' + ST + '/><rect x="-10" y="-10" width="20" height="20" rx="3" fill="url(#fx-holz)"' + ST + '/>'
+        + '<path d="M0,-58 l7,12 h-14 z" fill="#2e1a0b"/>';
+    case 'rakete':
+      return '<path d="M0,-56 C16,-40 18,-6 16,36 L-16,36 C-18,-6 -16,-40 0,-56 z" fill="#eef0f3"' + ST + '/>'
+        + '<path d="M-16,14 L-30,44 L-15,40 z M16,14 L30,44 L15,40 z" fill="#c1272d"' + ST + '/>'
+        + '<circle cx="0" cy="-16" r="8" fill="#5cc8ef" stroke="#2e1a0b" stroke-width="2.5"/>'
+        + '<path d="M-9,38 L0,58 L9,38 z" fill="#f0a52b"/>';
+    default:   /* boot */
+      return '<path d="M0,-52 C24,-32 26,12 21,44 L-21,44 C-26,12 -24,-32 0,-52 z" fill="url(#fx-holz)"' + ST + '/>'
+        + '<path d="M0,-44 C18,-28 19,10 15,38 L-15,38 C-19,10 -18,-28 0,-44 z" fill="#d6b574" stroke="#5b3519" stroke-width="1.5"/>'
+        + '<path d="M-15,-10 h30 M-17,6 h34 M-16,22 h32" stroke="#8a6a32" stroke-width="1.2"/>'
+        + '<circle cx="0" cy="-18" r="4" fill="#2e1a0b"/><path d="M0,-18 L-2,22" stroke="#2e1a0b" stroke-width="2"/>';
+  }
+}
+var KURS_HAUT = ['#f1c9a5', '#a8714b', '#d9a27a', '#7a4b2a', '#f3d2b8'];
+var KURS_HAAR = ['#2e1a0b', '#d9ae3e', '#7a4b20', '#22303f', '#a5611e'];
+var KURS_KLEID = ['#2f5fa6', '#1e7d32', '#c1272d', '#b8860b', '#6b7686'];
+function kursPerson(p, frisur){
+  var h = KURS_HAUT[p % 5], ha = KURS_HAAR[(p * 2 + 1) % 5], kl = KURS_KLEID[p % 5], S = ' stroke="#22303f" stroke-width="2"';
+  var haar = [
+    '<path d="M34,44 Q34,22 50,22 Q66,22 66,44 Q60,32 50,32 Q40,32 34,44 z" fill="' + ha + '"' + S + '/>',
+    '<path d="M33,50 Q30,20 50,20 Q70,20 67,50 L67,64 Q62,48 62,40 Q50,32 38,40 Q38,48 33,64 z" fill="' + ha + '"' + S + '/>',
+    '<circle cx="50" cy="26" r="9" fill="' + ha + '"' + S + '/><path d="M35,44 Q36,28 50,28 Q64,28 65,44 Q56,36 35,44 z" fill="' + ha + '"' + S + '/>',
+    '<path d="M35,42 Q38,24 50,24 Q62,24 65,42 L66,40 Q64,18 50,18 Q36,18 34,40 z" fill="' + ha + '"' + S + '/>',
+    '<path d="M33,46 Q32,22 50,22 Q68,22 67,46 Q58,34 46,36 Q40,40 33,46 z" fill="' + ha + '"' + S + '/><path d="M66,40 Q76,52 70,66" fill="none" stroke="' + ha + '" stroke-width="6" stroke-linecap="round"/>'
+  ][(frisur != null ? frisur : p) % 5];
+  return '<path d="M26,124 Q28,74 50,72 Q72,74 74,124 z" fill="' + kl + '"' + S + '/>'
+    + '<path d="M28,96 L20,112 M72,96 L80,112" stroke="' + kl + '" stroke-width="9" stroke-linecap="round"/>'
+    + '<circle cx="50" cy="46" r="17" fill="' + h + '"' + S + '/>' + haar
+    + '<circle cx="44" cy="47" r="2.2" fill="#22303f"/><circle cx="56" cy="47" r="2.2" fill="#22303f"/>'
+    + '<path d="M44,55 Q50,60 56,55" fill="none" stroke="#22303f" stroke-width="2" stroke-linecap="round"/>';
+}
+var KURS_WESEN_NAME = { eule:'Eule', fuchs:'Fuchs', drache:'Drache', roboter:'Roboter', geist:'Geist', zwerg:'Zwerg',
+                        golem:'Golem', fee:'Fee', troll:'Troll', organell:'Organell' };
+function kursWesen(t){
+  var S = ' stroke="#22303f" stroke-width="2"', aug = function(x, y, r){ return '<circle cx="' + x + '" cy="' + y + '" r="' + r + '" fill="#ffffff"' + S + '/><circle cx="' + x + '" cy="' + (y + 1) + '" r="' + (r * .45) + '" fill="#22303f"/>'; };
+  switch (t) {
+    case 'eule':
+      return '<ellipse cx="50" cy="80" rx="30" ry="38" fill="#7a4b20"' + S + '/><ellipse cx="50" cy="90" rx="18" ry="24" fill="#e9d3a5"/>'
+        + '<path d="M24,34 L32,48 L40,40 z M76,34 L68,48 L60,40 z" fill="#7a4b20"' + S + '/>' + aug(39, 56, 10) + aug(61, 56, 10)
+        + '<path d="M46,66 L54,66 L50,74 z" fill="#d9ae3e"' + S + '/><path d="M42,116 l-4,6 M50,116 v6 M58,116 l4,6" stroke="#d9ae3e" stroke-width="3"/>';
+    case 'fuchs':
+      return '<path d="M70,104 Q100,90 88,62 Q84,92 64,96 z" fill="#c97a2e"' + S + '/><path d="M86,66 Q88,74 82,80 Q84,70 86,66" fill="#ffffff"/>'
+        + '<ellipse cx="50" cy="96" rx="22" ry="26" fill="#c97a2e"' + S + '/><ellipse cx="50" cy="102" rx="11" ry="16" fill="#ffffff"/>'
+        + '<path d="M30,36 L36,58 L44,46 z M70,36 L64,58 L56,46 z" fill="#c97a2e"' + S + '/>'
+        + '<path d="M30,58 Q50,40 70,58 Q64,80 50,84 Q36,80 30,58 z" fill="#c97a2e"' + S + '/><path d="M40,70 Q50,86 60,70 Q50,76 40,70 z" fill="#ffffff"/>'
+        + '<circle cx="42" cy="60" r="3" fill="#22303f"/><circle cx="58" cy="60" r="3" fill="#22303f"/><circle cx="50" cy="76" r="3.5" fill="#22303f"/>';
+    case 'drache':
+      return '<path d="M30,76 Q6,58 12,40 Q22,56 34,60 z M70,76 Q94,58 88,40 Q78,56 66,60 z" fill="#d9ae3e"' + S + '/>'
+        + '<ellipse cx="50" cy="94" rx="24" ry="26" fill="#1e7d32"' + S + '/><ellipse cx="50" cy="100" rx="13" ry="17" fill="#e9d3a5"/>'
+        + '<path d="M36,40 L32,26 L42,36 M64,40 L68,26 L58,36" fill="#e9d3a5"' + S + '/>'
+        + '<ellipse cx="50" cy="56" rx="20" ry="18" fill="#1e7d32"' + S + '/>' + aug(43, 52, 5) + aug(57, 52, 5)
+        + '<path d="M44,64 Q50,68 56,64" fill="none" stroke="#22303f" stroke-width="2"/><path d="M72,112 Q90,116 92,104" fill="none" stroke="#1e7d32" stroke-width="6" stroke-linecap="round"/>';
+    case 'roboter':
+      return '<path d="M50,30 V20" stroke="#22303f" stroke-width="3"/><circle cx="50" cy="20" r="4" fill="#c1272d"/>'
+        + '<rect x="30" y="30" width="40" height="32" rx="7" fill="#9aa4b2"' + S + '/>'
+        + '<circle cx="41" cy="45" r="6" fill="#5cc8ef"' + S + '/><circle cx="59" cy="45" r="6" fill="#5cc8ef"' + S + '/><rect x="42" y="54" width="16" height="3" fill="#22303f"/>'
+        + '<rect x="28" y="66" width="44" height="40" rx="6" fill="#6b7686"' + S + '/><circle cx="50" cy="84" r="7" fill="url(#fx-messingR)"' + S + '/>'
+        + '<path d="M28,74 L16,94 M72,74 L84,94" stroke="#6b7686" stroke-width="7" stroke-linecap="round"/><rect x="34" y="106" width="10" height="14" fill="#22303f"/><rect x="56" y="106" width="10" height="14" fill="#22303f"/>';
+    case 'geist':
+      return '<path d="M24,118 V60 Q24,26 50,26 Q76,26 76,60 V118 L68,110 L59,118 L50,110 L41,118 L32,110 z" fill="#f4f6fb" stroke="#9aa6bb" stroke-width="2.5"/>'
+        + '<ellipse cx="41" cy="56" rx="5" ry="8" fill="#22303f"/><ellipse cx="59" cy="56" rx="5" ry="8" fill="#22303f"/><ellipse cx="50" cy="76" rx="5" ry="6" fill="#22303f"/>';
+    case 'zwerg':
+      return '<path d="M30,122 Q30,78 50,78 Q70,78 70,122 z" fill="#2f5fa6"' + S + '/>'
+        + '<circle cx="50" cy="58" r="16" fill="#f1c9a5"' + S + '/>'
+        + '<path d="M32,52 Q50,40 68,52 L50,14 z" fill="#c1272d"' + S + '/>'
+        + '<path d="M36,62 Q36,96 50,100 Q64,96 64,62 Q50,72 36,62 z" fill="#f4f6fb" stroke="#9aa6bb" stroke-width="2"/>'
+        + '<circle cx="44" cy="58" r="2.4" fill="#22303f"/><circle cx="56" cy="58" r="2.4" fill="#22303f"/><circle cx="50" cy="64" r="4" fill="#e9a07a"/>';
+    case 'golem':
+      return '<rect x="22" y="62" width="56" height="46" rx="8" fill="#8a8580"' + S + '/><rect x="32" y="26" width="36" height="34" rx="6" fill="#9b968f"' + S + '/>'
+        + '<rect x="10" y="66" width="14" height="36" rx="6" fill="#8a8580"' + S + '/><rect x="76" y="66" width="14" height="36" rx="6" fill="#8a8580"' + S + '/>'
+        + '<rect x="28" y="106" width="16" height="16" rx="3" fill="#6f6a64"' + S + '/><rect x="56" y="106" width="16" height="16" rx="3" fill="#6f6a64"' + S + '/>'
+        + '<circle cx="42" cy="42" r="4.5" fill="#f0a52b"/><circle cx="58" cy="42" r="4.5" fill="#f0a52b"/><path d="M30,82 l14,8 l12,-10 l14,6" fill="none" stroke="#5e5a55" stroke-width="2"/>';
+    case 'fee':
+      return '<ellipse cx="30" cy="70" rx="18" ry="26" fill="#bfe8ff" opacity=".8" stroke="#5cc8ef" stroke-width="1.5" transform="rotate(-20 30 70)"/>'
+        + '<ellipse cx="70" cy="70" rx="18" ry="26" fill="#bfe8ff" opacity=".8" stroke="#5cc8ef" stroke-width="1.5" transform="rotate(20 70 70)"/>'
+        + '<path d="M36,120 L50,70 L64,120 z" fill="#1e7d32"' + S + '/><circle cx="50" cy="56" r="14" fill="#f3d2b8"' + S + '/>'
+        + '<path d="M36,54 Q36,38 50,38 Q64,38 64,54 Q58,44 50,46 Q42,44 36,54 z" fill="#d9ae3e"' + S + '/>'
+        + '<circle cx="45" cy="57" r="2" fill="#22303f"/><circle cx="55" cy="57" r="2" fill="#22303f"/><path d="M46,63 Q50,66 54,63" fill="none" stroke="#22303f" stroke-width="1.8"/>'
+        + '<path d="M64,86 L82,64" stroke="#5b3519" stroke-width="2.5"/><path d="M82,56 l2,6 l6,0 l-5,4 l2,6 l-5,-4 l-5,4 l2,-6 l-5,-4 l6,0 z" fill="#ffd34d"/>';
+    case 'troll':
+      return '<ellipse cx="50" cy="90" rx="34" ry="32" fill="#7f9a6a"' + S + '/><ellipse cx="50" cy="52" rx="24" ry="22" fill="#8fab78"' + S + '/>'
+        + '<path d="M40,30 Q44,18 50,28 Q56,16 60,30" fill="none" stroke="#5b3519" stroke-width="3"/>'
+        + '<circle cx="42" cy="48" r="3" fill="#22303f"/><circle cx="58" cy="48" r="3" fill="#22303f"/>'
+        + '<ellipse cx="50" cy="58" rx="8" ry="10" fill="#9fbb88"' + S + '/><path d="M40,68 Q50,74 60,68" fill="none" stroke="#22303f" stroke-width="2"/>'
+        + '<path d="M44,69 v4 M56,69 v4" stroke="#ffffff" stroke-width="2.5"/>';
+    case 'organell':
+      return '<ellipse cx="50" cy="78" rx="38" ry="30" fill="#fbeee0" stroke="#c97a2e" stroke-width="3"/>'
+        + '<path d="M20,82 q6,-16 12,0 t12,0 t12,0 t12,0 t12,0" fill="none" stroke="#c97a2e" stroke-width="2.5"/>'
+        + aug(40, 66, 6) + aug(60, 66, 6) + '<path d="M42,96 Q50,102 58,96" fill="none" stroke="#22303f" stroke-width="2.2" stroke-linecap="round"/>'
+        + '<path d="M14,78 L4,70 M86,78 L96,70" stroke="#c97a2e" stroke-width="4" stroke-linecap="round"/>';
+    default: return kursPerson(0);
+  }
+}
 var GERAET = {
   /* Bruch-Uhr (v4): kurzer Zeiger auf den Stunden 1–12, langer Zeiger auf den Minuten 1–60.
      Das Kind entscheidet selbst (Knopf ⇄), welcher Zeiger Zähler und welcher Nenner ist –
@@ -2773,6 +2991,243 @@ var GERAET = {
     return { el:el,
       hol: function(){ return v == null ? null : { kompass: v }; },
       leere: function(){ v = null; zeichneKompass(false); } };
+  },
+
+  /* Wegwahl (v7): art 'kurs' – genau eine richtige Option, die Gruppe wählt in der Geschichte einen Weg.
+     modus 'fahrzeug' (Vorgabe): Fahrzeug von oben, nummerierte Kurslinien, Steuerrad (Ziehen, ◀/▶, Pfeiltasten)
+           fahrzeug: 'boot' | 'uboot' | 'floss' | 'schlitten' | 'kutsche' | 'lore' | 'ballon' | 'rakete'
+           gelaende: optional 'wasser' | 'tiefsee' | 'zelle' | 'schnee' | 'land' | 'himmel' | 'weltall'
+           einsteigen: true → die Gruppe steigt beim ersten Anzeigen ein (personen: 1–4, Vorgabe 3)
+     modus 'gruppe': die Gruppe steht an einer Weggabelung, jede Person schlägt einen Weg vor (STORY.gruppe /
+           r.gruppe: [{ name:'Ayla', haar:1 }, …] – sonst „Person 1 …“; haar 0–4 wählt die Frisur)
+     modus 'wesen': Wesen schlagen Wege vor – wesen: ['eule', 'fuchs', …] (eule, fuchs, drache, roboter, geist,
+           zwerg, golem, fee, troll, organell); sonst eine feste Auswahl
+     optionen: [{ t:'…', ok:true }, { t:'…' }, …] – 2 bis 5, einmal gemischt (4.3), dann nummeriert.
+     Antwort: { kurs: Index in r.optionen } */
+  kurs: function(r, alt, merke, aktiv, z, s){
+    if (!z.mix[s]) { z.mix[s] = mische(r.optionen.length); sichern(); }
+    if (!z.anim) z.anim = {};
+    var mix = z.mix[s], n = mix.length, modus = r.modus || 'fahrzeug';
+    var wahl = alt && alt.kurs != null ? alt.kurs : null;           /* Originalindex */
+    var geloest = !aktiv && wahl != null && r.optionen[wahl] && r.optionen[wahl].ok;
+    var gescheitert = !aktiv && wahl != null && !geloest;
+    var ruhig = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var el = neu('div', 'geraet kurs kurs-' + modus), auswahl = [], linien = [], schilder = [];
+    function pos(o){ return mix.indexOf(o); }                         /* angezeigte Stelle 0 … n−1 */
+
+    /* ---- Szene: Weggabelung bzw. Karte mit Kurslinien ---- */
+    var W = 600, H = modus === 'fahrzeug' ? 380 : 230;
+    var svg = svgLeucht({ viewBox:'0 0 ' + W + ' ' + H, role:'img',
+      'aria-label': modus === 'fahrzeug' ? n + ' nummerierte Kurslinien vor dem Fahrzeug; mit dem Steuerrad wird der Kurs gewählt'
+                                         : 'Weggabelung mit ' + n + ' nummerierten Wegen' });
+    var gel = r.gelaende || { boot:'wasser', floss:'wasser', uboot:'tiefsee', schlitten:'schnee', ballon:'himmel', rakete:'weltall' }[r.fahrzeug] || 'land';
+    if (modus !== 'fahrzeug') gel = r.gelaende || 'land';
+    svg.innerHTML += kursGelaende(gel, W, H);
+    var start = modus === 'fahrzeug' ? [300, 322] : [300, 212];
+    var spanne = [0, 0, 56, 90, 112, 124][n] || 124;
+    function winkel(p){ return n === 1 ? 0 : -spanne / 2 + p * spanne / (n - 1); }
+    var linienFarbe = { tiefsee:'#cfe8ff', weltall:'#ffe27a', himmel:'#ffffff', wasser:'#f6f0d8' }[gel] || '#5b3519';
+    for (var p = 0; p < n; p++) {
+      var e, c, a = winkel(p) * Math.PI / 180;
+      if (modus === 'fahrzeug') {
+        e = [start[0] + 262 * Math.sin(a), start[1] - 262 * Math.cos(a)];
+        c = [start[0] + 140 * Math.sin(a * 0.45), start[1] - 140 * Math.cos(a * 0.45)];
+      } else {
+        e = [70 + p * (W - 140) / Math.max(1, n - 1), 36];
+        if (n === 1) e[0] = 300;
+        c = [300 + (e[0] - 300) * 0.25, 120];
+      }
+      var d = 'M' + start[0] + ',' + start[1] + ' Q' + c[0].toFixed(1) + ',' + c[1].toFixed(1) + ' ' + e[0].toFixed(1) + ',' + e[1].toFixed(1);
+      var spur = svgEl('path', { d:d, fill:'none', stroke:'#000', 'stroke-opacity':'.18', 'stroke-width':modus === 'fahrzeug' ? 9 : 16, 'stroke-linecap':'round' });
+      var li = svgEl('path', { d:d, fill:'none', stroke:linienFarbe, 'stroke-width':modus === 'fahrzeug' ? 4 : 8,
+        'stroke-dasharray':modus === 'fahrzeug' ? '12 9' : '', 'stroke-linecap':'round', 'class':'kurs-linie' });
+      svg.appendChild(spur); svg.appendChild(li); linien[p] = li;
+      var sg = svgEl('g', { 'class':'kurs-schild' });
+      sg.appendChild(svgEl('circle', { cx:e[0], cy:e[1], r:19, fill:'url(#fx-messingR)', stroke:'#4a3208', 'stroke-width':2.5 }));
+      sg.appendChild(svgEl('text', { x:e[0], y:e[1] + 7, 'text-anchor':'middle', 'font-size':21, 'font-weight':'800', fill:'#2a1a05' }, String(p + 1)));
+      svg.appendChild(sg); schilder[p] = sg;
+    }
+
+    /* ---- Fahrzeug (mit Gruppe, die einsteigt) ---- */
+    var fz = null, figuren = [];
+    if (modus === 'fahrzeug') {
+      fz = svgEl('g', { 'class':'kurs-fahrzeug' });
+      var inner = svgEl('g', {}); inner.innerHTML = kursFahrzeug(r.fahrzeug || 'boot');
+      fz.appendChild(inner);
+      if (r.einsteigen) {
+        var np = Math.max(1, Math.min(4, r.personen || (STORY.gruppe ? STORY.gruppe.length : 3)));
+        var sitze = [[-8, -6], [8, -6], [-8, 12], [8, 12]], farben = ['#2f5fa6', '#c1272d', '#1e7d32', '#b8860b'];
+        for (var q = 0; q < np; q++) {
+          var fg = svgEl('g', { 'class':'kurs-figur' });
+          fg.innerHTML = '<circle r="8" fill="' + farben[q] + '" stroke="#22303f" stroke-width="1.5"/>'
+            + '<circle r="5" fill="' + ['#2e1a0b', '#d9ae3e', '#7a4b20', '#22303f'][q] + '"/>';
+          var ziel = 'translate(' + sitze[q][0] + 'px,' + sitze[q][1] + 'px)';
+          var drauss = 'translate(' + (-110 - q * 22) + 'px,' + (30 + (q % 2) * 18) + 'px)';
+          fg.style.transform = (z.anim['ein' + s] || ruhig) ? ziel : drauss;
+          fg.ziel = ziel; fz.appendChild(fg); figuren.push(fg);
+        }
+      }
+      svg.appendChild(fz);
+    } else {
+      /* kleine Gruppe am Fuß der Weggabelung (bei 'gruppe' stehen die Personen unten groß) */
+      if (modus === 'wesen') {
+        var gr = svgEl('g', {});
+        [-26, -9, 8, 25].slice(0, Math.max(1, Math.min(4, STORY.gruppe ? STORY.gruppe.length : 3))).forEach(function(x, k){
+          gr.innerHTML += '<circle cx="' + (300 + x) + '" cy="206" r="9" fill="' + ['#2f5fa6', '#c1272d', '#1e7d32', '#b8860b'][k] + '" stroke="#22303f" stroke-width="1.5"/>'
+            + '<circle cx="' + (300 + x) + '" cy="193" r="7" fill="#f1c9a5" stroke="#22303f" stroke-width="1.2"/>';
+        });
+        svg.appendChild(gr);
+      }
+    }
+    var szene = neu('div', 'kurs-szene'); szene.appendChild(svg); el.appendChild(szene);
+
+    /* ---- Steuerrad ---- */
+    var rad = null, radG = null;
+    if (modus === 'fahrzeug') {
+      var steuer = neu('div', 'kurs-steuer');
+      var links = neu('button', 'kurs-pfeil', '◀'), rechts = neu('button', 'kurs-pfeil', '▶');
+      links.type = rechts.type = 'button'; links.disabled = rechts.disabled = !aktiv;
+      links.setAttribute('aria-label', 'Kurs weiter nach links'); rechts.setAttribute('aria-label', 'Kurs weiter nach rechts');
+      rad = svgLeucht({ viewBox:'-110 -110 220 220', role:'slider', tabindex:aktiv ? '0' : '-1',
+        'aria-label':'Steuerrad: Kurs wählen', 'aria-valuemin':'1', 'aria-valuemax':String(n) });
+      radG = svgEl('g', { 'class':'kurs-rad' });
+      for (var sp = 0; sp < 8; sp++) {
+        var wk = sp * 45;
+        radG.appendChild(svgEl('rect', { x:-6, y:-104, width:12, height:30, rx:6, fill:'url(#fx-holz)', stroke:'#2e1a0b', 'stroke-width':2, transform:'rotate(' + wk + ')' }));
+        radG.appendChild(svgEl('rect', { x:-4, y:-72, width:8, height:66, fill:'url(#fx-holz)', stroke:'#2e1a0b', 'stroke-width':1.5, transform:'rotate(' + wk + ')' }));
+      }
+      radG.appendChild(svgEl('circle', { r:72, fill:'none', stroke:'#2e1a0b', 'stroke-width':17 }));
+      radG.appendChild(svgEl('circle', { r:72, fill:'none', stroke:'url(#fx-messingQ)', 'stroke-width':12 }));
+      radG.appendChild(svgEl('circle', { r:20, fill:'url(#fx-messingR)', stroke:'#4a3208', 'stroke-width':3 }));
+      radG.appendChild(svgEl('rect', { x:-5, y:-106, width:10, height:12, rx:3, fill:'#c1272d' }));   /* Markierung „geradeaus" */
+      rad.appendChild(radG);
+      steuer.appendChild(links); steuer.appendChild(rad); steuer.appendChild(rechts);
+      el.appendChild(steuer);
+    }
+
+    /* ---- Vorschläge: Antworttafel (Fahrzeug) bzw. Personen/Wesen mit Sprechblase ---- */
+    var tafel = neu('div', modus === 'fahrzeug' ? 'kurs-tafel' : 'vorschlaege');
+    var namenG = (r.gruppe || STORY.gruppe || []);
+    var wesenL = r.wesen || ['eule', 'fuchs', 'roboter', 'drache', 'zwerg'];
+    mix.forEach(function(o, p){
+      var b = neu('button', modus === 'fahrzeug' ? 'kurs-opt' : 'vorschlag', ''); b.type = 'button'; b.disabled = !aktiv;
+      if (r.optionen[o].ok) b.setAttribute('data-ok', '1');
+      if (modus === 'fahrzeug') {
+        b.innerHTML = '<span class="nr">' + (p + 1) + '</span><span class="kurs-text">' + r.optionen[o].t + '</span>';
+      } else {
+        var bild = svgLeucht({ viewBox:'0 0 100 125', 'aria-hidden':'true' });
+        var typ = modus === 'wesen' ? wesenL[p % wesenL.length] : null;
+        bild.innerHTML += modus === 'wesen' ? kursWesen(typ) : kursPerson(p, namenG[p] && namenG[p].haar);
+        b.stein = edelstein(bild, 50, 11, 9, 'aus');
+        var name = modus === 'wesen' ? (KURS_WESEN_NAME[typ] || typ) : (namenG[p] && namenG[p].name) || ('Person ' + (p + 1));
+        var fig = neu('span', 'vorschlag-bild'); fig.appendChild(bild);
+        b.appendChild(fig);
+        b.appendChild(neu('span', 'vorschlag-name', name));
+        b.appendChild(neu('span', 'blase', '<span class="nr">' + (p + 1) + '</span> ' + r.optionen[o].t));
+      }
+      b.addEventListener('click', function(){ waehle(p, true); });
+      tafel.appendChild(b); auswahl[p] = b;
+    });
+    el.appendChild(tafel);
+    var anz = neu('p', 'anzeige', ''); el.appendChild(anz);
+
+    /* ---- Zustand zeichnen ---- */
+    var gewP = wahl != null ? pos(wahl) : null, vorschauW = null;
+    function radWinkel(){ return (vorschauW != null ? vorschauW : gewP != null ? winkel(gewP) : 0) * 2.6; }
+    function zeichne(){
+      for (var p = 0; p < n; p++) {
+        var an = p === gewP, farbe = an ? (geloest ? '#3fd27f' : gescheitert ? '#f0476b' : '#5cc8ef') : linienFarbe;
+        linien[p].setAttribute('stroke', farbe);
+        linien[p].setAttribute('stroke-width', an ? (modus === 'fahrzeug' ? 7 : 11) : (modus === 'fahrzeug' ? 4 : 8));
+        if (an) linien[p].setAttribute('filter', svg.leucht); else linien[p].removeAttribute('filter');
+        schilder[p].setAttribute('opacity', gewP == null || an ? '1' : '.7');
+        auswahl[p].classList.toggle('an', an);
+        if (auswahl[p].stein) steinZustand(auswahl[p].stein, an ? (geloest ? 'ok' : gescheitert ? 'nok' : 'an') : 'aus');
+      }
+      if (fz && !fz.faehrt) {
+        var w = vorschauW != null ? vorschauW : gewP != null ? winkel(gewP) : 0;
+        fz.setAttribute('transform', 'translate(' + start[0] + ',' + start[1] + ') rotate(' + w.toFixed(1) + ')');
+      }
+      if (radG) {
+        radG.setAttribute('transform', 'rotate(' + radWinkel().toFixed(1) + ')');
+        rad.setAttribute('aria-valuenow', gewP != null ? String(gewP + 1) : '0');
+        rad.setAttribute('aria-valuetext', gewP != null ? 'Kurs ' + (gewP + 1) : 'kein Kurs gewählt');
+      }
+      anz.innerHTML = gewP == null
+        ? (modus === 'fahrzeug' ? T('Dreh am Steuerrad (oder tippe ◀ ▶ bzw. einen Kurs an), bis der Bug auf die richtige Linie zeigt.',
+                                    'Drehen Sie am Steuerrad (oder tippen Sie ◀ ▶ bzw. einen Kurs an), bis der Bug auf die richtige Linie zeigt.')
+                                : T('Tippe an, wessen Vorschlag du folgst.', 'Tippen Sie an, wessen Vorschlag Sie folgen.'))
+        : (modus === 'fahrzeug' ? 'Kurs <b>' + (gewP + 1) + '</b> ' + T('gewählt.', 'gewählt.')
+                                : T('Du folgst Weg ', 'Sie folgen Weg ') + '<b>' + (gewP + 1) + '</b>.');
+    }
+    function waehle(p, funk){
+      if (!aktiv) return;
+      gewP = Math.max(0, Math.min(n - 1, p)); vorschauW = null;
+      merke({ kurs: mix[gewP] });
+      zeichne();
+      if (funk && auswahl[gewP].stein) funkeln(auswahl[gewP].stein);
+    }
+    function schritt(um){
+      if (gewP == null) waehle(um > 0 ? Math.floor(n / 2) : Math.floor((n - 1) / 2), true);
+      else waehle(gewP + um, true);
+    }
+    if (modus === 'fahrzeug' && aktiv) {
+      links.addEventListener('click', function(){ schritt(-1); });
+      rechts.addEventListener('click', function(){ schritt(1); });
+      rad.addEventListener('keydown', function(ev){
+        if (ev.key === 'ArrowLeft' || ev.key === 'ArrowDown') { ev.preventDefault(); schritt(-1); }
+        if (ev.key === 'ArrowRight' || ev.key === 'ArrowUp') { ev.preventDefault(); schritt(1); }
+      });
+      var zieh = null;
+      function radPunkt(ev){ var bb = rad.getBoundingClientRect(); return Math.atan2(ev.clientX - (bb.left + bb.width / 2), -(ev.clientY - (bb.top + bb.height / 2))) * 180 / Math.PI; }
+      rad.addEventListener('pointerdown', function(ev){
+        zieh = { a0: radPunkt(ev), w0: radWinkel() }; try { rad.setPointerCapture(ev.pointerId); } catch (e) {}
+        ev.preventDefault();
+      });
+      rad.addEventListener('pointermove', function(ev){
+        if (!zieh) return;
+        var dw = radPunkt(ev) - zieh.a0; if (dw > 180) dw -= 360; if (dw < -180) dw += 360;
+        vorschauW = Math.max(-spanne / 2 - 8, Math.min(spanne / 2 + 8, (zieh.w0 + dw) / 2.6));
+        zeichne();
+      });
+      function los(){
+        if (!zieh) return; zieh = null;
+        if (vorschauW == null) return;
+        var best = 0; for (var p = 1; p < n; p++) if (Math.abs(winkel(p) - vorschauW) < Math.abs(winkel(best) - vorschauW)) best = p;
+        waehle(best, true);
+      }
+      rad.addEventListener('pointerup', los); rad.addEventListener('pointercancel', los);
+    }
+    zeichne();
+
+    /* ---- Einsteigen (einmal) und Fahrt nach dem Lösen (einmal) ---- */
+    if (figuren.length && !z.anim['ein' + s] && !ruhig) {
+      z.anim['ein' + s] = 1; sichern();
+      setTimeout(function(){ figuren.forEach(function(fg, k){ fg.style.transitionDelay = (k * 0.18) + 's'; fg.style.transform = fg.ziel; }); }, 120);
+    } else if (figuren.length && !z.anim['ein' + s]) { z.anim['ein' + s] = 1; sichern(); }
+    if (fz && geloest) {
+      var bahn = linien[gewP];
+      var amZiel = function(t){
+        if (!bahn.isConnected || !bahn.getTotalLength) return;
+        var L = bahn.getTotalLength(), pt = bahn.getPointAtLength(L * t), pt2 = bahn.getPointAtLength(Math.min(L, L * t + 1));
+        var w = Math.atan2(pt2.x - pt.x, -(pt2.y - pt.y)) * 180 / Math.PI;
+        fz.setAttribute('transform', 'translate(' + pt.x.toFixed(1) + ',' + pt.y.toFixed(1) + ') rotate(' + w.toFixed(1) + ')');
+      };
+      fz.faehrt = true;
+      var t0 = null, schon = z.anim['fahrt' + s] || ruhig;
+      if (!z.anim['fahrt' + s]) { z.anim['fahrt' + s] = 1; sichern(); }
+      var takt = function(ts){
+        if (!bahn.isConnected) { requestAnimationFrame(takt); return; }
+        if (schon) { amZiel(0.74); return; }
+        if (t0 == null) t0 = ts;
+        var t = Math.min(1, (ts - t0) / 1800); amZiel(0.74 * (1 - Math.pow(1 - t, 2)));
+        if (t < 1) requestAnimationFrame(takt);
+      };
+      requestAnimationFrame(takt);
+    }
+    return { el:el,
+      hol: function(){ return gewP != null ? { kurs: mix[gewP] } : null; },
+      leere: function(){ gewP = null; vorschauW = null; zeichne(); } };
   },
 
   /* Sternbild-Regler (v5): typ 'gerade' (Regler m, b) | 'parabel' (Regler a, d, e: y = a(x − d)² + e).
