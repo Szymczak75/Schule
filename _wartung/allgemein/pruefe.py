@@ -88,7 +88,7 @@ RBKA_MARKE = 'BAUSTEIN: Rückblick-KA-Engine'
 
 # Story-Engine (baustein_story.html, TEIL 2.11)
 STORY_TYP = 'Story'
-STORY_VERSION = 'v5'
+STORY_VERSION = 'v6'
 STORY_MARKE = 'BAUSTEIN: Story-Engine'
 STORY_ARTEN = ('zahl', 'bruch', 'term', 'text', 'wahl',                 # v1/v2
                'uhr', 'schloss', 'steck', 'felder', 'schalter',      # v3: Rätselgeräte
@@ -262,7 +262,9 @@ def pruefe(pfad):
             fehler('DATEI', 'verweist auf nicht vorhandene Datei: %s' % ziel)
 
     # ---------------------------------------------------- 2 Farben & Typografie
-    for hexw in set(re.findall(r'#[0-9a-fA-F]{6}\b|#[0-9a-fA-F]{3}\b', css)):
+    # Story-Engine v6: der Fantasy-Stil der Rätselgeräte (Messing, Holz, Pergament …) hat eigene Töne
+    css_farben = re.sub(r'/\* v6: Fantasy-Stil der Rätselgeräte \*/.*?(?=@media \(prefers-reduced-motion)', '', css, flags=re.S)
+    for hexw in set(re.findall(r'#[0-9a-fA-F]{6}\b|#[0-9a-fA-F]{3}\b', css_farben)):
         nh = _hex_norm(hexw)
         if nh in BEKANNT_FALSCH:
             fehler('FARBE', 'bekannt falscher Ton: %s' % hexw)
