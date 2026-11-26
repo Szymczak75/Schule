@@ -23,7 +23,10 @@ Was dieser Linter NICHT kann (bleibt Handarbeit bzw. Browsertest):
   - ob der Stand ein Neuladen wirklich vollständig übersteht (Browsertest: Seite
     bearbeiten, neu laden, vergleichen)
 
-Stand: 25.11.2026 (Story-Engine v5: Spielzeug-Paket – 8 neue Rätselgeräte;
+Stand: 26.11.2026 (Story-Engine v7: Wegwahl 'kurs' – Steuerrad, Personen, Wesen; Prüfung STORY:
+       genau eine richtige Option, 2–5 Optionen, bekannte modus/fahrzeug/wesen;
+       Story-Engine v6: Fantasy-Stil;
+       25.11.2026: Story-Engine v5: Spielzeug-Paket – 8 neue Rätselgeräte;
        Story-Engine v4: Fantasie-Paket – Edelsteine, Uhr mit Minutenring, Hebel,
        Korrekturrunde; Prüfung STORY: Uhr-Bruch muss auf Stunden (≤ 12) und Minuten (≤ 60) passen;
        Story-Engine v3: Rätselgeräte uhr/schloss/steck/felder/schalter,
@@ -88,12 +91,17 @@ RBKA_MARKE = 'BAUSTEIN: Rückblick-KA-Engine'
 
 # Story-Engine (baustein_story.html, TEIL 2.11)
 STORY_TYP = 'Story'
-STORY_VERSION = 'v6'
+STORY_VERSION = 'v7'
 STORY_MARKE = 'BAUSTEIN: Story-Engine'
 STORY_ARTEN = ('zahl', 'bruch', 'term', 'text', 'wahl',                 # v1/v2
                'uhr', 'schloss', 'steck', 'felder', 'schalter',      # v3: Rätselgeräte
                'wuerfel', 'karten', 'abakus', 'thermo', 'zeit',      # v5: Spielzeug-Paket
-               'gitter', 'kompass', 'regler')
+               'gitter', 'kompass', 'regler',
+               'kurs')                                                # v7: Wegwahl
+STORY_KURS_MODUS = ('fahrzeug', 'gruppe', 'wesen')
+STORY_FAHRZEUGE = ('boot', 'uboot', 'floss', 'schlitten', 'kutsche', 'lore', 'ballon', 'rakete')
+STORY_GELAENDE = ('wasser', 'tiefsee', 'zelle', 'schnee', 'land', 'himmel', 'weltall')
+STORY_WESEN = ('eule', 'fuchs', 'drache', 'roboter', 'geist', 'zwerg', 'golem', 'fee', 'troll', 'organell')
 
 # Formeltool (baustein_formeltool.html, TEIL 4.7)
 FT_VERSION = 'v2'
@@ -540,6 +548,32 @@ def pruefe(pfad):
                         if (int(wz) * teile) % (int(wn) * bis) or int(wz) > int(wn) * bis:
                             fehler('STORY', 'Karte %s: Diamant %s/%s liegt auf keinem Steckplatz des Zahlenstrahls '
                                             '(0 bis %d, %d Teile)' % (kid, wz, wn, bis, teile))
+                # v7: Wegwahl – genau eine richtige Option, 2 bis 5 Optionen, bekannte Kennwörter
+                for km in re.finditer(r"\bart:\s*'kurs'", t):
+                    anf = t.rfind('raetsel:', 0, km.start())
+                    end = t.find('tipps:', km.end())
+                    seg = t[anf if anf >= 0 else km.start():end if end >= 0 else len(t)]
+                    opt = re.search(r'\boptionen:\s*\[(.*?)\]\s*,', seg, re.S)
+                    if not opt:
+                        fehler('STORY', "Karte %s: 'kurs' ohne optionen" % kid)
+                    else:
+                        n_opt = len(re.findall(r'\{\s*t:', opt.group(1)))
+                        n_ok = len(re.findall(r'\bok:\s*true', opt.group(1)))
+                        if n_ok != 1:
+                            fehler('STORY', "Karte %s: 'kurs' braucht genau eine richtige Option (ok: true), "
+                                            "gefunden %d – mehrere richtige: 'schalter' oder 'karten' mit mehr" % (kid, n_ok))
+                        if not 2 <= n_opt <= 5:
+                            fehler('STORY', "Karte %s: 'kurs' mit %d Optionen – vorgesehen sind 2 bis 5" % (kid, n_opt))
+                    for feld, erlaubt in (('modus', STORY_KURS_MODUS), ('fahrzeug', STORY_FAHRZEUGE),
+                                          ('gelaende', STORY_GELAENDE)):
+                        fm = re.search(r"\b%s:\s*'([^']*)'" % feld, seg)
+                        if fm and fm.group(1) not in erlaubt:
+                            fehler('STORY', "Karte %s: unbekannter Wert %s '%s' bei 'kurs'" % (kid, feld, fm.group(1)))
+                    wm = re.search(r'\bwesen:\s*\[([^\]]*)\]', seg)
+                    if wm:
+                        for w in re.findall(r"'([^']*)'", wm.group(1)):
+                            if w not in STORY_WESEN:
+                                fehler('STORY', "Karte %s: unbekanntes Wesen '%s' bei 'kurs'" % (kid, w))
                 if n_soll < n_r:
                     fehler('STORY', 'Karte %s: nicht jedes Rätsel hat soll (bzw. eine Option mit ok: true)' % kid)
                 if len(re.findall(r'\btipps:\s*\[', t)) < n_r:

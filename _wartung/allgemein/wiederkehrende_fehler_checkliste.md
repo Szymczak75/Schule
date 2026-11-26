@@ -362,6 +362,11 @@ Diese Punkte standen offen und sind inzwischen als Regel in
   durchspielen. Seitdem regelt TEIL 0 Nr. 26 zwei Stufen: **erst die Dateien im Chat zeigen
   und auf das OK warten, dann** Branch und Pull Request. Kein Push vor dem OK.
 
+- **Story-Engine v7 – Wegwahl** (26.11.2026, Escape Rooms Steckbrief Q1 und Zellreise EF): Antippen einer
+  Liste wirkte wie ein Test, nicht wie eine Entscheidung in der Geschichte. Neue Antwortart `kurs`: Fahrzeug
+  mit Kurslinien und Steuerrad, Personen der Gruppe oder Wesen schlagen Wege vor – nur bei genau einer
+  richtigen Antwort. `pruefe.py` meldet als `STORY`: nicht genau eine richtige Option, weniger als 2 oder
+  mehr als 5 Optionen, unbekannte `modus`/`fahrzeug`/`gelaende`/`wesen`.
 - **Story-Engine v6 – Fantasy-Stil** (26.11.2026): alle Rätselgeräte im Stil der Geschichten
   (Messing, Holz, Pergament, geschliffene Edelsteine). Gemeinsame Verläufe heißen `fx-…` und werden
   einmal pro Seite angelegt; Steinfarben nur über `steinZustand()` ändern, nie die erste Fläche
