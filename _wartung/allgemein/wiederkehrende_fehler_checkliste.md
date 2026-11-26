@@ -367,6 +367,9 @@ Diese Punkte standen offen und sind inzwischen als Regel in
   mit Kurslinien und Steuerrad, Personen der Gruppe oder Wesen schlagen Wege vor – nur bei genau einer
   richtigen Antwort. `pruefe.py` meldet als `STORY`: nicht genau eine richtige Option, weniger als 2 oder
   mehr als 5 Optionen, unbekannte `modus`/`fahrzeug`/`gelaende`/`wesen`.
+- **Szenenbilder nie verzerren** (26.11.2026): Bilder beim Verkleinern immer im Seitenverhältnis
+  des Originals lassen (nur die Breite festlegen, z. B. quadratisch 500 px, Querformat 600 px).
+  Nie auf eine feste Breite *und* Höhe zwingen; im `<img>` immer `height:auto`.
 - **Story-Engine v6 – Fantasy-Stil** (26.11.2026): alle Rätselgeräte im Stil der Geschichten
   (Messing, Holz, Pergament, geschliffene Edelsteine). Gemeinsame Verläufe heißen `fx-…` und werden
   einmal pro Seite angelegt; Steinfarben nur über `steinZustand()` ändern, nie die erste Fläche
