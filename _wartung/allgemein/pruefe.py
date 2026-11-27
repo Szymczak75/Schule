@@ -23,7 +23,8 @@ Was dieser Linter NICHT kann (bleibt Handarbeit bzw. Browsertest):
   - ob der Stand ein Neuladen wirklich vollständig übersteht (Browsertest: Seite
     bearbeiten, neu laden, vergleichen)
 
-Stand: 27.11.2026 (Story-Engine v9: falsch gelöstes Rätsel bleibt sichtbar, Umweg mit Banner;
+Stand: 27.11.2026 (Story-Engine v12: Steinweg 'reihe' und Lückenfelder 'luecken'; Prüfung STORY: Teile/Lösungen, Zeilen;
+       Story-Engine v9: falsch gelöstes Rätsel bleibt sichtbar, Umweg mit Banner;
        Story-Engine v8: Symbolwand 'wand' – Runen in Nischen sortieren; Prüfung STORY:
        2–4 Nischen, 3–12 Zeichen, jede Nische gültig, bekannte und verschiedene Runen;
        26.11.2026: Story-Engine v7: Wegwahl 'kurs' – Steuerrad, Personen, Wesen; Prüfung STORY:
@@ -94,14 +95,15 @@ RBKA_MARKE = 'BAUSTEIN: Rückblick-KA-Engine'
 
 # Story-Engine (baustein_story.html, TEIL 2.11)
 STORY_TYP = 'Story'
-STORY_VERSION = 'v11'
+STORY_VERSION = 'v12'
 STORY_MARKE = 'BAUSTEIN: Story-Engine'
 STORY_ARTEN = ('zahl', 'bruch', 'term', 'text', 'wahl',                 # v1/v2
                'uhr', 'schloss', 'steck', 'felder', 'schalter',      # v3: Rätselgeräte
                'wuerfel', 'karten', 'abakus', 'thermo', 'zeit',      # v5: Spielzeug-Paket
                'gitter', 'kompass', 'regler',
                'kurs',                                                # v7: Wegwahl
-               'wand')                                                # v8: Symbolwand
+               'wand',                                                # v8: Symbolwand
+               'reihe', 'luecken')                                    # v12: Steinweg, Lückenfelder
 STORY_KURS_MODUS = ('fahrzeug', 'gruppe', 'wesen')
 STORY_FAHRZEUGE = ('boot', 'uboot', 'floss', 'schlitten', 'kutsche', 'lore', 'ballon', 'rakete')
 STORY_GELAENDE = ('wasser', 'tiefsee', 'zelle', 'schnee', 'land', 'himmel', 'weltall')
@@ -601,6 +603,33 @@ def pruefe(pfad):
                             fehler('STORY', "Karte %s: unbekannte Rune '%s' bei 'wand'" % (kid, x))
                     if len(set(ru)) < len(ru):
                         fehler('STORY', "Karte %s: 'wand' – eine Rune ist mehrfach vergeben" % kid)
+                # v12: Steinweg – 2 bis 14 Teile, jede Lösung besteht genau aus allen Teilen
+                for rm in re.finditer(r"\bart:\s*'reihe'", t):
+                    anf = t.rfind('raetsel:', 0, rm.start())
+                    end = t.find('tipps:', rm.end())
+                    seg = t[anf if anf >= 0 else rm.start():end if end >= 0 else len(t)]
+                    te = re.search(r'\bteile:\s*\[(.*?)\]', seg, re.S)
+                    teile = re.findall(r"'((?:[^'\\]|\\.)*)'", te.group(1)) if te else []
+                    if not 2 <= len(teile) <= 14:
+                        fehler('STORY', "Karte %s: 'reihe' mit %d Teilen – vorgesehen sind 2 bis 14" % (kid, len(teile)))
+                    so = re.search(r'\bsoll:\s*\[(.*?)\]', seg, re.S)
+                    loes = re.findall(r"'((?:[^'\\]|\\.)*)'", so.group(1)) if so else []
+                    if not loes:
+                        fehler('STORY', "Karte %s: 'reihe' ohne soll (alle richtigen Reihenfolgen als Text)" % kid)
+                    def _buchst(x):
+                        x = x.upper().replace('Ä', 'AE').replace('Ö', 'OE').replace('Ü', 'UE').replace('ß', 'SS')
+                        return sorted(re.sub(r'[^A-Z0-9]', '', x))
+                    alle = _buchst(''.join(teile))
+                    for x in loes:
+                        if _buchst(x) != alle:
+                            fehler('STORY', "Karte %s: 'reihe' – die Lösung „%s“ besteht nicht genau aus den Teilen" % (kid, x))
+                # v12: Lückenfelder – 2 bis 6 Zeilen, jede mit soll
+                for lm in re.finditer(r"\bart:\s*'luecken'", t):
+                    end = t.find('tipps:', lm.end())
+                    seg = t[lm.start():end if end >= 0 else len(t)]
+                    n_z = len(re.findall(r'\{\s*(?:vor:[^{}]*?)?soll:\s*\[', seg))
+                    if not 2 <= n_z <= 6:
+                        fehler('STORY', "Karte %s: 'luecken' mit %d Zeilen (je mit soll) – vorgesehen sind 2 bis 6" % (kid, n_z))
                 if n_soll < n_r:
                     fehler('STORY', 'Karte %s: nicht jedes Rätsel hat soll (bzw. eine Option mit ok: true)' % kid)
                 if len(re.findall(r'\btipps:\s*\[', t)) < n_r:
