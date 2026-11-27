@@ -850,8 +850,9 @@ def pruefe(pfad):
 
     # Navigationsleiste (TEIL 3.6) – nicht auf Ordner-Übersichten/Weiterleitungen (hubignore)
     if meta.get('rahmen') == 'ohne':
-        if NAV_BLOCK.search(h) or 'id="trex"' in h:
-            fehler('NAV', 'rahmen="ohne", aber Navigationsleiste oder Dino stehen noch in der Seite')
+        if 'class="dino-home"' in h or '<nav class="dino-nav"' in h or 'id="dino-fb"' in h or 'id="trex"' in h:
+            fehler('NAV', 'rahmen="ohne", aber 🏠-Knopf, Leiste, Feedback oder Dino stehen noch in der Seite '
+                          '(nur der QR-Knopf darf bleiben, TEIL 3.6)')
     elif 'name="hubignore"' not in h and not exam:
         nav = NAV_BLOCK.search(h)
         if not nav:

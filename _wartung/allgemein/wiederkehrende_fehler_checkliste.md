@@ -372,7 +372,8 @@ Diese Punkte standen offen und sind inzwischen als Regel in
   Elementen setzen (`el.isConnected`), sonst setzt der Aufruf für die ganze Karte sie danach.
 - **Werbeseite mit Hub-Navigation** (27.11.2026, Escape Room MCG-Funken): Die Seite kommt auf die Schulhomepage;
   Dino, 🏠- und QR-Knopf und die Leiste führten auf den Lernseiten-Hub. Seitdem `<meta name="rahmen" content="ohne">`
-  (TEIL 3.6): ohne Navigation und Dino, `pruefe.py` überspringt NAV/TREX.
+  (TEIL 3.6): ohne Navigation und Dino, `pruefe.py` überspringt NAV/TREX. Der **QR-Knopf bleibt** aber drauf
+  (Seite wird am Tag der offenen Tür per QR weitergegeben).
 - **Story-Engine v11 – Party-Ende** (27.11.2026, Escape Room MCG-Funken): Am Ende fehlte ein Jubel, und die
   Auswertung (direkt / Umweg / Hinweise) passte nicht zu einer Werbeseite für Viertklässler. Seitdem
   `STORY.party` (Banner + Konfetti) und `STORY.auswertung: false`.
