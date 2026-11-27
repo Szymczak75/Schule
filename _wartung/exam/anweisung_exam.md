@@ -278,12 +278,14 @@ ich eine gute Note?" –, dann gilt:
      („hilfsmittelfrei"), darüber im zweiten. Notengrenzen stellt die Lehrkraft in
      „Einstellungen" ein.
    - **`Gesamt_EXAM_<thema>.pdf`** – Deckblatt mit allen Codes und Auffälligkeiten, dann je
-     Code **ein Korrekturblatt**, kompakt, meist **2 Seiten** (Warnkasten, Sperrprotokoll;
+     Code **ein Korrekturblatt**, kompakt, meist **2 Seiten**. Es enthält **alle
+     Aufgabenstellungen**: Überschrift, Einleitungstext (z. B. die Ausgangslage) und Auftrag –
+     die Antworten hängen nie in der Luft (Warnkasten, Sperrprotokoll;
      Auswahl mit ✔/✘/○; Sortieren: falsch gelegte Karten mit „→ gehört auf Platz n“;
      Beschriftungen mit der **Abbildung der Testseite** – Nummern grün = richtig, rot = falsch –
      und den Antworten darunter; Fehler überall mit **rotem Textmarker hinterlegt** (bleiben
-     lesbar), Korrektur grün dahinter). Die Abbildung braucht `--seite`; ohne bleibt es bei der
-     Tabelle. Bei **jeder Aufgabe** steht „____ von X Punkten" – die Punkte
+     lesbar), Korrektur grün dahinter). Einleitungen und Abbildungen kommen aus der Testseite –
+     deshalb `--seite` **immer** angeben. Bei **jeder Aufgabe** steht „____ von X Punkten" – die Punkte
      überträgt die Lehrkraft mit dem Stift aus Excel; gedruckte Punkte gibt es im PDF nicht.
      Die Original-Abgabe wird **nicht** angehängt (der Schüler hat sie selbst). Lesezeichen je
      Code.

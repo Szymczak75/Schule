@@ -17,12 +17,14 @@ Ablauf im Test-Chat (anweisung_exam.md, Abschnitt 7):
        python3 exam_auswerten.py ausgeben PDF_ORDNER schluessel_<thema>.json bewertung_<thema>.json \\
                Punkteerfassung_Vorlage.xlsx AUSGABE_ORDNER [--kurs "7b"] [--seite TESTSEITE.html] \\
                [--codes "ABCD-E FGHJ-K …"]
-     --seite: Abbildungen der Testseite erscheinen auf den Korrekturblättern (Nummern grün =
-              richtig, rot = falsch); ohne --seite nur die Tabelle.
+     --seite: Einleitungstexte und Abbildungen der Testseite erscheinen auf den
+              Korrekturblättern (Nummern grün = richtig, rot = falsch). Ohne --seite fehlen die
+              Einleitungen – deshalb immer angeben.
      --codes: alle ausgegebenen Codes; wer fehlt, steht als leere Zeile „nicht mitgeschrieben"
               in der Excel-Tabelle (alphabetisch, passend zur Klassenliste).
-     Korrekturblätter (v1.2): kompakt (meist 2 Seiten je Code), Fehler mit rotem Textmarker
-     hinterlegt statt durchgestrichen, Korrektur grün dahinter.
+     Korrekturblätter (v1.2): kompakt, Fehler mit rotem Textmarker hinterlegt statt
+     durchgestrichen, Korrektur grün dahinter. Mit --seite stehen auch die Einleitungstexte
+     jeder Aufgabe (z. B. die Ausgangslage) auf dem Blatt – die Antworten hängen nie in der Luft.
 
 Benötigt: pypdf, reportlab (beide in der Claude-Umgebung vorhanden).
 """
@@ -382,12 +384,35 @@ def _korrigierter_text(text, korrekturen, rot, gruen):
     return t.replace('\n', '<br/>')
 
 
-def _figuren_aus_seite(seite):
-    """{teil_id: (svg, nummern)} aller beschriften-Teile aus der Testseite (EXAM-Block)."""
+def _seite_lesen(seite):
+    """EXAM-Block der Testseite → (figuren, einleitungen).
+    figuren: {teil_id: (svg, nummern)} der beschriften-Teile; einleitungen: {aufgaben_titel: html}."""
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
     from exam_vorschau import js_literal
     ex = js_literal(open(seite, encoding='utf-8').read())
-    return {t['id']: (t['svg'], t['nummern']) for a in ex['aufgaben'] for t in a['teile'] if t['typ'] == 'beschriften'}
+    fig = {t['id']: (t['svg'], t['nummern']) for a in ex['aufgaben'] for t in a['teile'] if t['typ'] == 'beschriften'}
+    ein = {a.get('titel', ''): a.get('einleitung', '') for a in ex['aufgaben']}
+    return fig, ein
+
+
+def _einleitung_flowables(einl_html, st, png_basis, mm):
+    """Einleitung einer Aufgabe für das Korrekturblatt: Text als Absatz, enthaltene SVGs als Bild."""
+    from reportlab.platypus import Image as RLImage, Paragraph
+    out, n = [], 0
+    for stueck in re.split(r'(<svg\b.*?</svg>)', einl_html or '', flags=re.S):
+        if stueck.startswith('<svg'):
+            n += 1
+            png = '%s_e%d.png' % (png_basis, n)
+            vh = _figur_png(stueck, [], {}, png)
+            bw = 150 * mm if vh > 2 else 105 * mm
+            out.append(RLImage(png, width=bw, height=bw / vh))
+            continue
+        txt = re.sub(r'</p>\s*<p[^>]*>', '<br/>', stueck)
+        txt = re.sub(r'<(?!/?(b|i|br)\b)[^>]+>', '', txt).strip()
+        txt = txt.replace('<br>', '<br/>')
+        if txt:
+            out.append(Paragraph('<font color="#6b7686">%s</font>' % txt, st['p']))
+    return out
 
 
 def _figur_png(svg, nummern, bewertung, ziel_png):
@@ -407,7 +432,8 @@ def _figur_png(svg, nummern, bewertung, ziel_png):
                     p['x'], p['y'] + 7, p['nr']))
     k = svg.rindex('</svg>')
     neu = svg[:k] + ''.join(z) + '</svg>'
-    neu = neu.replace('<svg ', '<svg xmlns="http://www.w3.org/2000/svg" width="%d" ' % int(vb[2] * 2), 1)
+    kopf = '<svg ' if 'xmlns=' in neu[:300] else '<svg xmlns="http://www.w3.org/2000/svg" '
+    neu = neu.replace('<svg ', kopf + 'width="%d" ' % int(vb[2] * 2), 1)
     svg_pfad = ziel_png[:-4] + '.svg'
     open(svg_pfad, 'w', encoding='utf-8').write(neu)
     try:
@@ -474,7 +500,7 @@ def gesamt_pdf(ziel, k, b, abgaben, seite=None):
                     texte[o['option']] = o['text']
 
     tmp = tempfile.mkdtemp()
-    figuren = _figuren_aus_seite(seite) if seite else {}
+    figuren, einleitungen = _seite_lesen(seite) if seite else ({}, {})
     from reportlab.platypus import Image as RLImage
     korr_pdfs = {}
     for code, e in b['abgaben'].items():
@@ -507,7 +533,9 @@ def gesamt_pdf(ziel, k, b, abgaben, seite=None):
             kopf.setStyle(TableStyle([('VALIGN', (0, 0), (-1, -1), 'BOTTOM'), ('LEFTPADDING', (0, 0), (-1, -1), 0),
                                       ('RIGHTPADDING', (0, 0), (-1, -1), 0), ('TOPPADDING', (0, 0), (-1, -1), 0),
                                       ('BOTTOMPADDING', (0, 0), (-1, -1), 0)]))
-            offen_kopf = kopf                       # Aufgabenkopf bleibt beim Anfang des ersten Teils
+            offen_kopf = [kopf] + _einleitung_flowables(einleitungen.get(aufg.get('titel', ''), ''), st,
+                                                        os.path.join(tmp, '%s_a%s' % (code, aufg['nr'])), mm)
+            # Aufgabenkopf + Einleitung bleiben beim Anfang des ersten Teils
             for t in aufg['teile']:
                 x = e['teile'][t['id']]
                 ant = teil_antwort(d, t['id'])
@@ -594,7 +622,7 @@ def gesamt_pdf(ziel, k, b, abgaben, seite=None):
                                                                     ROT, GRUEN), st['box']), '#e2e6ec', '#ffffff', 1))
                 if x.get('kommentar'):
                     block.append(Paragraph('<i>Anmerkung:</i> ' + html.escape(x['kommentar']), st['p']))
-                s.append(KeepTogether(([offen_kopf] if offen_kopf is not None else []) + block[:2]))
+                s.append(KeepTogether((offen_kopf or []) + block[:2]))
                 offen_kopf = None
                 s.extend(block[2:])                     # der Rest darf auf die nächste Seite umbrechen
                 s.append(Spacer(1, 2))
