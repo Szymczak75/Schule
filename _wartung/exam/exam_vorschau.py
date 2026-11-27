@@ -9,6 +9,13 @@ veröffentlicht sie als privates Artefakt im Test-Chat.
 Aufruf:
   python3 exam_vorschau.py inhalt.js schluessel_<thema>.json erwartungshorizont_<thema>.md vorschau.html
 
+Musterlösung zum Austeilen (wenn der Test fertig bewertet ist):
+  python3 exam_vorschau.py --musterloesung inhalt.js schluessel_<thema>.json \\
+          erwartungshorizont_<thema>.md musterloesung_<thema>.html musterloesung_<thema>.pdf
+  Aufgabenstellungen mit Lösungen, ohne Punkte und Bewertungsregeln. Geschlossene Teile kommen
+  aus dem Schlüssel, Freitexte aus der Zeile „Musterlösung: …" je Teil im Erwartungshorizont
+  (für eine Karte „❓ Fehlender Schritt" die Zeile „Musterlösung: …" im Abschnitt „### Teil <id>-fehlt").
+
 - inhalt.js: genau der Block  var EXAM = { … };  (wie für exam_bauen.py)
 - Schlüssel: geschlossene Teile (beschriften, sortieren, auswahl) werden daraus gelöst.
 - Erwartungshorizont: der Abschnitt „### Teil <id> …" erscheint als Musterlösung unter dem Teil.
@@ -214,7 +221,103 @@ def vorschau(exam, schluessel, ewh_md):
         ''.join(secs)), warn
 
 
+# ------------------------------------------------------------ Musterlösung für die Klasse
+def ewh_musterloesungen(md):
+    """{teil_id: text} aus den Zeilen „Musterlösung: …" im Erwartungshorizont (bis Leerzeile)."""
+    out = {}
+    for tid, block in ewh_teile(md).items():
+        m = re.search(r'^\**Musterlösung\**:\s*(.+?)(?:\n\s*\n|\Z)', block, flags=re.S | re.M)
+        if m:
+            out[tid] = ' '.join(z.strip() for z in m.group(1).splitlines())
+    return out
+
+
+CSS_ML = """@page{size:A4;margin:14mm 16mm}*{box-sizing:border-box}
+body{margin:0;color:#22303f;font:10.5pt/1.45 'DejaVu Sans',Helvetica,Arial,sans-serif}
+h1{font-size:16pt;margin:0 0 2mm;color:#1f4680}.unter{color:#6b7686;margin:0 0 5mm}
+section{break-inside:avoid;margin:0 0 5mm}h2{font-size:12.5pt;color:#1f4680;margin:0 0 1.5mm;break-after:avoid}
+.ein{color:#6b7686;margin:0 0 2mm}.auf{font-weight:700;margin:2mm 0 1mm;break-after:avoid}
+.loes{border-left:4px solid #1e7d32;background:#f3f8f3;padding:2mm 3mm;margin:0 0 2mm;break-inside:avoid}
+.fig{max-width:150mm;margin:1mm 0}.fig svg{width:100%;height:auto;display:block}
+.spalten{columns:2;column-gap:8mm}.spalten div{break-inside:avoid}ol{margin:0;padding-left:6mm}
+.ok{color:#1e7d32;font-weight:700}"""
+
+
+def musterloesung(exam, schluessel, ewh_md):
+    """Musterlösung zum Austeilen: Aufgabenstellungen + Lösungen, ohne Bewertungsregeln."""
+    kteile = {t['id']: t for a in schluessel.get('aufgaben', []) for t in a['teile']}
+    texte = ewh_musterloesungen(ewh_md)
+    fehlt, secs = [], []
+    e = lambda x: html.escape(str(x), quote=False)
+    for a in exam['aufgaben']:
+        h = '<section><h2>%s</h2>' % e(a['titel'])
+        ein = re.sub(r'<p>', '<p class="ein">', a.get('einleitung', ''))
+        h += ein
+        for t in a['teile']:
+            kt = kteile.get(t['id'], {})
+            h += '<p class="auf">%s</p>' % e(t.get('auftrag', ''))
+            if t['typ'] == 'beschriften':
+                vb = [float(v) for v in re.search(r'viewBox="([^"]+)"', t['svg']).group(1).split()]
+                h += '<div class="fig" style="max-width:%dmm">%s</div>' % (150 if vb[2] / vb[3] > 2 else 105, figur(t))
+                h += '<div class="loes spalten">' + ''.join('<div><b>%s</b> %s</div>' % (nr, e(v[0]))
+                     for nr, v in sorted(kt.get('nummern', {}).items(), key=lambda x: int(x[0]))) + '</div>'
+            elif t['typ'] == 'sortieren':
+                karten = {k['id']: k['t'] for k in t['karten']}
+                reihe = kt.get('reihenfolge', [])
+                zeilen = []
+                for kid in reihe:
+                    if karten.get(kid, '').startswith('❓'):
+                        zeilen.append('<b>%s</b>' % e(texte.get(t['id'] + '-fehlt', texte.get(t['id'], '(fehlender Schritt)'))))
+                    else:
+                        zeilen.append(e(karten.get(kid, kid)))
+                h += '<div class="loes"><ol>' + ''.join('<li>%s</li>' % z for z in zeilen) + '</ol></div>'
+            elif t['typ'] == 'auswahl':
+                richtig = set(kt.get('richtig', []))
+                h += '<div class="loes">' + '<br>'.join(('<span class="ok">✔ %s</span>' if o['id'] in richtig else '○ %s')
+                     % e(o['t']) for o in t['optionen']) + '</div>'
+            else:
+                if t['id'] in texte:
+                    h += '<div class="loes">%s</div>' % e(texte[t['id']])
+                else:
+                    fehlt.append(t['id'])
+                    h += '<div class="loes">(Musterlösung fehlt im Erwartungshorizont)</div>'
+        secs.append(h + '</section>')
+    seite = ('<!DOCTYPE html><html lang="de"><head><meta charset="UTF-8"><title>Musterlösung – %s</title>'
+             '<style>%s</style></head><body><h1>Musterlösung · %s</h1><p class="unter">%s</p>%s</body></html>') % (
+        e(exam.get('thema', '')), CSS_ML, e(re.sub(r'^\W+\s*', '', exam.get('titel', '')).replace('EXAM · ', '')),
+        e(exam.get('untertitel', '')), ''.join(secs))
+    return seite, fehlt
+
+
+def als_pdf(html_pfad, pdf_pfad):
+    """HTML → PDF mit Chromium (Playwright)."""
+    from playwright.sync_api import sync_playwright
+    import os
+    with sync_playwright() as pw:
+        try:
+            br = pw.chromium.launch()
+        except Exception:                                    # noqa: BLE001
+            br = pw.chromium.launch(executable_path=next(p for p in ('/usr/bin/google-chrome', '/usr/bin/chromium')
+                                                         if os.path.exists(p)))
+        pg = br.new_page()
+        pg.goto('file://' + os.path.abspath(html_pfad))
+        pg.pdf(path=pdf_pfad, format='A4', print_background=True, prefer_css_page_size=True)
+        br.close()
+
+
 if __name__ == '__main__':
+    if len(sys.argv) in (6, 7) and sys.argv[1] == '--musterloesung':
+        exam = js_literal(open(sys.argv[2], encoding='utf-8').read())
+        schl = json.load(open(sys.argv[3], encoding='utf-8'))
+        seite, fehlt = musterloesung(exam, schl, open(sys.argv[4], encoding='utf-8').read())
+        open(sys.argv[5], 'w', encoding='utf-8').write(seite)
+        for t in fehlt:
+            print('WARNUNG: keine „Musterlösung:“-Zeile im Erwartungshorizont für Teil', t)
+        if len(sys.argv) == 7:
+            als_pdf(sys.argv[5], sys.argv[6])
+            print('Musterlösung (PDF):', sys.argv[6])
+        print('Musterlösung (HTML):', sys.argv[5])
+        sys.exit(0)
     if len(sys.argv) != 5:
         sys.exit(__doc__)
     exam = js_literal(open(sys.argv[1], encoding='utf-8').read())

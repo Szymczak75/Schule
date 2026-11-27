@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""EXAM-Abgaben auswerten  (v1.1, 20.11.2026) – _wartung/exam/exam_auswerten.py
+"""EXAM-Abgaben auswerten  (v1.2, 27.11.2026) – _wartung/exam/exam_auswerten.py
 
 Ablauf im Test-Chat (anweisung_exam.md, Abschnitt 7):
 
@@ -15,7 +15,16 @@ Ablauf im Test-Chat (anweisung_exam.md, Abschnitt 7):
      Gesamt-PDF (Deckblatt + je Code EIN Korrekturblatt mit „___ von X Punkten" je Aufgabe,
      ohne die Original-Abgabe) und Begründungen (Markdown):
        python3 exam_auswerten.py ausgeben PDF_ORDNER schluessel_<thema>.json bewertung_<thema>.json \\
-               Punkteerfassung_Vorlage.xlsx AUSGABE_ORDNER [--kurs "7b"]
+               Punkteerfassung_Vorlage.xlsx AUSGABE_ORDNER [--kurs "7b"] [--seite TESTSEITE.html] \\
+               [--codes "ABCD-E FGHJ-K …"]
+     --seite: Einleitungstexte und Abbildungen der Testseite erscheinen auf den
+              Korrekturblättern (Nummern grün = richtig, rot = falsch). Ohne --seite fehlen die
+              Einleitungen – deshalb immer angeben.
+     --codes: alle ausgegebenen Codes; wer fehlt, steht als leere Zeile „nicht mitgeschrieben"
+              in der Excel-Tabelle (alphabetisch, passend zur Klassenliste).
+     Korrekturblätter (v1.2): kompakt (Seitenzahl je nach Testlänge), Fehler mit rotem Textmarker hinterlegt statt
+     durchgestrichen, Korrektur grün dahinter. Mit --seite stehen auch die Einleitungstexte
+     jeder Aufgabe (z. B. die Ausgangslage) auf dem Blatt – die Antworten hängen nie in der Luft.
 
 Benötigt: pypdf, reportlab (beide in der Claude-Umgebung vorhanden).
 """
@@ -31,6 +40,7 @@ import sys
 import tempfile
 import zipfile
 
+MARKER = '#f7c6c9'                            # roter Textmarker (Fehler bleiben lesbar)
 CODE_ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ'   # wie baustein_exam.html (v1.1)
 CODE_SALT = 7
 
@@ -216,6 +226,8 @@ def pruefe_bewertung(k, b):
 
 
 def aufgaben_punkte(k, e):
+    if e.get('fehlt'):                                       # nicht mitgeschrieben (--codes)
+        return []
     return [sum(e['teile'][t['id']]['punkte'] for t in a['teile']) for a in k['aufgaben']]
 
 
@@ -365,14 +377,79 @@ def _korrigierter_text(text, korrekturen, rot, gruen):
             muster = re.compile(re.escape(falsch))
         ersatz = '\x00%d\x00' % i
         t = muster.sub(ersatz, t)
-        marken.append((ersatz, '<strike><font color="%s">%s</font></strike> <font color="%s"><b>%s</b></font>'
-                       % (rot, falsch, gruen, html.escape(kor.get('richtig', '')))))
+        marken.append((ersatz, '<font backColor="%s">%s</font> <font color="%s"><b>%s</b></font>'
+                       % (MARKER, falsch, gruen, html.escape(kor.get('richtig', '')))))
     for ersatz, html_ in marken:
         t = t.replace(ersatz, html_)
     return t.replace('\n', '<br/>')
 
 
-def gesamt_pdf(ziel, k, b, abgaben):
+def _seite_lesen(seite):
+    """EXAM-Block der Testseite → (figuren, einleitungen).
+    figuren: {teil_id: (svg, nummern)} der beschriften-Teile; einleitungen: {aufgaben_titel: html}."""
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    from exam_vorschau import js_literal
+    ex = js_literal(open(seite, encoding='utf-8').read())
+    fig = {t['id']: (t['svg'], t['nummern']) for a in ex['aufgaben'] for t in a['teile'] if t['typ'] == 'beschriften'}
+    ein = {a.get('titel', ''): a.get('einleitung', '') for a in ex['aufgaben']}
+    return fig, ein
+
+
+def _einleitung_flowables(einl_html, st, png_basis, mm):
+    """Einleitung einer Aufgabe für das Korrekturblatt: Text als Absatz, enthaltene SVGs als Bild."""
+    from reportlab.platypus import Image as RLImage, Paragraph
+    out, n = [], 0
+    for stueck in re.split(r'(<svg\b.*?</svg>)', einl_html or '', flags=re.S):
+        if stueck.startswith('<svg'):
+            n += 1
+            png = '%s_e%d.png' % (png_basis, n)
+            vh = _figur_png(stueck, [], {}, png)
+            bw = 150 * mm if vh > 2 else 105 * mm
+            out.append(RLImage(png, width=bw, height=bw / vh))
+            continue
+        txt = re.sub(r'</p>\s*<p[^>]*>', '<br/>', stueck)
+        txt = re.sub(r'<(?!/?(b|i|br)\b)[^>]+>', '', txt).strip()
+        txt = txt.replace('<br>', '<br/>')
+        if txt:
+            out.append(Paragraph('<font color="#6b7686">%s</font>' % txt, st['p']))
+    return out
+
+
+def _figur_png(svg, nummern, bewertung, ziel_png):
+    """Abbildung der Testseite als PNG; Nummern grün (richtig), rot (falsch), grau (offen)."""
+    import subprocess
+    vb = [float(v) for v in re.search(r'viewBox="([^"]+)"', svg).group(1).split()]
+    z = []
+    for p in nummern:
+        ok = bewertung.get(str(p['nr']), {}).get('ok')
+        farbe = '#1e7d32' if ok else ('#c1272d' if ok is False else '#6b7686')
+        z.append('<line x1="%s" y1="%s" x2="%s" y2="%s" stroke="#6b7686" stroke-width="2"/>'
+                 '<circle cx="%s" cy="%s" r="7" fill="none" stroke="#6b7686" stroke-width="2"/>'
+                 '<circle cx="%s" cy="%s" r="19" fill="%s"/>'
+                 '<text x="%s" y="%s" text-anchor="middle" font-size="19" font-weight="700" fill="#ffffff" '
+                 'font-family="DejaVu Sans,Helvetica,Arial,sans-serif">%s</text>'
+                 % (p['x'], p['y'], p['zx'], p['zy'], p['zx'], p['zy'], p['x'], p['y'], farbe,
+                    p['x'], p['y'] + 7, p['nr']))
+    k = svg.rindex('</svg>')
+    neu = svg[:k] + ''.join(z) + '</svg>'
+    kopf = '<svg ' if 'xmlns=' in neu[:300] else '<svg xmlns="http://www.w3.org/2000/svg" '
+    neu = neu.replace('<svg ', kopf + 'width="%d" ' % int(vb[2] * 2), 1)
+    svg_pfad = ziel_png[:-4] + '.svg'
+    open(svg_pfad, 'w', encoding='utf-8').write(neu)
+    try:
+        subprocess.run(['rsvg-convert', '-b', 'white', '-o', ziel_png, svg_pfad], check=True)
+    except (OSError, subprocess.CalledProcessError):        # Ersatz: Chromium über Playwright
+        from playwright.sync_api import sync_playwright
+        with sync_playwright() as pw:
+            br = pw.chromium.launch()
+            pg = br.new_page(viewport={'width': int(vb[2] * 2), 'height': int(vb[3] * 2)})
+            pg.set_content('<body style="margin:0">' + neu.replace('<svg ', '<svg style="display:block;width:100%%;height:auto" ', 1) + '</body>')
+            pg.screenshot(path=ziel_png, full_page=True)
+            br.close()
+    return vb[2] / vb[3]
+
+
+def gesamt_pdf(ziel, k, b, abgaben, seite=None):
     from pypdf import PdfReader, PdfWriter
     from reportlab.lib import colors
     from reportlab.lib.pagesizes import A4
@@ -383,14 +460,14 @@ def gesamt_pdf(ziel, k, b, abgaben):
     f, fb = _schriften()
     TINTE, BLAU, GRAU, ROT, GRUEN, AMBER = '#22303f', '#1f4680', '#6b7686', '#c1272d', '#1e7d32', '#96690a'
     st = {
-        'h1': ParagraphStyle('h1', fontName=fb, fontSize=16, leading=20, textColor=TINTE, spaceAfter=4),
-        'h2': ParagraphStyle('h2', fontName=fb, fontSize=12.5, leading=16, textColor=BLAU, spaceBefore=8, spaceAfter=2),
-        'h3': ParagraphStyle('h3', fontName=fb, fontSize=10.5, leading=13.5, textColor=TINTE, spaceBefore=3, spaceAfter=2),
-        'p': ParagraphStyle('p', fontName=f, fontSize=10, leading=13.5, textColor=TINTE),
-        'klein': ParagraphStyle('k', fontName=f, fontSize=8.5, leading=11, textColor=GRAU),
-        'box': ParagraphStyle('b', fontName=f, fontSize=10.5, leading=14.5, textColor=TINTE),
+        'h1': ParagraphStyle('h1', fontName=fb, fontSize=13.5, leading=16, textColor=TINTE, spaceAfter=2),
+        'h2': ParagraphStyle('h2', fontName=fb, fontSize=11, leading=13.5, textColor=BLAU, spaceBefore=5, spaceAfter=1),
+        'h3': ParagraphStyle('h3', fontName=fb, fontSize=9.2, leading=11.5, textColor=TINTE, spaceBefore=2, spaceAfter=1),
+        'p': ParagraphStyle('p', fontName=f, fontSize=9, leading=11.5, textColor=TINTE),
+        'klein': ParagraphStyle('k', fontName=f, fontSize=8, leading=10, textColor=GRAU),
+        'box': ParagraphStyle('b', fontName=f, fontSize=9.2, leading=12, textColor=TINTE),
         'warn': ParagraphStyle('w', fontName=fb, fontSize=12, leading=16, textColor=colors.white),
-        'punkte': ParagraphStyle('pk', fontName=fb, fontSize=11, leading=14, textColor=TINTE, alignment=2),
+        'punkte': ParagraphStyle('pk', fontName=fb, fontSize=10.5, leading=13, textColor=TINTE, alignment=2),
     }
 
     def kasten(inhalt, rand, grund, breite=1.6):
@@ -398,7 +475,7 @@ def gesamt_pdf(ziel, k, b, abgaben):
         t.setStyle(TableStyle([('BOX', (0, 0), (-1, -1), breite, colors.HexColor(rand)),
                                ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor(grund)),
                                ('LEFTPADDING', (0, 0), (-1, -1), 7), ('RIGHTPADDING', (0, 0), (-1, -1), 7),
-                               ('TOPPADDING', (0, 0), (-1, -1), 5), ('BOTTOMPADDING', (0, 0), (-1, -1), 6)]))
+                               ('TOPPADDING', (0, 0), (-1, -1), 3), ('BOTTOMPADDING', (0, 0), (-1, -1), 4)]))
         return t
 
     texte = {}
@@ -423,6 +500,8 @@ def gesamt_pdf(ziel, k, b, abgaben):
                     texte[o['option']] = o['text']
 
     tmp = tempfile.mkdtemp()
+    figuren, einleitungen = _seite_lesen(seite) if seite else ({}, {})
+    from reportlab.platypus import Image as RLImage
     korr_pdfs = {}
     for code, e in b['abgaben'].items():
         d = abgaben[code]['daten']
@@ -454,7 +533,9 @@ def gesamt_pdf(ziel, k, b, abgaben):
             kopf.setStyle(TableStyle([('VALIGN', (0, 0), (-1, -1), 'BOTTOM'), ('LEFTPADDING', (0, 0), (-1, -1), 0),
                                       ('RIGHTPADDING', (0, 0), (-1, -1), 0), ('TOPPADDING', (0, 0), (-1, -1), 0),
                                       ('BOTTOMPADDING', (0, 0), (-1, -1), 0)]))
-            s.append(kopf)
+            offen_kopf = [kopf] + _einleitung_flowables(einleitungen.get(aufg.get('titel', ''), ''), st,
+                                                        os.path.join(tmp, '%s_a%s' % (code, aufg['nr'])), mm)
+            # Aufgabenkopf + Einleitung bleiben beim Anfang des ersten Teils
             for t in aufg['teile']:
                 x = e['teile'][t['id']]
                 ant = teil_antwort(d, t['id'])
@@ -480,25 +561,60 @@ def gesamt_pdf(ziel, k, b, abgaben):
                     for i, kid in enumerate(gelegt):
                         txt = html.escape(karten_text(code, t['id'], kid)) if kid else '(leer)'
                         ok = kid is not None and i < len(soll) and soll[i] == kid
-                        zeilen.append('%d. <font color="%s">%s</font>' % (i + 1, GRUEN if ok else TINTE, txt))
-                    richtig = ' → '.join(html.escape(karten_text(code, t['id'], kid)) for kid in soll)
+                        if ok:
+                            zeilen.append('%d. <font color="%s">%s</font>' % (i + 1, GRUEN, txt))
+                        else:
+                            platz_soll = (soll.index(kid) + 1) if kid in soll else '?'
+                            zeilen.append('%d. <font backColor="%s">%s</font> <font color="%s"><b>→ gehört auf Platz %s</b></font>'
+                                          % (i + 1, MARKER, txt, GRUEN, platz_soll))
                     block.append(Paragraph('<br/>'.join(zeilen), st['p']))
-                    block.append(Paragraph('<font color="%s">Richtig: %s</font>' % (GRUEN, richtig), st['p']))
                     block.append(Paragraph('Längste richtig geordnete Kette: %d Karten' % x['details'].get('kette', 0),
                                            st['klein']))
+                elif t['typ'] == 'beschriften' and t['id'] in figuren:
+                    svg, num = figuren[t['id']]
+                    antw = {str(a_['nr']): a_['text'] for a_ in (ant or {}).get('antwort', [])}
+                    png = os.path.join(tmp, '%s_%s.png' % (code, t['id']))
+                    vh = _figur_png(svg, num, x.get('nummern', {}), png)
+                    bw = 150 * mm if vh > 2 else 105 * mm
+                    block.append(RLImage(png, width=bw, height=bw / vh))
+                    zellen = []
+                    for nr in sorted(antw, key=int):
+                        n = x.get('nummern', {}).get(nr, {})
+                        ok = n.get('ok')
+                        roh = antw[nr] or '(keine Angabe)'
+                        if ok is False:
+                            txt = '<font backColor="%s">%s</font> <font color="%s"><b>→ %s</b></font>' % (
+                                MARKER, html.escape(roh), GRUEN, html.escape(n.get('richtig', '')))
+                        else:
+                            txt = _korrigierter_text(roh, x.get('korrekturen'), ROT, GRUEN)
+                            if ok:
+                                txt += ' <font color="%s">✔</font>' % GRUEN
+                        farbe = GRUEN if ok else (ROT if ok is False else GRAU)
+                        zellen.append([Paragraph('<font color="%s"><b>%s</b></font>' % (farbe, nr), st['p']),
+                                       Paragraph(txt, st['p'])])
+                    halb = (len(zellen) + 1) // 2
+                    reihen = [zellen[i] + (zellen[halb + i] if halb + i < len(zellen) else ['', ''])
+                              for i in range(halb)]
+                    tb = Table(reihen, colWidths=[7 * mm, 78 * mm, 7 * mm, 78 * mm])
+                    tb.setStyle(TableStyle([('VALIGN', (0, 0), (-1, -1), 'TOP'), ('TOPPADDING', (0, 0), (-1, -1), 1),
+                                            ('BOTTOMPADDING', (0, 0), (-1, -1), 1), ('LEFTPADDING', (0, 0), (-1, -1), 2)]))
+                    block.append(tb)
                 elif t['typ'] == 'beschriften':
                     reihen = [['Nr.', 'Antwort', 'Korrektur']]
                     for a_ in (ant or {}).get('antwort', []):
                         n = x.get('nummern', {}).get(str(a_['nr']), {})
                         ok = n.get('ok')
                         korr = ('<font color="%s">✔</font>' % GRUEN) if ok else (
-                            '<font color="%s">✘ richtig: <b>%s</b></font>' % (ROT, html.escape(n.get('richtig', '')))
+                            '<font color="%s">✘ richtig: <b>%s</b></font>' % (GRUEN, html.escape(n.get('richtig', '')))
                             if ok is False else '')
-                        reihen.append([str(a_['nr']), Paragraph(html.escape(a_['text'] or '(keine Angabe)'), st['p']),
+                        roh = html.escape(a_['text'] or '(keine Angabe)')
+                        reihen.append([str(a_['nr']), Paragraph('<font backColor="%s">%s</font>' % (MARKER, roh)
+                                                                if ok is False else roh, st['p']),
                                        Paragraph(korr, st['p'])])
-                    tb = Table(reihen, colWidths=[12 * mm, 75 * mm, 83 * mm])
+                    tb = Table(reihen, colWidths=[10 * mm, 75 * mm, 85 * mm])
                     tb.setStyle(TableStyle([('FONTNAME', (0, 0), (-1, -1), f), ('FONTNAME', (0, 0), (-1, 0), fb),
-                                            ('FONTSIZE', (0, 0), (-1, -1), 9.5), ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+                                            ('FONTSIZE', (0, 0), (-1, -1), 8.5), ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+                                            ('TOPPADDING', (0, 0), (-1, -1), 1), ('BOTTOMPADDING', (0, 0), (-1, -1), 1),
                                             ('LINEBELOW', (0, 0), (-1, -1), 0.4, colors.HexColor('#e2e6ec'))]))
                     block.append(tb)
                 else:
@@ -506,11 +622,13 @@ def gesamt_pdf(ziel, k, b, abgaben):
                                                                     ROT, GRUEN), st['box']), '#e2e6ec', '#ffffff', 1))
                 if x.get('kommentar'):
                     block.append(Paragraph('<i>Anmerkung:</i> ' + html.escape(x['kommentar']), st['p']))
-                s.append(KeepTogether(block))
-                s.append(Spacer(1, 3))
+                s.append(KeepTogether((offen_kopf or []) + block[:2]))
+                offen_kopf = None
+                s.extend(block[2:])                     # der Rest darf auf die nächste Seite umbrechen
+                s.append(Spacer(1, 2))
         pfad = os.path.join(tmp, code + '.pdf')
-        SimpleDocTemplate(pfad, pagesize=A4, leftMargin=20 * mm, rightMargin=20 * mm, topMargin=16 * mm,
-                          bottomMargin=16 * mm, title='Korrektur ' + code).build(s)
+        SimpleDocTemplate(pfad, pagesize=A4, leftMargin=20 * mm, rightMargin=20 * mm, topMargin=11 * mm,
+                          bottomMargin=11 * mm, title='Korrektur ' + code).build(s)
         korr_pdfs[code] = pfad
 
     # Deckblatt
@@ -546,7 +664,7 @@ def gesamt_pdf(ziel, k, b, abgaben):
         for p in PdfReader(korr_pdfs[code]).pages:
             w.add_page(p)
         w.add_outline_item('%s · %s' % (code, b['abgaben'][code]['initialen']), start)
-    w.add_metadata({'/Title': 'Gesamt-PDF ' + k.get('titel', k['thema']), '/Producer': 'EXAM-Auswertung v1.1'})
+    w.add_metadata({'/Title': 'Gesamt-PDF ' + k.get('titel', k['thema']), '/Producer': 'EXAM-Auswertung v1.2'})
     with open(ziel, 'wb') as fh:
         w.write(fh)
     shutil.rmtree(tmp, ignore_errors=True)
@@ -578,7 +696,7 @@ def begruendungen_md(ziel, k, b):
         f.write('\n'.join(z))
 
 
-def ausgeben(pdf_ordner, schluessel_pfad, bewertung_pfad, vorlage, ordner, kurs=''):
+def ausgeben(pdf_ordner, schluessel_pfad, bewertung_pfad, vorlage, ordner, kurs='', seite=None, codes=None):
     k, b = lade_json(schluessel_pfad), lade_json(bewertung_pfad)
     abgaben, fehler, warnungen = abgaben_lesen(pdf_ordner, k['thema'])
     for w in warnungen + punkte_abgleich(k, abgaben):
@@ -593,8 +711,16 @@ def ausgeben(pdf_ordner, schluessel_pfad, bewertung_pfad, vorlage, ordner, kurs=
     b['abgaben'] = dict(sorted(b['abgaben'].items()))
     os.makedirs(ordner, exist_ok=True)
     name = re.sub(r'[^A-Za-z0-9]+', '_', k['thema'])
-    excel_schreiben(vorlage, os.path.join(ordner, 'Punkte_EXAM_%s.xlsx' % name), k, b, kurs)
-    gesamt_pdf(os.path.join(ordner, 'Gesamt_EXAM_%s.pdf' % name), k, b, abgaben)
+    b_excel = b
+    if codes:                                                # Fehlende als leere Zeilen
+        fremd = [c for c in b['abgaben'] if c not in codes]
+        if fremd:
+            print('WARNUNG  Codes mit Abgabe, aber nicht in --codes:', ', '.join(fremd))
+        b_excel = dict(b)
+        b_excel['abgaben'] = {c: b['abgaben'].get(c, {'initialen': 'nicht mitgeschrieben', 'teile': {}, 'fehlt': True})
+                              for c in sorted(set(codes) | set(b['abgaben']))}
+    excel_schreiben(vorlage, os.path.join(ordner, 'Punkte_EXAM_%s.xlsx' % name), k, b_excel, kurs)
+    gesamt_pdf(os.path.join(ordner, 'Gesamt_EXAM_%s.pdf' % name), k, b, abgaben, seite)
     begruendungen_md(os.path.join(ordner, 'Vorbewertung_EXAM_%s.md' % name), k, b)
     print('fertig:', ', '.join(sorted(os.listdir(ordner))))
     return 0
@@ -607,8 +733,17 @@ if __name__ == '__main__':
         i = a.index('--kurs')
         kurs = a[i + 1]
         del a[i:i + 2]
+    seite = codes = None
+    if '--seite' in a:
+        i = a.index('--seite')
+        seite = a[i + 1]
+        del a[i:i + 2]
+    if '--codes' in a:
+        i = a.index('--codes')
+        codes = [c for c in re.split(r'[\s,;]+', a[i + 1].upper()) if c]
+        del a[i:i + 2]
     if len(a) == 4 and a[0] == 'vorbewerten':
         sys.exit(vorbewerten(a[1], a[2], a[3]))
     if len(a) == 6 and a[0] == 'ausgeben':
-        sys.exit(ausgeben(a[1], a[2], a[3], a[4], a[5], kurs))
+        sys.exit(ausgeben(a[1], a[2], a[3], a[4], a[5], kurs, seite, codes))
     sys.exit(__doc__)

@@ -1,6 +1,6 @@
 # Anweisung EXAM – bewertete Tests auf dem iPad
 
-Stand: 24.11.2026 · Engine `baustein_exam.html` v1.4 · Auswertung `exam_auswerten.py` v1.1 · gilt für das Projekt **„WEB EXAM"**
+Stand: 24.11.2026 · Engine `baustein_exam.html` v1.4 · Auswertung `exam_auswerten.py` v1.2 · gilt für das Projekt **„WEB EXAM"**
 (Sync: `_wartung/exam`, `_wartung/allgemein`).
 
 Ein EXAM ist ein **bewerteter Test**, den die Klasse auf dem iPad schreibt. Die Seite gibt
@@ -187,6 +187,7 @@ Höchstpunkte gesamt: 34
 Richtige Reihenfolge (Karten-id): kb, kw, kr, kq, kx, km, kd
 Punkte: Standardregel Sortieren (längste richtige Kette − 1, max. 6 P.)
 ### Teil 3b (freitext) – 4 P.
+Musterlösung: … (ein bis drei Sätze in Schülersprache – erscheint in der Musterlösung zum Austeilen)
 Erwartete Inhalte (je 1 P.): …
 Fachbegriffe, die richtig geschrieben sein müssen: …
 ```
@@ -265,24 +266,39 @@ ich eine gute Note?" –, dann gilt:
    "Zellkörper"}}`). Je Abgabe außerdem `manipulation` (siehe oben) und `hinweise` (z. B.
    auffällige Sperren). Automatische Punkte darf Claude nur mit Begründung ändern.
 4. `python3 exam_auswerten.py ausgeben PDF_ORDNER schluessel_<thema>.json bewertung_<thema>.json
-   Punkteerfassung_Vorlage.xlsx AUSGABE_ORDNER --kurs "7b"` erzeugt:
+   Punkteerfassung_Vorlage.xlsx AUSGABE_ORDNER --kurs "7b" --seite <testseite>.html
+   --codes "<alle ausgegebenen Codes>"` erzeugt (`--seite` und `--codes` sind optional, aber
+   empfohlen):
    - **`Punkte_EXAM_<thema>.xlsx`** aus der Vorlage „Punkteerfassung" – Einstellungen
      (Bezeichnung, Kurs, Aufgaben, Höchstpunkte), Schülerliste = `Code · Initialen`
-     **alphabetisch nach Code**, Punkte je Aufgabe in der Übersicht. Formeln, Datenprüfung und
+     **alphabetisch nach Code**, Punkte je Aufgabe in der Übersicht. Mit `--codes` stehen auch
+     die Codes ohne Abgabe als leere Zeile „Code · nicht mitgeschrieben" in der Liste – dann
+     passt die Reihenfolge genau zur Klassenliste. Formeln, Datenprüfung und
      bedingte Formatierung bleiben erhalten (die Datei wird auf XML-Ebene gefüllt, nicht mit
      openpyxl), Excel rechnet beim Öffnen neu. Bis 10 Aufgaben stehen alle im ersten Teil
      („hilfsmittelfrei"), darüber im zweiten. Notengrenzen stellt die Lehrkraft in
      „Einstellungen" ein.
    - **`Gesamt_EXAM_<thema>.pdf`** – Deckblatt mit allen Codes und Auffälligkeiten, dann je
-     Code **ein Korrekturblatt** (Warnkasten, Sperrprotokoll; Auswahl mit ✔/✘/○, Sortieren mit
-     richtiger Reihenfolge, Beschriftungen mit Korrektur, Freitext mit rot durchgestrichenen
-     Fehlern und grüner Korrektur). Bei **jeder Aufgabe** steht „____ von X Punkten" – die Punkte
+     Code **ein Korrekturblatt**, **kompakt** (die Seitenzahl hängt von der Testlänge ab). Es enthält **alle
+     Aufgabenstellungen**: Überschrift, Einleitungstext (z. B. die Ausgangslage) und Auftrag –
+     die Antworten hängen nie in der Luft (Warnkasten, Sperrprotokoll;
+     Auswahl mit ✔/✘/○; Sortieren: falsch gelegte Karten mit „→ gehört auf Platz n“;
+     Beschriftungen mit der **Abbildung der Testseite** – Nummern grün = richtig, rot = falsch –
+     und den Antworten darunter; Fehler überall mit **rotem Textmarker hinterlegt** (bleiben
+     lesbar), Korrektur grün dahinter). Einleitungen und Abbildungen kommen aus der Testseite –
+     deshalb `--seite` **immer** angeben. Bei **jeder Aufgabe** steht „____ von X Punkten" – die Punkte
      überträgt die Lehrkraft mit dem Stift aus Excel; gedruckte Punkte gibt es im PDF nicht.
      Die Original-Abgabe wird **nicht** angehängt (der Schüler hat sie selbst). Lesezeichen je
      Code.
    - **`Vorbewertung_EXAM_<thema>.md`** – Punktetabelle und alle Begründungen.
 5. Claude nennt in der Antwort: Warnungen (Manipulation, Sperren, ungültige Codes) zuerst, dann
    die Punktetabelle und offene Entscheidungen für die Lehrkraft.
+6. Sind alle Entscheidungen getroffen, erzeugt Claude die **Musterlösung zum Austeilen**:
+   `python3 exam_vorschau.py --musterloesung <testseite>.html schluessel_<thema>.json
+   erwartungshorizont_<thema>.md musterloesung_<thema>.html Musterloesung_<thema>.pdf` –
+   Aufgabenstellungen (Einleitung, Abbildungen, Auftrag) mit Lösungen, ohne Punkte und
+   Bewertungsregeln. Freitexte kommen aus den Zeilen „Musterlösung: …“ im Erwartungshorizont;
+   fehlt eine, warnt das Skript.
 
 ### Danach (Lehrkraft)
 Punkte in Excel prüfen und ändern; in „Schülerliste" die Codes durch die Namen ersetzen
@@ -312,7 +328,7 @@ Punkte in Excel prüfen und ändern; in „Schülerliste" die Codes durch die Na
 |---|---|---|
 | `baustein_exam.html` | `_wartung/exam/` | Engine + Beispiel-Inhalt mit allen Teil-Typen |
 | `exam_bauen.py` | `_wartung/exam/` | setzt EXAM-INHALT und Meta-Angaben in den Baustein |
-| `exam_vorschau.py` | `_wartung/exam/` | Entwickleransicht mit Musterlösungen (Stufe 1, nie ins Repo) |
+| `exam_vorschau.py` | `_wartung/exam/` | Entwickleransicht mit Musterlösungen (Stufe 1, nie ins Repo); mit `--musterloesung` die Musterlösung als PDF zum Austeilen |
 | `exam_auswerten.py` | `_wartung/exam/` | Vorbewertung, Excel, Gesamt-PDF (Abschnitt 7) |
 | `Punkteerfassung_Vorlage.xlsx` | `_wartung/exam/` | leere Excel-Vorlage der Lehrkraft |
 | `anweisung_exam.md` | `_wartung/exam/` | diese Anweisung |
