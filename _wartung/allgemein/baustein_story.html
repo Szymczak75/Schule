@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- =====================================================================
-     BAUSTEIN: Story (_story)  v9, 27.11.2026
+     BAUSTEIN: Story (_story)  v10, 27.11.2026
      Escape Room, Adventskalender, Detektivgeschichte oder freie Story: eine Geschichte
      in mehreren Karten, jede Karte endet mit einem Rätsel.
      Richtig → weiter zur nächsten Karte (mit Codewort zum späteren Wiedereinstieg).
@@ -53,6 +53,8 @@
         nicht verraten. Davor erscheint ein Banner „Neues Rätsel – Umweg 1 von 2“, das Umweg-Rätsel ist
         orange abgesetzt (🧭). Formeln werden nur in eingehängten Teilen gesetzt (vorher nach dem Neuladen
         riesige Formeln in Hinweisen gelöster Rätsel, v. a. Safari/iPad). Abwärtskompatibel, Datenblock unverändert.
+     v10 (Zielschilder): 'kurs' mit modus 'fahrzeug' und ziele: true schreibt die Ziele (option.ziel
+        oder der Text der Option) als Schild über die Nummern an den Enden der Kurslinien. Abwärtskompatibel.
      ===================================================================== -->
 <html lang="de">
 <head>
@@ -75,7 +77,7 @@
 </script>
 <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
 <style>
-/* ===== BAUSTEIN-CSS: Story (v9, 27.11.2026) – unverändert übernehmen ===== */
+/* ===== BAUSTEIN-CSS: Story (v10, 27.11.2026) – unverändert übernehmen ===== */
 :root{
   --ink:#22303f; --card:#ffffff; --green:#1e7d32; --red:#c1272d;
   --amber:#b8860b; --amber-light:#fdf3d9; --amber-dark:#96690a;
@@ -1087,6 +1089,8 @@ function m(t){
                                    gelaende: optional 'wasser' | 'tiefsee' | 'zelle' | 'schnee' | 'land' |
                                              'himmel' | 'weltall' (sonst passend zum Fahrzeug)
                                    einsteigen: true – die Gruppe steigt beim ersten Anzeigen ein (personen: 1–4)
+                                   ziele: true (v10) – Zielschild über jeder Nummer: option.ziel (kurz, z. B.
+                                          '🦘 Australien') oder sonst der Text der Option
                                  | 'gruppe' – Personen an der Weggabelung schlagen Wege vor
                                    (Namen aus STORY.gruppe bzw. r.gruppe: [{ name:'Ayla', haar: 1 }, …];
                                    haar 0 kurz · 1 lang · 2 Dutt · 3 kurz/Scheitel · 4 Zopf)
@@ -1247,7 +1251,7 @@ var STORY = {
 
 <script>
 /* ============================================================
-   BAUSTEIN: Story-Engine (v9, 27.11.2026) – unverändert übernehmen
+   BAUSTEIN: Story-Engine (v10, 27.11.2026) – unverändert übernehmen
    Baut aus dem Objekt STORY: Startkarte (Einleitung, Anleitung, Zeitraum, Einstieg per
    Codewort) → je Karte Geschichte + Rätsel → Endkarte mit Auswertung.
    Ablauf einer Karte:  Haupträtsel richtig → geschafft (direkter Weg).
@@ -2763,6 +2767,7 @@ var GERAET = {
            fahrzeug: 'boot' | 'uboot' | 'floss' | 'schlitten' | 'kutsche' | 'lore' | 'ballon' | 'rakete'
            gelaende: optional 'wasser' | 'tiefsee' | 'zelle' | 'schnee' | 'land' | 'himmel' | 'weltall'
            einsteigen: true → die Gruppe steigt beim ersten Anzeigen ein (personen: 1–4, Vorgabe 3)
+           ziele: true (v10) → Zielschild mit option.ziel (sonst Text der Option) über jeder Nummer
      modus 'gruppe': die Gruppe steht an einer Weggabelung, jede Person schlägt einen Weg vor (STORY.gruppe /
            r.gruppe: [{ name:'Ayla', haar:1 }, …] – sonst „Person 1 …“; haar 0–4 wählt die Frisur)
      modus 'wesen': Wesen schlagen Wege vor – wesen: ['eule', 'fuchs', …] (eule, fuchs, drache, roboter, geist,
@@ -2810,6 +2815,12 @@ var GERAET = {
       var sg = svgEl('g', { 'class':'kurs-schild' });
       sg.appendChild(svgEl('circle', { cx:e[0], cy:e[1], r:19, fill:'url(#fx-messingR)', stroke:'#4a3208', 'stroke-width':2.5 }));
       sg.appendChild(svgEl('text', { x:e[0], y:e[1] + 7, 'text-anchor':'middle', 'font-size':21, 'font-weight':'800', fill:'#2a1a05' }, String(p + 1)));
+      if (r.ziele && modus === 'fahrzeug') {                         /* v10: Zielschild über der Nummer */
+        var zo = r.optionen[mix[p]], zt = zo.ziel || String(zo.t).replace(/<[^>]*>/g, '');
+        var bw = Math.max(64, zt.length * 9.5 + 22), bx = Math.min(W - 16 - bw, Math.max(16, e[0] - bw / 2)), by = e[1] - 58;
+        sg.appendChild(svgEl('rect', { x:bx.toFixed(1), y:by, width:bw.toFixed(1), height:30, rx:15, fill:'#f6f0d8', stroke:'#4a3208', 'stroke-width':2 }));
+        sg.appendChild(svgEl('text', { x:(bx + bw / 2).toFixed(1), y:by + 21, 'text-anchor':'middle', 'font-size':17, 'font-weight':'700', fill:'#2a1a05' }, zt));
+      }
       svg.appendChild(sg); schilder[p] = sg;
     }
 

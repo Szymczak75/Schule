@@ -370,6 +370,10 @@ Diese Punkte standen offen und sind inzwischen als Regel in
   Dazu: riesige Formeln (Safari/iPad) in Hinweisen gelöster Rätsel nach dem Neuladen – `setzeFormel`
   lief auf noch nicht eingehängten Knoten, MathJax schrieb `width="NaNex"`. Formeln nur in eingehängten
   Elementen setzen (`el.isConnected`), sonst setzt der Aufruf für die ganze Karte sie danach.
+- **Story-Engine v10 – Zielschilder** (27.11.2026, Escape Room MCG-Funken): Beim Ballon zu den Kontinenten standen an
+  den Kurslinien nur Nummern; die Kinder mussten zwischen Bild und Liste hin- und herschauen. Seitdem `ziele: true`
+  bei `kurs`/`fahrzeug`. Schilder bleiben im Rahmen (Abstand 16 px). Inhaltlich prüfen, ob Emojis zum Ort passen
+  (kein Eisbär in der Antarktis).
 - **Story-Engine v7 – Wegwahl** (26.11.2026, Escape Rooms Steckbrief Q1 und Zellreise EF): Antippen einer
   Liste wirkte wie ein Test, nicht wie eine Entscheidung in der Geschichte. Neue Antwortart `kurs`: Fahrzeug
   mit Kurslinien und Steuerrad, Personen der Gruppe oder Wesen schlagen Wege vor – nur bei genau einer
