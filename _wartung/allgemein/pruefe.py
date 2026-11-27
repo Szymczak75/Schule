@@ -23,7 +23,9 @@ Was dieser Linter NICHT kann (bleibt Handarbeit bzw. Browsertest):
   - ob der Stand ein Neuladen wirklich vollständig übersteht (Browsertest: Seite
     bearbeiten, neu laden, vergleichen)
 
-Stand: 26.11.2026 (Story-Engine v7: Wegwahl 'kurs' – Steuerrad, Personen, Wesen; Prüfung STORY:
+Stand: 27.11.2026 (Story-Engine v8: Symbolwand 'wand' – Runen in Nischen sortieren; Prüfung STORY:
+       2–4 Nischen, 3–12 Zeichen, jede Nische gültig, bekannte und verschiedene Runen;
+       26.11.2026: Story-Engine v7: Wegwahl 'kurs' – Steuerrad, Personen, Wesen; Prüfung STORY:
        genau eine richtige Option, 2–5 Optionen, bekannte modus/fahrzeug/wesen;
        Story-Engine v6: Fantasy-Stil;
        25.11.2026: Story-Engine v5: Spielzeug-Paket – 8 neue Rätselgeräte;
@@ -91,16 +93,19 @@ RBKA_MARKE = 'BAUSTEIN: Rückblick-KA-Engine'
 
 # Story-Engine (baustein_story.html, TEIL 2.11)
 STORY_TYP = 'Story'
-STORY_VERSION = 'v7'
+STORY_VERSION = 'v8'
 STORY_MARKE = 'BAUSTEIN: Story-Engine'
 STORY_ARTEN = ('zahl', 'bruch', 'term', 'text', 'wahl',                 # v1/v2
                'uhr', 'schloss', 'steck', 'felder', 'schalter',      # v3: Rätselgeräte
                'wuerfel', 'karten', 'abakus', 'thermo', 'zeit',      # v5: Spielzeug-Paket
                'gitter', 'kompass', 'regler',
-               'kurs')                                                # v7: Wegwahl
+               'kurs',                                                # v7: Wegwahl
+               'wand')                                                # v8: Symbolwand
 STORY_KURS_MODUS = ('fahrzeug', 'gruppe', 'wesen')
 STORY_FAHRZEUGE = ('boot', 'uboot', 'floss', 'schlitten', 'kutsche', 'lore', 'ballon', 'rakete')
 STORY_GELAENDE = ('wasser', 'tiefsee', 'zelle', 'schnee', 'land', 'himmel', 'weltall')
+STORY_RUNEN = ('sonne', 'mond', 'stern', 'auge', 'spirale', 'welle', 'blitz', 'schluessel', 'krone', 'blatt',
+               'dreieck', 'raute')
 STORY_WESEN = ('eule', 'fuchs', 'drache', 'roboter', 'geist', 'zwerg', 'golem', 'fee', 'troll', 'organell')
 
 # Formeltool (baustein_formeltool.html, TEIL 4.7)
@@ -530,7 +535,8 @@ def pruefe(pfad):
                          len(re.findall(r'\bschalter:\s*\[[^\]]*?\bok:\s*true', t, re.S)) + \
                          len(re.findall(r'\bsteine:\s*\[\s*\{', t)) + \
                          len(re.findall(r'\bblatt:\s*\[[^\]]*?\bok:\s*true', t, re.S)) + \
-                         len(re.findall(r'\bsterne:\s*\[\s*\[', t))
+                         len(re.findall(r'\bsterne:\s*\[\s*\[', t)) + \
+                         len(re.findall(r'\bzeichen:\s*\[\s*\{', t))
                 # v3: Antwortarten und Rätselgeräte
                 for a in re.findall(r"\bart:\s*'([^']*)'", t):
                     if a not in STORY_ARTEN:
@@ -574,6 +580,26 @@ def pruefe(pfad):
                         for w in re.findall(r"'([^']*)'", wm.group(1)):
                             if w not in STORY_WESEN:
                                 fehler('STORY', "Karte %s: unbekanntes Wesen '%s' bei 'kurs'" % (kid, w))
+                # v8: Symbolwand – 2 bis 4 Nischen, 3 bis 12 Zeichen, jede Nische gültig, Runen bekannt und verschieden
+                for wm in re.finditer(r"\bart:\s*'wand'", t):
+                    anf = t.rfind('raetsel:', 0, wm.start())
+                    end = t.find('tipps:', wm.end())
+                    seg = t[anf if anf >= 0 else wm.start():end if end >= 0 else len(t)]
+                    ni = re.search(r'\bnischen:\s*\[(.*?)\]\s*,', seg, re.S)
+                    n_ni = len(re.findall(r"'(?:[^'\\]|\\.)*'", ni.group(1))) if ni else 0
+                    if not 2 <= n_ni <= 4:
+                        fehler('STORY', "Karte %s: 'wand' mit %d Nischen – vorgesehen sind 2 bis 4" % (kid, n_ni))
+                    ns = [int(x) for x in re.findall(r'\bn:\s*(\d+)', seg)]
+                    if not 3 <= len(ns) <= 12:
+                        fehler('STORY', "Karte %s: 'wand' mit %d Zeichen (je mit n:) – vorgesehen sind 3 bis 12" % (kid, len(ns)))
+                    if any(x >= n_ni for x in ns):
+                        fehler('STORY', "Karte %s: 'wand' – ein Zeichen verweist auf eine Nische, die es nicht gibt" % kid)
+                    ru = re.findall(r"\brune:\s*'([^']*)'", seg)
+                    for x in ru:
+                        if x not in STORY_RUNEN:
+                            fehler('STORY', "Karte %s: unbekannte Rune '%s' bei 'wand'" % (kid, x))
+                    if len(set(ru)) < len(ru):
+                        fehler('STORY', "Karte %s: 'wand' – eine Rune ist mehrfach vergeben" % kid)
                 if n_soll < n_r:
                     fehler('STORY', 'Karte %s: nicht jedes Rätsel hat soll (bzw. eine Option mit ok: true)' % kid)
                 if len(re.findall(r'\btipps:\s*\[', t)) < n_r:
