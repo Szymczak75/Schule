@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <!-- =====================================================================
-     BAUSTEIN: Story (_story)  v7, 26.11.2026
+     BAUSTEIN: Story (_story)  v13, 27.11.2026
      Escape Room, Adventskalender, Detektivgeschichte oder freie Story: eine Geschichte
      in mehreren Karten, jede Karte endet mit einem Rätsel.
      Richtig → weiter zur nächsten Karte (mit Codewort zum späteren Wiedereinstieg).
-     Falsch  → das Rätsel verschwindet, ein Umweg-Rätsel führt zurück in die Geschichte.
+     Falsch  → das Rätsel bleibt sichtbar, wird rot markiert und gesperrt; ein deutlich angekündigtes
+               Umweg-Rätsel führt zurück in die Geschichte.
                Nach zwei Umwegen zeigt die Seite den Lösungsweg – niemand bleibt hängen.
      Gepflegt im Wartungs-Projekt. Anleitung (anweisung_lernseiten.txt, TEIL 2.11):
      1. Datei kopieren, Name: thema_story.html (Suffix _story).
@@ -43,6 +44,31 @@
      v7 (Wegwahl): 'kurs' für Rätsel mit genau einer richtigen Antwort – Fahrzeug mit nummerierten
         Kurslinien und Steuerrad (optional steigt die Gruppe ein), Personen der Gruppe oder Wesen, die
         verschiedene Wege vorschlagen. Abwärtskompatibel.
+     v8 (Symbolwand): 'wand' zum Sortieren – jedes Zeichen (Graph, Term, Situation …) trägt eine Rune,
+        die Rune kommt in die passende Nische einer Steinwand (Tafel antippen, dann Nische).
+        Graphen zeichnet die Engine selbst (zeichen.graph). Korrekturrunde wie bei den Diamanten.
+        Abwärtskompatibel.
+     v9 (Umweg sichtbar): ein falsch gelöstes Rätsel verschwindet nicht mehr – es bleibt vollständig stehen
+        (Frage, Gerät bzw. Eingabe, eigene Antwort), rot umrandet und gesperrt; die richtige Lösung wird
+        nicht verraten. Davor erscheint ein Banner „Neues Rätsel – Umweg 1 von 2“, das Umweg-Rätsel ist
+        orange abgesetzt (🧭). Formeln werden nur in eingehängten Teilen gesetzt (vorher nach dem Neuladen
+        riesige Formeln in Hinweisen gelöster Rätsel, v. a. Safari/iPad). Abwärtskompatibel, Datenblock unverändert.
+     v10 (Zielschilder): 'kurs' mit modus 'fahrzeug' und ziele: true schreibt die Ziele (option.ziel
+        oder der Text der Option) als Schild über die Nummern an den Enden der Kurslinien. Abwärtskompatibel.
+     v11 (Party-Ende): STORY.party: true → wenn alles geschafft ist, großes Banner (STORY.partyText) und Konfetti
+        auf der Endkarte; STORY.auswertung: false blendet die Auswertung (Liste und Fazit) aus – z. B. für
+        Kennenlern- und Werbeseiten. Behoben: Das Codewort der letzten Karte brach das Skript ab
+        (sperre() wurde für eine Karte hinter der letzten aufgerufen). Abwärtskompatibel.
+     v12 (Steinweg und Lückenfelder): 'reihe' – Teile (Wörter, Satzglieder, Schritte) als Trittsteine oder
+        Holzplanken in die richtige Reihenfolge legen, alle richtigen Reihenfolgen in soll; 'luecken' – mehrere
+        Eingabefelder in einem Rätsel, jedes mit eigener Lösung. Beide mit Korrekturrunde. STORY.endeNachLetzter:
+        true zeigt Schluss und Party schon, wenn die letzte Karte geschafft ist. Abwärtskompatibel.
+     v13 (Antwort am Wegende): 'kurs' mit modus 'fahrzeug' – jede Antwort steht als Schild direkt am Ende
+        ihrer Kurslinie (auch Formeln), keine Antworttafel darunter, keine ◀ ▶-Knöpfe: gewählt wird nur durch
+        Drehen am Steuerrad (Pfeiltasten bleiben für die Tastatur). ziele: true ist damit immer an und
+        wird nicht mehr gebraucht. Behoben: Der Steinweg ('reihe') konnte die Teile schon in einer richtigen
+        Reihenfolge auslegen (v. a. bei 3–4 Teilen) – er mischt jetzt neu, bis keine Lösung daliegt.
+        Abwärtskompatibel, Datenblock unverändert.
      ===================================================================== -->
 <html lang="de">
 <head>
@@ -65,7 +91,7 @@
 </script>
 <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
 <style>
-/* ===== BAUSTEIN-CSS: Story (v9, 27.11.2026) – unverändert übernehmen ===== */
+/* ===== BAUSTEIN-CSS: Story (v13, 27.11.2026) – unverändert übernehmen ===== */
 :root{
   --ink:#22303f; --card:#ffffff; --green:#1e7d32; --red:#c1272d;
   --amber:#b8860b; --amber-light:#fdf3d9; --amber-dark:#96690a;
@@ -315,24 +341,36 @@ mjx-container{max-width:100%;overflow-x:auto;}
 .regler-zeile input::-moz-range-thumb{width:24px;height:24px;border-radius:50%;border:4px solid #c9a04a;
   background:radial-gradient(circle at 35% 30%,#ffd0d8,#e0294f 45%,#5e0619);}
 /* v7: Wegwahl (kurs) – Steuerrad, Kurslinien, Personen und Wesen im Fantasy-Stil */
-.kurs-szene > svg{display:block;width:100%;max-width:620px;height:auto;margin:0 auto;}
+.kurs-szene{max-width:620px;margin:0 auto;}
+.kurs-szene > svg{display:block;width:100%;height:auto;margin:0 auto;}
+/* v13: Antwortschilder am Ende der Kurslinien (gleich breite Spalten über den Linienenden) */
+.kurs-ziele{display:grid;gap:.35rem;align-items:end;margin:0 0 -6px;}
+.kurs-ziel{position:relative;display:flex;flex-direction:column;align-items:center;gap:.2rem;padding:.4rem .35rem .45rem;text-align:center;
+  font-size:1rem;line-height:1.3;color:#3b2a17;border:2px solid #8a6a32;border-radius:.6rem;background:linear-gradient(180deg,#fffdf6,#f2e2b8);
+  box-shadow:0 2px 4px rgba(0,0,0,.25);hyphens:auto;-webkit-hyphens:auto;overflow-wrap:anywhere;}
+.kurs-ziel::after{content:'';position:absolute;left:50%;bottom:-9px;margin-left:-8px;border:8px solid transparent;border-bottom:0;border-top:9px solid #8a6a32;}
+.kurs-ziel .nr{font-weight:800;}
+.kurs-ziel .kurs-text{display:block;max-width:100%;overflow-x:auto;}
+.kurs-ziel mjx-container{max-width:100%;overflow-x:auto;}
+.kurs-ziel.an{border-color:#1f7fb8;box-shadow:0 0 0 3px #5cc8ef,0 0 14px rgba(92,200,239,.7);}
+.kurs-ziel.an::after{border-top-color:#1f7fb8;}
+.kurs-ziel.ok{border-color:#16934d;box-shadow:0 0 0 3px #3fd27f,0 0 14px rgba(63,210,127,.7);}
+.kurs-ziel.ok::after{border-top-color:#16934d;}
+.kurs-ziel.nok{border-color:#c1272d;box-shadow:0 0 0 3px #f0476b;}
+.kurs-ziel.nok::after{border-top-color:#c1272d;}
 .kurs-steuer{display:flex;align-items:center;justify-content:center;gap:1rem;margin:.6rem 0;}
 .kurs-steuer > svg{display:block;width:170px;height:170px;touch-action:none;cursor:grab;border-radius:50%;}
 .kurs-steuer > svg:focus-visible{outline:4px solid #5cc8ef;outline-offset:4px;}
 .kurs-rad{transition:transform .25s ease-out;}
-.kurs-pfeil{min-width:56px;min-height:56px;border-radius:50%;border:3px solid #b8860b;font:inherit;font-size:1.4rem;cursor:pointer;
-  background:radial-gradient(circle at 35% 30%,#fff0b0,#d4a63a 60%,#6e4c0d);color:#2a1a05;box-shadow:0 3px 6px rgba(0,0,0,.35);}
-.kurs-pfeil:disabled{opacity:.5;cursor:default;}
 .kurs-fahrzeug{transition:transform .35s ease-out;}
 .kurs-figur{transition:transform 1.1s ease-in-out;}
-.kurs-tafel{display:grid;gap:.45rem;margin:.6rem 0;}
-.kurs-opt,.vorschlag{display:flex;align-items:center;gap:.6rem;min-height:48px;padding:.45rem .8rem;text-align:left;font:inherit;font-size:1.05rem;
+.vorschlag{display:flex;align-items:center;gap:.6rem;min-height:48px;padding:.45rem .8rem;text-align:left;font:inherit;font-size:1.05rem;
   color:#3b2a17;cursor:pointer;border:2px solid #b8860b;border-radius:.7rem;background:linear-gradient(135deg,#f6e7c1,#e2c78c);
   box-shadow:0 2px 4px rgba(0,0,0,.25);}
-.kurs-opt.an,.vorschlag.an{border-color:#1f7fb8;box-shadow:0 0 0 3px #5cc8ef,0 0 14px rgba(92,200,239,.7);}
-.kurs-opt:disabled,.vorschlag:disabled{cursor:default;}
-.geraet.geloest .kurs-opt.an,.geraet.geloest .vorschlag.an{border-color:#16934d;box-shadow:0 0 0 3px #3fd27f,0 0 14px rgba(63,210,127,.7);}
-.kurs-opt .nr,.vorschlag .nr{flex:none;}
+.vorschlag.an{border-color:#1f7fb8;box-shadow:0 0 0 3px #5cc8ef,0 0 14px rgba(92,200,239,.7);}
+.vorschlag:disabled{cursor:default;}
+.geraet.geloest .vorschlag.an{border-color:#16934d;box-shadow:0 0 0 3px #3fd27f,0 0 14px rgba(63,210,127,.7);}
+.vorschlag .nr{flex:none;}
 .vorschlaege{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,8.8rem),1fr));gap:.6rem;margin:.6rem 0;}
 .vorschlag{flex-direction:column;align-items:center;text-align:center;padding:.5rem;}
 .vorschlag-bild > svg{display:block;width:96px;height:auto;}
@@ -379,11 +417,44 @@ mjx-container{max-width:100%;overflow-x:auto;}
 @media (max-width:520px){ .wand{grid-template-columns:1fr !important;}   /* schmal: Nischen untereinander, Name links */
   .nische{flex-direction:row;min-height:4.4rem;border-radius:2.2rem .6rem .6rem 2.2rem;padding:.4rem .6rem;}
   .nische-name{margin-top:0;flex:none;max-width:60%;hyphens:manual;-webkit-hyphens:manual;overflow-wrap:anywhere;} .nische-platz{margin-top:0;flex:1;} }
+/* v12: Steinweg (reihe) – Teile in die richtige Reihenfolge legen; Stil 'stein' oder 'holz' */
+.reihe-weg{display:flex;flex-wrap:wrap;align-items:center;gap:.45rem;min-height:5.2rem;padding:.8rem .7rem;border:3px solid #1c1613;border-radius:1rem;
+  background:radial-gradient(ellipse 60% 40% at 30% 30%,rgba(255,255,255,.18),transparent 70%),linear-gradient(160deg,#4f7f93,#2f5868 55%,#1d3a46);
+  box-shadow:inset 0 6px 14px rgba(0,0,0,.45),0 4px 10px rgba(0,0,0,.3);}
+.reihe.holz .reihe-weg{background:repeating-linear-gradient(90deg,rgba(0,0,0,.18) 0 2px,transparent 2px 46px),linear-gradient(#6b4a2a,#4a3018);}
+.reihe-platz{display:inline-flex;align-items:center;justify-content:center;min-width:2.6rem;min-height:2.6rem;border:2px dashed rgba(255,255,255,.55);
+  border-radius:.6rem;color:#fdf3d9;font-weight:700;font-size:1rem;}
+.reihe-haufen{display:flex;flex-wrap:wrap;justify-content:center;gap:.55rem;margin:.8rem 0 .3rem;min-height:3.4rem;padding:.6rem;border-radius:1rem;
+  background:linear-gradient(#e9dcc0,#d6c39a);border:2px solid #8a6a3a;}
+.reihe-stein{position:relative;min-height:48px;padding:.55rem .9rem;font:inherit;font-size:1.05rem;font-weight:700;color:#22303f;cursor:pointer;
+  font-family:Georgia,'Palatino Linotype',serif;border:2px solid #4a4038;border-radius:1.1rem .8rem 1.2rem .7rem;
+  background:radial-gradient(ellipse 70% 50% at 35% 30%,#f3efe8,#cfc6ba 60%,#a99e90);box-shadow:inset 0 -3px 0 rgba(0,0,0,.25),0 3px 6px rgba(0,0,0,.35);}
+.reihe.holz .reihe-stein{border-color:#4a3018;border-radius:.35rem;color:#2a1a05;
+  background:repeating-linear-gradient(0deg,rgba(90,60,20,.12) 0 3px,transparent 3px 7px),linear-gradient(#f0d9a8,#d4ad6a);}
+.reihe-stein.drin{box-shadow:0 0 0 3px #5cc8ef,0 3px 6px rgba(0,0,0,.4);}
+.reihe-stein.fest{box-shadow:0 0 0 3px #3fd27f,0 0 12px rgba(63,210,127,.7);cursor:default;}
+.reihe-stein:disabled{cursor:default;}
+.geraet.geloest .reihe-stein{box-shadow:0 0 0 3px #3fd27f;}
+.reihe-nr{position:absolute;top:-.55rem;left:-.45rem;min-width:1.3rem;height:1.3rem;border-radius:50%;background:#1f4680;color:#fff;font:700 .8rem/1.3rem system-ui,sans-serif;text-align:center;}
+/* v12: Lückenfelder (luecken) – mehrere Eingaben in einem Rätsel */
+.luecken{display:grid;gap:.6rem;}
+.luecke{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem;padding:.55rem .7rem;border:2px solid #8a6a3a;border-radius:.8rem;
+  background:linear-gradient(#f7ecd2,#e8d6ad);}
+.luecke-vor,.luecke-nach{font-weight:700;font-size:1.05rem;color:#2a1a05;}
+.luecke input{flex:1 1 11rem;min-width:0;min-height:48px;font-size:1.1rem;padding:.35rem .6rem;border:2px solid #4a3208;border-radius:.5rem;background:#fffdf6;}
+.luecke.fest{border-color:#16934d;box-shadow:0 0 0 2px #3fd27f;}
+.luecke.fest input{background:#eafaf0;}
 @media (prefers-reduced-motion:reduce){ .funkeln,.rolle > .ziffer.klick,.wuerfel.rollt{animation:none;} .spielkarte,.kurs-rad,.kurs-fahrzeug,.kurs-figur{transition:none;} }
 .erwischt{border-left-color:var(--ink);}
 /* v4: Szenenbilder in Geschichte, Umweg, erwischt und Ende (als data-URI im Datenblock, TEIL 8.1) */
 .szene{margin:.2rem 0 .8rem;}
 .szene > img{display:block;width:100%;height:auto;border-radius:.8rem;box-shadow:0 2px 10px rgba(34,48,63,.25);}
+/* v11: Party-Ende (Konfettifarben setzt die Engine aus dem Schema) */
+.block.party{position:relative;overflow:hidden;}
+.party-banner{font-size:2rem;font-weight:800;text-align:center;line-height:1.25;margin:.3rem 0 1rem;}
+.konfetti{position:absolute;top:-24px;width:11px;height:17px;border-radius:2px;pointer-events:none;animation:konfetti 3s linear infinite;}
+@keyframes konfetti{0%{transform:translateY(0) rotate(0deg);}100%{transform:translateY(1400px) rotate(600deg);}}
+@media (prefers-reduced-motion:reduce){ .konfetti{display:none;} }
 /* ===== ENDE BAUSTEIN-CSS Story ===== */
 </style>
 <style id="dino-stil">
@@ -954,7 +1025,7 @@ return {
 </script>
 <!-- ============ ENDE BAUSTEIN Formeltool ============ -->
 </head>
-<body data-anrede="du" data-version="1">
+<body data-anrede="du" data-version="2">
 
 <header class="kopf"><div class="kopf-innen">
   <p class="kopf-typ" id="st-typ"></p>
@@ -1133,6 +1204,7 @@ function bild(n, alt){ return BILD[n] ? '<div class="bild"><img src="data:image/
 function w(t){ return m('\\sqrt{' + t + '}'); }
 
 var STORY = {
+  party: true,   /* v11: Banner und Konfetti auf der Endkarte */
   art: 'advent',
   titel: 'Eisdrache Funkel und die Sternwarte',
   untertitel: 'Ein Mathe-Adventskalender für Klasse 9',
@@ -1499,11 +1571,11 @@ var STORY = {
                weg: '12 · 1,15 = 13,80 Taler.' },
     umwege: [
       { geschichte: '<p>Zu teuer, sagen die Geister. Ein Fernrohr kostete 40 Taler und wird um 25 % reduziert.</p>',
-        raetsel: { frage: 'Berechne den reduzierten Preis in Talern.', kk: 'K7-5', art: 'zahl', eingabe: 'linear', soll: [30,1],
+        raetsel: { frage: 'Berechne den reduzierten Preis und stelle ihn am Kassenschloss ein.', kk: 'K7-5', art: 'schloss', schloss: 'zahl', stellen: [3], einheit: 'Taler', soll: [30,1],
                    tipps: [ 'Wachstumsfaktor bei −25 %.', '40 · 0,75.' ],
                    weg: '40 · 0,75 = 30 Taler.' } },
       { geschichte: '<p>Ein Sternatlas kostet 200 Taler und wird um 5 % teurer.</p>',
-        raetsel: { frage: 'Berechne den neuen Preis in Talern.', kk: 'K7-5', art: 'zahl', eingabe: 'linear', soll: [210,1],
+        raetsel: { frage: 'Berechne den neuen Preis und stelle ihn am Kassenschloss ein.', kk: 'K7-5', art: 'schloss', schloss: 'zahl', stellen: [3], einheit: 'Taler', soll: [210,1],
                    tipps: [ 'Faktor 1,05.', 'Multiplizieren.' ],
                    weg: '200 · 1,05 = 210 Taler.' } }
     ],
@@ -1567,16 +1639,16 @@ var STORY = {
 
   { id: '23', titel: 'Das quadratische Siegel',
     geschichte: '<p>Die vorletzte Linse ist mit einem Siegel verschlossen: x² = 2,25. „Nur die positive Lösung bricht das Siegel“, sagt Mabel.</p>',
-    raetsel: { frage: 'Bestimme die positive Lösung der Gleichung x² = 2,25.', art: 'zahl', eingabe: 'linear', soll: [3,2],
+    raetsel: { frage: 'Bestimme die positive Lösung der Gleichung x² = 2,25 und stelle sie an der Siegel-Skala ein.', art: 'thermo', skala: { von: 0, bis: 3, schritt: [1,10], marke: 0.5 }, soll: [3,2],
                tipps: [ 'Ziehe die Wurzel.', 'Schreibe 2,25 als Bruch mit Nenner 100.' ],
                weg: 'x = ' + w('2{,}25') + ' = ' + w('\\frac{225}{100}') + ' = ' + f(15,10) + ' = 1,5.' },
     umwege: [
       { geschichte: '<p>Das Siegel glüht rot. Ein zweites: x² = 0,81.</p>',
-        raetsel: { frage: 'Bestimme die positive Lösung der Gleichung x² = 0,81.', art: 'zahl', eingabe: 'linear', soll: [9,10],
+        raetsel: { frage: 'Bestimme die positive Lösung der Gleichung x² = 0,81 und stelle sie an der Siegel-Skala ein.', art: 'thermo', skala: { von: 0, bis: 2, schritt: [1,10], marke: 0.5 }, soll: [9,10],
                    tipps: [ 'Wurzel ziehen.', '0,81 = 81 Hundertstel.' ],
                    weg: 'x = 0,9.' } },
       { geschichte: '<p>Ein drittes: x² = 169.</p>',
-        raetsel: { frage: 'Bestimme die positive Lösung der Gleichung x² = 169.', art: 'zahl', eingabe: 'linear', soll: [13,1],
+        raetsel: { frage: 'Bestimme die positive Lösung der Gleichung x² = 169 und stelle sie am Siegelschloss ein.', art: 'schloss', schloss: 'zahl', stellen: [2], soll: [13,1],
                    tipps: [ 'Wurzel aus 169.', 'Eine Zahl zwischen 10 und 15.' ],
                    weg: 'x = 13.' } }
     ],
@@ -1618,7 +1690,7 @@ STORY.karten.forEach(function(k){ k.geschichte = bild(k.id, 'Bild zu Türchen ' 
 
 <script>
 /* ============================================================
-   BAUSTEIN: Story-Engine (v9, 27.11.2026) – unverändert übernehmen
+   BAUSTEIN: Story-Engine (v13, 27.11.2026) – unverändert übernehmen
    Baut aus dem Objekt STORY: Startkarte (Einleitung, Anleitung, Zeitraum, Einstieg per
    Codewort) → je Karte Geschichte + Rätsel → Endkarte mit Auswertung.
    Ablauf einer Karte:  Haupträtsel richtig → geschafft (direkter Weg).
@@ -1706,6 +1778,8 @@ function zk(i){
 }
 function fertig(i){ var s = zk(i).st; return s === 'ok' || s === 'durch' || s === 'code'; }
 function alleFertig(){ for (var i = 0; i < K.length; i++) if (!fertig(i)) return false; return K.length > 0; }
+/* v12: Schluss der Geschichte (STORY.ende, Party) – mit STORY.endeNachLetzter schon, wenn die letzte Karte geschafft ist */
+function endeErreicht(){ return STORY.endeNachLetzter && K.length ? fertig(K.length - 1) : alleFertig(); }
 /* Warum ist Karte i (noch) zu? '' = offen */
 function sperre(i){
   var p = phase();
@@ -1798,7 +1872,14 @@ var HINWEIS = {
   leerWand: T('Setze zuerst Runen an die Wand: Tafel antippen, dann die Nische antippen.',
               'Setzen Sie zuerst Runen an die Wand: Tafel antippen, dann die Nische antippen.'),
   halbWand: T('Es liegen noch Tafeln ohne Platz an der Wand. Setze alle Runen. Das kostet keinen Versuch.',
-              'Es liegen noch Tafeln ohne Platz an der Wand. Setzen Sie alle Runen. Das kostet keinen Versuch.')
+              'Es liegen noch Tafeln ohne Platz an der Wand. Setzen Sie alle Runen. Das kostet keinen Versuch.'),
+  /* v12 */
+  leerReihe: T('Lege zuerst Teile auf den Weg: Tippe sie in der richtigen Reihenfolge an.',
+               'Legen Sie zuerst Teile auf den Weg: Tippen Sie sie in der richtigen Reihenfolge an.'),
+  halbReihe: T('Es liegen noch Teile neben dem Weg. Lege alle Teile. Das kostet keinen Versuch.',
+               'Es liegen noch Teile neben dem Weg. Legen Sie alle Teile. Das kostet keinen Versuch.'),
+  halbLuecken: T('Es ist noch ein Feld leer. Fülle alle Felder aus. Das kostet keinen Versuch.',
+                 'Es ist noch ein Feld leer. Füllen Sie alle Felder aus. Das kostet keinen Versuch.')
 };
 
 /* ---------- Rätselgeräte (v3, Fantasie-Paket v4) ----------
@@ -2006,12 +2087,39 @@ function bewerteGeraet(r, a){
     if (gesetzt < r.zeichen.length) return 'halbWand';
     return r.zeichen.every(function(o, k){ return wa[k] === o.n; }) ? 'ok' : 'falsch';
   }
+  if (art === 'reihe') {                                        /* v12: Steinweg */
+    var re = a && a.reihe ? a.reihe : [];
+    if (!re.length) return 'leerReihe';
+    if (re.length < r.teile.length) return 'halbReihe';
+    var satz = norm(re.map(function(k){ return r.teile[k]; }).join(' '));
+    return (r.soll || []).some(function(x){ return norm(x) === satz; }) ? 'ok' : 'falsch';
+  }
+  if (art === 'luecken') {                                      /* v12: Lückenfelder */
+    var lu = a && a.luecken ? a.luecken : [];
+    var voll = r.zeilen.map(function(x, k){ return !!norm(lu[k]); });
+    if (!voll.some(Boolean)) return 'leer';
+    if (!voll.every(Boolean)) return 'halbLuecken';
+    return r.zeilen.every(function(x, k){ return luckeRichtig(x, lu[k]); }) ? 'ok' : 'falsch';
+  }
   if (art === 'schalter') {
     var sc = a && a.schalter ? a.schalter : [];
     if (!sc.some(Boolean)) return 'leerSchalter';
     return r.schalter.every(function(o, k){ return !!sc[k] === !!o.ok; }) ? 'ok' : 'falsch';
   }
   return 'leer';
+}
+
+/* v12: eine Zeile der Lückenfelder richtig? (Groß/klein, Umlaute als ae/oe/ue, ß als ss egal) */
+function luckeRichtig(zeile, txt){ return (zeile.soll || []).some(function(x){ return norm(x) === norm(txt); }); }
+/* v12: Länge des richtigen Anfangs auf dem Steinweg (passt zum Anfang mindestens einer Lösung) */
+function reiheAnfang(r, re){
+  var best = 0;
+  (r.soll || []).forEach(function(x){
+    var ziel = norm(x), n = 0, bis = '';
+    for (var k = 0; k < re.length; k++) { bis += norm(r.teile[re[k]]); if (ziel.indexOf(bis) === 0) n = k + 1; else break; }
+    if (n > best) best = n;
+  });
+  return best;
 }
 
 /* v5: Wert eines Reglers (Stufe → Zahl) und Funktionswert des Sternbild-Graphen */
@@ -3130,10 +3238,12 @@ var GERAET = {
   },
 
   /* Wegwahl (v7): art 'kurs' – genau eine richtige Option, die Gruppe wählt in der Geschichte einen Weg.
-     modus 'fahrzeug' (Vorgabe): Fahrzeug von oben, nummerierte Kurslinien, Steuerrad (Ziehen, ◀/▶, Pfeiltasten)
+     modus 'fahrzeug' (Vorgabe): Fahrzeug von oben, nummerierte Kurslinien, Antwortschild am Ende jeder Linie (v13),
+           Steuerrad (nur Drehen; Pfeiltasten für die Tastatur) – keine Antworttafel, keine ◀ ▶-Knöpfe
            fahrzeug: 'boot' | 'uboot' | 'floss' | 'schlitten' | 'kutsche' | 'lore' | 'ballon' | 'rakete'
            gelaende: optional 'wasser' | 'tiefsee' | 'zelle' | 'schnee' | 'land' | 'himmel' | 'weltall'
            einsteigen: true → die Gruppe steigt beim ersten Anzeigen ein (personen: 1–4, Vorgabe 3)
+           ziele: true (v10) – seit v13 ohne Wirkung, die Antworten stehen immer am Wegende
      modus 'gruppe': die Gruppe steht an einer Weggabelung, jede Person schlägt einen Weg vor (STORY.gruppe /
            r.gruppe: [{ name:'Ayla', haar:1 }, …] – sonst „Person 1 …“; haar 0–4 wählt die Frisur)
      modus 'wesen': Wesen schlagen Wege vor – wesen: ['eule', 'fuchs', …] (eule, fuchs, drache, roboter, geist,
@@ -3161,13 +3271,18 @@ var GERAET = {
     svg.innerHTML += kursGelaende(gel, W, H);
     var start = modus === 'fahrzeug' ? [300, 322] : [300, 212];
     var spanne = [0, 0, 56, 90, 112, 124][n] || 124;
-    function winkel(p){ return n === 1 ? 0 : -spanne / 2 + p * spanne / (n - 1); }
+    /* v13: Linienenden des Fahrzeugs gleichmäßig über die Breite, jedes unter seinem Antwortschild */
+    function endeF(p){ return [W * (p + 0.5) / n, 40]; }
+    function kontrollF(p){ var e = endeF(p); return [start[0] + (e[0] - start[0]) * 0.3, 205]; }
+    function winkel(p){
+      if (modus === 'fahrzeug') { var c = kontrollF(p); return Math.atan2(c[0] - start[0], start[1] - c[1]) * 180 / Math.PI; }
+      return n === 1 ? 0 : -spanne / 2 + p * spanne / (n - 1);
+    }
     var linienFarbe = { tiefsee:'#cfe8ff', weltall:'#ffe27a', himmel:'#ffffff', wasser:'#f6f0d8' }[gel] || '#5b3519';
     for (var p = 0; p < n; p++) {
       var e, c, a = winkel(p) * Math.PI / 180;
       if (modus === 'fahrzeug') {
-        e = [start[0] + 262 * Math.sin(a), start[1] - 262 * Math.cos(a)];
-        c = [start[0] + 140 * Math.sin(a * 0.45), start[1] - 140 * Math.cos(a * 0.45)];
+        e = endeF(p); c = kontrollF(p);
       } else {
         e = [70 + p * (W - 140) / Math.max(1, n - 1), 36];
         if (n === 1) e[0] = 300;
@@ -3221,9 +3336,6 @@ var GERAET = {
     var rad = null, radG = null;
     if (modus === 'fahrzeug') {
       var steuer = neu('div', 'kurs-steuer');
-      var links = neu('button', 'kurs-pfeil', '◀'), rechts = neu('button', 'kurs-pfeil', '▶');
-      links.type = rechts.type = 'button'; links.disabled = rechts.disabled = !aktiv;
-      links.setAttribute('aria-label', 'Kurs weiter nach links'); rechts.setAttribute('aria-label', 'Kurs weiter nach rechts');
       rad = svgLeucht({ viewBox:'-110 -110 220 220', role:'slider', tabindex:aktiv ? '0' : '-1',
         'aria-label':'Steuerrad: Kurs wählen', 'aria-valuemin':'1', 'aria-valuemax':String(n) });
       radG = svgEl('g', { 'class':'kurs-rad' });
@@ -3237,20 +3349,24 @@ var GERAET = {
       radG.appendChild(svgEl('circle', { r:20, fill:'url(#fx-messingR)', stroke:'#4a3208', 'stroke-width':3 }));
       radG.appendChild(svgEl('rect', { x:-5, y:-106, width:10, height:12, rx:3, fill:'#c1272d' }));   /* Markierung „geradeaus" */
       rad.appendChild(radG);
-      steuer.appendChild(links); steuer.appendChild(rad); steuer.appendChild(rechts);
+      steuer.appendChild(rad);
       el.appendChild(steuer);
     }
 
     /* ---- Vorschläge: Antworttafel (Fahrzeug) bzw. Personen/Wesen mit Sprechblase ---- */
-    var tafel = neu('div', modus === 'fahrzeug' ? 'kurs-tafel' : 'vorschlaege');
+    var tafel = neu('div', modus === 'fahrzeug' ? 'kurs-ziele' : 'vorschlaege');
+    if (modus === 'fahrzeug') tafel.style.gridTemplateColumns = 'repeat(' + n + ', minmax(0, 1fr))';
     var namenG = (r.gruppe || STORY.gruppe || []);
     var wesenL = r.wesen || ['eule', 'fuchs', 'roboter', 'drache', 'zwerg'];
     mix.forEach(function(o, p){
-      var b = neu('button', modus === 'fahrzeug' ? 'kurs-opt' : 'vorschlag', ''); b.type = 'button'; b.disabled = !aktiv;
+      if (modus === 'fahrzeug') {                                   /* v13: Antwort am Ende der Kurslinie, nur per Steuerrad */
+        var zs = neu('div', 'kurs-ziel', '<span class="nr">' + (p + 1) + '</span><span class="kurs-text">' + r.optionen[o].t + '</span>');
+        if (r.optionen[o].ok) zs.setAttribute('data-ok', '1');
+        tafel.appendChild(zs); auswahl[p] = zs; return;
+      }
+      var b = neu('button', 'vorschlag', ''); b.type = 'button'; b.disabled = !aktiv;
       if (r.optionen[o].ok) b.setAttribute('data-ok', '1');
-      if (modus === 'fahrzeug') {
-        b.innerHTML = '<span class="nr">' + (p + 1) + '</span><span class="kurs-text">' + r.optionen[o].t + '</span>';
-      } else {
+      {
         var bild = svgLeucht({ viewBox:'0 0 100 125', 'aria-hidden':'true' });
         var typ = modus === 'wesen' ? wesenL[p % wesenL.length] : null;
         bild.innerHTML += modus === 'wesen' ? kursWesen(typ) : kursPerson(p, namenG[p] && namenG[p].haar);
@@ -3264,7 +3380,9 @@ var GERAET = {
       b.addEventListener('click', function(){ waehle(p, true); });
       tafel.appendChild(b); auswahl[p] = b;
     });
-    el.appendChild(tafel);
+    if (modus === 'fahrzeug') {
+      szene.insertBefore(tafel, svg);
+    } else el.appendChild(tafel);
     var anz = neu('p', 'anzeige', ''); el.appendChild(anz);
 
     /* ---- Zustand zeichnen ---- */
@@ -3278,6 +3396,7 @@ var GERAET = {
         if (an) linien[p].setAttribute('filter', svg.leucht); else linien[p].removeAttribute('filter');
         schilder[p].setAttribute('opacity', gewP == null || an ? '1' : '.7');
         auswahl[p].classList.toggle('an', an);
+        auswahl[p].classList.toggle('ok', an && geloest); auswahl[p].classList.toggle('nok', an && gescheitert);
         if (auswahl[p].stein) steinZustand(auswahl[p].stein, an ? (geloest ? 'ok' : gescheitert ? 'nok' : 'an') : 'aus');
       }
       if (fz && !fz.faehrt) {
@@ -3290,8 +3409,8 @@ var GERAET = {
         rad.setAttribute('aria-valuetext', gewP != null ? 'Kurs ' + (gewP + 1) : 'kein Kurs gewählt');
       }
       anz.innerHTML = gewP == null
-        ? (modus === 'fahrzeug' ? T('Dreh am Steuerrad (oder tippe ◀ ▶ bzw. einen Kurs an), bis der Bug auf die richtige Linie zeigt.',
-                                    'Drehen Sie am Steuerrad (oder tippen Sie ◀ ▶ bzw. einen Kurs an), bis der Bug auf die richtige Linie zeigt.')
+        ? (modus === 'fahrzeug' ? T('Dreh am Steuerrad, bis der Bug auf die Linie mit der richtigen Antwort zeigt.',
+                                    'Drehen Sie am Steuerrad, bis der Bug auf die Linie mit der richtigen Antwort zeigt.')
                                 : T('Tippe an, wessen Vorschlag du folgst.', 'Tippen Sie an, wessen Vorschlag Sie folgen.'))
         : (modus === 'fahrzeug' ? 'Kurs <b>' + (gewP + 1) + '</b> ' + T('gewählt.', 'gewählt.')
                                 : T('Du folgst Weg ', 'Sie folgen Weg ') + '<b>' + (gewP + 1) + '</b>.');
@@ -3308,8 +3427,6 @@ var GERAET = {
       else waehle(gewP + um, true);
     }
     if (modus === 'fahrzeug' && aktiv) {
-      links.addEventListener('click', function(){ schritt(-1); });
-      rechts.addEventListener('click', function(){ schritt(1); });
       rad.addEventListener('keydown', function(ev){
         if (ev.key === 'ArrowLeft' || ev.key === 'ArrowDown') { ev.preventDefault(); schritt(-1); }
         if (ev.key === 'ArrowRight' || ev.key === 'ArrowUp') { ev.preventDefault(); schritt(1); }
@@ -3323,7 +3440,7 @@ var GERAET = {
       rad.addEventListener('pointermove', function(ev){
         if (!zieh) return;
         var dw = radPunkt(ev) - zieh.a0; if (dw > 180) dw -= 360; if (dw < -180) dw += 360;
-        vorschauW = Math.max(-spanne / 2 - 8, Math.min(spanne / 2 + 8, (zieh.w0 + dw) / 2.6));
+        vorschauW = Math.max(winkel(0) - 8, Math.min(winkel(n - 1) + 8, (zieh.w0 + dw) / 2.6));
         zeichne();
       });
       function los(){
@@ -3538,6 +3655,96 @@ var GERAET = {
         return '✨ ' + n + ' von ' + nz + T(' Runen leuchten grün – sie sitzen richtig. Die anderen darfst du jetzt einmal umsetzen. Dann prüfe noch einmal.',
                                             ' Runen leuchten grün – sie sitzen richtig. Die anderen dürfen Sie jetzt einmal umsetzen. Dann prüfen Sie noch einmal.');
       } };
+  },
+
+  /* ===== v12: Steinweg (Reihenfolge) ====================================================
+     Teile (Wörter, Satzglieder, Schritte …) liegen gemischt neben dem Weg. Antippen legt ein Teil
+     ans Ende des Weges, ein Teil auf dem Weg antippen nimmt es zurück (die folgenden rücken auf).
+     teile: ['Heute', 'wollen', 'wir', …]   (2 bis 14 Teile, jedes genau einmal zu legen)
+     soll:  ['Heute wollen wir …', 'Wir wollen heute …', …]  – ALLE richtigen Reihenfolgen als Text;
+            verglichen wird ohne Leerzeichen, Satzzeichen, Groß/klein (wie bei 'text').
+     stil:  'stein' (Vorgabe: Trittsteine über einen Fluss) | 'holz' (Holzplanken)
+     Antwort: { reihe:[Teil-Index in gelegter Reihenfolge] }. Korrekturrunde: nach dem ersten falschen
+     Prüfen bleibt der richtige Anfang grün liegen, der Rest darf einmal neu gelegt werden. */
+  reihe: function(r, alt, merke, aktiv, z, s){
+    if (!z.mix[s]) {                                                 /* v13: nie schon richtig ausgelegt (TEIL 0 Nr. 19) */
+      var versuch = 0;
+      do { z.mix[s] = mische(r.teile.length); } while (r.teile.length > 1 && ++versuch < 50 && bewerteGeraet(r, { reihe: z.mix[s] }) === 'ok');
+      sichern();
+    }
+    var weg = alt && alt.reihe ? alt.reihe.slice() : [], fest = 0;
+    var el = neu('div', 'geraet reihe' + (r.stil === 'holz' ? ' holz' : '')), bahn = neu('div', 'reihe-weg'), haufen = neu('div', 'reihe-haufen');
+    bahn.setAttribute('aria-label', T('Der Weg – hier liegen deine Teile in Reihenfolge', 'Der Weg – hier liegen Ihre Teile in Reihenfolge'));
+    var anz = neu('p', 'anzeige', '');
+    el.appendChild(bahn); el.appendChild(anz); el.appendChild(haufen);
+    function stein(k, nr){
+      var b = neu('button', 'reihe-stein', r.teile[k]); b.type = 'button'; b.disabled = !aktiv;
+      if (nr != null) { b.classList.add('drin'); b.insertBefore(neu('span', 'reihe-nr', String(nr + 1)), b.firstChild); }
+      if (nr != null && nr < fest) { b.classList.add('fest'); b.disabled = true; }
+      b.addEventListener('click', function(){
+        if (nr == null) weg.push(k); else if (nr >= fest) weg.splice(nr, 1);
+        zeichneReihe(); merke({ reihe: weg.slice() });
+      });
+      return b;
+    }
+    function zeichneReihe(){
+      bahn.innerHTML = ''; haufen.innerHTML = '';
+      weg.forEach(function(k, nr){ bahn.appendChild(stein(k, nr)); });
+      for (var p = weg.length; p < r.teile.length; p++) bahn.appendChild(neu('span', 'reihe-platz', String(p + 1)));
+      z.mix[s].forEach(function(k){ if (weg.indexOf(k) < 0) haufen.appendChild(stein(k, null)); });
+      haufen.hidden = weg.length === r.teile.length;
+      anz.textContent = weg.length === 0
+        ? T('Tippe die Teile in der richtigen Reihenfolge an. Ein Teil auf dem Weg antippen legt es zurück.',
+            'Tippen Sie die Teile in der richtigen Reihenfolge an. Ein Teil auf dem Weg antippen legt es zurück.')
+        : 'Auf dem Weg: ' + weg.length + ' von ' + r.teile.length + ' Teilen.';
+    }
+    zeichneReihe();
+    return { el:el,
+      hol: function(){ return weg.length ? { reihe: weg.slice() } : null; },
+      leere: function(){ weg = weg.slice(0, fest); zeichneReihe(); },
+      korrektur: function(a){
+        fest = reiheAnfang(r, a.reihe); weg = a.reihe.slice(0, fest); zeichneReihe(); merke({ reihe: weg.slice() });
+        var anfang = fest === 1 ? 'Das erste Teil liegt' : 'Die ersten ' + fest + ' Teile liegen';
+        return fest
+          ? '✨ ' + T(anfang + ' richtig und leuchtet grün. Lege den Rest noch einmal neu. Dann prüfe noch einmal.'.replace('leuchtet', fest === 1 ? 'leuchtet' : 'leuchten'),
+                      anfang + ' richtig und leuchtet grün. Legen Sie den Rest noch einmal neu. Dann prüfen Sie noch einmal.'.replace('leuchtet', fest === 1 ? 'leuchtet' : 'leuchten'))
+          : '✨ ' + T('Schon das erste Teil passt nicht. Lege alle Teile noch einmal neu. Dann prüfe noch einmal.',
+                      'Schon das erste Teil passt nicht. Legen Sie alle Teile noch einmal neu. Dann prüfen Sie noch einmal.');
+      } };
+  },
+
+  /* ===== v12: Lückenfelder =============================================================
+     Mehrere Eingabefelder in einem Rätsel, jedes mit eigener Lösung (z. B. drei Zahlwörter).
+     zeilen: [{ vor:'32 =', soll:['zweiunddreißig'], nach:'' }, …]  (2 bis 6 Zeilen; vor/nach optional)
+     Verglichen wird wie bei 'text'. Antwort: { luecken:['…', …] }. Korrekturrunde: richtige Felder
+     werden grün und fest, die anderen dürfen einmal verbessert werden. */
+  luecken: function(r, alt, merke, aktiv, z, s){
+    var w = alt && alt.luecken ? alt.luecken.slice() : r.zeilen.map(function(){ return ''; });
+    var fest = r.zeilen.map(function(){ return false; });
+    var el = neu('div', 'geraet luecken'), felder = [], reihen = [];
+    r.zeilen.forEach(function(zl, k){
+      var row = neu('label', 'luecke');
+      if (zl.vor) row.appendChild(neu('span', 'luecke-vor', zl.vor));
+      var inp = neu('input', ''); inp.type = 'text'; inp.value = w[k] || '';
+      inp.setAttribute('autocomplete', 'off'); inp.setAttribute('autocorrect', 'off'); inp.setAttribute('spellcheck', 'false');
+      inp.setAttribute('aria-label', 'Feld ' + (k + 1) + (zl.vor ? ': ' + String(zl.vor).replace(/<[^>]*>/g, '') : ''));
+      if (!aktiv) { inp.readOnly = true; inp.classList.add('zu'); }
+      inp.addEventListener('input', function(){ w[k] = inp.value; merke({ luecken: w.slice() }); });
+      row.appendChild(inp);
+      if (zl.nach) row.appendChild(neu('span', 'luecke-nach', zl.nach));
+      el.appendChild(row); felder.push(inp); reihen.push(row);
+    });
+    function zeichneLuecken(){ reihen.forEach(function(row, k){ row.classList.toggle('fest', fest[k]); if (fest[k]) felder[k].readOnly = true; }); }
+    return { el:el,
+      hol: function(){ return { luecken: felder.map(function(f){ return f.value; }) }; },
+      leere: function(){ felder.forEach(function(f, k){ if (!fest[k]) { f.value = ''; w[k] = ''; } }); },
+      korrektur: function(a){
+        fest = r.zeilen.map(function(zl, k){ return luckeRichtig(zl, a.luecken[k]); });
+        zeichneLuecken();
+        var n = fest.filter(Boolean).length;
+        return '✨ ' + n + ' von ' + r.zeilen.length + T(' Feldern sind richtig und leuchten grün. Verbessere die anderen einmal. Dann prüfe noch einmal.',
+                                                        ' Feldern sind richtig und leuchten grün. Verbessern Sie die anderen einmal. Dann prüfen Sie noch einmal.');
+      } };
   }
 };
 
@@ -3644,7 +3851,7 @@ function zeigeStart(){
     sichern(); reiterStand();
     zeigeStart(); zeigeAlleKarten();
     var weiter = treffer + 1 < K.length ? 'k' + (treffer + 1) : 'ende';
-    if (!sperre(treffer + 1) || weiter === 'ende') { zeigeKarte(weiter, true); return; }   /* direkt zur nächsten Karte */
+    if (weiter === 'ende' || !sperre(treffer + 1)) { zeigeKarte(weiter, true); return; }   /* direkt zur nächsten Karte (v11: Ende zuerst prüfen) */
     var f2 = $('karte-start').querySelector('.block:last-child .fb');
     if (f2) { f2.className = 'fb ok'; f2.textContent = '✅ Codewort angenommen – ' + R.karte + ' 1 bis ' + (treffer + 1) + ' gelten als geschafft.'
       + (testWort ? ' Testmodus ist wieder an.' : ''); }
@@ -3849,7 +4056,20 @@ function zeigeEnde(){
   var c = $('karte-ende'); c.innerHTML = '';
   var b = neu('div', 'block');
   b.appendChild(neu('p', 'eyebrow', '🏁 Ende'));
-  b.appendChild(neu('h2', '', 'Auswertung'));
+  var ohneAusw = STORY.auswertung === false, fest = STORY.party && endeErreicht();   /* v11, v12 */
+  if (fest) {
+    b.classList.add('party');
+    b.appendChild(neu('div', 'party-banner', STORY.partyText || '🎉 TOLL – du hast es geschafft! 🎉'));
+    var kf = ['#c1272d', '#2f5fa6', '#1e7d32', '#b8860b', '#c97a2e', '#1f7fb8'];
+    for (var q = 0; q < 40; q++) {
+      var kz = neu('span', 'konfetti', '');
+      kz.style.left = ((q * 37) % 100) + '%'; kz.style.background = kf[q % kf.length];
+      kz.style.animationDuration = (2.4 + (q % 5) * 0.35).toFixed(2) + 's';
+      kz.style.animationDelay = (-((q * 0.41) % 3)).toFixed(2) + 's';
+      b.appendChild(kz);
+    }
+  } else if (!ohneAusw) b.appendChild(neu('h2', '', 'Auswertung'));
+  else b.appendChild(neu('h2', '', alleFertig() ? 'Geschafft!' : 'Noch nicht ganz …'));
   var direkt = 0, umweg = 0, durch = 0, code = 0, tipps = 0, fertigN = 0;
   var ul = neu('ul', 'liste');
   K.forEach(function(k, i){
@@ -3864,7 +4084,11 @@ function zeigeEnde(){
     ul.appendChild(neu('li', '', '<span class="titel">' + (i + 1) + ' · ' + k.titel + '</span><br>' + text
       + (t ? ' · 💡 ' + t + (t === 1 ? ' Hinweis' : ' Hinweise') : '')));
   });
-  if (alleFertig()) b.appendChild(neu('div', 'geschichte', STORY.ende || ''));
+  if (endeErreicht()) b.appendChild(neu('div', 'geschichte', STORY.ende || ''));
+  if (ohneAusw) {                                                    /* v11: ohne Auswertung */
+    if (!alleFertig()) b.appendChild(neu('div', 'fazit offen', fertigN + ' von ' + K.length + ' ' + (R.karte === 'Türchen' ? 'Türchen' : 'Karten') + ' geschafft.'));
+    c.appendChild(b); return;
+  }
   b.appendChild(ul);
   var gewertet = K.length - code;
   var fz = alleFertig()

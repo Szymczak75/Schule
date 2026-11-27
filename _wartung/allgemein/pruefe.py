@@ -23,7 +23,7 @@ Was dieser Linter NICHT kann (bleibt Handarbeit bzw. Browsertest):
   - ob der Stand ein Neuladen wirklich vollständig übersteht (Browsertest: Seite
     bearbeiten, neu laden, vergleichen)
 
-Stand: 27.11.2026 (Story-Engine v12: Steinweg 'reihe' und Lückenfelder 'luecken'; Prüfung STORY: Teile/Lösungen, Zeilen;
+Stand: 27.11.2026 (Story-Engine v13: Antwort am Wegende bei 'kurs'/'fahrzeug'; v12: Steinweg 'reihe' und Lückenfelder 'luecken'; Prüfung STORY: Teile/Lösungen, Zeilen;
        Story-Engine v9: falsch gelöstes Rätsel bleibt sichtbar, Umweg mit Banner;
        Story-Engine v8: Symbolwand 'wand' – Runen in Nischen sortieren; Prüfung STORY:
        2–4 Nischen, 3–12 Zeichen, jede Nische gültig, bekannte und verschiedene Runen;
@@ -95,7 +95,7 @@ RBKA_MARKE = 'BAUSTEIN: Rückblick-KA-Engine'
 
 # Story-Engine (baustein_story.html, TEIL 2.11)
 STORY_TYP = 'Story'
-STORY_VERSION = 'v12'
+STORY_VERSION = 'v13'
 STORY_MARKE = 'BAUSTEIN: Story-Engine'
 STORY_ARTEN = ('zahl', 'bruch', 'term', 'text', 'wahl',                 # v1/v2
                'uhr', 'schloss', 'steck', 'felder', 'schalter',      # v3: Rätselgeräte
@@ -573,6 +573,20 @@ def pruefe(pfad):
                                             "gefunden %d – mehrere richtige: 'schalter' oder 'karten' mit mehr" % (kid, n_ok))
                         if not 2 <= n_opt <= 5:
                             fehler('STORY', "Karte %s: 'kurs' mit %d Optionen – vorgesehen sind 2 bis 5" % (kid, n_opt))
+                        # v13: beim Fahrzeug stehen die Antworten als Schilder am Wegende – lange Sätze passen dort nicht
+                        mo = re.search(r"\bmodus:\s*'([^']*)'", seg)
+                        if (not mo or mo.group(1) == 'fahrzeug'):
+                            texte = re.findall(r"\bt:\s*'((?:[^'\\]|\\.)*)'", opt.group(1))
+                            lang = [x for x in texte if len(re.sub(r'\\\(.*?\\\)|<[^>]*>', 'XXXX', x)) > 60]
+                            # Formeln brechen nicht um: bei 4–5 Wegen wird eine Spalte am Handy (≈ 90 px) zu schmal
+                            breit = [x for x in re.findall(r"\bm\('((?:[^'\\]|\\.)*)'\)", opt.group(1)) if len(x.replace(' ', '')) > 9]
+                            if breit and n_opt >= 4:
+                                hinweis('STORY', "Karte %s: 'kurs'/'fahrzeug' mit %d Wegen und breiter Formel (%s) – am Handy zu schmal; "
+                                                 "höchstens 3 Wege oder kürzere Terme" % (kid, n_opt, breit[0]))
+                            if lang:
+                                hinweis('STORY', "Karte %s: 'kurs'/'fahrzeug' mit langer Antwort (%d Zeichen) – die Antworten "
+                                                 "stehen seit v13 als Schilder am Wegende; kurz fassen oder modus 'gruppe'"
+                                        % (kid, max(len(x) for x in lang)))
                     for feld, erlaubt in (('modus', STORY_KURS_MODUS), ('fahrzeug', STORY_FAHRZEUGE),
                                           ('gelaende', STORY_GELAENDE)):
                         fm = re.search(r"\b%s:\s*'([^']*)'" % feld, seg)
@@ -583,6 +597,16 @@ def pruefe(pfad):
                         for w in re.findall(r"'([^']*)'", wm.group(1)):
                             if w not in STORY_WESEN:
                                 fehler('STORY', "Karte %s: unbekanntes Wesen '%s' bei 'kurs'" % (kid, w))
+                # v13: Skala (thermo) – 'marke' ist ein Wert; zu grob gewählt, steht keine Zahl an der Skala
+                for sm in re.finditer(r"skala:\s*\{\s*von:\s*(-?[\d.]+),\s*bis:\s*(-?[\d.]+),\s*schritt:\s*\[\s*(\d+)\s*,\s*(\d+)\s*\]"
+                                      r"(?:,\s*marke:\s*([\d.]+))?", t):
+                    von, bis, sa, sb = float(sm.group(1)), float(sm.group(2)), int(sm.group(3)), int(sm.group(4))
+                    mk = float(sm.group(5) or 1)
+                    n_mk = sum(1 for i in range(int(round((bis - von) * sb / sa)) + 1)
+                               if abs((von + i * sa / sb) / mk - round((von + i * sa / sb) / mk)) < 1e-9)
+                    if n_mk < 3:
+                        hinweis('STORY', "Karte %s: Skala von %g bis %g mit marke %g – nur %d beschriftete Marke(n); "
+                                         "'marke' ist ein Wert (z. B. 0.1), keine Schrittzahl" % (kid, von, bis, mk, n_mk))
                 # v8: Symbolwand – 2 bis 4 Nischen, 3 bis 12 Zeichen, jede Nische gültig, Runen bekannt und verschieden
                 for wm in re.finditer(r"\bart:\s*'wand'", t):
                     anf = t.rfind('raetsel:', 0, wm.start())
