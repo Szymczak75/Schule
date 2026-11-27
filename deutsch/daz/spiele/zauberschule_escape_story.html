@@ -61,7 +61,8 @@
         (sperre() wurde für eine Karte hinter der letzten aufgerufen). Abwärtskompatibel.
      v12 (Steinweg und Lückenfelder): 'reihe' – Teile (Wörter, Satzglieder, Schritte) als Trittsteine oder
         Holzplanken in die richtige Reihenfolge legen, alle richtigen Reihenfolgen in soll; 'luecken' – mehrere
-        Eingabefelder in einem Rätsel, jedes mit eigener Lösung. Beide mit Korrekturrunde. Abwärtskompatibel.
+        Eingabefelder in einem Rätsel, jedes mit eigener Lösung. Beide mit Korrekturrunde. STORY.endeNachLetzter:
+        true zeigt Schluss und Party schon, wenn die letzte Karte geschafft ist. Abwärtskompatibel.
      ===================================================================== -->
 <html lang="de">
 <head>
@@ -1175,6 +1176,7 @@ var STORY = {
   erwischt: lehrerin('Der Zauberstab wird warm und leuchtet. Frau Szymtatumoll-Kieswalf erscheint im Licht und lächelt: '
           + '„Keine Angst! Fehler sind nicht schlimm. Ich erkläre es dir. Dann geht ihr weiter.“'),
   party: true,
+  endeNachLetzter: true,   /* Schluss und Party, sobald das Lösungswort im Finale stimmt */
   partyText: '🎉 SUPER – du hast Frau Szymtatumoll-Kieswalf gerettet! 🎉',
   karten: [
   /* ---------- Raum 1 · Präsens ---------- */
@@ -1652,6 +1654,8 @@ function zk(i){
 }
 function fertig(i){ var s = zk(i).st; return s === 'ok' || s === 'durch' || s === 'code'; }
 function alleFertig(){ for (var i = 0; i < K.length; i++) if (!fertig(i)) return false; return K.length > 0; }
+/* v12: Schluss der Geschichte (STORY.ende, Party) – mit STORY.endeNachLetzter schon, wenn die letzte Karte geschafft ist */
+function endeErreicht(){ return STORY.endeNachLetzter && K.length ? fertig(K.length - 1) : alleFertig(); }
 /* Warum ist Karte i (noch) zu? '' = offen */
 function sperre(i){
   var p = phase();
@@ -3922,7 +3926,7 @@ function zeigeEnde(){
   var c = $('karte-ende'); c.innerHTML = '';
   var b = neu('div', 'block');
   b.appendChild(neu('p', 'eyebrow', '🏁 Ende'));
-  var ohneAusw = STORY.auswertung === false, fest = STORY.party && alleFertig();   /* v11 */
+  var ohneAusw = STORY.auswertung === false, fest = STORY.party && endeErreicht();   /* v11, v12 */
   if (fest) {
     b.classList.add('party');
     b.appendChild(neu('div', 'party-banner', STORY.partyText || '🎉 TOLL – du hast es geschafft! 🎉'));
@@ -3950,7 +3954,7 @@ function zeigeEnde(){
     ul.appendChild(neu('li', '', '<span class="titel">' + (i + 1) + ' · ' + k.titel + '</span><br>' + text
       + (t ? ' · 💡 ' + t + (t === 1 ? ' Hinweis' : ' Hinweise') : '')));
   });
-  if (alleFertig()) b.appendChild(neu('div', 'geschichte', STORY.ende || ''));
+  if (endeErreicht()) b.appendChild(neu('div', 'geschichte', STORY.ende || ''));
   if (ohneAusw) {                                                    /* v11: ohne Auswertung */
     if (!alleFertig()) b.appendChild(neu('div', 'fazit offen', fertigN + ' von ' + K.length + ' ' + (R.karte === 'Türchen' ? 'Türchen' : 'Karten') + ' geschafft.'));
     c.appendChild(b); return;

@@ -141,6 +141,9 @@ erst nach einem Fehler erscheint.
 
 **10. Kein Leeren-Button**, Aufgaben nach einer falschen Antwort dauerhaft gesperrt.
 
+**10a. Story: Umweg-Rätsel schlicht gestaltet** (nur `wahl`-Knöpfe), obwohl das Haupträtsel ein Gerät hat –
+Umwege genauso schön gestalten wie das Haupträtsel (TEIL 3, Story-Engine v12).
+
 **11. Aufklappbare Tipps nehmen die Rechnung vorweg** (z. B. bereits ausgerechnete
 Teilvektoren, oder das Ergebnis des vorherigen Schritts im Tipp des nächsten).
 
@@ -362,6 +365,30 @@ Diese Punkte standen offen und sind inzwischen als Regel in
   durchspielen. Seitdem regelt TEIL 0 Nr. 26 zwei Stufen: **erst die Dateien im Chat zeigen
   und auf das OK warten, dann** Branch und Pull Request. Kein Push vor dem OK.
 
+- **Story-Engine v12 – Steinweg, Lückenfelder, Umwege gestalten** (27.11.2026, DaZ-Escape-Room
+  „Rettet Frau Szymtatumoll-Kieswalf!“): Rückmeldungen der Lehrkraft und was daraus allgemein gilt:
+  1. **Umweg-Rätsel waren langweilig** – Haupträtsel mit Steinwand, Umwege nur mit schlichten
+     `wahl`-Knöpfen. Umwege nutzen dasselbe Gerät wie das Haupträtsel oder ein anderes passendes Gerät
+     (`karten`, `kurs`, `wand`, `reihe`, `schalter`, `luecken` …); `wahl` nur, wenn wirklich nichts passt.
+  2. **Satzbau ließ sich nicht als Sortieraufgabe stellen** – nur Tippen oder Antippen eines fertigen
+     Satzes. Seit v12: `reihe` (Wort-Steine bzw. Holzplanken in Reihenfolge legen). In `soll` **alle**
+     sprachlich richtigen Reihenfolgen aufnehmen (Vorfeld wechselt, Mittelfeld-Varianten, Satzklammer,
+     getrennt/zusammen geschriebene Verbteile) – am besten per Skript erzeugen und die Liste der
+     Lehrkraft zeigen. `pruefe.py` meldet Lösungen, die nicht genau aus den Teilen bestehen.
+  3. **Mehrere Antworten in einem Rätsel** (drei kaputte Stufen = drei Zahlwörter) – seit v12 `luecken`
+     statt drei Wörter in ein Feld.
+  4. **Uhrzeiten eindeutig** – bei digitaler Eingabe nur eine Tageszeit zulassen und sie im Text und an
+     der Uhr nennen („☀️ vormittags“); nicht 2:45 und 14:45 gleichzeitig. Uhren nicht schematisch
+     zeichnen (Turmuhr, Pendeluhr, Taschenuhr, verzierte Zeiger), Minutenzeiger kürzer als der Zahlenring.
+  5. **Die erklärende Figur zeigen** – erklärt eine Figur den Lösungsweg (`erwischt`, `wegTitel`), steht
+     ihr Bild daneben (Porträt im Datenblock).
+  6. **Schluss mit Lösungswort** – fragt die letzte Karte das Lösungswort aus allen Räumen ab,
+     `STORY.endeNachLetzter: true` setzen; sonst erscheinen Schlussbild und Party in der Lehreransicht nie.
+  7. **Bildreihen auf Konsistenz prüfen** – vor dem Einbau jedes Bild mit den Figurenblättern vergleichen
+     (Farbe, Kleidung, Anzahl): keine fremden Wesen (Greif, Gartenzwerg), keine Doppelgänger, Pflichtmerkmale
+     (Pullover, Schal) da. Bildprompts nennen jede Figur einzeln mit Merkmalen und schließen fremde Wesen aus
+     („No other creatures, each appearing only once“). Echte Namen und Begriffe, die an Disney/Harry Potter
+     erinnern („genie“, blauhäutiger Flaschengeist), führen zu „Third-Party-Content“-Sperren.
 - **Story-Engine v9 – Umweg sichtbar** (27.11.2026, alle 11 `_story`-Seiten): Falsch gelöste Rätsel
   verschwanden komplett, nur ein roter Streifen blieb; das Umweg-Rätsel sah aus wie das alte, der Wechsel
   fiel kaum auf. Jetzt bleibt das alte Rätsel vollständig stehen (rot, gesperrt, eigene Antwort sichtbar,
