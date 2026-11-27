@@ -362,6 +362,11 @@ Diese Punkte standen offen und sind inzwischen als Regel in
   durchspielen. Seitdem regelt TEIL 0 Nr. 26 zwei Stufen: **erst die Dateien im Chat zeigen
   und auf das OK warten, dann** Branch und Pull Request. Kein Push vor dem OK.
 
+- **Story-Engine v9 – Umweg sichtbar** (27.11.2026, alle 11 `_story`-Seiten): Falsch gelöste Rätsel
+  verschwanden komplett, nur ein roter Streifen blieb; das Umweg-Rätsel sah aus wie das alte, der Wechsel
+  fiel kaum auf. Jetzt bleibt das alte Rätsel vollständig stehen (rot, gesperrt, eigene Antwort sichtbar,
+  Lösung nicht verraten), davor steht ein Banner „Neues Rätsel – Umweg n von 2“, das Umweg-Rätsel ist
+  orange abgesetzt (🧭). Gleiche Gelegenheit: Bruchurwald von Engine v4 auf v9 gehoben.
 - **Story-Engine v7 – Wegwahl** (26.11.2026, Escape Rooms Steckbrief Q1 und Zellreise EF): Antippen einer
   Liste wirkte wie ein Test, nicht wie eine Entscheidung in der Geschichte. Neue Antwortart `kurs`: Fahrzeug
   mit Kurslinien und Steuerrad, Personen der Gruppe oder Wesen schlagen Wege vor – nur bei genau einer
