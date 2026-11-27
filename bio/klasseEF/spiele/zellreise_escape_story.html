@@ -1563,6 +1563,10 @@ var FELD = {};   /* aktive Formeltool-Felder je Rätsel-ID */
 function lies(){ try { var r = sessionStorage.getItem(KEY); return r ? JSON.parse(r) : null; } catch (e) { return null; } }
 function sichern(){ try { sessionStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
 function setzeFormel(el){
+  /* v9: nur eingehängte Elemente setzen – MathJax misst losgelöste Knoten mit 0 und schreibt
+     width="NaNex"; Safari zeigt die Formel dann riesengroß über der ganzen Seite. Losgelöste Teile
+     setzt der Aufruf für die ganze Karte, sobald sie eingehängt ist. */
+  if (!el || !el.isConnected) return;
   if (window.MathJax && MathJax.typesetPromise) { try { MathJax.typesetPromise([el]); } catch (e) {} }
   /* MathJax blockiert (Schul-WLAN): Notfall-Anzeige für neu aufgebaute Karten erneut anstoßen –
      sie hört nur auf 'load' und tut nichts, sobald MathJax da ist. */
@@ -2624,7 +2628,7 @@ var GERAET = {
         ? T('Tippe eine Karte an, um sie aufzudecken. Tippe sie noch einmal an, um sie zu wählen.',
             'Tippen Sie eine Karte an, um sie aufzudecken. Tippen Sie sie noch einmal an, um sie zu wählen.')
         : 'Ausgewählt: ' + nw + (nw === 1 ? ' Karte' : ' Karten') + (r.mehr ? T(' – wähle alle passenden.', ' – wählen Sie alle passenden.') : '.');
-      if (window.MathJax && MathJax.typesetPromise) { try { MathJax.typesetPromise([faecher]); } catch (e) {} }
+      if (faecher.isConnected && window.MathJax && MathJax.typesetPromise) { try { MathJax.typesetPromise([faecher]); } catch (e) {} }   /* v9: nur eingehängt */
     }
     zeichneKarten();
     return { el:el,

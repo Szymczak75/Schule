@@ -367,6 +367,9 @@ Diese Punkte standen offen und sind inzwischen als Regel in
   fiel kaum auf. Jetzt bleibt das alte Rätsel vollständig stehen (rot, gesperrt, eigene Antwort sichtbar,
   Lösung nicht verraten), davor steht ein Banner „Neues Rätsel – Umweg n von 2“, das Umweg-Rätsel ist
   orange abgesetzt (🧭). Gleiche Gelegenheit: Bruchurwald von Engine v4 auf v9 gehoben.
+  Dazu: riesige Formeln (Safari/iPad) in Hinweisen gelöster Rätsel nach dem Neuladen – `setzeFormel`
+  lief auf noch nicht eingehängten Knoten, MathJax schrieb `width="NaNex"`. Formeln nur in eingehängten
+  Elementen setzen (`el.isConnected`), sonst setzt der Aufruf für die ganze Karte sie danach.
 - **Story-Engine v7 – Wegwahl** (26.11.2026, Escape Rooms Steckbrief Q1 und Zellreise EF): Antippen einer
   Liste wirkte wie ein Test, nicht wie eine Entscheidung in der Geschichte. Neue Antwortart `kurs`: Fahrzeug
   mit Kurslinien und Steuerrad, Personen der Gruppe oder Wesen schlagen Wege vor – nur bei genau einer
