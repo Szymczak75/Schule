@@ -94,7 +94,7 @@ RBKA_MARKE = 'BAUSTEIN: Rückblick-KA-Engine'
 
 # Story-Engine (baustein_story.html, TEIL 2.11)
 STORY_TYP = 'Story'
-STORY_VERSION = 'v9'
+STORY_VERSION = 'v10'
 STORY_MARKE = 'BAUSTEIN: Story-Engine'
 STORY_ARTEN = ('zahl', 'bruch', 'term', 'text', 'wahl',                 # v1/v2
                'uhr', 'schloss', 'steck', 'felder', 'schalter',      # v3: Rätselgeräte
