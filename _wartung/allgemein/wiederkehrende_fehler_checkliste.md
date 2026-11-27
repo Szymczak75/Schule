@@ -367,6 +367,10 @@ Diese Punkte standen offen und sind inzwischen als Regel in
   mit Kurslinien und Steuerrad, Personen der Gruppe oder Wesen schlagen Wege vor – nur bei genau einer
   richtigen Antwort. `pruefe.py` meldet als `STORY`: nicht genau eine richtige Option, weniger als 2 oder
   mehr als 5 Optionen, unbekannte `modus`/`fahrzeug`/`gelaende`/`wesen`.
+- **MathJax nie auf Elemente anwenden, die noch nicht im Dokument stehen** (27.11.2026): sonst misst
+  MathJax (SVG-Ausgabe) die Schriftgröße als `NaN` und die Formel wird riesig über die Seite gelegt
+  (Symbolwand, Story v8). Formeln erst setzen, wenn die Karte eingehängt ist (`setzeFormel`). Beim
+  Testen MathJax nicht nur blockieren, sondern einmal mit echtem MathJax laden (z. B. lokal aus npm).
 - **Szenenbilder nie verzerren** (26.11.2026): Bilder beim Verkleinern immer im Seitenverhältnis
   des Originals lassen (nur die Breite festlegen, z. B. quadratisch 500 px, Querformat 600 px).
   Nie auf eine feste Breite *und* Höhe zwingen; im `<img>` immer `height:auto`.
