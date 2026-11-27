@@ -370,6 +370,14 @@ Diese Punkte standen offen und sind inzwischen als Regel in
   Dazu: riesige Formeln (Safari/iPad) in Hinweisen gelöster Rätsel nach dem Neuladen – `setzeFormel`
   lief auf noch nicht eingehängten Knoten, MathJax schrieb `width="NaNex"`. Formeln nur in eingehängten
   Elementen setzen (`el.isConnected`), sonst setzt der Aufruf für die ganze Karte sie danach.
+- **Werbeseite mit Hub-Navigation** (27.11.2026, Escape Room MCG-Funken): Die Seite kommt auf die Schulhomepage;
+  Dino, 🏠- und QR-Knopf und die Leiste führten auf den Lernseiten-Hub. Seitdem `<meta name="rahmen" content="ohne">`
+  (TEIL 3.6): ohne Navigation und Dino, `pruefe.py` überspringt NAV/TREX.
+- **Story-Engine v11 – Party-Ende** (27.11.2026, Escape Room MCG-Funken): Am Ende fehlte ein Jubel, und die
+  Auswertung (direkt / Umweg / Hinweise) passte nicht zu einer Werbeseite für Viertklässler. Seitdem
+  `STORY.party` (Banner + Konfetti) und `STORY.auswertung: false`.
+  Dabei behoben: Das Codewort der **letzten** Karte warf einen Skriptfehler (`sperre()` hinter der letzten Karte);
+  ältere Story-Seiten haben den Fehler noch – beim nächsten Baustein-Tausch mit erledigt.
 - **Story-Engine v10 – Zielschilder** (27.11.2026, Escape Room MCG-Funken): Beim Ballon zu den Kontinenten standen an
   den Kurslinien nur Nummern; die Kinder mussten zwischen Bild und Liste hin- und herschauen. Seitdem `ziele: true`
   bei `kurs`/`fahrzeug`. Schilder bleiben im Rahmen (Abstand 16 px). Inhaltlich prüfen, ob Emojis zum Ort passen
