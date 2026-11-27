@@ -187,6 +187,7 @@ Höchstpunkte gesamt: 34
 Richtige Reihenfolge (Karten-id): kb, kw, kr, kq, kx, km, kd
 Punkte: Standardregel Sortieren (längste richtige Kette − 1, max. 6 P.)
 ### Teil 3b (freitext) – 4 P.
+Musterlösung: … (ein bis drei Sätze in Schülersprache – erscheint in der Musterlösung zum Austeilen)
 Erwartete Inhalte (je 1 P.): …
 Fachbegriffe, die richtig geschrieben sein müssen: …
 ```
@@ -278,7 +279,7 @@ ich eine gute Note?" –, dann gilt:
      („hilfsmittelfrei"), darüber im zweiten. Notengrenzen stellt die Lehrkraft in
      „Einstellungen" ein.
    - **`Gesamt_EXAM_<thema>.pdf`** – Deckblatt mit allen Codes und Auffälligkeiten, dann je
-     Code **ein Korrekturblatt**, kompakt, meist **2 Seiten**. Es enthält **alle
+     Code **ein Korrekturblatt**, **kompakt** (die Seitenzahl hängt von der Testlänge ab). Es enthält **alle
      Aufgabenstellungen**: Überschrift, Einleitungstext (z. B. die Ausgangslage) und Auftrag –
      die Antworten hängen nie in der Luft (Warnkasten, Sperrprotokoll;
      Auswahl mit ✔/✘/○; Sortieren: falsch gelegte Karten mit „→ gehört auf Platz n“;
@@ -292,6 +293,12 @@ ich eine gute Note?" –, dann gilt:
    - **`Vorbewertung_EXAM_<thema>.md`** – Punktetabelle und alle Begründungen.
 5. Claude nennt in der Antwort: Warnungen (Manipulation, Sperren, ungültige Codes) zuerst, dann
    die Punktetabelle und offene Entscheidungen für die Lehrkraft.
+6. Sind alle Entscheidungen getroffen, erzeugt Claude die **Musterlösung zum Austeilen**:
+   `python3 exam_vorschau.py --musterloesung <testseite>.html schluessel_<thema>.json
+   erwartungshorizont_<thema>.md musterloesung_<thema>.html Musterloesung_<thema>.pdf` –
+   Aufgabenstellungen (Einleitung, Abbildungen, Auftrag) mit Lösungen, ohne Punkte und
+   Bewertungsregeln. Freitexte kommen aus den Zeilen „Musterlösung: …“ im Erwartungshorizont;
+   fehlt eine, warnt das Skript.
 
 ### Danach (Lehrkraft)
 Punkte in Excel prüfen und ändern; in „Schülerliste" die Codes durch die Namen ersetzen
@@ -321,7 +328,7 @@ Punkte in Excel prüfen und ändern; in „Schülerliste" die Codes durch die Na
 |---|---|---|
 | `baustein_exam.html` | `_wartung/exam/` | Engine + Beispiel-Inhalt mit allen Teil-Typen |
 | `exam_bauen.py` | `_wartung/exam/` | setzt EXAM-INHALT und Meta-Angaben in den Baustein |
-| `exam_vorschau.py` | `_wartung/exam/` | Entwickleransicht mit Musterlösungen (Stufe 1, nie ins Repo) |
+| `exam_vorschau.py` | `_wartung/exam/` | Entwickleransicht mit Musterlösungen (Stufe 1, nie ins Repo); mit `--musterloesung` die Musterlösung als PDF zum Austeilen |
 | `exam_auswerten.py` | `_wartung/exam/` | Vorbewertung, Excel, Gesamt-PDF (Abschnitt 7) |
 | `Punkteerfassung_Vorlage.xlsx` | `_wartung/exam/` | leere Excel-Vorlage der Lehrkraft |
 | `anweisung_exam.md` | `_wartung/exam/` | diese Anweisung |

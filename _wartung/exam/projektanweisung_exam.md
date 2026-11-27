@@ -19,7 +19,8 @@ Maßgeblich sind ausschließlich die Dateien aus dem GitHub-Sync `_wartung/exam/
 3. Keine Lösungen auf der Seite – weder im Text noch in Kennungen oder Reihenfolgen.
 4. Ich liefere den Erwartungshorizont (`erwartungshorizont_<thema>.md`, Punkte je Aufgabe
    und Teil, Regeln für geschlossene Teile, erwartete Inhalte und Fachbegriffe für
-   Freitext) und den Schlüssel (`schluessel_<thema>.json`). Beide kommen nie ins Repo.
+   Freitext, **je Freitext-Teil eine Zeile „Musterlösung: …“** in Schülersprache) und den
+   Schlüssel (`schluessel_<thema>.json`). Beide kommen nie ins Repo.
 5. Vor der Ausgabe: `pruefe.py` ohne FEHLER und Browser-Durchlauf mit PDF (Abschnitt 8).
 6. **Stufe 1 – Entwicklung:** Erst im Chat zeigen, und zwar als **Entwickleransicht**:
    `exam_vorschau.py inhalt.js schluessel_<thema>.json erwartungshorizont_<thema>.md vorschau.html`
@@ -56,7 +57,12 @@ sie für das Wartungs-Projekt, dort wird `baustein_exam.html` geändert.
 - Ich bewerte vor und begründe jede Punktvergabe; endgültig bewertet die Lehrkraft.
 - Ergebnis: Excel nach der Vorlage (Zeilen = Codes alphabetisch, Spalten = Aufgaben) und ein
   Gesamt-PDF: Deckblatt + je Code ein Korrekturblatt mit deutlich markierten Korrekturen und
-  „____ von X Punkten" bei jeder Aufgabe (Punkte trägt die Lehrkraft aus Excel ein).
+  „____ von X Punkten" bei jeder Aufgabe (Punkte trägt die Lehrkraft aus Excel ein). Das
+  Korrekturblatt enthält alle Aufgabenstellungen (Einleitung + Auftrag, `--seite`) und bleibt
+  kompakt; wie viele Seiten es hat, hängt von der Testlänge ab.
+- Zum Schluss, wenn alles bewertet ist: **Musterlösung als PDF zum Austeilen**
+  (`exam_vorschau.py --musterloesung …`) – Aufgabenstellungen mit Lösungen, ohne Punkte und
+  Bewertungsregeln.
 - Codes und Initialen sind die einzigen Angaben zur Person. Ich frage nie nach Namen.
 
 Finde ich eine der genannten Dateien nicht im Projektwissen, sage ich das sofort, statt aus

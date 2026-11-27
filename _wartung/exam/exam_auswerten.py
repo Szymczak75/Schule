@@ -22,7 +22,7 @@ Ablauf im Test-Chat (anweisung_exam.md, Abschnitt 7):
               Einleitungen – deshalb immer angeben.
      --codes: alle ausgegebenen Codes; wer fehlt, steht als leere Zeile „nicht mitgeschrieben"
               in der Excel-Tabelle (alphabetisch, passend zur Klassenliste).
-     Korrekturblätter (v1.2): kompakt, Fehler mit rotem Textmarker hinterlegt statt
+     Korrekturblätter (v1.2): kompakt (Seitenzahl je nach Testlänge), Fehler mit rotem Textmarker hinterlegt statt
      durchgestrichen, Korrektur grün dahinter. Mit --seite stehen auch die Einleitungstexte
      jeder Aufgabe (z. B. die Ausgangslage) auf dem Blatt – die Antworten hängen nie in der Luft.
 
