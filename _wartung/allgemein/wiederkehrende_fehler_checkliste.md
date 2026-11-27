@@ -365,6 +365,13 @@ Diese Punkte standen offen und sind inzwischen als Regel in
   durchspielen. Seitdem regelt TEIL 0 Nr. 26 zwei Stufen: **erst die Dateien im Chat zeigen
   und auf das OK warten, dann** Branch und Pull Request. Kein Push vor dem OK.
 
+- **Story-Engine v13 – Antwort am Wegende** (27.11.2026, alle `_story`-Seiten): Beim Wegwahl-Gerät mit Fahrzeug
+  standen die Antworten in einer Tafel unter dem Bild, die Linien trugen nur Nummern, und ◀ ▶ oder Antippen der Tafel
+  machten das Steuerrad überflüssig. Wunsch der Lehrkraft: Die Lösungen stehen **am Ende der Wege**, gewählt wird
+  **nur am Steuerrad**, keine Rechts-/Links-Knöpfe. Seit v13 so umgesetzt; Antworten fürs Fahrzeug kurz halten,
+  lange Sätze als `gruppe`/`wesen` (Hinweis `STORY` in `pruefe.py`). Dabei behoben: Der Steinweg (`reihe`) konnte die
+  Teile beim Mischen schon richtig herum auslegen (bei 3 Buchstaben jedes sechste Mal) – Lösung in der Startsortierung
+  (TEIL 0 Nr. 19). Jedes Mischen von Antworten muss prüfen, dass die Ausgangslage keine Lösung ist.
 - **Story-Engine v12 – Steinweg, Lückenfelder, Umwege gestalten** (27.11.2026, DaZ-Escape-Room
   „Rettet Frau Szymtatumoll-Kieswalf!“): Rückmeldungen der Lehrkraft und was daraus allgemein gilt:
   1. **Umweg-Rätsel waren langweilig** – Haupträtsel mit Steinwand, Umwege nur mit schlichten
