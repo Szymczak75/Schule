@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- =====================================================================
-     BAUSTEIN: Story (_story)  v11, 27.11.2026
+     BAUSTEIN: Story (_story)  v12, 27.11.2026
      Escape Room, Adventskalender, Detektivgeschichte oder freie Story: eine Geschichte
      in mehreren Karten, jede Karte endet mit einem Rätsel.
      Richtig → weiter zur nächsten Karte (mit Codewort zum späteren Wiedereinstieg).
@@ -59,6 +59,9 @@
         auf der Endkarte; STORY.auswertung: false blendet die Auswertung (Liste und Fazit) aus – z. B. für
         Kennenlern- und Werbeseiten. Behoben: Das Codewort der letzten Karte brach das Skript ab
         (sperre() wurde für eine Karte hinter der letzten aufgerufen). Abwärtskompatibel.
+     v12 (Steinweg und Lückenfelder): 'reihe' – Teile (Wörter, Satzglieder, Schritte) als Trittsteine oder
+        Holzplanken in die richtige Reihenfolge legen, alle richtigen Reihenfolgen in soll; 'luecken' – mehrere
+        Eingabefelder in einem Rätsel, jedes mit eigener Lösung. Beide mit Korrekturrunde. Abwärtskompatibel.
      ===================================================================== -->
 <html lang="de">
 <head>
@@ -395,6 +398,33 @@ mjx-container{max-width:100%;overflow-x:auto;}
 @media (max-width:520px){ .wand{grid-template-columns:1fr !important;}   /* schmal: Nischen untereinander, Name links */
   .nische{flex-direction:row;min-height:4.4rem;border-radius:2.2rem .6rem .6rem 2.2rem;padding:.4rem .6rem;}
   .nische-name{margin-top:0;flex:none;max-width:60%;hyphens:manual;-webkit-hyphens:manual;overflow-wrap:anywhere;} .nische-platz{margin-top:0;flex:1;} }
+/* v12: Steinweg (reihe) – Teile in die richtige Reihenfolge legen; Stil 'stein' oder 'holz' */
+.reihe-weg{display:flex;flex-wrap:wrap;align-items:center;gap:.45rem;min-height:5.2rem;padding:.8rem .7rem;border:3px solid #1c1613;border-radius:1rem;
+  background:radial-gradient(ellipse 60% 40% at 30% 30%,rgba(255,255,255,.18),transparent 70%),linear-gradient(160deg,#4f7f93,#2f5868 55%,#1d3a46);
+  box-shadow:inset 0 6px 14px rgba(0,0,0,.45),0 4px 10px rgba(0,0,0,.3);}
+.reihe.holz .reihe-weg{background:repeating-linear-gradient(90deg,rgba(0,0,0,.18) 0 2px,transparent 2px 46px),linear-gradient(#6b4a2a,#4a3018);}
+.reihe-platz{display:inline-flex;align-items:center;justify-content:center;min-width:2.6rem;min-height:2.6rem;border:2px dashed rgba(255,255,255,.55);
+  border-radius:.6rem;color:#fdf3d9;font-weight:700;font-size:1rem;}
+.reihe-haufen{display:flex;flex-wrap:wrap;justify-content:center;gap:.55rem;margin:.8rem 0 .3rem;min-height:3.4rem;padding:.6rem;border-radius:1rem;
+  background:linear-gradient(#e9dcc0,#d6c39a);border:2px solid #8a6a3a;}
+.reihe-stein{position:relative;min-height:48px;padding:.55rem .9rem;font:inherit;font-size:1.05rem;font-weight:700;color:#22303f;cursor:pointer;
+  font-family:Georgia,'Palatino Linotype',serif;border:2px solid #4a4038;border-radius:1.1rem .8rem 1.2rem .7rem;
+  background:radial-gradient(ellipse 70% 50% at 35% 30%,#f3efe8,#cfc6ba 60%,#a99e90);box-shadow:inset 0 -3px 0 rgba(0,0,0,.25),0 3px 6px rgba(0,0,0,.35);}
+.reihe.holz .reihe-stein{border-color:#4a3018;border-radius:.35rem;color:#2a1a05;
+  background:repeating-linear-gradient(0deg,rgba(90,60,20,.12) 0 3px,transparent 3px 7px),linear-gradient(#f0d9a8,#d4ad6a);}
+.reihe-stein.drin{box-shadow:0 0 0 3px #5cc8ef,0 3px 6px rgba(0,0,0,.4);}
+.reihe-stein.fest{box-shadow:0 0 0 3px #3fd27f,0 0 12px rgba(63,210,127,.7);cursor:default;}
+.reihe-stein:disabled{cursor:default;}
+.geraet.geloest .reihe-stein{box-shadow:0 0 0 3px #3fd27f;}
+.reihe-nr{position:absolute;top:-.55rem;left:-.45rem;min-width:1.3rem;height:1.3rem;border-radius:50%;background:#1f4680;color:#fff;font:700 .8rem/1.3rem system-ui,sans-serif;text-align:center;}
+/* v12: Lückenfelder (luecken) – mehrere Eingaben in einem Rätsel */
+.luecken{display:grid;gap:.6rem;}
+.luecke{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem;padding:.55rem .7rem;border:2px solid #8a6a3a;border-radius:.8rem;
+  background:linear-gradient(#f7ecd2,#e8d6ad);}
+.luecke-vor,.luecke-nach{font-weight:700;font-size:1.05rem;color:#2a1a05;}
+.luecke input{flex:1 1 11rem;min-width:0;min-height:48px;font-size:1.1rem;padding:.35rem .6rem;border:2px solid #4a3208;border-radius:.5rem;background:#fffdf6;}
+.luecke.fest{border-color:#16934d;box-shadow:0 0 0 2px #3fd27f;}
+.luecke.fest input{background:#eafaf0;}
 @media (prefers-reduced-motion:reduce){ .funkeln,.rolle > .ziffer.klick,.wuerfel.rollt{animation:none;} .spielkarte,.kurs-rad,.kurs-fahrzeug,.kurs-figur{transition:none;} }
 .erwischt{border-left-color:var(--ink);}
 /* v4: Szenenbilder in Geschichte, Umweg, erwischt und Ende (als data-URI im Datenblock, TEIL 8.1) */
@@ -1066,6 +1096,11 @@ function m(t){
                             figur: { form: 'steine', zeilen: 3, spalten: 4 } (Leuchtsteine, v4) |
                                    { form: 'kreis', teile: 8 } | { form: 'rechteck', zeilen: 3, spalten: 4 }
                             richtig, wenn eingefärbt : alle Felder = soll (jede Anordnung zählt)
+                 'reihe'    (v12) Steinweg: teile: ['Heute', 'wollen', …] in die richtige Reihenfolge legen;
+                            soll: ['Heute wollen wir …', …] = ALLE richtigen Reihenfolgen als Text
+                            (ohne Leerzeichen/Satzzeichen/Groß-klein verglichen); stil: 'stein' | 'holz'
+                 'luecken'  (v12) mehrere Felder: zeilen: [{ vor:'32 =', soll:['zweiunddreißig'], nach:'' }, …]
+                            (2–6 Zeilen, jede wird wie 'text' verglichen)
                  'schalter' Hebel: alle passenden umlegen  schalter: [{ t:'…', ok:true }, { t:'…' }]
                             (wird gemischt, 4.3; richtig nur, wenn genau die ok-Hebel auf I stehen)
                  steck und schalter (v4): nach dem ersten falschen Prüfen einmal korrigieren, erst
@@ -1264,7 +1299,7 @@ var STORY = {
 
 <script>
 /* ============================================================
-   BAUSTEIN: Story-Engine (v11, 27.11.2026) – unverändert übernehmen
+   BAUSTEIN: Story-Engine (v12, 27.11.2026) – unverändert übernehmen
    Baut aus dem Objekt STORY: Startkarte (Einleitung, Anleitung, Zeitraum, Einstieg per
    Codewort) → je Karte Geschichte + Rätsel → Endkarte mit Auswertung.
    Ablauf einer Karte:  Haupträtsel richtig → geschafft (direkter Weg).
@@ -1444,7 +1479,14 @@ var HINWEIS = {
   leerWand: T('Setze zuerst Runen an die Wand: Tafel antippen, dann die Nische antippen.',
               'Setzen Sie zuerst Runen an die Wand: Tafel antippen, dann die Nische antippen.'),
   halbWand: T('Es liegen noch Tafeln ohne Platz an der Wand. Setze alle Runen. Das kostet keinen Versuch.',
-              'Es liegen noch Tafeln ohne Platz an der Wand. Setzen Sie alle Runen. Das kostet keinen Versuch.')
+              'Es liegen noch Tafeln ohne Platz an der Wand. Setzen Sie alle Runen. Das kostet keinen Versuch.'),
+  /* v12 */
+  leerReihe: T('Lege zuerst Teile auf den Weg: Tippe sie in der richtigen Reihenfolge an.',
+               'Legen Sie zuerst Teile auf den Weg: Tippen Sie sie in der richtigen Reihenfolge an.'),
+  halbReihe: T('Es liegen noch Teile neben dem Weg. Lege alle Teile. Das kostet keinen Versuch.',
+               'Es liegen noch Teile neben dem Weg. Legen Sie alle Teile. Das kostet keinen Versuch.'),
+  halbLuecken: T('Es ist noch ein Feld leer. Fülle alle Felder aus. Das kostet keinen Versuch.',
+                 'Es ist noch ein Feld leer. Füllen Sie alle Felder aus. Das kostet keinen Versuch.')
 };
 
 /* ---------- Rätselgeräte (v3, Fantasie-Paket v4) ----------
@@ -1652,12 +1694,39 @@ function bewerteGeraet(r, a){
     if (gesetzt < r.zeichen.length) return 'halbWand';
     return r.zeichen.every(function(o, k){ return wa[k] === o.n; }) ? 'ok' : 'falsch';
   }
+  if (art === 'reihe') {                                        /* v12: Steinweg */
+    var re = a && a.reihe ? a.reihe : [];
+    if (!re.length) return 'leerReihe';
+    if (re.length < r.teile.length) return 'halbReihe';
+    var satz = norm(re.map(function(k){ return r.teile[k]; }).join(' '));
+    return (r.soll || []).some(function(x){ return norm(x) === satz; }) ? 'ok' : 'falsch';
+  }
+  if (art === 'luecken') {                                      /* v12: Lückenfelder */
+    var lu = a && a.luecken ? a.luecken : [];
+    var voll = r.zeilen.map(function(x, k){ return !!norm(lu[k]); });
+    if (!voll.some(Boolean)) return 'leer';
+    if (!voll.every(Boolean)) return 'halbLuecken';
+    return r.zeilen.every(function(x, k){ return luckeRichtig(x, lu[k]); }) ? 'ok' : 'falsch';
+  }
   if (art === 'schalter') {
     var sc = a && a.schalter ? a.schalter : [];
     if (!sc.some(Boolean)) return 'leerSchalter';
     return r.schalter.every(function(o, k){ return !!sc[k] === !!o.ok; }) ? 'ok' : 'falsch';
   }
   return 'leer';
+}
+
+/* v12: eine Zeile der Lückenfelder richtig? (Groß/klein, Umlaute als ae/oe/ue, ß als ss egal) */
+function luckeRichtig(zeile, txt){ return (zeile.soll || []).some(function(x){ return norm(x) === norm(txt); }); }
+/* v12: Länge des richtigen Anfangs auf dem Steinweg (passt zum Anfang mindestens einer Lösung) */
+function reiheAnfang(r, re){
+  var best = 0;
+  (r.soll || []).forEach(function(x){
+    var ziel = norm(x), n = 0, bis = '';
+    for (var k = 0; k < re.length; k++) { bis += norm(r.teile[re[k]]); if (ziel.indexOf(bis) === 0) n = k + 1; else break; }
+    if (n > best) best = n;
+  });
+  return best;
 }
 
 /* v5: Wert eines Reglers (Stufe → Zahl) und Funktionswert des Sternbild-Graphen */
@@ -3190,6 +3259,92 @@ var GERAET = {
         var n = fest.filter(Boolean).length; zeichneWand();
         return '✨ ' + n + ' von ' + nz + T(' Runen leuchten grün – sie sitzen richtig. Die anderen darfst du jetzt einmal umsetzen. Dann prüfe noch einmal.',
                                             ' Runen leuchten grün – sie sitzen richtig. Die anderen dürfen Sie jetzt einmal umsetzen. Dann prüfen Sie noch einmal.');
+      } };
+  },
+
+  /* ===== v12: Steinweg (Reihenfolge) ====================================================
+     Teile (Wörter, Satzglieder, Schritte …) liegen gemischt neben dem Weg. Antippen legt ein Teil
+     ans Ende des Weges, ein Teil auf dem Weg antippen nimmt es zurück (die folgenden rücken auf).
+     teile: ['Heute', 'wollen', 'wir', …]   (2 bis 14 Teile, jedes genau einmal zu legen)
+     soll:  ['Heute wollen wir …', 'Wir wollen heute …', …]  – ALLE richtigen Reihenfolgen als Text;
+            verglichen wird ohne Leerzeichen, Satzzeichen, Groß/klein (wie bei 'text').
+     stil:  'stein' (Vorgabe: Trittsteine über einen Fluss) | 'holz' (Holzplanken)
+     Antwort: { reihe:[Teil-Index in gelegter Reihenfolge] }. Korrekturrunde: nach dem ersten falschen
+     Prüfen bleibt der richtige Anfang grün liegen, der Rest darf einmal neu gelegt werden. */
+  reihe: function(r, alt, merke, aktiv, z, s){
+    if (!z.mix[s]) { z.mix[s] = mische(r.teile.length); sichern(); }
+    var weg = alt && alt.reihe ? alt.reihe.slice() : [], fest = 0;
+    var el = neu('div', 'geraet reihe' + (r.stil === 'holz' ? ' holz' : '')), bahn = neu('div', 'reihe-weg'), haufen = neu('div', 'reihe-haufen');
+    bahn.setAttribute('aria-label', T('Der Weg – hier liegen deine Teile in Reihenfolge', 'Der Weg – hier liegen Ihre Teile in Reihenfolge'));
+    var anz = neu('p', 'anzeige', '');
+    el.appendChild(bahn); el.appendChild(anz); el.appendChild(haufen);
+    function stein(k, nr){
+      var b = neu('button', 'reihe-stein', r.teile[k]); b.type = 'button'; b.disabled = !aktiv;
+      if (nr != null) { b.classList.add('drin'); b.insertBefore(neu('span', 'reihe-nr', String(nr + 1)), b.firstChild); }
+      if (nr != null && nr < fest) { b.classList.add('fest'); b.disabled = true; }
+      b.addEventListener('click', function(){
+        if (nr == null) weg.push(k); else if (nr >= fest) weg.splice(nr, 1);
+        zeichneReihe(); merke({ reihe: weg.slice() });
+      });
+      return b;
+    }
+    function zeichneReihe(){
+      bahn.innerHTML = ''; haufen.innerHTML = '';
+      weg.forEach(function(k, nr){ bahn.appendChild(stein(k, nr)); });
+      for (var p = weg.length; p < r.teile.length; p++) bahn.appendChild(neu('span', 'reihe-platz', String(p + 1)));
+      z.mix[s].forEach(function(k){ if (weg.indexOf(k) < 0) haufen.appendChild(stein(k, null)); });
+      haufen.hidden = weg.length === r.teile.length;
+      anz.textContent = weg.length === 0
+        ? T('Tippe die Teile in der richtigen Reihenfolge an. Ein Teil auf dem Weg antippen legt es zurück.',
+            'Tippen Sie die Teile in der richtigen Reihenfolge an. Ein Teil auf dem Weg antippen legt es zurück.')
+        : 'Auf dem Weg: ' + weg.length + ' von ' + r.teile.length + ' Teilen.';
+    }
+    zeichneReihe();
+    return { el:el,
+      hol: function(){ return weg.length ? { reihe: weg.slice() } : null; },
+      leere: function(){ weg = weg.slice(0, fest); zeichneReihe(); },
+      korrektur: function(a){
+        fest = reiheAnfang(r, a.reihe); weg = a.reihe.slice(0, fest); zeichneReihe(); merke({ reihe: weg.slice() });
+        var anfang = fest === 1 ? 'Das erste Teil liegt' : 'Die ersten ' + fest + ' Teile liegen';
+        return fest
+          ? '✨ ' + T(anfang + ' richtig und leuchtet grün. Lege den Rest noch einmal neu. Dann prüfe noch einmal.'.replace('leuchtet', fest === 1 ? 'leuchtet' : 'leuchten'),
+                      anfang + ' richtig und leuchtet grün. Legen Sie den Rest noch einmal neu. Dann prüfen Sie noch einmal.'.replace('leuchtet', fest === 1 ? 'leuchtet' : 'leuchten'))
+          : '✨ ' + T('Schon das erste Teil passt nicht. Lege alle Teile noch einmal neu. Dann prüfe noch einmal.',
+                      'Schon das erste Teil passt nicht. Legen Sie alle Teile noch einmal neu. Dann prüfen Sie noch einmal.');
+      } };
+  },
+
+  /* ===== v12: Lückenfelder =============================================================
+     Mehrere Eingabefelder in einem Rätsel, jedes mit eigener Lösung (z. B. drei Zahlwörter).
+     zeilen: [{ vor:'32 =', soll:['zweiunddreißig'], nach:'' }, …]  (2 bis 6 Zeilen; vor/nach optional)
+     Verglichen wird wie bei 'text'. Antwort: { luecken:['…', …] }. Korrekturrunde: richtige Felder
+     werden grün und fest, die anderen dürfen einmal verbessert werden. */
+  luecken: function(r, alt, merke, aktiv, z, s){
+    var w = alt && alt.luecken ? alt.luecken.slice() : r.zeilen.map(function(){ return ''; });
+    var fest = r.zeilen.map(function(){ return false; });
+    var el = neu('div', 'geraet luecken'), felder = [], reihen = [];
+    r.zeilen.forEach(function(zl, k){
+      var row = neu('label', 'luecke');
+      if (zl.vor) row.appendChild(neu('span', 'luecke-vor', zl.vor));
+      var inp = neu('input', ''); inp.type = 'text'; inp.value = w[k] || '';
+      inp.setAttribute('autocomplete', 'off'); inp.setAttribute('autocorrect', 'off'); inp.setAttribute('spellcheck', 'false');
+      inp.setAttribute('aria-label', 'Feld ' + (k + 1) + (zl.vor ? ': ' + String(zl.vor).replace(/<[^>]*>/g, '') : ''));
+      if (!aktiv) { inp.readOnly = true; inp.classList.add('zu'); }
+      inp.addEventListener('input', function(){ w[k] = inp.value; merke({ luecken: w.slice() }); });
+      row.appendChild(inp);
+      if (zl.nach) row.appendChild(neu('span', 'luecke-nach', zl.nach));
+      el.appendChild(row); felder.push(inp); reihen.push(row);
+    });
+    function zeichneLuecken(){ reihen.forEach(function(row, k){ row.classList.toggle('fest', fest[k]); if (fest[k]) felder[k].readOnly = true; }); }
+    return { el:el,
+      hol: function(){ return { luecken: felder.map(function(f){ return f.value; }) }; },
+      leere: function(){ felder.forEach(function(f, k){ if (!fest[k]) { f.value = ''; w[k] = ''; } }); },
+      korrektur: function(a){
+        fest = r.zeilen.map(function(zl, k){ return luckeRichtig(zl, a.luecken[k]); });
+        zeichneLuecken();
+        var n = fest.filter(Boolean).length;
+        return '✨ ' + n + ' von ' + r.zeilen.length + T(' Feldern sind richtig und leuchten grün. Verbessere die anderen einmal. Dann prüfe noch einmal.',
+                                                        ' Feldern sind richtig und leuchten grün. Verbessern Sie die anderen einmal. Dann prüfen Sie noch einmal.');
       } };
   }
 };
