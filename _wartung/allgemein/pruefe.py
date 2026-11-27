@@ -23,7 +23,8 @@ Was dieser Linter NICHT kann (bleibt Handarbeit bzw. Browsertest):
   - ob der Stand ein Neuladen wirklich vollständig übersteht (Browsertest: Seite
     bearbeiten, neu laden, vergleichen)
 
-Stand: 27.11.2026 (Story-Engine v8: Symbolwand 'wand' – Runen in Nischen sortieren; Prüfung STORY:
+Stand: 27.11.2026 (Story-Engine v9: falsch gelöstes Rätsel bleibt sichtbar, Umweg mit Banner;
+       Story-Engine v8: Symbolwand 'wand' – Runen in Nischen sortieren; Prüfung STORY:
        2–4 Nischen, 3–12 Zeichen, jede Nische gültig, bekannte und verschiedene Runen;
        26.11.2026: Story-Engine v7: Wegwahl 'kurs' – Steuerrad, Personen, Wesen; Prüfung STORY:
        genau eine richtige Option, 2–5 Optionen, bekannte modus/fahrzeug/wesen;
@@ -93,7 +94,7 @@ RBKA_MARKE = 'BAUSTEIN: Rückblick-KA-Engine'
 
 # Story-Engine (baustein_story.html, TEIL 2.11)
 STORY_TYP = 'Story'
-STORY_VERSION = 'v8'
+STORY_VERSION = 'v9'
 STORY_MARKE = 'BAUSTEIN: Story-Engine'
 STORY_ARTEN = ('zahl', 'bruch', 'term', 'text', 'wahl',                 # v1/v2
                'uhr', 'schloss', 'steck', 'felder', 'schalter',      # v3: Rätselgeräte

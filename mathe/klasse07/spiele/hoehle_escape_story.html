@@ -69,7 +69,7 @@
 </script>
 <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
 <style>
-/* ===== BAUSTEIN-CSS: Story (v8, 27.11.2026) – unverändert übernehmen ===== */
+/* ===== BAUSTEIN-CSS: Story (v9, 27.11.2026) – unverändert übernehmen ===== */
 :root{
   --ink:#22303f; --card:#ffffff; --green:#1e7d32; --red:#c1272d;
   --amber:#b8860b; --amber-light:#fdf3d9; --amber-dark:#96690a;
@@ -118,13 +118,23 @@ main{max-width:860px;margin:0 auto;padding:1rem .75rem 2rem;}
 .geschichte p:last-child{margin-bottom:0;}
 .raetsel{border:2px solid var(--blue);border-radius:.8rem;padding:.9rem 1rem;margin:.9rem 0;background:#fff;}
 .raetsel h3::before{content:"🧩 ";}
+/* v9: falsch gelöstes Rätsel bleibt sichtbar; Umweg deutlich angekündigt und abgesetzt */
+.raetsel.falsch{border-color:var(--red);}
+.raetsel.falsch .geraet{border-radius:1rem;box-shadow:0 0 0 3px var(--red);padding:.5rem;}
+.raetsel.falsch .optionen button.an{background:var(--red);border-color:var(--red);color:#fff;}
+.raetsel.falsch input.zu{border-color:var(--red);color:var(--red);}
+.raetsel.umweg{border-color:#c97a2e;background:#fbeee0;}
+.raetsel.umweg h3{color:#a5611e;}
+.raetsel.umweg h3::before{content:"🧭 ";}
+.raetsel.umweg.falsch{border-color:var(--red);background:#fff;}
+.umweg-banner{margin:1rem 0 .6rem;padding:.7rem 1rem;border-radius:.7rem;background:#c97a2e;color:#fff;}
+.umweg-banner b{display:block;font-size:1.15rem;}
+.umweg-banner span{display:block;font-size:1rem;}
 .frage{font-size:1.1rem;}
 /* Oberstufe: Hilfsmittel und Lösungsart am Anfang von frage (TEIL 3.2) */
 .op-tags{display:block;margin:.2rem 0 .4rem;}
 .op-tag{display:inline-block;font-size:1rem;font-weight:700;color:var(--blue-dark);background:var(--blue-light);
   border:1px solid var(--line);border-radius:1rem;padding:.05rem .65rem;margin:0 .35rem .25rem 0;}
-.versperrt{border-left:6px solid var(--red);background:#fff;border-radius:.6rem;padding:.6rem 1rem;margin:.8rem 0;
-  box-shadow:0 0 0 1px var(--line) inset;}
 .zeile{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin:.6rem 0;}
 .zeile > input{font:inherit;font-size:1.1rem;min-height:44px;padding:.35rem .6rem;border:2px solid var(--line);
   border-radius:.6rem;background:#fff;color:var(--ink);width:12rem;text-align:center;}
@@ -1358,11 +1368,11 @@ var STORY = {
 
 <script>
 /* ============================================================
-   BAUSTEIN: Story-Engine (v8, 27.11.2026) – unverändert übernehmen
+   BAUSTEIN: Story-Engine (v9, 27.11.2026) – unverändert übernehmen
    Baut aus dem Objekt STORY: Startkarte (Einleitung, Anleitung, Zeitraum, Einstieg per
    Codewort) → je Karte Geschichte + Rätsel → Endkarte mit Auswertung.
    Ablauf einer Karte:  Haupträtsel richtig → geschafft (direkter Weg).
-     falsch → Rätsel verschwindet, Umweg 1 erscheint; falsch → Umweg 2; falsch → Lösungsweg,
+     falsch → Rätsel bleibt gesperrt stehen (rot), Umweg 1 erscheint; falsch → Umweg 2; falsch → Lösungsweg,
      die Karte gilt trotzdem als geschafft. Unlesbare Eingaben, nicht gekürzte Brüche und
      gleichwertige Terme in falscher Form kosten KEINEN Versuch (nur ein Hinweis).
    Hinweise (2 je Rätsel) gibt es vor dem Antworten; sie werden in der Auswertung gezählt.
@@ -1406,6 +1416,10 @@ var FELD = {};   /* aktive Formeltool-Felder je Rätsel-ID */
 function lies(){ try { var r = sessionStorage.getItem(KEY); return r ? JSON.parse(r) : null; } catch (e) { return null; } }
 function sichern(){ try { sessionStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
 function setzeFormel(el){
+  /* v9: nur eingehängte Elemente setzen – MathJax misst losgelöste Knoten mit 0 und schreibt
+     width="NaNex"; Safari zeigt die Formel dann riesengroß über der ganzen Seite. Losgelöste Teile
+     setzt der Aufruf für die ganze Karte, sobald sie eingehängt ist. */
+  if (!el || !el.isConnected) return;
   if (window.MathJax && MathJax.typesetPromise) { try { MathJax.typesetPromise([el]); } catch (e) {} }
   /* MathJax blockiert (Schul-WLAN): Notfall-Anzeige für neu aufgebaute Karten erneut anstoßen –
      sie hört nur auf 'load' und tut nichts, sobald MathJax da ist. */
@@ -2467,7 +2481,7 @@ var GERAET = {
         ? T('Tippe eine Karte an, um sie aufzudecken. Tippe sie noch einmal an, um sie zu wählen.',
             'Tippen Sie eine Karte an, um sie aufzudecken. Tippen Sie sie noch einmal an, um sie zu wählen.')
         : 'Ausgewählt: ' + nw + (nw === 1 ? ' Karte' : ' Karten') + (r.mehr ? T(' – wähle alle passenden.', ' – wählen Sie alle passenden.') : '.');
-      if (window.MathJax && MathJax.typesetPromise) { try { MathJax.typesetPromise([faecher]); } catch (e) {} }
+      if (faecher.isConnected && window.MathJax && MathJax.typesetPromise) { try { MathJax.typesetPromise([faecher]); } catch (e) {} }   /* v9: nur eingehängt */
     }
     zeichneKarten();
     return { el:el,
@@ -3326,8 +3340,8 @@ function zeigeStart(){
   anl.appendChild(neu('ol', 'anleitung',
     '<li>' + T('Lies die Geschichte und löse das Rätsel am Ende jeder Karte.', 'Lesen Sie die Geschichte und lösen Sie das Rätsel am Ende jeder Karte.') + '</li>'
     + '<li>' + T('Richtig gelöst? Dann geht es weiter zur nächsten Karte.', 'Richtig gelöst? Dann geht es weiter zur nächsten Karte.') + '</li>'
-    + '<li>' + T('Falsch gelöst? Dann verschwindet das Rätsel und du nimmst einen Umweg mit einem neuen Rätsel. Langsam, aber sicher kommst du ans Ziel.',
-                 'Falsch gelöst? Dann verschwindet das Rätsel und Sie nehmen einen Umweg mit einem neuen Rätsel. Langsam, aber sicher kommen Sie ans Ziel.') + '</li>'
+    + '<li>' + T('Falsch gelöst? Dann wird das Rätsel gesperrt (du siehst es weiter) und du bekommst ein neues Umweg-Rätsel. Langsam, aber sicher kommst du ans Ziel.',
+                 'Falsch gelöst? Dann wird das Rätsel gesperrt (Sie sehen es weiter) und Sie bekommen ein neues Umweg-Rätsel. Langsam, aber sicher kommen Sie ans Ziel.') + '</li>'
     + '<li>' + T('Du steckst fest? Hol dir einen 💡 Hinweis – bevor du antwortest.', 'Sie stecken fest? Holen Sie sich einen 💡 Hinweis – bevor Sie antworten.') + '</li>'
     + '<li>' + T('Notiere nach jeder Karte das 🔑 Codewort. Damit steigst du später wieder ein – auch an einem anderen Tag.',
                  'Notieren Sie nach jeder Karte das 🔑 Codewort. Damit steigen Sie später wieder ein – auch an einem anderen Tag.') + '</li>'));
@@ -3412,14 +3426,13 @@ function zeigeKarteInhalt(i){
   }
   var letzte = z.st === 'offen' ? z.stufe : (z.st === 'ok' ? z.stufe : 2);
   for (var s = 0; s <= letzte; s++) {
-    if (s > 0) b.appendChild(neu('div', 'geschichte', k.umwege[s - 1].geschichte));
-    if (s < letzte) {
-      b.appendChild(neu('div', 'versperrt', '❌ ' + T('Deine Antwort war nicht richtig. Dieses Rätsel ist verschwunden – der Weg ist versperrt.',
-        'Ihre Antwort war nicht richtig. Dieses Rätsel ist verschwunden – der Weg ist versperrt.')
-        + (s === 0 ? ' ' + T('Aber es gibt einen Umweg …', 'Aber es gibt einen Umweg …') : ' ' + T('Noch ein Umweg …', 'Noch ein Umweg …'))));
-      continue;
+    if (s > 0) {   /* v9: neues Rätsel deutlich ankündigen */
+      b.appendChild(neu('div', 'umweg-banner', '<b>🧭 Neues Rätsel – Umweg ' + s + ' von 2</b><span>'
+        + T('Das Rätsel oben war nicht richtig und ist jetzt gesperrt. Über diesen Umweg kommst du weiter.',
+            'Das Rätsel oben war nicht richtig und ist jetzt gesperrt. Über diesen Umweg kommen Sie weiter.') + '</span>'));
+      b.appendChild(neu('div', 'geschichte', k.umwege[s - 1].geschichte));
     }
-    b.appendChild(raetselBlock(i, s));
+    b.appendChild(raetselBlock(i, s));   /* v9: auch falsch gelöste Rätsel bleiben vollständig stehen */
   }
   if (z.st === 'durch') {
     var r2 = raetsel(i, 2);
@@ -3455,8 +3468,9 @@ function abschluss(b, i){
 function raetselBlock(i, s){
   var r = raetsel(i, s), z = zk(i), id = rid(i, s);
   var aktiv = z.st === 'offen' && z.stufe === s;
-  var box = neu('div', 'raetsel');
-  box.appendChild(neu('h3', '', s === 0 ? 'Rätsel' : 'Umweg-Rätsel ' + s));
+  var falsch = s < z.stufe || (z.st === 'durch' && s === 2);   /* v9: dieses Rätsel wurde falsch gelöst */
+  var box = neu('div', 'raetsel' + (s > 0 ? ' umweg' : '') + (falsch ? ' falsch' : ''));
+  box.appendChild(neu('h3', '', s === 0 ? 'Rätsel' : 'Umweg-Rätsel ' + s + ' von 2'));
   box.appendChild(neu('p', 'frage', r.frage));
   var fb = neu('div', 'fb', '');
   var hol, leere, gt = null;                 /* aktuelle Antwort holen / Eingabe leeren; gt: Rätselgerät */
@@ -3545,6 +3559,9 @@ function raetselBlock(i, s){
     fb.className = 'fb ok'; fb.textContent = '✅ Richtig – das Rätsel ist gelöst!';
   } else if (z.st === 'durch' && s === 2) {
     fb.className = 'fb nok'; fb.textContent = '❌ ' + T('Auch das war nicht richtig.', 'Auch das war nicht richtig.');
+  } else if (falsch) {
+    fb.className = 'fb nok'; fb.textContent = '❌ ' + T('Nicht richtig – dieses Rätsel ist jetzt gesperrt. Weiter geht es mit dem Umweg darunter.',
+      'Nicht richtig – dieses Rätsel ist jetzt gesperrt. Weiter geht es mit dem Umweg darunter.');
   }
   box.appendChild(tp);
   box.appendChild(fb);
@@ -3570,7 +3587,8 @@ function raetselBlock(i, s){
     zeigeKarteInhalt(i);
     var karte = $('karte-k' + i);
     setzeFormel(karte);
-    var ziel = karte.querySelector(z.st === 'offen' ? '.versperrt:last-of-type' : '.geschafft');
+    var bn = karte.querySelectorAll('.umweg-banner');   /* v9: zum neuen Rätsel */
+    var ziel = z.st === 'offen' ? bn[bn.length - 1] : karte.querySelector('.geschafft');
     if (ziel && ziel.scrollIntoView) { try { ziel.scrollIntoView({ behavior:'smooth', block:'center' }); } catch (e) { ziel.scrollIntoView(); } }
   }
   return box;
