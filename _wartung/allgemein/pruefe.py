@@ -790,7 +790,9 @@ def pruefe(pfad):
     if interaktiv and 'sessionStorage' not in js:
         hinweis('NEULADEN', 'interaktive Seite ohne sessionStorage – der Stand geht beim '
                             'Neuladen verloren (TEIL 6)')
-    if 'dino-ikon' not in h:
+    if meta.get('rahmen') == 'ohne':
+        pass   # Seite für fremde Websites (z. B. Schulhomepage): ohne Dino und Navigation (TEIL 3.6)
+    elif 'dino-ikon' not in h:
         if re.search(r'''(?:id|class)="[^"]*\b(?:t?rex|dino)\b[^"]*"[^>]*>\s*(?:\U0001F996|&#129430;)''', h):
             hinweis('TREX', 'altes 🦖-Emoji statt Dino-Baustein – nachruesten_dino.py '
                             'laufen lassen (8.3)')
@@ -847,7 +849,10 @@ def pruefe(pfad):
                 fehler('STORAGE', 'localStorage im EXAM-INHALT')
 
     # Navigationsleiste (TEIL 3.6) – nicht auf Ordner-Übersichten/Weiterleitungen (hubignore)
-    if 'name="hubignore"' not in h and not exam:
+    if meta.get('rahmen') == 'ohne':
+        if NAV_BLOCK.search(h) or 'id="trex"' in h:
+            fehler('NAV', 'rahmen="ohne", aber Navigationsleiste oder Dino stehen noch in der Seite')
+    elif 'name="hubignore"' not in h and not exam:
         nav = NAV_BLOCK.search(h)
         if not nav:
             fehler('NAV', 'Navigationsleiste fehlt – baustein_navigation.html unverändert vor '
