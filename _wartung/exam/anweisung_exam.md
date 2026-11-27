@@ -1,6 +1,6 @@
 # Anweisung EXAM – bewertete Tests auf dem iPad
 
-Stand: 24.11.2026 · Engine `baustein_exam.html` v1.4 · Auswertung `exam_auswerten.py` v1.1 · gilt für das Projekt **„WEB EXAM"**
+Stand: 24.11.2026 · Engine `baustein_exam.html` v1.4 · Auswertung `exam_auswerten.py` v1.2 · gilt für das Projekt **„WEB EXAM"**
 (Sync: `_wartung/exam`, `_wartung/allgemein`).
 
 Ein EXAM ist ein **bewerteter Test**, den die Klasse auf dem iPad schreibt. Die Seite gibt
@@ -265,18 +265,25 @@ ich eine gute Note?" –, dann gilt:
    "Zellkörper"}}`). Je Abgabe außerdem `manipulation` (siehe oben) und `hinweise` (z. B.
    auffällige Sperren). Automatische Punkte darf Claude nur mit Begründung ändern.
 4. `python3 exam_auswerten.py ausgeben PDF_ORDNER schluessel_<thema>.json bewertung_<thema>.json
-   Punkteerfassung_Vorlage.xlsx AUSGABE_ORDNER --kurs "7b"` erzeugt:
+   Punkteerfassung_Vorlage.xlsx AUSGABE_ORDNER --kurs "7b" --seite <testseite>.html
+   --codes "<alle ausgegebenen Codes>"` erzeugt (`--seite` und `--codes` sind optional, aber
+   empfohlen):
    - **`Punkte_EXAM_<thema>.xlsx`** aus der Vorlage „Punkteerfassung" – Einstellungen
      (Bezeichnung, Kurs, Aufgaben, Höchstpunkte), Schülerliste = `Code · Initialen`
-     **alphabetisch nach Code**, Punkte je Aufgabe in der Übersicht. Formeln, Datenprüfung und
+     **alphabetisch nach Code**, Punkte je Aufgabe in der Übersicht. Mit `--codes` stehen auch
+     die Codes ohne Abgabe als leere Zeile „Code · nicht mitgeschrieben" in der Liste – dann
+     passt die Reihenfolge genau zur Klassenliste. Formeln, Datenprüfung und
      bedingte Formatierung bleiben erhalten (die Datei wird auf XML-Ebene gefüllt, nicht mit
      openpyxl), Excel rechnet beim Öffnen neu. Bis 10 Aufgaben stehen alle im ersten Teil
      („hilfsmittelfrei"), darüber im zweiten. Notengrenzen stellt die Lehrkraft in
      „Einstellungen" ein.
    - **`Gesamt_EXAM_<thema>.pdf`** – Deckblatt mit allen Codes und Auffälligkeiten, dann je
-     Code **ein Korrekturblatt** (Warnkasten, Sperrprotokoll; Auswahl mit ✔/✘/○, Sortieren mit
-     richtiger Reihenfolge, Beschriftungen mit Korrektur, Freitext mit rot durchgestrichenen
-     Fehlern und grüner Korrektur). Bei **jeder Aufgabe** steht „____ von X Punkten" – die Punkte
+     Code **ein Korrekturblatt**, kompakt, meist **2 Seiten** (Warnkasten, Sperrprotokoll;
+     Auswahl mit ✔/✘/○; Sortieren: falsch gelegte Karten mit „→ gehört auf Platz n“;
+     Beschriftungen mit der **Abbildung der Testseite** – Nummern grün = richtig, rot = falsch –
+     und den Antworten darunter; Fehler überall mit **rotem Textmarker hinterlegt** (bleiben
+     lesbar), Korrektur grün dahinter). Die Abbildung braucht `--seite`; ohne bleibt es bei der
+     Tabelle. Bei **jeder Aufgabe** steht „____ von X Punkten" – die Punkte
      überträgt die Lehrkraft mit dem Stift aus Excel; gedruckte Punkte gibt es im PDF nicht.
      Die Original-Abgabe wird **nicht** angehängt (der Schüler hat sie selbst). Lesezeichen je
      Code.
