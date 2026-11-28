@@ -301,6 +301,15 @@ Ordner-Übersichten `_*.html` über `linking.txt`). Änderungen an der Startseit
   Formatierung, also XML direkt bearbeiten –, Gesamt-PDF mit Korrekturen), mit ausgedachten
   Abgaben testen. **Schritt 3:** Neurobiologie als erster echter Durchlauf (Erwartungshorizont).
 
+- **Reflexion Sozialformen** (28.11.2026, Branch `sozialformen-reflexion`): Rückmeldung der
+  Lehrkraft nach den GA-Stunden Kl. 7. Lernseiten-Anweisung TEIL 0 Nr. 29 und 34–38, 2.10
+  (Gruppen-Check immer fragen, Expertenstart, EA/PA eigene Aufträge), neu 2.12 (Zielvorgabe in
+  eigener Runde, 70-%-Zeitplan, Umweg/Abkürzung/Profi, Material und Schülerrealität), neu 2.13
+  (Zu-3-Satz mit ≙, Hyperbel), 3.8 (`data-stunde`/`data-min`/`data-rest`). Dach-Anweisung und
+  Checkliste nachgezogen. `pruefe.py`: `ZEIT`, `DIFF`, `SOZIAL` (auf Bestandsseiten nur Hinweise).
+  Schritt 2 folgt: `baustein_gruppencheck.html` v3 (Rollen mit Namensfeldern, Expertennamen,
+  Zeitwächter-Uhr).
+
 **Noch offen:**
 1. **Neulade-Schutz Stufe 2** (voller Schutz inkl. Bewertungen, wie im Baukasten) nach und
    nach für bestehende Seiten im laufenden Unterricht bzw. beim nächsten Überarbeiten.
@@ -315,6 +324,9 @@ Ordner-Übersichten `_*.html` über `linking.txt`). Änderungen an der Startseit
    `KERN_ANZAHL` (`pruefe.py`) eintragen.
 6. **Bestandsseiten:** ≈ 200 Mathe-Seiten ohne Meta-Tag `kernkompetenzen` (Hinweis `KERN`) –
    wird beim Debuggen nach und nach nachgetragen; die drei `_rbka`-Seiten bekommen dabei `KA.kern`.
+7. **Bestehende GA-/Lernseiten nach 2.12 überarbeiten** (Erinnerung Ende Januar 2027): Zeitplan
+   ≤ 70 % mit `data-stunde`/`data-min` (`ZEIT`), drei Wege (`DIFF`), eigene EA/PA-Aufträge,
+   Zuordnungs-Seiten Kl. 7 mit Hyperbel und Zu-3-Satz. Erst nach Rücksprache.
 
 ---
 
