@@ -1,9 +1,15 @@
 <!-- ======================================================================
-     BAUSTEIN: Gruppenarbeit & Gruppen-Check  v2, 13.11.2026
+     BAUSTEIN: Gruppenarbeit & Gruppen-Check  v3, 28.11.2026
+     v3: Namensfelder (PA: Person A/B, GA: je Mitglied), Rollen mit Namen (Zeitwächter:in,
+         Sprecher:in, Schreiber:in, Prüfer:in, optional Materialwart:in) – auslosen und
+         weitergeben, Expertenbuchstaben mit Namen, Platzhalter <span class="gc-name">,
+         Phasen-Uhr für die Zeitwächter:in (TEIL D, eingeklappt), Anrede „Sie" über
+         <body data-anrede="sie"> für alle Engine-Texte. Methode Expertenstart.
+         Namen bleiben nur im sessionStorage dieses iPads (weg, sobald der Tab geschlossen ist).
      v2: Gruppenrechner zeigt keine Sterne einzelner Mitglieder und keine Teamwert-Rechnung
          mit den wenigsten Sternen – nur gültig/ungültig je Code und das Gruppenergebnis.
      Herkunft: zuordnungen_tabelle_term_ls.html (Klasse 7), dort entwickelt.
-     Regeln: anweisung_lernseiten.txt TEIL 2.10.
+     Regeln: anweisung_lernseiten.txt TEIL 2.10, 2.12, 3.8.
 
      WAS DER BAUSTEIN KANN
      1. Sozialform-Wahl ganz oben: EA / PA / GA. Bei GA Pflicht: Gruppengröße 3–7.
@@ -17,6 +23,21 @@
         „x von max" je Zeile (nie Einzelsterne von Mitgliedern), Gesamt „x von max möglichen", Balken und Prozent.
         Teamwert = (Summe + wenigste Sterne) : (n + 1), höchstens Anzahl Checks;
         +1 „Alle dabei" (alle mindestens 60 % der Sterne); +0…+2 Präsentation (abschaltbar).
+     4. Team (ab v3): Nach der Wahl PA/GA erscheinen Namensfelder. Bei GA verteilt die Engine
+        die Rollen aus GRUPPE.rollen (zu dritt hat eine Person zwei Rollen; mehr Personen als
+        Rollen → „hilft mit"), mit „🎲 auslosen" und „🔄 weitergeben" (neue Karte, neue Rolle).
+        GRUPPE.experten = höchste Buchstabenzahl (z. B. 6) → jede:r bekommt einen
+        Expertenbuchstaben A, B, … mit Namen (bei mehr Personen doppelt besetzt); 0 = keine.
+        Platzhalter auf der Seite, von der Engine mit Namen gefüllt:
+           <span class="gc-name" data-rolle="zeit"></span>      Name der Zeitwächter:in
+           <span class="gc-name" data-rolle="sprecher"></span>  (zeit|sprecher|schreiber|pruefer|material)
+           <span class="gc-name" data-experte="B"></span>       Name(n) für Expertenbuchstabe B
+           <span class="gc-name" data-person="A"></span>        PA: Person A / B; GA: 1 … 7
+        Ohne Namen steht dort die Rolle („die Zeitwächter:in") bzw. „Person 2".
+     5. Phasen-Uhr (TEIL D, ab v3): <div class="gc-uhr" data-uhr="u2" data-min="12"
+        data-titel="Expertenphase"></div> – eingeklappt; nur die Zeitwächter:in öffnet sie
+        (ihr Name steht in der Kopfzeile). Start/Pause/Zurück, ab 2 min Rest markiert, bei 0 rot.
+        data-min = Zeit dieser Phase im Ablaufplan (3.8). Stand übersteht das Neuladen.
 
      EINBAUEN
      a) CSS-Block unten in den <style>-Bereich der Seite (nutzt --h, --hd, --hl, --line,
@@ -29,17 +50,20 @@
      e) Datenblock GRUPPE anpassen und Engine unverändert vor </body> (vor das Seitenskript).
      f) Die Aufgaben-Engine der Seite meldet bei JEDER Check-Aufgabe den ERSTEN Prüfversuch:
            if (window.GC) GC.melde('g1', richtig);    // richtig = true/false; spätere Aufrufe zählen nicht
-        Weitere Schnittstellen: GC.sozialform() → 'ea'|'pa'|'ga'|null, GC.groesse() → 1|2|3…7|null.
+        Weitere Schnittstellen: GC.sozialform() → 'ea'|'pa'|'ga'|null, GC.groesse() → 1|2|3…7|null,
+        GC.name(i) → Name von Person i (0-basiert), GC.rolle('zeit') → Name, GC.experte('A') → Namen.
         Bei jeder Änderung der Sozialform feuert document das Ereignis 'gc-sozialform'.
      Ohne Gruppen-Check: TEIL B und C weglassen, GRUPPE.checks = [] – die Sozialform-Wahl
-     funktioniert allein.
+     mit Team, Rollen und Phasen-Uhren funktioniert allein.
+     Oberstufe: <body data-anrede="sie"> – die Engine siezt; die festen Texte in TEIL A–C
+     von Hand auf „Sie" umstellen (ANPASSEN).
 
      NICHT ÄNDERN: Engine und CSS. Fehler werden hier behoben (Version erhöhen) und dann in
      alle Seiten übertragen, die den Baustein nutzen (pruefe.py meldet alte Fassungen).
      ====================================================================== -->
 
 <style>
-/* ===== BAUSTEIN-CSS: Gruppen-Check (v2, 13.11.2026) ===== */
+/* ===== BAUSTEIN-CSS: Gruppen-Check (v3, 28.11.2026) ===== */
 .gc-box{background:#fff;border:3px solid var(--h);border-radius:12px;padding:12px 16px;margin-bottom:12px}
 .gc-box h2{margin:0 0 8px;font-size:1.15rem;color:var(--hd)}
 .gc-box h3{margin:12px 0 6px;font-size:1.05rem;color:var(--hd)}
@@ -83,6 +107,27 @@ input.gc-code{width:150px;min-height:48px;font-size:1.1rem;text-transform:upperc
 .gc-balken{margin-top:10px;height:18px;background:#fff;border:2px solid var(--hd);border-radius:9px;overflow:hidden}
 .gc-balken > div{height:100%;background:var(--hd)}
 .gc-prozent{margin:8px 0 0;font-size:1.05rem;font-weight:600}
+/* v3: Team, Rollen, Phasen-Uhr */
+.gc-team{display:none;margin-top:12px;border-top:1px solid var(--line);padding-top:10px}
+body.sf-pa .gc-team,body.sf-ga .gc-team{display:block}
+.gc-team h3{margin:4px 0 8px}
+.gc-namen{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px}
+.gc-namen label{display:block;font-weight:700;font-size:1rem;color:var(--hd)}
+input.gc-nameein{display:block;width:100%;box-sizing:border-box;min-height:48px;font-size:1.05rem;
+  border:2px solid var(--line);border-radius:10px;padding:6px 10px;font-family:inherit;margin-top:4px}
+.gc-tabwrap{overflow-x:auto;margin-top:10px}
+table.gc-rtab{width:100%;border-collapse:collapse}
+table.gc-rtab th,table.gc-rtab td{border:1px solid var(--line);padding:8px 10px;text-align:left;font-size:1rem;vertical-align:top}
+table.gc-rtab th{background:var(--hl);color:var(--hd)}
+.gc-klein{margin:8px 0 0;font-size:1rem;color:var(--ink)}
+.gc-name{font-weight:700}
+details.gc-uhr-d{border:2px solid var(--h);border-radius:12px;background:#fff;margin:10px 0}
+details.gc-uhr-d > summary{min-height:48px;padding:10px 14px;font-size:1.05rem;font-weight:700;color:var(--hd);cursor:pointer;list-style-position:inside}
+details.gc-uhr-d[open] > summary{border-bottom:1px solid var(--line)}
+.gc-uhr-in{padding:6px 14px 12px}
+.gc-uhr-anz{margin:4px 0;font-size:2.4rem;font-weight:700;color:var(--hd);font-variant-numeric:tabular-nums}
+details.gc-uhr-d.warn .gc-uhr-in{background:var(--hl)}
+details.gc-uhr-d.aus .gc-uhr-anz{background:var(--red);color:#fff;border-radius:10px;padding:2px 12px;display:inline-block}
 /* ===== ENDE BAUSTEIN-CSS Gruppen-Check ===== */
 </style>
 
@@ -109,9 +154,14 @@ input.gc-code{width:150px;min-height:48px;font-size:1.1rem;text-transform:upperc
   <div class="gc-zeile"><span id="gc-text"></span><button type="button" class="gc-btn sek" id="gc-aendern">ändern</button></div>
   <!-- ANPASSEN: Texte je Sozialform passend zur Methode der Seite -->
   <div class="gc-nur-ea"><p style="margin:10px 0 0"><b>Allein:</b> Du bearbeitest alles allein. Wo „zu zweit" oder „in der Gruppe" steht, gibt es einen Auftrag für dich allein.</p></div>
-  <div class="gc-nur-pa"><p style="margin:10px 0 0"><b>Zu zweit:</b> Teilt euch Aufgaben auf und erklärt sie euch danach gegenseitig.</p></div>
-  <div class="gc-nur-ga"><p style="margin:10px 0 0"><b>In der Gruppe:</b> Verteilt die Rollen Zeitwächter:in, Schreiber:in, Prüfer:in und Sprecher:in. Zu dritt übernimmt eine Person zwei Rollen, ab fünf Personen gibt es Rollen doppelt. Wechselt die Rollen bei jeder Karte.</p></div>
+  <div class="gc-nur-pa"><p style="margin:10px 0 0"><b>Zu zweit:</b> Ihr seid Person A und Person B. A erklärt, B prüft und fragt nach &ndash; bei der nächsten Aufgabe tauscht ihr.</p></div>
+  <div class="gc-nur-ga"><p style="margin:10px 0 0"><b>In der Gruppe:</b> Tragt eure Namen ein. Die Seite verteilt die Rollen. Bei jeder neuen Karte tippt ihr auf &bdquo;Rollen weitergeben&ldquo;. Nur die Zeitwächter:in schaut auf die Uhr.</p></div>
+  <!-- ab v3: Namen, Rollen, Experten – Inhalt erzeugt die Engine -->
+  <div class="gc-team" id="gc-team"></div>
 </section>
+
+<!-- ===== TEIL D: Phasen-Uhr (ab v3) – auf jede Karte mit Zeitvorgabe, data-min wie im Ablaufplan ===== -->
+<div class="gc-uhr" data-uhr="u1" data-min="10" data-titel="ANPASSEN Phase"></div>
 
 <!-- ===== TEIL B: Gruppenschlüssel (vor die Check-Aufgaben) ===== -->
 <div class="gc-merk gc-nicht-ea" id="gc-schluessel">
@@ -166,7 +216,9 @@ input.gc-code{width:150px;min-height:48px;font-size:1.1rem;text-transform:upperc
 /* ===== ANPASSEN: Datenblock Gruppenarbeit ===== */
 var GRUPPE = {
   key: 'ANPASSEN-seitenname',        /* eindeutig je Seite, z. B. 'm7-zuordnungen-ls' */
-  methode: 'Gruppenpuzzle',          /* Gruppenpuzzle | Expertenrunde | Think–Pair–Share | Museumsgang | Placemat | Kugellager | Lerntempoduett | Stationenlernen */
+  methode: 'Gruppenpuzzle',          /* Gruppenpuzzle | Expertenrunde | Expertenstart | Think–Pair–Share | Museumsgang | Placemat | Kugellager | Lerntempoduett | Stationenlernen */
+  rollen: [ 'zeit', 'sprecher', 'schreiber', 'pruefer' ],   /* Reihenfolge = Wichtigkeit; dazu ggf. 'material' */
+  experten: 0,                       /* höchste Zahl an Expertenbuchstaben (z. B. 6 beim Gruppenpuzzle); 0 = keine */
   checks: [ 'g1', 'g2', 'g3', 'g4', 'g5' ],   /* IDs der Check-Aufgaben; [] = kein Gruppen-Check */
   rechnerKarte: 'Karte 7',           /* Name der Teampunkte-Karte, wie im Reiter */
   praesentation: true                /* Präsentationsbonus 0–2 der Lehrkraft */
@@ -176,7 +228,7 @@ var GRUPPE = {
 
 <script>
 /* ============================================================
-   BAUSTEIN: Gruppen-Check-Engine (v2, 13.11.2026) – nicht ändern
+   BAUSTEIN: Gruppen-Check-Engine (v3, 28.11.2026) – nicht ändern
    ============================================================ */
 (function(){
   "use strict";
@@ -187,8 +239,11 @@ var GRUPPE = {
   G.sf = G.sf || null; G.gr = G.gr || null; G.erster = G.erster || {};
   G.key = G.key || ''; G.keyNeu = !!G.keyNeu; G.code = G.code || null;
   G.rech = G.rech || { n:null, codes:[], praes:null, ber:false, key:'' };
+  G.namen = G.namen || []; G.rs = G.rs || 0; G.es = G.es || 0; G.uhr = G.uhr || {};
   function sichern(){ try { sessionStorage.setItem(KEY, JSON.stringify(G)); } catch (e) {} }
   function $(id){ return document.getElementById(id); }
+  var SIE = !!(document.body && document.body.getAttribute('data-anrede') === 'sie');
+  function esc(t){ return String(t).replace(/[&<>"]/g, function(c){ return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]; }); }
 
   /* ---------- Sozialform ---------- */
   var NAME = { ea:'allein (EA)', pa:'zu zweit (PA)', ga:'in der Gruppe (GA)' };
@@ -203,7 +258,8 @@ var GRUPPE = {
     $('gc-groesse').hidden = G.sf !== 'ga';
     box.querySelectorAll('[data-sf]').forEach(function(x){ x.classList.toggle('aktiv', x.getAttribute('data-sf') === G.sf); });
     box.querySelectorAll('[data-gr]').forEach(function(x){ x.classList.toggle('aktiv', +x.getAttribute('data-gr') === G.gr); });
-    $('gc-text').innerHTML = fertig ? 'Du arbeitest: <b>' + NAME[G.sf] + (G.sf === 'ga' ? ', ' + G.gr + ' Personen' : '') + '</b>' : '';
+    $('gc-text').innerHTML = fertig ? (SIE ? 'Sie arbeiten: <b>' : 'Du arbeitest: <b>') + NAME[G.sf] + (G.sf === 'ga' ? ', ' + G.gr + ' Personen' : '') + '</b>' : '';
+    teamBau();
     try { document.dispatchEvent(new CustomEvent('gc-sozialform', { detail:{ sf:G.sf, groesse:groesse() } })); } catch (e) {}
   }
   if ($('gc-box')) {
@@ -257,7 +313,7 @@ var GRUPPE = {
     inp.value = G.key || '';
     if (!G.key) info.innerHTML = '';
     else if (!gueltig(G.key)) info.innerHTML = '&#10007; Ein Schlüssel hat genau 3 Zeichen. Bitte genau abschreiben.';
-    else info.innerHTML = G.keyNeu ? '&#10004; Diesen Schlüssel sagst du deiner Gruppe an: <b>' + norm(G.key) + '</b>' : '&#10004; Schlüssel eingetragen.';
+    else info.innerHTML = G.keyNeu ? (SIE ? '&#10004; Diesen Schlüssel sagen Sie Ihrer Gruppe an: <b>' : '&#10004; Diesen Schlüssel sagst du deiner Gruppe an: <b>') + norm(G.key) + '</b>' : '&#10004; Schlüssel eingetragen.';
   }
   if ($('gc-key')) {
     $('gc-key').addEventListener('input', function(){ G.key = norm(this.value).slice(0, 3); G.keyNeu = false; $('gc-key-info').innerHTML = ''; sichern(); codeZeig(); });
@@ -275,11 +331,12 @@ var GRUPPE = {
     var s = CHECKS.reduce(function(a, id){ return a + G.erster[id]; }, 0);
     if (!G.code || G.code.s !== s) { G.code = { s:s, r:[0, 1, 2].map(function(){ return Math.floor(Math.random() * NZ); }) }; sichern(); }
     if (off) off.style.display = 'none';
-    var h = '<p class="gc-sterne">' + sterneText(s) + '</p><p><b>Deine Sterne: ' + s + ' von ' + MAXS + '</b> (erster Versuch).</p>';
-    if (G.sf === 'ea') h += '<p>Notiere deine Sterne im Heft. Wenn du willst, kannst du die Aufgaben jetzt mit den Tipps weiterüben.</p>';
-    else if (!gueltig(G.key)) h += '<p><b>Dein Code fehlt noch:</b> Trage oben euren Gruppenschlüssel ein. Dann erscheint dein Code hier.</p>';
-    else h += '<p>Dein Code für den Gruppenrechner (Gruppenschlüssel ' + norm(G.key) + '):</p><p class="gc-codetext">' + baueCode(G.key, G.code.r, s) + '</p>' +
-      '<p>Gib diesen Code an das Mitglied, das den Gruppenrechner auf ' + GRUPPE.rechnerKarte + ' bedient. Der Code gilt nur für deine Gruppe und nur einmal. Wenn du willst, kannst du die Aufgaben jetzt mit den Tipps weiterüben.</p>';
+    var h = '<p class="gc-sterne">' + sterneText(s) + '</p><p><b>' + (SIE ? 'Ihre Sterne: ' : 'Deine Sterne: ') + s + ' von ' + MAXS + '</b> (erster Versuch).</p>';
+    if (G.sf === 'ea') h += SIE ? '<p>Notieren Sie Ihre Sterne im Heft. Sie können die Aufgaben jetzt mit den Tipps weiterüben.</p>' : '<p>Notiere deine Sterne im Heft. Wenn du willst, kannst du die Aufgaben jetzt mit den Tipps weiterüben.</p>';
+    else if (!gueltig(G.key)) h += SIE ? '<p><b>Ihr Code fehlt noch:</b> Tragen Sie oben den Gruppenschlüssel ein. Dann erscheint Ihr Code hier.</p>' : '<p><b>Dein Code fehlt noch:</b> Trage oben euren Gruppenschlüssel ein. Dann erscheint dein Code hier.</p>';
+    else h += (SIE ? '<p>Ihr Code für den Gruppenrechner (Gruppenschlüssel ' : '<p>Dein Code für den Gruppenrechner (Gruppenschlüssel ') + norm(G.key) + '):</p><p class="gc-codetext">' + baueCode(G.key, G.code.r, s) + '</p>' +
+      (SIE ? '<p>Geben Sie diesen Code an das Mitglied, das den Gruppenrechner auf ' : '<p>Gib diesen Code an das Mitglied, das den Gruppenrechner auf ') + GRUPPE.rechnerKarte +
+      (SIE ? ' bedient. Der Code gilt nur für Ihre Gruppe und nur einmal. Sie können die Aufgaben jetzt mit den Tipps weiterüben.</p>' : ' bedient. Der Code gilt nur für deine Gruppe und nur einmal. Wenn du willst, kannst du die Aufgaben jetzt mit den Tipps weiterüben.</p>');
     box.innerHTML = h; box.classList.add('zeig');
   }
 
@@ -291,8 +348,8 @@ var GRUPPE = {
       '<li><b>Sterne:</b> Jede:r holt beim Gruppen-Check 0 bis ' + MAXS + ' Sterne. Es zählt der erste Versuch.</li>' +
       '<li><b>Teamwert:</b> Alle Sterne werden zusammengezählt. Das Mitglied mit den <b>wenigsten</b> Sternen zählt dabei <b>doppelt</b>. Dann wird durch (Anzahl der Mitglieder + 1) geteilt. Höchstens ' + MAXS + '.</li>' +
       '<li><b>+1 Bonus „Alle dabei":</b> wenn jedes Mitglied mindestens ' + SCHWELLE + ' Sterne hat.</li>' +
-      (MAXP ? '<li><b>+0, +1 oder +2 Präsentationsbonus:</b> vergibt die Lehrkraft nach eurem Vortrag.</li>' : '') +
-      '</ol><p>Höchstens sind ' + MAXS + ' + 1' + (MAXP ? ' + ' + MAXP : '') + ' = ' + max + ' Teampunkte möglich. Große und kleine Gruppen haben die gleichen Chancen. Es lohnt sich, dass <b>alle</b> es verstehen &ndash; also helft euch gegenseitig!</p>';
+      (MAXP ? '<li><b>+0, +1 oder +2 Präsentationsbonus:</b> vergibt die Lehrkraft nach dem Vortrag.</li>' : '') +
+      '</ol><p>Höchstens sind ' + MAXS + ' + 1' + (MAXP ? ' + ' + MAXP : '') + ' = ' + max + ' Teampunkte möglich. Große und kleine Gruppen haben die gleichen Chancen. Es lohnt sich, dass <b>alle</b> es verstehen &ndash; ' + (SIE ? 'helfen Sie sich also gegenseitig!' : 'also helft euch gegenseitig!') + '</p>';
     if ($('gc-re-praes-box')) $('gc-re-praes-box').hidden = !MAXP;
   }
   function reBau(){
@@ -315,7 +372,7 @@ var GRUPPE = {
   }
   function rechne(){
     var erg = $('gc-re-erg'), n = G.rech.n || 4, sterne = [], h = '', fehler = false, gesehen = {};
-    if (!gueltig(G.rech.key)) { erg.innerHTML = '<div class="gc-erow bad">&#10007; Tragt zuerst euren Gruppenschlüssel (3 Zeichen) ein.</div>'; erg.classList.add('zeig'); return; }
+    if (!gueltig(G.rech.key)) { erg.innerHTML = SIE ? '<div class="gc-erow bad">&#10007; Tragen Sie zuerst den Gruppenschlüssel (3 Zeichen) ein.</div>' : '<div class="gc-erow bad">&#10007; Tragt zuerst euren Gruppenschlüssel (3 Zeichen) ein.</div>'; erg.classList.add('zeig'); return; }
     for (var i = 0; i < n; i++) {
       var c = norm(G.rech.codes[i]), s = liesCode(c, G.rech.key);
       if (c && gesehen[c]) { fehler = true; h += '<div class="gc-erow bad">&#10007; Mitglied ' + (i + 1) + ': Dieser Code wurde schon bei Mitglied ' + gesehen[c] + ' eingegeben. Jede:r hat einen eigenen Code.</div>'; continue; }
@@ -331,7 +388,7 @@ var GRUPPE = {
     var anteil = Math.round(gesamt / bezug * 100);
     h += '<div class="gc-erow neutral"><b>Teamwert:</b> ' + komma(team) + ' <span class="gc-von">von höchstens ' + MAXS + '</span></div>';
     h += '<div class="gc-erow ' + (alle ? 'ok' : 'neutral') + '"><b>Bonus „Alle dabei":</b> ' + (alle ? '+1 von 1 &ndash; alle haben mindestens ' + SCHWELLE + ' Sterne!' : '+0 von 1 &ndash; nicht alle haben mindestens ' + SCHWELLE + ' Sterne.') + '</div>';
-    if (MAXP) h += '<div class="gc-erow neutral"><b>Präsentationsbonus:</b> ' + (p === null ? 'noch offen (höchstens +' + MAXP + ') &ndash; die Lehrkraft tippt ihn nach eurem Vortrag an.' : '+' + p + ' von ' + MAXP) + '</div>';
+    if (MAXP) h += '<div class="gc-erow neutral"><b>Präsentationsbonus:</b> ' + (p === null ? 'noch offen (höchstens +' + MAXP + ') &ndash; die Lehrkraft tippt ihn nach dem Vortrag an.' : '+' + p + ' von ' + MAXP) + '</div>';
     h += '<div class="gc-gesamt">&#127942; Teampunkte: ' + komma(gesamt) + ' <span class="gc-von">von ' + bezug + ' möglichen' + (p === null ? ' (ohne Präsentationsbonus; mit Bonus höchstens ' + maxGes + ')' : '') + '</span>' +
       '<div class="gc-balken" role="img" aria-label="' + komma(gesamt) + ' von ' + bezug + ' Teampunkten"><div style="width:' + Math.min(100, anteil) + '%"></div></div>' +
       '<p class="gc-prozent">Das sind ' + anteil + '&nbsp;% der möglichen Punkte.</p></div>';
@@ -348,6 +405,123 @@ var GRUPPE = {
     $('gc-re-btn').addEventListener('click', function(){ G.rech.ber = true; rechne(); sichern(); });
   }
 
+  /* ---------- Team: Namen, Rollen, Experten (v3) ---------- */
+  var ROLLEN = {
+    zeit:      { t:'&#9201;&#65039; Zeitwächter:in', a:'schaut als Einzige:r auf die Phasen-Uhr und sagt bei 2 Minuten und am Ende Bescheid' },
+    sprecher:  { t:'&#127908; Sprecher:in',  a:'stellt das Ergebnis vor' },
+    schreiber: { t:'&#9999;&#65039; Schreiber:in', a:'hält das gemeinsame Ergebnis fest' },
+    pruefer:   { t:'&#9989; Prüfer:in',      a:'fragt nach, ob alle es verstanden haben' },
+    material:  { t:'&#128230; Materialwart:in', a:'holt das Material und räumt es am Ende auf' }
+  };
+  var RL = (GRUPPE.rollen || [ 'zeit', 'sprecher', 'schreiber', 'pruefer' ]).filter(function(r){ return ROLLEN[r]; });
+  var EXMAX = +GRUPPE.experten || 0;
+  function anzahl(){ return G.sf === 'pa' ? 2 : G.sf === 'ga' ? (G.gr || 0) : 0; }
+  function label(i){ return G.sf === 'pa' ? 'Person ' + 'AB'.charAt(i) : 'Person ' + (i + 1); }
+  function nameRoh(i){ var n = String(G.namen[i] || '').trim(); return n || label(i); }
+  function name(i){ return esc(nameRoh(i)); }
+  function rollenVon(i){          /* Rollen-Schlüssel der Person i */
+    var m = anzahl(), r = [];
+    if (G.sf !== 'ga' || !m) return r;
+    RL.forEach(function(k, j){ if ((j + G.rs) % m === i) r.push(k); });
+    return r;
+  }
+  function inhaber(k){ var m = anzahl(), j = RL.indexOf(k); return (G.sf !== 'ga' || !m || j < 0) ? -1 : (j + G.rs) % m; }
+  function buchstabe(i){ var m = anzahl(); if (!EXMAX || G.sf !== 'ga' || !m) return ''; return String.fromCharCode(65 + (i + G.es) % Math.min(m, EXMAX)); }
+  function teamBau(){
+    var t = $('gc-team'); if (!t) return;
+    var m = anzahl();
+    if (!m) { t.innerHTML = ''; t.removeAttribute('data-m'); namenFuellen(); return; }
+    if (t.getAttribute('data-m') !== G.sf + m) {
+      t.setAttribute('data-m', G.sf + m);
+      var h = '<h3>' + (G.sf === 'pa' ? (SIE ? '&#128101; Wer sind Sie?' : '&#128101; Wer seid ihr?') : (SIE ? '&#128106; Ihre Gruppe' : '&#128106; Eure Gruppe')) + '</h3><div class="gc-namen">';
+      for (var i = 0; i < m; i++) h += '<div><label for="gc-nm' + i + '">' + label(i) + '</label><input type="text" class="gc-nameein" id="gc-nm' + i + '" data-i="' + i + '" maxlength="20" autocomplete="off" spellcheck="false" aria-label="Vorname ' + label(i) + '"></div>';
+      h += '</div><div class="gc-tabwrap" id="gc-rollen"></div>';
+      if (G.sf === 'ga') h += '<div class="gc-zahlwahl"><button type="button" class="gc-btn sek" id="gc-los">&#127922; Rollen' + (EXMAX ? ' und Experten' : '') + ' auslosen</button><button type="button" class="gc-btn sek" id="gc-weiter">&#128260; Rollen weitergeben (neue Karte)</button></div>';
+      h += '<p class="gc-klein">Nur der Vorname reicht. Die Namen bleiben auf diesem iPad und verschwinden, wenn die Seite geschlossen wird.</p>';
+      t.innerHTML = h;
+      t.querySelectorAll('input.gc-nameein').forEach(function(inp){
+        inp.value = G.namen[+inp.getAttribute('data-i')] || '';
+        inp.addEventListener('input', function(){ G.namen[+inp.getAttribute('data-i')] = inp.value.slice(0, 20); sichern(); rollenZeig(); namenFuellen(); });
+      });
+      if ($('gc-los')) $('gc-los').addEventListener('click', function(){
+        G.rs = Math.floor(Math.random() * m); G.es = Math.floor(Math.random() * m); sichern(); rollenZeig(); namenFuellen();
+      });
+      if ($('gc-weiter')) $('gc-weiter').addEventListener('click', function(){ G.rs = (G.rs + 1) % m; sichern(); rollenZeig(); namenFuellen(); });
+    }
+    rollenZeig(); namenFuellen();
+  }
+  function rollenZeig(){
+    var r = $('gc-rollen'), m = anzahl(); if (!r || !m) return;
+    if (G.sf === 'pa') {
+      r.innerHTML = '<table class="gc-rtab"><tr><th>Wer</th><th>Aufgabe</th></tr>' +
+        '<tr><td><b>' + name(0) + '</b> (A)</td><td>erklärt zuerst</td></tr>' +
+        '<tr><td><b>' + name(1) + '</b> (B)</td><td>prüft und fragt nach &ndash; ' + (SIE ? 'dann tauschen Sie' : 'dann tauscht ihr') + '</td></tr></table>';
+      return;
+    }
+    var h = '<table class="gc-rtab"><tr><th>Name</th><th>Rolle</th>' + (EXMAX ? '<th>Experte</th>' : '') + '</tr>';
+    for (var i = 0; i < m; i++) {
+      var ks = rollenVon(i);
+      h += '<tr><td><b>' + name(i) + '</b></td><td>' + (ks.length ? ks.map(function(k){ return ROLLEN[k].t + ' &ndash; ' + ROLLEN[k].a; }).join('<br>') : 'hilft mit, wo es gerade nötig ist') + '</td>' +
+        (EXMAX ? '<td><b>' + buchstabe(i) + '</b></td>' : '') + '</tr>';
+    }
+    r.innerHTML = h + '</table>';
+  }
+  function namenFuellen(){
+    var m = anzahl();
+    document.querySelectorAll('.gc-name').forEach(function(el){
+      var k = el.getAttribute('data-rolle'), e = el.getAttribute('data-experte'), p = el.getAttribute('data-person'), t = '';
+      if (k) { var i = inhaber(k); t = i >= 0 ? nameRoh(i) : (ROLLEN[k] ? 'die ' + ROLLEN[k].t.replace(/^&[^;]+;(&[^;]+;)?\s*/, '') : ''); }
+      else if (e) { var ns = []; for (var j = 0; j < m; j++) if (buchstabe(j) === e.toUpperCase()) ns.push(nameRoh(j)); t = ns.length ? ns.join(' und ') : 'Experte ' + e.toUpperCase(); }
+      else if (p) { var q = /^[AB]$/i.test(p) ? 'AB'.indexOf(p.toUpperCase()) : +p - 1; t = (q >= 0 && q < Math.max(m, 1)) ? nameRoh(q) : 'Person ' + p; }
+      el.textContent = t;
+    });
+    uhrKoepfe();
+  }
+
+  /* ---------- Phasen-Uhr (TEIL D, v3) ---------- */
+  var UHREN = [], TAKT = null;
+  function mmss(x){ x = Math.max(0, Math.ceil(x)); return Math.floor(x / 60) + ':' + ('0' + x % 60).slice(-2); }
+  function rest(u){ var st = G.uhr[u.id]; if (!st) return u.min * 60; return st.start ? st.rest - (Date.now() - st.start) / 1000 : st.rest; }
+  function uhrKoepfe(){
+    UHREN.forEach(function(u){
+      var zw = inhaber('zeit'), wer;
+      if (G.sf === 'ga') wer = zw >= 0 ? ' &ndash; nur für die Zeitwächter:in <b>' + name(zw) + '</b>' : ' &ndash; nur für die Zeitwächter:in';
+      else if (G.sf === 'pa') wer = ' &ndash; ' + (SIE ? 'für Sie beide' : 'für euch beide');
+      else wer = SIE ? ' &ndash; für Sie' : ' &ndash; für dich';
+      u.kopf.innerHTML = '&#9201;&#65039; Phasen-Uhr &bdquo;' + esc(u.titel) + '&ldquo; (' + u.min + ' min)' + wer;
+      u.tipp.innerHTML = G.sf === 'ga' ? 'Nur die Zeitwächter:in schaut auf die Uhr und sagt bei 2 Minuten Bescheid und wenn die Zeit um ist.' : '';
+    });
+  }
+  function uhrZeig(){
+    var laeuft = false;
+    UHREN.forEach(function(u){
+      var r = rest(u), st = G.uhr[u.id], an = !!(st && st.start);
+      u.anz.textContent = mmss(r);
+      u.d.classList.toggle('warn', r <= 120 && r > 0);
+      u.d.classList.toggle('aus', r <= 0);
+      u.start.innerHTML = an ? (r > 0 ? '&#9208;&#65039; Pause' : '&#9209;&#65039; Uhr anhalten') : '&#9654;&#65039; Start';
+      if (r <= 0) u.anz.textContent = '0:00 \u2013 Zeit ist um';
+      if (an && r > 0) laeuft = true;
+    });
+    if (laeuft && !TAKT) TAKT = setInterval(uhrZeig, 500);
+    if (!laeuft && TAKT) { clearInterval(TAKT); TAKT = null; }
+  }
+  document.querySelectorAll('.gc-uhr[data-uhr]').forEach(function(el){
+    var u = { id:el.getAttribute('data-uhr'), min:+el.getAttribute('data-min') || 10, titel:el.getAttribute('data-titel') || 'Phase' };
+    el.innerHTML = '<details class="gc-uhr-d"><summary></summary><div class="gc-uhr-in"><p class="gc-uhr-anz" aria-live="off"></p>' +
+      '<div class="gc-zahlwahl"><button type="button" class="gc-btn" data-u="start"></button><button type="button" class="gc-btn sek" data-u="zurueck">&#8634; Zurück auf ' + u.min + ' min</button></div>' +
+      '<p class="gc-klein"></p></div></details>';
+    u.d = el.firstChild; u.kopf = u.d.querySelector('summary'); u.anz = u.d.querySelector('.gc-uhr-anz');
+    u.start = u.d.querySelector('[data-u="start"]'); u.tipp = u.d.querySelector('.gc-klein');
+    u.start.addEventListener('click', function(){
+      var st = G.uhr[u.id] || { rest:u.min * 60, start:null };
+      if (st.start) { st.rest = rest(u); st.start = null; } else if (rest(u) > 0) { st.rest = rest(u); st.start = Date.now(); }
+      G.uhr[u.id] = st; sichern(); uhrZeig();
+    });
+    u.d.querySelector('[data-u="zurueck"]').addEventListener('click', function(){ delete G.uhr[u.id]; sichern(); uhrZeig(); });
+    UHREN.push(u);
+  });
+
   /* ---------- Schnittstelle für die Seite ---------- */
   window.GC = {
     melde: function(id, richtig){
@@ -355,10 +529,13 @@ var GRUPPE = {
       G.erster[id] = richtig ? 1 : 0; sichern(); codeZeig();
     },
     sozialform: function(){ return G.sf; },
-    groesse: groesse
+    groesse: groesse,
+    name: function(i){ return nameRoh(i); },
+    rolle: function(k){ var i = inhaber(k); return i >= 0 ? nameRoh(i) : null; },
+    experte: function(b){ var m = anzahl(), ns = []; for (var j = 0; j < m; j++) if (buchstabe(j) === String(b).toUpperCase()) ns.push(nameRoh(j)); return ns; }
   };
 
-  sfZeig(); keyZeig(); regelnZeig(); reBau(); codeZeig();
+  sfZeig(); keyZeig(); regelnZeig(); reBau(); codeZeig(); uhrKoepfe(); uhrZeig();
   if (G.rech.ber) rechne();
 })();
 /* ============ ENDE BAUSTEIN Gruppen-Check-Engine ============ */

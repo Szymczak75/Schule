@@ -25,7 +25,8 @@ Was dieser Linter NICHT kann (bleibt Handarbeit bzw. Browsertest):
 
 Stand: 28.11.2026 (Planung: Zeitbudget ≤ 70 % bis zur Präsentation (ZEIT, data-stunde/data-min/
        data-rest), drei Wege Umweg/Abkürzung/Profi auf Lernseiten (DIFF), eigener EA-/PA-Ersatz
-       bei Sozialform-Wahl (SOZIAL), TEIL 2.10/2.12/3.8;
+       bei Sozialform-Wahl (SOZIAL), TEIL 2.10/2.12/3.8; Gruppen-Baustein v3 (Namen, Rollen,
+       Phasen-Uhr gc-uhr), Prüfung GCUHR: Uhr-Zeit passt nicht zum Ablaufplan;
        27.11.2026: Story-Engine v13: Antwort am Wegende bei 'kurs'/'fahrzeug'; v12: Steinweg 'reihe' und Lückenfelder 'luecken'; Prüfung STORY: Teile/Lösungen, Zeilen;
        Story-Engine v9: falsch gelöstes Rätsel bleibt sichtbar, Umweg mit Banner;
        Story-Engine v8: Symbolwand 'wand' – Runen in Nischen sortieren; Prüfung STORY:
@@ -125,7 +126,7 @@ EXAM_MARKE = 'BAUSTEIN: EXAM-Seite'
 EXAM_INHALT = re.compile(r'var EXAM = \{.*?\n\};', re.S)
 
 # Gruppenarbeit & Gruppen-Check (baustein_gruppencheck.html, TEIL 2.10)
-GC_VERSION = 'v2'
+GC_VERSION = 'v3'
 GC_MARKE = 'BAUSTEIN: Gruppen-Check-Engine'
 
 # Kernkompetenzen (kernkompetenzen.md, TEIL 2.9): Anzahl Kürzel je Jahrgang.
@@ -816,6 +817,20 @@ def pruefe(pfad):
             if not any(r for m, r in zeilen):
                 hinweis('ZEIT', 'keine Zeile mit data-rest – Präsentation, Sicherung und Puffer '
                                 'gehören in den Plan (TEIL 3.8)')
+
+    # Phasen-Uhren des Gruppen-Bausteins (v3) übernehmen die Zeiten des Ablaufplans (TEIL 3.8)
+    uhren = re.findall(r'<div\b[^>]*class="gc-uhr"[^>]*>', eigen)
+    if uhren and plan_m:
+        plan_min = set(re.findall(r'data-min="(\d+(?:[.,]\d+)?)"', plan_m.group(0)))
+        for u in uhren:
+            um = re.search(r'data-min="(\d+(?:[.,]\d+)?)"', u)
+            if not um:
+                fehler('GCUHR', 'Phasen-Uhr ohne data-min: %s' % u[:60])
+            elif plan_min and um.group(1) not in plan_min:
+                hinweis('GCUHR', 'Phasen-Uhr mit %s min – im Ablaufplan gibt es keine Phase mit dieser '
+                                 'Dauer (TEIL 3.8)' % um.group(1))
+    if 'data-titel="ANPASSEN' in eigen:
+        fehler('GCUHR', 'Phasen-Uhr noch mit Platzhalter-Titel „ANPASSEN“')
 
     # Drei Wege auf Lernseiten (TEIL 2.12): Umweg, Abkürzung, Profi-Material
     if typ == 'Lernseite':

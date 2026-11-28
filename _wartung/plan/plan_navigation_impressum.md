@@ -307,8 +307,11 @@ Ordner-Übersichten `_*.html` über `linking.txt`). Änderungen an der Startseit
   eigener Runde, 70-%-Zeitplan, Umweg/Abkürzung/Profi, Material und Schülerrealität), neu 2.13
   (Zu-3-Satz mit ≙, Hyperbel), 3.8 (`data-stunde`/`data-min`/`data-rest`). Dach-Anweisung und
   Checkliste nachgezogen. `pruefe.py`: `ZEIT`, `DIFF`, `SOZIAL` (auf Bestandsseiten nur Hinweise).
-  Schritt 2 folgt: `baustein_gruppencheck.html` v3 (Rollen mit Namensfeldern, Expertennamen,
-  Zeitwächter-Uhr).
+  Schritt 2 (Branch `gruppencheck-v3`): `baustein_gruppencheck.html` v3 – Namensfelder,
+  Rollen mit Namen (auslosen/weitergeben), Expertenbuchstaben mit Namen, Platzhalter `gc-name`,
+  Phasen-Uhr TEIL D für die Zeitwächter:in, Engine-Texte mit `data-anrede="sie"`. `pruefe.py`:
+  `GC_VERSION` v3, `GCUHR`. Bestandsseiten (12, alle v2) melden `GCALT` – Umstellung beim
+  Überarbeiten (Ideenliste Nr. 3).
 
 **Noch offen:**
 1. **Neulade-Schutz Stufe 2** (voller Schutz inkl. Bewertungen, wie im Baukasten) nach und
