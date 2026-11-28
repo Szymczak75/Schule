@@ -342,6 +342,8 @@ Diese Punkte standen offen und sind inzwischen als Regel in
   vereinbaren, höchstens 70 % der Stunde bis zur Präsentation (`data-stunde`/`data-min`/
   `data-rest`), Gruppen-Check immer fragen, EA/PA als eigene Aufträge, Umweg/Abkürzung/
   Profi-Material, Material und Schülerrealität. `pruefe.py` meldet `ZEIT`, `DIFF`, `SOZIAL`.
+  Gruppen-Baustein v3: Namensfelder, Rollen mit Namen, Zeitwächter:in mit eigener
+  Phasen-Uhr (`gc-uhr`, Zeiten wie im Ablaufplan, `GCUHR`).
 - **Änderungen kamen als Dateien zum Einspielen statt als Pull Request** (November 2026): Ein
   Chat ohne Schreibzugriff gab Baustein und `pruefe.py` zum Hochladen ins Wartungs-Projekt
   heraus. Seitdem gilt TEIL 0 Nr. 26: Repo mit Schreibzugriff anhängen, Branch, Pull Request,
