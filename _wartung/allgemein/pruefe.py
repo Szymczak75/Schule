@@ -27,6 +27,7 @@ Stand: 28.11.2026 (Planung: Zeitbudget ≤ 70 % bis zur Präsentation (ZEIT, dat
        data-rest), drei Wege Umweg/Abkürzung/Profi auf Lernseiten (DIFF), eigener EA-/PA-Ersatz
        bei Sozialform-Wahl (SOZIAL), TEIL 2.10/2.12/3.8; Gruppen-Baustein v3 (Namen, Rollen,
        Phasen-Uhr gc-uhr), Prüfung GCUHR: Uhr-Zeit passt nicht zum Ablaufplan;
+       Story-Engine v14: Fangspiel 'fang' (Teilchen antippen); Prüfung STORY: Sorten, ok-Teilchen, Farbe, Ziel, Zeit;
        27.11.2026: Story-Engine v13: Antwort am Wegende bei 'kurs'/'fahrzeug'; v12: Steinweg 'reihe' und Lückenfelder 'luecken'; Prüfung STORY: Teile/Lösungen, Zeilen;
        Story-Engine v9: falsch gelöstes Rätsel bleibt sichtbar, Umweg mit Banner;
        Story-Engine v8: Symbolwand 'wand' – Runen in Nischen sortieren; Prüfung STORY:
@@ -99,7 +100,7 @@ RBKA_MARKE = 'BAUSTEIN: Rückblick-KA-Engine'
 
 # Story-Engine (baustein_story.html, TEIL 2.11)
 STORY_TYP = 'Story'
-STORY_VERSION = 'v13'
+STORY_VERSION = 'v14'
 STORY_MARKE = 'BAUSTEIN: Story-Engine'
 STORY_ARTEN = ('zahl', 'bruch', 'term', 'text', 'wahl',                 # v1/v2
                'uhr', 'schloss', 'steck', 'felder', 'schalter',      # v3: Rätselgeräte
@@ -107,7 +108,8 @@ STORY_ARTEN = ('zahl', 'bruch', 'term', 'text', 'wahl',                 # v1/v2
                'gitter', 'kompass', 'regler',
                'kurs',                                                # v7: Wegwahl
                'wand',                                                # v8: Symbolwand
-               'reihe', 'luecken')                                    # v12: Steinweg, Lückenfelder
+               'reihe', 'luecken',                                    # v12: Steinweg, Lückenfelder
+               'fang')                                                # v14: Fangspiel
 STORY_KURS_MODUS = ('fahrzeug', 'gruppe', 'wesen')
 STORY_FAHRZEUGE = ('boot', 'uboot', 'floss', 'schlitten', 'kutsche', 'lore', 'ballon', 'rakete')
 STORY_GELAENDE = ('wasser', 'tiefsee', 'zelle', 'schnee', 'land', 'himmel', 'weltall')
@@ -543,7 +545,8 @@ def pruefe(pfad):
                          len(re.findall(r'\bsteine:\s*\[\s*\{', t)) + \
                          len(re.findall(r'\bblatt:\s*\[[^\]]*?\bok:\s*true', t, re.S)) + \
                          len(re.findall(r'\bsterne:\s*\[\s*\[', t)) + \
-                         len(re.findall(r'\bzeichen:\s*\[\s*\{', t))
+                         len(re.findall(r'\bzeichen:\s*\[\s*\{', t)) + \
+                         len(re.findall(r'\bteilchen:\s*\[[^\]]*?\bok:\s*true', t, re.S))
                 # v3: Antwortarten und Rätselgeräte
                 for a in re.findall(r"\bart:\s*'([^']*)'", t):
                     if a not in STORY_ARTEN:
@@ -658,6 +661,27 @@ def pruefe(pfad):
                     n_z = len(re.findall(r'\{\s*(?:vor:[^{}]*?)?soll:\s*\[', seg))
                     if not 2 <= n_z <= 6:
                         fehler('STORY', "Karte %s: 'luecken' mit %d Zeilen (je mit soll) – vorgesehen sind 2 bis 6" % (kid, n_z))
+                # v14: Fangspiel – 2 bis 6 Sorten, mindestens eine mit ok: true, Ziel und Zeit im Rahmen
+                for fm in re.finditer(r"\bart:\s*'fang'", t):
+                    anf = t.rfind('raetsel:', 0, fm.start())
+                    end = t.find('tipps:', fm.end())
+                    seg = t[anf if anf >= 0 else fm.start():end if end >= 0 else len(t)]
+                    te = re.search(r'\bteilchen:\s*\[(.*?)\]', seg, re.S)
+                    sorten = re.findall(r'\{[^{}]*\}', te.group(1)) if te else []
+                    if not 2 <= len(sorten) <= 6:
+                        fehler('STORY', "Karte %s: 'fang' mit %d Teilchen-Sorten – vorgesehen sind 2 bis 6" % (kid, len(sorten)))
+                    if not any(re.search(r'\bok:\s*true', x) for x in sorten):
+                        fehler('STORY', "Karte %s: 'fang' ohne Teilchen mit ok: true" % kid)
+                    for x in sorten:
+                        fb = re.search(r"\bfarbe:\s*'([^']*)'", x)
+                        if fb and fb.group(1) not in ('violett', 'gruen', 'blau', 'rot', 'gold', 'grau', 'orange'):
+                            fehler('STORY', "Karte %s: 'fang' – unbekannte farbe '%s'" % (kid, fb.group(1)))
+                    zm = re.search(r'\bziel:\s*(\d+)', seg)
+                    if zm and not 3 <= int(zm.group(1)) <= 30:
+                        fehler('STORY', "Karte %s: 'fang' mit ziel %s – vorgesehen sind 3 bis 30" % (kid, zm.group(1)))
+                    zt = re.search(r'\bzeit:\s*(\d+)', seg)
+                    if zt and not 15 <= int(zt.group(1)) <= 90:
+                        fehler('STORY', "Karte %s: 'fang' mit zeit %s s – vorgesehen sind 15 bis 90" % (kid, zt.group(1)))
                 if n_soll < n_r:
                     fehler('STORY', 'Karte %s: nicht jedes Rätsel hat soll (bzw. eine Option mit ok: true)' % kid)
                 if len(re.findall(r'\btipps:\s*\[', t)) < n_r:
