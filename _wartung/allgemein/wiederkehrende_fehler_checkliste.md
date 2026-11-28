@@ -378,6 +378,10 @@ Diese Punkte standen offen und sind inzwischen als Regel in
   durchspielen. Seitdem regelt TEIL 0 Nr. 26 zwei Stufen: **erst die Dateien im Chat zeigen
   und auf das OK warten, dann** Branch und Pull Request. Kein Push vor dem OK.
 
+- **Story-Engine v15 – Suchbild** (28.11.2026, Escape Room MCG-Funken): Das Suchbild auf dem Schulhof war nur ein
+  stilles Bild mit Auflösung im Text. Seit v15 gibt es `suchbild`: Stellen im Bild antippen, gefundene leuchten grün mit
+  Nummer. Trefferzonen in Prozent am echten Bild abmessen und mit eingezeichneten Kreisen prüfen; `pruefe.py` meldet
+  fehlendes `bild`, 0 oder mehr als 12 Punkte und ungültige x/y-Werte als `STORY`.
 - **Story-Engine v14 – Fangspiel** (28.11.2026, Escape Room „Funkstille im Rückenmark“, Bio Klasse 10): Gewünscht war eine
   „Balgerei“ an der Synapse zum Antippen – die Engine kannte kein Antippspiel, und Geräte im Datenblock sind verboten.
   Seit v14 gibt es `fang`: Teilchen mit Begriffen antippen, bevor sie verschwinden; nur die passenden zählen, Fehlgriffe
