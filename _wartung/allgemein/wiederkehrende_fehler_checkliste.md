@@ -378,6 +378,12 @@ Diese Punkte standen offen und sind inzwischen als Regel in
   durchspielen. Seitdem regelt TEIL 0 Nr. 26 zwei Stufen: **erst die Dateien im Chat zeigen
   und auf das OK warten, dann** Branch und Pull Request. Kein Push vor dem OK.
 
+- **Story-Engine v14 – Fangspiel** (28.11.2026, Escape Room „Funkstille im Rückenmark“, Bio Klasse 10): Gewünscht war eine
+  „Balgerei“ an der Synapse zum Antippen – die Engine kannte kein Antippspiel, und Geräte im Datenblock sind verboten.
+  Seit v14 gibt es `fang`: Teilchen mit Begriffen antippen, bevor sie verschwinden; nur die passenden zählen, Fehlgriffe
+  werden gezählt. Das Kriterium steht in der Frage, nicht die Sorte (Wissen statt reiner Reaktion). Vor dem Prüfen
+  beliebig oft spielbar, Korrekturrunde = genau ein weiteres Spiel, übersteht das Neuladen. `pruefe.py` prüft
+  Sorten (2–6), mindestens ein `ok`, Farbe, `ziel` (3–30) und `zeit` (15–90) als `STORY`.
 - **Story-Engine v13 – Antwort am Wegende** (27.11.2026, alle `_story`-Seiten): Beim Wegwahl-Gerät mit Fahrzeug
   standen die Antworten in einer Tafel unter dem Bild, die Linien trugen nur Nummern, und ◀ ▶ oder Antippen der Tafel
   machten das Steuerrad überflüssig. Wunsch der Lehrkraft: Die Lösungen stehen **am Ende der Wege**, gewählt wird

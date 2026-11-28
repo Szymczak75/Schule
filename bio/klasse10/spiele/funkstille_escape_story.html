@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- =====================================================================
-     BAUSTEIN: Story (_story)  v13, 27.11.2026
+     BAUSTEIN: Story (_story)  v14, 28.11.2026
      Escape Room, Adventskalender, Detektivgeschichte oder freie Story: eine Geschichte
      in mehreren Karten, jede Karte endet mit einem Rätsel.
      Richtig → weiter zur nächsten Karte (mit Codewort zum späteren Wiedereinstieg).
@@ -69,6 +69,10 @@
         wird nicht mehr gebraucht. Behoben: Der Steinweg ('reihe') konnte die Teile schon in einer richtigen
         Reihenfolge auslegen (v. a. bei 3–4 Teilen) – er mischt jetzt neu, bis keine Lösung daliegt.
         Abwärtskompatibel, Datenblock unverändert.
+     v14 (Fangspiel): 'fang' – Teilchen tauchen im Spielfeld auf und verschwinden wieder; die richtigen
+        (ok: true) werden durch Antippen gefangen, Fehlgriffe zählen. Geschafft mit mindestens „ziel“
+        Treffern in „zeit“ Sekunden und höchstens „fehler“ Fehlgriffen; vor dem Prüfen beliebig oft
+        spielbar, nach dem ersten falschen Prüfen genau ein weiteres Spiel. Abwärtskompatibel.
      ===================================================================== -->
 <html lang="de">
 <head>
@@ -90,7 +94,7 @@
 </script>
 <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
 <style>
-/* ===== BAUSTEIN-CSS: Story (v13, 27.11.2026) – unverändert übernehmen ===== */
+/* ===== BAUSTEIN-CSS: Story (v14, 28.11.2026) – unverändert übernehmen ===== */
 :root{
   --ink:#22303f; --card:#ffffff; --green:#1e7d32; --red:#c1272d;
   --amber:#b8860b; --amber-light:#fdf3d9; --amber-dark:#96690a;
@@ -443,6 +447,24 @@ mjx-container{max-width:100%;overflow-x:auto;}
 .luecke input{flex:1 1 11rem;min-width:0;min-height:48px;font-size:1.1rem;padding:.35rem .6rem;border:2px solid #4a3208;border-radius:.5rem;background:#fffdf6;}
 .luecke.fest{border-color:#16934d;box-shadow:0 0 0 2px #3fd27f;}
 .luecke.fest input{background:#eafaf0;}
+/* v14: Fangspiel – Teilchen antippen, bevor sie verschwinden */
+.fang-legende{display:flex;flex-wrap:wrap;justify-content:center;gap:.5rem;margin:.3rem 0 .5rem;}
+.fang-muster{display:inline-flex;align-items:center;min-height:2.4rem;padding:.25rem .8rem;border-radius:999px;border:2px solid rgba(255,255,255,.8);
+  color:#fff;font-weight:700;font-size:1rem;box-shadow:0 1px 4px rgba(0,0,0,.35);}
+.fang-leiste{display:flex;flex-wrap:wrap;justify-content:space-between;gap:.5rem;max-width:640px;margin:.4rem auto;font-weight:700;font-size:1rem;}
+.fang-feld{position:relative;width:100%;max-width:640px;aspect-ratio:16/10;margin:0 auto;border:3px solid #1c1613;border-radius:1rem;overflow:hidden;
+  background:radial-gradient(ellipse at 50% 40%,#2b3d52,#141c26 75%);touch-action:manipulation;-webkit-user-select:none;user-select:none;}
+.fang-start{position:absolute;inset:0;margin:auto;width:max-content;height:max-content;min-height:56px;font-size:1.15rem;}
+.fang-teil{position:absolute;transform:translate(-50%,-50%) scale(.2);opacity:0;min-width:3.6rem;min-height:3.6rem;padding:.35rem .7rem;
+  border-radius:999px;border:2px solid rgba(255,255,255,.85);color:#fff;font:inherit;font-size:1rem;font-weight:700;cursor:pointer;
+  box-shadow:0 0 14px rgba(255,255,255,.35);transition:transform .25s ease-out,opacity .25s ease-out;}
+.fang-teil.da{transform:translate(-50%,-50%) scale(1);opacity:1;}
+.fang-teil.flieht{transform:translate(-50%,-50%) scale(.3);opacity:0;}
+.fang-teil.gefangen{transform:translate(-50%,-50%) scale(1.6);opacity:0;box-shadow:0 0 0 4px #3fd27f,0 0 24px #3fd27f;}
+.fang-teil.daneben{background:#c1272d;transform:translate(-50%,-50%) scale(1.15);opacity:.2;}
+.f-violett{background:#6b3fa0;} .f-gruen{background:#1e7d32;} .f-blau{background:#2f5fa6;} .f-rot{background:#c1272d;}
+.f-gold{background:#96690a;} .f-grau{background:#5b6677;} .f-orange{background:#a5611e;}
+@media (prefers-reduced-motion:reduce){ .fang-teil{transition:none;} }
 @media (prefers-reduced-motion:reduce){ .funkeln,.rolle > .ziffer.klick,.wuerfel.rollt{animation:none;} .spielkarte,.kurs-rad,.kurs-fahrzeug,.kurs-figur{transition:none;} }
 .erwischt{border-left-color:var(--ink);}
 /* v4: Szenenbilder in Geschichte, Umweg, erwischt und Ende (als data-URI im Datenblock, TEIL 8.1) */
@@ -1024,7 +1046,7 @@ return {
 </script>
 <!-- ============ ENDE BAUSTEIN Formeltool ============ -->
 </head>
-<body data-anrede="du" data-version="1">
+<body data-anrede="du" data-version="2">
 
 <header class="kopf"><div class="kopf-innen">
   <p class="kopf-typ" id="st-typ"></p>
@@ -1128,8 +1150,8 @@ var STORY = {
        + 'kleiner als eine Blutzelle, jede mit Kamera, Messfühler, Greifarm und Sprühdüse, warten auf ihren Einsatz:</p>'
        + '<p>🔵 <b>SENSO</b> – Sinneszellen und sensorische Nervenzellen · 🟢 <b>SPINA</b> – Rückenmark · '
        + '🟠 <b>MOTO</b> – motorische Nervenzellen · 🔴 <b>MYO</b> – Muskel</p>'
-       + '<p>Jeder Raum dieses Escape Rooms ist eine Station des Einsatzes. Löst du das Rätsel, kommt ein Buchstabe ins '
-       + '<b>Einsatzprotokoll</b> – am Ende ergeben alle Buchstaben das Lösungswort. Irrst du dich, nimmt der Einsatz einen Umweg. '
+       + '<p>Jeder Raum dieses Escape Rooms ist eine Station des Einsatzes. In den ersten acht Räumen kommt für jedes gelöste Rätsel ein Buchstabe ins '
+       + '<b>Einsatzprotokoll</b> – zusammen ergeben sie das Lösungswort. Im letzten Raum musst du selbst mit anpacken. Irrst du dich, nimmt der Einsatz einen Umweg. '
        + 'Dr. Kaya und Tom geben dir Hinweise, und wenn gar nichts mehr geht, erklärt die Bord-KI <b>NEURA</b> den Weg.</p>'
        + '<p>💡 Ihr seid zu viert? Dann übernimmt jede und jeder eine Drohne und liest die Meldungen „seiner“ Drohne laut vor.</p>',
   karten: [
@@ -1487,9 +1509,8 @@ var STORY = {
     code: 'KLETTE' },
 
   /* ---------------------------------------------------------- Raum 8 */
-  { id: '8', titel: 'Die Balgerei an der Synapse',
-    geschichte: '<p>MOTO und SPINA reißen mit ihren Greifarmen die violetten Moleküle von den Rezeptoren. Doch kaum ist eines weg, dockt schon das nächste an.</p>'
-              + szene('balgerei', 'Wildes Durcheinander an der Synapse: Violette Moleküle werden von den Rezeptoren gerissen, neue fliegen heran. Ein feiner Nebel zieht durch den Spalt, kleine Y-förmige Antikörper packen freie Moleküle. Einige freie Rezeptoren leuchten hell auf. Dazwischen die vier Drohnen.')
+  { id: '8', titel: 'Der Plan',
+    geschichte: '<p>MOTO und SPINA zerren mit ihren Greifarmen an den violetten Molekülen. Doch kaum ist eines weg, dockt schon das nächste an.</p>'
               + tom('„Das bringt nichts! Ich sprühe einfach etwas drauf, das die Rezeptoren abschirmt!“')
               + kaya('„Stopp! Erst überlegen. Wir kennen drei Prinzipien für Gegengifte. Welche helfen hier wirklich?“'),
     raetsel: { frage: 'Entscheide, welche Gegenmaßnahmen gegen NX-7 helfen. Lege genau diese Hebel um.',
@@ -1504,10 +1525,8 @@ var STORY = {
                   + 'Dazu kommt ein <b>Gegenserum mit Antikörpern</b> (Prinzip 3, abfangen), das neues NX-7 im Blut abfängt. Abschirmen würde die Blockade '
                   + 'verstärken, und weniger Botenstoff freizusetzen würde alles noch schlimmer machen.' },
     umwege: [
-      { geschichte: '<p>Während das Team streitet, taucht eine riesige <b>weiße Blutzelle</b> auf. Sie hält SENSO für einen Eindringling und streckt '
-                  + 'ihre Fortsätze nach ihr aus – SENSO flieht mit vollem Schub!</p>'
-                  + szene('blutzelle', 'Eine große, durchscheinende weiße Blutzelle greift mit ihren Fortsätzen nach der blauen Drohne, die mit einem Lichtstrahl davonschießt. Daneben ein Klumpen aus Antikörpern und violetten Molekülen.')
-                  + kaya('„Zum Glück hat sie jetzt etwas Besseres gefunden. Zurück zur Arbeit – üben wir die Prinzipien an einem bekannten Fall.“'),
+      { geschichte: '<p>Dr. Kaya schüttelt den Kopf: „Noch nicht. Erinnert euch an einen Fall, den wir kennen.“ Sie zeigt auf eine alte Fallakte: '
+                  + 'ein Jäger, der versehentlich mit einem Curare-Pfeil verletzt wurde.</p>',
         raetsel: { frage: 'Entscheide, welche Gegenmaßnahme bei einer Vergiftung mit <b>Curare</b> hilft. Tippe die Person an, die recht hat.',
                    art: 'kurs', modus: 'gruppe',
                    optionen: [ { t: 'den Abbau des Botenstoffs bremsen', ok: true },
@@ -1518,29 +1537,66 @@ var STORY = {
                             tt('Wer gewinnt den Streit um die Rezeptoren, wenn viel mehr echter Botenstoff im Spalt ist?') ],
                    weg: 'Curare blockiert die Rezeptoren. Wird der Abbau des Botenstoffs gebremst, sammelt sich mehr Botenstoff im Spalt und '
                       + '<b>verdrängt</b> Curare nach und nach (Prinzip 1).' } },
-      { geschichte: '<p>Tom dreht den Abbau-Hemmer am Regler auf – und zwar ganz.</p>'
-                  + szene('zuviel', 'Links ein Oberschenkelmuskel, durch den goldene Blitze zucken, davor eine Drohne mit rotem Warnlicht. Rechts im Kontrollraum hält Dr. Kaya Toms Hand am aufgedrehten Regler fest, Tom schaut erschrocken.')
-                  + myo('„Der Muskel zuckt und zuckt, er hört nicht mehr auf!“'),
-        raetsel: { frage: 'Entscheide, was gerade an der Synapse passiert. Jede Drohne schlägt eine Erklärung vor – tippe die richtige an.',
+      { geschichte: '<p>Auch das hakt. Tom blättert weiter in den Fallakten: ein Landwirt, der früher mit dem Insektengift E 605 gearbeitet hat. '
+                  + 'Seine Muskeln zuckten und hörten nicht mehr auf.</p>',
+        raetsel: { frage: 'Entscheide, welche Gegenmaßnahme bei einer Vergiftung mit <b>E 605</b> hilft. Jede Drohne schlägt eine vor – tippe die richtige an.',
                    art: 'kurs', modus: 'wesen', wesen: ['roboter', 'roboter', 'roboter'],
-                   optionen: [ { t: 'Der Botenstoff wird kaum noch abgebaut und erregt die Zelle immer weiter – wie bei E 605.', ok: true },
-                               { t: 'NX-7 blockiert jetzt auch die Muskelsynapse.' },
-                               { t: 'Die Bläschen schütten keinen Botenstoff mehr aus.' } ],
-                   tipps: [ tk('Was macht der Abbau-Hemmer mit dem Botenstoff, der schon im Spalt ist?'),
-                            tt('Denk an das Insektengift aus dem Unterricht, bei dem die Muskeln nicht mehr aufhören zu zucken.') ],
-                   weg: 'Der Abbau-Hemmer verhindert, dass der Botenstoff nach der Übertragung zerlegt wird. Er bleibt im Spalt und <b>erregt die nächste Zelle '
-                      + 'immer weiter</b> – genau wie bei E 605. Die Dosis muss also wieder herunter.' } }
+                   optionen: [ { t: 'einen Teil der Rezeptoren abschirmen, damit die Dauererregung aufhört', ok: true },
+                               { t: 'den Abbau des Botenstoffs noch stärker bremsen' },
+                               { t: 'mehr Botenstoff in den Spalt sprühen' } ],
+                   tipps: [ tk('Bei E 605 ist nicht zu wenig, sondern zu viel Botenstoff im Spalt.'),
+                            tt('Wenn der Botenstoff nicht schnell genug verschwindet, kann man ihm einen Teil der Andockplätze wegnehmen.') ],
+                   weg: 'E 605 verhindert den Abbau des Botenstoffs, die nächste Zelle wird dauernd erregt. Hier hilft es, einen Teil der Rezeptoren '
+                      + '<b>abzuschirmen</b> (Prinzip 2) – genau das Gegenteil von dem, was bei NX-7 hilft.' } }
     ],
-    geschafft: '<p>Die Mischung macht’s: MYO sprüht den Abbau-Hemmer in den Spalt, SENSO lenkt die Antikörper heran, die freie NX-7-Moleküle packen '
-             + 'und verklumpen. Eine weiße Blutzelle hält SENSO kurz für einen Eindringling – dann stürzt sie sich lieber auf die Klumpen und frisst sie auf.</p>'
-             + '<p>Nur Tom übertreibt es: Er dreht den Abbau-Hemmer voll auf, und MYO meldet Dauerzucken. „Zu viel Botenstoff, der nicht mehr abgebaut wird – wie bei E 605!“, '
-             + 'ruft Dr. Kaya. Tom dreht zurück.</p>'
-             + kaya('„Test!“') + '<p>Sie klopft aufs Knie.</p>'
-             + senso('„Erregung läuft!“') + spina('„Glutamat bindet!“') + moto('„Erregung weitergeleitet!“') + myo('„Muskel zieht sich zusammen!“')
-             + '<p>Der Unterschenkel schnellt vor.</p>'
+    geschafft: kaya('„Genau so machen wir es: Abbau-Hemmer in den Spalt, Gegenserum in die Infusion. Und die Drohnen räumen von Hand auf.“')
              + buchstabe('G')
-             + '<p>Tom lehnt sich zurück: „Letztes Logbuchwort: <b>GEGENSERUM</b>.“</p>',
-    code: 'GEGENSERUM' }
+             + '<p>Tom reibt sich die Hände: „Logbuchwort: <b>GEGENSERUM</b>. Jetzt wird’s ruppig!“</p>',
+    code: 'GEGENSERUM' },
+
+  /* ---------------------------------------------------------- Raum 9 (Fangspiel, Engine v14) */
+  { id: '9', titel: 'Die Balgerei an der Synapse',
+    geschichte: '<p>MYO sprüht den Abbau-Hemmer in den Spalt, über die Infusion strömen Antikörper heran. Jetzt sind MOTO und SPINA dran – '
+              + 'und du steuerst ihre Greifarme.</p>'
+              + szene('balgerei', 'Wildes Durcheinander an der Synapse: Violette Moleküle werden von den Rezeptoren gerissen, neue fliegen heran. Ein feiner Nebel zieht durch den Spalt, kleine Y-förmige Antikörper packen freie Moleküle. Einige freie Rezeptoren leuchten hell auf. Dazwischen die vier Drohnen.')
+              + kaya('„Achtung: Im Spalt schwirrt jetzt alles durcheinander. Reißt nur weg, was die Rezeptoren blockiert. Alles, was wir für die Übertragung '
+              + 'brauchen oder was uns hilft, bleibt da!“'),
+    raetsel: { frage: 'Reiße die Blocker von den Rezeptoren: Tippe nur die Teilchen an, die die Rezeptoren blockieren. Fange mindestens 10 in 30 Sekunden – höchstens 2 Fehlgriffe.',
+               art: 'fang', ziel: 10, zeit: 30, fehler: 2, tempo: 'normal',
+               teilchen: [ { t: 'NX-7', ok: true, farbe: 'violett' }, { t: 'Glutamat', farbe: 'gruen' }, { t: 'Antikörper', farbe: 'gold' } ],
+               tipps: [ tk('Überlege bei jeder Teilchen-Sorte: Ist sie Schlüssel, Helfer oder abgebrochener Schlüssel im Schloss?'),
+                        tt('Der Botenstoff wird für die Übertragung gebraucht, und die Antikörper fangen das Gift ab. Weg muss nur der Stoff aus dem Kühlschrank.') ],
+               weg: 'Die Rezeptoren blockiert nur <b>NX-7</b>. <b>Glutamat</b> ist der Botenstoff, der wieder an die Rezeptoren soll, und die '
+                  + '<b>Antikörper</b> fangen freies NX-7 ab. Nur NX-7 musste weg.' },
+    umwege: [
+      { geschichte: '<p>Zu viele Fehlgriffe – und plötzlich taucht eine riesige <b>weiße Blutzelle</b> auf. Sie hält SENSO für einen Eindringling '
+                  + 'und greift nach ihr. SENSO flieht mit vollem Schub!</p>'
+                  + szene('blutzelle', 'Eine große, durchscheinende weiße Blutzelle greift mit ihren Fortsätzen nach der blauen Drohne, die mit einem Lichtstrahl davonschießt. Daneben ein Klumpen aus Antikörpern und violetten Molekülen.')
+                  + kaya('„Lenk sie ab! Zeig ihr, was sie wirklich fressen soll – aber nichts, was ins Blut gehört.“'),
+        raetsel: { frage: 'Zeige der weißen Blutzelle ihr Futter: Tippe nur die Teilchen an, die sie beseitigen soll. Fange mindestens 8 in 30 Sekunden – höchstens 2 Fehlgriffe.',
+                   art: 'fang', ziel: 8, zeit: 30, fehler: 2, tempo: 'ruhig',
+                   teilchen: [ { t: 'Gift-Klumpen', ok: true, farbe: 'gold' }, { t: 'rote Blutzelle', farbe: 'rot' }, { t: 'Blutplättchen', farbe: 'grau' } ],
+                   tipps: [ tk('Was haben die Antikörper mit dem NX-7 gemacht – und wer räumt das danach weg?'),
+                            tt('Rote Blutzellen und Blutplättchen gehören ins Blut. Beseitigt werden nur die verklumpten Pakete aus Antikörpern und Gift.') ],
+                   weg: 'Antikörper packen das Gift und verklumpen es. Diese <b>Gift-Klumpen</b> fressen weiße Blutzellen auf. Rote Blutzellen und '
+                      + 'Blutplättchen sind körpereigen und gehören ins Blut.' } },
+      { geschichte: '<p>Die weiße Blutzelle zieht zufrieden ab. Dr. Kaya schaltet das Spielfeld langsamer: „Noch einmal in Ruhe. Konzentration!“</p>',
+        raetsel: { frage: 'Reiße die Blocker von den Rezeptoren: Tippe nur die Teilchen an, die die Rezeptoren blockieren. Fange mindestens 8 in 40 Sekunden – höchstens 3 Fehlgriffe.',
+                   art: 'fang', ziel: 8, zeit: 40, fehler: 3, tempo: 'ruhig',
+                   teilchen: [ { t: 'NX-7', ok: true, farbe: 'violett' }, { t: 'Glutamat', farbe: 'gruen' }, { t: 'Antikörper', farbe: 'gold' } ],
+                   tipps: [ tk('Nur eine Sorte sitzt wie ein abgebrochener Schlüssel im Schloss.'),
+                            tt('Glutamat und Antikörper sind unsere Verbündeten – lass sie in Ruhe.') ],
+                   weg: 'Weg muss nur <b>NX-7</b>, der Blocker. Glutamat ist der Botenstoff, die Antikörper helfen beim Abfangen.' } }
+    ],
+    geschafft: '<p>Die Blocker fliegen davon, die Antikörper verklumpen das restliche NX-7, und eine weiße Blutzelle frisst die Klumpen auf.</p>'
+             + '<p>Nur Tom übertreibt es: Er dreht den Abbau-Hemmer voll auf.</p>'
+             + szene('zuviel', 'Links ein Oberschenkelmuskel, durch den goldene Blitze zucken, davor eine Drohne mit rotem Warnlicht. Rechts im Kontrollraum hält Dr. Kaya Toms Hand am aufgedrehten Regler fest, Tom schaut erschrocken.')
+             + myo('„Der Muskel zuckt und zuckt!“') + kaya('„Zu viel Botenstoff, der nicht abgebaut wird – wie bei E 605! Zurückdrehen!“')
+             + '<p>Tom dreht zurück. Dr. Kaya klopft aufs Knie.</p>'
+             + senso('„Erregung läuft!“') + spina('„Glutamat bindet!“') + moto('„Erregung weitergeleitet!“') + myo('„Muskel zieht sich zusammen!“')
+             + '<p>Der Unterschenkel schnellt vor. Das Einsatzprotokoll ist vollständig.</p>'
+             + '<p>Tom grinst: „Allerletztes Logbuchwort: <b>KNIESEHNE</b>.“</p>',
+    code: 'KNIESEHNE' }
   ],
   ende: szene('finale', 'Warmes Licht im Labor: Jonas sitzt lächelnd auf der Liege, Dr. Kaya prüft seinen Kniesehnenreflex. Tom klebt ein Schild an den Kühlschrank. Auf einem Tablett ruhen die vier Drohnen.')
       + '<p>21:05 Uhr. Im Einsatzprotokoll stehen acht Buchstaben: <b>E – R – R – E – G – U – N – G</b>. Das Lösungswort lautet <b>ERREGUNG</b>.</p>'
@@ -1555,7 +1611,7 @@ var STORY = {
 
 <script>
 /* ============================================================
-   BAUSTEIN: Story-Engine (v13, 27.11.2026) – unverändert übernehmen
+   BAUSTEIN: Story-Engine (v14, 28.11.2026) – unverändert übernehmen
    Baut aus dem Objekt STORY: Startkarte (Einleitung, Anleitung, Zeitraum, Einstieg per
    Codewort) → je Karte Geschichte + Rätsel → Endkarte mit Auswertung.
    Ablauf einer Karte:  Haupträtsel richtig → geschafft (direkter Weg).
@@ -1580,6 +1636,7 @@ var STORY = {
    ersetzt dessen Überschrift.
    v7 – Wegwahl 'kurs' (Steuerrad, Personen, Wesen): genau eine richtige Option, Antwort { kurs: Index };
    Einsteigen und Fahrt laufen je Rätsel nur einmal (z.anim), bei prefers-reduced-motion gar nicht.
+   v14 – Fangspiel 'fang': Teilchen antippen, bevor sie verschwinden; Antwort { fang: { gefangen, fehler, fertig } }.
    Anrede: <body data-anrede="sie"> → alle Texte gesiezt (Oberstufe), sonst „du".
    ============================================================ */
 (function(){
@@ -1744,7 +1801,11 @@ var HINWEIS = {
   halbReihe: T('Es liegen noch Teile neben dem Weg. Lege alle Teile. Das kostet keinen Versuch.',
                'Es liegen noch Teile neben dem Weg. Legen Sie alle Teile. Das kostet keinen Versuch.'),
   halbLuecken: T('Es ist noch ein Feld leer. Fülle alle Felder aus. Das kostet keinen Versuch.',
-                 'Es ist noch ein Feld leer. Füllen Sie alle Felder aus. Das kostet keinen Versuch.')
+                 'Es ist noch ein Feld leer. Füllen Sie alle Felder aus. Das kostet keinen Versuch.'),
+  /* v14 */
+  leerFang: T('Starte zuerst das Spiel mit dem Knopf im Spielfeld.', 'Starten Sie zuerst das Spiel mit dem Knopf im Spielfeld.'),
+  laeuftFang: T('Das Spiel läuft noch – warte, bis es zu Ende ist. Das kostet keinen Versuch.',
+                'Das Spiel läuft noch – warten Sie, bis es zu Ende ist. Das kostet keinen Versuch.')
 };
 
 /* ---------- Rätselgeräte (v3, Fantasie-Paket v4) ----------
@@ -1965,6 +2026,12 @@ function bewerteGeraet(r, a){
     if (!voll.some(Boolean)) return 'leer';
     if (!voll.every(Boolean)) return 'halbLuecken';
     return r.zeilen.every(function(x, k){ return luckeRichtig(x, lu[k]); }) ? 'ok' : 'falsch';
+  }
+  if (art === 'fang') {                                         /* v14: Fangspiel */
+    if (!a || !a.fang) return 'leerFang';
+    if (!a.fang.fertig) return 'laeuftFang';
+    var fz = r.ziel || 10, ff = r.fehler == null ? 2 : r.fehler;
+    return a.fang.gefangen >= fz && a.fang.fehler <= ff ? 'ok' : 'falsch';
   }
   if (art === 'schalter') {
     var sc = a && a.schalter ? a.schalter : [];
@@ -3609,6 +3676,129 @@ var GERAET = {
         var n = fest.filter(Boolean).length;
         return '✨ ' + n + ' von ' + r.zeilen.length + T(' Feldern sind richtig und leuchten grün. Verbessere die anderen einmal. Dann prüfe noch einmal.',
                                                         ' Feldern sind richtig und leuchten grün. Verbessern Sie die anderen einmal. Dann prüfen Sie noch einmal.');
+      } };
+  },
+
+  /* ===== v14: Fangspiel ================================================================
+     Teilchen tauchen im Spielfeld auf und verschwinden nach kurzer Zeit wieder. Antippen fängt
+     ein Teilchen. Gefangen werden sollen nur die Teilchen mit ok: true – wer ein anderes antippt,
+     greift daneben. Geschafft, wenn bis zum Ende der Zeit mindestens „ziel“ richtige Teilchen
+     gefangen sind und höchstens „fehler“ Fehlgriffe passiert sind (das Spiel endet vorzeitig,
+     sobald das Ziel erreicht ist). Vor dem Prüfen darf beliebig oft neu gespielt werden; nach dem
+     ersten falschen Prüfen gibt es (Korrekturrunde) genau ein weiteres Spiel.
+     teilchen: [{ t:'NX-7', ok:true, farbe:'violett' }, { t:'Glutamat', farbe:'gruen' }]  (2–6 Sorten)
+       farbe: 'violett' | 'gruen' | 'blau' | 'rot' | 'gold' | 'grau' | 'orange'
+     ziel: 3–30 (Vorgabe 10) · zeit: 15–90 Sekunden (Vorgabe 30) · fehler: erlaubte Fehlgriffe (Vorgabe 2)
+     tempo: 'ruhig' | 'normal' (Vorgabe) | 'schnell' · anteil: Anteil der ok-Teilchen (Vorgabe 0.6)
+     Antwort: { fang: { gefangen, fehler, fertig: true } } */
+  fang: function(r, alt, merke, aktiv){
+    var ziel = r.ziel || 10, dauer = r.zeit || 30, maxF = r.fehler == null ? 2 : r.fehler;
+    var tp = { ruhig: [1000, 3400], normal: [800, 2700], schnell: [600, 2100] }[r.tempo || 'normal'] || [800, 2700];
+    var anteil = r.anteil == null ? 0.6 : r.anteil;
+    var okL = [], nokL = [];
+    r.teilchen.forEach(function(o, k){ (o.ok ? okL : nokL).push(k); });
+    var erg = alt && alt.fang && alt.fang.fertig ? alt.fang : null;
+    var lauf = false, gefangen = 0, fehler = 0, rest = dauer, uhr = null, quelle = null, runde2 = false;
+    var el = neu('div', 'geraet fang');
+    var leiste = neu('div', 'fang-leiste'), lZeit = neu('span', '', ''), lFang = neu('span', '', ''), lFehl = neu('span', '', '');
+    leiste.appendChild(lZeit); leiste.appendChild(lFang); leiste.appendChild(lFehl);
+    var feld = neu('div', 'fang-feld');
+    feld.setAttribute('role', 'group');
+    feld.setAttribute('aria-label', T('Spielfeld: Tippe die richtigen Teilchen an, bevor sie verschwinden.',
+                                      'Spielfeld: Tippen Sie die richtigen Teilchen an, bevor sie verschwinden.'));
+    var startB = neu('button', 'btn btn-los fang-start', ''); startB.type = 'button';
+    startB.addEventListener('click', start);
+    var legende = neu('div', 'fang-legende');
+    r.teilchen.forEach(function(o){
+      legende.appendChild(neu('span', 'fang-muster f-' + (o.farbe || 'blau'), o.t));
+    });
+    var anz = neu('p', 'anzeige', '');
+    el.appendChild(legende); el.appendChild(leiste); el.appendChild(feld); el.appendChild(anz);
+    function stand(){
+      lZeit.textContent = '⏱ ' + rest + ' s';
+      lFang.textContent = '✋ ' + gefangen + ' von ' + ziel;
+      lFehl.textContent = '⚠️ daneben: ' + fehler + (maxF >= 0 ? ' (erlaubt: ' + maxF + ')' : '');
+    }
+    function stopp(){ lauf = false; if (uhr) clearInterval(uhr); if (quelle) clearInterval(quelle); uhr = quelle = null; }
+    function weg(){ if (!el.isConnected) { stopp(); return true; } return false; }
+    function ruhe(){
+      stopp(); feld.innerHTML = '';
+      if (erg) { gefangen = erg.gefangen; fehler = erg.fehler; rest = 0; }
+      else { gefangen = 0; fehler = 0; rest = dauer; }
+      stand();
+      if (aktiv && !(runde2 && erg)) {                     /* Korrekturrunde: genau ein weiteres Spiel */
+        startB.textContent = erg ? '↻ ' + T('Noch einmal spielen', 'Noch einmal spielen') : '▶ ' + T('Spiel starten', 'Spiel starten');
+        feld.appendChild(startB);
+      }
+      anz.textContent = erg
+        ? T('Ergebnis: ', 'Ergebnis: ') + erg.gefangen + ' gefangen, ' + erg.fehler + ' daneben. '
+          + (!aktiv ? '' : runde2 ? T('Prüfe jetzt.', 'Prüfen Sie jetzt.') : T('Prüfe jetzt – oder spiele noch einmal.', 'Prüfen Sie jetzt – oder spielen Sie noch einmal.'))
+        : T('Fange mindestens ' + ziel + ' richtige Teilchen in ' + dauer + ' Sekunden.',
+            'Fangen Sie mindestens ' + ziel + ' richtige Teilchen in ' + dauer + ' Sekunden.');
+    }
+    function start(){
+      if (!aktiv || lauf) return;
+      erg = null; gefangen = 0; fehler = 0; rest = dauer; lauf = true;
+      feld.innerHTML = ''; stand();
+      merke({ fang: { laeuft: true, runde2: runde2 } });
+      anz.textContent = T('Los geht’s!', 'Los geht’s!');
+      neuesTeil();
+      quelle = setInterval(function(){ if (!weg() && lauf) neuesTeil(); }, tp[0]);
+      uhr = setInterval(function(){
+        if (weg()) return;
+        rest--; stand();
+        if (rest <= 0) ende();
+      }, 1000);
+    }
+    function neuesTeil(){
+      var liste = (Math.random() < anteil || !nokL.length) ? okL : nokL;
+      if (!liste.length) liste = okL.length ? okL : nokL;
+      var k = liste[Math.floor(Math.random() * liste.length)], o = r.teilchen[k];
+      var b = neu('button', 'fang-teil f-' + (o.farbe || 'blau'), o.t); b.type = 'button';
+      if (o.ok) b.setAttribute('data-ok', '1');
+      b.style.left = (12 + Math.random() * 76) + '%';
+      b.style.top = (14 + Math.random() * 72) + '%';
+      var fertigT = false;
+      b.addEventListener('click', function(){
+        if (!lauf || fertigT) return;
+        fertigT = true;
+        if (o.ok) { gefangen++; b.classList.add('gefangen'); }
+        else { fehler++; b.classList.add('daneben'); }
+        stand();
+        setTimeout(function(){ if (b.parentNode) b.parentNode.removeChild(b); }, 350);
+        if (gefangen >= ziel) ende();
+      });
+      feld.appendChild(b);
+      requestAnimationFrame(function(){ b.classList.add('da'); });
+      setTimeout(function(){
+        if (fertigT) return; fertigT = true;
+        b.classList.remove('da'); b.classList.add('flieht');
+        setTimeout(function(){ if (b.parentNode) b.parentNode.removeChild(b); }, 350);
+      }, tp[1]);
+    }
+    function ende(){
+      if (!lauf) return;
+      stopp();
+      erg = { gefangen: gefangen, fehler: fehler, fertig: true, runde2: runde2 };
+      merke({ fang: erg });
+      ruhe();
+    }
+    ruhe();
+    return { el:el,
+      hol: function(){ return lauf ? { fang: { laeuft: true, runde2: runde2 } } : (erg ? { fang: erg } : null); },
+      leere: function(){ erg = null; ruhe(); },
+      korrektur: function(a){
+        var x = a && a.fang ? a.fang : { gefangen: 0, fehler: 0 };
+        if (x.runde2 && x.fertig) {                          /* nach dem Neuladen: zweites Spiel schon gespielt */
+          runde2 = true; erg = x; ruhe();
+          return '✨ ' + T('Dein zweites Spiel ist gespielt. Prüfe jetzt.', 'Ihr zweites Spiel ist gespielt. Prüfen Sie jetzt.');
+        }
+        runde2 = true; erg = null; ruhe();
+        if (x.runde2) return '✨ ' + T('Das zweite Spiel wurde unterbrochen. Starte es noch einmal, und prüfe danach.',
+                                       'Das zweite Spiel wurde unterbrochen. Starten Sie es noch einmal, und prüfen Sie danach.');
+        return '✨ ' + x.gefangen + ' von ' + ziel + T(' gefangen, ', ' gefangen, ') + x.fehler + ' daneben (erlaubt: ' + maxF + '). '
+          + T('Du hast noch ein Spiel. Starte es, und prüfe danach noch einmal.',
+              'Sie haben noch ein Spiel. Starten Sie es, und prüfen Sie danach noch einmal.');
       } };
   }
 };
