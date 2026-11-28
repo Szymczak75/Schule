@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- =====================================================================
-     BAUSTEIN: Story (_story)  v14, 28.11.2026
+     BAUSTEIN: Story (_story)  v15, 28.11.2026
      Escape Room, Adventskalender, Detektivgeschichte oder freie Story: eine Geschichte
      in mehreren Karten, jede Karte endet mit einem Rätsel.
      Richtig → weiter zur nächsten Karte (mit Codewort zum späteren Wiedereinstieg).
@@ -73,6 +73,9 @@
         (ok: true) werden durch Antippen gefangen, Fehlgriffe zählen. Geschafft mit mindestens „ziel“
         Treffern in „zeit“ Sekunden und höchstens „fehler“ Fehlgriffen; vor dem Prüfen beliebig oft
         spielbar, nach dem ersten falschen Prüfen genau ein weiteres Spiel. Abwärtskompatibel.
+     v15 (Suchbild): 'suchbild' – im Szenenbild versteckte Stellen (z. B. Logos) antippen; gefundene Stellen
+        bekommen einen grünen Ring mit Nummer. Geschafft, wenn alle gefunden sind; Daneben-Tippen kostet nichts,
+        außer eine Grenze „fehltipps“ ist gesetzt. Abwärtskompatibel.
      ===================================================================== -->
 <html lang="de">
 <head>
@@ -95,7 +98,7 @@
 </script>
 <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
 <style>
-/* ===== BAUSTEIN-CSS: Story (v14, 28.11.2026) – unverändert übernehmen ===== */
+/* ===== BAUSTEIN-CSS: Story (v15, 28.11.2026) – unverändert übernehmen ===== */
 :root{
   --ink:#22303f; --card:#ffffff; --green:#1e7d32; --red:#c1272d;
   --amber:#b8860b; --amber-light:#fdf3d9; --amber-dark:#96690a;
@@ -466,6 +469,20 @@ mjx-container{max-width:100%;overflow-x:auto;}
 .f-violett{background:#6b3fa0;} .f-gruen{background:#1e7d32;} .f-blau{background:#2f5fa6;} .f-rot{background:#c1272d;}
 .f-gold{background:#96690a;} .f-grau{background:#5b6677;} .f-orange{background:#a5611e;}
 @media (prefers-reduced-motion:reduce){ .fang-teil{transition:none;} }
+/* v15: Suchbild – versteckte Stellen im Bild antippen */
+.such-stand{text-align:center;font-weight:700;font-size:1.1rem;margin:.3rem 0 .5rem;}
+.such-rahmen{position:relative;max-width:760px;margin:0 auto;border:3px solid #22303f;border-radius:.9rem;overflow:hidden;cursor:crosshair;
+  touch-action:manipulation;-webkit-user-select:none;user-select:none;}
+.such-rahmen > img{display:block;width:100%;height:auto;pointer-events:none;}
+.such-ring{position:absolute;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;border:4px solid #3fd27f;
+  box-shadow:0 0 0 3px rgba(255,255,255,.85),0 0 18px #3fd27f;opacity:0;transition:opacity .3s;pointer-events:none;}
+.such-ring.an{opacity:1;}
+.such-ring > span{position:absolute;top:-.9rem;right:-.9rem;min-width:1.8rem;height:1.8rem;border-radius:50%;background:#1e7d32;color:#fff;
+  font-weight:800;font-size:1rem;line-height:1.8rem;text-align:center;box-shadow:0 0 0 2px #fff;}
+.such-daneben{position:absolute;width:2.2rem;height:2.2rem;transform:translate(-50%,-50%);border-radius:50%;border:3px solid #c1272d;
+  opacity:.9;pointer-events:none;animation:such-weg .6s ease-out forwards;}
+@keyframes such-weg{to{opacity:0;width:3.4rem;height:3.4rem;}}
+@media (prefers-reduced-motion:reduce){ .such-ring{transition:none;} .such-daneben{animation:none;} }
 @media (prefers-reduced-motion:reduce){ .funkeln,.rolle > .ziffer.klick,.wuerfel.rollt{animation:none;} .spielkarte,.kurs-rad,.kurs-fahrzeug,.kurs-figur{transition:none;} }
 .erwischt{border-left-color:var(--ink);}
 /* v4: Szenenbilder in Geschichte, Umweg, erwischt und Ende (als data-URI im Datenblock, TEIL 8.1) */
@@ -1039,7 +1056,7 @@ return {
 </script>
 <!-- ============ ENDE BAUSTEIN Formeltool ============ -->
 </head>
-<body data-anrede="du" data-version="2">
+<body data-anrede="du" data-version="3">
 
 <header class="kopf"><div class="kopf-innen">
   <p class="kopf-typ" id="st-typ"></p>
@@ -1072,9 +1089,9 @@ function m(t){
    ------------------------------------------------------------
    Das Geheimnis der MCG-Funken · Escape Room für Grundschulkinder (Klasse 4) zum Kennenlernen
    des Marie-Curie-Gymnasiums Recklinghausen (Werbung, Tag der offenen Tür). Fach: Kompass.
-   13 Räume: Altbau (Bio, Physik, Kunst, Musik) → Schulhof und Mensa → Neubau (Mathe, Deutsch,
+   14 Räume: Altbau (Bio, Physik, Kunst, Musik) → Schulhof (Suchbild) und Mensa → Neubau (Mathe, Deutsch,
    Englisch, Erdkunde, Religion, Kompass) → Baustelle Sporthalle → Kristall im Foyer.
-   Lösungswort aus den Buchstaben der Räume 1–4 und 6–12: SCHULFREUND.
+   Lösungswort aus den Buchstaben der Räume 1–4 und 7–13: SCHULFREUND.
    Umwege = die MCG-Scouts Mia, Emre und Lea helfen mit einem anderen Weg weiter.
    Ohne Zeitraum, keine Kernkompetenzen (Absprache mit der Lehrkraft, 27.11.2026).
    Szenenbilder: WebP 960 px, ≤ 80 KB, selbst generiert (Stil wie „Die Höhle hinter dem Busch“).
@@ -1280,17 +1297,42 @@ var STORY = {
              + '<p>Auf dem Notenständer liegt ein Blatt mit dem Merkwort <b>FLUEGEL</b>. 11:00 Uhr – raus auf den Schulhof!</p>',
     code: 'FLUEGEL' },
 
-  /* ---------- 5 · Schulhof und Mensa (kein Buchstabe) ---------- */
-  { id: '5', titel: 'Schulhof und Mensa',
+  /* ---------- 5 · Schulhof (kein Buchstabe) – Suchbild, Engine v15 ---------- */
+  { id: 'hof', titel: 'Der Schulhof',
     geschichte: '<p>Draußen ist große Pause! Auf dem Schulhof wird Fußball gespielt, die Tischtennisplatte klackert, andere klettern am Gerüst. '
               + 'Ein Ball rollt euch vor die Füße. „Spielt ihr nächstes Jahr mit?“, ruft ein Junge. Ben schießt ihn zurück – Treffer!</p>'
-              + '<div style="border:4px dashed #1f7fb8;border-radius:1rem;padding:.7rem .9rem;margin:1rem 0;background:#ffffff">'
-              + '<p style="font-size:1.25rem;margin:.2rem 0 .6rem"><b>🔍 Suchbild – nur in diesem Bild suchen!</b><br>'
-              + 'Auf dem Schulhof verstecken sich mehrere MCG-Zeichen. Wie viele findest du? Merk dir deine Zahl – '
-              + 'die Auflösung bekommst du, wenn ihr in der Mensa fertig seid.</p>'
-              + szene(BILD.hof, 'Suchbild: ein lebhafter Schulhof zwischen dem hellen Altbau und dem Neubau mit Flachdach, Waschbeton und Sonnenschutzgittern; bunte Wimpel, Kinder spielen Fußball, Tischtennis und klettern, auf Fahne, zwei Rucksäcken, Bank und Ball steht MCG; ein Ball rollt auf Ella und Ben zu.')
-              + '</div>'
-              + '<p style="font-size:1.2rem;margin:1.4rem 0 .5rem"><b>🍰 Weiter in die Mensa</b></p>'
+              + '<p>Funki kichert: „Auf dem Schulhof haben sich fünf <b>MCG-Zeichen</b> versteckt. Findet ihr alle?“</p>',
+    raetsel: { frage: '🔍 Suche die fünf MCG-Zeichen im Bild. Tippe jedes an, das du findest.', art: 'suchbild',
+               bild: BILD.hof, alt: 'Suchbild: ein lebhafter Schulhof zwischen dem hellen Altbau und dem Neubau mit Flachdach, Waschbeton und Sonnenschutzgittern; bunte Wimpel, Kinder spielen Fußball, Tischtennis und klettern, auf Fahne, zwei Rucksäcken, Bank und Ball steht MCG; ein Ball rollt auf Ella und Ben zu.',
+               punkte: [ { x: 69.0, y: 11.6, r: 6, t: 'Fahne' }, { x: 11.7, y: 74.6, r: 5, t: 'grüner Rucksack' },
+                         { x: 27.1, y: 75.2, r: 5, t: 'Ellas Rucksack' }, { x: 50.3, y: 91.8, r: 5, t: 'Fußball' },
+                         { x: 93.0, y: 84.3, r: 6, t: 'Bank rechts' } ],
+               tipps: [ 'Schau nicht nur unten auf dem Hof – eins weht ganz oben im Wind.', 'Zwei MCG-Zeichen sind auf Rucksäcken, eins rollt über den Boden, eins steht auf einer Bank.' ],
+               weg: 'Die fünf MCG-Zeichen: ① auf der Fahne am Fahnenmast · ② auf dem grünen Rucksack auf der Bank links · ③ auf Ellas Rucksack · '
+                  + '④ auf dem Fußball vor Ben · ⑤ auf der Bank rechts vorne.' },
+    umwege: [
+      { geschichte: '' + scout('Lea') + '<p>„Gar nicht so leicht, oder?“, lacht Lea. „Dann sucht erst mal etwas Größeres: Wo kann man auf unserem Schulhof spielen?“</p>',
+        raetsel: { frage: '🔍 Suche die zwei Tischtennisplatten und das Klettergerüst. Tippe sie an.', art: 'suchbild',
+                   bild: BILD.hof, alt: 'Der Schulhof mit Tischtennisplatten, Klettergerüst, Bänken und spielenden Kindern.',
+                   punkte: [ { x: 22.4, y: 64.4, r: 6, t: 'Tischtennisplatte links' }, { x: 44.8, y: 64.4, r: 6, t: 'Tischtennisplatte Mitte' },
+                             { x: 7.3, y: 54.1, r: 7, t: 'Klettergerüst' } ],
+                   tipps: [ 'Die Tischtennisplatten sind blau.', 'Das Klettergerüst steht ganz links unter dem Baum.' ],
+                   weg: 'Die blauen Tischtennisplatten stehen links und in der Mitte, das Klettergerüst ganz links unter dem Baum.' } },
+      { geschichte: '' + scout('Lea') + '<p>„Super! Ein Blick noch in die Mensa – da wartet gleich der Kuchen.“</p>',
+        raetsel: { frage: '🔍 Suche Funki und die zwei Brotkörbe im Bild der Mensa. Tippe sie an.', art: 'suchbild',
+                   bild: BILD.mensa, alt: 'Die Mensa mit Theke, Brotkörben, Obstschalen, Kuchenvitrine, Ella, Ben und Funki.',
+                   punkte: [ { x: 90.6, y: 56.9, r: 5, t: 'Funki' }, { x: 43.8, y: 60.6, r: 6, t: 'Brotkorb hinten' },
+                             { x: 49.5, y: 89.6, r: 7, t: 'Brotkorb vorne' } ],
+                   tipps: [ 'Funki leuchtet orange – schau bei der Kuchenvitrine.', 'Die Brotkörbe sind aus geflochtenem Holz und stehen auf der Theke.' ],
+                   weg: 'Funki schwebt vor der Kuchenvitrine rechts. Ein Brotkorb steht hinten auf der Theke, einer ganz vorne.' } }
+    ],
+    geschafft: '<p>Alle fünf gefunden – ihr seid echte MCG-Entdecker! Funki macht einen Freudensprung, dann gähnt er. „Puh … ich glaube, ich brauche etwas zu essen.“</p>'
+             + '<p>Merkt euch das Wort <b>FAHNE</b>. Hier gab es keinen Funken, also auch keinen Buchstaben.</p>',
+    code: 'FAHNE' },
+
+  /* ---------- 6 · Mensa (kein Buchstabe) ---------- */
+  { id: '5', titel: 'Die Mensa',
+    geschichte: '<p style="font-size:1.2rem;margin:.2rem 0 .5rem"><b>🍰 Weiter in die Mensa</b></p>'
               + szene(BILD.mensa, 'Eine helle Mensa mit großen Fenstern, einer Theke mit Salat, Gemüse, Vollkornbrot und Obst, einer Kuchenvitrine und Kaffeebechern mit MCG; Ella und Ben tragen Tabletts, Funki flackert müde neben dem Kuchen.')
               + '<p>Dann duftet es nach Kuchen. Ihr folgt der Nase in die <b>Mensa</b>. Doch Funki flackert nur noch ganz schwach. '
               + '„Ich brauche Energie“, gähnt er. Die Köchin lächelt: „Stellt euch einen gesunden Teller zusammen. Dann gibt es zum Nachtisch Kuchen – auch für Funki.“</p>',
@@ -1315,9 +1357,6 @@ var STORY = {
     ],
     geschafft: '<p>Mmh! Funki schnuppert am Kuchen und leuchtet sofort wieder hell. „Jetzt habe ich Kraft für den Neubau!“ '
              + '</p>'
-             + '<p style="font-size:1.15rem;border:3px dashed #1f7fb8;border-radius:.8rem;padding:.6rem .9rem">🔍 <b>Auflösung Suchbild: 5 MCG-Zeichen!</b><br>'
-             + '① auf der Fahne am Fahnenmast · ② auf dem grünen Rucksack auf der Bank links · ③ auf Ellas Rucksack · '
-             + '④ auf dem Fußball vor Ben · ⑤ auf der Bank rechts vorne.<br>Hattest du alle fünf? Dann bist du ein echter MCG-Entdecker!</p>'
              + '<p>Auf eurer Serviette steht: <b>KUCHEN</b> – euer Merkwort. Hier gab es keinen Funken, also auch keinen Buchstaben. 11:10 Uhr.</p>',
     code: 'KUCHEN' },
 
@@ -1578,7 +1617,7 @@ var STORY = {
 
 <script>
 /* ============================================================
-   BAUSTEIN: Story-Engine (v14, 28.11.2026) – unverändert übernehmen
+   BAUSTEIN: Story-Engine (v15, 28.11.2026) – unverändert übernehmen
    Baut aus dem Objekt STORY: Startkarte (Einleitung, Anleitung, Zeitraum, Einstieg per
    Codewort) → je Karte Geschichte + Rätsel → Endkarte mit Auswertung.
    Ablauf einer Karte:  Haupträtsel richtig → geschafft (direkter Weg).
@@ -1604,6 +1643,7 @@ var STORY = {
    v7 – Wegwahl 'kurs' (Steuerrad, Personen, Wesen): genau eine richtige Option, Antwort { kurs: Index };
    Einsteigen und Fahrt laufen je Rätsel nur einmal (z.anim), bei prefers-reduced-motion gar nicht.
    v14 – Fangspiel 'fang': Teilchen antippen, bevor sie verschwinden; Antwort { fang: { gefangen, fehler, fertig } }.
+   v15 – Suchbild 'suchbild': versteckte Stellen im Bild antippen; Antwort { such: [gefunden je Punkt], fehl }.
    Anrede: <body data-anrede="sie"> → alle Texte gesiezt (Oberstufe), sonst „du".
    ============================================================ */
 (function(){
@@ -1772,7 +1812,10 @@ var HINWEIS = {
   /* v14 */
   leerFang: T('Starte zuerst das Spiel mit dem Knopf im Spielfeld.', 'Starten Sie zuerst das Spiel mit dem Knopf im Spielfeld.'),
   laeuftFang: T('Das Spiel läuft noch – warte, bis es zu Ende ist. Das kostet keinen Versuch.',
-                'Das Spiel läuft noch – warten Sie, bis es zu Ende ist. Das kostet keinen Versuch.')
+                'Das Spiel läuft noch – warten Sie, bis es zu Ende ist. Das kostet keinen Versuch.'),
+  /* v15 */
+  leerSuch: T('Tippe im Bild auf die Stellen, die du gefunden hast.', 'Tippen Sie im Bild auf die Stellen, die Sie gefunden haben.'),
+  halbSuch: T('Da fehlt noch etwas – such weiter! Das kostet keinen Versuch.', 'Da fehlt noch etwas – suchen Sie weiter! Das kostet keinen Versuch.')
 };
 
 /* ---------- Rätselgeräte (v3, Fantasie-Paket v4) ----------
@@ -1993,6 +2036,12 @@ function bewerteGeraet(r, a){
     if (!voll.some(Boolean)) return 'leer';
     if (!voll.every(Boolean)) return 'halbLuecken';
     return r.zeilen.every(function(x, k){ return luckeRichtig(x, lu[k]); }) ? 'ok' : 'falsch';
+  }
+  if (art === 'suchbild') {                                     /* v15: Suchbild */
+    var gf = a && a.such ? a.such : [], ng = gf.filter(Boolean).length;
+    if (r.fehltipps != null && a && a.fehl > r.fehltipps) return 'falsch';
+    if (!ng) return 'leerSuch';
+    return ng === r.punkte.length ? 'ok' : 'halbSuch';
   }
   if (art === 'fang') {                                         /* v14: Fangspiel */
     if (!a || !a.fang) return 'leerFang';
@@ -3767,6 +3816,69 @@ var GERAET = {
           + T('Du hast noch ein Spiel. Starte es, und prüfe danach noch einmal.',
               'Sie haben noch ein Spiel. Starten Sie es, und prüfen Sie danach noch einmal.');
       } };
+  },
+
+  /* ===== v15: Suchbild =================================================================
+     Ein Szenenbild mit versteckten Dingen (z. B. Logos). Antippen einer versteckten Stelle markiert
+     sie mit einem leuchtenden Ring und ihrer Nummer. Geschafft, wenn alle Stellen gefunden sind.
+     Daneben tippen kostet nichts – außer es ist eine Grenze „fehltipps“ gesetzt: Wer öfter daneben
+     tippt, hat das Rätsel nicht gelöst (dann geht es in den Umweg).
+     bild: data-URI des Bildes (z. B. BILD.hof) · alt: Beschreibung des Bildes
+     punkte: [{ x: 69, y: 11.6, r: 5, t:'Fahne' }, …] – Mitte in Prozent der Bildbreite/-höhe,
+             r = Radius der Trefferzone in Prozent der Bildbreite (Vorgabe 5), 1 bis 12 Punkte
+     fehltipps: optional, erlaubte Fehltipps (ohne Angabe: unbegrenzt)
+     Antwort: { such: [true|false je Punkt], fehl: Anzahl Fehltipps } */
+  suchbild: function(r, alt, merke, aktiv){
+    var gef = alt && alt.such ? alt.such.slice() : r.punkte.map(function(){ return false; });
+    var fehl = alt && alt.fehl ? alt.fehl : 0;
+    var el = neu('div', 'geraet suchbild');
+    var stand = neu('p', 'such-stand', '');
+    var rahmen = neu('div', 'such-rahmen');
+    var img = neu('img', ''); img.src = r.bild; img.alt = r.alt || ''; img.draggable = false;
+    rahmen.appendChild(img);
+    var ringe = r.punkte.map(function(p, k){
+      var g = neu('span', 'such-ring', '<span>' + (k + 1) + '</span>');
+      var d = 2 * (p.r || 5);
+      g.style.left = p.x + '%'; g.style.top = p.y + '%'; g.style.width = d + '%';
+      rahmen.appendChild(g); return g;
+    });
+    var liste = neu('p', 'anzeige', '');
+    el.appendChild(stand); el.appendChild(rahmen); el.appendChild(liste);
+    function zeige(){
+      var n = gef.filter(Boolean).length;
+      stand.textContent = '🔍 ' + n + ' von ' + r.punkte.length + ' gefunden'
+        + (r.fehltipps != null ? ' · daneben: ' + fehl + ' (erlaubt: ' + r.fehltipps + ')' : '');
+      ringe.forEach(function(g, k){ g.classList.toggle('an', !!gef[k]); });
+      var namen = [];
+      r.punkte.forEach(function(p, k){ if (gef[k] && p.t) namen.push((k + 1) + ' ' + p.t); });
+      liste.textContent = n === r.punkte.length ? T('Alle gefunden! Prüfe jetzt.', 'Alle gefunden! Prüfen Sie jetzt.')
+        : namen.length ? 'Gefunden: ' + namen.join(' · ') : T('Tippe im Bild auf die Stellen, die du gefunden hast.', 'Tippen Sie im Bild auf die Stellen, die Sie gefunden haben.');
+    }
+    rahmen.addEventListener('click', function(e){
+      if (!aktiv) return;
+      var b = rahmen.getBoundingClientRect(); if (!b.width) return;
+      var x = (e.clientX - b.left) / b.width * 100, y = (e.clientY - b.top) / b.height * 100;
+      var hoch = b.height / b.width;                               /* Abstand in Breiten-Prozent */
+      var treffer = -1;
+      r.punkte.forEach(function(p, k){
+        var dx = x - p.x, dy = (y - p.y) * hoch;
+        if (treffer < 0 && Math.sqrt(dx * dx + dy * dy) <= (p.r || 5)) treffer = k;
+      });
+      if (treffer >= 0) {
+        gef[treffer] = true;
+      } else {
+        fehl++;
+        var m = neu('span', 'such-daneben', '');
+        m.style.left = x + '%'; m.style.top = y + '%';
+        rahmen.appendChild(m);
+        setTimeout(function(){ if (m.parentNode) m.parentNode.removeChild(m); }, 600);
+      }
+      zeige(); merke({ such: gef.slice(), fehl: fehl });
+    });
+    zeige();
+    return { el:el,
+      hol: function(){ return { such: gef.slice(), fehl: fehl }; },
+      leere: function(){ gef = r.punkte.map(function(){ return false; }); zeige(); } };
   }
 };
 

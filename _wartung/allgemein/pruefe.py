@@ -27,6 +27,7 @@ Stand: 28.11.2026 (Planung: Zeitbudget ≤ 70 % bis zur Präsentation (ZEIT, dat
        data-rest), drei Wege Umweg/Abkürzung/Profi auf Lernseiten (DIFF), eigener EA-/PA-Ersatz
        bei Sozialform-Wahl (SOZIAL), TEIL 2.10/2.12/3.8; Gruppen-Baustein v3 (Namen, Rollen,
        Phasen-Uhr gc-uhr), Prüfung GCUHR: Uhr-Zeit passt nicht zum Ablaufplan;
+       Story-Engine v15: Suchbild 'suchbild' (Stellen im Bild antippen); Prüfung STORY: Bild, Punkte, x/y;
        Story-Engine v14: Fangspiel 'fang' (Teilchen antippen); Prüfung STORY: Sorten, ok-Teilchen, Farbe, Ziel, Zeit;
        27.11.2026: Story-Engine v13: Antwort am Wegende bei 'kurs'/'fahrzeug'; v12: Steinweg 'reihe' und Lückenfelder 'luecken'; Prüfung STORY: Teile/Lösungen, Zeilen;
        Story-Engine v9: falsch gelöstes Rätsel bleibt sichtbar, Umweg mit Banner;
@@ -100,7 +101,7 @@ RBKA_MARKE = 'BAUSTEIN: Rückblick-KA-Engine'
 
 # Story-Engine (baustein_story.html, TEIL 2.11)
 STORY_TYP = 'Story'
-STORY_VERSION = 'v14'
+STORY_VERSION = 'v15'
 STORY_MARKE = 'BAUSTEIN: Story-Engine'
 STORY_ARTEN = ('zahl', 'bruch', 'term', 'text', 'wahl',                 # v1/v2
                'uhr', 'schloss', 'steck', 'felder', 'schalter',      # v3: Rätselgeräte
@@ -109,7 +110,8 @@ STORY_ARTEN = ('zahl', 'bruch', 'term', 'text', 'wahl',                 # v1/v2
                'kurs',                                                # v7: Wegwahl
                'wand',                                                # v8: Symbolwand
                'reihe', 'luecken',                                    # v12: Steinweg, Lückenfelder
-               'fang')                                                # v14: Fangspiel
+               'fang',                                                # v14: Fangspiel
+               'suchbild')                                            # v15: Suchbild
 STORY_KURS_MODUS = ('fahrzeug', 'gruppe', 'wesen')
 STORY_FAHRZEUGE = ('boot', 'uboot', 'floss', 'schlitten', 'kutsche', 'lore', 'ballon', 'rakete')
 STORY_GELAENDE = ('wasser', 'tiefsee', 'zelle', 'schnee', 'land', 'himmel', 'weltall')
@@ -546,7 +548,8 @@ def pruefe(pfad):
                          len(re.findall(r'\bblatt:\s*\[[^\]]*?\bok:\s*true', t, re.S)) + \
                          len(re.findall(r'\bsterne:\s*\[\s*\[', t)) + \
                          len(re.findall(r'\bzeichen:\s*\[\s*\{', t)) + \
-                         len(re.findall(r'\bteilchen:\s*\[[^\]]*?\bok:\s*true', t, re.S))
+                         len(re.findall(r'\bteilchen:\s*\[[^\]]*?\bok:\s*true', t, re.S)) + \
+                         len(re.findall(r"\bart:\s*'suchbild'", t))
                 # v3: Antwortarten und Rätselgeräte
                 for a in re.findall(r"\bart:\s*'([^']*)'", t):
                     if a not in STORY_ARTEN:
@@ -682,6 +685,21 @@ def pruefe(pfad):
                     zt = re.search(r'\bzeit:\s*(\d+)', seg)
                     if zt and not 15 <= int(zt.group(1)) <= 90:
                         fehler('STORY', "Karte %s: 'fang' mit zeit %s s – vorgesehen sind 15 bis 90" % (kid, zt.group(1)))
+                # v15: Suchbild – Bild, 1 bis 12 Punkte mit x und y zwischen 0 und 100
+                for sm2 in re.finditer(r"\bart:\s*'suchbild'", t):
+                    anf = t.rfind('raetsel:', 0, sm2.start())
+                    end = t.find('tipps:', sm2.end())
+                    seg = t[anf if anf >= 0 else sm2.start():end if end >= 0 else len(t)]
+                    if not re.search(r'\bbild:', seg):
+                        fehler('STORY', "Karte %s: 'suchbild' ohne bild" % kid)
+                    pu = re.search(r'\bpunkte:\s*\[(.*?)\]', seg, re.S)
+                    pk = re.findall(r'\{[^{}]*\}', pu.group(1)) if pu else []
+                    if not 1 <= len(pk) <= 12:
+                        fehler('STORY', "Karte %s: 'suchbild' mit %d Punkten – vorgesehen sind 1 bis 12" % (kid, len(pk)))
+                    for x in pk:
+                        xy = re.search(r'\bx:\s*([\d.]+)\s*,\s*y:\s*([\d.]+)', x)
+                        if not xy or not (0 <= float(xy.group(1)) <= 100 and 0 <= float(xy.group(2)) <= 100):
+                            fehler('STORY', "Karte %s: 'suchbild' – Punkt ohne gültige x/y-Angabe (0 bis 100): %s" % (kid, x[:40]))
                 if n_soll < n_r:
                     fehler('STORY', 'Karte %s: nicht jedes Rätsel hat soll (bzw. eine Option mit ok: true)' % kid)
                 if len(re.findall(r'\btipps:\s*\[', t)) < n_r:

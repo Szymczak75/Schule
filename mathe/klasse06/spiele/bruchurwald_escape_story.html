@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- =====================================================================
-     BAUSTEIN: Story (_story)  v14, 28.11.2026
+     BAUSTEIN: Story (_story)  v15, 28.11.2026
      Escape Room, Adventskalender, Detektivgeschichte oder freie Story: eine Geschichte
      in mehreren Karten, jede Karte endet mit einem Rätsel.
      Richtig → weiter zur nächsten Karte (mit Codewort zum späteren Wiedereinstieg).
@@ -73,6 +73,9 @@
         (ok: true) werden durch Antippen gefangen, Fehlgriffe zählen. Geschafft mit mindestens „ziel“
         Treffern in „zeit“ Sekunden und höchstens „fehler“ Fehlgriffen; vor dem Prüfen beliebig oft
         spielbar, nach dem ersten falschen Prüfen genau ein weiteres Spiel. Abwärtskompatibel.
+     v15 (Suchbild): 'suchbild' – im Szenenbild versteckte Stellen (z. B. Logos) antippen; gefundene Stellen
+        bekommen einen grünen Ring mit Nummer. Geschafft, wenn alle gefunden sind; Daneben-Tippen kostet nichts,
+        außer eine Grenze „fehltipps“ ist gesetzt. Abwärtskompatibel.
      ===================================================================== -->
 <html lang="de">
 <head>
@@ -95,7 +98,7 @@
 </script>
 <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
 <style>
-/* ===== BAUSTEIN-CSS: Story (v14, 28.11.2026) – unverändert übernehmen ===== */
+/* ===== BAUSTEIN-CSS: Story (v15, 28.11.2026) – unverändert übernehmen ===== */
 :root{
   --ink:#22303f; --card:#ffffff; --green:#1e7d32; --red:#c1272d;
   --amber:#b8860b; --amber-light:#fdf3d9; --amber-dark:#96690a;
@@ -466,6 +469,20 @@ mjx-container{max-width:100%;overflow-x:auto;}
 .f-violett{background:#6b3fa0;} .f-gruen{background:#1e7d32;} .f-blau{background:#2f5fa6;} .f-rot{background:#c1272d;}
 .f-gold{background:#96690a;} .f-grau{background:#5b6677;} .f-orange{background:#a5611e;}
 @media (prefers-reduced-motion:reduce){ .fang-teil{transition:none;} }
+/* v15: Suchbild – versteckte Stellen im Bild antippen */
+.such-stand{text-align:center;font-weight:700;font-size:1.1rem;margin:.3rem 0 .5rem;}
+.such-rahmen{position:relative;max-width:760px;margin:0 auto;border:3px solid #22303f;border-radius:.9rem;overflow:hidden;cursor:crosshair;
+  touch-action:manipulation;-webkit-user-select:none;user-select:none;}
+.such-rahmen > img{display:block;width:100%;height:auto;pointer-events:none;}
+.such-ring{position:absolute;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;border:4px solid #3fd27f;
+  box-shadow:0 0 0 3px rgba(255,255,255,.85),0 0 18px #3fd27f;opacity:0;transition:opacity .3s;pointer-events:none;}
+.such-ring.an{opacity:1;}
+.such-ring > span{position:absolute;top:-.9rem;right:-.9rem;min-width:1.8rem;height:1.8rem;border-radius:50%;background:#1e7d32;color:#fff;
+  font-weight:800;font-size:1rem;line-height:1.8rem;text-align:center;box-shadow:0 0 0 2px #fff;}
+.such-daneben{position:absolute;width:2.2rem;height:2.2rem;transform:translate(-50%,-50%);border-radius:50%;border:3px solid #c1272d;
+  opacity:.9;pointer-events:none;animation:such-weg .6s ease-out forwards;}
+@keyframes such-weg{to{opacity:0;width:3.4rem;height:3.4rem;}}
+@media (prefers-reduced-motion:reduce){ .such-ring{transition:none;} .such-daneben{animation:none;} }
 @media (prefers-reduced-motion:reduce){ .funkeln,.rolle > .ziffer.klick,.wuerfel.rollt{animation:none;} .spielkarte,.kurs-rad,.kurs-fahrzeug,.kurs-figur{transition:none;} }
 .erwischt{border-left-color:var(--ink);}
 /* v4: Szenenbilder in Geschichte, Umweg, erwischt und Ende (als data-URI im Datenblock, TEIL 8.1) */
@@ -1423,7 +1440,7 @@ var STORY = {
 
 <script>
 /* ============================================================
-   BAUSTEIN: Story-Engine (v14, 28.11.2026) – unverändert übernehmen
+   BAUSTEIN: Story-Engine (v15, 28.11.2026) – unverändert übernehmen
    Baut aus dem Objekt STORY: Startkarte (Einleitung, Anleitung, Zeitraum, Einstieg per
    Codewort) → je Karte Geschichte + Rätsel → Endkarte mit Auswertung.
    Ablauf einer Karte:  Haupträtsel richtig → geschafft (direkter Weg).
@@ -1449,6 +1466,7 @@ var STORY = {
    v7 – Wegwahl 'kurs' (Steuerrad, Personen, Wesen): genau eine richtige Option, Antwort { kurs: Index };
    Einsteigen und Fahrt laufen je Rätsel nur einmal (z.anim), bei prefers-reduced-motion gar nicht.
    v14 – Fangspiel 'fang': Teilchen antippen, bevor sie verschwinden; Antwort { fang: { gefangen, fehler, fertig } }.
+   v15 – Suchbild 'suchbild': versteckte Stellen im Bild antippen; Antwort { such: [gefunden je Punkt], fehl }.
    Anrede: <body data-anrede="sie"> → alle Texte gesiezt (Oberstufe), sonst „du".
    ============================================================ */
 (function(){
@@ -1617,7 +1635,10 @@ var HINWEIS = {
   /* v14 */
   leerFang: T('Starte zuerst das Spiel mit dem Knopf im Spielfeld.', 'Starten Sie zuerst das Spiel mit dem Knopf im Spielfeld.'),
   laeuftFang: T('Das Spiel läuft noch – warte, bis es zu Ende ist. Das kostet keinen Versuch.',
-                'Das Spiel läuft noch – warten Sie, bis es zu Ende ist. Das kostet keinen Versuch.')
+                'Das Spiel läuft noch – warten Sie, bis es zu Ende ist. Das kostet keinen Versuch.'),
+  /* v15 */
+  leerSuch: T('Tippe im Bild auf die Stellen, die du gefunden hast.', 'Tippen Sie im Bild auf die Stellen, die Sie gefunden haben.'),
+  halbSuch: T('Da fehlt noch etwas – such weiter! Das kostet keinen Versuch.', 'Da fehlt noch etwas – suchen Sie weiter! Das kostet keinen Versuch.')
 };
 
 /* ---------- Rätselgeräte (v3, Fantasie-Paket v4) ----------
@@ -1838,6 +1859,12 @@ function bewerteGeraet(r, a){
     if (!voll.some(Boolean)) return 'leer';
     if (!voll.every(Boolean)) return 'halbLuecken';
     return r.zeilen.every(function(x, k){ return luckeRichtig(x, lu[k]); }) ? 'ok' : 'falsch';
+  }
+  if (art === 'suchbild') {                                     /* v15: Suchbild */
+    var gf = a && a.such ? a.such : [], ng = gf.filter(Boolean).length;
+    if (r.fehltipps != null && a && a.fehl > r.fehltipps) return 'falsch';
+    if (!ng) return 'leerSuch';
+    return ng === r.punkte.length ? 'ok' : 'halbSuch';
   }
   if (art === 'fang') {                                         /* v14: Fangspiel */
     if (!a || !a.fang) return 'leerFang';
@@ -3612,6 +3639,69 @@ var GERAET = {
           + T('Du hast noch ein Spiel. Starte es, und prüfe danach noch einmal.',
               'Sie haben noch ein Spiel. Starten Sie es, und prüfen Sie danach noch einmal.');
       } };
+  },
+
+  /* ===== v15: Suchbild =================================================================
+     Ein Szenenbild mit versteckten Dingen (z. B. Logos). Antippen einer versteckten Stelle markiert
+     sie mit einem leuchtenden Ring und ihrer Nummer. Geschafft, wenn alle Stellen gefunden sind.
+     Daneben tippen kostet nichts – außer es ist eine Grenze „fehltipps“ gesetzt: Wer öfter daneben
+     tippt, hat das Rätsel nicht gelöst (dann geht es in den Umweg).
+     bild: data-URI des Bildes (z. B. BILD.hof) · alt: Beschreibung des Bildes
+     punkte: [{ x: 69, y: 11.6, r: 5, t:'Fahne' }, …] – Mitte in Prozent der Bildbreite/-höhe,
+             r = Radius der Trefferzone in Prozent der Bildbreite (Vorgabe 5), 1 bis 12 Punkte
+     fehltipps: optional, erlaubte Fehltipps (ohne Angabe: unbegrenzt)
+     Antwort: { such: [true|false je Punkt], fehl: Anzahl Fehltipps } */
+  suchbild: function(r, alt, merke, aktiv){
+    var gef = alt && alt.such ? alt.such.slice() : r.punkte.map(function(){ return false; });
+    var fehl = alt && alt.fehl ? alt.fehl : 0;
+    var el = neu('div', 'geraet suchbild');
+    var stand = neu('p', 'such-stand', '');
+    var rahmen = neu('div', 'such-rahmen');
+    var img = neu('img', ''); img.src = r.bild; img.alt = r.alt || ''; img.draggable = false;
+    rahmen.appendChild(img);
+    var ringe = r.punkte.map(function(p, k){
+      var g = neu('span', 'such-ring', '<span>' + (k + 1) + '</span>');
+      var d = 2 * (p.r || 5);
+      g.style.left = p.x + '%'; g.style.top = p.y + '%'; g.style.width = d + '%';
+      rahmen.appendChild(g); return g;
+    });
+    var liste = neu('p', 'anzeige', '');
+    el.appendChild(stand); el.appendChild(rahmen); el.appendChild(liste);
+    function zeige(){
+      var n = gef.filter(Boolean).length;
+      stand.textContent = '🔍 ' + n + ' von ' + r.punkte.length + ' gefunden'
+        + (r.fehltipps != null ? ' · daneben: ' + fehl + ' (erlaubt: ' + r.fehltipps + ')' : '');
+      ringe.forEach(function(g, k){ g.classList.toggle('an', !!gef[k]); });
+      var namen = [];
+      r.punkte.forEach(function(p, k){ if (gef[k] && p.t) namen.push((k + 1) + ' ' + p.t); });
+      liste.textContent = n === r.punkte.length ? T('Alle gefunden! Prüfe jetzt.', 'Alle gefunden! Prüfen Sie jetzt.')
+        : namen.length ? 'Gefunden: ' + namen.join(' · ') : T('Tippe im Bild auf die Stellen, die du gefunden hast.', 'Tippen Sie im Bild auf die Stellen, die Sie gefunden haben.');
+    }
+    rahmen.addEventListener('click', function(e){
+      if (!aktiv) return;
+      var b = rahmen.getBoundingClientRect(); if (!b.width) return;
+      var x = (e.clientX - b.left) / b.width * 100, y = (e.clientY - b.top) / b.height * 100;
+      var hoch = b.height / b.width;                               /* Abstand in Breiten-Prozent */
+      var treffer = -1;
+      r.punkte.forEach(function(p, k){
+        var dx = x - p.x, dy = (y - p.y) * hoch;
+        if (treffer < 0 && Math.sqrt(dx * dx + dy * dy) <= (p.r || 5)) treffer = k;
+      });
+      if (treffer >= 0) {
+        gef[treffer] = true;
+      } else {
+        fehl++;
+        var m = neu('span', 'such-daneben', '');
+        m.style.left = x + '%'; m.style.top = y + '%';
+        rahmen.appendChild(m);
+        setTimeout(function(){ if (m.parentNode) m.parentNode.removeChild(m); }, 600);
+      }
+      zeige(); merke({ such: gef.slice(), fehl: fehl });
+    });
+    zeige();
+    return { el:el,
+      hol: function(){ return { such: gef.slice(), fehl: fehl }; },
+      leere: function(){ gef = r.punkte.map(function(){ return false; }); zeige(); } };
   }
 };
 
