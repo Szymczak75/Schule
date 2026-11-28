@@ -59,7 +59,10 @@ Beginnt jede Karte, die auf der vorigen aufbaut, mit „Wo wir gerade stehen"? S
 Aufgaben ausformuliert (keine Tabellen-Stichworte)? Steht die Navigationsleiste
 (`baustein_navigation.html`) unverändert vor dem T-Rex, außerhalb von `<main>`? Steht ein
 Ablaufplan als eingeklappter `<details class="plan">`-Block über der Reiterleiste – nicht
-unten auf einer Karte?
+unten auf einer Karte? Trägt er `data-stunde` und je Zeile `data-min`, und bleiben die
+Phasen bis zur Präsentation bei höchstens 70 % (Anweisung 2.12, 3.8)? Hat jede vereinbarte
+Zielvorgabe eine Karte? Gibt es auf der Lernseite 🪜 Umweg, ⏩ Abkürzung und 🚀 Profi-Material?
+Sind EA- und PA-Ersatz eigene Aufträge?
 
 **4. Aufgaben- und Antwortlogik**
 Hat jede Eingabe einen erreichbaren Prüfen-Button? Werden MC-Optionen beim Laden einmal
@@ -331,6 +334,14 @@ Diese Punkte standen offen und sind inzwischen als Regel in
   Karten dürfen unterschiedlich arbeiten. Gruppenergebnisse nennen immer die Höchstpunktzahl
   – auf den Zuordnungs-Seiten Klasse 7 fehlte das. Der Gruppenrechner zeigt **keine Sterne
   einzelner Mitglieder** (sonst ist die Gruppe auf eine Person sauer), nur das Gruppenergebnis. `pruefe.py` meldet `GC`, `GCALT`, `GRUPPE`.
+- **Stunden zu voll, Ziele zu ungenau, EA/PA wie GA** (28.11.2026). Rückmeldung nach den
+  GA-Stunden Zuordnungen Klasse 7: Methoden und Technik funktionieren, aber der Fahrplan der
+  antiproportionalen Stunde verplante 69 von 75 min, die Hyperbel und der Dreisatz mit ≙
+  wurden nicht herausgearbeitet, der Gruppen-Check kam ungefragt, und die EA/PA-Fassung war
+  fast dieselbe Seite. Seitdem (Anweisung 2.10, 2.12, 2.13): Zielvorgabe in eigener Runde
+  vereinbaren, höchstens 70 % der Stunde bis zur Präsentation (`data-stunde`/`data-min`/
+  `data-rest`), Gruppen-Check immer fragen, EA/PA als eigene Aufträge, Umweg/Abkürzung/
+  Profi-Material, Material und Schülerrealität. `pruefe.py` meldet `ZEIT`, `DIFF`, `SOZIAL`.
 - **Änderungen kamen als Dateien zum Einspielen statt als Pull Request** (November 2026): Ein
   Chat ohne Schreibzugriff gab Baustein und `pruefe.py` zum Hochladen ins Wartungs-Projekt
   heraus. Seitdem gilt TEIL 0 Nr. 26: Repo mit Schreibzugriff anhängen, Branch, Pull Request,
@@ -439,4 +450,4 @@ Diese Punkte standen offen und sind inzwischen als Regel in
 
 ---
 
-*Stand: 22.11.2026 (Story-Seiten _story; Formeltool und Rückfrage zur Bruch-/Term-Eingabe; Operatoren nach NRW-Liste; Ablaufplan oben und aufklappbar; Sozialformen/Gruppen-Check; Kernkompetenzen; Seitenart Rückblick KA, Suffix _kavb; Schritt für Schritt; Navigationsleiste, keine Google Fonts) – gepflegt im Wartungs-Projekt „Wartung Unterrichtsprojekte".*
+*Stand: 28.11.2026 (Zielvorgabe, 70-%-Zeitplan, drei Wege, Material, EA/PA eigene Aufträge, Zu-3-Satz; Story-Seiten _story; Formeltool und Rückfrage zur Bruch-/Term-Eingabe; Operatoren nach NRW-Liste; Ablaufplan oben und aufklappbar; Sozialformen/Gruppen-Check; Kernkompetenzen; Seitenart Rückblick KA, Suffix _kavb; Schritt für Schritt; Navigationsleiste, keine Google Fonts) – gepflegt im Wartungs-Projekt „Wartung Unterrichtsprojekte".*

@@ -28,3 +28,10 @@ Status: `zurückgestellt` · `als Nächstes` · `verworfen` · `erledigt`
   Lehrkraft wieder aufgreifen, nicht von selbst vorschlagen.
 - **Machbarkeit (geklärt):** Canvas + Pointer-Events mit `setPointerCapture`; nur Stift zeichnet,
   Finger scrollt (Handballen-Erkennung); Striche als Punktlisten im `sessionStorage`, nicht als Bild.
+
+## 3. Bestehende Seiten an die Sozialform-Reflexion anpassen
+- **Status:** zurückgestellt bis Ende Januar 2027 (Erinnerung als geplante Aufgabe angelegt).
+- **Idee:** Bestandsseiten mit GA/PA nach Anweisung 2.12 nachrüsten – Zeitplan ≤ 70 %,
+  Umweg/Abkürzung/Profi-Material, eigene EA/PA-Aufträge; zuerst die Zuordnungs-Seiten Kl. 7
+  (Hyperbel, Zu-3-Satz mit ≙, 2.13). `pruefe.py` zeigt die Kandidaten (`ZEIT`, `DIFF`, `SOZIAL`).
+- **Vorgehen:** Lehrkraft wählt die Seiten aus; je Reihe ein eigener PR.

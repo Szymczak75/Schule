@@ -23,7 +23,10 @@ Was dieser Linter NICHT kann (bleibt Handarbeit bzw. Browsertest):
   - ob der Stand ein Neuladen wirklich vollständig übersteht (Browsertest: Seite
     bearbeiten, neu laden, vergleichen)
 
-Stand: 27.11.2026 (Story-Engine v13: Antwort am Wegende bei 'kurs'/'fahrzeug'; v12: Steinweg 'reihe' und Lückenfelder 'luecken'; Prüfung STORY: Teile/Lösungen, Zeilen;
+Stand: 28.11.2026 (Planung: Zeitbudget ≤ 70 % bis zur Präsentation (ZEIT, data-stunde/data-min/
+       data-rest), drei Wege Umweg/Abkürzung/Profi auf Lernseiten (DIFF), eigener EA-/PA-Ersatz
+       bei Sozialform-Wahl (SOZIAL), TEIL 2.10/2.12/3.8;
+       27.11.2026: Story-Engine v13: Antwort am Wegende bei 'kurs'/'fahrzeug'; v12: Steinweg 'reihe' und Lückenfelder 'luecken'; Prüfung STORY: Teile/Lösungen, Zeilen;
        Story-Engine v9: falsch gelöstes Rätsel bleibt sichtbar, Umweg mit Banner;
        Story-Engine v8: Symbolwand 'wand' – Runen in Nischen sortieren; Prüfung STORY:
        2–4 Nischen, 3–12 Zeichen, jede Nische gültig, bekannte und verschiedene Runen;
@@ -785,6 +788,53 @@ def pruefe(pfad):
                              'gehört über die Reiterleiste (TEIL 3.8)')
         elif re.search(r'\sopen\b', plan.group(0)):
             hinweis('ABLAUF', 'Ablaufplan startet aufgeklappt – eingeklappt beginnen (TEIL 3.8)')
+
+    # Zeitbudget (TEIL 2.12, 3.8): Phasen bis zur Präsentation höchstens 70 % der Stunde
+    plan_m = re.search(r'<details\b[^>]*class="[^"]*\bplan\b[^"]*"[^>]*>.*?</details>', koerper, re.S)
+    if plan_m and 'lehrer' not in name.lower() and '<meta name="typ"' in text:
+        plan_kopf = re.match(r'<details\b[^>]*>', plan_m.group(0)).group(0)
+        stunde = re.search(r'data-stunde="(\d+)"', plan_kopf)
+        zeilen = []
+        for attr in re.findall(r'<tr\b([^>]*)>', plan_m.group(0)):
+            dm = re.search(r'data-min="(\d+(?:[.,]\d+)?)"', attr)
+            if dm:
+                zeilen.append((float(dm.group(1).replace(',', '.')),
+                               bool(re.search(r'\bdata-rest\b', attr))))
+        if not stunde or not zeilen:
+            hinweis('ZEIT', 'Ablaufplan ohne Zeitbudget – data-stunde am <details class="plan"> und '
+                            'data-min je Zeile (data-rest ab der Präsentation), TEIL 3.8')
+        else:
+            gesamt = int(stunde.group(1))
+            arbeit = sum(m for m, r in zeilen if not r)
+            alle = sum(m for m, r in zeilen)
+            if arbeit > 0.7 * gesamt + 1e-9:
+                fehler('ZEIT', 'Phasen bis zur Präsentation: %g von %d min (%d %%) – höchstens 70 %% '
+                               '(%g min), TEIL 2.12' % (arbeit, gesamt, round(100.0 * arbeit / gesamt),
+                                                        int(0.7 * gesamt)))
+            if alle > gesamt + 1e-9:
+                fehler('ZEIT', 'Ablaufplan verplant %g min, die Stunde hat %d min' % (alle, gesamt))
+            if not any(r for m, r in zeilen):
+                hinweis('ZEIT', 'keine Zeile mit data-rest – Präsentation, Sicherung und Puffer '
+                                'gehören in den Plan (TEIL 3.8)')
+
+    # Drei Wege auf Lernseiten (TEIL 2.12): Umweg, Abkürzung, Profi-Material
+    if typ == 'Lernseite':
+        fehlt = [n for k, n in (('umweg', '🪜 Umweg'), ('abkuerzung', '⏩ Abkürzung'),
+                                ('profi', '🚀 Profi-Material'))
+                 if not re.search(r'class="[^"]*\b%s\b' % k, eigen)]
+        if fehlt:
+            hinweis('DIFF', 'Lernseite ohne ' + ', '.join(fehlt) + ' (class="umweg" / "abkuerzung" / '
+                            '"profi", TEIL 2.12)')
+
+    # EA/PA als eigene Aufträge (TEIL 2.10): außerhalb der Baustein-Texte
+    if 'id="gc-box"' in h:
+        rest = re.sub(r'<section\b[^>]*id="gc-box".*?</section>', ' ', eigen, flags=re.S)
+        rest = re.sub(r'<p class="gc-nur-ea"><b>Allein:</b> Die Teampunkte entfallen.*?</p>', ' ', rest, flags=re.S)
+        rest = re.sub(r'<!--.*?-->', ' ', rest, flags=re.S)
+        for k, n in (('gc-nur-ea', 'EA'), ('gc-nur-pa', 'PA')):
+            if not re.search(r'class="[^"]*\b%s\b' % k, rest):
+                hinweis('SOZIAL', 'Sozialform-Wahl, aber kein eigener %s-Auftrag (.%s) auf den Karten – '
+                                  'EA und PA laufen anders als GA (TEIL 2.10)' % (n, k))
 
     if 'href="#"' in h or "location.href='#'" in h or 'location.href="#"' in h:
         fehler('WEITER', 'toter Weiter-Button (Ziel "#")')

@@ -16,6 +16,23 @@ Du unterstützt eine Lehrkraft in NRW bei der vollständigen Unterrichtsvorberei
 - Zeitumfang (45 min / 90 min / mehrere Stunden)
 - Liegt Buchmaterial als Screenshot vor?
 - Bei Kursen der Q1/Q2: Nur Grundkurs (GK), nur Leistungskurs (LK), oder für beide Niveaus?
+- Sozialform, bei GA Methode, und ob es einen Gruppen-Check gibt (immer fragen, nie von selbst
+  einbauen – Lernseiten-Anweisung TEIL 2.10).
+- **Material und Praxis:** Claude schlägt von sich aus Material zum Anfassen oder Selbstbauen
+  und eine Praxisphase vor und fragt, was in der Sammlung vorhanden ist oder angeschafft
+  werden kann (Lernseiten-Anweisung TEIL 2.12, dort auch bekannte Bestände und Ideen).
+
+**Danach eigene Runde – Zielvorgabe (Pflicht seit 28.11.2026):** Claude schlägt 2–4 fachlich
+konkrete Ziele vor (was am Ende im Heft steht bzw. gekonnt wird, mit Darstellung und
+Fachbegriff) und baut erst nach dem OK. Diese Ziele tragen alle drei Produkte: Karten der
+Schüler-Website, Sicherung auf der Lehrer-Website, „Ziel der Stunde" im Planungs-Docx.
+Fachliche Festlegungen der Lehrkraft (Lernseiten-Anweisung TEIL 2.13, z. B. Zu-3-Satz mit ≙)
+gehen jeder Lehrbuch-Darstellung vor.
+
+**Zeitplan (Pflicht seit 28.11.2026):** Alle Phasen vor der Präsentation füllen zusammen
+höchstens **70 %** der Stundenzeit (45 min → ≤ 31 min, 90 min → ≤ 63 min); der Rest bleibt für
+Präsentation, Sicherung und Puffer. Gilt gleich für Lehrer-Website, Schüler-Website
+(Ablaufplan mit `data-stunde`/`data-min`/`data-rest`, TEIL 3.8) und Planungs-Docx.
 
 **Immer mitlesen:** `anweisung_lernseiten.txt` (alle Website-Regeln, TEIL 0 dort ist die
 Kurzfassung der härtesten Pflichtregeln) und `wiederkehrende_fehler_checkliste.md`
@@ -62,7 +79,7 @@ Die Lehrpläne für Mathematik und Biologie (NRW) sind in der Wissensdatenbank h
 | **Übungsphase** | Aufgaben in differenzierten Niveaustufen (Eigenauswahl durch SuS) |
 | **Erweiterung** | Weiterführende Aufgaben im Sachkontext |
  
-> **Für beide Fächer gilt:** Das Problem soll zur Erlebniswelt der Kinder und Jugendlichen passen. Zeitumfang kann flexibel auf mehrere Stunden verteilt werden.
+> **Für beide Fächer gilt:** Das Problem soll zur Erlebniswelt der Kinder und Jugendlichen passen. Zeitumfang kann flexibel auf mehrere Stunden verteilt werden. Wo es passt, gehört eine **Praxisphase** mit Material dazu (Mathe: messen, legen, bauen; Bio: Modelle untersuchen oder selbst bauen) – vorher fragen, was vorhanden ist. Was nicht in 70 % der Zeit passt, wird Profi-Material, Hausaufgabe oder Folgestunde.
  
 ---
  
@@ -146,9 +163,9 @@ Die Schüler-Website passt sich der jeweiligen Sozialform an:
 | **Think–Pair–Share** | Drei-Phasen-Struktur klar getrennt (Timer pro Phase sinnvoll) |
 | **Museumsgang** | Stations-Karten einzeln aufrufbar |
 | **Gruppenpuzzle** | Expertenmaterial und Stammmaterial klar getrennt |
-| **Expertenrunde, Placemat, Kugellager, Lerntempoduett, Stationenlernen** | wie in Lernseiten-Anweisung TEIL 2.10 beschrieben |
+| **Expertenrunde, Expertenstart, Placemat, Kugellager, Lerntempoduett, Stationenlernen** | wie in Lernseiten-Anweisung TEIL 2.10 beschrieben |
 
-Für die Schüler-Website gilt Lernseiten-Anweisung **TEIL 2.10**: Bei GA am Anfang die Wahl EA / PA / GA mit Gruppengröße 3–7 (`baustein_gruppencheck.html`, EA und PA immer wählbar); jede Karte trägt ihr eigenes Sozialform-Etikett, Karten dürfen unterschiedlich arbeiten. Ob am Ende ein **Gruppen-Check mit Gruppenergebnis** kommt, wird beim Planen abgefragt (zusammen mit Sozialform und Methode). Gruppenergebnisse nennen immer die Höchstpunktzahl („x von max möglichen").
+Für die Schüler-Website gilt Lernseiten-Anweisung **TEIL 2.10**: Bei GA am Anfang die Wahl EA / PA / GA mit Gruppengröße 3–7 (`baustein_gruppencheck.html`, EA und PA immer wählbar); jede Karte trägt ihr eigenes Sozialform-Etikett, Karten dürfen unterschiedlich arbeiten. Ob am Ende ein **Gruppen-Check mit Gruppenergebnis** kommt, wird beim Planen **immer** abgefragt (zusammen mit Sozialform und Methode) und nie von selbst eingebaut. Gruppenergebnisse nennen immer die Höchstpunktzahl („x von max möglichen"). EA und PA sind **eigene Aufträge** (PA mit Rollen A/B und Wechsel), GA passt sich der Gruppengröße an (TEIL 2.10). Jede Lernseite bietet **🪜 Umweg, ⏩ Abkürzung und 🚀 Profi-Material** (TEIL 2.12).
  
 ### Timer auf Schüler-Websites
 Wenn es inhaltlich sinnvoll ist (z. B. Think-Phase, Partnerarbeit, Testphasen), können Countdown-Timer eingebunden werden:
@@ -214,11 +231,11 @@ Das Word-Dokument ist für die Ablage in **OneNote** optimiert. Aufbau und Optik
 
 | Abschnitt | Inhalt |
 |---|---|
-| **Ziel der Stunde** | Kompetenz / Lernziel klar und knapp, mit Kompetenzkürzeln aus dem Kernlehrplan; dazu eine Zeile „Rahmen“ (Zeit, Sozialform, Methode) |
-| **Ablauf** | Aufzählung je Phase: **Zeit · Phase** (Sozialform): Inhalt, mit Verweis auf Karte der Lernseite bzw. Buchseite; Puffer nennen |
+| **Ziel der Stunde** | Die vereinbarte Zielvorgabe (2–4 konkrete Ziele), mit Kompetenzkürzeln aus dem Kernlehrplan; dazu eine Zeile „Rahmen“ (Zeit, Sozialform, Methode) |
+| **Ablauf** | Aufzählung je Phase: **Zeit · Phase** (Sozialform): Inhalt, mit Verweis auf Karte der Lernseite bzw. Buchseite; Puffer nennen. Phasen bis zur Präsentation zusammen ≤ 70 % der Stunde – die Summe steht am Ende („Arbeitsphasen 60 von 90 min“) |
 | **Zentrale Erkenntnisse / neue Techniken** | Definitionen, Vorgehen, Kriterien – ausführlich, Fachbegriffe fett. Platzhalter für Bilder/Grafiken (werden von Lehrkraft ergänzt). |
 | **Benötigte Kenntnisse** | Vorwissen, das SuS mitbringen müssen – in Mathematik mit den Kernkompetenz-Kürzeln (z. B. „K6-1 Brüche kürzen") |
-| **Verwendete Materialien** | Buchseiten (mit Seitenangabe), Arbeitsblätter, Experimente; ein Block **„Websites:“** mit anklickbaren Links – sprechender Name plus kurzer Zweck, nie eine nackte URL |
+| **Verwendete Materialien** | Buchseiten (mit Seitenangabe), Arbeitsblätter, Experimente, Material aus der Sammlung bzw. zum Selbstbauen (mit Anzahl, z. B. „6 Bruchrechen-Sets, je eins pro Gruppe“); ein Block **„Websites:“** mit anklickbaren Links – sprechender Name plus kurzer Zweck, nie eine nackte URL |
 | **Hausaufgaben / Weitere Übungen** | Aufgaben aus dem Buch oder ergänzendes Material, verlinkt, wo es eine Seite dazu gibt |
 
 Verlinkt werden nur Seiten, die tatsächlich veröffentlicht werden (z. B. keine Lehrer-Website, die nicht ins Repo kommt).
@@ -371,7 +388,11 @@ Zuerst `wiederkehrende_fehler_checkliste.md` durchgehen und `pruefe.py` laufen l
 - [ ] Wird keine externe Bibliothek und keine nicht existierende Datei referenziert?
 - [ ] Ist der Dino aus `baustein_dino.html` sichtbar?
 - [ ] Passen die Inhalte zum Lehrplan NRW der genannten Jahrgangsstufe – auch die falschen Antwortoptionen?
-- [ ] Passt das Thema zur Lebenswelt der SuS?
+- [ ] Passt das Thema zur Lebenswelt der SuS? Stammen die Aufgabenkontexte aus der Schülerrealität?
+- [ ] Wurde die Zielvorgabe vorher vereinbart, und hat jedes Ziel eine Karte und einen Platz in der Sicherung?
+- [ ] Bleiben die Phasen bis zur Präsentation bei höchstens 70 % der Stunde – auf allen drei Produkten gleich?
+- [ ] Gibt es Umweg, Abkürzung und Profi-Material? Sind EA- und PA-Ersatz eigene Aufträge?
+- [ ] Wurde Material bzw. eine Praxisphase vorgeschlagen und nach dem Vorhandenen gefragt?
 - [ ] Gibt es differenzierte Niveaustufen (wo sinnvoll)?
 - [ ] Sind Timer sinnvoll eingebaut (wo passend)?
 - [ ] Meldet `pruefe.py` keinen FEHLER mehr?
